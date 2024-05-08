@@ -21,7 +21,6 @@ package org.neo4j.gds.core.io;
 
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -34,12 +33,9 @@ import java.util.Optional;
 import java.util.function.LongFunction;
 import java.util.stream.Collectors;
 
-@ValueClass
-public interface NeoNodeProperties {
+public record NeoNodeProperties(Map<String, LongFunction<Object>> neoNodeProperties) {
 
-    Map<String, LongFunction<Object>> neoNodeProperties();
-
-    static Optional<NeoNodeProperties> of(
+    public static Optional<NeoNodeProperties> of(
         GraphStore graphStore,
         TransactionContext transactionContext,
         PropertyMappings propertyMappings,
@@ -62,12 +58,10 @@ public interface NeoNodeProperties {
                 )
             );
 
-        return Optional.of(ImmutableNeoNodeProperties.builder()
-            .neoNodeProperties(neoNodeProperties)
-            .build());
+        return Optional.of(new NeoNodeProperties(neoNodeProperties));
     }
 
-    final class NeoProperties implements LongFunction<Object> {
+    static final class NeoProperties implements LongFunction<Object> {
 
         private final TransactionContext transactionContext;
         private final IdMap idMap;

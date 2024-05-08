@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.core.io.file.ImmutableHeaderProperty;
+import org.neo4j.gds.core.io.file.HeaderProperty;
 import org.neo4j.gds.core.io.file.RelationshipFileHeader;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,9 +42,9 @@ class RelationshipFileHeaderTest {
         assertThat(fileHeader).isNotNull();
         assertThat(fileHeader.relationshipType()).isEqualTo("REL");
         assertThat(fileHeader.propertyMappings()).containsExactlyInAnyOrder(
-            ImmutableHeaderProperty.of(2, "foo", ValueType.LONG),
-            ImmutableHeaderProperty.of(3, "bar", ValueType.DOUBLE),
-            ImmutableHeaderProperty.of(4, "baz", ValueType.LONG)
+            new HeaderProperty(2, "foo", ValueType.LONG),
+            new HeaderProperty(3, "bar", ValueType.DOUBLE),
+            new HeaderProperty(4, "baz", ValueType.LONG)
         );
     }
 

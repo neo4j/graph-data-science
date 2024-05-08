@@ -27,6 +27,7 @@ import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.values.storable.LongValue;
@@ -82,7 +83,7 @@ public final class CommunityCompanion {
         boolean consecutiveIds,
         LongNodePropertyValues nodeProperties,
         Optional<Long> minCommunitySize,
-        int concurrency,
+        Concurrency concurrency,
         Supplier<NodeProperty> seedPropertySupplier
     ) {
         var resultAfterMinFilter = minCommunitySize
@@ -103,7 +104,7 @@ public final class CommunityCompanion {
         boolean consecutiveIds,
         LongNodePropertyValues nodeProperties,
         Optional<Long> minCommunitySize,
-        int concurrency
+        Concurrency concurrency
     ) {
         var resultAfterMinFilter = minCommunitySize
             .map(size -> applySizeFilter(nodeProperties, size, concurrency))
@@ -133,7 +134,7 @@ public final class CommunityCompanion {
     private static LongNodePropertyValues applySizeFilter(
         LongNodePropertyValues nodeProperties,
         long size,
-        int concurrency
+        Concurrency concurrency
     ) {
         var communitySizes = CommunityStatistics.communitySizes(
             nodeProperties.nodeCount(),
@@ -232,7 +233,7 @@ public final class CommunityCompanion {
                     seedingProperty
                 ));
         }
-        
+
         return nodePropertyValues;
     }
 

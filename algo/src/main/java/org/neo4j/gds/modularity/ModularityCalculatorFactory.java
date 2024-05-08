@@ -21,7 +21,7 @@ package org.neo4j.gds.modularity;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 public class ModularityCalculatorFactory<CONFIG extends ModularityBaseConfig> extends GraphAlgorithmFactory<ModularityCalculator, CONFIG> {

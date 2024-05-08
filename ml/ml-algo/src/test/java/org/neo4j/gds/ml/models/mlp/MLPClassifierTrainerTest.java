@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.models.mlp;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestFeatures;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -46,7 +47,7 @@ class MLPClassifierTrainerTest {
             ProgressTracker.NULL_TRACKER,
             LogLevel.INFO,
             TerminationFlag.RUNNING_TRUE,
-            1
+            new Concurrency(1)
         );
 
         double[][] featuresArr = new double[5][3];

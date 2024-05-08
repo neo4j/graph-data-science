@@ -97,10 +97,12 @@ class MultiLabelGraphSageTrainTest {
     void shouldRunWithDifferentProjectedFeatureSizes(String name, GraphSageTrainConfig config) {
         var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
             weightedGraph,
-            config,
+            config.toParameters(),
+            config.projectedFeatureDimension().get(),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
-            testGdsVersion
+            testGdsVersion,
+            config
         );
         // should not fail
         multiLabelGraphSageTrain.compute();
@@ -118,10 +120,12 @@ class MultiLabelGraphSageTrainTest {
 
         var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
             weightedGraph,
-            config,
+            config.toParameters(),
+            PROJECTED_FEATURE_SIZE,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
-            testGdsVersion
+            testGdsVersion,
+            config
         );
         // should not fail
         var model = multiLabelGraphSageTrain.compute();
@@ -133,10 +137,11 @@ class MultiLabelGraphSageTrainTest {
     void runsTrainingOnMultiLabelGraph() {
         String modelName = "gsModel";
 
+        int featureDimension = 5;
         var graphSageTrainConfig = GraphSageTrainConfigImpl.builder()
             .modelUser("")
             .concurrency(1)
-            .projectedFeatureDimension(5)
+            .projectedFeatureDimension(featureDimension)
             .featureProperties(List.of("numEmployees", "numIngredients", "rating", "numPurchases", "embedding"))
             .aggregator(Aggregator.AggregatorType.MEAN)
             .activationFunction(ActivationFunction.SIGMOID)
@@ -147,10 +152,12 @@ class MultiLabelGraphSageTrainTest {
 
         var graphSageTrain = new MultiLabelGraphSageTrain(
             weightedGraph,
-            graphSageTrainConfig,
+            graphSageTrainConfig.toParameters(),
+            featureDimension,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
-            testGdsVersion
+            testGdsVersion,
+            graphSageTrainConfig
         );
 
         var model = graphSageTrain.compute();
@@ -160,7 +167,7 @@ class MultiLabelGraphSageTrainTest {
 
         GraphSageTrainConfig trainConfig = model.trainConfig();
         assertNotNull(trainConfig);
-        assertEquals(1, trainConfig.concurrency());
+        assertEquals(1, trainConfig.concurrency().value());
         assertEquals(List.of("numEmployees", "numIngredients", "rating", "numPurchases", "embedding"), trainConfig.featureProperties());
         assertEquals("MEAN", Aggregator.AggregatorType.toString(trainConfig.aggregator()));
         assertEquals("SIGMOID", ActivationFunction.toString(trainConfig.activationFunction()));
@@ -179,21 +186,24 @@ class MultiLabelGraphSageTrainTest {
 
     @Test
     void shouldFailUnequalLengthArrays() {
+        int featureDimension = 10;
         var config = GraphSageTrainConfigImpl.builder()
             .modelUser("")
             .featureProperties(List.of("p1", "p2"))
             .embeddingDimension(64)
             .projectedFeatureDimension(PROJECTED_FEATURE_SIZE)
             .modelName("foo")
-            .projectedFeatureDimension(10)
+            .projectedFeatureDimension(featureDimension)
             .build();
 
         var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
             unequalGraph,
-            config,
+            config.toParameters(),
+            featureDimension,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
-            testGdsVersion
+            testGdsVersion,
+            config
         );
 
         assertThatExceptionOfType(IllegalArgumentException.class)
@@ -215,10 +225,12 @@ class MultiLabelGraphSageTrainTest {
 
         var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
             graph,
-            config,
+            config.toParameters(),
+            PROJECTED_FEATURE_SIZE,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
-            testGdsVersion
+            testGdsVersion,
+            config
         );
         assertThatExceptionOfType(IllegalArgumentException.class)
             .isThrownBy(multiLabelGraphSageTrain::compute)

@@ -37,19 +37,22 @@ public final class RelationshipStore {
     private final long propertyCount;
 
     final Map<RelationshipType, CompositeRelationshipIterator> relationshipIterators;
+    private final IdentifierMapper<RelationshipType> relationshipTypeMapping;
     private final IdMap idMap;
 
     private RelationshipStore(
         IdMap idMap,
         long relationshipCount,
         long propertyCount,
-        Map<RelationshipType, CompositeRelationshipIterator> relationshipIterators
+        Map<RelationshipType, CompositeRelationshipIterator> relationshipIterators,
+        IdentifierMapper<RelationshipType> relationshipTypeMapping
     ) {
         this.idMap = idMap;
         this.nodeCount = idMap.nodeCount();
         this.relationshipCount = relationshipCount;
         this.propertyCount = propertyCount;
         this.relationshipIterators = relationshipIterators;
+        this.relationshipTypeMapping = relationshipTypeMapping;
     }
 
     long propertyCount() {
@@ -58,6 +61,10 @@ public final class RelationshipStore {
 
     public IdMap idMap() {
         return idMap;
+    }
+
+    IdentifierMapper<RelationshipType> typeMapping() {
+        return this.relationshipTypeMapping;
     }
 
     RelationshipStore concurrentCopy() {
@@ -70,11 +77,16 @@ public final class RelationshipStore {
             idMap,
             relationshipCount,
             propertyCount,
-            copyIterators
+            copyIterators,
+            relationshipTypeMapping
         );
     }
 
-    static RelationshipStore of(GraphStore graphStore, String defaultRelationshipType) {
+    static RelationshipStore of(
+        GraphStore graphStore,
+        RelationshipType defaultRelationshipType,
+        IdentifierMapper<RelationshipType> relationshipTypeMapping
+    ) {
         Map<RelationshipType, CompositeRelationshipIterator> relationshipIterators = new HashMap<>();
         var propertyCount = new MutableLong(0);
 
@@ -85,7 +97,7 @@ public final class RelationshipStore {
             propertyCount.add(outputProperties.size() * graphStore.relationshipCount(relationshipType));
 
             var outputRelationshipType = relationshipType.equals(RelationshipType.ALL_RELATIONSHIPS)
-                ? RelationshipType.of(defaultRelationshipType)
+                ? defaultRelationshipType
                 : relationshipType;
 
             relationshipIterators.put(
@@ -101,7 +113,8 @@ public final class RelationshipStore {
             graphStore.nodes(),
             graphStore.relationshipCount(),
             propertyCount.getValue(),
-            relationshipIterators
+            relationshipIterators,
+            relationshipTypeMapping
         );
     }
 }

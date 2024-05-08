@@ -24,6 +24,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.properties.nodes.FloatArrayNodePropertyValues;
 import org.neo4j.gds.collections.hsa.HugeSparseFloatArrayArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.utils.Neo4jValueConversion;
@@ -37,11 +38,11 @@ public class FloatArrayNodePropertiesBuilder implements InnerNodePropertiesBuild
 
     private final HugeSparseFloatArrayArray.Builder builder;
     private final float[] defaultValue;
-    private final int concurrency;
+    private final Concurrency concurrency;
 
     public FloatArrayNodePropertiesBuilder(
         DefaultValue defaultValue,
-        int concurrency
+        Concurrency concurrency
     ) {
         this.concurrency = concurrency;
         this.defaultValue = defaultValue.floatArrayValue();
@@ -67,7 +68,7 @@ public class FloatArrayNodePropertiesBuilder implements InnerNodePropertiesBuild
 
         var drainingIterator = propertiesByNeoIds.drainingIterator();
 
-        var tasks = IntStream.range(0, concurrency).mapToObj(threadId -> (Runnable) () -> {
+        var tasks = IntStream.range(0, concurrency.value()).mapToObj(threadId -> (Runnable) () -> {
             var batch = drainingIterator.drainingBatch();
 
             while (drainingIterator.next(batch)) {

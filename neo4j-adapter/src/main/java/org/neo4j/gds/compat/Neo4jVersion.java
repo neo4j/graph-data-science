@@ -27,17 +27,15 @@ import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
 public enum Neo4jVersion {
-    V_5_11,
-    V_5_12,
-    V_5_13,
     V_5_14,
     V_5_15,
     V_5_16,
     V_5_17,
     V_5_18,
+    V_5_19,
     V_Dev;
 
-    private static final int MINOR_DEV_VERSION = 19;
+    private static final int MINOR_DEV_VERSION = 20;
 
     static Neo4jVersion parse(String version) {
         var versionSegments = Pattern.compile("[.-]")
@@ -60,12 +58,6 @@ public enum Neo4jVersion {
 
         if (majorVersion == 5) {
             switch (minorVersion) {
-                case 11:
-                    return Neo4jVersion.V_5_11;
-                case 12:
-                    return Neo4jVersion.V_5_12;
-                case 13:
-                    return Neo4jVersion.V_5_13;
                 case 14:
                     return Neo4jVersion.V_5_14;
                 case 15:
@@ -76,6 +68,8 @@ public enum Neo4jVersion {
                     return Neo4jVersion.V_5_17;
                 case 18:
                     return Neo4jVersion.V_5_18;
+                case 19:
+                    return Neo4jVersion.V_5_19;
                 default:
                     if (minorVersion >= MINOR_DEV_VERSION) {
                         return Neo4jVersion.V_Dev;
@@ -132,12 +126,6 @@ public enum Neo4jVersion {
     @Override
     public String toString() {
         switch (this) {
-            case V_5_11:
-                return "5.11";
-            case V_5_12:
-                return "5.12";
-            case V_5_13:
-                return "5.13";
             case V_5_14:
                 return "5.14";
             case V_5_15:
@@ -148,6 +136,8 @@ public enum Neo4jVersion {
                 return "5.17";
             case V_5_18:
                 return "5.18";
+            case V_5_19:
+                return "5.19";
             case V_Dev:
                 return "dev";
             default:

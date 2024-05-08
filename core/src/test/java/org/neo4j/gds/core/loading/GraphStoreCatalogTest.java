@@ -71,15 +71,6 @@ class GraphStoreCatalogTest {
     }
 
     @Test
-    void overwrite() {
-        GraphStoreCatalog.set(GraphProjectConfig.emptyWithName(USER_NAME, GRAPH_NAME), graphStore);
-        assertThat(GraphStoreCatalog.get(USER_NAME, DATABASE_ID, GRAPH_NAME).graphStore()).isEqualTo(graphStore);
-        GraphStoreCatalog.overwrite(GraphProjectConfig.emptyWithName(USER_NAME, GRAPH_NAME), otherGraphStore);
-        assertThat(GraphStoreCatalog.get(USER_NAME, DATABASE_ID, GRAPH_NAME).graphStore()).isEqualTo(otherGraphStore);
-        assertThat(GraphStoreCatalog.get(USER_NAME, DATABASE_ID, GRAPH_NAME).graphStore()).isNotEqualTo(graphStore);
-    }
-
-    @Test
     void get() {
         GraphStoreCatalog.set(CONFIG, graphStore);
         var graphStoreWithConfig = GraphStoreCatalog.get(

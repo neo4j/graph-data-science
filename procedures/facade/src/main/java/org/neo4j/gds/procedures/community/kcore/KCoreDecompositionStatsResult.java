@@ -20,7 +20,7 @@
 package org.neo4j.gds.procedures.community.kcore;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.gds.results.StandardStatsResult;
+import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 
 import java.util.Map;
 

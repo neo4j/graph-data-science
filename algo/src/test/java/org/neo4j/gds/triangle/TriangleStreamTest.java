@@ -23,6 +23,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -100,7 +101,7 @@ class TriangleStreamTest {
         AtomicInteger centerAppearances = new AtomicInteger();
         AtomicInteger allAppearances = new AtomicInteger();
 
-        TriangleStream.create(graph, DefaultPool.INSTANCE, concurrency)
+        TriangleStream.create(graph, DefaultPool.INSTANCE, new Concurrency(concurrency))
             .compute()
             .forEach(r -> {
                 if (r.nodeA == centerId || r.nodeB == centerId || r.nodeC == centerId) {

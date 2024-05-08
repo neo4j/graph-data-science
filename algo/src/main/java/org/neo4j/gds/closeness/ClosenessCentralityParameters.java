@@ -20,27 +20,7 @@
 package org.neo4j.gds.closeness;
 
 import org.neo4j.gds.annotation.Parameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 @Parameters
-public final class ClosenessCentralityParameters {
-
-    static ClosenessCentralityParameters create(int concurrency, boolean useWassermanFaust) {
-        return new ClosenessCentralityParameters(concurrency, useWassermanFaust);
-    }
-
-    private final int concurrency;
-    private final boolean useWassermanFaust;
-
-    private ClosenessCentralityParameters(int concurrency, boolean useWassermanFaust) {
-        this.concurrency = concurrency;
-        this.useWassermanFaust = useWassermanFaust;
-    }
-
-    int concurrency() {
-        return concurrency;
-    }
-
-    boolean useWassermanFaust() {
-        return useWassermanFaust;
-    }
-}
+public record ClosenessCentralityParameters(Concurrency concurrency, boolean useWassermanFaust) { }

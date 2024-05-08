@@ -19,7 +19,8 @@
  */
 package org.neo4j.gds.core.utils.progress.tasks;
 
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.mem.MemoryRange;
 
 import java.util.function.Supplier;
 
@@ -27,7 +28,7 @@ public interface ProgressTracker {
 
     ProgressTracker NULL_TRACKER = new EmptyProgressTracker();
 
-    void setEstimatedResourceFootprint(MemoryRange memoryEstimationInBytes, int concurrency);
+    void setEstimatedResourceFootprint(MemoryRange memoryEstimationInBytes, Concurrency concurrency);
 
     void beginSubTask();
 
@@ -88,7 +89,7 @@ public interface ProgressTracker {
     class EmptyProgressTracker implements ProgressTracker {
 
         @Override
-        public void setEstimatedResourceFootprint(MemoryRange memoryRangeInBytes, int concurrency) {
+        public void setEstimatedResourceFootprint(MemoryRange memoryRangeInBytes, Concurrency concurrency) {
         }
 
         @Override

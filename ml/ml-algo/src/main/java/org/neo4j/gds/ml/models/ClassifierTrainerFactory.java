@@ -19,10 +19,11 @@
  */
 package org.neo4j.gds.ml.models;
 
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.metrics.ModelSpecificMetricsHandler;
@@ -46,7 +47,7 @@ public final class ClassifierTrainerFactory {
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker,
         LogLevel messageLogLevel,
-        int concurrency,
+        Concurrency concurrency,
         Optional<Long> randomSeed,
         boolean reduceClassCount,
         ModelSpecificMetricsHandler metricsHandler

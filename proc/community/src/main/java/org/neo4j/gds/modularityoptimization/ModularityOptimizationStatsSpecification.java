@@ -19,11 +19,12 @@
  */
 package org.neo4j.gds.modularityoptimization;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationStatsResult;
 
 import java.util.stream.Stream;
@@ -53,7 +54,7 @@ public class ModularityOptimizationStatsSpecification implements AlgorithmSpec<M
 
     @Override
     public ComputationResultConsumer<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationStatsConfig, Stream<ModularityOptimizationStatsResult>> computationResultConsumer() {
-        return  null;  //it's all in facade
+        return new NullComputationResultConsumer<>();
     }
 
 

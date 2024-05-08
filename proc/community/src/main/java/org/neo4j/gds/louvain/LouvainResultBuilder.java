@@ -21,6 +21,7 @@ package org.neo4j.gds.louvain;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
@@ -33,7 +34,7 @@ abstract class LouvainResultBuilder<PROC_RESULT> extends AbstractCommunityResult
     double[] modularities = new double[]{};
     double modularity = -1;
 
-    LouvainResultBuilder(ProcedureReturnColumns returnColumns, int concurrency) {
+    LouvainResultBuilder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
         super(returnColumns, concurrency);
     }
 

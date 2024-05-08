@@ -22,17 +22,18 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.gradientdescent.GradientDescentConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStep;
@@ -60,9 +61,9 @@ final class LinkFeaturesAndLabelsExtractor {
         return MemoryEstimations
             .builder()
             .rangePerGraphDimension(setDesc + " relationship features", (graphDim, threads) -> fudgedLinkFeatureDim
-                .apply(MemoryUsage::sizeOfDoubleArray)
+                .apply(Estimate::sizeOfDoubleArray)
                 .times(relSetSizeExtractor.applyAsLong(graphDim.relationshipCounts()))
-                .add(MemoryUsage.sizeOfInstance(HugeObjectArray.class)))
+                .add(Estimate.sizeOfInstance(HugeObjectArray.class)))
             .perGraphDimension(
                 setDesc + " relationship targets",
                 (graphDim, threads) -> MemoryRange.of(
@@ -74,7 +75,7 @@ final class LinkFeaturesAndLabelsExtractor {
     static FeaturesAndLabels extractFeaturesAndLabels(
         Graph graph,
         List<LinkFeatureStep> featureSteps,
-        int concurrency,
+        Concurrency concurrency,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
@@ -95,7 +96,7 @@ final class LinkFeaturesAndLabelsExtractor {
     private static HugeIntArray extractLabels(
         Graph graph,
         long numberOfTargets,
-        int concurrency,
+        Concurrency concurrency,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {

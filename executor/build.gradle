@@ -12,6 +12,7 @@ dependencies {
 
     implementation project(':annotations')
     implementation project(':algo')
+    implementation project(':algorithms-machinery')
     implementation project(':algo-common')
     implementation project(':algorithms-procedure-facade')
     implementation project(':config-api')

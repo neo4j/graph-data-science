@@ -19,18 +19,14 @@
  */
 package org.neo4j.gds.paths.spanningtree;
 
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.AlgorithmSpecProgressTrackerProvider;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeWriteResult;
 import org.neo4j.gds.spanningtree.Prim;
-import org.neo4j.gds.spanningtree.SpanningGraph;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeAlgorithmFactory;
 import org.neo4j.gds.spanningtree.SpanningTreeWriteConfig;
@@ -60,56 +56,10 @@ public class SpanningTreeWriteSpec implements
     @Override
     public NewConfigFunction<SpanningTreeWriteConfig> newConfigFunction() {
         return (__, config) -> SpanningTreeWriteConfig.of(config);
-
     }
 
+    @Override
     public ComputationResultConsumer<Prim, SpanningTree, SpanningTreeWriteConfig, Stream<SpanningTreeWriteResult>> computationResultConsumer() {
-
-        return (computationResult, executionContext) -> {
-            SpanningTreeWriteResult.Builder builder = new SpanningTreeWriteResult.Builder();
-
-            if (computationResult.result().isEmpty()) {
-                return Stream.of(builder.build());
-            }
-
-            Graph graph = computationResult.graph();
-            Prim prim = computationResult.algorithm();
-            SpanningTree spanningTree = computationResult.result().get();
-            SpanningTreeWriteConfig config = computationResult.config();
-
-            builder
-                .withEffectiveNodeCount(spanningTree.effectiveNodeCount())
-                .withTotalWeight(spanningTree.totalWeight());
-
-            try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
-
-                var spanningGraph = new SpanningGraph(graph, spanningTree);
-
-                executionContext.relationshipExporterBuilder()
-                    .withGraph(spanningGraph)
-                    .withIdMappingOperator(spanningGraph::toOriginalNodeId)
-                    .withTerminationFlag(prim.getTerminationFlag())
-                    .withProgressTracker(
-                        AlgorithmSpecProgressTrackerProvider.createProgressTracker(
-                            name(),
-                            graph.nodeCount(),
-                            config.writeConcurrency(),
-                            executionContext
-                        )
-                    )
-                    .withArrowConnectionInfo(
-                        config.arrowConnectionInfo(),
-                        computationResult.graphStore().databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
-                    )
-                    .withResultStore(config.resolveResultStore(computationResult.graphStore().resultStore()))
-                    .build()
-                    .write(config.writeRelationshipType(), config.writeProperty());
-            }
-            builder.withComputeMillis(computationResult.computeMillis());
-            builder.withPreProcessingMillis(computationResult.preProcessingMillis());
-            builder.withRelationshipsWritten(spanningTree.effectiveNodeCount() - 1);
-            builder.withConfig(config);
-            return Stream.of(builder.build());
-        };
+        return new NullComputationResultConsumer<>();
     }
 }

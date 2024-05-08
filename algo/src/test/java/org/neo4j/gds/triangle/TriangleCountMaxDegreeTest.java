@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
@@ -41,7 +42,7 @@ class TriangleCountMaxDegreeTest {
             .build()
             .generate();
 
-        var tc = IntersectingTriangleCount.create(graph, 4, 100, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER).compute();
+        var tc = IntersectingTriangleCount.create(graph, new Concurrency(4), 100, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER).compute();
         assertThat(tc.globalTriangles()).isEqualTo(1262L);
     }
 }

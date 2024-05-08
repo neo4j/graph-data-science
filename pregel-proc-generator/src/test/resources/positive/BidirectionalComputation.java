@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.pregel.cc;
 
-import org.neo4j.gds.MemoryEstimateDefinition;
+import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.beta.pregel.BidirectionalPregelComputation;
 import org.neo4j.gds.beta.pregel.Messages;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;

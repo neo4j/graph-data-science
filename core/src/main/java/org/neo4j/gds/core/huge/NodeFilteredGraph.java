@@ -36,6 +36,7 @@ import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.config.ConcurrencyConfig;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -189,13 +190,13 @@ public class NodeFilteredGraph extends CSRGraphAdapter implements FilteredIdMap 
 
     private void doCount() {
         var tasks = PartitionUtils.rangePartition(
-            ConcurrencyConfig.DEFAULT_CONCURRENCY,
+            ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY,
             nodeCount(),
             partition -> new RelationshipCounter(concurrentCopy(), partition),
             Optional.empty()
         );
         RunWithConcurrency.builder()
-            .concurrency(ConcurrencyConfig.DEFAULT_CONCURRENCY)
+            .concurrency(ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY)
             .tasks(tasks)
             .run();
 
@@ -353,7 +354,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter implements FilteredIdMap 
     }
 
     @Override
-    public Optional<FilteredIdMap> withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
+    public Optional<FilteredIdMap> withFilteredLabels(Collection<NodeLabel> nodeLabels, Concurrency concurrency) {
         return filteredIdMap.withFilteredLabels(nodeLabels, concurrency);
     }
 

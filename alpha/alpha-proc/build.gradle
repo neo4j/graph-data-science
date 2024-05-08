@@ -20,8 +20,9 @@ dependencies {
         }
     }
 
-    implementation project(':algo-common')
+    implementation project(':algorithms-machinery')
     implementation project(':algorithms-procedure-facade')
+    implementation project(':algo-common')
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')

@@ -24,6 +24,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -134,7 +135,7 @@ public class ComponentPropertyNodeSimilarityTest {
     void shouldOptimizeForDistinctComponentsProperty(Orientation orientation, int concurrency) {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
-        var parameters = NodeSimilarityParameters.create(
+        var parameters = new NodeSimilarityParameters(
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -149,7 +150,7 @@ public class ComponentPropertyNodeSimilarityTest {
         var nodeSimilarity = new NodeSimilarity(
             graph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );

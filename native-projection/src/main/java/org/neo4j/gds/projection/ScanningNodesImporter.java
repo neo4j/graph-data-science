@@ -29,6 +29,7 @@ import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.loading.ImportSizing;
 import org.neo4j.gds.core.loading.LabelInformation;
@@ -59,7 +60,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         GraphLoaderContext loadingContext,
         GraphDimensions dimensions,
         ProgressTracker progressTracker,
-        int concurrency
+        Concurrency concurrency
     ) {
         var expectedCapacity = dimensions.highestPossibleNodeCount();
 
@@ -114,7 +115,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         GraphLoaderContext loadingContext,
         GraphDimensions dimensions,
         ProgressTracker progressTracker,
-        int concurrency,
+        Concurrency concurrency,
         Map<NodeLabel, PropertyMappings> propertyMappingsByLabel,
         LoadablePropertyMappings propertyMappings,
         @Nullable NativeNodePropertyImporter nodePropertyImporter,
@@ -198,7 +199,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
     private static @Nullable NativeNodePropertyImporter initializeNodePropertyImporter(
         LoadablePropertyMappings propertyMappings,
         GraphDimensions dimensions,
-        int concurrency
+        Concurrency concurrency
     ) {
         var propertyMappingsByLabel = propertyMappings.storedProperties();
         boolean loadProperties = propertyMappingsByLabel

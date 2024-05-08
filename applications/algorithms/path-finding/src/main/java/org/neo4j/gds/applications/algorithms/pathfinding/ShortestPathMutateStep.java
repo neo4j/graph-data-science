@@ -23,14 +23,18 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 
 import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.TOTAL_COST_KEY;
 
-class ShortestPathMutateStep implements MutateOrWriteStep<PathFindingResult> {
+class ShortestPathMutateStep implements MutateOrWriteStep<PathFindingResult, RelationshipsWritten> {
     private final MutateRelationshipConfig configuration;
 
     ShortestPathMutateStep(MutateRelationshipConfig configuration) {
@@ -38,11 +42,11 @@ class ShortestPathMutateStep implements MutateOrWriteStep<PathFindingResult> {
     }
 
     @Override
-    public void execute(
+    public RelationshipsWritten execute(
         Graph graph,
         GraphStore graphStore,
-        PathFindingResult result,
-        SideEffectProcessingCountsBuilder countsBuilder
+        ResultStore resultStore, PathFindingResult result,
+        JobId jobId
     ) {
         var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
 
@@ -68,6 +72,6 @@ class ShortestPathMutateStep implements MutateOrWriteStep<PathFindingResult> {
         graphStore.addRelationshipType(relationships);
 
         // result
-        countsBuilder.withRelationshipsWritten(relationships.topology().elementCount());
+        return new RelationshipsWritten(relationships.topology().elementCount());
     }
 }

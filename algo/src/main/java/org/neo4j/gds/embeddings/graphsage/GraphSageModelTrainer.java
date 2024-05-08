@@ -28,10 +28,9 @@ import org.neo4j.gds.core.model.Model.CustomInfo;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainParameters;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
-import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.functions.ConstantScale;
 import org.neo4j.gds.ml.core.functions.ElementSum;
 import org.neo4j.gds.ml.core.functions.L2NormSquared;
@@ -61,53 +60,53 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class GraphSageModelTrainer {
     private final long randomSeed;
+    private final GraphSageTrainParameters parameters;
     private final FeatureFunction featureFunction;
     private final Collection<Weights<Matrix>> labelProjectionWeights;
     private final ExecutorService executor;
     private final ProgressTracker progressTracker;
-    private final GraphSageTrainConfig config;
+    private final Layer[] layers;
 
-    public GraphSageModelTrainer(GraphSageTrainConfig config, ExecutorService executor, ProgressTracker progressTracker) {
-        this(config, executor, progressTracker, new SingleLabelFeatureFunction(), Collections.emptyList());
+    public GraphSageModelTrainer(GraphSageTrainParameters parameters, int featureDimension, ExecutorService executor, ProgressTracker progressTracker) {
+        this(parameters, executor, progressTracker, new SingleLabelFeatureFunction(), Collections.emptyList(), featureDimension);
     }
 
     public GraphSageModelTrainer(
-        GraphSageTrainConfig config,
+        GraphSageTrainParameters parameters,
         ExecutorService executor,
         ProgressTracker progressTracker,
         FeatureFunction featureFunction,
-        Collection<Weights<Matrix>> labelProjectionWeights
+        Collection<Weights<Matrix>> labelProjectionWeights,
+        int featureDimension
     ) {
-        this.config = config;
+        this.parameters = parameters;
         this.featureFunction = featureFunction;
         this.labelProjectionWeights = labelProjectionWeights;
         this.executor = executor;
         this.progressTracker = progressTracker;
-        this.randomSeed = config.randomSeed().orElseGet(() -> ThreadLocalRandom.current().nextLong());
+        this.randomSeed = parameters.randomSeed().orElseGet(() -> ThreadLocalRandom.current().nextLong());
+        this.layers = parameters.layerConfigs(featureDimension)
+            .stream()
+            .map(LayerFactory::createLayer)
+            .toArray(Layer[]::new);
     }
 
-    public static List<Task> progressTasks(GraphSageTrainConfig config, long nodeCount) {
+    public static List<Task> progressTasks(long numberOfBatches, int batchesPerIteration, int maxIterations, int epochs) {
         return List.of(
-            Tasks.leaf("Prepare batches", config.numberOfBatches(nodeCount)),
+            Tasks.leaf("Prepare batches", numberOfBatches),
             Tasks.iterativeDynamic(
                 "Train model",
                 () -> List.of(Tasks.iterativeDynamic(
                     "Epoch",
-                    () -> List.of(Tasks.leaf("Iteration", config.batchesPerIteration(nodeCount))),
-                    config.maxIterations()
+                    () -> List.of(Tasks.leaf("Iteration", batchesPerIteration)),
+                    maxIterations
                 )),
-                config.epochs()
+                epochs
             )
         );
     }
 
     public ModelTrainResult train(Graph graph, HugeObjectArray<double[]> features) {
-        var layers = config.layerConfigs(firstLayerColumns(config, graph)).stream()
-            .map(LayerFactory::createLayer)
-            .toArray(Layer[]::new);
-
-        assert graph.hasRelationshipProperty() == config.hasRelationshipWeightProperty() : "Weight property of graph and config needs to match.";
-
         var weights = new ArrayList<Weights<? extends Tensor<?>>>(labelProjectionWeights);
         for (Layer layer : layers) {
             weights.addAll(layer.weights());
@@ -118,7 +117,7 @@ public class GraphSageModelTrainer {
         var batchSampler = new BatchSampler(graph, progressTracker);
 
         List<long[]> extendedBatches = batchSampler
-            .extendedBatches(config.batchSize(), config.searchDepth(), randomSeed);
+            .extendedBatches(parameters.batchSize(), parameters.searchDepth(), randomSeed);
 
         var random = new SplittableRandom(randomSeed);
 
@@ -129,10 +128,10 @@ public class GraphSageModelTrainer {
         boolean converged = false;
         var iterationLossesPerEpoch = new ArrayList<List<Double>>();
         var prevEpochLoss = Double.NaN;
-        int epochs = config.epochs();
+        int epochs = parameters.epochs();
 
         // if each batch is used more than once, we cache the tasks, otherwise we compute them lazily
-        boolean createBatchTasksEagerly = config.batchesPerIteration(graph.nodeCount()) * config.maxIterations() > extendedBatches.size();
+        boolean createBatchTasksEagerly = parameters.batchesPerIteration(graph.nodeCount()) * parameters.maxIterations() > extendedBatches.size();
 
         for (int epoch = 1; epoch <= epochs && !converged; epoch++) {
             progressTracker.beginSubTask("Epoch");
@@ -154,12 +153,12 @@ public class GraphSageModelTrainer {
                     .collect(Collectors.toList());
 
                 batchTaskSampler = () -> IntStream
-                    .range(0, config.batchesPerIteration(graph.nodeCount()))
+                    .range(0, parameters.batchesPerIteration(graph.nodeCount()))
                     .mapToObj(__ -> tasksForEpoch.get(random.nextInt(tasksForEpoch.size())))
                     .collect(Collectors.toList());
             } else {
                 batchTaskSampler = () -> IntStream
-                    .range(0, config.batchesPerIteration(graph.nodeCount()))
+                    .range(0, parameters.batchesPerIteration(graph.nodeCount()))
                     .mapToObj(__ -> createBatchTask(
                         extendedBatches.get(random.nextInt(extendedBatches.size())),
                         graph,
@@ -212,13 +211,13 @@ public class GraphSageModelTrainer {
             SubGraph.relationshipWeightFunction(localGraph),
             embeddingVariable,
             extendedBatch,
-            config.negativeSampleWeight()
+            parameters.negativeSampleWeight()
         );
 
         long originalBatchSize = extendedBatch.length / 3;
 
         Variable<Scalar> loss;
-        if (config.penaltyL2() > 0) {
+        if (parameters.penaltyL2() > 0) {
             List<Variable<?>> l2penalty = Arrays
                 .stream(layers)
                 .map(layer -> layer.aggregator().weightsWithoutBias())
@@ -230,7 +229,7 @@ public class GraphSageModelTrainer {
                 new ConstantScale<>(
                     new ElementSum(l2penalty),
                     // we scale the penalty to achieve the same impact on the last (smaller) batch as on every other batch
-                    config.penaltyL2() * originalBatchSize / graph.nodeCount()
+                    parameters.penaltyL2() * originalBatchSize / graph.nodeCount()
                 )
             ));
         } else {
@@ -245,14 +244,14 @@ public class GraphSageModelTrainer {
         List<Weights<? extends Tensor<?>>> weights,
         double prevEpochLoss
     ) {
-        var updater = new AdamOptimizer(weights, config.learningRate());
+        var updater = new AdamOptimizer(weights, parameters.learningRate());
 
         int iteration = 1;
         var iterationLosses = new ArrayList<Double>();
         double prevLoss = prevEpochLoss;
         var converged = false;
 
-        int maxIterations = config.maxIterations();
+        int maxIterations = parameters.maxIterations();
         for (; iteration <= maxIterations; iteration++) {
             progressTracker.beginSubTask("Iteration");
 
@@ -260,7 +259,7 @@ public class GraphSageModelTrainer {
 
             // run forward + maybe backward for each Batch
             RunWithConcurrency.builder()
-                .concurrency(config.concurrency())
+                .concurrency(parameters.concurrency())
                 .tasks(sampledBatchTasks)
                 .executor(executor)
                 .run();
@@ -268,7 +267,7 @@ public class GraphSageModelTrainer {
             iterationLosses.add(avgLossPerNode);
             progressTracker.logInfo(formatWithLocale("Average loss per node: %.10f", avgLossPerNode));
 
-            if (Math.abs(prevLoss - avgLossPerNode) < config.tolerance()) {
+            if (Math.abs(prevLoss - avgLossPerNode) < parameters.tolerance()) {
                 converged = true;
                 progressTracker.endSubTask("Iteration");
                 break;
@@ -333,13 +332,6 @@ public class GraphSageModelTrainer {
         List<? extends Tensor<?>> weightGradients() {
             return weightGradients;
         }
-    }
-
-    private static int firstLayerColumns(GraphSageTrainConfig config, Graph graph) {
-        return config.projectedFeatureDimension().orElseGet(() -> {
-            var featureExtractors = GraphSageHelper.featureExtractors(graph, config);
-            return FeatureExtraction.featureCount(featureExtractors);
-        });
     }
 
     @ValueClass

@@ -22,7 +22,8 @@ package org.neo4j.gds.kmeans;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.mem.Estimate;
 
 import java.util.List;
 
@@ -42,7 +43,7 @@ class KmeansMemoryEstimateDefinitionTest {
         var memoryEstimation = new KmeansMemoryEstimateDefinition(params).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation).
-            memoryRange(graphDimensions, 4)
+            memoryRange(graphDimensions, new Concurrency(4))
             .hasMin(33928)
             .hasMax(54920);
 
@@ -60,10 +61,12 @@ class KmeansMemoryEstimateDefinitionTest {
         when(params.isSeeded()).thenReturn(true);
         var memoryEstimation = new KmeansMemoryEstimateDefinition(params).memoryEstimation();
 
+        var sizeOfCentroids = 4 * Estimate.sizeOfInstance(List.class) // four lists
+                            + 6 * 24; // eight doubles
         MemoryEstimationAssert.assertThat(memoryEstimation).
-            memoryRange(graphDimensions, 4)
-            .hasMin(33928L + MemoryUsage.sizeOf(centroidsSeeds))
-            .hasMax(54920L + MemoryUsage.sizeOf(centroidsSeeds));
+            memoryRange(graphDimensions, new Concurrency(4))
+            .hasMin(33928L + sizeOfCentroids)
+            .hasMax(54920L + sizeOfCentroids);
     }
 
     @Test
@@ -77,7 +80,7 @@ class KmeansMemoryEstimateDefinitionTest {
         var memoryEstimation = new KmeansMemoryEstimateDefinition(parameters).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation).
-            memoryRange(graphDimensions, 4)
+            memoryRange(graphDimensions, new Concurrency(4))
             .hasMin(34304)
             .hasMax(55296);
 

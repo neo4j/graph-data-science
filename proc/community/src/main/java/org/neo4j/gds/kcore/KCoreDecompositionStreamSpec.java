@@ -19,18 +19,16 @@
  */
 package org.neo4j.gds.kcore;
 
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionStreamResult;
 
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.kcore.KCoreDecomposition.KCORE_DESCRIPTION;
 
@@ -53,22 +51,6 @@ public class KCoreDecompositionStreamSpec implements AlgorithmSpec<KCoreDecompos
 
     @Override
     public ComputationResultConsumer<KCoreDecomposition, KCoreDecompositionResult, KCoreDecompositionStreamConfig, Stream<KCoreDecompositionStreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging(
-            "Result streaming failed",
-            executionContext.log(),
-            () -> computationResult.result()
-                .map(result -> {
-                    var coreValues = result.coreValues();
-                    var graph = computationResult.graph();
-                    return LongStream
-                        .range(IdMap.START_NODE_ID, graph.nodeCount())
-                        .mapToObj(nodeId ->
-                            new KCoreDecompositionStreamResult(
-                                graph.toOriginalNodeId(nodeId),
-                                coreValues.get(nodeId)
-                            ));
-                }).orElseGet(Stream::empty));
+        return new NullComputationResultConsumer<>();
     }
-
-
 }

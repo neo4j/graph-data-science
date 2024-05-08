@@ -23,10 +23,10 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.Username;
-import org.neo4j.gds.executor.AlgoConfigParser;
+import org.neo4j.gds.procedures.algorithms.configuration.AlgoConfigParser;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallableFinder;
-import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.utils.StringJoining;
 

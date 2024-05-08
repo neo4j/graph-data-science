@@ -27,6 +27,7 @@ import org.neo4j.gds.config.CommunitySizeConfig;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.ConsecutiveIdsConfig;
 import org.neo4j.gds.config.SeedConfig;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.nodeproperties.ConsecutiveLongNodePropertyValues;
 import org.neo4j.gds.nodeproperties.LongIfChangedNodePropertyValues;
@@ -102,7 +103,7 @@ public final class CommunityProcCompanion {
         if (consecutiveIds && !isIncremental) {
             return new ConsecutiveLongNodePropertyValues(nodeProperties);
         }
-        
+
         return nodeProperties;
     }
 
@@ -117,7 +118,7 @@ public final class CommunityProcCompanion {
     private static LongNodePropertyValues applySizeFilter(
         LongNodePropertyValues nodeProperties,
         long size,
-        int concurrency
+        Concurrency concurrency
     ) {
         var communitySizes = CommunityStatistics.communitySizes(
             nodeProperties.nodeCount(),

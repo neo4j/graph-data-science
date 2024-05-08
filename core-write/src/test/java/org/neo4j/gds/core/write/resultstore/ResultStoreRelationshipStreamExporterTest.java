@@ -21,8 +21,11 @@ package org.neo4j.gds.core.write.resultstore;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.EphemeralResultStore;
+import org.neo4j.gds.api.ExportedRelationship;
 import org.neo4j.gds.api.ImmutableExportedRelationship;
+import org.neo4j.gds.api.ResultStoreEntry;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -36,13 +39,14 @@ class ResultStoreRelationshipStreamExporterTest {
 
     @Test
     void shouldWriteRelationshipStreamWithPropertiesToResultStore() {
+        var jobId = new JobId("test");
         var resultStore = new EphemeralResultStore();
         var relationshipStream = Stream.of(
             ImmutableExportedRelationship.of(0, 1, new Value[]{ Values.doubleValue(42.0), Values.doubleArray(new double[]{ 43.0, 44.0 })}),
             ImmutableExportedRelationship.of(1, 2, new Value[]{ Values.doubleValue(45.0), Values.doubleArray(new double[]{ 46.0, 47.0 })})
         );
         LongUnaryOperator mappingOperator = l -> l + 42;
-        new ResultStoreRelationshipStreamExporter(resultStore, relationshipStream, mappingOperator)
+        new ResultStoreRelationshipStreamExporter(jobId, resultStore, relationshipStream, mappingOperator)
             .write(
                 "REL",
                 List.of("doubleProp", "doubleArrayProp"),
@@ -50,10 +54,33 @@ class ResultStoreRelationshipStreamExporterTest {
             );
         var relationshipStreamEntry = resultStore.getRelationshipStream("REL", List.of("doubleProp", "doubleArrayProp"));
         assertThat(relationshipStreamEntry).isNotNull();
-        assertThat(relationshipStreamEntry.propertyTypes()).isEqualTo(List.of(ValueType.DOUBLE, ValueType.DOUBLE_ARRAY));
-        assertThat(relationshipStreamEntry.toOriginalId()).isEqualTo(mappingOperator);
+        assertRelationshipEntryWithProperties(
+            relationshipStreamEntry.propertyTypes(),
+            relationshipStreamEntry.relationshipStream(),
+            relationshipStreamEntry.toOriginalId(),
+            mappingOperator
+        );
 
-        var relationshipIterator = relationshipStreamEntry.relationshipStream().iterator();
+        var entry = resultStore.get(jobId);
+        assertThat(entry).isInstanceOf(ResultStoreEntry.RelationshipStream.class);
+
+        var jobIdRelationshipStreamEntry = (ResultStoreEntry.RelationshipStream) entry;
+        assertThat(jobIdRelationshipStreamEntry.relationshipType()).isEqualTo("REL");
+        assertThat(jobIdRelationshipStreamEntry.propertyKeys()).containsExactly("doubleProp", "doubleArrayProp");
+        assertThat(jobIdRelationshipStreamEntry.propertyTypes()).isEqualTo(relationshipStreamEntry.propertyTypes());
+        assertThat(jobIdRelationshipStreamEntry.relationshipStream()).isEqualTo(relationshipStreamEntry.relationshipStream());
+    }
+
+    private static void assertRelationshipEntryWithProperties(
+        List<ValueType> propertyTypes,
+        Stream<ExportedRelationship> relationshipStream,
+        LongUnaryOperator actualOperator,
+        LongUnaryOperator expectedOperator
+    ) {
+        assertThat(propertyTypes).isEqualTo(List.of(ValueType.DOUBLE, ValueType.DOUBLE_ARRAY));
+        assertThat(actualOperator).isEqualTo(expectedOperator);
+
+        var relationshipIterator = relationshipStream.iterator();
 
         assertThat(relationshipIterator).hasNext();
         var firstRelationship = relationshipIterator.next();
@@ -72,23 +99,46 @@ class ResultStoreRelationshipStreamExporterTest {
 
     @Test
     void shouldWriteRelationshipStreamWithoutPropertiesToResultStore() {
+        var jobId = new JobId("test");
         var resultStore = new EphemeralResultStore();
         var relationshipStream = Stream.of(
             ImmutableExportedRelationship.of(0, 1, new Value[0]),
             ImmutableExportedRelationship.of(1, 2, new Value[0])
         );
         LongUnaryOperator mappingOperator = l -> l + 42;
-        new ResultStoreRelationshipStreamExporter(resultStore, relationshipStream, mappingOperator).write(
+        new ResultStoreRelationshipStreamExporter(jobId, resultStore, relationshipStream, mappingOperator).write(
             "REL",
             List.of(),
             List.of()
         );
         var relationshipStreamEntry = resultStore.getRelationshipStream("REL", List.of());
         assertThat(relationshipStreamEntry).isNotNull();
-        assertThat(relationshipStreamEntry.propertyTypes()).isEqualTo(List.of());
-        assertThat(relationshipStreamEntry.toOriginalId()).isEqualTo(mappingOperator);
+        assertRelationshipEntryWithoutProperties(
+            relationshipStreamEntry.propertyTypes(),
+            relationshipStreamEntry.relationshipStream(),
+            relationshipStreamEntry.toOriginalId(),
+            mappingOperator
+        );
 
-        var relationshipIterator = relationshipStreamEntry.relationshipStream().iterator();
+        var entry = resultStore.get(jobId);
+        assertThat(entry).isInstanceOf(ResultStoreEntry.RelationshipStream.class);
+        var jobIdRelationshipStreamEntry = (ResultStoreEntry.RelationshipStream) entry;
+        assertThat(jobIdRelationshipStreamEntry.relationshipType()).isEqualTo("REL");
+        assertThat(jobIdRelationshipStreamEntry.propertyKeys()).isEmpty();
+        assertThat(jobIdRelationshipStreamEntry.propertyTypes()).isEqualTo(relationshipStreamEntry.propertyTypes());
+        assertThat(jobIdRelationshipStreamEntry.relationshipStream()).isEqualTo(relationshipStreamEntry.relationshipStream());
+    }
+
+    private static void assertRelationshipEntryWithoutProperties(
+        List<ValueType> propertyTypes,
+        Stream<ExportedRelationship> relationshipStream,
+        LongUnaryOperator actualOperator,
+        LongUnaryOperator expectedOperator
+    ) {
+        assertThat(propertyTypes).isEqualTo(List.of());
+        assertThat(actualOperator).isEqualTo(expectedOperator);
+
+        var relationshipIterator = relationshipStream.iterator();
 
         assertThat(relationshipIterator).hasNext();
         var firstRelationship = relationshipIterator.next();

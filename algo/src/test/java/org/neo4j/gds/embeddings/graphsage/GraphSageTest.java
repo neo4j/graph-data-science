@@ -36,6 +36,7 @@ import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
@@ -120,7 +121,7 @@ class GraphSageTest {
             DatabaseId.random(),
             randomGraph,
             Optional.of("weight"),
-            4
+            new Concurrency(4)
         );
 
         features = HugeObjectArray.newArray(double[].class, nodeCount);
@@ -145,10 +146,11 @@ class GraphSageTest {
 
         var trainAlgo = new SingleLabelGraphSageTrain(
             orphanGraph,
-            trainConfig,
+            trainConfig.toParameters(),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
-            testGdsVersion
+            testGdsVersion,
+            trainConfig
         );
         var model = trainAlgo.compute();
         modelCatalog.set(model);
@@ -180,7 +182,14 @@ class GraphSageTest {
             .concurrency(1)
             .build();
 
-        var graphSageTrain = new SingleLabelGraphSageTrain(graph, trainConfig, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER, testGdsVersion);
+        var graphSageTrain = new SingleLabelGraphSageTrain(
+            graph,
+            trainConfig.toParameters(),
+            DefaultPool.INSTANCE,
+            ProgressTracker.NULL_TRACKER,
+            testGdsVersion,
+            trainConfig
+        );
         var model = graphSageTrain.compute();
 
 
@@ -197,15 +206,14 @@ class GraphSageTest {
             .build()
             .generate();
 
-        var streamConfig = GraphSageStreamConfigImpl
-            .builder()
-            .modelUser("")
-            .modelName(MODEL_NAME)
-            .concurrency(4)
-            .batchSize(2)
-            .build();
-
-        var graphSage = new GraphSage(trainGraph, model, streamConfig, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER);
+        var graphSage = new GraphSage(
+            trainGraph,
+            model,
+            new Concurrency(4),
+            2,
+            DefaultPool.INSTANCE,
+            ProgressTracker.NULL_TRACKER
+        );
 
         assertThat(graphSage.compute().embeddings().size()).isEqualTo(predictNodeCount);
     }

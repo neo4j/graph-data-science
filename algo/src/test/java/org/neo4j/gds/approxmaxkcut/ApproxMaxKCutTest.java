@@ -27,6 +27,7 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfigImpl;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -160,7 +161,7 @@ final class ApproxMaxKCutTest {
                 k,
                 iterations,
                 vnsMaxNeighborhoodOrder,
-                concurrency,
+                new Concurrency(concurrency),
                 minBatchSize,
                 randomSeed,
                 minCommunitySizes,
@@ -208,7 +209,7 @@ final class ApproxMaxKCutTest {
                 k,
                 8,
                 0,
-                concurrency,
+                new Concurrency(concurrency),
                 minBatchSize,
                 Optional.empty(),
                 minCommunitySizes,

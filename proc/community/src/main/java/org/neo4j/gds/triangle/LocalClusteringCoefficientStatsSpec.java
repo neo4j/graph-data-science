@@ -19,19 +19,20 @@
  */
 package org.neo4j.gds.triangle;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientStatsResult;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.BaseProc.STATS_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
+import static org.neo4j.gds.triangle.LocalClusteringCoefficientCompanion.LOCAL_CLUSTERING_COEFFICIENT_DESCRIPTION;
 
-@GdsCallable(name = "gds.localClusteringCoefficient.stats", description = STATS_DESCRIPTION, executionMode = STATS)
+@GdsCallable(name = "gds.localClusteringCoefficient.stats", description = LOCAL_CLUSTERING_COEFFICIENT_DESCRIPTION, executionMode = STATS)
 public class LocalClusteringCoefficientStatsSpec implements AlgorithmSpec<LocalClusteringCoefficient, LocalClusteringCoefficientResult, LocalClusteringCoefficientStatsConfig, Stream<LocalClusteringCoefficientStatsResult>, LocalClusteringCoefficientFactory<LocalClusteringCoefficientStatsConfig>> {
 
     @Override
@@ -51,23 +52,6 @@ public class LocalClusteringCoefficientStatsSpec implements AlgorithmSpec<LocalC
 
     @Override
     public ComputationResultConsumer<LocalClusteringCoefficient, LocalClusteringCoefficientResult, LocalClusteringCoefficientStatsConfig, Stream<LocalClusteringCoefficientStatsResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-            var builder = LocalClusteringCoefficientStatsResult.statsBuilder();
-            computationResult.result()
-                .ifPresent(result ->
-                    builder
-                        .withAverageClusteringCoefficient(result.averageClusteringCoefficient())
-                );
-
-            builder
-                .withPreProcessingMillis(computationResult.preProcessingMillis())
-                .withComputeMillis(computationResult.computeMillis())
-                .withNodeCount(computationResult.graph().nodeCount())
-                .withConfig(computationResult.config());
-
-            return Stream.of(builder.build());
-        };
+        return new NullComputationResultConsumer<>();
     }
-
-
 }

@@ -26,6 +26,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeIntArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -37,7 +38,7 @@ import java.util.Optional;
 import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
 
-public class Kmeans extends Algorithm<KmeansResult> {
+public final class Kmeans extends Algorithm<KmeansResult> {
 
     static final String KMEANS_DESCRIPTION =
         "The Kmeans  algorithm clusters nodes into different communities based on Euclidean distance";
@@ -45,6 +46,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
     private HugeIntArray bestCommunities;
     private final Graph graph;
     private final KmeansParameters parameters;
+    private final Concurrency concurrency;
     private final ExecutorService executorService;
     private final SplittableRandom random;
     private final NodePropertyValues nodePropertyValues;
@@ -76,8 +78,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
         );
     }
 
-
-    Kmeans(
+    private Kmeans(
         ProgressTracker progressTracker,
         ExecutorService executorService,
         Graph graph,
@@ -100,6 +101,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
         );
         this.distanceFromCentroid = HugeDoubleArray.newArray(graph.nodeCount());
         this.parameters = parameters;
+        this.concurrency = parameters.concurrency();
         this.nodesInCluster = new long[parameters.k()];
     }
 
@@ -174,7 +176,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
         currentCommunities.setAll(v -> UNASSIGNED);
 
         var tasks = PartitionUtils.rangePartition(
-            parameters.concurrency(),
+            concurrency,
             nodeCount,
             partition -> KmeansTask.createTask(
                 parameters.samplerType(),
@@ -186,7 +188,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
                 dimensions,
                 partition
             ),
-            Optional.of((int) nodeCount / parameters.concurrency())
+            Optional.of((int) nodeCount / concurrency.value())
         );
         int numberOfTasks = tasks.size();
 
@@ -196,14 +198,14 @@ public class Kmeans extends Algorithm<KmeansResult> {
             clusterManager,
             nodeCount,
             parameters.k(),
-            parameters.concurrency(),
+            concurrency,
             currentDistanceFromCentroid,
             executorService,
             tasks,
             progressTracker
         );
 
-        assert numberOfTasks <= parameters.concurrency();
+        assert numberOfTasks <= concurrency.value();
 
         //Initialization do initial centroid computation and assignment
         initializeCentroids(clusterManager, sampler);
@@ -219,7 +221,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
                 || (parameters.samplerType() == KmeansSampler.SamplerType.UNIFORM);
             if (shouldComputeDistance) {
                 RunWithConcurrency.builder()
-                    .concurrency(parameters.concurrency())
+                    .concurrency(concurrency)
                     .tasks(tasks)
                     .executor(executorService)
                     .run();
@@ -290,7 +292,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
         }
         ParallelUtil.parallelForEachNode(
             graph.nodeCount(),
-            parameters.concurrency(),
+            concurrency,
             TerminationFlag.RUNNING_TRUE,
             nodeId -> {
                 if (nodePropertyValues.valueType() == ValueType.FLOAT_ARRAY) {
@@ -335,7 +337,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
         progressTracker.beginSubTask();
         this.silhouette = HugeDoubleArray.newArray(nodeCount);
         var tasks = PartitionUtils.rangePartition(
-            parameters.concurrency(),
+            concurrency,
             nodeCount,
             partition -> SilhouetteTask.createTask(
                 nodePropertyValues,
@@ -347,10 +349,10 @@ public class Kmeans extends Algorithm<KmeansResult> {
                 partition,
                 progressTracker
             ),
-            Optional.of((int) nodeCount / parameters.concurrency())
+            Optional.of((int) nodeCount / concurrency.value())
         );
         RunWithConcurrency.builder()
-            .concurrency(parameters.concurrency())
+            .concurrency(concurrency)
             .tasks(tasks)
             .executor(executorService)
             .run();
@@ -367,7 +369,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
             task.switchToPhase(TaskPhase.DISTANCE);
         }
         RunWithConcurrency.builder()
-            .concurrency(parameters.concurrency())
+            .concurrency(concurrency)
             .tasks(tasks)
             .executor(executorService)
             .run();
@@ -390,7 +392,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
                 bestDistance = averageDistanceFromCentroid;
                 ParallelUtil.parallelForEachNode(
                     graph.nodeCount(),
-                    parameters.concurrency(),
+                    concurrency,
                     terminationFlag,
                     v -> {
                         bestCommunities.set(v, currentCommunities.get(v));

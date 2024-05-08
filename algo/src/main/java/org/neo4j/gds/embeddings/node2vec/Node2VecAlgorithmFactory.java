@@ -21,7 +21,7 @@ package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -53,8 +53,7 @@ public class Node2VecAlgorithmFactory<CONFIG extends Node2VecBaseConfig> extends
             configuration.sourceNodes(),
             configuration.randomSeed(),
             configuration.walkBufferSize(),
-            configuration.walkParameters(),
-            configuration.trainParameters(),
+            configuration.node2VecParameters(),
             progressTracker
         );
     }

@@ -21,7 +21,7 @@ package org.neo4j.gds.pagerank;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.centrality.pagerank.PageRankMutateResult;
-import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -30,12 +30,11 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.ProcedureConstants.ESTIMATE_DESCRIPTION;
-import static org.neo4j.gds.procedures.centrality.pagerank.PageRankProcCompanion.ARTICLE_RANK_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
+import static org.neo4j.gds.pagerank.Constants.ARTICLE_RANK_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class ArticleRankMutateProc {
-
     @Context
     public GraphDataScienceProcedures facade;
 
@@ -49,13 +48,11 @@ public class ArticleRankMutateProc {
     }
 
     @Procedure(value = "gds.articleRank.mutate.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         return facade.centrality().articleRankMutateEstimate(graphNameOrConfiguration, algoConfiguration);
     }
-
-
 }

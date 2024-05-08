@@ -23,10 +23,13 @@ import org.neo4j.configuration.Config;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.io.GraphStoreExporterBaseConfig;
 import org.neo4j.gds.core.io.NeoNodeProperties;
@@ -38,10 +41,9 @@ import org.neo4j.gds.core.io.file.GraphStoreExporterUtil;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfig;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterParameters;
 import org.neo4j.gds.core.io.file.csv.estimation.CsvExportEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.preconditions.ClusterRestrictions;
-import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.procedure.Description;
@@ -85,19 +87,21 @@ public class GraphStoreExportProc extends BaseProc {
                 var progressTracker = new TaskProgressTracker(
                     ProgressTrackerExecutionMonitor.progressTask(graphStore),
                     executionContext().log(),
-                    exportConfig.writeConcurrency(),
+                    exportConfig.typedWriteConcurrency(),
                     exportConfig.jobId(),
                     executionContext().taskRegistryFactory(),
                     executionContext().userLogRegistryFactory()
                 );
 
-                var parameters = GraphStoreToDatabaseExporterParameters.create(
-                    exportConfig.dbName(),
-                    exportConfig.writeConcurrency(),
+                var parameters = new GraphStoreToDatabaseExporterParameters(
+                    exportConfig.databaseName(),
+                    new Concurrency(exportConfig.writeConcurrency()),
                     exportConfig.batchSize(),
-                    exportConfig.enableDebugLog(),
-                    exportConfig.defaultRelationshipType()
+                    RelationshipType.of(exportConfig.defaultRelationshipType()),
+                    exportConfig.databaseFormat(),
+                    exportConfig.enableDebugLog()
                 );
+
                 var exporter = GraphStoreToDatabaseExporter.of(
                     graphStore,
                     databaseService,
@@ -114,7 +118,7 @@ public class GraphStoreExportProc extends BaseProc {
 
                     return new DatabaseExportResult(
                         graphName,
-                        exportConfig.dbName(),
+                        exportConfig.databaseName(),
                         graphStore.nodeCount(),
                         graphStore.relationshipCount(),
                         graphStore.relationshipTypes().size(),
@@ -169,13 +173,11 @@ public class GraphStoreExportProc extends BaseProc {
 
         var neo4jConfig = GraphDatabaseApiProxy.resolveDependency(databaseService, Config.class);
 
-        var exportParameters = GraphStoreToFileExporterParameters.create(
+        var exportParameters = new GraphStoreToFileExporterParameters(
             exportConfig.exportName(),
             exportConfig.username(),
-            exportConfig.includeMetaData(),
-            exportConfig.useLabelMapping(),
-            exportConfig.defaultRelationshipType(),
-            exportConfig.writeConcurrency(),
+            RelationshipType.of(exportConfig.defaultRelationshipType()),
+            exportConfig.typedWriteConcurrency(),
             exportConfig.batchSize()
         );
         var result = GraphStoreExporterUtil.export(
@@ -241,7 +243,7 @@ public class GraphStoreExportProc extends BaseProc {
                 var dimensions = GraphDimensions.of(graphStore.nodeCount(), graphStore.relationshipCount());
                 var memoryTree = CsvExportEstimation
                     .estimate(graphStore, exportConfig.samplingFactor())
-                    .estimate(dimensions, 1);
+                    .estimate(dimensions, new Concurrency(1));
                 return new MemoryTreeWithDimensions(memoryTree, dimensions);
             }
         );

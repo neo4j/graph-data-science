@@ -20,8 +20,9 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.BitUtil;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 import java.util.function.LongConsumer;
 
@@ -35,13 +36,13 @@ public final class HugeAtomicBitSet {
 
     public static long memoryEstimation(long size) {
         var wordsSize = BitUtil.ceilDiv(size, NUM_BITS);
-        return HugeAtomicLongArray.memoryEstimation(wordsSize) + MemoryUsage.sizeOfInstance(HugeAtomicBitSet.class);
+        return HugeAtomicLongArray.memoryEstimation(wordsSize) + Estimate.sizeOfInstance(HugeAtomicBitSet.class);
     }
 
     public static HugeAtomicBitSet create(long size) {
         var wordsSize = BitUtil.ceilDiv(size, NUM_BITS);
         int remainder = (int) (size % NUM_BITS);
-        return new HugeAtomicBitSet(HugeAtomicLongArray.of(wordsSize, ParalleLongPageCreator.passThrough(1)), size, remainder);
+        return new HugeAtomicBitSet(HugeAtomicLongArray.of(wordsSize, ParalleLongPageCreator.passThrough(new Concurrency(1))), size, remainder);
     }
 
     private HugeAtomicBitSet(HugeAtomicLongArray bits, long numBits, int remainder) {

@@ -21,12 +21,13 @@ package org.neo4j.gds.procedures.algorithms.pathfinding.stubs;
 
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensMutateConfig;
-import org.neo4j.gds.procedures.algorithms.pathfinding.MutateStub;
+import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
+import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingResultBuilderForMutateMode;
-import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -59,7 +60,7 @@ public class SinglePairShortestPathYensMutateStub implements MutateStub<Shortest
             username,
             configuration,
             ShortestPathYensMutateConfig::of,
-            estimationMode()::singlePairShortestPathYensEstimation
+            estimationMode()::singlePairShortestPathYens
         );
     }
 
@@ -69,7 +70,7 @@ public class SinglePairShortestPathYensMutateStub implements MutateStub<Shortest
             graphName,
             configuration,
             ShortestPathYensMutateConfig::of,
-            estimationMode()::singlePairShortestPathYensEstimation
+            estimationMode()::singlePairShortestPathYens
         );
     }
 

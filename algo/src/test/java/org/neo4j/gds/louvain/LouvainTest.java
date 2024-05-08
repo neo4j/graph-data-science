@@ -33,6 +33,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -126,7 +127,7 @@ class LouvainTest {
 
         var algorithm = new Louvain(
             graph,
-            1,
+            new Concurrency(1),
             10,
             TOLERANCE_DEFAULT,
             10,
@@ -173,7 +174,7 @@ class LouvainTest {
 
         var algorithm = new Louvain(
             graph,
-            1,
+            new Concurrency(1),
             10,
             TOLERANCE_DEFAULT,
             10,
@@ -220,7 +221,7 @@ class LouvainTest {
 
         var algorithm = new Louvain(
             graph,
-            1,
+            new Concurrency(1),
             10,
             TOLERANCE_DEFAULT,
             10,
@@ -261,7 +262,7 @@ class LouvainTest {
 
         var algorithm = new Louvain(
             graph,
-            1,
+            new Concurrency(1),
             10,
             2.0,
             10,
@@ -274,7 +275,7 @@ class LouvainTest {
         algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
         var result = algorithm.compute();
-        
+
         assertEquals(1, result.ranLevels());
     }
 
@@ -288,7 +289,7 @@ class LouvainTest {
 
         var algorithm = new Louvain(
             graph,
-            1,
+            new Concurrency(1),
             10,
             TOLERANCE_DEFAULT,
             1,
@@ -317,7 +318,7 @@ class LouvainTest {
             {
                 var louvain = new Louvain(
                     graph,
-                    2,
+                    new Concurrency(2),
                     10,
                     TOLERANCE_DEFAULT,
                     10,
@@ -339,7 +340,7 @@ class LouvainTest {
             RelationshipType.listOf("TYPE_OUT"),
             Optional.empty()
         );
-        var concurrency = 4;
+        var concurrency = new Concurrency(4);
         var maxIterations = 10;
         var maxLevels = 10;
         var progressTask = new LouvainAlgorithmFactory<>().progressTask(graph, maxIterations, maxLevels);
@@ -374,7 +375,7 @@ class LouvainTest {
 
         var algorithm = new Louvain(
             graph,
-            4,
+            new Concurrency(4),
             10,
             TOLERANCE_DEFAULT,
             10,
@@ -405,7 +406,7 @@ class LouvainTest {
 
         var louvain = new Louvain(
             myGraph,
-            4,
+            new Concurrency(4),
             10,
             TOLERANCE_DEFAULT,
             10,
@@ -418,7 +419,7 @@ class LouvainTest {
         var result = louvain.compute();
         assertThat(result.ranLevels()).isGreaterThan(1);
         LongUnaryOperator vToCommunity = v -> result.getCommunity(v);
-        var modularityCalculator = ModularityCalculator.create(myGraph, vToCommunity, 4);
+        var modularityCalculator = ModularityCalculator.create(myGraph, vToCommunity, new Concurrency(4));
         double calculatedModularity = modularityCalculator.compute().totalModularity();
         assertThat(result.modularity()).isCloseTo(calculatedModularity, Offset.offset(1e-5));
     }

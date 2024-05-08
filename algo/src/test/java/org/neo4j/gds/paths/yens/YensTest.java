@@ -30,6 +30,7 @@ import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -62,7 +63,7 @@ class YensTest {
             .concurrency(concurrency);
     }
 
-    
+
     // https://en.wikipedia.org/wiki/Yen%27s_algorithm#/media/File:Yen's_K-Shortest_Path_Algorithm,_K=3,_A_to_F.gif
     @GdlGraph(aggregation = Aggregation.SINGLE)
     private static final String DB_CYPHER =
@@ -157,9 +158,9 @@ class YensTest {
 
         var progressTask = new YensFactory<>().progressTask(graph, config);
         var log = Neo4jProxy.testLog();
-        var progressTracker = new TestProgressTracker(progressTask, log, 1, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TestProgressTracker(progressTask, log, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
 
-        Yens.sourceTarget(graph, config, progressTracker)
+        Yens.sourceTarget(graph, config, config.concurrency(), progressTracker)
             .compute()
             .pathSet();
 
@@ -195,9 +196,9 @@ class YensTest {
 
         var progressTask = new YensFactory<>().progressTask(graph, config);
         var log = Neo4jProxy.testLog();
-        var progressTracker = new TestProgressTracker(progressTask, log, 1, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TestProgressTracker(progressTask, log, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
 
-        Yens.sourceTarget(graph, config, progressTracker)
+        Yens.sourceTarget(graph, config, config.concurrency(), progressTracker)
             .compute()
             .pathSet();
 
@@ -240,7 +241,7 @@ class YensTest {
             .build();
 
         var actualPathResults = Yens
-            .sourceTarget(graph, config, ProgressTracker.NULL_TRACKER)
+            .sourceTarget(graph, config, config.concurrency(), ProgressTracker.NULL_TRACKER)
             .compute()
             .pathSet();
 

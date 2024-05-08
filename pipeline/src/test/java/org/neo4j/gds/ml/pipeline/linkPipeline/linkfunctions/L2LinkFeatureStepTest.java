@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -62,7 +63,7 @@ final class L2LinkFeatureStepTest {
         var linkFeatures = LinkFeatureExtractor.extractFeatures(
             graph,
             List.of(step),
-            4,
+            new Concurrency(4),
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         );
@@ -81,7 +82,7 @@ final class L2LinkFeatureStepTest {
         var linkFeatures = LinkFeatureExtractor.extractFeatures(
             graph,
             List.of(step),
-            4,
+            new Concurrency(4),
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         );
@@ -98,7 +99,7 @@ final class L2LinkFeatureStepTest {
         assertThatThrownBy(() -> LinkFeatureExtractor.extractFeatures(
             graph,
             List.of(step),
-            4,
+            new Concurrency(4),
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         ))

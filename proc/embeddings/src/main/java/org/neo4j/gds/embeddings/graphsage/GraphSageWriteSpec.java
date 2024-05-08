@@ -19,26 +19,22 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
-import org.neo4j.gds.core.write.NodeProperty;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.embeddings.results.DefaultNodeEmbeddingsWriteResult;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPH_SAGE_DESCRIPTION;
-import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.nodePropertyValues;
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 
 @GdsCallable(name = "gds.beta.graphSage.write", description = GRAPH_SAGE_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
@@ -61,29 +57,11 @@ public class GraphSageWriteSpec implements AlgorithmSpec<GraphSage, GraphSageRes
 
     @Override
     public ComputationResultConsumer<GraphSage, GraphSageResult, GraphSageWriteConfig, Stream<DefaultNodeEmbeddingsWriteResult>> computationResultConsumer() {
-        return new WriteNodePropertiesComputationResultConsumer<>(
-            this::resultBuilder,
-            this::nodePropertyList,
-            name()
-        );
+        return new NullComputationResultConsumer<>();
     }
 
     @Override
     public ValidationConfiguration<GraphSageWriteConfig> validationConfig(ExecutionContext executionContext) {
         return new GraphSageConfigurationValidation<>(executionContext.modelCatalog());
-    }
-
-    private DefaultNodeEmbeddingsWriteResult.Builder resultBuilder(
-        ComputationResult<GraphSage, GraphSageResult, GraphSageWriteConfig> computationResult,
-        ExecutionContext executionContext
-    ) {
-        return new DefaultNodeEmbeddingsWriteResult.Builder();
-    }
-
-    private List<NodeProperty> nodePropertyList(ComputationResult<GraphSage, GraphSageResult, GraphSageWriteConfig> computationResult) {
-        return List.of(NodeProperty.of(
-            computationResult.config().writeProperty(),
-            nodePropertyValues(computationResult.result())
-        ));
     }
 }

@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.pipeline.linkPipeline;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
@@ -63,7 +64,7 @@ public final class LinkFeatureExtractor {
     public static Features extractFeatures(
         Graph graph,
         List<LinkFeatureStep> linkFeatureSteps,
-        int concurrency,
+        Concurrency concurrency,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {

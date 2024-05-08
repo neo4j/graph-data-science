@@ -21,7 +21,7 @@ package org.neo4j.gds.paths.yens;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -52,6 +52,6 @@ public class YensFactory<CONFIG extends ShortestPathYensBaseConfig> extends Grap
         CONFIG configuration,
         ProgressTracker progressTracker
     ) {
-        return Yens.sourceTarget(graph, configuration, progressTracker);
+        return Yens.sourceTarget(graph, configuration, configuration.concurrency(), progressTracker);
     }
 }

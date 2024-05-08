@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.config;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
@@ -36,7 +35,6 @@ public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig, JobIdConf
     String NODE_LABELS_KEY = "nodeLabels";
     String RELATIONSHIP_TYPES_KEY = "relationshipTypes";
 
-    @Value.Default
     @Configuration.Key(RELATIONSHIP_TYPES_KEY)
     default List<String> relationshipTypes() {
         return Collections.singletonList(ElementProjection.PROJECT_ALL);
@@ -60,7 +58,6 @@ public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig, JobIdConf
         return ElementTypeValidator.resolveTypes(graphStore, relationshipTypes());
     }
 
-    @Value.Default
     @Configuration.Key(NODE_LABELS_KEY)
     default List<String> nodeLabels() {
         return Collections.singletonList(ElementProjection.PROJECT_ALL);
@@ -81,8 +78,6 @@ public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig, JobIdConf
     }
 
     @Configuration.GraphStoreValidation
-    @Value.Auxiliary
-    @Value.Default
     default void graphStoreValidation(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,

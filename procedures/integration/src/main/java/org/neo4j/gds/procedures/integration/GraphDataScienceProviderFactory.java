@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.procedures.integration;
 
-import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
@@ -91,19 +91,22 @@ final class GraphDataScienceProviderFactory {
         );
 
         var algorithmFacadeService = createAlgorithmService(
-            defaultsConfiguration,
             graphStoreCatalogService,
-            limitsConfiguration,
             useMaxMemoryEstimation
         );
 
+        var configurationParser = new ConfigurationParser(defaultsConfiguration, limitsConfiguration);
+
         return new GraphDataScienceProvider(
             log,
+            defaultsConfiguration,
+            limitsConfiguration,
             algorithmFacadeService,
             metricsFacade.algorithmMetrics(),
             algorithmProcessingTemplateDecorator,
             catalogBusinessFacadeDecorator,
             catalogFacadeProvider,
+            configurationParser,
             metricsFacade.deprecatedProcedures(),
             exporterBuildersProviderService,
             graphStoreCatalogService,
@@ -136,21 +139,15 @@ final class GraphDataScienceProviderFactory {
     }
 
     private AlgorithmFacadeFactoryProvider createAlgorithmService(
-        DefaultsConfiguration defaultsConfiguration,
         GraphStoreCatalogService graphStoreCatalogService,
-        LimitsConfiguration limitsConfiguration,
         boolean useMaxMemoryEstimation
     ) {
         // Defaults and limits is a big shared thing (or, will be)
-        var configurationParser = new ConfigurationParser(defaultsConfiguration, limitsConfiguration);
         var modelCatalogServiceProvider = new ModelCatalogServiceProvider(modelCatalog);
 
         return new AlgorithmFacadeFactoryProvider(
             log,
-            configurationParser,
-            defaultsConfiguration,
             graphStoreCatalogService,
-            limitsConfiguration,
             useMaxMemoryEstimation,
             metricsFacade.algorithmMetrics(),
             modelCatalogServiceProvider

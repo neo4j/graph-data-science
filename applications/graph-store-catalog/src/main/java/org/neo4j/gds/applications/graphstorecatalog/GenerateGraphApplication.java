@@ -66,7 +66,8 @@ public class GenerateGraphApplication {
     }
 
     private GraphGenerationStats generateGraph(
-        DatabaseId databaseId, String name,
+        DatabaseId databaseId,
+        String name,
         long averageDegree,
         RandomGraphGeneratorConfig config
     ) {

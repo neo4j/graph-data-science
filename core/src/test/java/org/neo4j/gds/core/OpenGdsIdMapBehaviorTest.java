@@ -23,6 +23,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.ArrayIdMapBuilder;
 import org.neo4j.gds.core.loading.GrowingArrayIdMapBuilder;
 
@@ -50,7 +51,7 @@ class OpenGdsIdMapBehaviorTest {
         Optional<Long> nodeCount,
         Class<?> idMapBuilderClazz
     ) {
-        var idMapBuilder = new OpenGdsIdMapBehavior().create(id, 1, maxOriginalId, nodeCount);
+        var idMapBuilder = new OpenGdsIdMapBehavior().create(id, new Concurrency(1), maxOriginalId, nodeCount);
         assertThat(idMapBuilder).isInstanceOf(idMapBuilderClazz);
     }
 

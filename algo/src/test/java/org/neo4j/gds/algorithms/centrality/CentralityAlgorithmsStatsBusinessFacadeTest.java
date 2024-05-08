@@ -25,15 +25,18 @@ import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.centrality.specificfields.DefaultCentralitySpecificFields;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @GdlExtension
 class CentralityAlgorithmsStatsBusinessFacadeTest {
@@ -57,7 +60,7 @@ class CentralityAlgorithmsStatsBusinessFacadeTest {
     void statsWithoutAlgorithmResult() {
 
         var configurationMock = mock(AlgoBaseConfig.class);
-        var algorithmResult = AlgorithmComputationResult.<Long>withoutAlgorithmResult(graph, graphStore);
+        var algorithmResult = AlgorithmComputationResult.<Long>withoutAlgorithmResult(graph, graphStore, ResultStore.EMPTY);
 
 
         var businessFacade = new CentralityAlgorithmsStatsBusinessFacade(null);
@@ -91,7 +94,8 @@ class CentralityAlgorithmsStatsBusinessFacadeTest {
         var algorithmResultMock = AlgorithmComputationResult.of(
             result,
             graph,
-            graphStore
+            graphStore,
+            ResultStore.EMPTY
         );
 
         var statsResult = businessFacade.statsResult(
@@ -117,13 +121,15 @@ class CentralityAlgorithmsStatsBusinessFacadeTest {
         var businessFacade = new CentralityAlgorithmsStatsBusinessFacade(null);
 
         var configMock = mock(MutateNodePropertyConfig.class);
+        when(configMock.concurrency()).thenReturn(new Concurrency(4));
 
 
         var result = HugeDoubleArray.of(0.1, 0.2, 0.3, 0.4);
         var algorithmResultMock = AlgorithmComputationResult.of(
             result,
             graph,
-            graphStore
+            graphStore,
+            ResultStore.EMPTY
         );
 
         var statsResult = businessFacade.statsResult(

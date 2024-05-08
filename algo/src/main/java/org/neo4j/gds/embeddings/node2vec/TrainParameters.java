@@ -22,30 +22,13 @@ package org.neo4j.gds.embeddings.node2vec;
 import org.neo4j.gds.annotation.Parameters;
 
 @Parameters
-public class TrainParameters {
-    final double initialLearningRate;
-    final double minLearningRate;
-    final int iterations;
-    final int windowSize;
-    final int negativeSamplingRate;
-    final int embeddingDimension;
-    final EmbeddingInitializer embeddingInitializer;
-
-    public TrainParameters(
-        double initialLearningRate,
-        double minLearningRate,
-        int iterations,
-        int windowSize,
-        int negativeSamplingRate,
-        int embeddingDimension,
-        EmbeddingInitializer embeddingInitializer
-    ) {
-        this.initialLearningRate = initialLearningRate;
-        this.minLearningRate = minLearningRate;
-        this.iterations = iterations;
-        this.windowSize = windowSize;
-        this.negativeSamplingRate = negativeSamplingRate;
-        this.embeddingDimension = embeddingDimension;
-        this.embeddingInitializer = embeddingInitializer;
-    }
+public record TrainParameters(
+    double initialLearningRate,
+    double minLearningRate,
+    int iterations,
+    int windowSize,
+    int negativeSamplingRate,
+    int embeddingDimension,
+    EmbeddingInitializer embeddingInitializer
+) {
 }

@@ -20,6 +20,7 @@
 package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -50,7 +51,7 @@ public class Node2VecModel {
     private final int windowSize;
     private final int negativeSamplingRate;
     private final EmbeddingInitializer embeddingInitializer;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final CompressedRandomWalks walks;
     private final RandomWalkProbabilities randomWalkProbabilities;
     private final ProgressTracker progressTracker;
@@ -62,7 +63,7 @@ public class Node2VecModel {
         LongUnaryOperator toOriginalId,
         long nodeCount,
         TrainParameters trainParameters,
-        int concurrency,
+        Concurrency concurrency,
         Optional<Long> maybeRandomSeed,
         CompressedRandomWalks walks,
         RandomWalkProbabilities randomWalkProbabilities,
@@ -71,13 +72,13 @@ public class Node2VecModel {
         this(
             toOriginalId,
             nodeCount,
-            trainParameters.initialLearningRate,
-            trainParameters.minLearningRate,
-            trainParameters.iterations,
-            trainParameters.windowSize,
-            trainParameters.negativeSamplingRate,
-            trainParameters.embeddingDimension,
-            trainParameters.embeddingInitializer,
+            trainParameters.initialLearningRate(),
+            trainParameters.minLearningRate(),
+            trainParameters.iterations(),
+            trainParameters.windowSize(),
+            trainParameters.negativeSamplingRate(),
+            trainParameters.embeddingDimension(),
+            trainParameters.embeddingInitializer(),
             concurrency,
             maybeRandomSeed,
             walks,
@@ -96,7 +97,7 @@ public class Node2VecModel {
         int negativeSamplingRate,
         int embeddingDimension,
         EmbeddingInitializer embeddingInitializer,
-        int concurrency,
+        Concurrency concurrency,
         Optional<Long> maybeRandomSeed,
         CompressedRandomWalks walks,
         RandomWalkProbabilities randomWalkProbabilities,
@@ -139,7 +140,7 @@ public class Node2VecModel {
             var tasks = PartitionUtils.degreePartitionWithBatchSize(
                 walks.size(),
                 walks::walkLength,
-                BitUtil.ceilDiv(randomWalkProbabilities.sampleCount(), concurrency),
+                BitUtil.ceilDiv(randomWalkProbabilities.sampleCount(), concurrency.value()),
                 partition -> {
                     var positiveSampleProducer = new PositiveSampleProducer(
                         walks.iterator(partition.startNode(), partition.nodeCount()),

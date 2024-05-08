@@ -25,7 +25,7 @@ import org.neo4j.gds.ml.core.tensor.Tensor;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.mem.Estimate.sizeOfInstance;
 
 // Division, squaring and square-rooting is done element-wise.
 // Based on https://arxiv.org/pdf/1412.6980.pdf

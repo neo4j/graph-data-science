@@ -19,15 +19,14 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.core.loading.GraphStoreCatalog.GraphStoreCatalogEntryWithUsername;
 
 import java.util.Collection;
 import java.util.Map;
@@ -49,12 +48,12 @@ public class GraphStoreCatalogService {
         return GraphStoreCatalog.exists(user.getUsername(), databaseId, graphName.getValue());
     }
 
-    public GraphStoreWithConfig removeGraph(
+    public GraphStoreCatalogEntry removeGraph(
         CatalogRequest request,
         GraphName graphName,
         boolean shouldFailIfMissing
     ) {
-        var result = new AtomicReference<GraphStoreWithConfig>();
+        var result = new AtomicReference<GraphStoreCatalogEntry>();
         GraphStoreCatalog.remove(
             request,
             graphName.getValue(),
@@ -64,18 +63,19 @@ public class GraphStoreCatalogService {
         return result.get();
     }
 
-    public GraphStoreWithConfig get(CatalogRequest catalogRequest, GraphName graphName) {
+    public GraphStoreCatalogEntry get(CatalogRequest catalogRequest, GraphName graphName) {
         return GraphStoreCatalog.get(catalogRequest, graphName.getValue());
     }
 
-    public Pair<Graph, GraphStore> getGraphWithGraphStore(
+    public GraphResources getGraphResources(
         GraphName graphName,
         AlgoBaseConfig config,
         Optional<String> relationshipProperty,
         User user,
         DatabaseId databaseId
     ) {
-        var graphStore = getGraphStore(graphName, config, user, databaseId);
+        var graphStoreCatalogEntry = getGraphStoreCatalogEntry(graphName, config, user, databaseId);
+        var graphStore = graphStoreCatalogEntry.graphStore();
         // TODO: Maybe validation of the graph store, where do this happen? Is this the right place?
 
         var nodeLabels = config.nodeLabelsFilter();
@@ -96,17 +96,16 @@ public class GraphStoreCatalogService {
         config.graphStoreValidation(graphStore, nodeLabels, relationshipTypes);
 
         var graph = graphStore.getGraph(nodeLabels, relationshipTypes, relationshipProperty);
-        return Pair.of(graph, graphStore);
+        return new GraphResources(graphStore, graph, graphStoreCatalogEntry.resultStore());
     }
 
     /**
      * @deprecated Push RequestScopedDependencies down and use it instead of database id + user parameters
      */
     @Deprecated
-    public GraphStore getGraphStore(GraphName graphName, AlgoBaseConfig config, User user, DatabaseId databaseId) {
+    public GraphStoreCatalogEntry getGraphStoreCatalogEntry(GraphName graphName, AlgoBaseConfig config, User user, DatabaseId databaseId) {
         var catalogRequest = CatalogRequest.of(user, databaseId, config.usernameOverride());
-        var graphStoreWithConfig = get(catalogRequest, graphName);
-        return graphStoreWithConfig.graphStore();
+        return get(catalogRequest, graphName);
     }
 
     /**
@@ -161,15 +160,17 @@ public class GraphStoreCatalogService {
         );
     }
 
-    public Stream<GraphStoreCatalog.GraphStoreWithUserNameAndConfig> getAllGraphStores() {
-        return GraphStoreCatalog.getAllGraphStores();
+    public Stream<GraphStoreCatalogEntry> getAllGraphStores() {
+        return GraphStoreCatalog
+            .getAllGraphStores()
+            .map(GraphStoreCatalogEntryWithUsername::catalogEntry);
     }
 
     public long graphStoreCount() {
         return GraphStoreCatalog.graphStoreCount();
     }
 
-    public Map<GraphProjectConfig, GraphStore> getGraphStores(User user) {
+    public Collection<GraphStoreCatalogEntry> getGraphStores(User user) {
         return GraphStoreCatalog.getGraphStores(user.getUsername());
     }
 

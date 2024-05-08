@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.models.mlp;
 
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
@@ -47,7 +48,7 @@ public class MLPClassifierTrainer implements ClassifierTrainer {
 
     private final TerminationFlag terminationFlag;
 
-    private final int concurrency;
+    private final Concurrency concurrency;
 
     public MLPClassifierTrainer(int numberOfClasses,
                                 MLPClassifierTrainConfig trainConfig,
@@ -55,7 +56,7 @@ public class MLPClassifierTrainer implements ClassifierTrainer {
                                 ProgressTracker progressTracker,
                                 LogLevel messageLogLevel,
                                 TerminationFlag terminationFlag,
-                                int concurrency
+                                Concurrency concurrency
     ) {
         this.numberOfClasses = numberOfClasses;
         this.trainConfig = trainConfig;

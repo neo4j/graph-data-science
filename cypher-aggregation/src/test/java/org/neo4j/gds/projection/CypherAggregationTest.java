@@ -44,6 +44,7 @@ import org.neo4j.gds.compat.CompatUserAggregationFunction;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.RandomGraphTestCase;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
@@ -942,7 +943,7 @@ class CypherAggregationTest extends BaseProcTest {
 
         var config = GraphProjectFromCypherAggregationConfig.of("", "g", "", configMap);
 
-        assertThat(config.readConcurrency()).isEqualTo(2);
+        assertThat(config.readConcurrency()).isEqualTo(new Concurrency(2));
     }
 
     @Test

@@ -20,8 +20,8 @@
 package org.neo4j.gds.similarity.filteredknn;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.similarity.knn.KnnWriteResult;
-import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.procedures.algorithms.similarity.KnnWriteResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
+import static org.neo4j.gds.similarity.filteredknn.FilteredKnnConstants.PROCEDURE_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
@@ -40,12 +41,12 @@ public class FilteredKnnWriteProc {
     public GraphDataScienceProcedures facade;
 
     @Procedure(name = "gds.knn.filtered.write", mode = WRITE)
-    @Description(FilteredKnnConstants.PROCEDURE_DESCRIPTION)
+    @Description(PROCEDURE_DESCRIPTION)
     public Stream<KnnWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.similarity().filteredKnnWrite(graphName, configuration);
+        return facade.algorithms().similarity().filteredKnnWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.knn.filtered.write.estimate", mode = READ)
@@ -54,11 +55,11 @@ public class FilteredKnnWriteProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.similarity().filteredKnnWriteEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().similarity().filteredKnnWriteEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Procedure(name = "gds.alpha.knn.filtered.write", mode = WRITE, deprecatedBy = "gds.knn.filtered.write")
-    @Description(FilteredKnnConstants.PROCEDURE_DESCRIPTION)
+    @Description(PROCEDURE_DESCRIPTION)
     @Internal
     @Deprecated
     public Stream<KnnWriteResult> alphaWrite(

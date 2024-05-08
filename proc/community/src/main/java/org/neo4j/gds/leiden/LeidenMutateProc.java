@@ -19,10 +19,9 @@
  */
 package org.neo4j.gds.leiden;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.community.leiden.LeidenMutateResult;
-import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -32,16 +31,16 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.leiden.LeidenStreamProc.DESCRIPTION;
+import static org.neo4j.gds.leiden.Constants.LEIDEN_DESCRIPTION;
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class LeidenMutateProc extends BaseProc {
-
+public class LeidenMutateProc {
     @Context
     public GraphDataScienceProcedures facade;
+
     @Procedure(value = "gds.leiden.mutate", mode = READ)
-    @Description(DESCRIPTION)
+    @Description(LEIDEN_DESCRIPTION)
     public Stream<LeidenMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -61,14 +60,13 @@ public class LeidenMutateProc extends BaseProc {
     @Deprecated(forRemoval = true)
     @Internal
     @Procedure(value = "gds.beta.leiden.mutate", mode = READ, deprecatedBy = "gds.leiden.mutate")
-    @Description(DESCRIPTION)
+    @Description(LEIDEN_DESCRIPTION)
     public Stream<LeidenMutateResult> mutateBeta(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         facade.deprecatedProcedures().called("gds.beta.leiden.mutate");
-
-        executionContext()
+        facade
             .log()
             .warn("Procedure `gds.beta.leiden.mutate` has been deprecated, please use `gds.leiden.mutate`.");
 
@@ -84,12 +82,10 @@ public class LeidenMutateProc extends BaseProc {
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
         facade.deprecatedProcedures().called("gds.beta.leiden.mutate.estimate");
-
-        executionContext()
+        facade
             .log()
             .warn("Procedure `gds.beta.leiden.mutate.estimate` has been deprecated, please use `gds.leiden.mutate.estimate`.");
 
         return estimate(graphName, configuration);
     }
-
 }

@@ -20,6 +20,7 @@
 package org.neo4j.gds.influenceMaximization;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
@@ -29,7 +30,7 @@ import java.util.concurrent.ExecutorService;
 
 final class ICLazyForwardMC {
 
-    private final int concurrency;
+    private final Concurrency concurrency;
 
     private final List<ICLazyForwardTask> tasks;
 
@@ -44,7 +45,7 @@ final class ICLazyForwardMC {
         int monteCarloSimulations,
         long firstNodeInSeedSet,
         int seedSetCount,
-        int concurrency,
+        Concurrency concurrency,
         ExecutorService executorService,
         long initialRandomSeed,
         int batchSize
@@ -63,14 +64,14 @@ final class ICLazyForwardMC {
                 initialRandomSeed,
                 batchSize
             ),
-            Optional.of(monteCarloSimulations / concurrency)
+            Optional.of(monteCarloSimulations / concurrency.value())
         );
         return new ICLazyForwardMC(tasks, concurrency, executorService, spread);
     }
 
     private ICLazyForwardMC(
         List<ICLazyForwardTask> tasks,
-        int concurrency,
+        Concurrency concurrency,
         ExecutorService executorService,
         double[] spread
     ) {

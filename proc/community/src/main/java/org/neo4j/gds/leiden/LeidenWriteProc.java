@@ -19,10 +19,9 @@
  */
 package org.neo4j.gds.leiden;
 
-import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.community.leiden.LeidenWriteResult;
-import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -32,18 +31,17 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.leiden.LeidenStreamProc.DESCRIPTION;
+import static org.neo4j.gds.leiden.Constants.LEIDEN_DESCRIPTION;
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class LeidenWriteProc extends BaseProc {
-
+public class LeidenWriteProc {
     @Context
     public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.leiden.write", mode = WRITE)
-    @Description(DESCRIPTION)
+    @Description(LEIDEN_DESCRIPTION)
     public Stream<LeidenWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -63,13 +61,13 @@ public class LeidenWriteProc extends BaseProc {
     @Deprecated(forRemoval = true)
     @Internal
     @Procedure(value = "gds.beta.leiden.write", mode = WRITE, deprecatedBy = "gds.leiden.write")
-    @Description(DESCRIPTION)
+    @Description(LEIDEN_DESCRIPTION)
     public Stream<LeidenWriteResult> writeBeta(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         facade.deprecatedProcedures().called("gds.beta.leiden.write");
-        executionContext()
+        facade
             .log()
             .warn("Procedure `gds.beta.leiden.write` has been deprecated, please use `gds.leiden.write`.");
 
@@ -85,11 +83,10 @@ public class LeidenWriteProc extends BaseProc {
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
         facade.deprecatedProcedures().called("gds.beta.leiden.write.estimate");
-        executionContext()
+        facade
             .log()
             .warn("Procedure `gds.beta.leiden.write.estimate` has been deprecated, please use `gds.leiden.write.estimate`.");
 
         return estimate(graphName, configuration);
     }
-
 }

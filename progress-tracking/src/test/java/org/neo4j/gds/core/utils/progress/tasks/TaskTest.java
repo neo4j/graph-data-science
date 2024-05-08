@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.utils.progress.tasks;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.List;
 
@@ -148,8 +149,8 @@ class TaskTest {
         var c = Tasks.leaf("C");
         var d = Tasks.task("C", b, c);
 
-        c.setMaxConcurrency(concurrency + 1);
-        d.setMaxConcurrency(concurrency);
+        c.setMaxConcurrency(new Concurrency(concurrency + 1));
+        d.setMaxConcurrency(new Concurrency(concurrency));
 
         assertThat(a.maxConcurrency()).isEqualTo(concurrency);
         assertThat(b.maxConcurrency()).isEqualTo(concurrency);

@@ -28,7 +28,7 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountMutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
@@ -36,9 +36,9 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
-import static org.neo4j.gds.triangle.TriangleCountCompanion.DESCRIPTION;
+import static org.neo4j.gds.triangle.TriangleCountCompanion.TRIANGLE_COUNT_DESCRIPTION;
 
-@GdsCallable(name = "gds.triangleCount.mutate", description = DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
+@GdsCallable(name = "gds.triangleCount.mutate", description = TRIANGLE_COUNT_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class TriangleCountMutateSpec implements AlgorithmSpec<IntersectingTriangleCount, TriangleCountResult, TriangleCountMutateConfig, Stream<TriangleCountMutateResult>, IntersectingTriangleCountFactory<TriangleCountMutateConfig>> {
     @Override
     public String name() {

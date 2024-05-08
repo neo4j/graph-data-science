@@ -32,6 +32,7 @@ import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -41,7 +42,6 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -89,7 +89,7 @@ class RandomWalkTest {
         var walkParameters = new WalkParameters(10, 80, 1.0, 1.0);
         var randomWalk = RandomWalk.create(
             graph,
-            4,
+            new Concurrency(4),
             walkParameters,
             List.of(),
             1000,
@@ -100,7 +100,7 @@ class RandomWalkTest {
 
         List<long[]> result = randomWalk.compute().collect(Collectors.toList());
 
-        int expectedNumberOfWalks = walkParameters.walksPerNode * 3;
+        int expectedNumberOfWalks = walkParameters.walksPerNode() * 3;
         assertEquals(expectedNumberOfWalks, result.size());
         long nodeZero = graph.toMappedNodeId("a");
         long[] walkForNodeZero = result
@@ -108,7 +108,7 @@ class RandomWalkTest {
             .filter(arr -> arr[0] == nodeZero)
             .findFirst()
             .orElse(new long[0]);
-        int expectedStepsInWalkForNode0 = walkParameters.walkLength;
+        int expectedStepsInWalkForNode0 = walkParameters.walkLength();
         assertEquals(expectedStepsInWalkForNode0, walkForNodeZero.length);
     }
 
@@ -122,7 +122,7 @@ class RandomWalkTest {
 
         var firstResult = RandomWalk.create(
             graph,
-            concurrency,
+            new Concurrency(concurrency),
             walkParameters,
             sourceNodes,
             walkBufferSize,
@@ -133,7 +133,7 @@ class RandomWalkTest {
 
         var secondResult = RandomWalk.create(
             graph,
-            concurrency,
+            new Concurrency(concurrency),
             walkParameters,
             sourceNodes,
             walkBufferSize,
@@ -158,7 +158,7 @@ class RandomWalkTest {
         WalkParameters walkParameters = new WalkParameters(10, 80, 1.0, 1.0);
         RandomWalk randomWalk = RandomWalk.create(
             graph,
-            4,
+            new Concurrency(4),
             walkParameters,
             List.of(),
             1000,
@@ -167,7 +167,7 @@ class RandomWalkTest {
             DefaultPool.INSTANCE
         );
 
-        int expectedNumberOfWalks = walkParameters.walksPerNode * 3;
+        int expectedNumberOfWalks = walkParameters.walksPerNode() * 3;
         List<long[]> result = randomWalk.compute().collect(Collectors.toList());
         assertEquals(expectedNumberOfWalks, result.size());
         long nodeZero = graph.toMappedNodeId("a");
@@ -176,7 +176,7 @@ class RandomWalkTest {
             .filter(arr -> arr[0] == nodeZero)
             .findFirst()
             .orElse(new long[0]);
-        int expectedStepsInWalkForNode0 = walkParameters.walkLength;
+        int expectedStepsInWalkForNode0 = walkParameters.walkLength();
         assertEquals(expectedStepsInWalkForNode0, walkForNodeZero.length);
     }
 
@@ -195,7 +195,7 @@ class RandomWalkTest {
 
         RandomWalk randomWalk = RandomWalk.create(
             graph,
-            4,
+            new Concurrency(4),
             walkParameters,
             List.of(),
             1000,
@@ -251,7 +251,7 @@ class RandomWalkTest {
 
         RandomWalk randomWalk = RandomWalk.create(
             graph,
-            4,
+            new Concurrency(4),
             walkParameters,
             List.of(),
             1000,
@@ -296,7 +296,7 @@ class RandomWalkTest {
 
         RandomWalk randomWalk = RandomWalk.create(
             graph,
-            1,
+            new Concurrency(1),
             walkParameters,
             List.of(),
             100,
@@ -329,7 +329,7 @@ class RandomWalkTest {
         assertThatThrownBy(
             () -> RandomWalk.create(
                 graph,
-                1,
+                new Concurrency(1),
                 walkParameters,
                 List.of(),
                 100,
@@ -362,7 +362,7 @@ class RandomWalkTest {
 
         var randomWalk = RandomWalk.create(
             graph,
-            4,
+            new Concurrency(4),
             walkParameters,
             List.of(),
             100,
@@ -391,7 +391,7 @@ class RandomWalkTest {
 
         var randomWalk = RandomWalk.create(
             graph,
-            4,
+            new Concurrency(4),
             walkParameters,
             sourceNodes,
             1000,
@@ -415,7 +415,7 @@ class RandomWalkTest {
 
             var randomWalk = RandomWalk.create(
                     graph,
-                    4,
+                    new Concurrency(4),
                     new WalkParameters(10, 80, 1.0, 1.0),
                     List.of(),
                     1,
@@ -427,12 +427,7 @@ class RandomWalkTest {
             var stream = randomWalk.compute();
             long count = stream.limit(10).count();
 
-            randomWalk.setTerminationFlag(new TerminationFlag() {
-                @Override
-                public boolean running() {
-                    return false;
-                }
-            });
+            randomWalk.setTerminationFlag(() -> false);
 
             assertEquals(10, count);
         }
@@ -607,7 +602,7 @@ class RandomWalkTest {
                     config
                 ),
                 Neo4jProxy.testLog(),
-                4,
+                new Concurrency(4),
                 TaskRegistryFactory.local("rw", taskStore)
             );
 

@@ -52,7 +52,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.SysInfoProc.DebugValue.value;
-import static org.neo4j.gds.mem.MemoryUsage.humanReadable;
+import static org.neo4j.gds.mem.Estimate.humanReadable;
 
 // don't extend BaseProc and only inject GraphDatabaseService so that
 // we can run this procedure even if unrestricted=gds.* had not been configured
@@ -159,7 +159,6 @@ public class SysInfoProc {
 
     private static void features(Stream.Builder<DebugValue> builder) {
         builder
-            .add(value("featureSkipOrphanNodes", GdsFeatureToggles.SKIP_ORPHANS.isEnabled()))
             .add(value("featureBitIdMap", GdsFeatureToggles.USE_BIT_ID_MAP.isEnabled()))
             .add(value(
                 "featureUncompressedAdjacencyList",

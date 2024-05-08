@@ -19,14 +19,13 @@
  */
 package org.neo4j.gds.similarity.nodesim;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.procedures.similarity.SimilarityWriteResult;
-import org.neo4j.gds.similarity.SimilarityGraphResult;
-import org.neo4j.gds.similarity.SimilarityWriteConsumer;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.similarity.SimilarityWriteResult;
 
 import java.util.stream.Stream;
 
@@ -52,12 +51,6 @@ public class NodeSimilarityWriteSpecification implements AlgorithmSpec<NodeSimil
 
     @Override
     public ComputationResultConsumer<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig, Stream<SimilarityWriteResult>> computationResultConsumer() {
-        return new SimilarityWriteConsumer<>(
-            (computationResult) -> new NodeSimilarityWriteResultBuilder(),
-            (computationResult) -> computationResult.result()
-                .map(NodeSimilarityResult::graphResult)
-                .orElseGet(() -> new SimilarityGraphResult(computationResult.graph(), 0, false)),
-            name()
-        );
+        return new NullComputationResultConsumer<>();
     }
 }

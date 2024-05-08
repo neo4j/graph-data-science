@@ -32,14 +32,12 @@ import org.neo4j.gds.config.ToleranceConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
-import org.neo4j.gds.embeddings.graphsage.LayerConfig;
+import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
 import org.neo4j.gds.ml.training.TrainBaseConfig;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 @Configuration("GraphSageTrainConfigImpl")
@@ -120,18 +118,6 @@ public interface GraphSageTrainConfig extends
         return 0;
     }
 
-    @Configuration.Ignore
-    default int batchesPerIteration(long nodeCount) {
-        var totalNumberOfBatches = numberOfBatches(nodeCount);
-        var samplingRatio = maybeBatchSamplingRatio().orElse(Math.min(1.0, batchSize() * concurrency() / (double) nodeCount));
-        return (int) Math.ceil(samplingRatio * totalNumberOfBatches);
-    }
-
-    @Configuration.Ignore
-    default long numberOfBatches(long nodeCount) {
-        return (long) Math.ceil(nodeCount / (double) batchSize());
-    }
-
     default int searchDepth() {
         return 5;
     }
@@ -150,36 +136,8 @@ public interface GraphSageTrainConfig extends
     }
 
     @Configuration.Ignore
-    default List<LayerConfig> layerConfigs(int featureDimension) {
-        List<LayerConfig> result = new ArrayList<>(sampleSizes().size());
-
-        Random random = new Random();
-        randomSeed().ifPresent(random::setSeed);
-
-        for (int i = 0; i < sampleSizes().size(); i++) {
-            LayerConfig layerConfig = LayerConfig.builder()
-                .aggregatorType(aggregator())
-                .activationFunction(activationFunction())
-                .rows(embeddingDimension())
-                .cols(i == 0 ? featureDimension : embeddingDimension())
-                .sampleSize(sampleSizes().get(i))
-                .randomSeed(random.nextLong())
-                .build();
-
-            result.add(layerConfig);
-        }
-
-        return result;
-    }
-
-    @Configuration.Ignore
     default boolean isMultiLabel() {
         return projectedFeatureDimension().isPresent();
-    }
-
-    @Configuration.Ignore
-    default int estimationFeatureDimension() {
-        return projectedFeatureDimension().orElse(featureProperties().size());
     }
 
     @Configuration.Check
@@ -209,14 +167,37 @@ public interface GraphSageTrainConfig extends
 
     @Configuration.Ignore
     default GraphSageTrainMemoryEstimateParameters toMemoryEstimateParameters() {
+        var estimationFeatureDimension = projectedFeatureDimension().orElse(featureProperties().size());
+        var layerConfigs = GraphSageHelper.layerConfigs(estimationFeatureDimension, sampleSizes(), randomSeed(), aggregator(), activationFunction(), embeddingDimension());
         return new GraphSageTrainMemoryEstimateParameters(
-            layerConfigs(estimationFeatureDimension()),
+            layerConfigs,
             isMultiLabel(),
             featureProperties().size(),
-            estimationFeatureDimension(),
+            estimationFeatureDimension,
             batchSize(),
             embeddingDimension()
         );
     }
 
+    @Configuration.Ignore
+    default GraphSageTrainParameters toParameters() {
+        return new GraphSageTrainParameters(
+            concurrency(),
+            batchSize(),
+            maxIterations(),
+            searchDepth(),
+            epochs(),
+            learningRate(),
+            tolerance(),
+            negativeSampleWeight(),
+            penaltyL2(),
+            embeddingDimension(),
+            sampleSizes(),
+            featureProperties(),
+            maybeBatchSamplingRatio(),
+            randomSeed(),
+            aggregator(),
+            activationFunction()
+        );
+    }
 }

@@ -20,8 +20,9 @@
 package org.neo4j.gds.procedures.community.scc;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
-import org.neo4j.gds.results.StandardWriteResult;
+import org.neo4j.gds.procedures.algorithms.results.StandardWriteResult;
 
 import java.util.Map;
 
@@ -50,7 +51,7 @@ public class SccWriteResult extends StandardWriteResult {
 
     public static class Builder extends AbstractCommunityResultBuilder<SccWriteResult> {
 
-        public Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+        public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
             super(returnColumns, concurrency);
         }
 
@@ -79,4 +80,3 @@ public class SccWriteResult extends StandardWriteResult {
 
     }
 }
-

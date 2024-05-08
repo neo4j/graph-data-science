@@ -19,14 +19,20 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
-import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ImmutableExportedRelationship;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
+import org.neo4j.gds.config.JobIdConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.logging.Log;
@@ -45,8 +51,8 @@ import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfi
 /**
  * This is relationship writes as needed by path finding algorithms (for now).
  */
-class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & WritePathOptionsConfig> implements
-    MutateOrWriteStep<PathFindingResult> {
+class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & WritePathOptionsConfig & JobIdConfig> implements
+    MutateOrWriteStep<PathFindingResult, RelationshipsWritten> {
     private final Log log;
     private final RequestScopedDependencies requestScopedDependencies;
     private final CONFIGURATION configuration;
@@ -66,11 +72,12 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
      * We do it synchronously, time it, and gather metadata about how many relationships we wrote.
      */
     @Override
-    public void execute(
+    public RelationshipsWritten execute(
         Graph graph,
         GraphStore graphStore,
+        ResultStore resultStore,
         PathFindingResult result,
-        SideEffectProcessingCountsBuilder countsBuilder
+        JobId jobId
     ) {
         var writeNodeIds = configuration.writeNodeIds();
         var writeCosts = configuration.writeCosts();
@@ -95,9 +102,18 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
             var progressTracker = new TaskProgressTracker(
                 RelationshipStreamExporter.baseTask("Write shortest Paths"),
                 (org.neo4j.logging.Log) log.getNeo4jLog(),
-                1,
+                new Concurrency(1),
                 requestScopedDependencies.getTaskRegistryFactory()
             );
+
+            var maybeResultStore = configuration.resolveResultStore(resultStore);
+            // When we are writing to the result store, the path finding result stream is not consumed
+            // inside the current transaction. This causes the stream to immediately return an empty stream
+            // as the termination flag, which is bound to the current transaction is set to true. We therefore
+            // need to collect the stream and trigger an eager computation.
+            var maybeCollectedStream = maybeResultStore
+                .map(__ -> relationshipStream.toList().stream())
+                .orElse(relationshipStream);
 
             // configure the exporter
             var relationshipStreamExporter = requestScopedDependencies.getRelationshipStreamExporterBuilder()
@@ -106,11 +122,12 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
                     configuration.arrowConnectionInfo(),
                     graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                 )
-                .withResultStore(configuration.resolveResultStore(graphStore.resultStore()))
+                .withResultStore(maybeResultStore)
                 .withIdMappingOperator(graph::toOriginalNodeId)
                 .withProgressTracker(progressTracker)
-                .withRelationships(relationshipStream)
+                .withRelationships(maybeCollectedStream)
                 .withTerminationFlag(requestScopedDependencies.getTerminationFlag())
+                .withJobId(configuration.jobId())
                 .build();
 
             var writeRelationshipType = configuration.writeRelationshipType();
@@ -129,7 +146,7 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
             var relationshipsWritten = relationshipStreamExporter.write(writeRelationshipType, keys, types);
 
             // the final result is the side effect of writing to the database, plus this metadata
-            countsBuilder.withRelationshipsWritten(relationshipsWritten);
+            return new RelationshipsWritten(relationshipsWritten);
         }
     }
 

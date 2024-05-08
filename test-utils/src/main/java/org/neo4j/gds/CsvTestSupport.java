@@ -81,4 +81,8 @@ public final class CsvTestSupport {
             throw new UncheckedIOException(e);
         }
     }
+
+    public static void assertFileContent(Path path, String fileName, String expected) {
+        assertThat(path.resolve(fileName)).hasContent(expected);
+    }
 }

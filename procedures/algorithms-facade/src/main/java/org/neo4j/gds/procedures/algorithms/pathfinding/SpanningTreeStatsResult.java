@@ -20,7 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.gds.results.StandardModeResult;
+import org.neo4j.gds.procedures.algorithms.results.StandardModeResult;
 
 import java.util.Map;
 

@@ -29,7 +29,10 @@ import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.compat.CompatUserAggregator;
 import org.neo4j.gds.core.ConfigKeyValidation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.loading.LazyIdMapBuilder;
 import org.neo4j.gds.core.loading.construction.NodeLabelToken;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.PropertyValues;
@@ -158,19 +161,48 @@ abstract class GraphAggregator implements CompatUserAggregator {
         try {
             data = this.importer;
             if (data == null) {
-                this.importer = data = GraphImporter.of(
-                    graphName,
-                    this.username,
-                    this.queryProvider.executingQuery().orElse(""),
-                    this.databaseId,
-                    config,
-                    this.writeMode,
-                    PropertyState.PERSISTENT
-                );
+                this.importer = data = createGraphImporter(graphName, config);
             }
             return data;
         } finally {
             this.lock.unlock();
+        }
+    }
+
+    private GraphImporter createGraphImporter(
+        TextValue graphNameValue,
+        AnyValue configMap
+    ) {
+        var graphName = graphNameValue.stringValue();
+        var query = this.queryProvider.executingQuery().orElse("");
+
+        validateGraphName(graphName, this.username, this.databaseId);
+        var config = GraphProjectFromCypherAggregationConfig.of(
+            this.username,
+            graphName,
+            query,
+            (configMap instanceof MapValue) ? (MapValue) configMap : MapValue.EMPTY
+        );
+
+        var idMapBuilder = idMapBuilder(config.readConcurrency());
+
+        return new GraphImporter(
+            config,
+            config.undirectedRelationshipTypes(),
+            config.inverseIndexedRelationshipTypes(),
+            idMapBuilder,
+            this.writeMode,
+            query
+        );
+    }
+
+    private static LazyIdMapBuilder idMapBuilder(Concurrency readConcurrency) {
+        return new LazyIdMapBuilder(readConcurrency, true, true, PropertyState.PERSISTENT);
+    }
+
+    private static void validateGraphName(String graphName, String username, DatabaseId databaseId) {
+        if (GraphStoreCatalog.exists(username, databaseId, graphName)) {
+            throw new IllegalArgumentException("Graph " + graphName + " already exists");
         }
     }
 
@@ -203,7 +235,7 @@ abstract class GraphAggregator implements CompatUserAggregator {
             projectionMetric.start();
             result = buildGraph();
         } catch (Exception e) {
-            projectionMetric.failed();
+            projectionMetric.failed(e);
             throw new ProcedureException(
                 Status.Procedure.ProcedureCallFailed,
                 e,
@@ -243,6 +275,7 @@ abstract class GraphAggregator implements CompatUserAggregator {
             .databaseId(this.databaseId)
             .databaseLocation(DatabaseLocation.LOCAL)
             .build();
+
         this.result = importer.result(
             databaseInfo,
             this.progressTimer,

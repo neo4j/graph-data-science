@@ -23,6 +23,7 @@ import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
 import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfigImpl;
@@ -61,7 +62,7 @@ public final class GraphProjectConfigBuilders {
         Map<String, RelationshipProjection> relationshipProjectionsWithIdentifier,
         List<PropertyMapping> nodeProperties,
         List<PropertyMapping> relationshipProperties,
-        Optional<Integer> concurrency,
+        Optional<Concurrency> concurrency,
         Optional<JobId> jobId,
         Optional<Orientation> globalProjection,
         Optional<Aggregation> globalAggregation,
@@ -128,7 +129,8 @@ public final class GraphProjectConfigBuilders {
             .relationshipProjections(rp)
             .nodeProperties(ImmutablePropertyMappings.of(nodeProperties))
             .relationshipProperties(relationshipPropertyMappings)
-            .readConcurrency(concurrency.orElse(ConcurrencyConfig.DEFAULT_CONCURRENCY))
+            .readConcurrency(concurrency.orElse(ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY))
+            // TODO: should be able to just not set readConcurrency
             .jobId(jobId.orElse(new JobId()))
             .validateRelationships(validateRelationships.orElse(false))
             .build()
@@ -144,7 +146,7 @@ public final class GraphProjectConfigBuilders {
         Optional<String> graphName,
         Optional<String> nodeQuery,
         Optional<String> relationshipQuery,
-        Optional<Integer> concurrency,
+        Optional<Concurrency> concurrency,
         Optional<JobId> jobId,
         Optional<Boolean> validateRelationships,
         Optional<Map<String, Object>> parameters
@@ -155,7 +157,7 @@ public final class GraphProjectConfigBuilders {
             .graphName(graphName.orElse(""))
             .nodeQuery(nodeQuery.orElse(ALL_NODES_QUERY))
             .relationshipQuery(relationshipQuery.orElse(ALL_RELATIONSHIPS_QUERY))
-            .readConcurrency(concurrency.orElse(ConcurrencyConfig.DEFAULT_CONCURRENCY))
+            .readConcurrency(concurrency.orElse(ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY))
             .validateRelationships(validateRelationships.orElse(true))
             .parameters(parameters.orElse(Collections.emptyMap()))
             .jobId(jobId.orElse(new JobId()))

@@ -23,9 +23,9 @@ import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.LongIntHashMap;
 import com.carrotsearch.hppc.cursors.LongCursor;
 import com.carrotsearch.hppc.cursors.LongIntCursor;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.Estimate;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,8 +42,8 @@ public class LocalIdMap {
 
     public static MemoryEstimation memoryEstimation(int numberOfClasses) {
         return MemoryEstimations.builder(LocalIdMap.class.getSimpleName())
-            .fixed("original IDs", MemoryUsage.sizeOfLongArray(numberOfClasses))
-            .fixed("id mapping", MemoryUsage.sizeOfLongArray(numberOfClasses) + MemoryUsage.sizeOfIntArray(numberOfClasses))
+            .fixed("original IDs", Estimate.sizeOfLongArray(numberOfClasses))
+            .fixed("id mapping", Estimate.sizeOfLongArray(numberOfClasses) + Estimate.sizeOfIntArray(numberOfClasses))
             .build();
     }
 

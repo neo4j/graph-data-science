@@ -22,6 +22,7 @@ package org.neo4j.gds.kcore;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -56,7 +57,7 @@ class RebuildTaskTest {
                 tasks.add(new RebuildTask(partition,atomicLong,core,nodeOrder));
             }
 
-            RunWithConcurrency.builder().concurrency(tasks.size()).tasks(tasks).run();
+            RunWithConcurrency.builder().concurrency(new Concurrency(tasks.size())).tasks(tasks).run();
 
             assertThat(nodeOrder.toArray()).containsExactlyInAnyOrder(0,2,4,5,7,9);
 

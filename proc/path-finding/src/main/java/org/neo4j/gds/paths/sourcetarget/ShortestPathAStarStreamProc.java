@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.paths.sourcetarget;
 
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingStreamResult;
-import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -30,8 +30,8 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.ProcedureConstants.ESTIMATE_DESCRIPTION;
 import static org.neo4j.gds.paths.sourcetarget.SinglePairShortestPathConstants.ASTAR_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class ShortestPathAStarStreamProc {
@@ -44,16 +44,16 @@ public class ShortestPathAStarStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().singlePairShortestPathAStarStream(graphName, configuration);
+        return facade.algorithms().pathFinding().singlePairShortestPathAStarStream(graphName, configuration);
     }
 
     @Procedure(name = "gds.shortestPath.astar.stream.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.pathFinding().singlePairShortestPathAStarStreamEstimate(
+        return facade.algorithms().pathFinding().singlePairShortestPathAStarStreamEstimate(
             graphNameOrConfiguration,
             algoConfiguration
         );

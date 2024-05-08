@@ -31,6 +31,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.assertj.Extractors;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
@@ -92,7 +93,7 @@ class ModularityOptimizationTest {
     void testUnweighted() {
         var graph = unweightedGraph();
 
-        var pmo = compute(graph, 3, null, 1, 10_000);
+        var pmo = compute(graph, 3, null, new Concurrency(1), 10_000);
 
         assertEquals(0.12244, pmo.modularity(), 0.001);
         CommunityHelper.assertCommunities(
@@ -105,7 +106,7 @@ class ModularityOptimizationTest {
 
     @Test
     void testWeighted() {
-        var pmo = compute(graph, 3, null, 3, 2);
+        var pmo = compute(graph, 3, null, new Concurrency(3), 2);
 
         assertEquals(0.4985, pmo.modularity(), 0.001);
         CommunityHelper.assertCommunities(
@@ -123,7 +124,7 @@ class ModularityOptimizationTest {
         var pmo = compute(
             graph,
             10, graph.nodeProperties("seed2"),
-            1,
+            new Concurrency(1),
             100
         );
 
@@ -141,7 +142,7 @@ class ModularityOptimizationTest {
         var pmo = compute(
             graph,
             10, graph.nodeProperties("seed1"),
-            1,
+            new Concurrency(1),
             100
         );
 
@@ -164,7 +165,7 @@ class ModularityOptimizationTest {
     void testLogging() {
         var log = Neo4jProxy.testLog();
 
-        compute(graph, K1COLORING_MAX_ITERATIONS, null, 3, 2, log);
+        compute(graph, K1COLORING_MAX_ITERATIONS, null, new Concurrency(3), 2, log);
 
         assertThat(log.getMessages(INFO))
             .extracting(Extractors.removingThreadId())
@@ -186,7 +187,7 @@ class ModularityOptimizationTest {
         Graph graph,
         int maxIterations,
         NodePropertyValues properties,
-        int concurrency,
+        Concurrency concurrency,
         int minBatchSize
     ) {
         return compute(graph, maxIterations, properties, concurrency, minBatchSize, Neo4jProxy.testLog());
@@ -197,7 +198,7 @@ class ModularityOptimizationTest {
         Graph graph,
         int maxIterations,
         NodePropertyValues properties,
-        int concurrency,
+        Concurrency concurrency,
         int minBatchSize,
         Log log
     ) {

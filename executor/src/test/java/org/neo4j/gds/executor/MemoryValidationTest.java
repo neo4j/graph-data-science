@@ -25,10 +25,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.applications.graphstorecatalog.MemoryUsageValidator;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryTreeWithDimensions;
 import org.neo4j.logging.NullLog;
 
 import java.util.stream.Stream;
@@ -60,7 +61,7 @@ class MemoryValidationTest {
     @ParameterizedTest
     @MethodSource("input")
     void doesNotThrow(MemoryEstimation estimation, boolean useMaxMemoryUsage) {
-        var memoryTree = estimation.estimate(TEST_DIMENSIONS, 1);
+        var memoryTree = estimation.estimate(TEST_DIMENSIONS, new Concurrency(1));
         var memoryTreeWithDimensions = new MemoryTreeWithDimensions(memoryTree, TEST_DIMENSIONS);
 
         assertDoesNotThrow(() -> MemoryUsageValidator.validateMemoryUsage(
@@ -74,7 +75,7 @@ class MemoryValidationTest {
     @ParameterizedTest
     @MethodSource("input")
     void throwsOnMinUsageExceeded(MemoryEstimation estimation, boolean ignored) {
-        var memoryTree = estimation.estimate(TEST_DIMENSIONS, 1);
+        var memoryTree = estimation.estimate(TEST_DIMENSIONS, new Concurrency(1));
         var memoryTreeWithDimensions = new MemoryTreeWithDimensions(memoryTree, TEST_DIMENSIONS);
 
         assertThatThrownBy(() -> MemoryUsageValidator.validateMemoryUsage(
@@ -90,7 +91,7 @@ class MemoryValidationTest {
     @ParameterizedTest
     @MethodSource("input")
     void throwsOnMaxUsageExceeded(MemoryEstimation estimation, boolean ignored) {
-        var memoryTree = estimation.estimate(TEST_DIMENSIONS, 1);
+        var memoryTree = estimation.estimate(TEST_DIMENSIONS, new Concurrency(1));
         var memoryTreeWithDimensions = new MemoryTreeWithDimensions(memoryTree, TEST_DIMENSIONS);
 
         assertThatThrownBy(() -> MemoryUsageValidator.validateMemoryUsage(

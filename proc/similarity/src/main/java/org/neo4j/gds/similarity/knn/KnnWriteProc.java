@@ -20,8 +20,8 @@
 package org.neo4j.gds.similarity.knn;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.similarity.knn.KnnWriteResult;
-import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.procedures.algorithms.similarity.KnnWriteResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
-import static org.neo4j.gds.similarity.knn.KnnProc.KNN_DESCRIPTION;
+import static org.neo4j.gds.similarity.knn.Constants.KNN_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
@@ -45,7 +45,7 @@ public class KnnWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.similarity().knnWrite(graphName, configuration);
+        return facade.algorithms().similarity().knnWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.knn.write.estimate", mode = READ)
@@ -54,6 +54,6 @@ public class KnnWriteProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.similarity().knnWriteEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().similarity().knnWriteEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

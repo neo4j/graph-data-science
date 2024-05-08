@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.gdl.GdlFactory;
@@ -47,7 +48,7 @@ class SameCategoryStepTest {
         var linkFeatures = LinkFeatureExtractor.extractFeatures(
             graph,
             List.of(step),
-            4,
+            new Concurrency(4),
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         );

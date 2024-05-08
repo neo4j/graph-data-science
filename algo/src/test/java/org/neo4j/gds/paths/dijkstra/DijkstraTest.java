@@ -28,6 +28,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -287,7 +288,7 @@ final class DijkstraTest {
 
             var progressTask = new DijkstraFactory.SourceTargetDijkstraFactory<>().progressTask(graph, config);
             var testLog = Neo4jProxy.testLog();
-            var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
+            var progressTracker = new TestProgressTracker(progressTask, testLog, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
 
             Dijkstra.sourceTarget(
                     graph,

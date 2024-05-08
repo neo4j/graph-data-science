@@ -20,77 +20,21 @@
 package org.neo4j.gds.approxmaxkcut;
 
 import org.neo4j.gds.annotation.Parameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.List;
 import java.util.Optional;
 
 @Parameters
-public final class ApproxMaxKCutParameters {
-    private final byte k;
-    private final int iterations;
-    private final int vnsMaxNeighborhoodOrder;
-    private final int concurrency;
-    private final int minBatchSize;
-    private final Optional<Long> randomSeed;
-    private final List<Long> minCommunitySizes;
-    private final boolean hasRelationshipWeightProperty;
-    private final boolean minimize;
-
-    public ApproxMaxKCutParameters(
-        byte k,
-        int iterations,
-        int vnsMaxNeighborhoodOrder,
-        int concurrency,
-        int minBatchSize,
-        Optional<Long> randomSeed,
-        List<Long> minCommunitySizes,
-        boolean hasRelationshipWeightProperty,
-        boolean minimize
-    ) {
-        this.k = k;
-        this.iterations = iterations;
-        this.vnsMaxNeighborhoodOrder = vnsMaxNeighborhoodOrder;
-        this.concurrency = concurrency;
-        this.minBatchSize = minBatchSize;
-        this.randomSeed = randomSeed;
-        this.minCommunitySizes = minCommunitySizes;
-        this.hasRelationshipWeightProperty = hasRelationshipWeightProperty;
-        this.minimize = minimize;
-    }
-
-    byte k() {
-        return this.k;
-    }
-
-    int iterations() {
-        return this.iterations;
-    }
-
-    int vnsMaxNeighborhoodOrder() {
-        return this.vnsMaxNeighborhoodOrder;
-    }
-
-    int concurrency() {
-        return this.concurrency;
-    }
-
-    int minBatchSize() {
-        return this.minBatchSize;
-    }
-
-    Optional<Long> randomSeed() {
-        return this.randomSeed;
-    }
-
-    List<Long> minCommunitySizes() {
-        return this.minCommunitySizes;
-    }
-
-    boolean hasRelationshipWeightProperty() {
-        return this.hasRelationshipWeightProperty;
-    }
-
-    boolean minimize() {
-        return this.minimize;
-    }
+public record ApproxMaxKCutParameters(
+    byte k,
+    int iterations,
+    int vnsMaxNeighborhoodOrder,
+    Concurrency concurrency,
+    int minBatchSize,
+    Optional<Long> randomSeed,
+    List<Long> minCommunitySizes,
+    boolean hasRelationshipWeightProperty,
+    boolean minimize
+) {
 }

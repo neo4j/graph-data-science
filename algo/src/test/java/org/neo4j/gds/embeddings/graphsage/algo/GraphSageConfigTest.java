@@ -66,7 +66,7 @@ class GraphSageTrainConfigTest {
             "batchSize", 100
         ));
 
-        assertThat(GraphSageTrainConfig.of("user", mapWrapper).batchesPerIteration(nodeCount)).isEqualTo(expectedSampledBatches);
+        assertThat(GraphSageTrainConfig.of("user", mapWrapper).toParameters().batchesPerIteration(nodeCount)).isEqualTo(expectedSampledBatches);
     }
 
     @Test

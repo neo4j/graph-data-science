@@ -36,7 +36,6 @@ import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.core.io.file.GraphInfo;
-import org.neo4j.gds.core.io.file.ImmutableGraphInfo;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -76,7 +75,7 @@ public class GraphInfoLoader {
                 .databaseLocation(line.databaseLocation)
                 .remoteDatabaseId(remoteDatabaseId)
                 .build();
-            return ImmutableGraphInfo.builder()
+            return GraphInfo.builder()
                 .databaseInfo(databaseInfo)
                 .idMapBuilderType(line.idMapBuilderType)
                 .nodeCount(line.nodeCount)

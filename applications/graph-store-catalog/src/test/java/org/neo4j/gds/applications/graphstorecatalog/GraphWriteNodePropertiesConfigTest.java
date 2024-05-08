@@ -90,8 +90,8 @@ class GraphWriteNodePropertiesConfigTest {
         var map = CypherMapWrapper.create(inputs);
         var config = GraphWriteNodePropertiesConfig.of("g", List.of("a"), List.of("A"), map);
 
-        assertEquals(expectedConcurrency, config.concurrency());
-        assertEquals(expectedWriteConcurrency, config.writeConcurrency());
+        assertEquals(expectedConcurrency, config.concurrency().value());
+        assertEquals(expectedWriteConcurrency, config.writeConcurrency().value());
     }
 
     private static Stream<Arguments> inputs() {

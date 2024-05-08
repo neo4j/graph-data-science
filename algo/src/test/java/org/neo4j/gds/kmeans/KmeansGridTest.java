@@ -24,6 +24,7 @@ import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeIntArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -113,7 +114,7 @@ class KmeansGridTest {
             clusterManager,
             graph.nodeCount(),
             2,
-            2,
+            new Concurrency(2),
             distanceFromCentroid,
             kmeansContext.executor(),
             tasks,

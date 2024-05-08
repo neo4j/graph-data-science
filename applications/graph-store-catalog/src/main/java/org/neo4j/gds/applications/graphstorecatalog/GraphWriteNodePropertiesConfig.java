@@ -22,6 +22,7 @@ package org.neo4j.gds.applications.graphstorecatalog;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.JobIdConfig;
 import org.neo4j.gds.config.WriteConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -31,7 +32,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Configuration
-public interface GraphWriteNodePropertiesConfig extends GraphNodePropertiesConfig, WriteConfig {
+public interface GraphWriteNodePropertiesConfig extends GraphNodePropertiesConfig, WriteConfig, JobIdConfig {
 
     @Configuration.Parameter
     @Configuration.ConvertWith(method = "org.neo4j.gds.applications.graphstorecatalog.GraphWriteNodePropertiesConfig#parseNodeProperties")

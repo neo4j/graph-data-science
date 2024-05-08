@@ -27,6 +27,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.TestMethodRunner;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -38,8 +39,8 @@ class InverseRelationshipsMemoryEstimateDefinitionTest {
         var uncompressedRunner = TestMethodRunner.runUncompressedOrdered();
 
         return Stream.of(
-            Arguments.of(compressedRunner, 1_462_328),
-            Arguments.of(uncompressedRunner, 2_248_816)
+            Arguments.of(compressedRunner, 1_462_336),
+            Arguments.of(uncompressedRunner, 2_248_824)
         );
     }
 
@@ -52,7 +53,7 @@ class InverseRelationshipsMemoryEstimateDefinitionTest {
         runner.run(() -> {
             var memoryEstimation = new InverseRelationshipsMemoryEstimateDefinition(List.of("T1")).memoryEstimation();
             MemoryEstimationAssert.assertThat(memoryEstimation)
-                .memoryTree(graphDimensions, 4)
+                .memoryTree(graphDimensions, new Concurrency(4))
                 .memoryRange()
                 .hasSameMinAndMaxEqualTo(expectedSize);
         });
@@ -71,14 +72,14 @@ class InverseRelationshipsMemoryEstimateDefinitionTest {
         var memoryEstimation = new InverseRelationshipsMemoryEstimateDefinition(List.of("T1", "T2")).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
-            .memoryTree(graphDimensions, 4)
+            .memoryTree(graphDimensions, new Concurrency(4))
             .componentsDescriptionsContainExactly(
                 "this.instance",
                 "Inverse 'T1'",
                 "Inverse 'T2'"
             )
             .memoryRange()
-            .hasSameMinAndMaxEqualTo(2_924_624);
+            .hasSameMinAndMaxEqualTo(2_924_632);
     }
 
     @Test
@@ -93,13 +94,13 @@ class InverseRelationshipsMemoryEstimateDefinitionTest {
         var memoryEstimation = new InverseRelationshipsMemoryEstimateDefinition(List.of("T2")).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
-            .memoryTree(graphDimensions, 4)
+            .memoryTree(graphDimensions, new Concurrency(4))
             .componentsDescriptionsContainExactly(
                 "this.instance",
                 "Inverse 'T2'"
             )
             .memoryRange()
-            .hasSameMinAndMaxEqualTo(1_462_328);
+            .hasSameMinAndMaxEqualTo(1_462_336);
 
     }
 
@@ -116,12 +117,12 @@ class InverseRelationshipsMemoryEstimateDefinitionTest {
         var memoryEstimation = new InverseRelationshipsMemoryEstimateDefinition(List.of("*")).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
-            .memoryTree(graphDimensions, 4)
+            .memoryTree(graphDimensions, new Concurrency(4))
             .componentsDescriptionsContainExactly(
                 "this.instance",
                 "Inverse '*'"
             )
             .memoryRange()
-            .hasSameMinAndMaxEqualTo(2_924_624);
+            .hasSameMinAndMaxEqualTo(2_924_632);
     }
 }

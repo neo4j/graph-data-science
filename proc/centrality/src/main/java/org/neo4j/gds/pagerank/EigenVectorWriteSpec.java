@@ -21,10 +21,10 @@ package org.neo4j.gds.pagerank;
 
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
-import static org.neo4j.gds.procedures.centrality.pagerank.PageRankProcCompanion.EIGENVECTOR_DESCRIPTION;
+import static org.neo4j.gds.pagerank.Constants.EIGENVECTOR_DESCRIPTION;
 
 @GdsCallable(name = "gds.eigenvector.write", description = EIGENVECTOR_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 public class EigenVectorWriteSpec extends  PageRankWriteSpec {

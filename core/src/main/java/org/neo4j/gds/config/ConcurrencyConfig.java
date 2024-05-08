@@ -19,25 +19,43 @@
  */
 package org.neo4j.gds.config;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
+import org.neo4j.gds.core.concurrency.Concurrency;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface ConcurrencyConfig {
 
     String CONCURRENCY_KEY = "concurrency";
     int DEFAULT_CONCURRENCY = 4;
+    Concurrency TYPED_DEFAULT_CONCURRENCY = new Concurrency(DEFAULT_CONCURRENCY);
     int CONCURRENCY_LIMITATION = 4;
 
-    @Value.Default
     @Configuration.Key(CONCURRENCY_KEY)
-    default int concurrency() {
-        return DEFAULT_CONCURRENCY;
+    @Configuration.ConvertWith(method = "org.neo4j.gds.config.ConcurrencyConfig#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.config.ConcurrencyConfig#render")
+    default Concurrency concurrency() {
+        return TYPED_DEFAULT_CONCURRENCY;
+    }
+
+    static Concurrency parse(Object userInput) {
+        if (userInput instanceof Concurrency) return (Concurrency) userInput;
+        if (userInput instanceof Integer) return new Concurrency((Integer) userInput);
+        if (userInput instanceof Long) return new Concurrency(Math.toIntExact((Long) userInput));
+        var type = null == userInput ? "null" : userInput.getClass().getSimpleName();
+        throw new IllegalArgumentException(
+            formatWithLocale("Unsupported Concurrency input of type %s", type)
+        );
+    }
+
+    static int render(Concurrency concurrency) {
+        return concurrency.value();
     }
 
     @Configuration.Check
     default void validateConcurrency() {
-        ConcurrencyValidatorService.validator().validate(concurrency(), CONCURRENCY_KEY, CONCURRENCY_LIMITATION);
+        ConcurrencyValidatorService.validator().validate(concurrency().value(), CONCURRENCY_KEY, CONCURRENCY_LIMITATION);
     }
 
 }

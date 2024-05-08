@@ -19,15 +19,13 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.core.loading.GraphStoreCatalog.GraphStoreWithUserNameAndConfig;
+import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 
-import java.util.Map;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,9 +38,9 @@ class GraphListingServiceTest {
         var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
         var graphListingService = new GraphListingService(graphStoreCatalogService);
 
-        var graphStore1 = new StubGraphStoreWithUserNameAndConfig();
-        var graphStore2 = new StubGraphStoreWithUserNameAndConfig();
-        var graphStore3 = new StubGraphStoreWithUserNameAndConfig();
+        var graphStore1 = stubCatalogEntryWithUsername();
+        var graphStore2 = stubCatalogEntryWithUsername();
+        var graphStore3 = stubCatalogEntryWithUsername();
         when(graphStoreCatalogService.getAllGraphStores()).thenReturn(Stream.of(
             graphStore1,
             graphStore2,
@@ -51,9 +49,9 @@ class GraphListingServiceTest {
         var result = graphListingService.listGraphs(new User("Bossman", true));
 
         assertThat(result).containsExactly(
-            Pair.of(graphStore1.config(), graphStore1.graphStore()),
-            Pair.of(graphStore2.config(), graphStore2.graphStore()),
-            Pair.of(graphStore3.config(), graphStore3.graphStore())
+            new GraphStoreCatalogEntry(graphStore1.graphStore(), graphStore1.config(), ResultStore.EMPTY),
+            new GraphStoreCatalogEntry(graphStore2.graphStore(), graphStore2.config(), ResultStore.EMPTY),
+            new GraphStoreCatalogEntry(graphStore3.graphStore(), graphStore3.config(), ResultStore.EMPTY)
         );
     }
 
@@ -62,46 +60,24 @@ class GraphListingServiceTest {
         var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
         var graphListingService = new GraphListingService(graphStoreCatalogService);
 
-        var graphStore1 = new StubGraphStoreWithUserNameAndConfig();
-        var graphStore2 = new StubGraphStoreWithUserNameAndConfig();
-        var graphStore3 = new StubGraphStoreWithUserNameAndConfig();
-        when(graphStoreCatalogService.getGraphStores(new User("nobody", false))).thenReturn(Map.of(
-            graphStore1.config(), graphStore1.graphStore(),
-            graphStore2.config(), graphStore2.graphStore(),
-            graphStore3.config(), graphStore3.graphStore()
+        var graphStore1 = stubCatalogEntryWithUsername();
+        var graphStore2 = stubCatalogEntryWithUsername();
+        var graphStore3 = stubCatalogEntryWithUsername();
+        when(graphStoreCatalogService.getGraphStores(new User("nobody", false))).thenReturn(List.of(
+            new GraphStoreCatalogEntry(graphStore1.graphStore(), graphStore1.config(), ResultStore.EMPTY),
+            new GraphStoreCatalogEntry(graphStore2.graphStore(), graphStore2.config(), ResultStore.EMPTY),
+            new GraphStoreCatalogEntry(graphStore3.graphStore(), graphStore3.config(), ResultStore.EMPTY)
         ));
         var result = graphListingService.listGraphs(new User("nobody", false));
 
         assertThat(result).containsExactlyInAnyOrder(
-            Pair.of(graphStore1.config(), graphStore1.graphStore()),
-            Pair.of(graphStore2.config(), graphStore2.graphStore()),
-            Pair.of(graphStore3.config(), graphStore3.graphStore())
+            new GraphStoreCatalogEntry(graphStore1.graphStore(), graphStore1.config(), ResultStore.EMPTY),
+            new GraphStoreCatalogEntry(graphStore2.graphStore(), graphStore2.config(), ResultStore.EMPTY),
+            new GraphStoreCatalogEntry(graphStore3.graphStore(), graphStore3.config(),ResultStore.EMPTY)
         );
     }
 
-    /*
-     * Look, this is what it is. Just enough stubbing to be able to assert that we get stuff passing through things.
-     * It does not matter what's inside these POJOs.
-     * I wish we didn't have these modeled this way: strongly typed holders of other strong types.
-     *  Makes me have to create these nested stubs :shrug:
-     */
-    private static class StubGraphStoreWithUserNameAndConfig implements GraphStoreWithUserNameAndConfig {
-        private final GraphStore graphStore = new StubGraphStore();
-        private final GraphProjectConfig graphProjectConfig = new StubGraphProjectConfig();
-
-        @Override
-        public GraphStore graphStore() {
-            return graphStore;
-        }
-
-        @Override
-        public String userName() {
-            throw new UnsupportedOperationException("TODO");
-        }
-
-        @Override
-        public GraphProjectConfig config() {
-            return graphProjectConfig;
-        }
+    private static GraphStoreCatalogEntry stubCatalogEntryWithUsername() {
+        return new GraphStoreCatalogEntry(new StubGraphStore(), new StubGraphProjectConfig(), ResultStore.EMPTY);
     }
 }

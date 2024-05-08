@@ -22,7 +22,7 @@ package org.neo4j.gds;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -121,8 +121,8 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
      * compute the actual consumption depending on {@link org.neo4j.gds.core.GraphDimensions} and concurrency.
      *
      * @return memory estimation
-     * @see org.neo4j.gds.core.utils.mem.MemoryEstimations
-     * @see org.neo4j.gds.core.utils.mem.MemoryEstimation#estimate(org.neo4j.gds.core.GraphDimensions, int)
+     * @see org.neo4j.gds.mem.MemoryEstimations
+     * @see org.neo4j.gds.mem.MemoryEstimation#estimate(org.neo4j.gds.core.GraphDimensions, org.neo4j.gds.core.concurrency.Concurrency)
      */
     default MemoryEstimation memoryEstimation(CONFIG configuration) {
         throw new MemoryEstimationNotImplementedException();

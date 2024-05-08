@@ -22,6 +22,7 @@ package org.neo4j.gds.msbfs;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipIterator;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -273,7 +274,7 @@ public final class MultiSourceBFSAccessMethods {
     /**
      * Runs MS-BFS, possibly in parallel.
      */
-    public void run(int concurrency, ExecutorService executor) {
+    public void run(Concurrency concurrency, ExecutorService executor) {
         final int threads = numberOfThreads();
         var bfss = allSourceBfss(threads);
 

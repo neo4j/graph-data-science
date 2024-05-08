@@ -12,8 +12,11 @@ dependencies {
     }
 
     implementation project(':algo')
+    implementation project(':algo-common')
+    implementation project(':algorithms-machinery')
     implementation project(':annotations')
     implementation project(':applications-facade')
+    implementation project(':centrality-algorithms')
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':defaults-and-limits-configuration')
@@ -21,6 +24,7 @@ dependencies {
     implementation project(':neo4j-api')
     implementation project(':path-finding-algorithms')
     implementation project(':progress-tracking')
+    implementation project(':similarity-algorithms')
     implementation project(':string-formatting')
 
     // test infrastructure

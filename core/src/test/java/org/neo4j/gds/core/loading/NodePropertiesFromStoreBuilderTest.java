@@ -28,6 +28,7 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
@@ -57,7 +58,7 @@ final class NodePropertiesFromStoreBuilderTest {
         var nodeCount = 100_000;
         var properties = NodePropertiesFromStoreBuilder.of(
             DefaultValue.of(42.0D),
-            1
+            new Concurrency(1)
         ).build(idMap(nodeCount));
 
         assertEquals(nodeCount, properties.nodeCount());
@@ -70,7 +71,7 @@ final class NodePropertiesFromStoreBuilderTest {
         var nodeCount = 100_000;
         var properties = NodePropertiesFromStoreBuilder.of(
             DefaultValue.of(42L),
-            1
+            new Concurrency(1)
         ).build(idMap(nodeCount));
 
         assertEquals(nodeCount, properties.nodeCount());
@@ -271,7 +272,7 @@ final class NodePropertiesFromStoreBuilderTest {
 
         var builder = NodePropertiesFromStoreBuilder.of(
             DefaultValue.DEFAULT,
-            1
+            new Concurrency(1)
         );
 
         builder.set(0, null);
@@ -290,7 +291,7 @@ final class NodePropertiesFromStoreBuilderTest {
         var nodeSize = 100_000;
         var builder = NodePropertiesFromStoreBuilder.of(
             DefaultValue.of(Double.NaN),
-            1
+            new Concurrency(1)
         );
 
         var phaser = new Phaser(3);
@@ -339,7 +340,7 @@ final class NodePropertiesFromStoreBuilderTest {
     static NodePropertyValues createNodeProperties(long nodeCount, Object defaultValue, Consumer<NodePropertiesFromStoreBuilder> buildBlock) {
         var builder = NodePropertiesFromStoreBuilder.of(
             DefaultValue.of(defaultValue),
-            1
+            new Concurrency(1)
         );
         buildBlock.accept(builder);
         return builder.build(idMap(nodeCount));

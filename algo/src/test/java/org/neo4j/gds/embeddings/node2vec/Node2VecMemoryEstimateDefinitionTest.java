@@ -21,6 +21,8 @@ package org.neo4j.gds.embeddings.node2vec;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.traversal.WalkParameters;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -30,18 +32,15 @@ class Node2VecMemoryEstimateDefinitionTest {
     @Test
     void shouldEstimateMemory() {
         var configMock = mock(Node2VecBaseConfig.class);
-        when(configMock.walksPerNode()).thenReturn(10);
-        when(configMock.walkLength()).thenReturn(80);
         when(configMock.embeddingDimension()).thenReturn(128);
+        when(configMock.walkParameters()).thenReturn(new WalkParameters(10, 80, 1.0, 1.0));
 
         when(configMock.node2VecParameters()).thenCallRealMethod();
-        when(configMock.walkParameters()).thenCallRealMethod();
-        when(configMock.trainParameters()).thenCallRealMethod();
 
         var memoryEstimation = new Node2VecMemoryEstimateDefinition(configMock.node2VecParameters()).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
-            .memoryRange(1000, 1)
+            .memoryRange(1000, new Concurrency(1))
             .hasSameMinAndMaxEqualTo(7_688_464L);
     }
 

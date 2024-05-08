@@ -27,7 +27,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.apache.commons.lang3.StringUtils;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 import javax.lang.model.element.Modifier;
 import java.lang.invoke.VarHandle;
@@ -106,7 +106,7 @@ final class SingleArrayBuilder {
             .returns(TypeName.LONG)
             .addStatement(
                 "return $T.sizeOf$NArray((int) size)",
-                MemoryUsage.class,
+                Estimate.class,
                 StringUtils.capitalize(valueType.toString())
             )
             .build();
@@ -301,7 +301,7 @@ final class SingleArrayBuilder {
             .addModifiers(Modifier.PUBLIC)
             .returns(TypeName.LONG)
             .addStatement("return $T.sizeOf$NArray((int) size)",
-                MemoryUsage.class,
+                Estimate.class,
                 StringUtils.capitalize(valueType.toString()))
             .build();
     }
@@ -325,7 +325,7 @@ final class SingleArrayBuilder {
             .beginControlFlow("if ($N != null)", page)
             .addStatement("$N = null", page)
             .addStatement("return $T.sizeOf$NArray((int) size)",
-                MemoryUsage.class,
+                Estimate.class,
                 StringUtils.capitalize(valueType.toString()))
             .endControlFlow()
             .addStatement("return 0L")

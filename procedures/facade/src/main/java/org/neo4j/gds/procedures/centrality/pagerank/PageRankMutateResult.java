@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.centrality.pagerank;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.Map;
 
@@ -57,7 +58,7 @@ public final class PageRankMutateResult extends PageRankStatsResult {
 
     public static class Builder extends PageRankProcCompanion.PageRankResultBuilder<PageRankMutateResult> {
 
-        public Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+        public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
             super(returnColumns, concurrency);
         }
 

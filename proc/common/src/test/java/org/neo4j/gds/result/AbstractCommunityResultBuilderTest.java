@@ -26,6 +26,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
 
 import java.util.Arrays;
@@ -43,7 +44,7 @@ final class AbstractCommunityResultBuilderTest {
 
     @ParameterizedTest
     @MethodSource("concurrencies")
-    void countCommunitySizesOverHugeCommunities(int concurrency) {
+    void countCommunitySizesOverHugeCommunities(Concurrency concurrency) {
         AbstractCommunityResultBuilder<Void> builder = builder(
             procedureReturnColumns("communityCount", "communityDistribution"),
             concurrency,
@@ -68,7 +69,7 @@ final class AbstractCommunityResultBuilderTest {
 
     @ParameterizedTest
     @MethodSource("concurrencies")
-    void countCommunitySizesOverPresizedHugeCommunities(int concurrency) {
+    void countCommunitySizesOverPresizedHugeCommunities(Concurrency concurrency) {
         AbstractCommunityResultBuilder<Void> builder = builder(
             procedureReturnColumns("communityCount", "communityDistribution"),
             concurrency,
@@ -93,7 +94,7 @@ final class AbstractCommunityResultBuilderTest {
 
     @ParameterizedTest
     @MethodSource("concurrencies")
-    void countCommunitySizesOverIntegerCommunities(int concurrency) {
+    void countCommunitySizesOverIntegerCommunities(Concurrency concurrency) {
         AbstractCommunityResultBuilder<Void> builder = builder(
             procedureReturnColumns("communityCount", "communityDistribution"),
             concurrency,
@@ -118,7 +119,7 @@ final class AbstractCommunityResultBuilderTest {
 
     @ParameterizedTest
     @MethodSource("concurrencies")
-    void countCommunitySizesOverLongCommunities(int concurrency) {
+    void countCommunitySizesOverLongCommunities(Concurrency concurrency) {
         AbstractCommunityResultBuilder<Void> builder = builder(
             procedureReturnColumns("communityCount", "communityDistribution"),
             concurrency,
@@ -143,7 +144,7 @@ final class AbstractCommunityResultBuilderTest {
 
     @ParameterizedTest
     @MethodSource("concurrencies")
-    void doNotGenerateCommunityCountOrHistogram(int concurrency) {
+    void doNotGenerateCommunityCountOrHistogram(Concurrency concurrency) {
         AbstractCommunityResultBuilder<Void> builder = builder(
             procedureReturnColumns(),
             concurrency,
@@ -160,7 +161,7 @@ final class AbstractCommunityResultBuilderTest {
 
     @ParameterizedTest
     @MethodSource("concurrencies")
-    void doNotGenerateHistogram(int concurrency) {
+    void doNotGenerateHistogram(Concurrency concurrency) {
         AbstractCommunityResultBuilder<Void> builder = builder(
             procedureReturnColumns("communityCount"),
             concurrency,
@@ -192,7 +193,7 @@ final class AbstractCommunityResultBuilderTest {
 
     @ParameterizedTest
     @MethodSource("concurrencies")
-    void buildCommunityCountWithHugeCommunityCount(int concurrency) {
+    void buildCommunityCountWithHugeCommunityCount(Concurrency concurrency) {
         AbstractCommunityResultBuilder<Void> builder = builder(
             procedureReturnColumns("communityCount"),
             concurrency,
@@ -213,7 +214,7 @@ final class AbstractCommunityResultBuilderTest {
 
     @ParameterizedTest
     @MethodSource("concurrencies")
-    void buildCommunityHistogramWithHugeCommunityCount(int concurrency) {
+    void buildCommunityHistogramWithHugeCommunityCount(Concurrency concurrency) {
         AbstractCommunityResultBuilder<Void> builder = builder(
             procedureReturnColumns("communityCount", "communityDistribution"),
             concurrency,
@@ -238,8 +239,8 @@ final class AbstractCommunityResultBuilderTest {
 
     private static Stream<Arguments> concurrencies() {
         return Stream.of(
-            Arguments.of(1),
-            Arguments.of(4)
+            Arguments.of(new Concurrency(1)),
+            Arguments.of(new Concurrency(4))
         );
     }
 
@@ -255,7 +256,7 @@ final class AbstractCommunityResultBuilderTest {
 
     private AbstractCommunityResultBuilder<Void> builder(
         ProcedureReturnColumns returnColumns,
-        int concurrency,
+        Concurrency concurrency,
         BiConsumer<OptionalLong, Optional<Histogram>> check
     ) {
         return new AbstractCommunityResultBuilder<>(

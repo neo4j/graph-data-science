@@ -21,10 +21,11 @@ package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
@@ -53,7 +54,7 @@ public final class ModularityComputer {
         HugeDoubleArray communityVolumes,
         double gamma,
         double coefficient,
-        int concurrency,
+        Concurrency concurrency,
         ExecutorService executorService,
         ProgressTracker progressTracker
     ) {

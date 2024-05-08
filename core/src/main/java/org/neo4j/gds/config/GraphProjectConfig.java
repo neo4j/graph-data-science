@@ -25,6 +25,7 @@ import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
 import org.neo4j.gds.core.StringIdentifierValidations;
 import org.neo4j.gds.core.Username;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.TimeUtil;
 
 import java.time.ZonedDateTime;
@@ -71,8 +72,10 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
     String graphName();
 
     @Configuration.Key(READ_CONCURRENCY_KEY)
-    default int readConcurrency() {
-        return ConcurrencyConfig.DEFAULT_CONCURRENCY;
+    @Configuration.ConvertWith(method = "org.neo4j.gds.config.ConcurrencyConfig#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.config.ConcurrencyConfig#render")
+    default Concurrency readConcurrency() {
+        return ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY;
     }
 
     @Configuration.Key(NODE_COUNT_KEY)
@@ -110,7 +113,7 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
     default void validateReadConcurrency() {
         ConcurrencyValidatorService
             .validator()
-            .validate(readConcurrency(), READ_CONCURRENCY_KEY, ConcurrencyConfig.CONCURRENCY_LIMITATION);
+            .validate(readConcurrency().value(), READ_CONCURRENCY_KEY, ConcurrencyConfig.CONCURRENCY_LIMITATION);
     }
 
     static @Nullable String validateName(String input) {

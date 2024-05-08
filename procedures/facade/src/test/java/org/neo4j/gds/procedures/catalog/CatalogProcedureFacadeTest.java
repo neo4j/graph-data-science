@@ -49,7 +49,7 @@ import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.DeletionResult;
-import org.neo4j.gds.core.loading.GraphStoreWithConfig;
+import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
@@ -170,7 +170,11 @@ class CatalogProcedureFacadeTest {
         when(businessFacade.listGraphs(new User("Bob", false), "foo", false, null))
             .thenReturn(
                 List.of(
-                    Pair.of(GraphStoreWithConfig.of(new StubGraphStore(), mock(GraphProjectConfig.class)), null)
+                    Pair.of(new GraphStoreCatalogEntry(
+                        new StubGraphStore(),
+                        mock(GraphProjectConfig.class),
+                        ResultStore.EMPTY
+                    ), null)
                 )
             );
         var graphs = catalogFacade.listGraphs("foo");
@@ -207,7 +211,7 @@ class CatalogProcedureFacadeTest {
             .thenReturn(
                 List.of(
                     Pair.of(
-                        GraphStoreWithConfig.of(new StubGraphStore(), mock(GraphProjectConfig.class)),
+                        new GraphStoreCatalogEntry(new StubGraphStore(), mock(GraphProjectConfig.class), ResultStore.EMPTY),
                         Map.of("deg", 117, "ree", 23, "dist", 512)
                     )
                 )
@@ -254,7 +258,11 @@ class CatalogProcedureFacadeTest {
         when(businessFacade.listGraphs(new User("Bob", false), "foo", false, null))
             .thenReturn(
                 List.of(
-                    Pair.of(GraphStoreWithConfig.of(new StubGraphStore(), mock(GraphProjectConfig.class)), null)
+                    Pair.of(new GraphStoreCatalogEntry(
+                        new StubGraphStore(),
+                        mock(GraphProjectConfig.class),
+                        ResultStore.EMPTY
+                    ), null)
                 )
             );
         var graphs = catalogFacade.listGraphs("foo");
@@ -293,7 +301,11 @@ class CatalogProcedureFacadeTest {
         when(businessFacade.listGraphs(new User("Bob", false), "foo", false, null))
             .thenReturn(
                 List.of(
-                    Pair.of(GraphStoreWithConfig.of(new StubGraphStore(), mock(GraphProjectConfig.class)), null)
+                    Pair.of(new GraphStoreCatalogEntry(
+                        new StubGraphStore(),
+                        mock(GraphProjectConfig.class),
+                        ResultStore.EMPTY
+                    ), null)
                 )
             );
         var graphs = catalogFacade.listGraphs("foo");
@@ -318,11 +330,6 @@ class CatalogProcedureFacadeTest {
         @Override
         public ZonedDateTime modificationTime() {
             return ZonedDateTime.now();
-        }
-
-        @Override
-        public ResultStore resultStore() {
-            throw new UnsupportedOperationException("TODO");
         }
 
         @Override

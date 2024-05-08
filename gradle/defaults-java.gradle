@@ -32,6 +32,48 @@ allprojects {
             from javadoc
         }
 
+        sourceSets {
+            integrationTest {
+                compileClasspath += sourceSets.main.output
+                runtimeClasspath += sourceSets.main.output
+            }
+        }
+
+        configurations {
+            integrationTestCompileOnly.extendsFrom testCompileOnly
+            integrationTestAnnotationProcessor.extendsFrom testAnnotationProcessor
+            integrationTestImplementation.extendsFrom testImplementation
+            integrationTestRuntimeOnly.extendsFrom runtimeOnly
+        }
+
+        tasks.register('integrationTest', Test) {
+            description = 'Runs integration tests.'
+            group = 'verification'
+
+            testClassesDirs = sourceSets.integrationTest.output.classesDirs
+            classpath = sourceSets.integrationTest.runtimeClasspath
+        }
+
+        tasks.named('integrationTest').configure {
+            maxHeapSize = "4G"
+
+            // Since JDK 17 the default access to the following
+            // packages is "deny". We need to open them in order
+            // to gain access in GDS / Neo4j.
+            jvmArgs += '--add-opens=java.base/java.lang=ALL-UNNAMED'
+            jvmArgs += '--add-opens=java.base/java.lang.invoke=ALL-UNNAMED'
+            jvmArgs += '--add-opens=java.base/java.nio=ALL-UNNAMED'
+            jvmArgs += '--add-opens=java.base/java.util.stream=ALL-UNNAMED'
+            jvmArgs += '--add-opens=java.base/sun.net.www.protocol.http=ALL-UNNAMED'
+            jvmArgs += '--add-opens=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED'
+            jvmArgs += '--add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED'
+            jvmArgs += '--add-opens=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED'
+
+            useJUnitPlatform {
+                includeEngines 'junit-jupiter'
+            }
+        }
+
         test {
             debugOptions {
                 enabled = project.hasProperty('test-debug')

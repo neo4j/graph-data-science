@@ -20,10 +20,11 @@
 package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 
 public class LeidenDendrogramManager {
@@ -37,7 +38,7 @@ public class LeidenDendrogramManager {
 
     private final Graph rootGraph;
     private final long nodeCount;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final TerminationFlag terminationFlag;
     private final boolean trackIntermediateCommunities;
     private final HugeLongArray[] dendrograms;
@@ -46,7 +47,7 @@ public class LeidenDendrogramManager {
     LeidenDendrogramManager(
         Graph rootGraph,
         int maxIterations,
-        int concurrency,
+        Concurrency concurrency,
         boolean trackIntermediateCommunities,
         TerminationFlag terminationFlag
     ) {

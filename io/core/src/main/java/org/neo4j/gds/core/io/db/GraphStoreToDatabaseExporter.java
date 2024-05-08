@@ -19,9 +19,12 @@
  */
 package org.neo4j.gds.core.io.db;
 
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.io.GraphStoreExporter;
 import org.neo4j.gds.core.io.GraphStoreInput;
+import org.neo4j.gds.core.io.IdentifierMapper;
 import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -51,38 +54,50 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter {
         Log log,
         ProgressTracker progressTracker
     ) {
+        var pbiConfig = GdsParallelBatchImporter.Config.builder()
+            .databaseName(parameters.databaseName())
+            .batchSize(parameters.batchSize())
+            .enableDebugLog(parameters.enableDebugLog())
+            .defaultRelationshipType(parameters.defaultRelationshipType())
+            .writeConcurrency(parameters.writeConcurrency().value())
+            .databaseFormat(parameters.databaseFormat())
+            .force(false)
+            .highIO(false)
+            .useBadCollector(false)
+            .build();
+
+        var executionMonitor = new ProgressTrackerExecutionMonitor(
+            graphStore,
+            progressTracker,
+            GdsParallelBatchImporter.Config.toBatchImporterConfig(pbiConfig)
+        );
+
+        var parallelBatchImporter = GdsParallelBatchImporter.fromDb(databaseService, pbiConfig, log, executionMonitor);
+
         return new GraphStoreToDatabaseExporter(
             graphStore,
-            databaseService,
+            parallelBatchImporter,
             parameters,
-            neoNodeProperties,
-            log,
-            progressTracker
+            neoNodeProperties
         );
     }
 
     private GraphStoreToDatabaseExporter(
         GraphStore graphStore,
-        GraphDatabaseService databaseService,
+        GdsParallelBatchImporter parallelBatchImporter,
         GraphStoreToDatabaseExporterParameters parameters,
-        Optional<NeoNodeProperties> neoNodeProperties,
-        Log log,
-        ProgressTracker progressTracker
+        Optional<NeoNodeProperties> neoNodeProperties
     ) {
         super(
             graphStore,
             neoNodeProperties,
-            Optional.empty(),
+            IdentifierMapper.biject(NodeLabel::name, NodeLabel::of),
+            IdentifierMapper.biject(RelationshipType::name, RelationshipType::of),
             parameters.defaultRelationshipType(),
             parameters.writeConcurrency(),
             parameters.batchSize()
         );
-        var executionMonitor = new ProgressTrackerExecutionMonitor(
-            graphStore,
-            progressTracker,
-            parameters.toBatchImporterConfig()
-        );
-        this.parallelBatchImporter = GdsParallelBatchImporter.fromDb(databaseService, parameters, log, executionMonitor);
+        this.parallelBatchImporter = parallelBatchImporter;
     }
 
     @Override

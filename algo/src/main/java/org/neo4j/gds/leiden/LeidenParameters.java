@@ -21,92 +21,19 @@ package org.neo4j.gds.leiden;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Parameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.Optional;
 
 @Parameters
-public final class LeidenParameters {
-
-    static LeidenParameters create(
-        int concurrency,
-        double tolerance,
-        @Nullable String seedProperty,
-        int maxLevels,
-        double gamma,
-        double theta,
-        boolean includeIntermediateCommunities,
-        Optional<Long> randomSeed
-    ) {
-        return new LeidenParameters(
-            concurrency,
-            tolerance,
-            seedProperty,
-            maxLevels,
-            gamma,
-            theta,
-            includeIntermediateCommunities,
-            randomSeed
-        );
-    }
-
-    private final int concurrency;
-    private final double tolerance;
-    private final String seedProperty;
-    private final int maxLevels;
-    private final double gamma;
-    private final double theta;
-    private final boolean includeIntermediateCommunities;
-    private final Optional<Long> randomSeed;
-
-    private LeidenParameters(
-        int concurrency,
-        double tolerance,
-        @Nullable String seedProperty,
-        int maxLevels,
-        double gamma,
-        double theta,
-        boolean includeIntermediateCommunities,
-        Optional<Long> randomSeed
-    ) {
-        this.concurrency = concurrency;
-        this.tolerance = tolerance;
-        this.seedProperty = seedProperty;
-        this.maxLevels = maxLevels;
-        this.gamma = gamma;
-        this.theta = theta;
-        this.includeIntermediateCommunities = includeIntermediateCommunities;
-        this.randomSeed = randomSeed;
-    }
-
-    int concurrency() {
-        return concurrency;
-    }
-
-    double tolerance() {
-        return tolerance;
-    }
-
-    @Nullable String seedProperty() {
-        return seedProperty;
-    }
-
-    int maxLevels() {
-        return maxLevels;
-    }
-
-    double gamma() {
-        return gamma;
-    }
-
-    double theta() {
-        return theta;
-    }
-
-    boolean includeIntermediateCommunities() {
-        return includeIntermediateCommunities;
-    }
-
-    Optional<Long> randomSeed() {
-        return randomSeed;
-    }
+public record LeidenParameters(
+    Concurrency concurrency,
+    double tolerance,
+    @Nullable String seedProperty,
+    int maxLevels,
+    double gamma,
+    double theta,
+    boolean includeIntermediateCommunities,
+    Optional<Long> randomSeed
+) {
 }

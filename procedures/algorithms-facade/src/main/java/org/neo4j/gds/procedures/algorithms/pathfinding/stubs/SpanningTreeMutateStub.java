@@ -21,10 +21,11 @@ package org.neo4j.gds.procedures.algorithms.pathfinding.stubs;
 
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.procedures.algorithms.pathfinding.MutateStub;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
+import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeMutateResult;
-import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.spanningtree.SpanningTreeMutateConfig;
 
 import java.util.Map;
@@ -58,7 +59,7 @@ public class SpanningTreeMutateStub implements MutateStub<SpanningTreeMutateConf
             username,
             configuration,
             SpanningTreeMutateConfig::of,
-            __ -> estimationMode().spanningTreeEstimation()
+            __ -> estimationMode().spanningTree()
         );
     }
 
@@ -68,7 +69,7 @@ public class SpanningTreeMutateStub implements MutateStub<SpanningTreeMutateConf
             graphName,
             configuration,
             SpanningTreeMutateConfig::of,
-            __ -> estimationMode().spanningTreeEstimation()
+            __ -> estimationMode().spanningTree()
         );
     }
 

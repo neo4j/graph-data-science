@@ -19,15 +19,12 @@
  */
 package org.neo4j.gds.config;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 
 import java.util.Set;
 
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface GraphSampleAlgoConfig extends AlgoBaseConfig, RelationshipWeightConfig {
-    @Value.Derived
     @Configuration.Ignore
     default Set<String> outputFieldDenylist() {
         return Set.of("jobId", "concurrency", "sudo");

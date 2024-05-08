@@ -23,6 +23,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.haa.HugeAtomicIntArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.ParallelIntPageCreator;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -41,21 +42,17 @@ import java.util.concurrent.ExecutorService;
  */
 public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResult> {
 
-    public static final String CLOSENESS_DESCRIPTION =
-        "Closeness centrality is a way of detecting nodes that are " +
-        "able to spread information very efficiently through a graph.";
-
     private final Graph graph;
     private final long nodeCount;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final ExecutorService executorService;
     private final HugeAtomicIntArray farness;
     private final HugeAtomicIntArray component;
     private final CentralityComputer centralityComputer;
 
-    ClosenessCentrality(
+    public ClosenessCentrality(
         Graph graph,
-        int concurrency,
+        Concurrency concurrency,
         CentralityComputer centralityComputer,
         ExecutorService executorService,
         ProgressTracker progressTracker
@@ -115,7 +112,7 @@ public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResu
         ParallelUtil.run(tasks, executorService);
 
         progressTracker.endSubTask();
-        
+
         return closeness;
     }
 }

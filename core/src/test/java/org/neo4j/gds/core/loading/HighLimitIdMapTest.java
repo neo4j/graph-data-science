@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.PropertyState;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.utils.paged.ShardedLongLongMap;
@@ -41,7 +42,7 @@ class HighLimitIdMapTest {
 
     @BeforeEach
     void setup() {
-        var builder = new LazyIdMapBuilder(4, true, false, PropertyState.PERSISTENT);
+        var builder = new LazyIdMapBuilder(new Concurrency(4), true, false, PropertyState.PERSISTENT);
         builder.addNode(1000, NodeLabelTokens.ofStrings("A"));
         builder.addNode(2000, NodeLabelTokens.ofStrings("B"));
         builder.addNode(3000, NodeLabelTokens.ofStrings("C"));
@@ -59,7 +60,7 @@ class HighLimitIdMapTest {
 
     @Test
     void shouldHandleUnmappedIds() {
-        var intermediateIdMapBuilder = ShardedLongLongMap.builder(1);
+        var intermediateIdMapBuilder = ShardedLongLongMap.builder(new Concurrency(1));
         intermediateIdMapBuilder.addNode(0);
         var intermediateIdMap = intermediateIdMapBuilder.build(0);
         var internalIdMap = new DirectIdMap(1);
@@ -73,9 +74,10 @@ class HighLimitIdMapTest {
     @Test
     void shouldReturnCorrectTypeIds() {
         long[] nodes = LongStream.range(0, 42).toArray();
-        var builder = HighLimitIdMapBuilder.of(1, ArrayIdMapBuilder.of(nodes.length));
+        var concurrency = new Concurrency(1);
+        var builder = HighLimitIdMapBuilder.of(concurrency, ArrayIdMapBuilder.of(nodes.length));
         builder.allocate(nodes.length).insert(nodes);
-        var idMap = builder.build(LabelInformationBuilders.allNodes(), nodes.length - 1, 1);
+        var idMap = builder.build(LabelInformationBuilders.allNodes(), nodes.length - 1, concurrency);
 
         assertThat(idMap.typeId()).contains(HighLimitIdMapBuilder.ID).contains(ArrayIdMapBuilder.ID);
         assertThat(HighLimitIdMap.innerTypeId(idMap.typeId()).get()).isEqualTo(ArrayIdMapBuilder.ID);
@@ -101,16 +103,17 @@ class HighLimitIdMapTest {
 
         @Test
         void testToRootNodeId() {
-            var filteredIdMapA = idMap.withFilteredLabels(List.of(NodeLabel.of("A")), 1).get();
+            var concurrency = new Concurrency(1);
+            var filteredIdMapA = idMap.withFilteredLabels(List.of(NodeLabel.of("A")), concurrency).get();
             long expectedA = idMap.toMappedNodeId(1000);
             assertThat(filteredIdMapA.toRootNodeId(0)).isEqualTo(expectedA);
 
-            var filteredIdMapB = idMap.withFilteredLabels(List.of(NodeLabel.of("B")), 1).get();
+            var filteredIdMapB = idMap.withFilteredLabels(List.of(NodeLabel.of("B")), concurrency).get();
             long expectedB = idMap.toMappedNodeId(2000);
             assertThat(filteredIdMapB.toRootNodeId(0)).isEqualTo(expectedB);
 
 
-            var filteredIdMapC = idMap.withFilteredLabels(List.of(NodeLabel.of("C")), 1).get();
+            var filteredIdMapC = idMap.withFilteredLabels(List.of(NodeLabel.of("C")), concurrency).get();
             long expectedC = idMap.toMappedNodeId(3000);
             assertThat(filteredIdMapC.toRootNodeId(0)).isEqualTo(expectedC);
         }

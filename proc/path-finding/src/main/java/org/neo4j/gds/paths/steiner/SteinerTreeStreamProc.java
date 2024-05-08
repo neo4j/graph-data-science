@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.paths.steiner;
 
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SteinerTreeStreamResult;
-import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -31,8 +31,8 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.ProcedureConstants.ESTIMATE_DESCRIPTION;
 import static org.neo4j.gds.paths.steiner.Constants.STEINER_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class SteinerTreeStreamProc {
@@ -45,16 +45,16 @@ public class SteinerTreeStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().steinerTreeStream(graphName, configuration);
+        return facade.algorithms().pathFinding().steinerTreeStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.steinerTree.stream.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfiguration,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().steinerTreeStreamEstimate(graphNameOrConfiguration, configuration);
+        return facade.algorithms().pathFinding().steinerTreeStreamEstimate(graphNameOrConfiguration, configuration);
     }
 
     @Deprecated

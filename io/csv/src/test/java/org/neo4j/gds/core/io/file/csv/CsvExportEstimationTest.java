@@ -22,8 +22,9 @@ package org.neo4j.gds.core.io.file.csv;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.io.file.csv.estimation.CsvExportEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -54,7 +55,7 @@ class CsvExportEstimationTest {
     void estimate() {
         MemoryRange estimation = CsvExportEstimation
             .estimate(graphStore, 1)
-            .estimate(GraphDimensions.of(0), 1)
+            .estimate(GraphDimensions.of(0), new Concurrency(1))
             .memoryUsage();
 
         // The actual value is 40K

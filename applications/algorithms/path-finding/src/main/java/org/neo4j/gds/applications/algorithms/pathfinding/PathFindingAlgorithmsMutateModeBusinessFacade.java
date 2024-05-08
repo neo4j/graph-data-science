@@ -21,6 +21,9 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordMutateConfig;
@@ -71,7 +74,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     public <RESULT> RESULT bellmanFord(
         GraphName graphName,
         BellmanFordMutateConfig configuration,
-        ResultBuilder<BellmanFordMutateConfig, BellmanFordResult, RESULT> resultBuilder
+        ResultBuilder<BellmanFordMutateConfig, BellmanFordResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
         var mutateStep = new BellmanFordMutateStep(configuration);
 
@@ -79,7 +82,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             BELLMAN_FORD,
-            () -> estimationFacade.bellmanFordEstimation(configuration),
+            () -> estimationFacade.bellmanFord(configuration),
             graph -> pathFindingAlgorithms.bellmanFord(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
@@ -89,7 +92,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     public <RESULT> RESULT breadthFirstSearch(
         GraphName graphName,
         BfsMutateConfig configuration,
-        ResultBuilder<BfsMutateConfig, HugeLongArray, RESULT> resultBuilder
+        ResultBuilder<BfsMutateConfig, HugeLongArray, RESULT, RelationshipsWritten> resultBuilder
     ) {
         var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
         var mutateStep = new SearchMutateStep(mutateRelationshipType);
@@ -98,7 +101,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             BFS,
-            estimationFacade::breadthFirstSearchEstimation,
+            estimationFacade::breadthFirstSearch,
             graph -> pathFindingAlgorithms.breadthFirstSearch(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
@@ -108,7 +111,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     public <RESULT> RESULT deltaStepping(
         GraphName graphName,
         AllShortestPathsDeltaMutateConfig configuration,
-        ResultBuilder<AllShortestPathsDeltaMutateConfig, PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<AllShortestPathsDeltaMutateConfig, PathFindingResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
         var mutateStep = new ShortestPathMutateStep(configuration);
 
@@ -116,7 +119,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             DELTA_STEPPING,
-            estimationFacade::deltaSteppingEstimation,
+            estimationFacade::deltaStepping,
             graph -> pathFindingAlgorithms.deltaStepping(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
@@ -126,7 +129,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     public <RESULT> RESULT depthFirstSearch(
         GraphName graphName,
         DfsMutateConfig configuration,
-        ResultBuilder<DfsMutateConfig, HugeLongArray, RESULT> resultBuilder
+        ResultBuilder<DfsMutateConfig, HugeLongArray, RESULT, RelationshipsWritten> resultBuilder
     ) {
         var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
         var mutateStep = new SearchMutateStep(mutateRelationshipType);
@@ -135,7 +138,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             DFS,
-            estimationFacade::depthFirstSearchEstimation,
+            estimationFacade::depthFirstSearch,
             graph -> pathFindingAlgorithms.depthFirstSearch(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
@@ -145,7 +148,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     public <RESULT> RESULT singlePairShortestPathAStar(
         GraphName graphName,
         ShortestPathAStarMutateConfig configuration,
-        ResultBuilder<ShortestPathAStarMutateConfig, PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<ShortestPathAStarMutateConfig, PathFindingResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
         var mutateStep = new ShortestPathMutateStep(configuration);
 
@@ -153,7 +156,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             A_STAR,
-            estimationFacade::singlePairShortestPathAStarEstimation,
+            estimationFacade::singlePairShortestPathAStar,
             graph -> pathFindingAlgorithms.singlePairShortestPathAStar(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
@@ -163,7 +166,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     public <RESULT> RESULT singlePairShortestPathDijkstra(
         GraphName graphName,
         ShortestPathDijkstraMutateConfig configuration,
-        ResultBuilder<ShortestPathDijkstraMutateConfig, PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<ShortestPathDijkstraMutateConfig, PathFindingResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
         var mutateStep = new ShortestPathMutateStep(configuration);
 
@@ -171,7 +174,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             DIJKSTRA,
-            () -> estimationFacade.singlePairShortestPathDijkstraEstimation(configuration),
+            () -> estimationFacade.singlePairShortestPathDijkstra(configuration),
             graph -> pathFindingAlgorithms.singlePairShortestPathDijkstra(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
@@ -181,7 +184,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     public <RESULT> RESULT singlePairShortestPathYens(
         GraphName graphName,
         ShortestPathYensMutateConfig configuration,
-        ResultBuilder<ShortestPathYensMutateConfig, PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<ShortestPathYensMutateConfig, PathFindingResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
         var mutateStep = new ShortestPathMutateStep(configuration);
 
@@ -189,7 +192,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             YENS,
-            () -> estimationFacade.singlePairShortestPathYensEstimation(configuration),
+            () -> estimationFacade.singlePairShortestPathYens(configuration),
             graph -> pathFindingAlgorithms.singlePairShortestPathYens(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
@@ -199,7 +202,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     public <RESULT> RESULT singleSourceShortestPathDijkstra(
         GraphName graphName,
         AllShortestPathsDijkstraMutateConfig configuration,
-        ResultBuilder<AllShortestPathsDijkstraMutateConfig, PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<AllShortestPathsDijkstraMutateConfig, PathFindingResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
         var mutateStep = new ShortestPathMutateStep(configuration);
 
@@ -207,7 +210,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             DIJKSTRA,
-            () -> estimationFacade.singleSourceShortestPathDijkstraEstimation(configuration),
+            () -> estimationFacade.singleSourceShortestPathDijkstra(configuration),
             graph -> pathFindingAlgorithms.singleSourceShortestPathDijkstra(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
@@ -217,7 +220,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     public <RESULT> RESULT spanningTree(
         GraphName graphName,
         SpanningTreeMutateConfig configuration,
-        ResultBuilder<SpanningTreeMutateConfig, SpanningTree, RESULT> resultBuilder
+        ResultBuilder<SpanningTreeMutateConfig, SpanningTree, RESULT, RelationshipsWritten> resultBuilder
     ) {
         var mutateOrWriteStep = new SpanningTreeMutateStep(configuration);
 
@@ -225,7 +228,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             SPANNING_TREE,
-            estimationFacade::spanningTreeEstimation,
+            estimationFacade::spanningTree,
             graph -> pathFindingAlgorithms.spanningTree(graph, configuration),
             Optional.of(mutateOrWriteStep),
             resultBuilder
@@ -235,7 +238,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     public <RESULT> RESULT steinerTree(
         GraphName graphName,
         SteinerTreeMutateConfig configuration,
-        ResultBuilder<SteinerTreeMutateConfig, SteinerTreeResult, RESULT> resultBuilder
+        ResultBuilder<SteinerTreeMutateConfig, SteinerTreeResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
         var mutateOrWriteStep = new SteinerTreeMutateStep(configuration);
 
@@ -243,7 +246,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             STEINER,
-            () -> estimationFacade.steinerTreeEstimation(configuration),
+            () -> estimationFacade.steinerTree(configuration),
             graph -> pathFindingAlgorithms.steinerTree(graph, configuration),
             Optional.of(mutateOrWriteStep),
             resultBuilder

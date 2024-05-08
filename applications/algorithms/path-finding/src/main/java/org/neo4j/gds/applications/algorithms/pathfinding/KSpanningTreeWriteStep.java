@@ -19,10 +19,13 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
-import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
@@ -31,7 +34,7 @@ import org.neo4j.gds.spanningtree.SpanningTree;
 
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.K_SPANNING_TREE;
 
-class KSpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree> {
+class KSpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree, Void> {
     private final Log log;
     private final RequestScopedDependencies requestScopedDependencies;
     private final KSpanningTreeWriteConfig configuration;
@@ -47,14 +50,14 @@ class KSpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree> {
     }
 
     @Override
-    public void execute(
+    public Void execute(
         Graph graph,
         GraphStore graphStore,
+        ResultStore resultStore,
         SpanningTree spanningTree,
-        SideEffectProcessingCountsBuilder countsBuilder
+        JobId jobId
     ) {
         var properties = new SpanningTreeBackedNodePropertyValues(spanningTree, graph.nodeCount());
-        var resultStore = configuration.resolveResultStore(graphStore.resultStore());
 
         var progressTracker = new TaskProgressTracker(
             NodePropertyExporter.baseTask(K_SPANNING_TREE, graph.nodeCount()),
@@ -71,7 +74,8 @@ class KSpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree> {
                 configuration.arrowConnectionInfo(),
                 graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
             )
-            .withResultStore(resultStore)
+            .withResultStore(configuration.resolveResultStore(resultStore))
+            .withJobId(configuration.jobId())
             .build();
 
         // effect
@@ -79,5 +83,6 @@ class KSpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree> {
 
         // reporting
         // countsBuilder.withNodePropertiesWritten(...);
+        return null;
     }
 }

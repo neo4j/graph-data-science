@@ -124,6 +124,14 @@ class ConfigurationProcessorTest {
     }
 
     @Test
+    void whitespaceAroundKeyIsNotAllowed() {
+        runNegativeTest(
+            "WhitespaceAroundKey",
+            e("The key must not be surrounded by whitespace", 28, 9)
+        );
+    }
+
+    @Test
     void invalidAnnotationCombinations() {
         runNegativeTest(
             "InvalidAnnotationCombinations",

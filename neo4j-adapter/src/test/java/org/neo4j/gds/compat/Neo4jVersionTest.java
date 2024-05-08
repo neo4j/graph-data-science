@@ -35,15 +35,13 @@ class Neo4jVersionTest {
 
     @ParameterizedTest
     @CsvSource({
-        "5.11.0, V_5_11",
-        "5.12.0, V_5_12",
-        "5.13.0, V_5_13",
         "5.14.0, V_5_14",
         "5.15.0, V_5_15",
         "5.16.0, V_5_16",
         "5.17.0, V_5_17",
         "5.18.1, V_5_18",
-        "5.19.0, V_Dev",
+        "5.19.0, V_5_19",
+        "5.20.0, V_Dev",
     })
     void testParse(String input, Neo4jVersion expected) {
         assertEquals(expected.name(), Neo4jVersion.parse(input).name());
@@ -87,14 +85,12 @@ class Neo4jVersionTest {
     @ParameterizedTest
     @CsvSource(
         {
-            "5.11.0, 5, 11",
-            "5.12.0, 5, 12",
-            "5.13.0, 5, 13",
             "5.14.0, 5, 14",
             "5.15.0, 5, 15",
             "5.16.0, 5, 16",
             "5.17.0, 5, 17",
             "5.18.1, 5, 18",
+            "5.19.0, 5, 19",
         }
     )
     void semanticVersion(String input, int expectedMajor, int expectedMinor) {

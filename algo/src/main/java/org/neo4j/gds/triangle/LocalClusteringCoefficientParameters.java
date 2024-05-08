@@ -19,34 +19,9 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Parameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 @Parameters
-public final class LocalClusteringCoefficientParameters {
-    private final int concurrency;
-    private final long maxDegree;
-    private final String seedProperty;
-
-    private LocalClusteringCoefficientParameters(int concurrency, long maxDegree, String seedProperty) {
-        this.concurrency = concurrency;
-        this.maxDegree = maxDegree;
-        this.seedProperty = seedProperty;
-    }
-
-    public static LocalClusteringCoefficientParameters create(int concurrency, long maxDegree, @Nullable String seedProperty) {
-        return new LocalClusteringCoefficientParameters(concurrency, maxDegree, seedProperty);
-    }
-
-    int concurrency() {
-        return concurrency;
-    }
-
-    long maxDegree() {
-        return maxDegree;
-    }
-
-    String seedProperty() {
-        return seedProperty;
-    }
+public record LocalClusteringCoefficientParameters(Concurrency concurrency, long maxDegree, String seedProperty) {
 }

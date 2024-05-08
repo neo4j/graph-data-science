@@ -31,7 +31,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.graph.GraphProperty;
@@ -71,11 +70,6 @@ class StubGraphStore implements GraphStore {
     @Override
     public DatabaseInfo databaseInfo() {
         return databaseInfo;
-    }
-
-    @Override
-    public ResultStore resultStore() {
-        throw new UnsupportedOperationException("TODO");
     }
 
     @Override

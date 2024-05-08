@@ -20,7 +20,7 @@
 package org.neo4j.gds.similarity.knn;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
-import static org.neo4j.gds.similarity.knn.KnnProc.KNN_DESCRIPTION;
+import static org.neo4j.gds.similarity.knn.Constants.KNN_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class KnnStreamProc {
@@ -44,7 +44,7 @@ public class KnnStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.similarity().knnStream(graphName, configuration);
+        return facade.algorithms().similarity().knnStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.knn.stream.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class KnnStreamProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.similarity().knnStreamEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().similarity().knnStreamEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

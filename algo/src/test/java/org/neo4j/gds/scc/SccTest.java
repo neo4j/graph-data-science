@@ -24,6 +24,7 @@ import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -150,7 +151,7 @@ class SccTest {
         var progressTracker = new TestProgressTracker(
             factory.progressTask(graph, config),
             log,
-            4,
+            new Concurrency(4),
             EmptyTaskRegistryFactory.INSTANCE
         );
         factory.build(graph, config, progressTracker).compute();

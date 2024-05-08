@@ -28,7 +28,7 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientMutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
@@ -37,7 +37,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 
-@GdsCallable(name = "gds.localClusteringCoefficient.mutate", description = LocalClusteringCoefficientCompanion.DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
+@GdsCallable(name = "gds.localClusteringCoefficient.mutate", description = LocalClusteringCoefficientCompanion.LOCAL_CLUSTERING_COEFFICIENT_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class LocalClusteringCoefficientMutateSpec implements AlgorithmSpec<LocalClusteringCoefficient, LocalClusteringCoefficientResult, LocalClusteringCoefficientMutateConfig, Stream<LocalClusteringCoefficientMutateResult>, LocalClusteringCoefficientFactory<LocalClusteringCoefficientMutateConfig>> {
     @Override
     public String name() {

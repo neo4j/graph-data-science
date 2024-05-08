@@ -20,7 +20,6 @@
 package org.neo4j.gds.mem;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;

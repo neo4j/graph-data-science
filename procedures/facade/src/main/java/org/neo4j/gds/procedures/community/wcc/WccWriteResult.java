@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.community.wcc;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
 import java.util.Map;
@@ -54,7 +55,7 @@ public final class WccWriteResult extends WccStatsResult {
 
     public static class Builder extends AbstractCommunityResultBuilder<WccWriteResult> {
 
-        public Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+        public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
             super(returnColumns, concurrency);
         }
 

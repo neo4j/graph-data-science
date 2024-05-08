@@ -29,6 +29,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ArrowConnectionInfo;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.embeddings.fastrp.FastRPWriteConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
@@ -73,7 +74,7 @@ public class NodeEmbeddingsAlgorithmsWriteBusinessFacade {
             configuration.writeConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(intermediateResult.algorithmResult.graphStore().resultStore())
+            configuration.resolveResultStore(intermediateResult.algorithmResult.resultStore())
         );
     }
 
@@ -97,7 +98,7 @@ public class NodeEmbeddingsAlgorithmsWriteBusinessFacade {
             configuration.writeConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(intermediateResult.algorithmResult.graphStore().resultStore())
+            configuration.resolveResultStore(intermediateResult.algorithmResult.resultStore())
         );
     }
 
@@ -122,7 +123,7 @@ public class NodeEmbeddingsAlgorithmsWriteBusinessFacade {
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
 
-            configuration.resolveResultStore(intermediateResult.algorithmResult.graphStore().resultStore())
+            configuration.resolveResultStore(intermediateResult.algorithmResult.resultStore())
         );
     }
 
@@ -134,7 +135,7 @@ public class NodeEmbeddingsAlgorithmsWriteBusinessFacade {
         long computeMilliseconds,
         Supplier<ASF> emptyASFSupplier,
         String procedureName,
-        int writeConcurrency,
+        Concurrency writeConcurrency,
         String writeProperty,
         Optional<ArrowConnectionInfo> arrowConnectionInfo,
         Optional<ResultStore> resultStore
@@ -155,7 +156,8 @@ public class NodeEmbeddingsAlgorithmsWriteBusinessFacade {
                 writeProperty,
                 procedureName,
                 arrowConnectionInfo,
-                resultStore
+                resultStore,
+                configuration.jobId()
             );
 
 

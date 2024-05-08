@@ -10,13 +10,11 @@ If your version of GDS or Neo4j is not listed in the matrix, you should upgrade.
 [opts=header]
 |===
 | Neo4j version    | Neo4j Graph Data Science
+| `5.19`           | `2.7`, `2.6.5` and later
 | `5.18`           | `2.7`, `2.6.2` and later
 | `5.17`           | `2.7`, `2.6.1` and later
 | `5.16`           | `2.7`, `2.6`
 | `5.15`           | `2.7`, `2.6`
 | `5.14`           | `2.7`, `2.6`
-| `5.13`           | `2.7`, `2.6`
-| `5.12`           | `2.7`, `2.6`
-| `5.11`           | `2.7`, `2.6`
 | `4.4.9` or later | `2.6`
 |===

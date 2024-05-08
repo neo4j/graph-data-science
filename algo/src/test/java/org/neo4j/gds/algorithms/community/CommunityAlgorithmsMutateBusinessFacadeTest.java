@@ -25,9 +25,11 @@ import org.neo4j.gds.algorithms.community.specificfields.StandardCommunityStatis
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -61,7 +63,7 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
     void mutateWithoutAlgorithmResult() {
 
         var configurationMock = mock(MutateNodePropertyConfig.class);
-        var algorithmResult = AlgorithmComputationResult.<Long>withoutAlgorithmResult(graph, graphStore);
+        var algorithmResult = AlgorithmComputationResult.<Long>withoutAlgorithmResult(graph, graphStore, ResultStore.EMPTY);
 
         var nodePropertyServiceMock = mock(MutateNodePropertyService.class);
 
@@ -96,13 +98,15 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
 
         var configMock = mock(MutateNodePropertyConfig.class);
         when(configMock.mutateProperty()).thenReturn("bugger-off");
+        when(configMock.concurrency()).thenReturn(new Concurrency(4));
 
         var result = HugeLongArray.newArray(graph.nodeCount());
         result.setAll(graph::toOriginalNodeId);
         var algorithmResultMock = AlgorithmComputationResult.of(
             result,
             graph,
-            graphStore
+            graphStore,
+            ResultStore.EMPTY
         );
 
         var statisticsComputationInstructionsMock = mock(StatisticsComputationInstructions.class);
@@ -130,7 +134,7 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
         assertThat(mutateResult.computeMillis()).isEqualTo(50);
         assertThat(mutateResult.mutateMillis()).isGreaterThanOrEqualTo(0L);
         assertThat(mutateResult.postProcessingMillis()).isGreaterThanOrEqualTo(0L);
-        
+
         var nodeProperty = graphStore.nodeProperty("bugger-off");
         assertThat(nodeProperty).isNotNull();
         var buggerOffValues = nodeProperty.values();
@@ -159,7 +163,8 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
         var algorithmResultMock = AlgorithmComputationResult.of(
             result,
             graph,
-            graphStore
+            graphStore,
+            ResultStore.EMPTY
         );
 
         NodePropertyValuesMapper<HugeLongArray, MutateNodePropertyConfig> nodePropertyValuesMapper =
@@ -189,5 +194,5 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
             return true;
         });
     }
-    
+
 }

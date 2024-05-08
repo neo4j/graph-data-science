@@ -40,6 +40,7 @@ import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.huge.HugeGraphBuilder;
@@ -85,14 +86,15 @@ public final class GraphFactory {
         Optional<Boolean> hasLabelInformation,
         Optional<Boolean> hasProperties,
         Optional<Boolean> deduplicateIds,
-        Optional<Integer> concurrency,
+        Optional<Concurrency> concurrency,
         Optional<PropertyState> propertyState,
         Optional<String> idMapBuilderType
     ) {
         boolean labelInformation = nodeSchema
             .map(schema -> !(schema.availableLabels().isEmpty() && schema.containsOnlyAllNodesLabel()))
-            .or(() -> hasLabelInformation).orElse(false);
-        int threadCount = concurrency.orElse(1);
+            .or(() -> hasLabelInformation)
+            .orElse(false);
+        var threadCount = concurrency.orElse(new Concurrency(1));
 
         var idMapBehavior = IdMapBehaviorServiceProvider.idMapBehavior();
 
@@ -127,7 +129,7 @@ public final class GraphFactory {
 
         return nodeSchema.isPresent()
             ? fromSchema(
-            maxOriginalNodeId,
+                maxOriginalNodeId,
                 maxIntermediateId,
                 idMapBuilder,
                 threadCount,
@@ -152,7 +154,7 @@ public final class GraphFactory {
         long maxOriginalId,
         long maxIntermediateId,
         IdMapBuilder idMapBuilder,
-        int concurrency,
+        Concurrency concurrency,
         NodeSchema nodeSchema,
         boolean hasLabelInformation,
         boolean deduplicateIds
@@ -219,9 +221,10 @@ public final class GraphFactory {
         List<PropertyConfig> propertyConfigs,
         Optional<Aggregation> aggregation,
         Optional<Boolean> skipDanglingRelationships,
-        Optional<Integer> concurrency,
+        Optional<Concurrency> concurrency,
         Optional<Boolean> indexInverse,
-        Optional<ExecutorService> executorService
+        Optional<ExecutorService> executorService,
+        Optional<Boolean> usePooledBuilderProvider
     ) {
         var loadRelationshipProperties = !propertyConfigs.isEmpty();
 
@@ -241,19 +244,21 @@ public final class GraphFactory {
             .orientation(actualOrientation)
             .indexInverse(indexInverse.orElse(false));
 
-        propertyConfigs.forEach(propertyConfig -> projectionBuilder.addProperty(
-            propertyConfig.propertyKey(),
-            propertyConfig.propertyKey(),
-            DefaultValue.of(propertyConfig.defaultValue()),
-            propertyConfig.aggregation()
-        ));
+        propertyConfigs.forEach(
+            propertyConfig -> projectionBuilder.addProperty(
+                propertyConfig.propertyKey(),
+                propertyConfig.propertyKey(),
+                DefaultValue.of(propertyConfig.defaultValue()),
+                propertyConfig.aggregation()
+            )
+        );
 
         var projection = projectionBuilder.build();
 
         int[] propertyKeyIds = IntStream.range(0, propertyConfigs.size()).toArray();
         double[] defaultValues = propertyConfigs.stream().mapToDouble(c -> c.defaultValue().doubleValue()).toArray();
 
-        int finalConcurrency = concurrency.orElse(1);
+        var finalConcurrency = concurrency.orElse(new Concurrency(1));
         var maybeRootNodeCount = nodes.rootNodeCount();
         var importSizing = maybeRootNodeCount.isPresent()
             ? ImportSizing.of(finalConcurrency, maybeRootNodeCount.getAsLong())
@@ -318,7 +323,15 @@ public final class GraphFactory {
             singleTypeRelationshipsBuilderBuilder.inverseImporter(inverseImporter);
         }
 
-        return new RelationshipsBuilder(singleTypeRelationshipsBuilderBuilder.build(), skipDangling);
+        var singleTypeRelationshipsBuilder = singleTypeRelationshipsBuilderBuilder.build();
+
+        var localBuilderProvider = usePooledBuilderProvider.orElse(false)
+            ? LocalRelationshipsBuilderProvider
+                .pooled(singleTypeRelationshipsBuilder::threadLocalRelationshipsBuilder, finalConcurrency)
+            : LocalRelationshipsBuilderProvider
+                .threadLocal(singleTypeRelationshipsBuilder::threadLocalRelationshipsBuilder);
+
+        return new RelationshipsBuilder(singleTypeRelationshipsBuilder, localBuilderProvider, skipDangling);
     }
 
     /**
@@ -334,7 +347,8 @@ public final class GraphFactory {
         idMap.availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
 
         relationships.properties().ifPresent(relationshipPropertyStore -> {
-            assert relationshipPropertyStore.values().size() == 1: "Cannot instantiate graph with more than one relationship property.";
+            assert relationshipPropertyStore.values()
+                .size() == 1 : "Cannot instantiate graph with more than one relationship property.";
         });
 
         var relationshipSchema = MutableRelationshipSchema.empty();
@@ -358,11 +372,13 @@ public final class GraphFactory {
         var inverseTopology = relationships.inverseTopology();
 
         var properties = relationships.properties().map(relationshipPropertyStore -> {
-            assert relationshipPropertyStore.values().size() == 1: "Cannot instantiate graph with more than one relationship property.";
+            assert relationshipPropertyStore.values()
+                .size() == 1 : "Cannot instantiate graph with more than one relationship property.";
             return relationshipPropertyStore.values().iterator().next().values();
         });
         var inverseProperties = relationships.inverseProperties().map(relationshipPropertyStore -> {
-            assert relationshipPropertyStore.values().size() == 1: "Cannot instantiate graph with more than one relationship property.";
+            assert relationshipPropertyStore.values()
+                .size() == 1 : "Cannot instantiate graph with more than one relationship property.";
             return relationshipPropertyStore.values().iterator().next().values();
         });
 

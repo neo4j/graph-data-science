@@ -24,6 +24,7 @@ import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodeLabelToken;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
@@ -40,7 +41,7 @@ public final class LazyIdMapBuilder implements PartialIdMap {
     private final NodesBuilder nodesBuilder;
 
     public LazyIdMapBuilder(
-        int concurrency,
+        Concurrency concurrency,
         boolean hasLabelInformation,
         boolean hasProperties,
         PropertyState propertyState

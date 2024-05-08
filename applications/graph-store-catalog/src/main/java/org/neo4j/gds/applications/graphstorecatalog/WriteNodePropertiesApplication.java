@@ -23,6 +23,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.JobId;
@@ -52,6 +53,7 @@ public class WriteNodePropertiesApplication {
 
     NodePropertiesWriteResult write(
         GraphStore graphStore,
+        ResultStore resultStore,
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
@@ -91,6 +93,7 @@ public class WriteNodePropertiesApplication {
             try {
                 var propertiesWritten = writeNodeProperties(
                     graphStore,
+                    resultStore,
                     configuration,
                     validNodeLabels,
                     nodePropertyExporterBuilder,
@@ -110,6 +113,7 @@ public class WriteNodePropertiesApplication {
 
     private static long writeNodeProperties(
         GraphStore graphStore,
+        ResultStore resultStore,
         GraphWriteNodePropertiesConfig config,
         Iterable<NodeLabel> validNodeLabels,
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
@@ -127,7 +131,6 @@ public class WriteNodePropertiesApplication {
                     Optional.empty()
                 );
 
-                var resultStore = config.resolveResultStore(graphStore.resultStore());
                 var exporter = nodePropertyExporterBuilder
                     .withIdMap(subGraph)
                     .withTerminationFlag(terminationFlag)
@@ -137,7 +140,8 @@ public class WriteNodePropertiesApplication {
                         config.arrowConnectionInfo(),
                         graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                     )
-                    .withResultStore(resultStore)
+                    .withResultStore(config.resolveResultStore(resultStore))
+                    .withJobId(config.jobId())
                     .build();
 
                 var writeNodeProperties = config.nodeProperties()

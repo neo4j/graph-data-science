@@ -20,13 +20,14 @@
 package org.neo4j.gds.core.io.file;
 
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.io.GraphStoreExporter;
 import org.neo4j.gds.core.io.GraphStoreInput;
+import org.neo4j.gds.core.io.IdentifierMapper;
 import org.neo4j.gds.core.io.NeoNodeProperties;
-import org.neo4j.gds.core.io.NodeLabelMapping;
 import org.neo4j.gds.core.io.schema.ElementSchemaVisitor;
 import org.neo4j.gds.core.io.schema.NodeSchemaVisitor;
 import org.neo4j.gds.core.io.schema.RelationshipSchemaVisitor;
@@ -60,6 +61,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
     private final Supplier<SingleRowVisitor<GraphInfo>> graphInfoVisitorSupplier;
     private final Supplier<NodeSchemaVisitor> nodeSchemaVisitorSupplier;
     private final Supplier<SimpleVisitor<Map.Entry<NodeLabel, String>>> labelMappingVisitorSupplier;
+    private final Supplier<SimpleVisitor<Map.Entry<RelationshipType, String>>> typeMappingVisitorSupplier;
 
     private final Supplier<RelationshipSchemaVisitor> relationshipSchemaVisitorSupplier;
     private final Supplier<ElementSchemaVisitor> graphPropertySchemaVisitorSupplier;
@@ -74,11 +76,13 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
         GraphStore graphStore,
         GraphStoreToFileExporterParameters parameters,
         Optional<NeoNodeProperties> neoNodeProperties,
-        Optional<NodeLabelMapping> nodeLabelMapping,
+        IdentifierMapper<NodeLabel> nodeLabelMapping,
+        IdentifierMapper<RelationshipType> relationshipTypeMapping,
         Supplier<SingleRowVisitor<String>> userInfoVisitorSupplier,
         Supplier<SingleRowVisitor<GraphInfo>> graphInfoVisitorSupplier,
         Supplier<NodeSchemaVisitor> nodeSchemaVisitorSupplier,
         Supplier<SimpleVisitor<Map.Entry<NodeLabel, String>>> labelMappingVisitorSupplier,
+        Supplier<SimpleVisitor<Map.Entry<RelationshipType, String>>> typeMappingVisitorSupplier,
         Supplier<RelationshipSchemaVisitor> relationshipSchemaVisitorSupplier,
         Supplier<ElementSchemaVisitor> graphPropertySchemaVisitorSupplier,
         Supplier<SimpleWriter<Capabilities>> graphCapabilitiesWriterSupplier,
@@ -90,7 +94,15 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
         String rootTaskName,
         ExecutorService executorService
     ) {
-        super(graphStore, neoNodeProperties, nodeLabelMapping, parameters.defaultRelationshipType(), parameters.concurrency(), parameters.batchSize());
+        super(
+            graphStore,
+            neoNodeProperties,
+            nodeLabelMapping,
+            relationshipTypeMapping,
+            parameters.defaultRelationshipType(),
+            parameters.concurrency(),
+            parameters.batchSize()
+        );
         this.parameters = parameters;
         this.nodeVisitorSupplier = nodeVisitorSupplier;
         this.relationshipVisitorSupplier = relationshipVisitorSupplier;
@@ -99,6 +111,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
         this.graphInfoVisitorSupplier = graphInfoVisitorSupplier;
         this.nodeSchemaVisitorSupplier = nodeSchemaVisitorSupplier;
         this.labelMappingVisitorSupplier = labelMappingVisitorSupplier;
+        this.typeMappingVisitorSupplier = typeMappingVisitorSupplier;
         this.relationshipSchemaVisitorSupplier = relationshipSchemaVisitorSupplier;
         this.graphPropertySchemaVisitorSupplier = graphPropertySchemaVisitorSupplier;
         this.graphCapabilitiesWriterSupplier = graphCapabilitiesWriterSupplier;
@@ -110,20 +123,17 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
 
     @Override
     protected void export(GraphStoreInput graphStoreInput) {
-        if (parameters.includeMetaData()) {
+        var progressTracker = createProgressTracker(graphStoreInput);
+        try {
+            progressTracker.beginSubTask("Csv export");
             exportUserName();
             exportGraphInfo(graphStoreInput);
             exportNodeSchema(graphStoreInput);
             exportRelationshipSchema(graphStoreInput);
             exportGraphPropertySchema(graphStoreInput);
             exportGraphCapabilities(graphStoreInput);
-        }
-        exportNodeLabelMapping(graphStoreInput);
-
-        var progressTracker = createProgressTracker(graphStoreInput);
-
-        try {
-            progressTracker.beginSubTask();
+            exportNodeLabelMapping(graphStoreInput);
+            exportRelationshipTypeMapping(graphStoreInput);
             exportNodes(graphStoreInput, progressTracker);
             exportRelationships(graphStoreInput, progressTracker);
             exportGraphProperties(graphStoreInput, progressTracker);
@@ -268,14 +278,22 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
 
     private void exportNodeLabelMapping(GraphStoreInput graphStoreInput) {
         var labelMapping = graphStoreInput.labelMapping();
-        if (labelMapping.isPresent()) {
-            try (var labelMappingVisitor = labelMappingVisitorSupplier.get()) {
-                labelMapping.get().entrySet().forEach(labelMappingVisitor::export);
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
+        try (var labelMappingVisitor = labelMappingVisitorSupplier.get()) {
+            labelMapping.forEach((label, identifier) -> labelMappingVisitor.export(Map.entry(label, identifier)));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
+
+    private void exportRelationshipTypeMapping(GraphStoreInput graphStoreInput) {
+        var labelMapping = graphStoreInput.typeMapping();
+        try (var typeMappingVisitor = typeMappingVisitorSupplier.get()) {
+            labelMapping.forEach((label, identifier) -> typeMappingVisitor.export(Map.entry(label, identifier)));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
 
     private void exportRelationshipSchema(GraphStoreInput graphStoreInput) {
         var relationshipSchema = graphStoreInput.metaDataStore().relationshipSchema();

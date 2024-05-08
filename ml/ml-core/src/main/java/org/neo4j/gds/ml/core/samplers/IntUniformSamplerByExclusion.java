@@ -20,16 +20,16 @@
 package org.neo4j.gds.ml.core.samplers;
 
 import com.carrotsearch.hppc.IntArrayList;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryRange;
 
 import java.util.Arrays;
 import java.util.SplittableRandom;
 import java.util.function.IntPredicate;
 import java.util.stream.IntStream;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfIntArray;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfIntArrayList;
+import static org.neo4j.gds.mem.Estimate.sizeOfInstance;
+import static org.neo4j.gds.mem.Estimate.sizeOfIntArray;
+import static org.neo4j.gds.mem.Estimate.sizeOfIntArrayList;
 
 public class IntUniformSamplerByExclusion {
     private final IntUniformSamplerWithRetries samplerWithRetries;

@@ -20,8 +20,8 @@
 package org.neo4j.gds.closeness;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.centrality.CentralityWriteResult;
-import org.neo4j.gds.procedures.centrality.betacloseness.BetaClosenessCentralityWriteResult;
+import org.neo4j.gds.procedures.algorithms.centrality.BetaClosenessCentralityWriteResult;
+import org.neo4j.gds.procedures.algorithms.centrality.CentralityWriteResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -31,11 +31,10 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.closeness.ClosenessCentrality.CLOSENESS_DESCRIPTION;
+import static org.neo4j.gds.closeness.Constants.CLOSENESS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class ClosenessCentralityWriteProc {
-
     @Context
     public GraphDataScienceProcedures facade;
 
@@ -45,7 +44,7 @@ public class ClosenessCentralityWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.centrality().closenessCentralityWrite(graphName, configuration);
+        return facade.algorithms().centrality().closenessCentralityWrite(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)
@@ -56,15 +55,11 @@ public class ClosenessCentralityWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        facade
-            .deprecatedProcedures().called("gds.beta.closeness.write");
-
+        facade.deprecatedProcedures().called("gds.beta.closeness.write");
         facade
             .log()
             .warn("Procedure `gds.beta.closeness.write` has been deprecated, please use `gds.closeness.write`.");
 
-        return facade.centrality().betaClosenessCentralityWrite(graphName, configuration);
-
+        return facade.algorithms().centrality().betaClosenessCentralityWrite(graphName, configuration);
     }
-    
 }

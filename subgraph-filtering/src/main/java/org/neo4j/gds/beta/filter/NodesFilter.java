@@ -29,6 +29,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.beta.filter.expression.EvaluationContext;
 import org.neo4j.gds.beta.filter.expression.Expression;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -63,7 +64,7 @@ public final class NodesFilter {
     public static FilteredNodes filterNodes(
         GraphStore inputGraphStore,
         Expression expression,
-        int concurrency,
+        Concurrency concurrency,
         Map<String, Object> parameterMap,
         ExecutorService executorService,
         ProgressTracker progressTracker
@@ -121,7 +122,7 @@ public final class NodesFilter {
     public static NodePropertyStore filterNodeProperties(
         GraphStore inputGraphStore,
         IdMap filteredIdMap,
-        int concurrency,
+        Concurrency concurrency,
         ProgressTracker progressTracker
     ) {
         var propertyKeys = inputGraphStore.nodePropertyKeys();
@@ -165,10 +166,10 @@ public final class NodesFilter {
         return builder.build();
     }
 
-    public static NodePropertiesBuilder<?> getPropertiesBuilder(
+    private static NodePropertiesBuilder<?> getPropertiesBuilder(
         IdMap idMap,
         NodePropertyValues inputNodePropertyValues,
-        int concurrency
+        Concurrency concurrency
     ) {
         NodePropertiesBuilder<?> propertiesBuilder = null;
 

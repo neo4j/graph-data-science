@@ -25,6 +25,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.paths.PathResult;
@@ -42,7 +43,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
     private final Graph graph;
     private final long sourceId;
     private final List<Long> terminals;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final BitSet isTerminal;
     private final boolean applyRerouting;
     private final double delta;
@@ -55,7 +56,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         long sourceId,
         List<Long> terminals,
         double delta,
-        int concurrency,
+        Concurrency concurrency,
         boolean applyRerouting,
         ExecutorService executorService,
         ProgressTracker progressTracker
@@ -80,7 +81,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         long sourceId,
         List<Long> terminals,
         double delta,
-        int concurrency,
+        Concurrency concurrency,
         boolean applyRerouting,
         int binSizeThreshold,
         ExecutorService executorService,
@@ -101,7 +102,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
 
     }
 
-    
+
     private BitSet createTerminals() {
         long maxTerminalId = -1;
         for (long terminalId : terminals) {

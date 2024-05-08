@@ -21,6 +21,7 @@ package org.neo4j.gds.allshortestpaths;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipIterator;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Arrays;
@@ -55,14 +56,14 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
     private final BlockingQueue<AllShortestPathsStreamResult> resultQueue = new LinkedBlockingQueue<>();
 
     private final int nodeCount;
-    private final int concurrency; // maximum number of workers
+    private final Concurrency concurrency; // maximum number of workers
     private final ExecutorService executorService;
     private final Graph graph;
     private final AtomicInteger counter; // nodeId counter (init with nodeCount, counts down for each node)
 
     private volatile boolean outputStreamOpen;
 
-    public WeightedAllShortestPaths(Graph graph, ExecutorService executorService, int concurrency) {
+    public WeightedAllShortestPaths(Graph graph, ExecutorService executorService, Concurrency concurrency) {
         super(ProgressTracker.NULL_TRACKER);
         if (!graph.hasRelationshipProperty()) {
             throw new UnsupportedOperationException("WeightedAllShortestPaths is not supported on graphs without a weight property");
@@ -71,9 +72,6 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
         this.graph = graph;
         this.nodeCount = Math.toIntExact(graph.nodeCount());
         this.executorService = executorService;
-        if (concurrency < 1) {
-            throw new IllegalArgumentException("concurrency must be >0");
-        }
         this.concurrency = concurrency;
         this.counter = new AtomicInteger();
     }
@@ -91,7 +89,7 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
         counter.set(0);
         outputStreamOpen = true;
 
-        for (int i = 0; i < concurrency; i++) {
+        for (int i = 0; i < concurrency.value(); i++) {
             executorService.submit(new ShortestPathTask());
         }
 

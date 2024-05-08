@@ -22,6 +22,7 @@ package org.neo4j.gds.closeness;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -66,7 +67,7 @@ class ClosenessCentralityDiscoTest {
 
         var algo = new ClosenessCentrality(
             graph,
-            2,
+            new Concurrency(2),
             new WassermanFaustCentralityComputer(graph.nodeCount()),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER

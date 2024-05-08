@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.spanningtree;
 
-import org.neo4j.gds.MemoryEstimateDefinition;
+import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 public class SpanningTreeMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
@@ -34,7 +34,7 @@ public class SpanningTreeMemoryEstimateDefinition implements MemoryEstimateDefin
         return MemoryEstimations.builder(Prim.class)
             .perNode("Parent array", HugeLongArray::memoryEstimation)
             .add("Priority queue", HugeLongPriorityQueue.memoryEstimation())
-            .perNode("visited", MemoryUsage::sizeOfBitset)
+            .perNode("visited", Estimate::sizeOfBitset)
             .build();
     }
 }

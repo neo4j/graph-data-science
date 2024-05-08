@@ -26,6 +26,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
@@ -37,8 +38,8 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.procedures.similarity.SimilarityMutateResult;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.similarity.SimilarityMutateResult;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityProc;
 import org.neo4j.gds.similarity.SimilarityResultBuilder;
@@ -137,7 +138,7 @@ public class NodeSimilarityMutateSpecification implements AlgorithmSpec<NodeSimi
                 .relationshipType(relationshipType)
                 .orientation(Orientation.NATURAL)
                 .addPropertyConfig(GraphFactory.PropertyConfig.of(relationshipPropertyKey))
-                .concurrency(1)
+                .concurrency(new Concurrency(1))
                 .executorService(DefaultPool.INSTANCE)
                 .build();
 

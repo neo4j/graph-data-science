@@ -30,8 +30,9 @@ import org.neo4j.gds.assertj.Extractors;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -228,14 +229,15 @@ class LinkPredictionRelationshipSamplerTest {
             .negativeSamplingRatio(1.0);
 
         var splitConfig = splitConfigBuilder.testFraction(0.2).build();
+        var concurrency = new Concurrency(4);
         var actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
-            .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), 4);
+            .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), concurrency);
 
         assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(17_760, 17_760));
 
         splitConfig = splitConfigBuilder.testFraction(0.8).build();
         actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
-            .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), 4);
+            .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), concurrency);
 
         // higher testFraction -> lower estimation as test-complement is smaller
         // the test_complement is kept until the end of all splitting
@@ -249,15 +251,16 @@ class LinkPredictionRelationshipSamplerTest {
             .validationFolds(3)
             .negativeSamplingRatio(1.0);
 
+        var concurrency = new Concurrency(4);
         var splitConfig = splitConfigBuilder.trainFraction(0.2).build();
         var actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
-            .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), 4);
+            .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), concurrency);
 
         assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(17_760, 17_760));
 
         splitConfig = splitConfigBuilder.trainFraction(0.8).build();
         actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
-            .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), 4);
+            .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), concurrency);
 
         assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(19_424, 19_424));
     }
@@ -269,15 +272,16 @@ class LinkPredictionRelationshipSamplerTest {
             .trainFraction(0.3)
             .validationFolds(3);
 
+        var concurrency = new Concurrency(4);
         var splitConfig = splitConfigBuilder.negativeSamplingRatio(1).build();
         var actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
-            .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), 4);
+            .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), concurrency);
 
         assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(18_024, 18_024));
 
         splitConfig = splitConfigBuilder.negativeSamplingRatio(4).build();
         actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
-            .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), 4);
+            .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), concurrency);
 
         assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(36_384, 36_384));
     }
@@ -296,13 +300,14 @@ class LinkPredictionRelationshipSamplerTest {
             .relationshipCounts(Map.of(RelationshipType.of("REL"), 1000L))
             .relCountUpperBound(3000L);
 
+        var concurrency = new Concurrency(4);
         var actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
-            .estimate(splitConfig.expectedGraphDimensions(graphDimensionBuilder.relationshipCounts(Map.of(RelationshipType.of("NEG"), 1000L)).build(), "REL"), 4);
+            .estimate(splitConfig.expectedGraphDimensions(graphDimensionBuilder.relationshipCounts(Map.of(RelationshipType.of("NEG"), 1000L)).build(), "REL"), concurrency);
 
         assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(47_760, 47_760));
 
         actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
-            .estimate(splitConfig.expectedGraphDimensions(graphDimensionBuilder.relationshipCounts(Map.of(RelationshipType.of("NEG"), 2000L)).build(), "REL"), 4);
+            .estimate(splitConfig.expectedGraphDimensions(graphDimensionBuilder.relationshipCounts(Map.of(RelationshipType.of("NEG"), 2000L)).build(), "REL"), concurrency);
 
         assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(59_760, 59_760));
     }
@@ -313,11 +318,12 @@ class LinkPredictionRelationshipSamplerTest {
             .testFraction(0.3)
             .trainFraction(0.3)
             .validationFolds(3).negativeSamplingRatio(1).build();
+        var concurrency = new Concurrency(4);
         var unweightedEstimation = splitEstimation(splitConfig, "REL", Optional.empty())
-            .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), 4);
+            .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), concurrency);
 
         var weightedEstimation = splitEstimation(splitConfig, "REL", Optional.of("weight"))
-            .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), 4);
+            .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), concurrency);
 
         assertThat(unweightedEstimation.memoryUsage()).isNotEqualTo(weightedEstimation.memoryUsage());
     }

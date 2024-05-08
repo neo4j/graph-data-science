@@ -43,7 +43,7 @@ public final class DegreeDistribution {
 
         ParallelUtil.parallelForEachNode(
             graph.nodeCount(),
-            ConcurrencyConfig.DEFAULT_CONCURRENCY,
+            ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY,
             terminationFlag,
             nodeId -> histogram.recordValue(graph.degree(nodeId))
         );

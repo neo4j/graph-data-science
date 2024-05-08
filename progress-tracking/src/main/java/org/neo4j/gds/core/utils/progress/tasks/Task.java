@@ -20,8 +20,9 @@
 package org.neo4j.gds.core.utils.progress.tasks;
 
 import org.apache.commons.lang3.mutable.MutableLong;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.ClockService;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryRange;
 
 import java.util.List;
 
@@ -165,8 +166,8 @@ public class Task {
         return this.maxConcurrency;
     }
 
-    public void setMaxConcurrency(int maxConcurrency) {
-        this.maxConcurrency = maxConcurrency;
+    public void setMaxConcurrency(Concurrency maxConcurrency) {
+        this.maxConcurrency = maxConcurrency.value();
         subTasks.forEach(task -> {
             if (task.maxConcurrency() == UNKNOWN_CONCURRENCY) {
                 task.setMaxConcurrency(maxConcurrency);

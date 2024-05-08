@@ -20,7 +20,7 @@
 package org.neo4j.gds.algorithms.misc;
 
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
-import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.scaleproperties.ScalePropertiesBaseConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesMemoryEstimateDefinition;
 

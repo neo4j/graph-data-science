@@ -21,6 +21,7 @@ package org.neo4j.gds.leiden;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -78,7 +79,7 @@ class LeidenWeightedCliqueTest {
             19L,
             null,
             TOLERANCE_DEFAULT,
-            4,
+            new Concurrency(4),
             ProgressTracker.NULL_TRACKER
 
         );

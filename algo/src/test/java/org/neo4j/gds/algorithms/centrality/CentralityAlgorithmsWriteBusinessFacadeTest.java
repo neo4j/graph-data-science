@@ -22,7 +22,6 @@ package org.neo4j.gds.algorithms.centrality;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
-import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.algorithms.centrality.specificfields.DefaultCentralitySpecificFields;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyResult;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
@@ -31,9 +30,12 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.config.ArrowConnectionInfo;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankWriteConfig;
 import org.neo4j.gds.scaling.ScalerFactory;
@@ -56,7 +58,7 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
         var configurationMock = mock(BetweennessCentralityWriteConfig.class);
         var graph = mock(Graph.class);
         var graphStore = mock(GraphStore.class);
-        var algorithmResult = AlgorithmComputationResult.<Long>withoutAlgorithmResult(graph, graphStore);
+        var algorithmResult = AlgorithmComputationResult.<Long>withoutAlgorithmResult(graph, graphStore, ResultStore.EMPTY);
 
         var nodePropertyServiceMock = mock(WriteNodePropertyService.class);
 
@@ -72,7 +74,7 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
             0,
             () -> DefaultCentralitySpecificFields.EMPTY,
             "FOO",
-            4,
+            new Concurrency(4),
             "foo",
             Optional.empty(),
             Optional.empty()
@@ -95,8 +97,9 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
 
     @Test
     void writeWithoutStatistics() {
-
+        var jobId = new JobId("test");
         var configurationMock = mock(BetweennessCentralityWriteConfig.class);
+        when(configurationMock.jobId()).thenReturn(jobId);
         var graph = mock(Graph.class);
         var graphStore = mock(GraphStore.class);
 
@@ -104,10 +107,11 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
         var algorithmResultMock = AlgorithmComputationResult.of(
             result,
             graph,
-            graphStore
+            graphStore,
+            ResultStore.EMPTY
         );
 
-        when(graph.nodeCount()).thenReturn(4l);
+        when(graph.nodeCount()).thenReturn(4L);
 
 
         var nodePropertyServiceMock = mock(WriteNodePropertyService.class);
@@ -118,11 +122,12 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
             eq(graph),
             eq(graphStore),
             any(),
-            eq(4),
+            eq(new Concurrency(4)),
             eq("foo"),
             eq("FooWrite"),
             eq(Optional.empty()),
-            eq(Optional.empty())
+            eq(Optional.empty()),
+            eq(jobId)
         )).thenReturn(new WriteNodePropertyResult(4, 100));
 
         var businessFacade = new CentralityAlgorithmsWriteBusinessFacade(null, nodePropertyServiceMock);
@@ -137,7 +142,7 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
             0L,
             () -> DefaultCentralitySpecificFields.EMPTY,
             "FooWrite",
-            4,
+            new Concurrency(4),
             "foo",
             Optional.empty(),
             Optional.empty()
@@ -163,8 +168,10 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
 
     @Test
     void writeWithStatistics() {
-
+        var jobId = new JobId("test");
         var configurationMock = mock(BetweennessCentralityWriteConfig.class);
+        when(configurationMock.jobId()).thenReturn(jobId);
+        when(configurationMock.concurrency()).thenReturn(new Concurrency(4));
         var graph = mock(Graph.class);
         var graphStore = mock(GraphStore.class);
 
@@ -172,7 +179,8 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
         var algorithmResultMock = AlgorithmComputationResult.of(
             result,
             graph,
-            graphStore
+            graphStore,
+            ResultStore.EMPTY
         );
 
         when(graph.nodeCount()).thenReturn(4l);
@@ -186,11 +194,12 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
             eq(graph),
             eq(graphStore),
             any(),
-            eq(4),
+            eq(new Concurrency(4)),
             eq("foo"),
             eq("FooWrite"),
             eq(Optional.empty()),
-            eq(Optional.empty())
+            eq(Optional.empty()),
+            eq(jobId)
         )).thenReturn(new WriteNodePropertyResult(4, 100));
 
         var businessFacade = new CentralityAlgorithmsWriteBusinessFacade(null, nodePropertyServiceMock);
@@ -205,7 +214,7 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
             0L,
             () -> DefaultCentralitySpecificFields.EMPTY,
             "FooWrite",
-            4,
+            new Concurrency(4),
             "foo",
             Optional.empty(),
             Optional.empty()
@@ -243,7 +252,8 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
                 AlgorithmComputationResult.of(
                     pageRankResultMock,
                     mock(Graph.class),
-                    mock(GraphStore.class)
+                    mock(GraphStore.class),
+                    ResultStore.EMPTY
                 )
             );
 
@@ -264,6 +274,7 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
     void pageRankShouldHaveRealDistributionWhenScalerIsNotLog() {
         var pageRankConfigMock = mock(PageRankWriteConfig.class);
         when(pageRankConfigMock.scaler()).thenReturn(ScalerFactory.parse("none"));
+        when(pageRankConfigMock.concurrency()).thenReturn(new Concurrency(4));
 
         var centralityAlgorithmsFacadeMock = mock(CentralityAlgorithmsFacade.class);
         var pageRankResultMock = mock(PageRankResult.class);
@@ -275,7 +286,8 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
                 AlgorithmComputationResult.of(
                     pageRankResultMock,
                     mock(Graph.class),
-                    mock(GraphStore.class)
+                    mock(GraphStore.class),
+                    ResultStore.EMPTY
                 )
             );
 
@@ -309,11 +321,12 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
             Graph graph,
             GraphStore graphStore,
             NodePropertyValues nodePropertyValues,
-            int writeConcurrency,
+            Concurrency writeConcurrency,
             String writeProperty,
             String procedureName,
             Optional<ArrowConnectionInfo> arrowConnectionInfo,
-            Optional<ResultStore> resultStore
+            Optional<ResultStore> resultStore,
+            JobId jobId
         ) {
             return new WriteNodePropertyResult(nodePropertiesWritten, writeMilliseconds);
         }

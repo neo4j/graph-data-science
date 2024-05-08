@@ -20,15 +20,15 @@
 package org.neo4j.gds.labelpropagation;
 
 import com.carrotsearch.hppc.LongDoubleScatterMap;
-import org.neo4j.gds.MemoryEstimateDefinition;
+import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
+import org.neo4j.gds.mem.Estimate;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
+import static org.neo4j.gds.mem.Estimate.sizeOfDoubleArray;
+import static org.neo4j.gds.mem.Estimate.sizeOfLongArray;
 
 public class LabelPropagationMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
@@ -43,8 +43,8 @@ public class LabelPropagationMemoryEstimateDefinition implements MemoryEstimateD
                 .field("compute step consumer", ComputeStepConsumer.class)
                 .field("votes container", LongDoubleScatterMap.class)
                 .rangePerNode("votes", nodeCount -> {
-                    long minBufferSize = MemoryUsage.sizeOfEmptyOpenHashContainer();
-                    long maxBufferSize = MemoryUsage.sizeOfOpenHashContainer(nodeCount);
+                    long minBufferSize = Estimate.sizeOfEmptyOpenHashContainer();
+                    long maxBufferSize = Estimate.sizeOfOpenHashContainer(nodeCount);
                     if (maxBufferSize < minBufferSize) {
                         maxBufferSize = minBufferSize;
                     }

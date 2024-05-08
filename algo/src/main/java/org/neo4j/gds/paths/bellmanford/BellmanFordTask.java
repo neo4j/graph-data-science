@@ -20,8 +20,8 @@
 package org.neo4j.gds.paths.bellmanford;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 

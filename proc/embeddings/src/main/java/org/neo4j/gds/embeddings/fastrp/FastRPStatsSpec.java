@@ -19,16 +19,16 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.embeddings.fastrp.FastRPStatsResult;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
 
 @GdsCallable(name = "gds.fastRP.stats", description = "Random Projection produces node embeddings via the fastrp algorithm", executionMode = STATS)
@@ -50,17 +50,6 @@ public class FastRPStatsSpec implements AlgorithmSpec<FastRP, FastRPResult, Fast
 
     @Override
     public ComputationResultConsumer<FastRP, FastRPResult, FastRPStatsConfig, Stream<FastRPStatsResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging(
-            "Stats call failed",
-            executionContext.log(),
-            () -> Stream.of(
-                new FastRPStatsResult.Builder()
-                    .withPreProcessingMillis(computationResult.preProcessingMillis())
-                    .withComputeMillis(computationResult.computeMillis())
-                    .withNodeCount(computationResult.graph().nodeCount())
-                    .withConfig(computationResult.config())
-                    .build()
-            )
-        );
+        return new NullComputationResultConsumer<>();
     }
 }

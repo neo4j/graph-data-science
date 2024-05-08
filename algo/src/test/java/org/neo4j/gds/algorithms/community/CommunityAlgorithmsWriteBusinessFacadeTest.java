@@ -26,9 +26,12 @@ package org.neo4j.gds.algorithms.community;
     import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
     import org.neo4j.gds.api.Graph;
     import org.neo4j.gds.api.GraphStore;
+    import org.neo4j.gds.api.ResultStore;
     import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
     import org.neo4j.gds.collections.ha.HugeLongArray;
     import org.neo4j.gds.config.AlgoBaseConfig;
+    import org.neo4j.gds.core.concurrency.Concurrency;
+    import org.neo4j.gds.core.utils.progress.JobId;
     import org.neo4j.gds.result.StatisticsComputationInstructions;
     import org.neo4j.gds.wcc.WccWriteConfig;
 
@@ -49,7 +52,7 @@ package org.neo4j.gds.algorithms.community;
         var configurationMock = mock(WccWriteConfig.class);
         var graph=mock(Graph.class);
         var graphStore = mock(GraphStore.class);
-        var algorithmResult = AlgorithmComputationResult.<Long>withoutAlgorithmResult(graph, graphStore);
+        var algorithmResult = AlgorithmComputationResult.<Long>withoutAlgorithmResult(graph, graphStore, ResultStore.EMPTY);
 
         var nodePropertyServiceMock = mock(WriteNodePropertyService.class);
 
@@ -63,7 +66,7 @@ package org.neo4j.gds.algorithms.community;
             0L,
             () -> 19L,
             "FOO",
-            4,
+            new Concurrency(4),
             "foo",
             Optional.empty(),
             Optional.empty()
@@ -86,8 +89,9 @@ package org.neo4j.gds.algorithms.community;
 
         @Test
         void writeWithoutCommunityStatistics() {
-
+            var jobId = new JobId("test");
             var configurationMock = mock(WccWriteConfig.class);
+            when(configurationMock.jobId()).thenReturn(jobId);
             var graph = mock(Graph.class);
             var graphStore = mock(GraphStore.class);
 
@@ -97,7 +101,8 @@ package org.neo4j.gds.algorithms.community;
             var algorithmResultMock = AlgorithmComputationResult.of(
                 algoResult,
                 graph,
-                graphStore
+                graphStore,
+                ResultStore.EMPTY
             );
 
             when(graph.nodeCount()).thenReturn(4l);
@@ -111,11 +116,12 @@ package org.neo4j.gds.algorithms.community;
                 eq(graph),
                 eq(graphStore),
                 any(),
-                eq(4),
+                eq(new Concurrency(4)),
                 eq("foo"),
                 eq("FooWrite"),
                 eq(Optional.empty()),
-                eq(Optional.empty())
+                eq(Optional.empty()),
+                eq(jobId)
             )).thenReturn(new WriteNodePropertyResult(4, 100));
 
             var businessFacade = new CommunityAlgorithmsWriteBusinessFacade(nodePropertyServiceMock, null);
@@ -128,7 +134,7 @@ package org.neo4j.gds.algorithms.community;
                 0L,
                 () -> 19L,
                 "FooWrite",
-                4,
+                new Concurrency(4),
                 "foo",
                 Optional.empty(),
                 Optional.empty()
@@ -154,8 +160,10 @@ package org.neo4j.gds.algorithms.community;
 
         @Test
         void writeWithCommunityStatistics() {
-
+            var jobId = new JobId("test");
             var configurationMock = mock(WccWriteConfig.class);
+            when(configurationMock.concurrency()).thenReturn(new Concurrency(4));
+            when(configurationMock.jobId()).thenReturn(jobId);
             var graph = mock(Graph.class);
             var graphStore = mock(GraphStore.class);
 
@@ -165,7 +173,8 @@ package org.neo4j.gds.algorithms.community;
             var algorithmResultMock = AlgorithmComputationResult.of(
                 algoResult,
                 graph,
-                graphStore
+                graphStore,
+                ResultStore.EMPTY
             );
 
             when(graph.nodeCount()).thenReturn(4l);
@@ -182,11 +191,12 @@ package org.neo4j.gds.algorithms.community;
                 eq(graph),
                 eq(graphStore),
                 any(),
-                eq(4),
+                eq(new Concurrency(4)),
                 eq("foo"),
                 eq("FooWrite"),
                 eq(Optional.empty()),
-                eq(Optional.empty())
+                eq(Optional.empty()),
+                eq(jobId)
             )).thenReturn(new WriteNodePropertyResult(4, 100));
 
             var businessFacade = new CommunityAlgorithmsWriteBusinessFacade(nodePropertyServiceMock, null);
@@ -204,7 +214,7 @@ package org.neo4j.gds.algorithms.community;
                 0L,
                 () -> StandardCommunityStatisticsSpecificFields.EMPTY,
                 "FooWrite",
-                4,
+                new Concurrency(4),
                 "foo",
                 Optional.empty(),
                 Optional.empty()
@@ -228,5 +238,5 @@ package org.neo4j.gds.algorithms.community;
                 .isEqualTo(3);
 
         }
-        
+
     }

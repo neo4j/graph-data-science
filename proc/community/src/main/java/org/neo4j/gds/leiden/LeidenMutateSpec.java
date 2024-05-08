@@ -29,7 +29,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.community.leiden.LeidenMutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
@@ -38,10 +38,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.leiden.LeidenStreamProc.DESCRIPTION;
+import static org.neo4j.gds.leiden.Constants.LEIDEN_DESCRIPTION;
 
 
-@GdsCallable(name = "gds.leiden.mutate", aliases = {"gds.beta.leiden.mutate"}, description = DESCRIPTION, executionMode = ExecutionMode.MUTATE_NODE_PROPERTY)
+@GdsCallable(name = "gds.leiden.mutate", aliases = {"gds.beta.leiden.mutate"}, description = LEIDEN_DESCRIPTION, executionMode = ExecutionMode.MUTATE_NODE_PROPERTY)
 public class LeidenMutateSpec implements AlgorithmSpec<Leiden, LeidenResult, LeidenMutateConfig, Stream<LeidenMutateResult>, LeidenAlgorithmFactory<LeidenMutateConfig>> {
     @Override
     public String name() {

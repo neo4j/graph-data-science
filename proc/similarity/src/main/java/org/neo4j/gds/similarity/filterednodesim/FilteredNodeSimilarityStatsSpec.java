@@ -19,29 +19,22 @@
  */
 package org.neo4j.gds.similarity.filterednodesim;
 
-import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.procedures.similarity.SimilarityStatsResult;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.similarity.SimilarityStatsResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarity;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsResultBuilder;
 
-import java.util.Collections;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
-import static org.neo4j.gds.similarity.SimilarityProc.computeHistogram;
-import static org.neo4j.gds.similarity.SimilarityProc.shouldComputeHistogram;
-import static org.neo4j.gds.similarity.SimilarityProc.withGraphsizeAndTimings;
-import static org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamProc.DESCRIPTION;
+import static org.neo4j.gds.similarity.filterednodesim.Constants.FILTERED_NODE_SIMILARITY_DESCRIPTION;
 
-@GdsCallable(name = "gds.nodeSimilarity.filtered.stats", aliases = {"gds.alpha.nodeSimilarity.filtered.stats"}, description = DESCRIPTION, executionMode = ExecutionMode.STATS)
+@GdsCallable(name = "gds.nodeSimilarity.filtered.stats", aliases = {"gds.alpha.nodeSimilarity.filtered.stats"}, description = FILTERED_NODE_SIMILARITY_DESCRIPTION, executionMode = ExecutionMode.STATS)
 public class FilteredNodeSimilarityStatsSpec implements AlgorithmSpec<
     NodeSimilarity,
     NodeSimilarityResult,
@@ -67,37 +60,6 @@ public class FilteredNodeSimilarityStatsSpec implements AlgorithmSpec<
 
     @Override
     public ComputationResultConsumer<NodeSimilarity, NodeSimilarityResult, FilteredNodeSimilarityStatsConfig, Stream<SimilarityStatsResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging("Graph stats failed", executionContext.log(), () -> {
-            NodeSimilarityStatsConfig config = computationResult.config();
-
-            if (computationResult.isGraphEmpty()) {
-                return Stream.of(
-                    new SimilarityStatsResult(
-                        computationResult.preProcessingMillis(),
-                        0,
-                        0,
-                        0,
-                        0,
-                        Collections.emptyMap(),
-                        config.toMap()
-                    )
-                );
-            }
-
-            var resultBuilder = withGraphsizeAndTimings(
-                new NodeSimilarityStatsResultBuilder(),
-                computationResult,
-                NodeSimilarityResult::graphResult
-            );
-
-            if (shouldComputeHistogram(executionContext.returnColumns())) {
-                try (ProgressTimer ignored = resultBuilder.timePostProcessing()) {
-                    computationResult.result().ifPresent(result -> {
-                        resultBuilder.withHistogram(computeHistogram(result.graphResult().similarityGraph()));
-                    });
-                }
-            }
-            return Stream.of(resultBuilder.build());
-        });
+        return new NullComputationResultConsumer<>();
     }
 }

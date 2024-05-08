@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.core.utils.shuffle.ShuffleUtil;
 
@@ -76,7 +77,7 @@ class ComponentNodesTest {
             components,
             28,
             (v) -> true,
-            4
+            new Concurrency(4)
         );
         // we cannot infer which component follows another, but the range must match in size for the component
         Map<Long, Long> componentPerIdxUpperBound = new HashMap<>(7);
@@ -104,7 +105,7 @@ class ComponentNodesTest {
         // nodeId -> componentId
         var components = prepare7DistinctSizeComponents();
         // componentId, upperIdx of component
-        var upperBoundPerComponent = HugeAtomicLongArray.of(28, ParalleLongPageCreator.passThrough(4));
+        var upperBoundPerComponent = HugeAtomicLongArray.of(28, ParalleLongPageCreator.passThrough(new Concurrency(4)));
         upperBoundPerComponent.set(0, 2);
         upperBoundPerComponent.set(1, 7);
         upperBoundPerComponent.set(2, 11);
@@ -114,7 +115,7 @@ class ComponentNodesTest {
         upperBoundPerComponent.set(6, 27);
 
         var nodesSortedByComponent = ComponentNodes.computeNodesSortedByComponent(components,
-            upperBoundPerComponent, (v) -> true, 4
+            upperBoundPerComponent, (v) -> true, new Concurrency(4)
         );
 
         // nodes may occur in arbitrary order within components, but with the given assignment, nodeIds must be within
@@ -142,7 +143,7 @@ class ComponentNodesTest {
             }
         };
         // componentId, upperIdx of component
-        var upperBoundPerComponent = HugeAtomicLongArray.of(11, ParalleLongPageCreator.passThrough(4));
+        var upperBoundPerComponent = HugeAtomicLongArray.of(11, ParalleLongPageCreator.passThrough(new Concurrency(4)));
         upperBoundPerComponent.set(3, 3);
         upperBoundPerComponent.set(5, 10);
         upperBoundPerComponent.set(1, 8);
@@ -150,7 +151,7 @@ class ComponentNodesTest {
         var nodesSortedByComponent = ComponentNodes.computeNodesSortedByComponent(components,
             upperBoundPerComponent,
             (v) -> true,
-            4
+            new Concurrency(4)
         );
 
         // nodes may occur in arbitrary order within components, but with the given assignment, nodeIds must be within
@@ -226,7 +227,7 @@ class ComponentNodesTest {
         nodesSorted.set(6, 4);
         nodesSorted.set(7, 3);
 
-        var upperBoundPerComponent = HugeAtomicLongArray.of(8, ParalleLongPageCreator.passThrough(4));
+        var upperBoundPerComponent = HugeAtomicLongArray.of(8, ParalleLongPageCreator.passThrough(new Concurrency(4)));
         // componentId, upperBound
         upperBoundPerComponent.set(0, 2);
         upperBoundPerComponent.set(1, 7);
@@ -262,7 +263,7 @@ class ComponentNodesTest {
         nodesSorted.setAll(x -> x);
         ShuffleUtil.shuffleArray(nodesSorted, new SplittableRandom(92));
 
-        var upperBoundPerComponent = HugeAtomicLongArray.of(1, ParalleLongPageCreator.passThrough(4));
+        var upperBoundPerComponent = HugeAtomicLongArray.of(1, ParalleLongPageCreator.passThrough(new Concurrency(4)));
         upperBoundPerComponent.set(0, 19);
 
         ComponentNodes componentNodesMock = Mockito.mock(ComponentNodes.class);
@@ -286,7 +287,7 @@ class ComponentNodesTest {
             components::get,
             components.size(),
             includeFilter,
-            4
+            new Concurrency(4)
         );
         assertThat(upperIndex.get(0)).isEqualTo(-1L);
         assertThat(upperIndex.get(1)).isEqualTo(-1L);
@@ -320,7 +321,7 @@ class ComponentNodesTest {
         HugeLongArray components = HugeLongArray.of(0, 3, 0, 3, 5, 5, 5, 7, 8, 8, 8);
         LongPredicate includeFilter = (v) -> v >= 3 && v != 9;
 
-        var componentNodes = ComponentNodes.create(components::get, includeFilter, components.size(), 4);
+        var componentNodes = ComponentNodes.create(components::get, includeFilter, components.size(), new Concurrency(4));
         assertThat(componentNodes.iterator(0, 0).hasNext()).isFalse();
         assertThat(componentNodes.iterator(1, 0).hasNext()).isFalse();
         assertThat(componentNodes.iterator(2, 0).hasNext()).isFalse();

@@ -21,6 +21,7 @@ package org.neo4j.gds.similarity.filtering;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.core.loading.ArrayIdMapBuilder;
 import org.neo4j.gds.core.loading.LabelInformationBuilders;
@@ -52,7 +53,7 @@ class NodeFilterTest {
         graphIds.set(1, 1);
         graphIds.set(2, 2);
         graphIds.set(3, 3);
-        var arrayIdMap = arrayIdMapBuilder.build(labelInformationBuilder, 3, 1);
+        var arrayIdMap = arrayIdMapBuilder.build(labelInformationBuilder, 3, new Concurrency(1));
 
         // test that the idMap is as expected
         assertThat(arrayIdMap.hasLabel(0, labelOne)).isTrue();

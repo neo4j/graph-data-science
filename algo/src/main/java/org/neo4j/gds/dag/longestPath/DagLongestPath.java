@@ -28,6 +28,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ExecutorServiceUtil;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -61,13 +62,13 @@ public class DagLongestPath extends Algorithm<PathFindingResult> {
     private final HugeAtomicLongArray inDegrees;
     private final Graph graph;
     private final long nodeCount;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final TentativeDistances parentsAndDistances;
 
     public DagLongestPath(
         Graph graph,
         ProgressTracker progressTracker,
-        int concurrency
+        Concurrency concurrency
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -202,7 +203,7 @@ public class DagLongestPath extends Algorithm<PathFindingResult> {
 
     private static Stream<PathResult> pathResults(
         TentativeDistances tentativeDistances,
-        int concurrency
+        Concurrency concurrency
     ) {
         var distances = tentativeDistances.distances();
         var predecessors = tentativeDistances.predecessors().orElseThrow();

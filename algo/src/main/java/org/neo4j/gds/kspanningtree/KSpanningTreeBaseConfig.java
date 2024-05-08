@@ -27,7 +27,7 @@ public interface KSpanningTreeBaseConfig extends SpanningTreeBaseConfig {
     long k();
 
     @Configuration.Ignore
-    default KSpanningTreeParameters toParameters() {
-        return KSpanningTreeParameters.create(objective(), sourceNode(), k());
+    default KSpanningTreeParameters toKSpanningTreeParameters() {
+        return new KSpanningTreeParameters(objective(), sourceNode(), k());
     }
 }

@@ -22,6 +22,7 @@ package org.neo4j.gds.triangle;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -98,7 +99,7 @@ class UnionGraphTriangleCountingTest {
     void shouldWorkWithUnionGraphs() {
         var a = IntersectingTriangleCount.create(
             graph,
-            1,
+            new Concurrency(1),
             Long.MAX_VALUE,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER

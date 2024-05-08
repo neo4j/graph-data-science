@@ -8,9 +8,10 @@ ext {
         '5.16': properties.getOrDefault('neo4jVersion516', '5.16.0'),
         '5.17': properties.getOrDefault('neo4jVersion517', '5.17.0'),
         '5.18': properties.getOrDefault('neo4jVersion518', '5.18.1'),
+        '5.19': properties.getOrDefault('neo4jVersion519', '5.19.0'),
     ]
 
-    neo4jDefault = neos.'5.17'
+    neo4jDefault = neos.'5.19'
     neo4j_minor = properties.getOrDefault('neo4jVersion', neo4jDefault).toString().split('\\.')[0..1].join('.')
 
     scalas = [
@@ -23,6 +24,7 @@ ext {
         '5.17': '2.13.11',
         '5.18': '2.13.11',
         '5.19': '2.13.11',
+        '5.20': '2.13.11',
     ]
 
     log4js = [
@@ -35,6 +37,7 @@ ext {
         '5.17': '2.20.0',
         '5.18': '2.20.0',
         '5.19': '2.20.0',
+        '5.20': '2.20.0',
     ]
 
     shiros = [
@@ -47,6 +50,7 @@ ext {
         '5.17': '1.13.0',
         '5.18': '1.13.0',
         '5.19': '2.0.0',
+        '5.20': '2.0.0',
     ]
 
     ver = [
@@ -58,8 +62,8 @@ ext {
         'assertj'              : '3.25.3',
         'auto-common'          : '1.2.2',
         'auto-service'         : '1.1.1',
-        'bouncycastle-prov'     : '1.77',
-        'checkStyle'            : '10.12.1',
+        'bouncycastle-prov'    : '1.78',
+        'checkStyle'           : '10.12.1',
         'commons-io'           : '2.15.1',
         'commons-lang3'        : '3.14.0',
         'commons-math3'        : '3.6.1',
@@ -91,6 +95,7 @@ ext {
         'opencypher-front-end' : '9.0.20210312',
         'picocli'              : '4.7.5',
         'qala-datagen'         : '2.5.1',
+        'record-builder'       : '41',
         'sb-contrib'           : '7.6.3',
         'scala'                : scalas[neo4j_minor],
         'protobuf'             : '3.25.3',

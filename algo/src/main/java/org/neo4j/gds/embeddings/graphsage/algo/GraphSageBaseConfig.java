@@ -19,9 +19,15 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
+import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.model.ModelConfig;
 
 public interface GraphSageBaseConfig extends AlgoBaseConfig, BatchSizeConfig, ModelConfig {
     long serialVersionUID = 0x42L;
+
+    @Configuration.Ignore
+    default GraphSageParameters toParameters() {
+        return new GraphSageParameters(concurrency(), batchSize());
+    }
 }

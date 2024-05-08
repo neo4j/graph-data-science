@@ -28,7 +28,6 @@ import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.DatabaseInfo;
-import org.neo4j.gds.api.EphemeralResultStore;
 import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.GraphCharacteristics;
 import org.neo4j.gds.api.GraphStore;
@@ -37,7 +36,6 @@ import org.neo4j.gds.api.Properties;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.graph.GraphProperty;
@@ -51,6 +49,7 @@ import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.huge.CSRCompositeRelationshipIterator;
 import org.neo4j.gds.core.huge.HugeGraphBuilder;
 import org.neo4j.gds.core.huge.NodeFilteredGraph;
@@ -79,7 +78,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @Value.Style(typeBuilder = "GraphStoreBuilder")
 public final class CSRGraphStore implements GraphStore {
 
-    private final int concurrency;
+    private final Concurrency concurrency;
 
     private final DatabaseInfo databaseInfo;
 
@@ -88,8 +87,6 @@ public final class CSRGraphStore implements GraphStore {
     private final IdMap nodes;
 
     private final Map<RelationshipType, SingleTypeRelationships> relationships;
-
-    private final ResultStore resultStore;
 
     private MutableGraphSchema schema;
 
@@ -107,7 +104,7 @@ public final class CSRGraphStore implements GraphStore {
         NodePropertyStore nodeProperties,
         Map<RelationshipType, SingleTypeRelationships> relationships,
         GraphPropertyStore graphProperties,
-        int concurrency
+        Concurrency concurrency
     ) {
         this.databaseInfo = databaseInfo;
         this.capabilities = capabilities;
@@ -122,8 +119,6 @@ public final class CSRGraphStore implements GraphStore {
         // We want mutable collections inside the GraphStore
         this.relationships = new HashMap<>(relationships);
 
-        this.resultStore = new EphemeralResultStore();
-
         this.concurrency = concurrency;
         this.modificationTime = TimeUtil.now();
     }
@@ -136,7 +131,7 @@ public final class CSRGraphStore implements GraphStore {
         Nodes nodes,
         RelationshipImportResult relationshipImportResult,
         Optional<GraphPropertyStore> graphProperties,
-        int concurrency
+        Concurrency concurrency
     ) {
         return new CSRGraphStore(
             databaseInfo,
@@ -148,11 +143,6 @@ public final class CSRGraphStore implements GraphStore {
             graphProperties.orElseGet(GraphPropertyStore::empty),
             concurrency
         );
-    }
-
-    @Override
-    public ResultStore resultStore() {
-        return resultStore;
     }
 
     @Override

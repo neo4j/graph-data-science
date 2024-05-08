@@ -20,18 +20,19 @@
 package org.neo4j.gds.algorithms.estimation;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.MemoryEstimateDefinition;
-import org.neo4j.gds.algorithms.RequestScopedDependencies;
+import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.applications.algorithms.machinery.GraphDimensionsComputer;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
 import org.neo4j.gds.memest.MemoryEstimationGraphConfigParser;
-import org.neo4j.gds.results.MemoryEstimateResult;
 
 import java.util.Map;
 import java.util.Optional;
@@ -77,14 +78,14 @@ public class AlgorithmEstimator {
             dimensions = graphMemoryEstimation.dimensions();
             estimationBuilder.add("graph", graphMemoryEstimation.estimateMemoryUsageAfterLoading());
         } else if (graphNameOrConfiguration instanceof String) {
-            var graphStore = graphStoreCatalogService.getGraphWithGraphStore(
+            var graphStore = graphStoreCatalogService.getGraphResources(
                 GraphName.parse(
                     (String) graphNameOrConfiguration),
                 config,
                 maybeRelationshipProperty,
                 requestScopedDependencies.getUser(),
                 requestScopedDependencies.getDatabaseId()
-            ).getRight();
+            ).graphStore();
             dimensions = GraphDimensionsComputer.of(graphStore, config);
         } else {
             throw new IllegalArgumentException(formatWithLocale(

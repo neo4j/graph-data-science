@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.scaleproperties;
 
-import org.neo4j.gds.MemoryEstimateDefinition;
+import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
+import org.neo4j.gds.mem.Estimate;
 
 import java.util.List;
 
@@ -53,7 +53,7 @@ public class ScalePropertiesMemoryEstimateDefinition implements MemoryEstimateDe
 
                 return MemoryRange.of(HugeObjectArray.memoryEstimation(
                     graphDimensions.nodeCount(),
-                    MemoryUsage.sizeOfDoubleArray(totalPropertyDimension)
+                    Estimate.sizeOfDoubleArray(totalPropertyDimension)
                 ));
             }
         );

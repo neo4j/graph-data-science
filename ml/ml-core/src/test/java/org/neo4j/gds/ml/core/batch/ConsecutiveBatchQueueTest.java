@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.core.batch;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.termination.TerminatedException;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -36,15 +37,16 @@ class ConsecutiveBatchQueueTest {
         var batchQueue = BatchQueue.consecutive(totalSize);
         assertThat(batchQueue.totalSize()).isEqualTo(totalSize);
         var counter = new AtomicLong(0);
-        batchQueue.parallelConsume(batch -> counter.getAndAdd(batch.size()), 4, TerminationFlag.RUNNING_TRUE);
+        batchQueue.parallelConsume(batch -> counter.getAndAdd(batch.size()), new Concurrency(4), TerminationFlag.RUNNING_TRUE);
         assertThat(counter.get()).isEqualTo(totalSize);
     }
 
     @Test
     void shouldHandleVeryLargeBatches() {
-        var batchQueue = BatchQueue.consecutive(5L * Integer.MAX_VALUE, 1, 4);
+        var concurrency = new Concurrency(4);
+        var batchQueue = BatchQueue.consecutive(5L * Integer.MAX_VALUE, 1, concurrency);
         assertThat(batchQueue.pop().orElseThrow().size()).isEqualTo(Integer.MAX_VALUE);
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < concurrency.value(); i++) {
             assertThat(batchQueue.pop()).isPresent();
         }
         assertThat(batchQueue.pop()).isEmpty();
@@ -52,7 +54,7 @@ class ConsecutiveBatchQueueTest {
 
     @Test
     void shouldRespectMinBatchSize() {
-        var batchQueue = BatchQueue.consecutive(100, 100, 4);
+        var batchQueue = BatchQueue.consecutive(100, 100, new Concurrency(4));
         int actualSize = batchQueue.pop().orElseThrow().size();
         assertThat(actualSize).isEqualTo(100);
         assertThat(batchQueue.pop()).isEmpty();
@@ -60,7 +62,7 @@ class ConsecutiveBatchQueueTest {
 
     @Test
     void shouldNotGiveBatchLargerThanNodeCount() {
-        var batchQueue = BatchQueue.consecutive(100, 200, 4);
+        var batchQueue = BatchQueue.consecutive(100, 200, new Concurrency(4));
         int actualSize = batchQueue.pop().orElseThrow().size();
         assertThat(actualSize).isEqualTo(100);
         assertThat(batchQueue.pop()).isEmpty();
@@ -68,7 +70,7 @@ class ConsecutiveBatchQueueTest {
 
     @Test
     void shouldDivideNodesAlmostEqually() {
-        var batchQueue = BatchQueue.consecutive(101, 1, 4);
+        var batchQueue = BatchQueue.consecutive(101, 1, new Concurrency(4));
         for (int i = 0; i < 3; i++) {
             assertThat(batchQueue.pop().orElseThrow().size()).isEqualTo(26);
         }
@@ -78,10 +80,11 @@ class ConsecutiveBatchQueueTest {
 
     @Test
     void checkTerminationFlag() {
+        var concurrency = new Concurrency(4);
         TerminationFlag flag = () -> false;
-        var batchQueue = BatchQueue.consecutive(101, 1, 4);
+        var batchQueue = BatchQueue.consecutive(101, 1, concurrency);
 
-        assertThatThrownBy(() -> batchQueue.parallelConsume(Batch::elementIds, 4, flag))
+        assertThatThrownBy(() -> batchQueue.parallelConsume(Batch::elementIds, concurrency, flag))
             .isInstanceOf(TerminatedException.class)
             .hasMessageContaining("The execution has been terminated.");
     }

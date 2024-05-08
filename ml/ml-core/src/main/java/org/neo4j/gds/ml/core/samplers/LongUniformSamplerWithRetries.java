@@ -20,15 +20,15 @@
 package org.neo4j.gds.ml.core.samplers;
 
 import com.carrotsearch.hppc.LongHashSet;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryRange;
 
 import java.util.SplittableRandom;
 import java.util.function.LongPredicate;
 import java.util.stream.LongStream;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongHashSet;
+import static org.neo4j.gds.mem.Estimate.sizeOfInstance;
+import static org.neo4j.gds.mem.Estimate.sizeOfLongArray;
+import static org.neo4j.gds.mem.Estimate.sizeOfLongHashSet;
 
 public class LongUniformSamplerWithRetries {
     private final SplittableRandom rng;

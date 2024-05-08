@@ -43,7 +43,7 @@ final class GenerateConfigurationMethods {
 
     private GenerateConfigurationMethods() {}
 
-    static Iterable<MethodSpec> defineMemberMethods(ConfigParser.Spec config, NameAllocator names) {
+    static Iterable<MethodSpec> defineMemberMethods(Spec config, NameAllocator names) {
         return config
             .members()
             .stream()
@@ -53,9 +53,9 @@ final class GenerateConfigurationMethods {
     }
 
     private static Optional<MethodSpec> generateMethodCode(
-        ConfigParser.Spec config,
+        Spec config,
         NameAllocator names,
-        ConfigParser.Member member
+        Spec.Member member
     ) {
         MethodSpec.Builder builder = MethodSpec
             .overriding(member.method())
@@ -74,11 +74,11 @@ final class GenerateConfigurationMethods {
         return Optional.of(builder.build());
     }
 
-    private static void injectToMapCode(ConfigParser.Spec config, MethodSpec.Builder builder) {
-        List<ConfigParser.Member> configMembers = config
+    private static void injectToMapCode(Spec config, MethodSpec.Builder builder) {
+        List<Spec.Member> configMembers = config
             .members()
             .stream()
-            .filter(ConfigParser.Member::isConfigMapEntry)
+            .filter(Spec.Member::isConfigMapEntry)
             .collect(Collectors.toList());
 
         switch (configMembers.size()) {
@@ -86,7 +86,7 @@ final class GenerateConfigurationMethods {
                 builder.addStatement("return $T.emptyMap()", Collections.class);
                 break;
             case 1:
-                ConfigParser.Member singleConfigMember = configMembers.get(0);
+                Spec.Member singleConfigMember = configMembers.get(0);
                 String parameter = singleConfigMember.lookupKey();
                 builder.addStatement(
                     "return $T.singletonMap($S, $L)",
@@ -114,7 +114,7 @@ final class GenerateConfigurationMethods {
     }
 
     @NotNull
-    private static CodeBlock getMapValueCode(ConfigParser.Member configMember) {
+    private static CodeBlock getMapValueCode(Spec.Member configMember) {
         String getter = configMember.methodName();
         Configuration.ToMapValue toMapValue = configMember.method().getAnnotation(Configuration.ToMapValue.class);
         return (toMapValue == null)
@@ -123,7 +123,7 @@ final class GenerateConfigurationMethods {
     }
 
     @NotNull
-    private static CodeBlock getMapPutOptionalCode(ConfigParser.Member configMember) {
+    private static CodeBlock getMapPutOptionalCode(Spec.Member configMember) {
         Configuration.ToMapValue toMapValue = configMember.method().getAnnotation(Configuration.ToMapValue.class);
 
         CodeBlock mapValue = (toMapValue == null)
@@ -142,12 +142,12 @@ final class GenerateConfigurationMethods {
         return toMapValue.value().replace('#', '.');
     }
 
-    private static CodeBlock collectKeysCode(ConfigParser.Spec config) {
+    private static CodeBlock collectKeysCode(Spec config) {
         Collection<String> configKeys = config
             .members()
             .stream()
-            .filter(ConfigParser.Member::isConfigMapEntry)
-            .map(ConfigParser.Member::lookupKey)
+            .filter(Spec.Member::isConfigMapEntry)
+            .map(Spec.Member::lookupKey)
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
         switch (configKeys.size()) {
@@ -165,13 +165,13 @@ final class GenerateConfigurationMethods {
     }
 
     private static void graphStoreValidationCode(
-        ConfigParser.Member validationMethod,
-        ConfigParser.Spec config,
+        Spec.Member validationMethod,
+        Spec config,
         NameAllocator names,
         MethodSpec.Builder builder
     ) {
         var graphStoreValidationMethods = config.members().stream()
-            .filter(ConfigParser.Member::graphStoreValidationCheck)
+            .filter(Spec.Member::graphStoreValidationCheck)
             .collect(Collectors.toList());
         var parameters = validationMethod.method().getParameters();
 
@@ -185,7 +185,7 @@ final class GenerateConfigurationMethods {
             );
         }
 
-        for (ConfigParser.Member check : graphStoreValidationMethods) {
+        for (Spec.Member check : graphStoreValidationMethods) {
             ErrorPropagator.catchAndPropagateIllegalArgumentError(
                 builder,
                 errorsVarName,

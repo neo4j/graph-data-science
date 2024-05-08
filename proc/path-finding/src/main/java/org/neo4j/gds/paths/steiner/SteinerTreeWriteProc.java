@@ -21,7 +21,7 @@ package org.neo4j.gds.paths.steiner;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SteinerWriteResult;
-import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -46,7 +46,7 @@ public class SteinerTreeWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().steinerTreeWrite(graphName, configuration);
+        return facade.algorithms().pathFinding().steinerTreeWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.steinerTree.write.estimate", mode = READ)
@@ -55,7 +55,7 @@ public class SteinerTreeWriteProc {
         @Name(value = "graphName") Object graphNameOrConfiguration,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().steinerTreeWriteEstimate(graphNameOrConfiguration, configuration);
+        return facade.algorithms().pathFinding().steinerTreeWriteEstimate(graphNameOrConfiguration, configuration);
     }
 
 

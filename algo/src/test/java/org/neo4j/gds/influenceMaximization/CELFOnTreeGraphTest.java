@@ -24,14 +24,13 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-
-import java.util.Optional;
 
 
 @GdlExtension
@@ -132,12 +131,12 @@ class CELFOnTreeGraphTest {
         IdFunction mappedId = variable -> graph.toMappedNodeId(idFunction.of(variable));
 
 
-        var parameters = CELFParameters.create(
+        var parameters = new CELFParameters(
             5,
             0.51,
             3,
-            1,
-            Optional.of(10l),
+            new Concurrency(1),
+            10L,
             10
         );
 

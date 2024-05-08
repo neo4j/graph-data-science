@@ -8,8 +8,9 @@ dependencies {
     annotationProcessor project(':annotations')
     annotationProcessor project(':procedure-collector')
 
-    annotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
-    annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
+    annotationProcessor group: 'io.soabase.record-builder', name: 'record-builder-processor', version: ver.'record-builder'
+    annotationProcessor group: 'org.immutables', name: 'builder', version: ver.'immutables'
+    annotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
 
     api(project(':algo'))
     api project(':metrics-api')
@@ -39,11 +40,12 @@ dependencies {
     implementation project(':termination')
     implementation project(':transaction')
 
-    implementation group: 'org.reflections',  name: 'reflections',  version: ver.doc.'reflections'
+    implementation group: 'org.reflections', name: 'reflections', version: ver.doc.'reflections'
     implementation group: 'org.hdrhistogram', name: 'HdrHistogram', version: ver.'HdrHistogram'
 
+    compileOnly group: 'io.soabase.record-builder', name: 'record-builder-processor', version: ver.'record-builder'
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
-    compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
+    compileOnly group: 'org.jetbrains', name: 'annotations', version: ver.'jetbrains-annotations'
 
     neodeps().each {
         compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
@@ -55,14 +57,14 @@ dependencies {
 
     testAnnotationProcessor project(':annotations')
     testAnnotationProcessor project(':config-generator')
-    testAnnotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
+    testAnnotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
 
     testImplementation project(':algo-test')
     testImplementation project(':proc-test')
     testImplementation project(':graph-schema-api')
     testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
-    testCompileOnly group: 'org.immutables', name: 'builder',           version: ver.'immutables'
-    testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
+    testCompileOnly group: 'org.immutables', name: 'builder', version: ver.'immutables'
+    testCompileOnly group: 'org.jetbrains', name: 'annotations', version: ver.'jetbrains-annotations'
 
     testImplementation project(':opengds-extension')
 }

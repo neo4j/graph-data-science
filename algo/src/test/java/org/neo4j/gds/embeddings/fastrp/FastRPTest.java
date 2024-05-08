@@ -32,6 +32,7 @@ import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.ArrayIdMap;
 import org.neo4j.gds.core.loading.LabelInformationBuilders;
@@ -125,7 +126,7 @@ class FastRPTest {
         var concurrency = 4;
         var minBatchSize = 10_000;
 
-        var parameters = FastRPParameters.create(
+        var parameters = new FastRPParameters(
             List.of("f1", "f2", "f3"),
             List.of(1.0D),
             DEFAULT_EMBEDDING_DIMENSION,
@@ -137,7 +138,7 @@ class FastRPTest {
         FastRP fastRP = new FastRP(
             graph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             minBatchSize,
             FeatureExtraction.propertyExtractors(graph, parameters.featureProperties()),
             ProgressTracker.NULL_TRACKER,
@@ -168,7 +169,7 @@ class FastRPTest {
         var concurrency = 4;
         var minBatchSize = 10_000;
 
-        var parameters = FastRPParameters.create(
+        var parameters = new FastRPParameters(
             List.of("f1", "f2", "f3"),
             List.of(1.0D),
             DEFAULT_EMBEDDING_DIMENSION,
@@ -180,7 +181,7 @@ class FastRPTest {
         FastRP fastRP = new FastRP(
             graph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             minBatchSize,
             FeatureExtraction.propertyExtractors(graph, parameters.featureProperties()),
             ProgressTracker.NULL_TRACKER,
@@ -209,7 +210,7 @@ class FastRPTest {
         var embeddingDimension = 6;
         var concurrency = 4;
         var minBatchSize = 10_000;
-        var parameters = FastRPParameters.create(
+        var parameters = new FastRPParameters(
             List.of("f1", "f2", "f3"),
             List.of(0.0D),
             embeddingDimension,
@@ -228,7 +229,7 @@ class FastRPTest {
         FastRP fastRP = new FastRP(
             graph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             minBatchSize,
             FeatureExtraction.propertyExtractors(graph, parameters.featureProperties()),
             ProgressTracker.NULL_TRACKER,
@@ -286,7 +287,7 @@ class FastRPTest {
         var concurrency = 4;
         var minBatchSize = 10_000;
 
-        var parameters = FastRPParameters.create(
+        var parameters = new FastRPParameters(
             List.of("f1", "f2", "f3"),
             List.of(1.0D),
             DEFAULT_EMBEDDING_DIMENSION,
@@ -298,7 +299,7 @@ class FastRPTest {
         FastRP fastRP = new FastRP(
             graph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             minBatchSize,
             FeatureExtraction.propertyExtractors(graph, parameters.featureProperties()),
             ProgressTracker.NULL_TRACKER,
@@ -351,7 +352,7 @@ class FastRPTest {
         );
         var minBatchSize = 1;
 
-        var parameters = FastRPParameters.create(
+        var parameters = new FastRPParameters(
             List.of("f1", "f2", "f3"),
             List.of(1.0D),
             DEFAULT_EMBEDDING_DIMENSION,
@@ -364,7 +365,7 @@ class FastRPTest {
         FastRP concurrentFastRP = new FastRP(
             graph,
             parameters,
-            4,
+            new Concurrency(4),
             minBatchSize,
             FeatureExtraction.propertyExtractors(graph, parameters.featureProperties()),
             ProgressTracker.NULL_TRACKER,
@@ -377,7 +378,7 @@ class FastRPTest {
         FastRP sequentialFastRP = new FastRP(
             graph,
             parameters,
-            1,
+            new Concurrency(1),
             minBatchSize,
             FeatureExtraction.propertyExtractors(graph, parameters.featureProperties()),
             ProgressTracker.NULL_TRACKER,
@@ -403,7 +404,7 @@ class FastRPTest {
         var concurrency = 4;
         var minBatchSize = 10_000;
 
-        var parameters = FastRPParameters.create(
+        var parameters = new FastRPParameters(
             List.of("f1", "f2", "f3"),
             List.of(1.0D),
             DEFAULT_EMBEDDING_DIMENSION,
@@ -416,7 +417,7 @@ class FastRPTest {
         FastRP fastRP = new FastRP(
             graph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             minBatchSize,
             FeatureExtraction.propertyExtractors(graph, parameters.featureProperties()),
             ProgressTracker.NULL_TRACKER,
@@ -450,7 +451,7 @@ class FastRPTest {
         var concurrency = 4;
         var minBatchSize = 10_000;
 
-        var parameters = FastRPParameters.create(
+        var parameters = new FastRPParameters(
             List.of(),
             List.of(1.0D),
             512,
@@ -463,7 +464,7 @@ class FastRPTest {
         var fastRP = new FastRP(
             graph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             minBatchSize,
             List.of(),
             ProgressTracker.NULL_TRACKER,
@@ -507,7 +508,7 @@ class FastRPTest {
     void shouldYieldEmptyEmbeddingForIsolatedNodes() {
         var concurrency = 4;
         var minBatchSize = 10_000;
-        var parameters = FastRPParameters.create(
+        var parameters = new FastRPParameters(
             List.of("f1", "f2", "f3"),
             List.of(1.0D),
             DEFAULT_EMBEDDING_DIMENSION,
@@ -519,7 +520,7 @@ class FastRPTest {
         FastRP fastRP = new FastRP(
             scalarGraph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             minBatchSize,
             List.of(),
             ProgressTracker.NULL_TRACKER,
@@ -540,10 +541,10 @@ class FastRPTest {
             List.of(RelationshipType.of("REL")),
             Optional.empty()
         );
-        var concurrency = 4;
+        var concurrency = new Concurrency(4);
         var minBatchSize = 10_000;
 
-        var parameters = FastRPParameters.create(
+        var parameters = new FastRPParameters(
             List.of("f1", "f2", "f3"),
             List.of(0.0D),
             DEFAULT_EMBEDDING_DIMENSION,
@@ -557,7 +558,7 @@ class FastRPTest {
 
         var progressTask = factory.progressTask(graph, parameters.nodeSelfInfluence(), parameters.iterationWeights().size());
         var log = Neo4jProxy.testLog();
-        var progressTracker = new TaskProgressTracker(progressTask, log, 4, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TaskProgressTracker(progressTask, log, concurrency, EmptyTaskRegistryFactory.INSTANCE);
 
         new FastRP(
             graph,
@@ -614,7 +615,7 @@ class FastRPTest {
             Graph graph = graphStore.getGraph(NodeLabel.of("N"), RelationshipType.of("REL"), Optional.empty());
             var concurrency = 4;
             var minBatchSize = 10_000;
-            var parameters = FastRPParameters.create(
+            var parameters = new FastRPParameters(
                 List.of("prop"),
                 List.of(1.0D, 1.0D, 1.0D, 1.0D),
                 64,
@@ -626,7 +627,7 @@ class FastRPTest {
             FastRP fastRP = new FastRP(
                 graph,
                 parameters,
-                concurrency,
+                new Concurrency(concurrency),
                 minBatchSize,
                 FeatureExtraction.propertyExtractors(graph, List.of("prop")),
                 ProgressTracker.NULL_TRACKER,
@@ -652,7 +653,7 @@ class FastRPTest {
             var concurrency = 4;
             var minBatchSize = 10_000;
 
-            var parameters = FastRPParameters.create(
+            var parameters = new FastRPParameters(
                 List.of(),
                 List.of(1.0D),
                 DEFAULT_EMBEDDING_DIMENSION,
@@ -665,7 +666,7 @@ class FastRPTest {
             FastRP fastRP = new FastRP(
                 graph,
                 parameters,
-                concurrency,
+                new Concurrency(concurrency),
                 minBatchSize,
                 List.of(),
                 ProgressTracker.NULL_TRACKER,
@@ -750,7 +751,7 @@ class FastRPTest {
 
         var concurrency = 1;
         var minBatchSize = 10_000;
-        var parameters = FastRPParameters.create(
+        var parameters = new FastRPParameters(
             List.of(),
             List.of(1.0D),
             embeddingDimension,
@@ -763,7 +764,7 @@ class FastRPTest {
         var firstEmbeddings = new FastRP(
             firstGraph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             minBatchSize,
             List.of(),
             ProgressTracker.NULL_TRACKER,
@@ -773,7 +774,7 @@ class FastRPTest {
         var secondEmbeddings = new FastRP(
             secondGraph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             minBatchSize,
             List.of(),
             ProgressTracker.NULL_TRACKER,
@@ -793,7 +794,7 @@ class FastRPTest {
     private HugeObjectArray<float[]> embeddings(Graph graph, List<String> properties) {
         var concurrency = 4;
         var minBatchSize = 10_000;
-        var parameters = FastRPParameters.create(
+        var parameters = new FastRPParameters(
             List.of("f1", "f2", "f3"),
             List.of(1.0D),
             DEFAULT_EMBEDDING_DIMENSION,
@@ -805,7 +806,7 @@ class FastRPTest {
         var fastRPArray = new FastRP(
             graph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             minBatchSize,
             FeatureExtraction.propertyExtractors(graph, properties),
             ProgressTracker.NULL_TRACKER,

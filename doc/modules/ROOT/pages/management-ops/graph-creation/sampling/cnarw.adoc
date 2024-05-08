@@ -229,6 +229,6 @@ RETURN requiredMemory;
 [opts="header"]
 |===
 | requiredMemory
-| "1264 Bytes"
+| "1272 Bytes"
 |===
 --

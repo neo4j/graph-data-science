@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -34,8 +35,6 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
@@ -101,12 +100,12 @@ class CELFOnConnectedGraphTest {
         IdFunction idFunction = variable -> graph.toMappedNodeId(variable);
 
 
-        var parameters = CELFParameters.create(
+        var parameters = new CELFParameters(
             5,
             0.2,
             3,
-            2,
-            Optional.of(0l),
+            new Concurrency(2),
+            0L,
             10
         );
 
@@ -152,7 +151,7 @@ class CELFOnConnectedGraphTest {
 
         var progressTask = factory.progressTask(graph, config);
         var log = Neo4jProxy.testLog();
-        var progressTracker = new TaskProgressTracker(progressTask, log, 4, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TaskProgressTracker(progressTask, log, new Concurrency(4), EmptyTaskRegistryFactory.INSTANCE);
 
         factory
             .build(graph, config, progressTracker)

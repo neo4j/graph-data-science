@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
-import org.neo4j.gds.MemoryEstimateDefinition;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryEstimateDefinition;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.similarity.knn.KnnMemoryEstimateDefinition;
 import org.neo4j.gds.similarity.knn.KnnMemoryEstimationParametersBuilder;
 import org.neo4j.gds.similarity.knn.KnnSampler;

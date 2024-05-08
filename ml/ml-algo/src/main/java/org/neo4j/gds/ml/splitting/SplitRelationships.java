@@ -35,24 +35,24 @@ public final class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult
     private final Graph graph;
     private final Graph masterGraph;
 
-    private final SplitRelationshipsBaseConfig config;
 
     private final IdMap rootNodes;
 
     private final IdMap sourceNodes;
 
     private final IdMap targetNodes;
+    private final SplitRelationshipsParameters parameters;
 
     private SplitRelationships(Graph graph, Graph masterGraph,
                                IdMap rootNodes,
-                               IdMap sourceNodes, IdMap targetNodes, SplitRelationshipsBaseConfig config) {
+                               IdMap sourceNodes, IdMap targetNodes, SplitRelationshipsParameters parameters) {
         super(ProgressTracker.NULL_TRACKER);
         this.graph = graph;
         this.masterGraph = masterGraph;
         this.rootNodes = rootNodes;
-        this.config = config;
         this.sourceNodes = sourceNodes;
         this.targetNodes = targetNodes;
+        this.parameters = parameters;
     }
 
     public static SplitRelationships of(GraphStore graphStore, SplitRelationshipsBaseConfig config) {
@@ -68,7 +68,7 @@ public final class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult
         IdMap sourceNodes = graphStore.getGraph(sourceLabels);
         IdMap targetNodes = graphStore.getGraph(targetLabels);
 
-        return new SplitRelationships(graph, masterGraph, graphStore.nodes(), sourceNodes, targetNodes, config);
+        return new SplitRelationships(graph, masterGraph, graphStore.nodes(), sourceNodes, targetNodes, config.toParameters());
     }
 
     @Override
@@ -76,38 +76,38 @@ public final class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult
         boolean isUndirected = graph.schema().isUndirected();
         var splitter = isUndirected
             ? new UndirectedEdgeSplitter(
-            config.randomSeed(),
+            parameters.randomSeed(),
             rootNodes,
             sourceNodes,
             targetNodes,
-            config.holdoutRelationshipType(),
-            config.remainingRelationshipType(),
-            config.concurrency()
+            parameters.holdoutRelationshipType(),
+            parameters.remainingRelationshipType(),
+            parameters.concurrency()
         )
             : new DirectedEdgeSplitter(
-                config.randomSeed(),
+                parameters.randomSeed(),
                 rootNodes,
                 sourceNodes,
                 targetNodes,
-                config.holdoutRelationshipType(),
-                config.remainingRelationshipType(),
-                config.concurrency()
+                parameters.holdoutRelationshipType(),
+                parameters.remainingRelationshipType(),
+                parameters.concurrency()
             );
 
         var splitResult =  splitter.splitPositiveExamples(
             graph,
-            config.holdoutFraction(),
-            config.relationshipWeightProperty()
+            parameters.holdoutFraction(),
+            parameters.relationshipWeightProperty()
         );
 
         NegativeSampler negativeSampler = new RandomNegativeSampler(
             masterGraph,
-            (long) (splitResult.selectedRelCount() * config.negativeSamplingRatio()),
+            (long) (splitResult.selectedRelCount() * parameters.negativeSamplingRatio()),
             //SplitRelationshipsProc does not add negative samples to holdout set
             0,
             sourceNodes,
             targetNodes,
-            config.randomSeed()
+            parameters.randomSeed()
         );
 
         negativeSampler.produceNegativeSamples(splitResult.selectedRels(), null);

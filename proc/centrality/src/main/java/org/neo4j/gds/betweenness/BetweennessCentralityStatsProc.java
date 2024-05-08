@@ -20,8 +20,8 @@
 package org.neo4j.gds.betweenness;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.centrality.CentralityStatsResult;
-import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.procedures.algorithms.centrality.CentralityStatsResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -30,8 +30,8 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.betweenness.Constants.BETWEENNESS_DESCRIPTION;
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
-import static org.neo4j.gds.procedures.ProcedureConstants.STATS_MODE_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class BetweennessCentralityStatsProc {
@@ -39,12 +39,12 @@ public class BetweennessCentralityStatsProc {
     public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.betweenness.stats", mode = READ)
-    @Description(STATS_MODE_DESCRIPTION)
+    @Description(BETWEENNESS_DESCRIPTION)
     public Stream<CentralityStatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.centrality().betweenessCentralityStats(graphName, configuration);
+        return facade.algorithms().centrality().betweennessCentralityStats(graphName, configuration);
     }
 
     @Procedure(value = "gds.betweenness.stats.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class BetweennessCentralityStatsProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.centrality().betweenessCentralityStatsEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().centrality().betweennessCentralityStatsEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

@@ -20,9 +20,10 @@
 package org.neo4j.gds.ml.metrics.classification;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 
@@ -36,8 +37,8 @@ class OutOfBagErrorTest {
             ReadOnlyHugeLongArray.of(HugeLongArray.of(1L)),
             1,
             HugeIntArray.of(0),
-            4,
-            HugeAtomicLongArray.of(1, ParalleLongPageCreator.identity(1))
+            new Concurrency(4),
+            HugeAtomicLongArray.of(1, ParalleLongPageCreator.identity(new Concurrency(1)))
         );
 
         assertThat(outOfBagError).isEqualTo(0D);

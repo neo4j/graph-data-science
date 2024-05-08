@@ -27,7 +27,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.apache.commons.lang3.StringUtils;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 import javax.lang.model.element.Modifier;
 import java.lang.invoke.VarHandle;
@@ -153,7 +153,7 @@ final class PagedArrayBuilder {
             .addStatement(
                 "$T arrayMemoryEstimator = $T::sizeOf$NArray",
                 arrayMemoryEstimatorFuncType,
-                MemoryUsage.class,
+                Estimate.class,
                 StringUtils.capitalize(valueType.toString())
             )
             .addStatement("int numberOfPages = $T.numPagesFor(size, $N, $N)", PAGE_UTIL, pageShift, pageMask)
@@ -161,7 +161,7 @@ final class PagedArrayBuilder {
             .addStatement("long bytesPerPage = arrayMemoryEstimator.apply($N)", pageSize)
             .addStatement("int sizeOfLastPage = $T.exclusiveIndexOfPage(size, $N)", PAGE_UTIL, pageMask)
             .addStatement("long bytesOfLastPage = arrayMemoryEstimator.apply(sizeOfLastPage)")
-            .addStatement("long memoryUsed = $T.sizeOfObjectArray(numberOfPages)", MemoryUsage.class)
+            .addStatement("long memoryUsed = $T.sizeOfObjectArray(numberOfPages)", Estimate.class)
             .addStatement("memoryUsed += (numberOfFullPages * bytesPerPage)")
             .addStatement("memoryUsed += bytesOfLastPage")
             .addStatement("return memoryUsed")

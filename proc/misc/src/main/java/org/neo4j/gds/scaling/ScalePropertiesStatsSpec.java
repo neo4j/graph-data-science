@@ -19,15 +19,13 @@
  */
 package org.neo4j.gds.scaling;
 
-import org.neo4j.gds.StatsComputationResultConsumer;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesStatsResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.scaleproperties.ScaleProperties;
 import org.neo4j.gds.scaleproperties.ScalePropertiesFactory;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
@@ -62,19 +60,6 @@ public class ScalePropertiesStatsSpec implements AlgorithmSpec<ScaleProperties, 
 
     @Override
     public ComputationResultConsumer<ScaleProperties, ScalePropertiesResult, ScalePropertiesStatsConfig, Stream<ScalePropertiesStatsResult>> computationResultConsumer() {
-        return new StatsComputationResultConsumer<>(this::resultBuilder);
+        return new NullComputationResultConsumer<>();
     }
-
-    private AbstractResultBuilder<ScalePropertiesStatsResult> resultBuilder(
-        ComputationResult<ScaleProperties, ScalePropertiesResult, ScalePropertiesStatsConfig> computationResult,
-        ExecutionContext executionContext
-    ) {
-        var builder = new ScalePropertiesStatsResult.Builder();
-
-        computationResult.result().ifPresent(result -> builder.withScalerStatistics(result.scalerStatistics()));
-
-        return builder;
-    }
-
-
 }

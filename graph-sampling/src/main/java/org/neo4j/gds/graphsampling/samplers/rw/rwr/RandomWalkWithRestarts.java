@@ -24,6 +24,7 @@ import com.carrotsearch.hppc.LongSet;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
@@ -49,11 +50,13 @@ public class RandomWalkWithRestarts implements RandomWalkBasedNodesSampler {
     protected static final long INVALID_NODE_ID = -1;
 
     private final RandomWalkWithRestartsConfig config;
+    private final Concurrency concurrency;
     private LongHashSet startNodesUsed;
     private final WalkerProducer walkerProducer;
 
     public RandomWalkWithRestarts(RandomWalkWithRestartsConfig config) {
         this.config = config;
+        this.concurrency = config.concurrency();
         this.walkerProducer = WalkerProducer.RWRWalkerProducer();
     }
 
@@ -67,7 +70,7 @@ public class RandomWalkWithRestarts implements RandomWalkBasedNodesSampler {
             inputGraph,
             progressTracker,
             config.nodeLabelStratification(),
-            config.concurrency(),
+            concurrency,
             config.samplingRatio()
         );
 
@@ -82,11 +85,11 @@ public class RandomWalkWithRestarts implements RandomWalkBasedNodesSampler {
             inputGraph.nodeCount()
         );
 
-        var tasks = ParallelUtil.tasks(config.concurrency(), () ->
+        var tasks = ParallelUtil.tasks(concurrency, () ->
             walkerProducer.getWalker(
                 seenNodes,
                 totalWeights,
-                QUALITY_THRESHOLD_BASE / (config.concurrency() * config.concurrency()),
+                QUALITY_THRESHOLD_BASE / concurrency.squared(),
                 new WalkQualities(initialStartQualities),
                 rng.split(),
                 inputGraph.concurrentCopy(),
@@ -96,7 +99,7 @@ public class RandomWalkWithRestarts implements RandomWalkBasedNodesSampler {
         );
 
         RunWithConcurrency.builder()
-            .concurrency(config.concurrency())
+            .concurrency(concurrency)
             .tasks(tasks)
             .run();
 

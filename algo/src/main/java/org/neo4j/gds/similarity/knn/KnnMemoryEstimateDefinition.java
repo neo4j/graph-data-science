@@ -20,18 +20,18 @@
 package org.neo4j.gds.similarity.knn;
 
 import com.carrotsearch.hppc.LongArrayList;
-import org.neo4j.gds.MemoryEstimateDefinition;
+import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 
 import java.util.function.LongFunction;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfIntArray;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfOpenHashContainer;
+import static org.neo4j.gds.mem.Estimate.sizeOfInstance;
+import static org.neo4j.gds.mem.Estimate.sizeOfIntArray;
+import static org.neo4j.gds.mem.Estimate.sizeOfLongArray;
+import static org.neo4j.gds.mem.Estimate.sizeOfOpenHashContainer;
 
 public class KnnMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
@@ -76,12 +76,12 @@ public class KnnMemoryEstimateDefinition implements MemoryEstimateDefinition {
                         "initial-random-neighbors (per thread)",
                         KnnFactory
                             .initialSamplerMemoryEstimation(parameters.samplerType(), k.value)
-                            .times(concurrency)
+                            .times(concurrency.value())
                     )
                     .fixed(
                         "sampled-random-neighbors (per thread)",
                         MemoryRange.of(
-                            sizeOfIntArray(sizeOfOpenHashContainer(k.sampledValue)) * concurrency
+                            sizeOfIntArray(sizeOfOpenHashContainer(k.sampledValue)) * concurrency.value()
                         )
                     )
                     .build();

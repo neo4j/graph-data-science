@@ -23,9 +23,10 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryRange;
 
 public interface GraphCreation<
     ALGO extends Algorithm<ALGO_RESULT>,
@@ -33,6 +34,8 @@ public interface GraphCreation<
     CONFIG extends AlgoBaseConfig
     > {
     GraphStore graphStore();
+
+    ResultStore resultStore();
 
     Graph createGraph(GraphStore graphStore);
 

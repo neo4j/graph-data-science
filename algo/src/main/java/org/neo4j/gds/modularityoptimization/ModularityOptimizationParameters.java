@@ -20,44 +20,8 @@
 package org.neo4j.gds.modularityoptimization;
 
 import org.neo4j.gds.annotation.Parameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 @Parameters
-public final class ModularityOptimizationParameters {
-
-    public static ModularityOptimizationParameters create(
-        int concurrency,
-        int maxIterations,
-        int batchSize,
-        double tolerance
-    ) {
-        return new ModularityOptimizationParameters(concurrency, maxIterations, batchSize, tolerance);
-    }
-
-    private final int concurrency;
-    private final int maxIterations;
-    private final int batchSize;
-    private final double tolerance;
-
-    private ModularityOptimizationParameters(int concurrency, int maxIterations, int batchSize, double tolerance) {
-        this.concurrency = concurrency;
-        this.maxIterations = maxIterations;
-        this.batchSize = batchSize;
-        this.tolerance = tolerance;
-    }
-
-    int concurrency() {
-        return concurrency;
-    }
-
-    int maxIterations() {
-        return maxIterations;
-    }
-
-    int batchSize() {
-        return batchSize;
-    }
-
-    double tolerance() {
-        return tolerance;
-    }
+public record ModularityOptimizationParameters(Concurrency concurrency, int maxIterations, int batchSize, double tolerance) {
 }

@@ -99,7 +99,7 @@ public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, SingleT
     }
 
     @Configuration.Ignore
-    default KnnMemoryEstimationParametersBuilder tomMemoryEstimationParameters() {
+    default KnnMemoryEstimationParametersBuilder toMemoryEstimationParameters() {
         return new KnnMemoryEstimationParametersBuilder(sampleRate(), topK(), initialSampler());
     }
 }

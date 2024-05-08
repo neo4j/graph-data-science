@@ -34,8 +34,8 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfigImpl;
 import org.neo4j.gds.extension.GdlExtension;
@@ -43,6 +43,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.core.AbstractVariable;
 import org.neo4j.gds.ml.core.Dimensions;
+import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.helper.TensorTestUtils;
 
 import java.util.Collections;
@@ -118,8 +119,6 @@ class GraphSageModelTrainerTest {
             .modelUser("")
             .build();
 
-        var trainModel = new GraphSageModelTrainer(config, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER);
-
         int nodeCount = 5_000;
         var bigGraph = RandomGraphGenerator
             .builder()
@@ -131,6 +130,10 @@ class GraphSageModelTrainerTest {
             .seed(42L)
             .build()
             .generate();
+
+        var parameters = config.toParameters();
+        var featureDimension = FeatureExtraction.featureCount(bigGraph, parameters.featureProperties());
+        var trainModel = new GraphSageModelTrainer(parameters, featureDimension, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER);
 
         features = HugeObjectArray.newArray(double[].class, nodeCount);
 
@@ -153,17 +156,25 @@ class GraphSageModelTrainerTest {
         if (useRelationshipWeight) {
             configBuilder.relationshipWeightProperty("times");
         }
+        var maybeWeights = useRelationshipWeight ? Optional.of("times") : Optional.<String>empty();
+
         var config = configBuilder
             .aggregator(AggregatorType.MEAN)
             .modelName(MODEL_NAME)
             .build();
+        var parameters = config.toParameters();
 
-        var trainModel = new GraphSageModelTrainer(config, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER);
-
-        var maybeWeights = useRelationshipWeight ? Optional.of("times") : Optional.<String>empty();
+        var graph = graphStore.getGraph(graphStore.nodeLabels(), graphStore.relationshipTypes(), maybeWeights);
+        int featureDimension = FeatureExtraction.featureCount(graph, parameters.featureProperties());
+        var trainModel = new GraphSageModelTrainer(
+            parameters,
+            featureDimension,
+            DefaultPool.INSTANCE,
+            ProgressTracker.NULL_TRACKER
+        );
 
         GraphSageModelTrainer.ModelTrainResult result = trainModel.train(
-            graphStore.getGraph(graphStore.nodeLabels(), graphStore.relationshipTypes(), maybeWeights),
+            graph,
             features
         );
 
@@ -199,7 +210,9 @@ class GraphSageModelTrainerTest {
             .modelName(MODEL_NAME)
             .build();
 
-        var trainModel = new GraphSageModelTrainer(config, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER);
+        var parameters = config.toParameters();
+        var featureDimension = FeatureExtraction.featureCount(graph, parameters.featureProperties());
+        var trainModel = new GraphSageModelTrainer(parameters, featureDimension, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER);
 
         GraphSageModelTrainer.ModelTrainResult result = trainModel.train(graph, features);
         Layer[] layers = result.layers();
@@ -248,8 +261,10 @@ class GraphSageModelTrainerTest {
             .modelName("model")
             .modelUser("")
             .build();
+        var parameters = config.toParameters();
+        var featureDimension = FeatureExtraction.featureCount(arrayGraph, parameters.featureProperties());
 
-        var trainer = new GraphSageModelTrainer(config, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER);
+        var trainer = new GraphSageModelTrainer(parameters, featureDimension, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER);
 
         var result = trainer.train(arrayGraph, arrayFeatures);
 
@@ -272,8 +287,12 @@ class GraphSageModelTrainerTest {
             .randomSeed(42L)
             .build();
 
+        var parameters = config.toParameters();
+        var featureDimension = FeatureExtraction.featureCount(unweightedGraph, parameters.featureProperties());
+
         var trainer = new GraphSageModelTrainer(
-            config,
+            parameters,
+            featureDimension,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -305,8 +324,12 @@ class GraphSageModelTrainerTest {
             .randomSeed(42L)
             .build();
 
+        var parameters = config.toParameters();
+        var featureDimension = FeatureExtraction.featureCount(unweightedGraph, parameters.featureProperties());
+
         var trainer = new GraphSageModelTrainer(
-            config,
+            parameters,
+            featureDimension,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -325,8 +348,12 @@ class GraphSageModelTrainerTest {
 
     @Test
     void testConvergence() {
+        var config = configBuilder.modelName("convergingModel:)").tolerance(100.0).epochs(10).build();
+        var parameters = config.toParameters();
+        var featureDimension = FeatureExtraction.featureCount(unweightedGraph, parameters.featureProperties());
         var trainer = new GraphSageModelTrainer(
-            configBuilder.modelName("convergingModel:)").tolerance(100.0).epochs(10).build(),
+            parameters,
+            featureDimension,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -351,14 +378,18 @@ class GraphSageModelTrainerTest {
             .maxIterations(100)
             .randomSeed(42L);
 
+        var parameters1 = configBuilder.maybeBatchSamplingRatio(1.0).build().toParameters();
         var trainResultWithoutSampling = new GraphSageModelTrainer(
-            configBuilder.maybeBatchSamplingRatio(1.0).build(),
+            parameters1,
+            FeatureExtraction.featureCount(unweightedGraph, parameters1.featureProperties()),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         ).train(unweightedGraph, features);
 
+        var parameters2 = configBuilder.maybeBatchSamplingRatio(0.01).build().toParameters();
         var trainResultWithSampling = new GraphSageModelTrainer(
-            configBuilder.maybeBatchSamplingRatio(0.01).build(),
+            parameters2,
+            FeatureExtraction.featureCount(unweightedGraph, parameters2.featureProperties()),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         ).train(unweightedGraph, features);
@@ -381,9 +412,12 @@ class GraphSageModelTrainerTest {
             .batchSize(5)
             .randomSeed(42L)
             .build();
+        var parameters = config.toParameters();
+        var featureDimension = FeatureExtraction.featureCount(unweightedGraph, parameters.featureProperties());
 
         var result = new GraphSageModelTrainer(
-            config,
+            parameters,
+            featureDimension,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         ).train(unweightedGraph, features);
@@ -401,9 +435,11 @@ class GraphSageModelTrainerTest {
             .randomSeed(seed)
             .concurrency(1)
             .build();
+        var parameters = config.toParameters();
+        var featureDimension = FeatureExtraction.featureCount(unweightedGraph, parameters.featureProperties());
 
-        var trainer = new GraphSageModelTrainer(config, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER);
-        var otherTrainer = new GraphSageModelTrainer(config, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER);
+        var trainer = new GraphSageModelTrainer(parameters, featureDimension, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER);
+        var otherTrainer = new GraphSageModelTrainer(parameters, featureDimension, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER);
 
         var result = trainer.train(unweightedGraph, features);
         var otherResult = otherTrainer.train(unweightedGraph, features);
@@ -421,9 +457,11 @@ class GraphSageModelTrainerTest {
             .concurrency(1)
             .batchSize(5)
             .build();
+        var parameters = config.toParameters();
+        var featureDimension = FeatureExtraction.featureCount(unweightedGraph, parameters.featureProperties());
 
-        var trainer = new GraphSageModelTrainer(config, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER);
-        var otherTrainer = new GraphSageModelTrainer(config, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER);
+        var trainer = new GraphSageModelTrainer(parameters, featureDimension, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER);
+        var otherTrainer = new GraphSageModelTrainer(parameters, featureDimension, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER);
 
         var result = trainer.train(unweightedGraph, features);
         var otherResult = otherTrainer.train(unweightedGraph, features);

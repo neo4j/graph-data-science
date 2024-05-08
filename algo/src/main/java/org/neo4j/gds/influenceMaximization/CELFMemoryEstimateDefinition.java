@@ -19,14 +19,14 @@
  */
 package org.neo4j.gds.influenceMaximization;
 
-import org.neo4j.gds.MemoryEstimateDefinition;
+import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 public final class CELFMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
@@ -45,9 +45,9 @@ public final class CELFMemoryEstimateDefinition implements MemoryEstimateDefinit
         //CELF class
         builder.fixed(
                 "seedSet",
-                MemoryUsage.sizeOfLongDoubleScatterMap(celfParameters.seedSetSize())
+                Estimate.sizeOfLongDoubleScatterMap(celfParameters.seedSetSize())
             )
-            .fixed("firstK", MemoryUsage.sizeOfLongArray(DEFAULT_BATCH_SIZE))
+            .fixed("firstK", Estimate.sizeOfLongArray(DEFAULT_BATCH_SIZE))
             .add("LazyForwarding: spread priority queue", HugeLongPriorityQueue.memoryEstimation())
             .perNode("greedy part: single spread array: ", HugeDoubleArray::memoryEstimation);
 
@@ -58,27 +58,27 @@ public final class CELFMemoryEstimateDefinition implements MemoryEstimateDefinit
 
 
         //ICLazyMC
-        builder.fixed("spread", MemoryUsage.sizeOfDoubleArray(DEFAULT_BATCH_SIZE));
+        builder.fixed("spread", Estimate.sizeOfDoubleArray(DEFAULT_BATCH_SIZE));
         //ICLazyMCTask class
         builder.add("newActive", ICLazyMemoryEstimationBuilder(celfParameters.seedSetSize()).build());
         builder.add(MemoryEstimations.builder(CELFParameters.class).build());
-        
+
         return builder.build();
     }
 
     private MemoryEstimations.Builder ICInitMemoryEstimationBuilder() {
         return MemoryEstimations.builder(ICLazyForwardTask.class)
-            .perNode("active", MemoryUsage::sizeOfBitset)
+            .perNode("active", Estimate::sizeOfBitset)
             .add("newActive", HugeLongArrayStack.memoryEstimation());
     }
 
     private MemoryEstimations.Builder ICLazyMemoryEstimationBuilder(int seedSetSize) {
         return MemoryEstimations.builder(ICLazyForwardTask.class)
-            .perNode("seedActive", MemoryUsage::sizeOfBitset)
-            .perNode("candidateActive", MemoryUsage::sizeOfBitset)
-            .fixed("localSpread", MemoryRange.of(MemoryUsage.sizeOfDoubleArray(DEFAULT_BATCH_SIZE)))
-            .fixed("candidateNodeIds", MemoryRange.of(MemoryUsage.sizeOfLongArray(DEFAULT_BATCH_SIZE)))
-            .fixed("seedSetNodeIds", MemoryRange.of(MemoryUsage.sizeOfLongArray(seedSetSize)))
+            .perNode("seedActive", Estimate::sizeOfBitset)
+            .perNode("candidateActive", Estimate::sizeOfBitset)
+            .fixed("localSpread", MemoryRange.of(Estimate.sizeOfDoubleArray(DEFAULT_BATCH_SIZE)))
+            .fixed("candidateNodeIds", MemoryRange.of(Estimate.sizeOfLongArray(DEFAULT_BATCH_SIZE)))
+            .fixed("seedSetNodeIds", MemoryRange.of(Estimate.sizeOfLongArray(seedSetSize)))
             .add("newActive", HugeLongArrayStack.memoryEstimation());
     }
 }

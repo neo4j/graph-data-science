@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
 import org.neo4j.gds.collections.cursor.HugeCursor;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
@@ -38,7 +39,7 @@ final class ArrayIdMapBuilderOps {
         long nodeCount,
         LabelInformation.Builder labelInformationBuilder,
         long highestNodeId,
-        int concurrency
+        Concurrency concurrency
     ) {
         if (highestNodeId == NodesBuilder.UNKNOWN_MAX_ID) {
             highestNodeId = findMaxNodeId(internalToOriginalIds).orElse(NodesBuilder.UNKNOWN_MAX_ID);
@@ -75,7 +76,7 @@ final class ArrayIdMapBuilderOps {
     static HugeSparseLongArray buildSparseIdMap(
         long nodeCount,
         long highestNodeId,
-        int concurrency,
+        Concurrency concurrency,
         HugeLongArray graphIds
     ) {
         HugeSparseLongArray.Builder idMapBuilder = HugeSparseLongArray.builder(

@@ -24,6 +24,7 @@ import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -133,7 +134,7 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
 
     ProgressTracker createProgressTracker(
         long taskVolume,
-        int writeConcurrency,
+        Concurrency writeConcurrency,
         ExecutionContext executionContext
     ) {
         return new TaskProgressTracker(
@@ -189,7 +190,7 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
                 config.arrowConnectionInfo().isPresent()
             );
 
-            var resultStore = config.resolveResultStore(computationResult.graphStore().resultStore());
+            var resultStore = config.resolveResultStore(computationResult.resultStore());
             var exporter = executionContext
                 .nodePropertyExporterBuilder()
                 .withIdMap(graph)
@@ -200,6 +201,7 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
                     computationResult.graphStore().databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                 )
                 .withResultStore(resultStore)
+                .withJobId(config.jobId())
                 .parallel(DefaultPool.INSTANCE, config.writeConcurrency())
                 .build();
 

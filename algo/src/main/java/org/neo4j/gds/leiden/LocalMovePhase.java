@@ -21,9 +21,10 @@ package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -60,7 +61,7 @@ final class LocalMovePhase {
     private final HugeDoubleArray communityVolumes;
     private final double gamma;
 
-    private final int concurrency;
+    private final Concurrency concurrency;
 
     long swaps;
 
@@ -70,9 +71,8 @@ final class LocalMovePhase {
         HugeDoubleArray nodeVolumes,
         HugeDoubleArray communityVolumes,
         double gamma,
-        int concurrency
+        Concurrency concurrency
     ) {
-        
         return new LocalMovePhase(
             graph,
             seedCommunities,
@@ -89,7 +89,7 @@ final class LocalMovePhase {
         HugeDoubleArray nodeVolumes,
         HugeDoubleArray communityVolumes,
         double gamma,
-        int concurrency
+        Concurrency concurrency
     ) {
         this.graph = graph;
         this.currentCommunities = seedCommunities;
@@ -120,7 +120,7 @@ final class LocalMovePhase {
             return true;
         });
         var tasks = new ArrayList<LocalMoveTask>();
-        for (int i = 0; i < concurrency; ++i) {
+        for (int i = 0; i < concurrency.value(); ++i) {
             tasks.add(new LocalMoveTask(
                 graph.concurrentCopy(),
                 currentCommunities,

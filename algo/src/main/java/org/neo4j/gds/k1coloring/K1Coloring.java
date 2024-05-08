@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
@@ -66,7 +67,7 @@ public class K1Coloring extends Algorithm<K1ColoringResult> {
     private final long nodeCount;
     private final ExecutorService executor;
     private final int minBatchSize;
-    private final int concurrency;
+    private final Concurrency concurrency;
 
     private final long maxIterations;
 
@@ -81,7 +82,7 @@ public class K1Coloring extends Algorithm<K1ColoringResult> {
         Graph graph,
         long maxIterations,
         int minBatchSize,
-        int concurrency,
+        Concurrency concurrency,
         ExecutorService executor,
         ProgressTracker progressTracker
     ) {

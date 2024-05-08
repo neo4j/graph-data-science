@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.paths.dijkstra;
 
-import org.neo4j.gds.MemoryEstimateDefinition;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryEstimateDefinition;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 public class DijkstraMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
@@ -46,10 +46,10 @@ public class DijkstraMemoryEstimateDefinition implements MemoryEstimateDefinitio
             builder.add("relationship ids", HugeLongLongMap.memoryEstimation());
         }
         if (manyTargets) {
-            builder.perNode("targets bitset", MemoryUsage::sizeOfBitset);
+            builder.perNode("targets bitset", Estimate::sizeOfBitset);
         }
         return builder
-            .perNode("visited set", MemoryUsage::sizeOfBitset)
+            .perNode("visited set", Estimate::sizeOfBitset)
             .build();
     }
 

@@ -21,6 +21,7 @@ package org.neo4j.gds.steiner;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -73,7 +74,7 @@ class ShortestPathsSteinerAlgorithmTest {
             a[0],
             List.of(a[4], a[7], a[8]),
             2.0,
-            1,
+            new Concurrency(1),
             false,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER

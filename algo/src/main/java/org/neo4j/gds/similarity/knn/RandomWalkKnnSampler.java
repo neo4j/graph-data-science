@@ -21,7 +21,7 @@ package org.neo4j.gds.similarity.knn;
 
 import com.carrotsearch.hppc.LongHashSet;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.ml.core.samplers.LongUniformSamplerFromRange;
 import org.neo4j.gds.ml.core.samplers.RandomWalkSampler;
 
@@ -30,9 +30,9 @@ import java.util.Random;
 import java.util.SplittableRandom;
 import java.util.function.LongPredicate;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongHashSet;
+import static org.neo4j.gds.mem.Estimate.sizeOfInstance;
+import static org.neo4j.gds.mem.Estimate.sizeOfLongArray;
+import static org.neo4j.gds.mem.Estimate.sizeOfLongHashSet;
 
 class RandomWalkKnnSampler implements KnnSampler {
 

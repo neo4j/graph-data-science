@@ -22,9 +22,8 @@ package org.neo4j.gds.procedures.algorithms.pathfinding;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.pathfinding.ResultBuilder;
-import org.neo4j.gds.applications.algorithms.pathfinding.SideEffectProcessingCounts;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeStreamConfig;
 
@@ -32,7 +31,7 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class SpanningTreeResultBuilderForStreamMode implements ResultBuilder<SpanningTreeStreamConfig, SpanningTree, Stream<SpanningTreeStreamResult>> {
+class SpanningTreeResultBuilderForStreamMode implements ResultBuilder<SpanningTreeStreamConfig, SpanningTree, Stream<SpanningTreeStreamResult>, Void> {
     @Override
     public Stream<SpanningTreeStreamResult> build(
         Graph graph,
@@ -40,7 +39,7 @@ class SpanningTreeResultBuilderForStreamMode implements ResultBuilder<SpanningTr
         SpanningTreeStreamConfig configuration,
         Optional<SpanningTree> result,
         AlgorithmProcessingTimings timings,
-        SideEffectProcessingCounts counts
+        Optional<Void> metadata
     ) {
         if (result.isEmpty()) return Stream.empty();
 

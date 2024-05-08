@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.paths.sourcetarget;
 
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.results.StandardWriteRelationshipsResult;
+import org.neo4j.gds.procedures.algorithms.results.StandardWriteRelationshipsResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -30,8 +30,8 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.ProcedureConstants.ESTIMATE_DESCRIPTION;
 import static org.neo4j.gds.paths.sourcetarget.SinglePairShortestPathConstants.YENS_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
@@ -45,15 +45,15 @@ public class ShortestPathYensWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().singlePairShortestPathYensWrite(graphName, configuration);
+        return facade.algorithms().pathFinding().singlePairShortestPathYensWrite(graphName, configuration);
     }
 
     @Procedure(name = "gds.shortestPath.yens.write.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphName,
         @Name(value = "configuration") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().singlePairShortestPathYensWriteEstimate(graphName, configuration);
+        return facade.algorithms().pathFinding().singlePairShortestPathYensWriteEstimate(graphName, configuration);
     }
 }

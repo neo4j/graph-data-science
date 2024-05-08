@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.compat._518;
 
-import org.neo4j.common.DependencyResolver;
 import org.neo4j.configuration.Config;
 import org.neo4j.gds.compat.CompatMonitor;
 import org.neo4j.gds.compat.Neo4jProxyApi;
@@ -33,9 +32,7 @@ import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.context.CursorContextFactory;
-import org.neo4j.io.pagecache.context.FixedVersionContextSupplier;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
-import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
 import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
 import org.neo4j.logging.internal.LogService;
@@ -45,35 +42,9 @@ import org.neo4j.storageengine.api.StorageEngineFactory;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
 import java.util.function.Function;
 
 public final class Neo4jProxyImpl implements Neo4jProxyApi {
-
-    private static final DependencyResolver EMPTY_DEPENDENCY_RESOLVER = new DependencyResolver() {
-        @Override
-        public <T> T resolveDependency(Class<T> type, SelectionStrategy selector) {
-            return null;
-        }
-
-        @Override
-        public boolean containsDependency(Class<?> type) {
-            return false;
-        }
-    };
-
-    @Override
-    public DependencyResolver emptyDependencyResolver() {
-        return EMPTY_DEPENDENCY_RESOLVER;
-    }
-
-    @Override
-    public CursorContextFactory cursorContextFactory(Optional<PageCacheTracer> pageCacheTracer) {
-        return pageCacheTracer.map(cacheTracer -> new CursorContextFactory(
-            cacheTracer,
-            FixedVersionContextSupplier.EMPTY_CONTEXT_SUPPLIER
-        )).orElse(CursorContextFactory.NULL_CONTEXT_FACTORY);
-    }
 
     @Override
     public String neo4jArrowServerAddressHeader() {
@@ -103,11 +74,6 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     @Override
     public long estimateRelationshipCount(Read read, int sourceLabel, int targetLabel, int type) {
         return read.estimateCountsForRelationships(sourceLabel, type, targetLabel);
-    }
-
-    @Override
-    public void registerCloseableResource(KernelTransaction transaction, AutoCloseable autoCloseable) {
-        transaction.resourceMonitor().registerCloseableResource(autoCloseable);
     }
 
     @Override
@@ -143,7 +109,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             TransactionLogInitializer.getLogFilesInitializer(),
             new IndexImporterFactoryImpl(),
             EmptyMemoryTracker.INSTANCE,
-            cursorContextFactory(Optional.empty())
+            CursorContextFactory.NULL_CONTEXT_FACTORY
         );
     }
 

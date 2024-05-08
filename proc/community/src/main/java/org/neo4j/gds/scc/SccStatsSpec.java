@@ -19,16 +19,15 @@
  */
 package org.neo4j.gds.scc;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.community.scc.SccStatsResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.stream.Stream;
 
@@ -54,29 +53,6 @@ public class SccStatsSpec implements AlgorithmSpec<Scc, HugeLongArray, SccStatsC
 
     @Override
     public ComputationResultConsumer<Scc, HugeLongArray, SccStatsConfig, Stream<SccStatsResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> Stream.of(resultBuilder(computationResult,executionContext).build());
-    }
-
-    private AbstractResultBuilder<SccStatsResult> resultBuilder(
-        ComputationResult<Scc, HugeLongArray, SccStatsConfig> computationResult,
-        ExecutionContext executionContext
-    ) {
-        var config = computationResult.config();
-        var statsBuilder = new SccStatsResult.Builder(
-            executionContext.returnColumns(),
-            config.concurrency()
-        )
-            .buildCommunityCount(true)
-            .buildHistogram(true);
-
-        computationResult.result().ifPresent(result -> statsBuilder.withCommunityFunction(result::get));
-
-        statsBuilder
-            .withNodeCount(computationResult.graph().nodeCount())
-            .withConfig(config)
-            .withPreProcessingMillis(computationResult.preProcessingMillis())
-            .withComputeMillis(computationResult.computeMillis());
-
-        return statsBuilder;
+        return new NullComputationResultConsumer<>();
     }
 }

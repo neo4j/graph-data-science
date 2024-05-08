@@ -24,10 +24,10 @@ import org.neo4j.configuration.Config;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.mem.GcListenerExtension;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
+import org.neo4j.gds.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.settings.GdsSettings;
 import org.neo4j.logging.Log;
 
@@ -122,8 +122,8 @@ public class MemoryUsageValidator {
             errorMessage.add(formatWithLocale(
                 "Procedure was blocked since %s estimated memory (%s) exceeds current free memory (%s).",
                 memoryString,
-                MemoryUsage.humanReadable(requiredBytes),
-                MemoryUsage.humanReadable(availableBytes)
+                Estimate.humanReadable(requiredBytes),
+                Estimate.humanReadable(availableBytes)
             ));
 
             if (!GraphStoreCatalog.isEmpty()) {

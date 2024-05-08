@@ -43,11 +43,11 @@ public interface DijkstraSourceTargetsBaseConfig extends OptionalTargetNodeConfi
     default void validate() {
         if (!targetNodes().isEmpty() && targetNode().isPresent()) {
             throw new IllegalArgumentException(
-                "The `targets` and `target` parameters cannot be both specified at the same time");
+                "The `targetNodes` and `targetNode` parameters cannot be both specified at the same time");
         }
         if (targetsList().isEmpty() && targetNode().isEmpty()) {
             throw new IllegalArgumentException(
-                "One of `targets` or `target` parameters must be specified");
+                "One of `targetNodes` or `targetNode` parameters must be specified");
         }
 
     }

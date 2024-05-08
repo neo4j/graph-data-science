@@ -24,6 +24,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IntersectionConsumer;
 import org.neo4j.gds.api.RelationshipIntersect;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -63,14 +64,14 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
     // results
     private final HugeAtomicLongArray triangleCounts;
     private final long maxDegree;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private long globalTriangleCount;
 
     private final LongAdder globalTriangleCounter;
 
     public static IntersectingTriangleCount create(
         Graph graph,
-        int concurrency,
+        Concurrency concurrency,
         long maxDegree,
         ExecutorService executorService,
         ProgressTracker progressTracker
@@ -86,7 +87,7 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
     private IntersectingTriangleCount(
         Graph graph,
         RelationshipIntersectFactory intersectFactory,
-        int concurrency,
+        Concurrency concurrency,
         long maxDegree,
         ExecutorService executorService,
         ProgressTracker progressTracker

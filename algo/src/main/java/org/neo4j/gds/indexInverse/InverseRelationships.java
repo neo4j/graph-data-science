@@ -29,6 +29,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -48,19 +49,21 @@ import java.util.stream.Collectors;
 
 public class InverseRelationships extends Algorithm<Map<RelationshipType, SingleTypeRelationships>> {
     private final GraphStore graphStore;
-    private final InverseRelationshipsConfig config;
+    private final InverseRelationshipsParameters parameters;
+    private final Concurrency concurrency;
     private final ExecutorService executorService;
 
     protected InverseRelationships(
         GraphStore graphStore,
-        InverseRelationshipsConfig config,
+        InverseRelationshipsParameters parameters,
         ProgressTracker progressTracker,
         ExecutorService executorService
     ) {
         super(progressTracker);
 
         this.graphStore = graphStore;
-        this.config = config;
+        this.parameters = parameters;
+        this.concurrency = parameters.concurrency();
         this.executorService = executorService;
     }
 
@@ -68,7 +71,7 @@ public class InverseRelationships extends Algorithm<Map<RelationshipType, Single
     public Map<RelationshipType, SingleTypeRelationships> compute() {
         progressTracker.beginSubTask();
 
-        var fromRelationshipTypes = config.internalRelationshipTypes(graphStore);
+        var fromRelationshipTypes = parameters.internalRelationshipTypes(graphStore);
 
         var relationshipsPerType = new HashMap<RelationshipType, SingleTypeRelationships>();
 
@@ -88,7 +91,7 @@ public class InverseRelationships extends Algorithm<Map<RelationshipType, Single
             RunWithConcurrency.
                 builder()
                 .tasks(tasks)
-                .concurrency(config.concurrency())
+                .concurrency(concurrency)
                 .executor(executorService)
                 .terminationFlag(terminationFlag)
                 .build()
@@ -112,7 +115,7 @@ public class InverseRelationships extends Algorithm<Map<RelationshipType, Single
     private RelationshipsBuilder initializeRelationshipsBuilder(RelationshipType relationshipType, List<RelationshipPropertySchema> propertySchemas) {
         RelationshipsBuilderBuilder relationshipsBuilderBuilder = GraphFactory.initRelationshipsBuilder()
             .relationshipType(relationshipType)
-            .concurrency(config.concurrency())
+            .concurrency(concurrency)
             .nodes(graphStore.nodes())
             .executorService(executorService)
             .orientation(Orientation.NATURAL)
@@ -163,7 +166,7 @@ public class InverseRelationships extends Algorithm<Map<RelationshipType, Single
 
         return PartitionUtils.degreePartition(
             graphStore.getGraph(fromRelationshipType),
-            config.concurrency(),
+            concurrency,
             taskCreator,
             Optional.empty()
         );

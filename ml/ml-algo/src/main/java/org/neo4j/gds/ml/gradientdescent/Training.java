@@ -19,10 +19,11 @@
  */
 package org.neo4j.gds.ml.gradientdescent;
 
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.ComputationContext;
@@ -94,7 +95,7 @@ public class Training {
             .build();
     }
 
-    public void train(Objective<?> objective, Supplier<BatchQueue> queueSupplier, int concurrency) {
+    public void train(Objective<?> objective, Supplier<BatchQueue> queueSupplier, Concurrency concurrency) {
         Updater updater = new AdamOptimizer(objective.weights(), config.learningRate());
         var stopper = TrainingStopper.defaultStopper(config);
 
@@ -133,9 +134,9 @@ public class Training {
         ));
     }
 
-    private List<ObjectiveUpdateConsumer> executeBatches(int concurrency, Objective<?> objective, BatchQueue batches) {
-        var consumers = new ArrayList<ObjectiveUpdateConsumer>(concurrency);
-        for (int i = 0; i < concurrency; i++) {
+    private List<ObjectiveUpdateConsumer> executeBatches(Concurrency concurrency, Objective<?> objective, BatchQueue batches) {
+        var consumers = new ArrayList<ObjectiveUpdateConsumer>(concurrency.value());
+        for (int i = 0; i < concurrency.value(); i++) {
             consumers.add(new ObjectiveUpdateConsumer(objective, trainSize));
         }
         batches.parallelConsume(concurrency, consumers, terminationFlag);

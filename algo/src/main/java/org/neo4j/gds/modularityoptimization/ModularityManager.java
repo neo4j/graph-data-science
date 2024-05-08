@@ -21,6 +21,7 @@ package org.neo4j.gds.modularityoptimization;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -37,10 +38,10 @@ final class ModularityManager {
     private double totalWeight;
     private final HugeAtomicDoubleArray communityWeights;
     private HugeLongArray communities;
-    private final int concurrency;
+    private final Concurrency concurrency;
 
 
-    static ModularityManager create(Graph graph, int concurrency) {
+    static ModularityManager create(Graph graph, Concurrency concurrency) {
         return new ModularityManager(
             graph,
             HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(concurrency)),
@@ -48,7 +49,7 @@ final class ModularityManager {
         );
     }
 
-    private ModularityManager(Graph graph, HugeAtomicDoubleArray communityWeights, int concurrency) {
+    private ModularityManager(Graph graph, HugeAtomicDoubleArray communityWeights, Concurrency concurrency) {
         this.graph = graph;
         this.communityWeights = communityWeights;
         this.concurrency = concurrency;

@@ -136,7 +136,7 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
                 seedingSummary.nodePairsCompared(),
                 seedingSummary.nodesCompared()
             ) : delegate.compute();
-        
+
         return new FilteredKnnResult(
             targetNodeFiltering,
             result,

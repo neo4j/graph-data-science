@@ -100,7 +100,7 @@ class ConfigKeyValidationTest extends BaseProcTest {
 
         assertThat(
             exception,
-            rootCause(IllegalArgumentException.class, "Unexpected configuration key: writeConccurrency (Did you mean one of [writeConcurrency, concurrency]?)")
+            rootCause(IllegalArgumentException.class, "Unexpected configuration key: writeConccurrency (Did you mean one of [writeConcurrency, writeToResultStore, concurrency]?)")
         );
     }
 

@@ -23,8 +23,8 @@ import com.carrotsearch.hppc.BitMixer;
 import com.carrotsearch.hppc.cursors.LongLongCursor;
 import org.neo4j.gds.collections.cursor.HugeCursor;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.BitUtil;
 
 import java.util.Iterator;

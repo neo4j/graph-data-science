@@ -24,6 +24,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -104,7 +105,7 @@ class BFSTest {
             source,
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
             (s, t, w) -> 1.,
-            concurrency,
+            new Concurrency(concurrency),
             ProgressTracker.NULL_TRACKER,
             BFS.ALL_DEPTHS_ALLOWED
         ).compute().toArray();
@@ -130,7 +131,7 @@ class BFSTest {
             source,
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
             Aggregator.NO_AGGREGATION,
-            concurrency,
+            new Concurrency(concurrency),
             ProgressTracker.NULL_TRACKER,
             BFS.ALL_DEPTHS_ALLOWED
         ).compute().toArray();
@@ -153,7 +154,7 @@ class BFSTest {
             source,
             (s, t, w) -> w >= maxHops ? Result.CONTINUE : Result.FOLLOW,
             (s, t, w) -> w + 1.,
-            concurrency,
+            new Concurrency(concurrency),
             ProgressTracker.NULL_TRACKER,
             maxHops - 1
         ).compute().toArray();
@@ -169,7 +170,7 @@ class BFSTest {
         BFS.create(loopGraph, 0,
             (s, t, w) -> Result.FOLLOW,
             Aggregator.NO_AGGREGATION,
-            concurrency,
+            new Concurrency(concurrency),
             ProgressTracker.NULL_TRACKER,
             BFS.ALL_DEPTHS_ALLOWED
         ).compute();
@@ -180,13 +181,13 @@ class BFSTest {
     void shouldLogProgress(int concurrency) {
         var progressTask = Tasks.leaf("BFS", naturalGraph.relationshipCount());
         var testLog = Neo4jProxy.testLog();
-        var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TestProgressTracker(progressTask, testLog, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
         BFS.create(
             naturalGraph,
             0,
             (s, t, w) -> Result.FOLLOW,
             Aggregator.NO_AGGREGATION,
-            concurrency,
+            new Concurrency(concurrency),
             progressTracker,
             BFS.ALL_DEPTHS_ALLOWED
         ).compute();

@@ -90,8 +90,7 @@ class AlgorithmFactoryGeneratorTest {
         var type = generator.memoryEstimationMethod();
         assertThat(type.toString()).isEqualTo("" +
             "@java.lang.Override" + NL +
-            "public org.neo4j.gds.core.utils.mem.MemoryEstimation memoryEstimation(" + NL +
-            "    gds.testconfig.TheConfig configuration) {" + NL +
+            "public org.neo4j.gds.mem.MemoryEstimation memoryEstimation(gds.testconfig.TheConfig configuration) {" + NL +
             "  var computation = new gds.test.Baz();" + NL +
             "  return computation.estimateDefinition(configuration.isAsynchronous()).memoryEstimation();" + NL +
             "}" + NL

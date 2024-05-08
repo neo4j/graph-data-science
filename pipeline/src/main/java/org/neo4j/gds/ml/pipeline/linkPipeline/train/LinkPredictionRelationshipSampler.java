@@ -29,9 +29,9 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -242,8 +242,7 @@ public class LinkPredictionRelationshipSampler {
             .build();
     }
 
-
-    public static MemoryEstimation estimatePositiveRelations(
+    private static MemoryEstimation estimatePositiveRelations(
         String relationshipType,
         double testFraction,
         double trainFraction,
@@ -268,7 +267,7 @@ public class LinkPredictionRelationshipSampler {
     }
 
 
-    public static MemoryEstimation estimateNegativeSampling(
+    private static MemoryEstimation estimateNegativeSampling(
         String relationshipType,
         double testFraction,
         double trainFraction,
@@ -284,7 +283,6 @@ public class LinkPredictionRelationshipSampler {
                 return MemoryRange.of(negativeRelCount / 2).times(sizePerRel);
             })
             .build();
-
     }
 
     private static long estimateNegativeRelCount(
@@ -302,5 +300,4 @@ public class LinkPredictionRelationshipSampler {
              return (long) (testAndTrainPositiveRelCount * negativeSamplingRatio);
          }
     }
-
 }

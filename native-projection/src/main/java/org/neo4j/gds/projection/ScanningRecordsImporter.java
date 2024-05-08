@@ -21,6 +21,7 @@ package org.neo4j.gds.projection;
 
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.ImportSizing;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -30,7 +31,7 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.concurrent.ExecutorService;
 
-import static org.neo4j.gds.mem.MemoryUsage.humanReadable;
+import static org.neo4j.gds.mem.Estimate.humanReadable;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 abstract class ScanningRecordsImporter<Record, T> {
@@ -43,14 +44,14 @@ abstract class ScanningRecordsImporter<Record, T> {
     protected final TransactionContext transaction;
     protected final GraphDimensions dimensions;
     protected final ProgressTracker progressTracker;
-    protected final int concurrency;
+    protected final Concurrency concurrency;
 
     ScanningRecordsImporter(
         StoreScanner.Factory<Record> storeScannerFactory,
         GraphLoaderContext loadingContext,
         GraphDimensions dimensions,
         ProgressTracker progressTracker,
-        int concurrency
+        Concurrency concurrency
     ) {
         this.storeScannerFactory = storeScannerFactory;
         this.transaction = loadingContext.transactionContext();

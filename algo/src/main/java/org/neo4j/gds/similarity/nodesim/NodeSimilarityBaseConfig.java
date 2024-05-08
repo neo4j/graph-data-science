@@ -156,7 +156,7 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
         var normalizedN = bottomNSetByUser ? -bottomN() : topN();
 
         var componentUsage = useComponents();
-        return NodeSimilarityParameters.create(
+        return new NodeSimilarityParameters(
             similarityMetric().build(similarityCutoff()),
             degreeCutoff(),
             upperDegreeCutoff(),

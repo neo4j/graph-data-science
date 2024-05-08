@@ -20,64 +20,15 @@
 package org.neo4j.gds.influenceMaximization;
 
 import org.neo4j.gds.annotation.Parameters;
-
-import java.util.Optional;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 @Parameters
-public class CELFParameters {
-
-    private final  int seedSetSize;
-
-    private final  double propagationProbability;
-
-    private final  int monteCarloSimulations;
-
-    private final  int concurrency;
-
-    private final long randomSeed;
-
-    private final int batchSize;
-
-    public CELFParameters(int seedSetSize, double propagationProbability, int monteCarloSimulations,int concurrency, long randomSeed, int batchSize) {
-        this.seedSetSize = seedSetSize;
-        this.propagationProbability = propagationProbability;
-        this.monteCarloSimulations = monteCarloSimulations;
-        this.concurrency = concurrency;
-        this.randomSeed = randomSeed;
-        this.batchSize=batchSize;
-    }
-
-    public static CELFParameters create(
-        int seedSetSize,
-        double propagationProbability,
-        int monteCarloSimulations,
-        int concurrency,
-        Optional<Long> randomSeed,
-        int batchSize
-
-    ) {
-        return new CELFParameters(seedSetSize, propagationProbability, monteCarloSimulations,concurrency,randomSeed.orElse(0L),batchSize);
-    }
-
-    int concurrency() {
-        return concurrency;
-    }
-
-    int seedSetSize(){return seedSetSize;}
-
-    double propagationProbability(){return propagationProbability;}
-
-    int monteCarloSimulations() {
-        return monteCarloSimulations;
-    }
-
-    long randomSeed(){
-        return  randomSeed;
-    }
-
-    int batchSize(){
-        return  batchSize;
-    }
-
-
+public record CELFParameters(
+    int seedSetSize,
+    double propagationProbability,
+    int monteCarloSimulations,
+    Concurrency concurrency,
+    long randomSeed,
+    int batchSize
+) {
 }

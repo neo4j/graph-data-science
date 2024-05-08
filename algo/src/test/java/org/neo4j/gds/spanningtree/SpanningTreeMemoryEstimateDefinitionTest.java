@@ -22,6 +22,7 @@ package org.neo4j.gds.spanningtree;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 class SpanningTreeMemoryEstimateDefinitionTest {
 
@@ -29,7 +30,7 @@ class SpanningTreeMemoryEstimateDefinitionTest {
     void shouldEstimateMemory() {
         var memoryEstimation = new SpanningTreeMemoryEstimateDefinition().memoryEstimation();
         MemoryEstimationAssert.assertThat(memoryEstimation)
-            .memoryRange( GraphDimensions.of(10_000, 100_000), 1)
+            .memoryRange( GraphDimensions.of(10_000, 100_000), new Concurrency(1))
             .hasSameMinAndMaxEqualTo(321544);
     }
 }

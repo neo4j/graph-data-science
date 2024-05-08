@@ -28,6 +28,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
@@ -59,7 +60,7 @@ class PartitionUtilsTest {
     void testAlignment() {
         long alignTo = 64;
         long nodeCount = 200;
-        int concurrency = 2;
+        var concurrency = new Concurrency(2);
 
         List<Partition> partitions = PartitionUtils.numberAlignedPartitioning(
             concurrency,
@@ -79,7 +80,7 @@ class PartitionUtilsTest {
     void testAlignmentWithTaskSupplier() {
         long alignTo = 64;
         long nodeCount = 200;
-        int concurrency = 2;
+        var concurrency = new Concurrency(2);
 
         var tasks = PartitionUtils.numberAlignedPartitioning(
             concurrency,
@@ -108,7 +109,7 @@ class PartitionUtilsTest {
         long alignTo = 42;
         long maxSize = 100;
         long nodeCount = 400;
-        int concurrency = 3;
+        var concurrency = new Concurrency(3);
 
         List<Partition> partitions = PartitionUtils.numberAlignedPartitioningWithMaxSize(
             concurrency,
@@ -130,7 +131,7 @@ class PartitionUtilsTest {
         long alignTo = 42;
         long maxSize = 100;
         long nodeCount = 400;
-        int concurrency = 3;
+        var concurrency = new Concurrency(3);
 
         var tasks = PartitionUtils.numberAlignedPartitioningWithMaxSize(
             concurrency,
@@ -184,7 +185,7 @@ class PartitionUtilsTest {
     void testRangePartitioning(int concurrency, long nodeCount, List<Partition> expectedPartitions) {
         assertEquals(
             expectedPartitions,
-            PartitionUtils.rangePartition(concurrency, nodeCount, Function.identity(), Optional.empty())
+            PartitionUtils.rangePartition(new Concurrency(concurrency), nodeCount, Function.identity(), Optional.empty())
         );
     }
 
@@ -217,11 +218,11 @@ class PartitionUtilsTest {
     @MethodSource("degreeDistributionWithPartitions")
     @ParameterizedTest
     void testDegreePartitioning(String distribution, List<DegreePartition> expectedPartitions) {
-        var concurrency = 4;
+        var concurrency = new Concurrency(4);
 
         var graph = RandomGraphGenerator.builder()
             .nodeCount(10_000)
-            .averageDegree(concurrency)
+            .averageDegree(concurrency.value())
             .seed(42)
             .relationshipDistribution(RelationshipDistribution.parse(distribution))
             .build()
@@ -328,7 +329,7 @@ class PartitionUtilsTest {
         LongToIntFunction weightFunction = x -> weights[(int) x];
         var partitions = PartitionUtils.customDegreePartitionWithBatchSize(
             graph,
-            3,
+            new Concurrency(3),
             weightFunction,
             Function.identity(),
             Optional.of(1),
@@ -358,7 +359,7 @@ class PartitionUtilsTest {
         LongToIntFunction weightFunction = x -> weights[(int) x];
         var partitions = PartitionUtils.customDegreePartitionWithBatchSize(
             graph,
-            3,
+            new Concurrency(3),
             weightFunction,
             Function.identity(),
             Optional.of(1),
@@ -419,7 +420,7 @@ class PartitionUtilsTest {
 
         var nodeCount = 6;
         int[] degrees = {20, 20, 20, 20, 10, 10};
-        var concurrency = 4;
+        var concurrency = new Concurrency(4);
         var degreesPerPartition = ParallelUtil.adjustedBatchSize(Arrays.stream(degrees).sum(), concurrency, 1);
 
         List<DegreePartition> partitions = PartitionUtils.degreePartitionWithBatchSize(
@@ -452,7 +453,7 @@ class PartitionUtilsTest {
         int[] degrees = {20, 20, 20, 20, 10, 10};
         var nodeCount = degrees.length;
         long relCount = Arrays.stream(degrees).sum();
-        var concurrency = 4;
+        var concurrency = new Concurrency(4);
 
         Stream<DegreePartition> partitions = PartitionUtils.degreePartitionStream(
             nodeCount,

@@ -27,6 +27,7 @@ dependencies {
 
     // the necessary GDS things for the extension to construct the application
     implementation project(':algo')
+    implementation project(':algorithms-machinery')
     implementation project(':algo-common')
     implementation project(':annotations')
     implementation project(':config-api')

@@ -168,7 +168,7 @@ final class GenerateConfigurationBuilder {
     }
 
     @NotNull
-    private static Optional<String> getInverseMethod(ConfigParser.Member configMember) {
+    private static Optional<String> getInverseMethod(Spec.Member configMember) {
         return Optional
             .ofNullable(configMember.method().getAnnotation(Configuration.ConvertWith.class))
             .map(i -> i.inverse().equals(Configuration.ConvertWith.INVERSE_IS_TO_MAP)

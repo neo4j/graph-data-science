@@ -22,14 +22,15 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.predicates.LongPredicate;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.BoundedLongLongPriorityQueue;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.ml.linkmodels.ExhaustiveLinkPredictionResult;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
@@ -51,7 +52,7 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
         Graph graph,
         LPNodeFilter sourceNodeFilter,
         LPNodeFilter targetNodeFilter,
-        int concurrency,
+        Concurrency concurrency,
         int topN,
         double threshold,
         ProgressTracker progressTracker,
@@ -75,8 +76,8 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
         return MemoryEstimations.builder(ExhaustiveLinkPrediction.class.getSimpleName())
             .add("Priority queue", BoundedLongLongPriorityQueue.memoryEstimation(config.topN().orElseThrow()))
             .perGraphDimension("Predict links operation", (dim, threads) -> MemoryRange.of(
-                MemoryUsage.sizeOfDoubleArray(linkFeatureDimension) + MemoryUsage.sizeOfLongHashSet(dim.averageDegree())
-            ).times(threads))
+                Estimate.sizeOfDoubleArray(linkFeatureDimension) + Estimate.sizeOfLongHashSet(dim.averageDegree())
+            ).times(threads.value()))
             .build();
     }
 

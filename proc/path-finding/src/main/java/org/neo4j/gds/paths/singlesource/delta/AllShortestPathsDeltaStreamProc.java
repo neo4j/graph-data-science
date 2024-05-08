@@ -21,7 +21,7 @@ package org.neo4j.gds.paths.singlesource.delta;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingStreamResult;
-import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -44,7 +44,7 @@ public class AllShortestPathsDeltaStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().deltaSteppingStream(graphName, configuration);
+        return facade.algorithms().pathFinding().deltaSteppingStream(graphName, configuration);
     }
 
     @Procedure(name = "gds.allShortestPaths.delta.stream.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class AllShortestPathsDeltaStreamProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.pathFinding().deltaSteppingStreamEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().pathFinding().deltaSteppingStreamEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

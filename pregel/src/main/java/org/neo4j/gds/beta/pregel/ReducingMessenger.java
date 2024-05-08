@@ -23,8 +23,8 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 
 /**
@@ -67,7 +67,7 @@ public class ReducingMessenger implements Messenger<ReducingMessenger.SingleMess
         this.receiveArray = sendArray;
         this.sendArray = tmp;
 
-        int concurrency = config.concurrency();
+        var concurrency = config.concurrency();
         ParallelUtil.parallelForEachNode(
             graph.nodeCount(),
             concurrency,

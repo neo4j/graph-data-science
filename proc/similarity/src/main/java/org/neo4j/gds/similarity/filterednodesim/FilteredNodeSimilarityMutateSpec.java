@@ -27,6 +27,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
@@ -38,8 +39,8 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.procedures.similarity.SimilarityMutateResult;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.similarity.SimilarityMutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityProc;
@@ -55,9 +56,9 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
 import static org.neo4j.gds.similarity.SimilarityProc.computeHistogram;
 import static org.neo4j.gds.similarity.SimilarityProc.shouldComputeHistogram;
-import static org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamProc.DESCRIPTION;
+import static org.neo4j.gds.similarity.filterednodesim.Constants.FILTERED_NODE_SIMILARITY_DESCRIPTION;
 
-@GdsCallable(name = "gds.nodeSimilarity.filtered.mutate", aliases = {"gds.alpha.nodeSimilarity.filtered.mutate"}, description = DESCRIPTION, executionMode = ExecutionMode.MUTATE_RELATIONSHIP)
+@GdsCallable(name = "gds.nodeSimilarity.filtered.mutate", aliases = {"gds.alpha.nodeSimilarity.filtered.mutate"}, description = FILTERED_NODE_SIMILARITY_DESCRIPTION, executionMode = ExecutionMode.MUTATE_RELATIONSHIP)
 public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
     NodeSimilarity,
     NodeSimilarityResult,
@@ -149,7 +150,7 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
                 .relationshipType(relationshipType)
                 .orientation(Orientation.NATURAL)
                 .addPropertyConfig(GraphFactory.PropertyConfig.of(relationshipPropertyKey))
-                .concurrency(1)
+                .concurrency(new Concurrency(1))
                 .executorService(DefaultPool.INSTANCE)
                 .build();
 

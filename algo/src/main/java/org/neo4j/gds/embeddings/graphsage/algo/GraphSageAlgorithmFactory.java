@@ -23,11 +23,14 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.MutateConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer.GraphSageTrainMetrics;
+import org.neo4j.gds.embeddings.graphsage.ModelData;
 
 import static org.neo4j.gds.embeddings.graphsage.algo.GraphSageModelResolver.resolveModel;
 import static org.neo4j.gds.ml.core.EmbeddingUtils.validateRelationshipWeightPropertyValue;
@@ -41,27 +44,36 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
         this.modelCatalog = modelCatalog;
     }
 
-
-    @Override
-    public GraphSage build(Graph graph, CONFIG configuration, ProgressTracker progressTracker) {
+    public GraphSage build(
+        Graph graph,
+        GraphSageParameters parameters,
+        Model<ModelData, GraphSageTrainConfig, GraphSageTrainMetrics> model,
+        ProgressTracker progressTracker
+    ) {
         var executorService = DefaultPool.INSTANCE;
-        var model = resolveModel(
-            modelCatalog,
-            configuration.modelUser(),
-            configuration.modelName()
-        );
 
         if (graph.hasRelationshipProperty()) {
-            validateRelationshipWeightPropertyValue(graph, configuration.concurrency(), executorService);
+            validateRelationshipWeightPropertyValue(graph, parameters.concurrency(), executorService);
         }
 
         return new GraphSage(
             graph,
             model,
-            configuration,
+            parameters.concurrency(),
+            parameters.batchSize(),
             executorService,
             progressTracker
         );
+    }
+
+    @Override
+    public GraphSage build(Graph graph, CONFIG configuration, ProgressTracker progressTracker) {
+        var model = resolveModel(
+            modelCatalog,
+            configuration.modelUser(),
+            configuration.modelName()
+        );
+        return build(graph, configuration.toParameters(), model, progressTracker);
     }
 
     @Override

@@ -24,9 +24,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
 import java.util.stream.Stream;
 
@@ -49,15 +49,15 @@ class HugeMergeSortTest {
                 )
             ).map(Arguments::of),
             // concurrencies
-            () -> List.of(1, 4).stream().map(Arguments::of),
+            () -> Stream.of(1, 4).map(Concurrency::new).map(Arguments::of),
             // single vs paged array
-            () -> List.of(true, false).stream().map(Arguments::of)
+            () -> Stream.of(true, false).map(Arguments::of)
         );
     }
 
     @ParameterizedTest
     @MethodSource("sizeAndConcurrency")
-    void sortArray(long size, int concurrency, boolean useSingleArray) {
+    void sortArray(long size, Concurrency concurrency, boolean useSingleArray) {
         var array = useSingleArray
             ? HugeLongArray.newSingleArray((int) size)
             : HugeLongArray.newPagedArray(size);

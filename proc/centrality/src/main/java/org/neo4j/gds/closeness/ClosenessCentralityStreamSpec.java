@@ -19,19 +19,17 @@
  */
 package org.neo4j.gds.closeness;
 
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.procedures.centrality.CentralityStreamResult;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.centrality.CentralityStreamResult;
 
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
-import static org.neo4j.gds.closeness.ClosenessCentrality.CLOSENESS_DESCRIPTION;
+import static org.neo4j.gds.closeness.Constants.CLOSENESS_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
 @GdsCallable(name = "gds.closeness.stream", aliases = {"gds.beta.closeness.stream"}, description = CLOSENESS_DESCRIPTION, executionMode = STREAM)
@@ -54,22 +52,6 @@ public class ClosenessCentralityStreamSpec implements AlgorithmSpec<ClosenessCen
 
     @Override
     public ComputationResultConsumer<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityStreamConfig, Stream<CentralityStreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging(
-            "Result streaming failed",
-            executionContext.log(),
-            () -> computationResult.result()
-                .map(result -> {
-                    var nodePropertyValues = result.nodePropertyValues();
-                    var graph = computationResult.graph();
-                    return LongStream
-                        .range(IdMap.START_NODE_ID, graph.nodeCount())
-                        .filter(nodePropertyValues::hasValue)
-                        .mapToObj(nodeId ->
-                            new CentralityStreamResult(
-                                graph.toOriginalNodeId(nodeId),
-                                nodePropertyValues.doubleValue(nodeId)
-                            ));
-                }).orElseGet(Stream::empty)
-        );
+        return new NullComputationResultConsumer<>();
     }
 }

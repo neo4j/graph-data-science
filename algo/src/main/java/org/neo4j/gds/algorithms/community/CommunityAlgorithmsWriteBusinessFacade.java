@@ -39,6 +39,7 @@ import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ArrowConnectionInfo;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.k1coloring.K1ColoringWriteConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionWriteConfig;
@@ -116,7 +117,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             configuration.writeConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
+            configuration.resolveResultStore(algorithmResult.resultStore())
         );
 
     }
@@ -143,7 +144,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             configuration.writeConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
+            configuration.resolveResultStore(algorithmResult.resultStore())
         );
 
     }
@@ -181,7 +182,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             configuration.writeConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
+            configuration.resolveResultStore(algorithmResult.resultStore())
         );
 
     }
@@ -215,7 +216,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             configuration.writeConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
+            configuration.resolveResultStore(algorithmResult.resultStore())
         );
 
     }
@@ -264,7 +265,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             configuration.writeConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
+            configuration.resolveResultStore(algorithmResult.resultStore())
         );
     }
 
@@ -306,7 +307,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             configuration.writeConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
+            configuration.resolveResultStore(algorithmResult.resultStore())
         );
     }
 
@@ -358,7 +359,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             configuration.writeConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
+            configuration.resolveResultStore(algorithmResult.resultStore())
         );
     }
 
@@ -396,7 +397,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             configuration.writeConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
+            configuration.resolveResultStore(algorithmResult.resultStore())
         );
     }
 
@@ -437,7 +438,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             config.writeConcurrency(),
             config.writeProperty(),
             config.arrowConnectionInfo(),
-            config.resolveResultStore(algorithmResult.graphStore().resultStore())
+            config.resolveResultStore(algorithmResult.resultStore())
         );
     }
 
@@ -483,7 +484,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             configuration.writeConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
+            configuration.resolveResultStore(algorithmResult.resultStore())
         );
     }
 
@@ -509,7 +510,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             config.writeConcurrency(),
             config.writeProperty(),
             config.arrowConnectionInfo(),
-            config.resolveResultStore(algorithmResult.graphStore().resultStore())
+            config.resolveResultStore(algorithmResult.resultStore())
         );
     }
 
@@ -538,7 +539,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             config.writeConcurrency(),
             config.writeProperty(),
             config.arrowConnectionInfo(),
-            config.resolveResultStore(algorithmResult.graphStore().resultStore())
+            config.resolveResultStore(algorithmResult.resultStore())
         );
     }
 
@@ -553,7 +554,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
         long computeMilliseconds,
         Supplier<ASF> emptyASFSupplier,
         String procedureName,
-        int writeConcurrency,
+        Concurrency writeConcurrency,
         String writeProperty,
         Optional<ArrowConnectionInfo> arrowConnectionInfo,
         Optional<ResultStore> resultStore
@@ -576,7 +577,8 @@ public class CommunityAlgorithmsWriteBusinessFacade {
                 writeProperty,
                 procedureName,
                 arrowConnectionInfo,
-                resultStore
+                resultStore,
+                configuration.jobId()
             );
 
             // 4. Compute result statistics
@@ -613,7 +615,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
         long computeMilliseconds,
         Supplier<ASF> emptyASFSupplier,
         String procedureName,
-        int writeConcurrency,
+        Concurrency writeConcurrency,
         String writeProperty,
         Optional<ArrowConnectionInfo> arrowConnectionInfo,
         Optional<ResultStore> resultStore
@@ -636,7 +638,8 @@ public class CommunityAlgorithmsWriteBusinessFacade {
                 writeProperty,
                 procedureName,
                 arrowConnectionInfo,
-                resultStore
+                resultStore,
+                configuration.jobId()
             );
 
 

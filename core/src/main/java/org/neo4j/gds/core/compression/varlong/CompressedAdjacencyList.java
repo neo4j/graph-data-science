@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.compression.varlong;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.RelationshipType;
@@ -29,12 +28,12 @@ import org.neo4j.gds.core.compression.MemoryInfo;
 import org.neo4j.gds.collections.PageUtil;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
 import org.neo4j.gds.core.loading.MutableIntValue;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.gds.collections.PageUtil.indexInPage;
@@ -73,9 +72,9 @@ public final class CompressedAdjacencyList implements AdjacencyList {
         int minPages = PageUtil.numPagesFor(bestCaseAdjacencySize, BumpAllocator.PAGE_SHIFT, BumpAllocator.PAGE_MASK);
         int maxPages = PageUtil.numPagesFor(worstCaseAdjacencySize, BumpAllocator.PAGE_SHIFT, BumpAllocator.PAGE_MASK);
 
-        long bytesPerPage = MemoryUsage.sizeOfByteArray(BumpAllocator.PAGE_SIZE);
-        long minMemoryReqs = minPages * bytesPerPage + MemoryUsage.sizeOfObjectArray(minPages);
-        long maxMemoryReqs = maxPages * bytesPerPage + MemoryUsage.sizeOfObjectArray(maxPages);
+        long bytesPerPage = Estimate.sizeOfByteArray(BumpAllocator.PAGE_SIZE);
+        long minMemoryReqs = minPages * bytesPerPage + Estimate.sizeOfObjectArray(minPages);
+        long maxMemoryReqs = maxPages * bytesPerPage + Estimate.sizeOfObjectArray(maxPages);
 
         MemoryRange pagesMemoryRange = MemoryRange.of(minMemoryReqs, maxMemoryReqs);
 
@@ -175,17 +174,6 @@ public final class CompressedAdjacencyList implements AdjacencyList {
                 degree
             );
             currentPosition = 0;
-        }
-
-        @Override
-        public @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination) {
-            var dest = destination instanceof DecompressingCursor
-                ? (DecompressingCursor) destination
-                : new DecompressingCursor(pages);
-            dest.decompress.copyFrom(this.decompress);
-            dest.currentPosition = this.currentPosition;
-            dest.maxTargets = this.maxTargets;
-            return dest;
         }
 
         @Override

@@ -21,9 +21,8 @@ package org.neo4j.gds.steiner;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
 
 class ReroutingChildrenManager {
 
@@ -32,8 +31,7 @@ class ReroutingChildrenManager {
     private final long sourceId;
 
     static MemoryEstimation estimation() {
-
-        var linkCutNodeMemoryEstimation = MemoryUsage.sizeOfObject(LinkCutNode.createSingle(0)).getAsLong();
+        var linkCutNodeMemoryEstimation = 8 + 8 + 8 + 8 + 8;
 
         var memoryEstimationBuilder = MemoryEstimations.builder(LinkCutTree.class)
             .perNode("nodes", nodeCount -> HugeObjectArray.memoryEstimation(nodeCount, linkCutNodeMemoryEstimation));

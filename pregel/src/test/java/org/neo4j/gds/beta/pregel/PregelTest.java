@@ -28,7 +28,8 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.GdlBuilder;
-import org.neo4j.gds.MemoryEstimateDefinition;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.TestTaskStore;
@@ -46,7 +47,7 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -547,7 +548,7 @@ class PregelTest {
             MemoryRange.of(expectedBytes).max,
             Pregel
                 .memoryEstimation(pregelSchema.propertiesMap(), isQueueBased, isAsync)
-                .estimate(dimensions, concurrency)
+                .estimate(dimensions, new Concurrency(concurrency))
                 .memoryUsage().max
         );
     }

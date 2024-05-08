@@ -20,12 +20,14 @@
 package org.neo4j.gds.core.io;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.graph.GraphProperty;
 import org.neo4j.gds.compat.InputEntityIdVisitor;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.io.GraphStoreExporter.IdMapFunction;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.internal.batchimport.InputIterable;
@@ -47,7 +49,6 @@ import java.util.ArrayDeque;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.Spliterator;
@@ -64,7 +65,7 @@ public final class GraphStoreInput implements Input {
 
     private final Set<GraphProperty> graphProperties;
     private final int batchSize;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final IdMapFunction idMapFunction;
     private final IdMode idMode;
     private final Capabilities capabilities;
@@ -99,7 +100,7 @@ public final class GraphStoreInput implements Input {
         Capabilities capabilities,
         Set<GraphProperty> graphProperties,
         int batchSize,
-        int concurrency,
+        Concurrency concurrency,
         GraphStoreExporter.IdMappingType idMappingType
     ) {
         // Neo reserves node id 2^32 - 1 for handling special internal cases.
@@ -156,7 +157,7 @@ public final class GraphStoreInput implements Input {
         Capabilities capabilities,
         Set<GraphProperty> graphProperties,
         int batchSize,
-        int concurrency,
+        Concurrency concurrency,
         IdMapFunction idMapFunction,
         IdMode idMode
     ) {
@@ -219,21 +220,25 @@ public final class GraphStoreInput implements Input {
         return () -> new GraphPropertyIterator(graphProperties.iterator(), concurrency);
     }
 
-    public Optional<NodeLabelMapping> labelMapping() {
+    public IdentifierMapper<NodeLabel> labelMapping() {
         return nodeStore.labelMapping();
+    }
+
+    public IdentifierMapper<RelationshipType> typeMapping() {
+        return relationshipStore.typeMapping();
     }
 
     static class GraphPropertyIterator implements InputIterator {
 
         private final Iterator<GraphProperty> graphPropertyIterator;
-        private final int concurrency;
+        private final Concurrency concurrency;
         private final Queue<Spliterator<?>> splits;
         private @Nullable String currentPropertyName;
 
-        GraphPropertyIterator(Iterator<GraphProperty> graphPropertyIterator, int concurrency) {
+        GraphPropertyIterator(Iterator<GraphProperty> graphPropertyIterator, Concurrency concurrency) {
             this.graphPropertyIterator = graphPropertyIterator;
             this.concurrency = concurrency;
-            this.splits = new ArrayBlockingQueue<>(concurrency);
+            this.splits = new ArrayBlockingQueue<>(concurrency.value());
         }
 
         @Override
@@ -272,7 +277,7 @@ public final class GraphStoreInput implements Input {
             var graphProperty = graphPropertyIterator.next();
             var graphPropertySpliterator = graphProperty.values().objects().parallel().spliterator();
 
-            precomputeSplits(graphPropertySpliterator, concurrency);
+            precomputeSplits(graphPropertySpliterator, concurrency.value());
             this.currentPropertyName = graphProperty.key();
         }
 

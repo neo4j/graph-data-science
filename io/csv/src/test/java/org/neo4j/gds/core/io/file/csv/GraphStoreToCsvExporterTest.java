@@ -22,6 +22,7 @@ package org.neo4j.gds.core.io.file.csv;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.CsvTestSupport;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
@@ -29,6 +30,7 @@ import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterParameters;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
@@ -126,6 +128,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
     @Inject
     private GraphStore noPropertiesGraphStore;
 
+    public static final List<String> LABEL_MAPPINGS_COLUMNS = List.of("index", "label");
     private static final List<String> NODE_COLUMNS = List.of(ID_COLUMN_NAME);
     private static final List<String> RELATIONSHIP_COLUMNS = List.of(START_ID_COLUMN_NAME, END_ID_COLUMN_NAME);
 
@@ -136,13 +139,11 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
     @Test
     void exportTopology() {
-        var parameters = GraphStoreToFileExporterParameters.create(
+        var parameters = new GraphStoreToFileExporterParameters(
             tempDir.toString(),
             "",
-            true,
-            false,
-            RelationshipType.ALL_RELATIONSHIPS.name,
-            1,
+            RelationshipType.ALL_RELATIONSHIPS,
+            new Concurrency(1),
             10_000
         );
         // export db
@@ -164,41 +165,48 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
         assertCsvFiles(
             List.of(
-                "nodes_A_B_0.csv",
-                "nodes_A_B_header.csv",
-                "nodes_A_C_0.csv",
-                "nodes_A_C_header.csv",
-                "nodes_B_0.csv",
-                "nodes_B_header.csv",
-                "relationships_REL1_0.csv",
-                "relationships_REL1_header.csv",
-                "relationships_REL2_0.csv",
-                "relationships_REL2_header.csv"
+                "label-mappings.csv",
+                "nodes_label1_label2_0.csv",
+                "nodes_label1_label2_header.csv",
+                "nodes_label1_label3_0.csv",
+                "nodes_label1_label3_header.csv",
+                "nodes_label2_0.csv",
+                "nodes_label2_header.csv",
+                "relationships_type1_0.csv",
+                "relationships_type1_header.csv",
+                "relationships_type2_0.csv",
+                "relationships_type2_header.csv"
             )
         );
 
-        // Assert nodes
+        // Assert label mappings
+        CsvTestSupport.assertFileContent(tempDir, "label-mappings.csv", """
+                index,label
+                label1,A
+                label2,B
+                label3,C
+                """);
 
-        assertHeaderFile("nodes_A_B_header.csv", NODE_COLUMNS, abSchema);
+        assertHeaderFile("nodes_label1_label2_header.csv", NODE_COLUMNS, abSchema);
         assertDataContent(
-            "nodes_A_B_0.csv",
+            "nodes_label1_label2_0.csv",
             List.of(
                 List.of(stringIdOf("a"), "0", "42", "1;3;3;7"),
                 List.of(stringIdOf("b"), "1", "43", "")
             )
         );
 
-        assertHeaderFile("nodes_A_C_header.csv", NODE_COLUMNS, acSchema);
+        assertHeaderFile("nodes_label1_label3_header.csv", NODE_COLUMNS, acSchema);
         assertDataContent(
-            "nodes_A_C_0.csv",
+            "nodes_label1_label3_0.csv",
             List.of(
                 List.of(stringIdOf("c"), "2", "44", "1;9;8;4")
             )
         );
 
-        assertHeaderFile("nodes_B_header.csv", NODE_COLUMNS, bSchema);
+        assertHeaderFile("nodes_label2_header.csv", NODE_COLUMNS, bSchema);
         assertDataContent(
-            "nodes_B_0.csv",
+            "nodes_label2_0.csv",
             List.of(
                 List.of(stringIdOf("d"), "3", "", "")
             )
@@ -206,9 +214,9 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
         // assert relationships
 
-        assertHeaderFile("relationships_REL1_header.csv", RELATIONSHIP_COLUMNS, rel1Schema);
+        assertHeaderFile("relationships_type1_header.csv", RELATIONSHIP_COLUMNS, rel1Schema);
         assertDataContent(
-            "relationships_REL1_0.csv",
+            "relationships_type1_0.csv",
             List.of(
                 List.of(stringIdOf("a"), stringIdOf("a"), "0.0", "42.0"),
                 List.of(stringIdOf("a"), stringIdOf("a"), "0.0", "42.0"),
@@ -220,9 +228,9 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             )
         );
 
-        assertHeaderFile("relationships_REL2_header.csv", RELATIONSHIP_COLUMNS, rel2Schema);
+        assertHeaderFile("relationships_type2_header.csv", RELATIONSHIP_COLUMNS, rel2Schema);
         assertDataContent(
-            "relationships_REL2_0.csv",
+            "relationships_type2_0.csv",
             List.of(
                 List.of(stringIdOf("b"), stringIdOf("c"), "3.0", "45.0"),
                 List.of(stringIdOf("c"), stringIdOf("b"), "3.0", "45.0"),
@@ -237,13 +245,11 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
     @Test
     void shouldExportGraphProperties() {
-        var parameters = GraphStoreToFileExporterParameters.create(
+        var parameters = new GraphStoreToFileExporterParameters(
             tempDir.toString(),
             "",
-            false,
-            false,
-            RelationshipType.ALL_RELATIONSHIPS.name,
-            1,
+            RelationshipType.ALL_RELATIONSHIPS,
+            new Concurrency(1),
             10_000
         );
 
@@ -293,13 +299,11 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
     @Test
     void exportMultithreaded() {
-        var parameters = GraphStoreToFileExporterParameters.create(
+        var parameters = new GraphStoreToFileExporterParameters(
             tempDir.toString(),
             "",
-            true,
-            false,
-            RelationshipType.ALL_RELATIONSHIPS.name,
-            2,
+            RelationshipType.ALL_RELATIONSHIPS,
+            new Concurrency(2),
             10_000
         );
 
@@ -318,7 +322,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
         // Assert headers
         var nodeSchema = concurrentGraphStore.schema().nodeSchema();
         assertHeaderFile("nodes_header.csv", NODE_COLUMNS, nodeSchema.unionProperties());
-        assertHeaderFile("relationships_REL1_header.csv", RELATIONSHIP_COLUMNS, Collections.emptyMap());
+        assertHeaderFile("relationships_type1_header.csv", RELATIONSHIP_COLUMNS, Collections.emptyMap());
 
         // Sometimes we end up with only one file, so we cannot make absolute assumptions about the files created
         var nodeContents = Arrays.stream(
@@ -372,13 +376,11 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
     @Test
     void exportGraphPropertiesMultithreaded() throws IOException {
-        var parameters = GraphStoreToFileExporterParameters.create(
+        var parameters = new GraphStoreToFileExporterParameters(
             tempDir.toString(),
             "",
-            false,
-            false,
-            RelationshipType.ALL_RELATIONSHIPS.name,
-            4,
+            RelationshipType.ALL_RELATIONSHIPS,
+            new Concurrency(4),
             10_000
         );
 
@@ -410,7 +412,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
         assertCsvFiles(
             LongStream
-                .range(0, parameters.concurrency())
+                .range(0, parameters.concurrency().value())
                 .mapToObj(
                     i -> formatWithLocale(
                         CsvGraphPropertyVisitor.GRAPH_PROPERTY_DATA_FILE_NAME_TEMPLATE,
@@ -448,13 +450,11 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
     @Test
     void exportSchemaAndDatabaseId() {
-        var parameters = GraphStoreToFileExporterParameters.create(
+        var parameters = new GraphStoreToFileExporterParameters(
             tempDir.toString(),
             "",
-            true,
-            false,
-            RelationshipType.ALL_RELATIONSHIPS.name,
-            1,
+            RelationshipType.ALL_RELATIONSHIPS,
+            new Concurrency(1),
             10_000
         );
 
@@ -647,13 +647,11 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
     @Test
     void exportUsername() {
-        var parameters = GraphStoreToFileExporterParameters.create(
+        var parameters = new GraphStoreToFileExporterParameters(
             tempDir.toString(),
             "UserA",
-            true,
-            false,
-            RelationshipType.ALL_RELATIONSHIPS.name,
-            1,
+            RelationshipType.ALL_RELATIONSHIPS,
+            new Concurrency(1),
             10_000
         );
 
@@ -677,13 +675,11 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
     @Test
     void exportSchemaWithoutProperties() {
-        var parameters = GraphStoreToFileExporterParameters.create(
+        var parameters = new GraphStoreToFileExporterParameters(
             tempDir.toString(),
             "",
-            true,
-            false,
-            RelationshipType.ALL_RELATIONSHIPS.name,
-            1,
+            RelationshipType.ALL_RELATIONSHIPS,
+            new Concurrency(1),
             10_000
         );
 
@@ -731,13 +727,11 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             .build()
             .build();
 
-        var parameters = GraphStoreToFileExporterParameters.create(
+        var parameters = new GraphStoreToFileExporterParameters(
             tempDir.toString(),
             "",
-            false,
-            false,
-            RelationshipType.ALL_RELATIONSHIPS.name,
-            1,
+            RelationshipType.ALL_RELATIONSHIPS,
+            new Concurrency(1),
             10_000
         );
 
@@ -757,8 +751,8 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             List.of(
                 "nodes_0.csv",
                 "nodes_header.csv",
-                "relationships_REL_0.csv",
-                "relationships_REL_header.csv"
+                "relationships_type1_0.csv",
+                "relationships_type1_header.csv"
             )
         );
 
@@ -771,7 +765,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
         );
 
         assertDataContent(
-            "relationships_REL_0.csv",
+            "relationships_type1_0.csv",
             List.of(
                 List.of("42", "43")
             )
@@ -780,13 +774,11 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
     @Test
     void shouldExportGraphCapabilities() {
-        var parameters = GraphStoreToFileExporterParameters.create(
+        var parameters = new GraphStoreToFileExporterParameters(
             tempDir.toString(),
             "",
-            true,
-            false,
-            RelationshipType.ALL_RELATIONSHIPS.name,
-            1,
+            RelationshipType.ALL_RELATIONSHIPS,
+            new Concurrency(1),
             10_000
         );
 

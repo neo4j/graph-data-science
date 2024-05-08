@@ -21,6 +21,7 @@ package org.neo4j.gds.similarity.nodesim;
 
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -49,7 +50,7 @@ public final class ComponentNodes {
         this.nodesSorted = nodesSorted;
     }
 
-    public static ComponentNodes create(LongUnaryOperator components, long nodeCount, int concurrency) {
+    public static ComponentNodes create(LongUnaryOperator components, long nodeCount, Concurrency concurrency) {
         return create(components, (v) -> true, nodeCount, concurrency);
     }
 
@@ -57,7 +58,7 @@ public final class ComponentNodes {
         LongUnaryOperator components,
         LongPredicate targetNodesFilter,
         long nodeCount,
-        int concurrency
+        Concurrency concurrency
     ) {
         var upperBoundPerComponent = computeIndexUpperBoundPerComponent(
             components,
@@ -103,10 +104,10 @@ public final class ComponentNodes {
     }
 
     static HugeAtomicLongArray computeIndexUpperBoundPerComponent(
-            LongUnaryOperator components,
-            long nodeCount,
-            LongPredicate includeNode,
-        int concurrency
+        LongUnaryOperator components,
+        long nodeCount,
+        LongPredicate includeNode,
+        Concurrency concurrency
     ) {
 
         var upperBoundPerComponent = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(concurrency));
@@ -142,7 +143,7 @@ public final class ComponentNodes {
             LongUnaryOperator components,
             HugeAtomicLongArray idxUpperBoundPerComponent,
             LongPredicate includeNode,
-            int concurrency
+            Concurrency concurrency
     ) {
 
         // initialized to its max possible size of 1 node <=> 1 component in a disconnected graph

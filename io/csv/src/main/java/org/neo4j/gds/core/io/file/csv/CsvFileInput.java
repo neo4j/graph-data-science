@@ -26,6 +26,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.collections.impl.block.factory.Functions;
+import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
@@ -58,6 +59,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 final class CsvFileInput implements FileInput {
 
@@ -83,10 +85,12 @@ final class CsvFileInput implements FileInput {
     private final String userName;
     private final GraphInfo graphInfo;
     private final MutableNodeSchema nodeSchema;
+    // TODO: type that has the mapping
     private final Optional<HashMap<String, String>> labelMapping;
     private final MutableRelationshipSchema relationshipSchema;
     private final Map<String, PropertySchema> graphPropertySchema;
     private final Capabilities capabilities;
+    private final Optional<Map<String, String>> typeMapping;
 
     CsvFileInput(Path importPath) {
         this.importPath = importPath;
@@ -94,6 +98,7 @@ final class CsvFileInput implements FileInput {
         this.graphInfo = new GraphInfoLoader(importPath, CSV_MAPPER).load();
         this.nodeSchema = new NodeSchemaLoader(importPath).load();
         this.labelMapping = new NodeLabelMappingLoader(importPath).load();
+        this.typeMapping = new RelationshipTypeMappingLoader(importPath).load();
         this.relationshipSchema = new RelationshipSchemaLoader(importPath).load();
         this.graphPropertySchema = new GraphPropertySchemaLoader(importPath).load();
         this.capabilities = new GraphCapabilitiesLoader(importPath, CSV_MAPPER).load();
@@ -101,7 +106,9 @@ final class CsvFileInput implements FileInput {
 
     @Override
     public InputIterable nodes(Collector badCollector) {
-        Map<Path, List<Path>> pathMapping = CsvImportFileUtil.nodeHeaderToFileMapping(importPath);
+        Map<Path, List<Path>> pathMapping = CsvImportFileUtil.nodeHeaderToFileMapping(
+            this.importPath
+        );
         Map<NodeFileHeader, List<Path>> headerToDataFilesMapping = pathMapping.entrySet()
             .stream()
             .collect(Collectors.toMap(
@@ -115,12 +122,22 @@ final class CsvFileInput implements FileInput {
         return () -> new NodeImporter(headerToDataFilesMapping, nodeSchema);
     }
 
+    private Stream<String> nodeLabels() {
+        return this.labelMapping.map(lm -> lm.keySet().stream()).orElseGet(() -> this.nodeSchema.availableLabels()
+            .stream()
+            .map(ElementIdentifier::name));
+    }
+
     @Override
     public InputIterable relationships(Collector badCollector) {
         Map<Path, List<Path>> pathMapping = CsvImportFileUtil.relationshipHeaderToFileMapping(importPath);
-        Map<RelationshipFileHeader, List<Path>> headerToDataFilesMapping = pathMapping.entrySet().stream().collect(Collectors.toMap(
-            entry -> CsvImportFileUtil.parseRelationshipHeader(entry.getKey()),
-            Map.Entry::getValue
+        Map<RelationshipFileHeader, List<Path>> headerToDataFilesMapping = pathMapping.entrySet().stream()
+            .collect(Collectors.toMap(
+                entry -> CsvImportFileUtil.parseRelationshipHeader(
+                    entry.getKey(),
+                    typeMapping.isPresent() ? typeMapping.get()::get : Functions.identity()
+                ),
+                Map.Entry::getValue
         ));
 
         return () -> new RelationshipImporter(headerToDataFilesMapping, relationshipSchema);

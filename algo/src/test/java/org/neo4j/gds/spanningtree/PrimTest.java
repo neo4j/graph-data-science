@@ -29,6 +29,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -146,13 +147,13 @@ class PrimTest {
 
     @Test
     void shouldLogProgress() {
-        var parameters = SpanningTreeParameters.create(Prim.MIN_OPERATOR, graph.toOriginalNodeId("a"));
+        var parameters = new SpanningTreeParameters(Prim.MIN_OPERATOR, graph.toOriginalNodeId("a"));
         var factory = new SpanningTreeAlgorithmFactory<>();
         var log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(
             factory.progressTask(graph),
             log,
-            1,
+            new Concurrency(1),
             EmptyTaskRegistryFactory.INSTANCE
         );
         factory.build(graph, parameters, progressTracker).compute();

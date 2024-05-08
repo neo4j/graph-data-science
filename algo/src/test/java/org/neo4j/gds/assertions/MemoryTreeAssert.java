@@ -21,7 +21,7 @@ package org.neo4j.gds.assertions;
 
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.Assertions;
-import org.neo4j.gds.core.utils.mem.MemoryTree;
+import org.neo4j.gds.mem.MemoryTree;
 
 import java.util.stream.Collectors;
 

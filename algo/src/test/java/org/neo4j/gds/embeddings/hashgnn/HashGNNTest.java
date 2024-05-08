@@ -36,6 +36,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.ArrayIdMap;
 import org.neo4j.gds.core.loading.LabelInformationBuilders;
@@ -97,8 +98,8 @@ class HashGNNTest {
     @Test
     void binaryLowNeighborInfluence() {
         int embeddingDensity = 4;
-        var parameters = HashGNNParameters.create(
-            4,
+        var parameters = new HashGNNParameters(
+            new Concurrency(4),
             10,
             embeddingDensity,
             0.01,
@@ -118,8 +119,8 @@ class HashGNNTest {
 
     @Test
     void binaryHighEmbeddingDensityHighNeighborInfluence() {
-        var parameters = HashGNNParameters.create(
-            4,
+        var parameters = new HashGNNParameters(
+            new Concurrency(4),
             10,
             200,
             100,
@@ -151,8 +152,8 @@ class HashGNNTest {
     @ParameterizedTest
     @MethodSource("determinismParams")
     void shouldBeDeterministic(int concurrency, boolean binarize, boolean dimReduce) {
-        var parameters = HashGNNParameters.create(
-            concurrency,
+        var parameters = new HashGNNParameters(
+            new Concurrency(concurrency),
             1,
             2,
             1,
@@ -180,8 +181,8 @@ class HashGNNTest {
         // not all random seeds will give b a unique feature
         // this intends to test that if b has a unique feature before the first iteration, then it also has it after the first iteration
         // however we simulate what is before the first iteration by running with neighborInfluence 0
-        Function<Double, HashGNNParameters> parametersMaker = (neighborInfluence) -> HashGNNParameters.create(
-            4,
+        Function<Double, HashGNNParameters> parametersMaker = (neighborInfluence) -> new HashGNNParameters(
+            new Concurrency(4),
             1,
             embeddingDensity,
             neighborInfluence,
@@ -224,8 +225,8 @@ class HashGNNTest {
         int embeddingDensity = 100;
         int binarizationDimension = 8;
 
-        Function<Double, HashGNNParameters> parametersMaker = (neighborInfluence) ->  HashGNNParameters.create(
-            4,
+        Function<Double, HashGNNParameters> parametersMaker = (neighborInfluence) ->  new HashGNNParameters(
+            new Concurrency(4),
             1,
             embeddingDensity,
             neighborInfluence,
@@ -302,7 +303,7 @@ class HashGNNTest {
         var factory = new HashGNNFactory<>();
         var progressTask = factory.progressTask(g, config);
         var log = Neo4jProxy.testLog();
-        var progressTracker = new TaskProgressTracker(progressTask, log, 4, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TaskProgressTracker(progressTask, log, new Concurrency(4), EmptyTaskRegistryFactory.INSTANCE);
 
         factory.build(g, config, progressTracker).compute();
 

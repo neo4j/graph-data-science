@@ -22,8 +22,8 @@ package org.neo4j.gds.similarity.knn;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -70,7 +70,7 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends GraphAlgorithmFact
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return new KnnMemoryEstimateDefinition(configuration.tomMemoryEstimationParameters()).memoryEstimation();
+        return new KnnMemoryEstimateDefinition(configuration.toMemoryEstimationParameters()).memoryEstimation();
     }
 
     public static MemoryRange initialSamplerMemoryEstimation(KnnSampler.SamplerType samplerType, long boundedK) {

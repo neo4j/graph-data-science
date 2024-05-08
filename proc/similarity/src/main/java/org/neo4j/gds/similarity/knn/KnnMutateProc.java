@@ -20,8 +20,8 @@
 package org.neo4j.gds.similarity.knn;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.similarity.knn.KnnMutateResult;
-import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.procedures.algorithms.similarity.KnnMutateResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
-import static org.neo4j.gds.similarity.knn.KnnProc.KNN_DESCRIPTION;
+import static org.neo4j.gds.similarity.knn.Constants.KNN_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class KnnMutateProc {
@@ -44,7 +44,7 @@ public class KnnMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.similarity().knnMutate(graphName, configuration);
+        return facade.algorithms().similarity().knnMutateStub().execute(graphName, configuration);
     }
 
     @Procedure(value = "gds.knn.mutate.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class KnnMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.similarity().knnMutateEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().similarity().knnMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

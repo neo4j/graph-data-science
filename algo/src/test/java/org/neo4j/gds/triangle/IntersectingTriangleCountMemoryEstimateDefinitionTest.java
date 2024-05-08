@@ -25,7 +25,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.mem.MemoryEstimation;
 
 class IntersectingTriangleCountMemoryEstimateDefinitionTest {
 
@@ -41,7 +42,7 @@ class IntersectingTriangleCountMemoryEstimateDefinitionTest {
         long expected = 72 + hugeAtomicLongArray;
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
-            .memoryRange(graphDimensions, 1)
+            .memoryRange(graphDimensions, new Concurrency(1))
             .hasSameMinAndMaxEqualTo(expected);
     }
 
@@ -52,12 +53,12 @@ class IntersectingTriangleCountMemoryEstimateDefinitionTest {
             new IntersectingTriangleCountMemoryEstimateDefinition().memoryEstimation();
 
         GraphDimensions graphDimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
-        
+
         long hugeAtomicLongArray = 32 + sizeOfHugeArray;
         long expected = 72 + hugeAtomicLongArray;
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
-            .memoryRange(graphDimensions, 1)
+            .memoryRange(graphDimensions, new Concurrency(1))
             .hasSameMinAndMaxEqualTo(expected);
 
     }

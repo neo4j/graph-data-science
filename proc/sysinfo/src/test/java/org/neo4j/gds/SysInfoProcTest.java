@@ -54,15 +54,6 @@ class SysInfoProcTest extends BaseProcTest {
         "Neo4j Settings 5.x",
         "Neo4j Settings 5.x (placeholder)",
 
-        "Neo4j 5.11",
-        "Neo4j 5.11 (placeholder)",
-
-        "Neo4j 5.12",
-        "Neo4j 5.12 (placeholder)",
-
-        "Neo4j 5.13",
-        "Neo4j 5.13 (placeholder)",
-
         "Neo4j 5.14",
         "Neo4j 5.14 (placeholder)",
 
@@ -77,6 +68,9 @@ class SysInfoProcTest extends BaseProcTest {
 
         "Neo4j 5.18",
         "Neo4j 5.18 (placeholder)",
+
+        "Neo4j 5.19",
+        "Neo4j 5.19 (placeholder)",
 
         "Neo4j DEV",
         "Neo4j DEV (placeholder)",
@@ -131,30 +125,6 @@ class SysInfoProcTest extends BaseProcTest {
 
         Set<String> expectedCompatibilities;
         switch (neo4jVersion) {
-            case V_5_11:
-                expectedCompatibilities = Set.of(
-                    "Neo4j Settings 5.x (placeholder)",
-                    "Neo4j Settings 5.x",
-                    "Neo4j 5.11 (placeholder)",
-                    "Neo4j 5.11"
-                );
-                break;
-            case V_5_12:
-                expectedCompatibilities = Set.of(
-                    "Neo4j Settings 5.x (placeholder)",
-                    "Neo4j Settings 5.x",
-                    "Neo4j 5.12 (placeholder)",
-                    "Neo4j 5.12"
-                );
-                break;
-            case V_5_13:
-                expectedCompatibilities = Set.of(
-                    "Neo4j Settings 5.x (placeholder)",
-                    "Neo4j Settings 5.x",
-                    "Neo4j 5.13 (placeholder)",
-                    "Neo4j 5.13"
-                );
-                break;
             case V_5_14:
                 expectedCompatibilities = Set.of(
                     "Neo4j Settings 5.x (placeholder)",
@@ -195,6 +165,14 @@ class SysInfoProcTest extends BaseProcTest {
                     "Neo4j 5.18"
                 );
                 break;
+            case V_5_19:
+                expectedCompatibilities = Set.of(
+                    "Neo4j Settings 5.x (placeholder)",
+                    "Neo4j Settings 5.x",
+                    "Neo4j 5.19 (placeholder)",
+                    "Neo4j 5.19"
+                );
+                break;
             case V_Dev:
                 expectedCompatibilities = Set.of(
                     "Neo4j Settings 5.x",
@@ -228,7 +206,7 @@ class SysInfoProcTest extends BaseProcTest {
         };
 
         assertThat(result)
-            .hasSizeGreaterThanOrEqualTo(44)
+            .hasSizeGreaterThanOrEqualTo(43)
             .containsEntry("gdsVersion", buildInfoProperties.gdsVersion())
             .containsEntry("minimumRequiredJavaVersion", buildInfoProperties.minimumRequiredJavaVersion())
             .containsEntry("buildDate", buildInfoProperties.buildDate())
@@ -273,7 +251,6 @@ class SysInfoProcTest extends BaseProcTest {
             .containsEntry(Neo4jSettings.pageCacheMemory().name(), Neo4jSettings.pageCacheMemoryValue("42M"))
             .containsEntry(Neo4jSettings.transactionStateAllocation().name(), "ON_HEAP")
             .containsEntry(Neo4jSettings.transactionStateMaxOffHeapMemory().name(), 1337L)
-            .containsEntry("featureSkipOrphanNodes", GdsFeatureToggles.SKIP_ORPHANS.isEnabled())
             .containsEntry("featureBitIdMap", GdsFeatureToggles.USE_BIT_ID_MAP.isEnabled())
             .containsEntry("featureUncompressedAdjacencyList", GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled())
             .containsEntry("featurePackedAdjacencyList", GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST.isEnabled())

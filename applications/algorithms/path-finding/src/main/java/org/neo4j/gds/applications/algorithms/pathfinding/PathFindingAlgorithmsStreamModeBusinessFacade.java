@@ -22,6 +22,8 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.dag.longestPath.DagLongestPathStreamConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
@@ -82,13 +84,13 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> RESULT allShortestPaths(
         GraphName graphName,
         AllShortestPathsConfig configuration,
-        ResultBuilder<AllShortestPathsConfig, Stream<AllShortestPathsStreamResult>, RESULT> resultBuilder
+        ResultBuilder<AllShortestPathsConfig, Stream<AllShortestPathsStreamResult>, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
             ALL_SHORTEST_PATHS,
-            estimationFacade::allShortestPathsEstimation,
+            estimationFacade::allShortestPaths,
             graph -> pathFindingAlgorithms.allShortestPaths(graph, configuration),
             Optional.empty(),
             resultBuilder
@@ -98,13 +100,13 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> RESULT bellmanFord(
         GraphName graphName,
         BellmanFordStreamConfig configuration,
-        ResultBuilder<BellmanFordStreamConfig, BellmanFordResult, RESULT> resultBuilder
+        ResultBuilder<BellmanFordStreamConfig, BellmanFordResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
             BELLMAN_FORD,
-            () -> estimationFacade.bellmanFordEstimation(configuration),
+            () -> estimationFacade.bellmanFord(configuration),
             graph -> pathFindingAlgorithms.bellmanFord(graph, configuration),
             Optional.empty(),
             resultBuilder
@@ -114,13 +116,13 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> RESULT breadthFirstSearch(
         GraphName graphName,
         BfsStreamConfig configuration,
-        ResultBuilder<BfsStreamConfig, HugeLongArray, RESULT> resultBuilder
+        ResultBuilder<BfsStreamConfig, HugeLongArray, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
             BFS,
-            estimationFacade::breadthFirstSearchEstimation,
+            estimationFacade::breadthFirstSearch,
             graph -> pathFindingAlgorithms.breadthFirstSearch(graph, configuration),
             Optional.empty(),
             resultBuilder
@@ -130,13 +132,13 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> RESULT deltaStepping(
         GraphName graphName,
         AllShortestPathsDeltaStreamConfig configuration,
-        ResultBuilder<AllShortestPathsDeltaStreamConfig, PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<AllShortestPathsDeltaStreamConfig, PathFindingResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
             DELTA_STEPPING,
-            estimationFacade::deltaSteppingEstimation,
+            estimationFacade::deltaStepping,
             graph -> pathFindingAlgorithms.deltaStepping(graph, configuration),
             Optional.empty(),
             resultBuilder
@@ -146,13 +148,13 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> RESULT depthFirstSearch(
         GraphName graphName,
         DfsStreamConfig configuration,
-        ResultBuilder<DfsStreamConfig, HugeLongArray, RESULT> resultBuilder
+        ResultBuilder<DfsStreamConfig, HugeLongArray, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
             DFS,
-            estimationFacade::depthFirstSearchEstimation,
+            estimationFacade::depthFirstSearch,
             graph -> pathFindingAlgorithms.depthFirstSearch(graph, configuration),
             Optional.empty(),
             resultBuilder
@@ -162,13 +164,13 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> RESULT longestPath(
         GraphName graphName,
         DagLongestPathStreamConfig configuration,
-        ResultBuilder<DagLongestPathStreamConfig, PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<DagLongestPathStreamConfig, PathFindingResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
             LONGEST_PATH,
-            estimationFacade::longestPathEstimation,
+            estimationFacade::longestPath,
             graph -> pathFindingAlgorithms.longestPath(graph, configuration),
             Optional.empty(),
             resultBuilder
@@ -178,13 +180,13 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> RESULT randomWalk(
         GraphName graphName,
         RandomWalkStreamConfig configuration,
-        ResultBuilder<RandomWalkStreamConfig, Stream<long[]>, RESULT> resultBuilder
+        ResultBuilder<RandomWalkStreamConfig, Stream<long[]>, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
             RANDOM_WALK,
-            () -> estimationFacade.randomWalkEstimation(configuration),
+            () -> estimationFacade.randomWalk(configuration),
             graph -> pathFindingAlgorithms.randomWalk(graph, configuration),
             Optional.empty(),
             resultBuilder
@@ -194,13 +196,13 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> RESULT singlePairShortestPathAStar(
         GraphName graphName,
         ShortestPathAStarStreamConfig configuration,
-        ResultBuilder<ShortestPathAStarStreamConfig, PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<ShortestPathAStarStreamConfig, PathFindingResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
             A_STAR,
-            estimationFacade::singlePairShortestPathAStarEstimation,
+            estimationFacade::singlePairShortestPathAStar,
             graph -> pathFindingAlgorithms.singlePairShortestPathAStar(graph, configuration),
             Optional.empty(),
             resultBuilder
@@ -210,13 +212,13 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> RESULT singlePairShortestPathDijkstra(
         GraphName graphName,
         ShortestPathDijkstraStreamConfig configuration,
-        ResultBuilder<ShortestPathDijkstraStreamConfig, PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<ShortestPathDijkstraStreamConfig, PathFindingResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
             DIJKSTRA,
-            () -> estimationFacade.singlePairShortestPathDijkstraEstimation(configuration),
+            () -> estimationFacade.singlePairShortestPathDijkstra(configuration),
             graph -> pathFindingAlgorithms.singlePairShortestPathDijkstra(graph, configuration),
             Optional.empty(),
             resultBuilder
@@ -226,13 +228,13 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> RESULT singlePairShortestPathYens(
         GraphName graphName,
         ShortestPathYensStreamConfig configuration,
-        ResultBuilder<ShortestPathYensStreamConfig, PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<ShortestPathYensStreamConfig, PathFindingResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
             YENS,
-            () -> estimationFacade.singlePairShortestPathYensEstimation(configuration),
+            () -> estimationFacade.singlePairShortestPathYens(configuration),
             graph -> pathFindingAlgorithms.singlePairShortestPathYens(graph, configuration),
             Optional.empty(),
             resultBuilder
@@ -242,13 +244,13 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> RESULT singleSourceShortestPathDijkstra(
         GraphName graphName,
         AllShortestPathsDijkstraStreamConfig configuration,
-        ResultBuilder<AllShortestPathsDijkstraStreamConfig, PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<AllShortestPathsDijkstraStreamConfig, PathFindingResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
             DIJKSTRA,
-            () -> estimationFacade.singleSourceShortestPathDijkstraEstimation(configuration),
+            () -> estimationFacade.singleSourceShortestPathDijkstra(configuration),
             graph -> pathFindingAlgorithms.singleSourceShortestPathDijkstra(graph, configuration),
             Optional.empty(),
             resultBuilder
@@ -258,13 +260,13 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> RESULT spanningTree(
         GraphName graphName,
         SpanningTreeStreamConfig configuration,
-        ResultBuilder<SpanningTreeStreamConfig, SpanningTree, RESULT> resultBuilder
+        ResultBuilder<SpanningTreeStreamConfig, SpanningTree, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
             SPANNING_TREE,
-            estimationFacade::spanningTreeEstimation,
+            estimationFacade::spanningTree,
             graph -> pathFindingAlgorithms.spanningTree(graph, configuration),
             Optional.empty(),
             resultBuilder
@@ -274,13 +276,13 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> RESULT steinerTree(
         GraphName graphName,
         SteinerTreeStreamConfig configuration,
-        ResultBuilder<SteinerTreeStreamConfig, SteinerTreeResult, RESULT> resultBuilder
+        ResultBuilder<SteinerTreeStreamConfig, SteinerTreeResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
             STEINER,
-            () -> estimationFacade.steinerTreeEstimation(configuration),
+            () -> estimationFacade.steinerTree(configuration),
             graph -> pathFindingAlgorithms.steinerTree(graph, configuration),
             Optional.empty(),
             resultBuilder
@@ -290,13 +292,13 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> RESULT topologicalSort(
         GraphName graphName,
         TopologicalSortStreamConfig configuration,
-        ResultBuilder<TopologicalSortStreamConfig, TopologicalSortResult, RESULT> resultBuilder
+        ResultBuilder<TopologicalSortStreamConfig, TopologicalSortResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
             TOPOLOGICAL_SORT,
-            estimationFacade::topologicalSortEstimation,
+            estimationFacade::topologicalSort,
             graph -> pathFindingAlgorithms.topologicalSort(graph, configuration),
             Optional.empty(),
             resultBuilder

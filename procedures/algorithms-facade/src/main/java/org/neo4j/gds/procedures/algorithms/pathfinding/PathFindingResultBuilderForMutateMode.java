@@ -21,15 +21,15 @@ package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.pathfinding.ResultBuilder;
-import org.neo4j.gds.applications.algorithms.pathfinding.SideEffectProcessingCounts;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 
 import java.util.Optional;
 
-public class PathFindingResultBuilderForMutateMode<CONFIGURATION extends ToMapConvertible> implements ResultBuilder<CONFIGURATION, PathFindingResult, PathFindingMutateResult> {
+public class PathFindingResultBuilderForMutateMode<CONFIGURATION extends ToMapConvertible> implements ResultBuilder<CONFIGURATION, PathFindingResult, PathFindingMutateResult, RelationshipsWritten> {
     @Override
     public PathFindingMutateResult build(
         Graph graph,
@@ -37,14 +37,14 @@ public class PathFindingResultBuilderForMutateMode<CONFIGURATION extends ToMapCo
         CONFIGURATION configuration,
         Optional<PathFindingResult> pathFindingResult,
         AlgorithmProcessingTimings timings,
-        SideEffectProcessingCounts counts
+        Optional<RelationshipsWritten> metadata
     ) {
         return new PathFindingMutateResult(
             timings.preProcessingMillis,
             timings.computeMillis,
             0, // yeah, I don't understand it either :shrug:
-            timings.postProcessingMillis,
-            counts.relationshipsWritten,
+            timings.mutateOrWriteMillis,
+            metadata.map(rw -> rw.value).orElse(0L),
             configuration.toMap()
         );
     }

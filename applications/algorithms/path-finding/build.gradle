@@ -5,11 +5,14 @@ description = 'Neo4j Graph Data Science :: Path Finding Algorithms'
 group = 'org.neo4j.gds'
 
 dependencies {
-    compileOnly(group: 'org.neo4j', name: 'neo4j-common', version: ver.'neo4j') { transitive = false }
-    compileOnly(group: 'org.neo4j', name: 'neo4j-logging', version: ver.'neo4j') { transitive = false }
-    compileOnly(group: 'org.neo4j', name: 'neo4j-values', version: ver.'neo4j') { transitive = false }
+    neodeps().each {
+        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
+            transitive = false
+        }
+    }
 
     implementation project(':algo')
+    implementation project(':algorithms-machinery')
     implementation project(':algo-common')
     implementation project(':config-api')
     implementation project(':core')

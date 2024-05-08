@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.paged.ShardedLongLongMap;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 
@@ -32,11 +33,11 @@ public final class HighLimitIdMapBuilder implements IdMapBuilder {
 
     private final CloseableThreadLocal<BulkAdder> bulkAdders;
 
-    public static HighLimitIdMapBuilder of(int concurrency, IdMapBuilder internalIdMapBuilder) {
+    public static HighLimitIdMapBuilder of(Concurrency concurrency, IdMapBuilder internalIdMapBuilder) {
         return new HighLimitIdMapBuilder(concurrency, internalIdMapBuilder);
     }
 
-    private HighLimitIdMapBuilder(int concurrency, IdMapBuilder internalIdMapBuilder) {
+    private HighLimitIdMapBuilder(Concurrency concurrency, IdMapBuilder internalIdMapBuilder) {
         // We use a builder that overrides the node ids in the input batch with the
         // generated intermediate node ids. This is necessary for downstream label
         // and property processing.
@@ -55,7 +56,7 @@ public final class HighLimitIdMapBuilder implements IdMapBuilder {
     }
 
     @Override
-    public IdMap build(LabelInformation.Builder labelInformationBuilder, long highestNodeId, int concurrency) {
+    public IdMap build(LabelInformation.Builder labelInformationBuilder, long highestNodeId, Concurrency concurrency) {
         var intermediateIdMap = this.originalToIntermediateMapping.build();
         var highestIntermediateId = intermediateIdMap.size() - 1;
         var internalIdMap = this.intermediateToInternalMapping.build(labelInformationBuilder, highestIntermediateId, concurrency);

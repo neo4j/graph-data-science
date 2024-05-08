@@ -23,12 +23,13 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.beta.filter.GraphFilterResult;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
+import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.write.NodeLabelExporterBuilder;
@@ -40,7 +41,6 @@ import org.neo4j.gds.legacycypherprojection.GraphProjectCypherResult;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.gds.projection.GraphProjectNativeResult;
-import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -240,7 +240,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
      * @throws IllegalArgumentException if a database name was null or blank or not a String
      */
     @Override
-    public List<GraphStoreWithConfig> dropGraph(
+    public List<GraphStoreCatalogEntry> dropGraph(
         Object graphNameOrListOfGraphNames,
         boolean failIfMissing,
         String databaseName,
@@ -258,7 +258,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
     }
 
     @Override
-    public List<Pair<GraphStoreWithConfig, Map<String, Object>>> listGraphs(
+    public List<Pair<GraphStoreCatalogEntry, Map<String, Object>>> listGraphs(
         User user,
         String graphName,
         boolean includeDegreeDistribution,
@@ -308,7 +308,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
                 configuration
             );
         } catch (Exception e) {
-            projectMetric.failed();
+            projectMetric.failed(e);
             throw e;
         }
     }
@@ -381,7 +381,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
                 configuration
             );
         } catch (Exception e) {
-            projectMetric.failed();
+            projectMetric.failed(e);
             throw e;
         }
     }
@@ -457,7 +457,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
                 originGraphConfiguration.graphStore()
             );
         } catch (Exception e) {
-            subGraphMetric.failed();
+            subGraphMetric.failed(e);
             throw e;
         }
     }
@@ -750,8 +750,9 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
             rawConfiguration
         );
 
-        var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
-        var graphStore = graphStoreWithConfig.graphStore();
+        var catalogEntry = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
+        var graphStore = catalogEntry.graphStore();
+        var resultStore = catalogEntry.resultStore();
         var nodeLabels = configuration.nodeLabels();
         var nodeLabelIdentifiers = configuration.nodeLabelIdentifiers(graphStore);
         var nodeProperties = configuration.nodeProperties().stream()
@@ -767,6 +768,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
 
         return writeNodePropertiesApplication.write(
             graphStore,
+            resultStore,
             nodePropertyExporterBuilder,
             taskRegistryFactory,
             terminationFlag,
@@ -790,8 +792,9 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         var graphName = graphNameValidationService.validate(graphNameAsString);
 
         // why graphstore first here?
-        var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
-        var graphStore = graphStoreWithConfig.graphStore();
+        var catalogEntry = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
+        var graphStore = catalogEntry.graphStore();
+        var resultStore = catalogEntry.resultStore();
         graphStoreValidationService.ensureRelationshipPropertiesMatchRelationshipType(
             graphStore,
             relationshipType,
@@ -805,6 +808,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
             relationshipPropertiesExporterBuilder,
             terminationFlag,
             graphStore,
+            resultStore,
             graphName,
             relationshipType,
             relationshipProperties,
@@ -826,8 +830,9 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
 
         var configuration = WriteLabelConfig.of(rawConfiguration);
 
-        var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
-        var graphStore = graphStoreWithConfig.graphStore();
+        var catalogEntry = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
+        var graphStore = catalogEntry.graphStore();
+        var resultStore = catalogEntry.resultStore();
 
         var nodeFilter = NodeFilterParser.parseAndValidate(graphStore, configuration.nodeFilter());
 
@@ -835,6 +840,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
             nodeLabelExporterBuilder,
             terminationFlag,
             graphStore,
+            resultStore,
             graphName,
             nodeLabel,
             configuration,
@@ -863,8 +869,9 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
             rawConfiguration
         );
 
-        var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
-        var graphStore = graphStoreWithConfig.graphStore();
+        var catalogEntry = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
+        var graphStore = catalogEntry.graphStore();
+        var resultStore = catalogEntry.resultStore();
         graphStoreValidationService.ensurePossibleRelationshipPropertyMatchesRelationshipType(
             graphStore,
             configuration.relationshipType(),
@@ -877,6 +884,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
             terminationFlag,
             userLogRegistryFactory,
             graphStore,
+            resultStore,
             graphName,
             configuration
         );
@@ -973,9 +981,9 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         var graphName = ensureGraphNameValidAndUnknown(user, databaseId, graphNameAsString);
         var originGraphName = GraphName.parse(originGraphNameAsString);
 
-        var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), originGraphName);
-        var graphStore = graphStoreWithConfig.graphStore();
-        var graphProjectConfig = graphStoreWithConfig.config();
+        var catalogEntry = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), originGraphName);
+        var graphStore = catalogEntry.graphStore();
+        var graphProjectConfig = catalogEntry.config();
 
         var samplingMetric = projectionMetricsService.createRandomWakSampling(samplerType.name());
         try (samplingMetric) {
@@ -991,7 +999,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
                 samplerType
             );
         } catch (Exception e) {
-            samplingMetric.failed();
+            samplingMetric.failed(e);
             throw e;
         }
 

@@ -19,24 +19,23 @@
  */
 package org.neo4j.gds.influenceMaximization;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.centrality.celf.CELFStreamResult;
 
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.influenceMaximization.CELFStreamProc.DESCRIPTION;
+import static org.neo4j.gds.influenceMaximization.Constants.CELF_DESCRIPTION;
 
 @GdsCallable(
     name = "gds.influenceMaximization.celf.stream",
     aliases = {"gds.beta.influenceMaximization.celf.stream"},
-    description = DESCRIPTION,
+    description = CELF_DESCRIPTION,
     executionMode = STREAM
 )
 public class CELFStreamSpec implements AlgorithmSpec<CELF, CELFResult, InfluenceMaximizationStreamConfig, Stream<CELFStreamResult>, CELFAlgorithmFactory<InfluenceMaximizationStreamConfig>> {
@@ -58,21 +57,6 @@ public class CELFStreamSpec implements AlgorithmSpec<CELF, CELFResult, Influence
 
     @Override
     public ComputationResultConsumer<CELF, CELFResult, InfluenceMaximizationStreamConfig, Stream<CELFStreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging(
-            "Result streaming failed",
-            executionContext.log(),
-            () -> computationResult.result()
-                .map(result -> {
-                    var graph = computationResult.graph();
-                    var celfSeedSet = result.seedSetNodes();
-                    long[] keySet = celfSeedSet.keys().toArray();
-                    return LongStream.of(keySet)
-                        .mapToObj(node -> new CELFStreamResult(
-                            graph.toOriginalNodeId(node),
-                            celfSeedSet.getOrDefault(node, 0)
-                        ));
-                })
-                .orElseGet(Stream::empty)
-        );
+        return new NullComputationResultConsumer<>();
     }
 }

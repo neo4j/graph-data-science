@@ -23,94 +23,17 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Parameters;
 
 @Parameters
-public final class NodeSimilarityParameters {
-
-    public static NodeSimilarityParameters create(
-        MetricSimilarityComputer similarityComputer,
-        int degreeCutoff,
-        int upperDegreeCutoff,
-        int normalizedK,
-        int normalizedN,
-        boolean computeToStream,
-        boolean hasRelationshipWeightProperty,
-        boolean useComponents,
-        @Nullable String componentProperty
-    ) {
-        return new NodeSimilarityParameters(
-            similarityComputer,
-            degreeCutoff,
-            upperDegreeCutoff,
-            normalizedK,
-            normalizedN,
-            computeToStream,
-            hasRelationshipWeightProperty,
-            useComponents,
-            componentProperty
-        );
-    }
-
-    private final MetricSimilarityComputer similarityComputer;
-    private final int degreeCutoff;
-    private final int upperDegreeCutoff;
-    private final int normalizedK;
-    private final int normalizedN;
-    private final boolean computeToStream;
-    private final boolean hasRelationshipWeightProperty;
-    private final boolean useComponents;
-    private final String componentProperty;
-
-    private NodeSimilarityParameters(
-        MetricSimilarityComputer similarityComputer,
-        int degreeCutoff,
-        int upperDegreeCutoff,
-        int normalizedK,
-        int normalizedN,
-        boolean computeToStream,
-        boolean hasRelationshipWeightProperty,
-        boolean useComponents,
-        @Nullable String componentProperty
-    ) {
-        this.similarityComputer = similarityComputer;
-        this.degreeCutoff = degreeCutoff;
-        this.upperDegreeCutoff = upperDegreeCutoff;
-        this.normalizedK = normalizedK;
-        this.normalizedN = normalizedN;
-        this.computeToStream = computeToStream;
-        this.hasRelationshipWeightProperty = hasRelationshipWeightProperty;
-        this.useComponents = useComponents;
-        this.componentProperty = componentProperty;
-    }
-
-    public MetricSimilarityComputer similarityComputer() {
-        return similarityComputer;
-    }
-
-    int degreeCutoff() {
-        return degreeCutoff;
-    }
-
-    int upperDegreeCutoff() {
-        return upperDegreeCutoff;
-    }
-
-    public int normalizedK() {
-        return normalizedK;
-    }
-
-    public int normalizedN() {
-        return normalizedN;
-    }
-
-    public boolean computeToStream() {
-        return computeToStream;
-    }
-
-    public boolean computeToGraph() {return !computeToStream;} //adding for clarity
-
-    boolean hasRelationshipWeightProperty() {
-        return hasRelationshipWeightProperty;
-    }
-
+public record NodeSimilarityParameters(
+    MetricSimilarityComputer similarityComputer,
+    int degreeCutoff,
+    int upperDegreeCutoff,
+    int normalizedK,
+    int normalizedN,
+    boolean computeToStream,
+    boolean hasRelationshipWeightProperty,
+    boolean useComponents,
+    @Nullable String componentProperty
+) {
     boolean hasTopK() {
         return normalizedK != 0;
     }
@@ -119,27 +42,17 @@ public final class NodeSimilarityParameters {
         return normalizedN != 0;
     }
 
-    // WCC specialization
-
-    public boolean useComponents() {
-        return useComponents;
-    }
-
-    @Nullable
-    public String componentProperty() {
-        return componentProperty;
-    }
-
     boolean runWCC() {
         return useComponents && componentProperty == null;
     }
 
     public NodeSimilarityEstimateParameters memoryParameters() {
-
-        return NodeSimilarityEstimateParameters.create(
+        return new NodeSimilarityEstimateParameters(
             normalizedK,
             normalizedN,
-            useComponents, runWCC(), computeToGraph()
+            useComponents,
+            runWCC(),
+            !computeToStream
         );
     }
 }

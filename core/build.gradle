@@ -41,6 +41,7 @@ dependencies {
             project(':graph-projection-api'),
             project(':graph-dimensions'),
             project(':collections'),
+            project(':concurrency'),
 
             [group: 'org.agrona',              name: 'agrona',                   version: ver.'agrona'],
             [group: 'org.apache.commons',      name: 'commons-text',             version: ver.'commons-text'],
@@ -48,6 +49,7 @@ dependencies {
             [group: 'org.eclipse.collections', name: 'eclipse-collections',      version: ver.'eclipse-collections'],
             [group: 'com.carrotsearch',        name: 'hppc',                     version: ver.'hppc'],
             [group: 'org.hdrhistogram',        name: 'HdrHistogram',             version: ver.'HdrHistogram'],
+            [group: 'com.github.chrisvest',    name: 'stormpot',                 version: "3.1"],
     )
 
     // TEST DEPENDENCIES

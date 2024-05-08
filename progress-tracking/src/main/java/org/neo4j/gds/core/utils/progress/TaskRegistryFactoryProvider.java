@@ -25,13 +25,17 @@ import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
 class TaskRegistryFactoryProvider implements ThrowingFunction<Context, TaskRegistryFactory, ProcedureException> {
-    private final TaskStore taskStore;
 
-    TaskRegistryFactoryProvider(TaskStore taskStore) {this.taskStore = taskStore;}
+    private final TaskStoreProvider taskStoreProvider;
+
+    TaskRegistryFactoryProvider(TaskStoreProvider taskStoreProvider) {
+
+        this.taskStoreProvider = taskStoreProvider;
+    }
 
     @Override
     public TaskRegistryFactory apply(Context context) throws ProcedureException {
         var username = Neo4jProxy.username(context.securityContext().subject());
-        return new LocalTaskRegistryFactory(username, taskStore);
+        return new LocalTaskRegistryFactory(username, taskStoreProvider.apply(context));
     }
 }

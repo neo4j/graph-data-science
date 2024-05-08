@@ -27,6 +27,7 @@ import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.partition.Partition;
@@ -41,12 +42,11 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class DegreeCentrality extends Algorithm<DegreeCentralityResult> {
 
-    static final String DEGREE_CENTRALITY_DESCRIPTION = "Degree centrality measures the number of incoming and outgoing relationships from a node.";
     private static final double DEFAULT_WEIGHT = 0D;
 
     private final Graph graph;
     private final ExecutorService executor;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final Orientation orientation;
     private final boolean hasRelationshipWeightProperty;
     private final int minBatchSize;
@@ -54,7 +54,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentralityResult> {
     public DegreeCentrality(
         Graph graph,
         ExecutorService executor,
-        int concurrency,
+        Concurrency concurrency,
         Orientation orientation,
         boolean hasRelationshipWeightProperty,
         int minBatchSize,

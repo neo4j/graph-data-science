@@ -20,34 +20,8 @@
 package org.neo4j.gds.k1coloring;
 
 import org.neo4j.gds.annotation.Parameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 @Parameters
-public final class K1ColoringParameters {
-
-    public static K1ColoringParameters create(int concurrency, int maxIterations, int batchSize) {
-        return new K1ColoringParameters(concurrency, maxIterations, batchSize);
-    }
-
-    private final int concurrency;
-    private final int maxIterations;
-    private final int batchSize;
-
-
-    private K1ColoringParameters(int concurrency, int maxIterations, int batchSize) {
-        this.concurrency = concurrency;
-        this.maxIterations = maxIterations;
-        this.batchSize = batchSize;
-    }
-
-    int concurrency() {
-        return concurrency;
-    }
-
-    int maxIterations() {
-        return maxIterations;
-    }
-
-    int batchSize() {
-        return batchSize;
-    }
+public record K1ColoringParameters(Concurrency concurrency, int maxIterations, int batchSize) {
 }

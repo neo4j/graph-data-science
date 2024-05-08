@@ -19,10 +19,9 @@
  */
 package org.neo4j.gds.leiden;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.community.leiden.LeidenStreamResult;
-import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -32,18 +31,16 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.leiden.Constants.LEIDEN_DESCRIPTION;
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class LeidenStreamProc extends BaseProc {
-    static final String DESCRIPTION =
-        "Leiden is a community detection algorithm, which guarantees that communities are well connected";
-
+public class LeidenStreamProc {
     @Context
     public GraphDataScienceProcedures facade;
 
     @Procedure(name = "gds.leiden.stream", mode = READ)
-    @Description(DESCRIPTION)
+    @Description(LEIDEN_DESCRIPTION)
     public Stream<LeidenStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -57,22 +54,19 @@ public class LeidenStreamProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-
         return facade.community().leidenEstimateStream(graphName, configuration);
-
     }
 
     @Deprecated(forRemoval = true)
     @Internal
     @Procedure(name = "gds.beta.leiden.stream", mode = READ, deprecatedBy = "gds.leiden.stream")
-    @Description(DESCRIPTION)
+    @Description(LEIDEN_DESCRIPTION)
     public Stream<LeidenStreamResult> streamBeta(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         facade.deprecatedProcedures().called("gds.beta.leiden.stream");
-
-        executionContext()
+        facade
             .log()
             .warn("Procedure `gds.beta.leiden.stream` has been deprecated, please use `gds.leiden.stream`.");
 
@@ -82,18 +76,16 @@ public class LeidenStreamProc extends BaseProc {
     @Deprecated(forRemoval = true)
     @Internal
     @Procedure(value = "gds.beta.leiden.stream.estimate", mode = READ, deprecatedBy = "gds.leiden.stream.estimate")
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimateBeta(
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
         facade.deprecatedProcedures().called("gds.beta.leiden.stream.estimate");
-
-        executionContext()
+        facade
             .log()
             .warn("Procedure `gds.beta.leiden.stream.estimate` has been deprecated, please use `gds.leiden.stream.estimate`.");
 
         return estimate(graphName, configuration);
     }
-
 }

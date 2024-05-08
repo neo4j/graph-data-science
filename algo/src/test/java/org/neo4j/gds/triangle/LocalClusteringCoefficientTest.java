@@ -29,6 +29,7 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -276,9 +277,9 @@ class LocalClusteringCoefficientTest {
 
         var progressTask = factory.progressTask(graph, seedProperty);
         var log = Neo4jProxy.testLog();
-        var progressTracker = new TaskProgressTracker(progressTask, log, 4, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TaskProgressTracker(progressTask, log, new Concurrency(4), EmptyTaskRegistryFactory.INSTANCE);
 
-        new LocalClusteringCoefficient(graph, 4, Long.MAX_VALUE, seedProperty, progressTracker).compute();
+        new LocalClusteringCoefficient(graph, new Concurrency(4), Long.MAX_VALUE, seedProperty, progressTracker).compute();
 
         log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Start");
         if (!useSeed) {
@@ -333,7 +334,7 @@ class LocalClusteringCoefficientTest {
     private LocalClusteringCoefficientResult compute(Graph graph) {
         var localClusteringCoefficient = new LocalClusteringCoefficient(
             graph,
-            4,
+            new Concurrency(4),
             Long.MAX_VALUE,
             null,
             ProgressTracker.NULL_TRACKER

@@ -20,11 +20,12 @@
 package org.neo4j.gds.paths.steiner;
 
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SteinerStatsResult;
 import org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm;
 import org.neo4j.gds.steiner.SteinerTreeAlgorithmFactory;
@@ -56,28 +57,10 @@ public class SteinerTreeStatsSpec implements AlgorithmSpec<ShortestPathsSteinerA
     @Override
     public NewConfigFunction<SteinerTreeStatsConfig> newConfigFunction() {
         return (__, config) -> SteinerTreeStatsConfig.of(config);
-
     }
 
+    @Override
     public ComputationResultConsumer<ShortestPathsSteinerAlgorithm, SteinerTreeResult, SteinerTreeStatsConfig, Stream<SteinerStatsResult>> computationResultConsumer() {
-
-        return (computationResult, executionContext) -> {
-            var builder = new SteinerStatsResult.Builder();
-
-            if (computationResult.result().isEmpty()) {
-                return Stream.of(builder.build());
-            }
-
-            var steinerTreeResult = computationResult.result().get();
-
-            builder
-                .withEffectiveNodeCount(steinerTreeResult.effectiveNodeCount())
-                .withTotalWeight(steinerTreeResult.totalCost())
-                .withEffectiveTargetNodesCount(steinerTreeResult.effectiveTargetNodesCount())
-                .withComputeMillis(computationResult.computeMillis())
-                .withPreProcessingMillis(computationResult.preProcessingMillis())
-                .withConfig(computationResult.config());
-            return Stream.of(builder.build());
-        };
+        return new NullComputationResultConsumer<>();
     }
 }

@@ -22,10 +22,10 @@ package org.neo4j.gds.applications.graphstorecatalog;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.beta.filter.GraphFilterResult;
 import org.neo4j.gds.beta.filter.GraphStoreFilterService;
 import org.neo4j.gds.config.GraphProjectFromGraphConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.beta.filter.GraphFilterResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -127,7 +127,7 @@ public class SubGraphProjectApplication {
         var progressTracker = new TaskProgressTracker(
             task,
             (org.neo4j.logging.Log) log.getNeo4jLog(),
-            configuration.concurrency(),
+            configuration.typedConcurrency(),
             configuration.jobId(),
             taskRegistryFactory,
             userLogRegistryFactory

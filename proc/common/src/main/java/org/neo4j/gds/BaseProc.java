@@ -26,7 +26,7 @@ import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.loading.GraphStoreWithConfig;
+import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -51,7 +51,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public abstract class BaseProc {
 
     public static final String ESTIMATE_DESCRIPTION = "Returns an estimation of the memory consumption for that procedure.";
-    public static final String STATS_DESCRIPTION = "Executes the algorithm and returns result statistics without writing the result to Neo4j.";
 
     @Context
     public GraphDatabaseService databaseService;
@@ -87,7 +86,7 @@ public abstract class BaseProc {
         return username.username();
     }
 
-    protected GraphStoreWithConfig graphStoreFromCatalog(String graphName, BaseConfig config) {
+    protected GraphStoreCatalogEntry graphStoreFromCatalog(String graphName, BaseConfig config) {
         return GraphStoreFromCatalogLoader.graphStoreFromCatalog(
             graphName,
             config,
@@ -153,7 +152,7 @@ public abstract class BaseProc {
                 .nodeLookup(new TransactionNodeLookup(transaction))
                 .isGdsAdmin(transactionContext().isGdsAdmin())
                 .metricsFacade(metricsFacade)
-                .algorithmsProcedureFacade(graphDataScienceProcedures.algorithmsProcedureFacade())
+                .algorithmsProcedureFacade(graphDataScienceProcedures.algorithms())
                 .build();
     }
 

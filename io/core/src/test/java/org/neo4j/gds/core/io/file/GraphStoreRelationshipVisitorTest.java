@@ -28,6 +28,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.io.GraphStoreRelationshipVisitor;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
@@ -81,7 +82,7 @@ class GraphStoreRelationshipVisitorTest {
         Map<String, RelationshipsBuilder> relationshipBuildersByType = new HashMap<>();
         Supplier<RelationshipsBuilderBuilder> relationshipBuilderSupplier = () -> GraphFactory
             .initRelationshipsBuilder()
-            .concurrency(1)
+            .concurrency(new Concurrency(1))
             .nodes(graph);
         var relationshipVisitor = new GraphStoreRelationshipVisitor(
             relationshipSchema,
@@ -114,7 +115,7 @@ class GraphStoreRelationshipVisitorTest {
             .withRelationshipBuildersToTypeResultMap(relationshipBuildersByType)
             .withInverseIndexedRelationshipTypes(List.of())
             .withAllocationTracker()
-            .withConcurrency(1)
+            .withConcurrency(new Concurrency(1))
             .build();
 
         relationshipVisitor.type("R");
@@ -140,7 +141,7 @@ class GraphStoreRelationshipVisitorTest {
             .withRelationshipBuildersToTypeResultMap(relationshipBuildersByType)
             .withInverseIndexedRelationshipTypes(List.of(RelationshipType.of("R")))
             .withAllocationTracker()
-            .withConcurrency(1)
+            .withConcurrency(new Concurrency(1))
             .build();
 
         relationshipVisitor.type("R");
@@ -177,7 +178,7 @@ class GraphStoreRelationshipVisitorTest {
             .nodes(nodes)
             .relationshipImportResult(actualRelationships)
             .databaseInfo(DatabaseInfo.of(DatabaseId.random(), DatabaseLocation.LOCAL))
-            .concurrency(1)
+            .concurrency(new Concurrency(1))
             .build()
             .getUnion();
     }

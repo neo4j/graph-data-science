@@ -19,6 +19,6 @@
  */
 package org.neo4j.gds.closeness;
 
-interface CentralityComputer {
+public interface CentralityComputer {
     double centrality(long farness, long componentSize);
 }

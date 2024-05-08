@@ -27,8 +27,8 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.procedures.centrality.CentralityMutateResult;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.centrality.CentralityMutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 
-@GdsCallable(name = "gds.betweenness.mutate", description = BetweennessCentrality.BETWEENNESS_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
+@GdsCallable(name = "gds.betweenness.mutate", description = Constants.BETWEENNESS_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class BetweennessCentralityMutateSpecification implements AlgorithmSpec<BetweennessCentrality, BetwennessCentralityResult, BetweennessCentralityMutateConfig, Stream<CentralityMutateResult>, BetweennessCentralityFactory<BetweennessCentralityMutateConfig>> {
     @Override
     public String name() {

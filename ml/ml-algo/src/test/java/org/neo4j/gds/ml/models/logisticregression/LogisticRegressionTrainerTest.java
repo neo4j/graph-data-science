@@ -23,6 +23,7 @@ import org.assertj.core.data.Offset;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestFeatures;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -42,7 +43,7 @@ class LogisticRegressionTrainerTest {
     @Test
     void withBias() {
         var trainer = new LogisticRegressionTrainer(
-            1,
+            new Concurrency(1),
             LogisticRegressionTrainConfig.DEFAULT,
             4,
             true,
@@ -83,7 +84,7 @@ class LogisticRegressionTrainerTest {
         HugeLongArray labels = HugeLongArray.newArray(20_000);
         labels.setAll(i -> i % 4);
         var trainer = new LogisticRegressionTrainer(
-            4,
+            new Concurrency(4),
             LogisticRegressionTrainConfig.DEFAULT,
             4,
             true,
@@ -118,7 +119,7 @@ class LogisticRegressionTrainerTest {
     @Test
     void usingStandardWeights() {
         var trainer = new LogisticRegressionTrainer(
-            1,
+            new Concurrency(1),
             LogisticRegressionTrainConfig.DEFAULT,
             4,
             false,
@@ -164,7 +165,7 @@ class LogisticRegressionTrainerTest {
     @Test
     void usingPenaltyShouldGiveSmallerAbsoluteValueWeights() {
         var trainer = new LogisticRegressionTrainer(
-            1,
+            new Concurrency(1),
             LogisticRegressionTrainConfig.of(Map.of("penalty", 100, "maxEpochs", 100)),
             4,
             true,
@@ -200,7 +201,7 @@ class LogisticRegressionTrainerTest {
     @Test
     void shouldHandleLargeValuedFeatures() {
         var trainer = new LogisticRegressionTrainer(
-            1,
+            new Concurrency(1),
             LogisticRegressionTrainConfig.DEFAULT,
             4,
             true,
@@ -260,7 +261,7 @@ class LogisticRegressionTrainerTest {
     @NotNull
     private LogisticRegressionTrainer trainer() {
         return new LogisticRegressionTrainer(
-            1,
+            new Concurrency(1),
             LogisticRegressionTrainConfig.of(Map.of("penalty", 1L)),
             1,
             false,

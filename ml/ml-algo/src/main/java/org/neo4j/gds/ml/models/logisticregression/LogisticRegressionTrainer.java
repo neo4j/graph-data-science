@@ -19,10 +19,11 @@
  */
 package org.neo4j.gds.ml.models.logisticregression;
 
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
@@ -46,7 +47,7 @@ public final class LogisticRegressionTrainer implements ClassifierTrainer {
     private final TerminationFlag terminationFlag;
     private final boolean reduceClassCount;
     private final LogLevel messageLogLevel;
-    private final int concurrency;
+    private final Concurrency concurrency;
 
     public static MemoryEstimation memoryEstimation(
         boolean isReduced,
@@ -62,7 +63,7 @@ public final class LogisticRegressionTrainer implements ClassifierTrainer {
                 "computation graph",
                 (graphDimensions, concurrency) -> {
                     long actualTrainSetSize = numberOfTrainingExamples.applyAsLong(graphDimensions.nodeCount());
-                    int numberOfConcurrentComputationGraphs = (int) Math.min(concurrency, Math.ceil((double) actualTrainSetSize / batchSize));
+                    int numberOfConcurrentComputationGraphs = (int) Math.min(concurrency.value(), Math.ceil((double) actualTrainSetSize / batchSize));
                     return featureDimension.apply(dim ->
                         sizeInBytesOfComputationGraph(
                             isReduced,
@@ -82,7 +83,7 @@ public final class LogisticRegressionTrainer implements ClassifierTrainer {
 
 
     public LogisticRegressionTrainer(
-        int concurrency,
+        Concurrency concurrency,
         LogisticRegressionTrainConfig trainConfig,
         int numberOfClasses,
         boolean reduceClassCount,

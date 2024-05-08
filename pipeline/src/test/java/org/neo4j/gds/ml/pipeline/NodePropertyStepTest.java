@@ -32,6 +32,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.executor.GdsCallableFinder;
@@ -91,7 +92,7 @@ class NodePropertyStepTest extends BaseProcTest {
                 GRAPH_NAME,
                 List.of(NodeLabel.ALL_NODES),
                 List.of(RelationshipType.ALL_RELATIONSHIPS),
-                4,
+                new Concurrency(4),
                 null
             )
         );
@@ -124,7 +125,7 @@ class NodePropertyStepTest extends BaseProcTest {
                 List.of(ElementProjection.PROJECT_ALL),
                 null
             )
-            .estimate(GraphDimensions.of(1), 4)
+            .estimate(GraphDimensions.of(1), new Concurrency(4))
             .memoryUsage().max).isZero();
     }
 }

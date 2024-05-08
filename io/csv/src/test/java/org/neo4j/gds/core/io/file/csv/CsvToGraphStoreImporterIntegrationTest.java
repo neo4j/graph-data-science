@@ -22,9 +22,7 @@ package org.neo4j.gds.core.io.file.csv;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
@@ -35,6 +33,7 @@ import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.api.properties.graph.DoubleArrayGraphPropertyValues;
 import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterParameters;
 import org.neo4j.gds.core.loading.ArrayIdMapBuilder;
@@ -89,23 +88,14 @@ class CsvToGraphStoreImporterIntegrationTest {
     @TempDir
     Path graphLocation;
 
-    private static Stream<Arguments> concurrencyLabelMappingArgs() {
-        return Stream.of(
-            Arguments.of(1, false),
-            Arguments.of(4, false),
-            Arguments.of(1, true),
-            Arguments.of(4, true)
-        );
-    }
-
     @ParameterizedTest
-    @MethodSource("concurrencyLabelMappingArgs")
-    void shouldImportProperties(int concurrency, boolean useLabelMapping) {
+    @ValueSource(ints = {1, 4})
+    void shouldImportProperties(int concurrency) {
         var graphStore = GdlFactory.of(GRAPH_WITH_PROPERTIES).build();
 
         GraphStoreToCsvExporter.create(
             graphStore,
-            exportParameters(concurrency, useLabelMapping),
+            exportParameters(concurrency),
             graphLocation,
             Optional.empty(),
             TaskRegistryFactory.empty(),
@@ -113,7 +103,7 @@ class CsvToGraphStoreImporterIntegrationTest {
             DefaultPool.INSTANCE
         ).run();
 
-        var importer = new CsvToGraphStoreImporter(concurrency, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var importer = new CsvToGraphStoreImporter(new Concurrency(concurrency), graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run();
 
         var importedGraphStore = userGraphStore.graphStore();
@@ -122,8 +112,8 @@ class CsvToGraphStoreImporterIntegrationTest {
     }
 
     @ParameterizedTest
-    @MethodSource("concurrencyLabelMappingArgs")
-    void shouldImportGraphStoreWithGraphProperties(int concurrency, boolean useLabelMapping) {
+    @ValueSource(ints = {1, 4})
+    void shouldImportGraphStoreWithGraphProperties(int concurrency) {
         var graphStore = GdlFactory.of(GRAPH_WITH_PROPERTIES).build();
 
         addLongGraphProperty(graphStore);
@@ -132,14 +122,14 @@ class CsvToGraphStoreImporterIntegrationTest {
 
         GraphStoreToCsvExporter.create(
             graphStore,
-            exportParameters(concurrency, useLabelMapping),
+            exportParameters(concurrency),
             graphLocation,
             Optional.empty(),
             TaskRegistryFactory.empty(),
             NullLog.getInstance(),
             DefaultPool.INSTANCE
         ).run();
-        var importer = new CsvToGraphStoreImporter(concurrency, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var importer = new CsvToGraphStoreImporter(new Concurrency(concurrency), graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run().graphStore();
 
         assertThat(userGraphStore.graphPropertyKeys()).containsExactlyInAnyOrder(
@@ -168,7 +158,7 @@ class CsvToGraphStoreImporterIntegrationTest {
 
         GraphStoreToCsvExporter.create(
             graphStore,
-            exportParameters(concurrency, true /* will not work without label mapping */),
+            exportParameters(concurrency),
             graphLocation,
             Optional.empty(),
             TaskRegistryFactory.empty(),
@@ -176,7 +166,7 @@ class CsvToGraphStoreImporterIntegrationTest {
             DefaultPool.INSTANCE
         ).run();
 
-        var importer = new CsvToGraphStoreImporter(concurrency, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var importer = new CsvToGraphStoreImporter(new Concurrency(concurrency), graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run();
 
         var importedGraphStore = userGraphStore.graphStore();
@@ -190,7 +180,7 @@ class CsvToGraphStoreImporterIntegrationTest {
 
         GraphStoreToCsvExporter.create(
             graphStore,
-            exportParameters(4, false),
+            exportParameters(4),
             graphLocation,
             Optional.empty(),
             TaskRegistryFactory.empty(),
@@ -198,7 +188,7 @@ class CsvToGraphStoreImporterIntegrationTest {
             DefaultPool.INSTANCE
         ).run();
 
-        var importer = new CsvToGraphStoreImporter(4, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var importer = new CsvToGraphStoreImporter(new Concurrency(4), graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run();
 
         var importedGraphStore = userGraphStore.graphStore();
@@ -217,7 +207,7 @@ class CsvToGraphStoreImporterIntegrationTest {
 
         GraphStoreToCsvExporter.create(
             graphStoreWithCapabilities,
-            exportParameters(1, false),
+            exportParameters(1),
             graphLocation,
             Optional.empty(),
             TaskRegistryFactory.empty(),
@@ -225,7 +215,7 @@ class CsvToGraphStoreImporterIntegrationTest {
             DefaultPool.INSTANCE
         ).run();
 
-        var importer = new CsvToGraphStoreImporter(1, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var importer = new CsvToGraphStoreImporter(new Concurrency(1), graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run();
 
         var importedGraphStore = userGraphStore.graphStore();
@@ -246,7 +236,7 @@ class CsvToGraphStoreImporterIntegrationTest {
 
         GraphStoreToCsvExporter.create(
             graphStore,
-            exportParameters(1, false),
+            exportParameters(1),
             graphLocation,
             Optional.empty(),
             TaskRegistryFactory.empty(),
@@ -254,7 +244,7 @@ class CsvToGraphStoreImporterIntegrationTest {
             DefaultPool.INSTANCE
         ).run();
 
-        var importer = new CsvToGraphStoreImporter(1, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var importer = new CsvToGraphStoreImporter(new Concurrency(1), graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run();
 
         assertThat(userGraphStore.graphStore().nodes().typeId()).startsWith(idMapBuilderType);
@@ -269,7 +259,7 @@ class CsvToGraphStoreImporterIntegrationTest {
 
         GraphStoreToCsvExporter.create(
             graphStore,
-            exportParameters(1, false),
+            exportParameters(1),
             graphLocation,
             Optional.empty(),
             TaskRegistryFactory.empty(),
@@ -277,20 +267,18 @@ class CsvToGraphStoreImporterIntegrationTest {
             DefaultPool.INSTANCE
         ).run();
 
-        var importer = new CsvToGraphStoreImporter(1, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var importer = new CsvToGraphStoreImporter(new Concurrency(1), graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run();
 
         assertThat(userGraphStore.graphStore().databaseInfo()).isEqualTo(graphStore.databaseInfo());
     }
 
-    private GraphStoreToFileExporterParameters exportParameters(int concurrency, boolean useLabelMapping) {
-        return GraphStoreToFileExporterParameters.create(
+    private GraphStoreToFileExporterParameters exportParameters(int concurrency) {
+        return new GraphStoreToFileExporterParameters(
             "my-export",
             "",
-            true,
-            useLabelMapping,
-            RelationshipType.ALL_RELATIONSHIPS.name,
-            concurrency,
+            RelationshipType.ALL_RELATIONSHIPS,
+            new Concurrency(concurrency),
             10_000
         );
     }

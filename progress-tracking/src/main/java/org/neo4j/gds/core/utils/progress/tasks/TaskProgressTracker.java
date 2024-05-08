@@ -21,7 +21,8 @@ package org.neo4j.gds.core.utils.progress.tasks;
 
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -56,14 +57,14 @@ public class TaskProgressTracker implements ProgressTracker {
 
     private final Consumer<RuntimeException> onError;
 
-    public TaskProgressTracker(Task baseTask, Log log, int concurrency, TaskRegistryFactory taskRegistryFactory) {
+    public TaskProgressTracker(Task baseTask, Log log, Concurrency concurrency, TaskRegistryFactory taskRegistryFactory) {
         this(baseTask, log, concurrency, new JobId(), taskRegistryFactory, EmptyUserLogRegistryFactory.INSTANCE);
     }
 
     public TaskProgressTracker(
         Task baseTask,
         Log log,
-        int concurrency,
+        Concurrency concurrency,
         JobId jobId,
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory
@@ -102,7 +103,7 @@ public class TaskProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void setEstimatedResourceFootprint(MemoryRange memoryRangeInBytes, int maxConcurrency) {
+    public void setEstimatedResourceFootprint(MemoryRange memoryRangeInBytes, Concurrency maxConcurrency) {
         this.baseTask.setEstimatedMemoryRangeInBytes(memoryRangeInBytes);
         this.baseTask.setMaxConcurrency(maxConcurrency);
     }

@@ -43,7 +43,7 @@ public class KSpanningTreeWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().kSpanningTreeWrite(graphName, configuration);
+        return facade.algorithms().pathFinding().kSpanningTreeWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.alpha.kSpanningTree.write", mode = WRITE, deprecatedBy = "gds.kSpanningTree.write")

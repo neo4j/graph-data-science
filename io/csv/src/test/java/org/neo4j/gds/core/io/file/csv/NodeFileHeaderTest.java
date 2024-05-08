@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.core.io.file.ImmutableHeaderProperty;
+import org.neo4j.gds.core.io.file.HeaderProperty;
 import org.neo4j.gds.core.io.file.NodeFileHeader;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,9 +41,9 @@ class NodeFileHeaderTest {
         assertThat(fileHeader).isNotNull();
         assertThat(fileHeader.nodeLabels()).containsExactlyInAnyOrder("A", "B", "C");
         assertThat(fileHeader.propertyMappings()).containsExactlyInAnyOrder(
-            ImmutableHeaderProperty.of(1, "foo", ValueType.LONG),
-            ImmutableHeaderProperty.of(2, "bar", ValueType.DOUBLE),
-            ImmutableHeaderProperty.of(3, "baz", ValueType.LONG)
+            new HeaderProperty(1, "foo", ValueType.LONG),
+            new HeaderProperty(2, "bar", ValueType.DOUBLE),
+            new HeaderProperty(3, "baz", ValueType.LONG)
         );
     }
 

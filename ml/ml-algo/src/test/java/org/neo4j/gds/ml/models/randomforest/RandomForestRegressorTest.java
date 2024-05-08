@@ -26,8 +26,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
@@ -86,7 +87,7 @@ class RandomForestRegressorTest {
     @ValueSource(ints = {1, 4})
     void usingOneTree(int concurrency) {
         var randomForestTrainer = new RandomForestRegressorTrainer(
-            concurrency,
+            new Concurrency(concurrency),
             RandomForestRegressorTrainerConfigImpl
                 .builder()
                 .maxDepth(1)
@@ -112,7 +113,7 @@ class RandomForestRegressorTest {
     @ValueSource(ints = {1, 4})
     void usingTwentyTrees(int concurrency) {
         var randomForestTrainer = new RandomForestRegressorTrainer(
-            concurrency,
+            new Concurrency(concurrency),
             RandomForestRegressorTrainerConfigImpl
                 .builder()
                 .maxDepth(3)
@@ -138,7 +139,7 @@ class RandomForestRegressorTest {
     @ValueSource(ints = {1, 4})
     void considerTrainSet(int concurrency) {
         var randomForestTrainer = new RandomForestRegressorTrainer(
-            concurrency,
+            new Concurrency(concurrency),
             RandomForestRegressorTrainerConfigImpl
                 .builder()
                 .maxDepth(3)
@@ -190,13 +191,14 @@ class RandomForestRegressorTest {
         int maxDepth,
         long numberOfTrainingSamples,
         int featureDimension,
-        int concurrency,
+        int concurrencyValue,
         int numTrees,
         double maxFeaturesRatio,
         double numberOfSamplesRatio,
         long expectedMin,
         long expectedMax
     ) {
+        var concurrency = new Concurrency(concurrencyValue);
         var config = RandomForestRegressorTrainerConfigImpl.builder()
             .maxDepth(maxDepth)
             .numberOfDecisionTrees(numTrees)
@@ -243,7 +245,7 @@ class RandomForestRegressorTest {
             config
         );
         // Does not depend on node count, only indirectly so with the size of the training set.
-        var estimation = estimator.estimate(GraphDimensions.of(10), 4).memoryUsage();
+        var estimation = estimator.estimate(GraphDimensions.of(10), new Concurrency(4)).memoryUsage();
 
         assertMemoryRange(estimation, expectedMin, expectedMax);
     }

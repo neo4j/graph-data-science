@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.metrics.classification;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
@@ -66,7 +67,7 @@ public final class OutOfBagError implements Metric {
         ReadOnlyHugeLongArray trainSet,
         int numberOfClasses,
         HugeIntArray expectedLabels,
-        int concurrency,
+        Concurrency concurrency,
         HugeAtomicLongArray predictions
     ) {
         var totalMistakes = new LongAdder();

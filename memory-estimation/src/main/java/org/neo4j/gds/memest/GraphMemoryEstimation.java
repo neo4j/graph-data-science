@@ -20,7 +20,7 @@
 package org.neo4j.gds.memest;
 
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimation;
 
 public class GraphMemoryEstimation {
     private final GraphDimensions dimensions;

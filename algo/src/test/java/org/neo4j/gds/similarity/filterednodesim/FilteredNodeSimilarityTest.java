@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -169,12 +170,12 @@ class FilteredNodeSimilarityTest {
 
     @ParameterizedTest
     @ValueSource(ints = {1, 2})
-    void shouldLogProgressAccurately(int concurrency) {
+    void shouldLogProgressAccurately(int concurrencyValue) {
         var sourceNodeFilter = List.of(graph.toOriginalNodeId("c"), graph.toOriginalNodeId("d"));
-
+        var concurrency = new Concurrency(concurrencyValue);
         var config = FilteredNodeSimilarityStreamConfigImpl.builder()
             .sourceNodeFilter(NodeFilterSpecFactory.create(sourceNodeFilter))
-            .concurrency(concurrency)
+            .concurrency(concurrency.value())
             .topK(1)
             .topN(10)
             .build();

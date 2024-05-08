@@ -25,6 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -92,7 +93,14 @@ final class BellmanFordCopiedDeltaSteppingTests {
             );
 
             var sourceNode = graph.toMappedNodeId("a");
-            var paths = new BellmanFord(graph, ProgressTracker.NULL_TRACKER, sourceNode, true, true, concurrency)
+            var paths = new BellmanFord(
+                graph,
+                ProgressTracker.NULL_TRACKER,
+                sourceNode,
+                true,
+                true,
+                new Concurrency(concurrency)
+            )
                 .compute()
                 .shortestPaths()
                 .pathSet();
@@ -114,7 +122,14 @@ final class BellmanFordCopiedDeltaSteppingTests {
             );
 
             var sourceNode = graph.toMappedNodeId("c");
-            var paths = new BellmanFord(graph, ProgressTracker.NULL_TRACKER, sourceNode, true, true, concurrency)
+            var paths = new BellmanFord(
+                graph,
+                ProgressTracker.NULL_TRACKER,
+                sourceNode,
+                true,
+                true,
+                new Concurrency(concurrency)
+            )
                 .compute()
                 .shortestPaths()
                 .pathSet();
@@ -167,7 +182,14 @@ final class BellmanFordCopiedDeltaSteppingTests {
             );
 
             var sourceNode = graph.toMappedNodeId("n1");
-            var paths = new BellmanFord(graph, ProgressTracker.NULL_TRACKER, sourceNode, true, true, concurrency)
+            var paths = new BellmanFord(
+                graph,
+                ProgressTracker.NULL_TRACKER,
+                sourceNode,
+                true,
+                true,
+                new Concurrency(concurrency)
+            )
                 .compute()
                 .shortestPaths()
                 .pathSet();
@@ -215,7 +237,14 @@ final class BellmanFordCopiedDeltaSteppingTests {
             );
             var sourceNode = graph.toMappedNodeId("a");
 
-            var paths = new BellmanFord(graph, ProgressTracker.NULL_TRACKER, sourceNode, true, true, concurrency)
+            var paths = new BellmanFord(
+                graph,
+                ProgressTracker.NULL_TRACKER,
+                sourceNode,
+                true,
+                true,
+                new Concurrency(concurrency)
+            )
                 .compute()
                 .shortestPaths()
                 .pathSet();

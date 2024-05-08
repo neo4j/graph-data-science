@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.beta.pregel;
 
-import org.neo4j.gds.MemoryEstimateDefinition;
+import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.beta.pregel.context.MasterComputeContext;
 
 import java.util.Optional;

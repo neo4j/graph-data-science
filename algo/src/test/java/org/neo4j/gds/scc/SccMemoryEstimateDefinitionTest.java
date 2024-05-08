@@ -21,6 +21,7 @@ package org.neo4j.gds.scc;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 class SccMemoryEstimateDefinitionTest {
 
@@ -29,7 +30,7 @@ class SccMemoryEstimateDefinitionTest {
         var memoryEstimation = new SccMemoryEstimateDefinition().memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
-            .memoryRange(100, 6000, 1)
+            .memoryRange(100, 6000, new Concurrency(1))
             .hasMin(36348L)
             .hasMax(69132L);
     }

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.pregel.proc;
 
-import org.neo4j.gds.results.StandardStatsResult;
+import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 
 import java.util.Map;
 

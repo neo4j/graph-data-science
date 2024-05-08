@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.nodePropertyPrediction.regression;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.api.TrainingMethod;
@@ -46,7 +47,7 @@ class NodeRegressionPredictTest {
         NodeRegressionPredict algo = new NodeRegressionPredict(
             regressor,
             features,
-            1,
+            new Concurrency(1),
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         );

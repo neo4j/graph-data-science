@@ -21,15 +21,15 @@ package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.pathfinding.ResultBuilder;
-import org.neo4j.gds.applications.algorithms.pathfinding.SideEffectProcessingCounts;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.bellmanford.BellmanFordWriteConfig;
 
 import java.util.Optional;
 
-class BellmanFordResultBuilderForWriteMode implements ResultBuilder<BellmanFordWriteConfig, BellmanFordResult, BellmanFordWriteResult> {
+class BellmanFordResultBuilderForWriteMode implements ResultBuilder<BellmanFordWriteConfig, BellmanFordResult, BellmanFordWriteResult, RelationshipsWritten> {
     @Override
     public BellmanFordWriteResult build(
         Graph graph,
@@ -37,7 +37,7 @@ class BellmanFordResultBuilderForWriteMode implements ResultBuilder<BellmanFordW
         BellmanFordWriteConfig configuration,
         Optional<BellmanFordResult> result,
         AlgorithmProcessingTimings timings,
-        SideEffectProcessingCounts counts
+        Optional<RelationshipsWritten> metadata
     ) {
         var builder = BellmanFordWriteResult.builder();
 
@@ -45,9 +45,9 @@ class BellmanFordResultBuilderForWriteMode implements ResultBuilder<BellmanFordW
 
         builder.withPreProcessingMillis(timings.preProcessingMillis);
         builder.withComputeMillis(timings.computeMillis);
-        builder.withWriteMillis(timings.postProcessingMillis);
+        builder.withWriteMillis(timings.mutateOrWriteMillis);
 
-        builder.withRelationshipsWritten(counts.relationshipsWritten);
+        metadata.ifPresent(rw -> builder.withRelationshipsWritten(rw.value));
 
         //noinspection OptionalIsPresent
         if (result.isPresent()) builder.withContainsNegativeCycle(result.get().containsNegativeCycle());

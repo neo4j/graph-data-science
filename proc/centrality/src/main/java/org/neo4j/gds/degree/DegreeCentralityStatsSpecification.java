@@ -19,16 +19,17 @@
  */
 package org.neo4j.gds.degree;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.procedures.centrality.CentralityStatsResult;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.centrality.CentralityStatsResult;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.degree.DegreeCentrality.DEGREE_CENTRALITY_DESCRIPTION;
+import static org.neo4j.gds.degree.Constants.DEGREE_CENTRALITY_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
 
 @GdsCallable(name = "gds.degree.stats", description = DEGREE_CENTRALITY_DESCRIPTION, executionMode = STATS)
@@ -50,22 +51,6 @@ public class DegreeCentralityStatsSpecification implements AlgorithmSpec<DegreeC
 
     @Override
     public ComputationResultConsumer<DegreeCentrality, DegreeCentralityResult, DegreeCentralityStatsConfig, Stream<CentralityStatsResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-            var builder = new CentralityStatsResult.Builder(
-                executionContext.returnColumns(),
-                computationResult.config().concurrency()
-            );
-
-            computationResult.result()
-                .ifPresent(result -> builder.withCentralityFunction(result.centralityScoreProvider()));
-
-            return Stream.of(
-                builder.withPreProcessingMillis(computationResult.preProcessingMillis())
-                    .withComputeMillis(computationResult.computeMillis())
-                    .withNodeCount(computationResult.graph().nodeCount())
-                    .withConfig(computationResult.config())
-                    .build()
-            );
-        };
+        return new NullComputationResultConsumer<>();
     }
 }

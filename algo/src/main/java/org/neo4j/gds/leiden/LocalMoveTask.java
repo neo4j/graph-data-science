@@ -25,12 +25,12 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -41,8 +41,8 @@ public class LocalMoveTask implements Runnable {
             .rangePerNode(
                 "community map",
                 (nodeCount) -> MemoryRange.of(
-                    MemoryUsage.sizeOfLongDoubleHashMap(50),
-                    MemoryUsage.sizeOfLongDoubleHashMap(Math.max(50, nodeCount))
+                    Estimate.sizeOfLongDoubleHashMap(50),
+                    Estimate.sizeOfLongDoubleHashMap(Math.max(50, nodeCount))
                 )
             )
             .add("local queue", HugeLongArrayQueue.memoryEstimation())

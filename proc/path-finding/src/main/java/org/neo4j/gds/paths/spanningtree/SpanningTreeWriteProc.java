@@ -21,7 +21,7 @@ package org.neo4j.gds.paths.spanningtree;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeWriteResult;
-import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -46,7 +46,7 @@ public class SpanningTreeWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().spanningTreeWrite(graphName, configuration);
+        return facade.algorithms().pathFinding().spanningTreeWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.spanningTree.write" + ".estimate", mode = READ)
@@ -55,7 +55,7 @@ public class SpanningTreeWriteProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().spanningTreeWriteEstimate(graphName, configuration);
+        return facade.algorithms().pathFinding().spanningTreeWriteEstimate(graphName, configuration);
     }
 
     @Procedure(value = "gds.beta.spanningTree.write", mode = WRITE, deprecatedBy = "gds.spanningTree.write")

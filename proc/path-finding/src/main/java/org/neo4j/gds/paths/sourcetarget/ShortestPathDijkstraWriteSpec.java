@@ -19,17 +19,17 @@
  */
 package org.neo4j.gds.paths.sourcetarget;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.paths.ShortestPathWriteResultConsumer;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig;
-import org.neo4j.gds.results.StandardWriteRelationshipsResult;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.results.StandardWriteRelationshipsResult;
 
 import java.util.stream.Stream;
 
@@ -58,7 +58,7 @@ public class ShortestPathDijkstraWriteSpec implements AlgorithmSpec<Dijkstra, Pa
 
     @Override
     public ComputationResultConsumer<Dijkstra, PathFindingResult, ShortestPathDijkstraWriteConfig, Stream<StandardWriteRelationshipsResult>> computationResultConsumer() {
-        return new ShortestPathWriteResultConsumer<>();
+        return new NullComputationResultConsumer<>();
     }
 
     @Override

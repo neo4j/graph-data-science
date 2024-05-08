@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.community.labelpropagation;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.Map;
 
@@ -54,14 +55,14 @@ public class LabelPropagationWriteResult extends LabelPropagationStatsResult {
         this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    public static Builder builder(ProcedureReturnColumns returnColumns, int concurrency) {
+    public static Builder builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
         return new Builder(returnColumns, concurrency);
     }
 
 
     public static class Builder extends LabelPropagationResultBuilder<LabelPropagationWriteResult> {
 
-        Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+        Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
             super(returnColumns, concurrency);
         }
 

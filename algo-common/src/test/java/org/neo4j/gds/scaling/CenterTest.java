@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
@@ -61,7 +62,7 @@ class CenterTest {
         var scaler = (Center) Center.buildFrom(CypherMapWrapper.empty()).create(
             properties,
             10,
-            1,
+            new Concurrency(1),
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE
         );
@@ -79,7 +80,7 @@ class CenterTest {
         var scaler = Center.buildFrom(CypherMapWrapper.empty()).create(
             properties,
             10,
-            1,
+            new Concurrency(1),
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE
         );

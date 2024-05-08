@@ -21,16 +21,16 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.core.ReadOnlyHugeLongIdentityArray;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
@@ -56,7 +56,7 @@ import java.util.List;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
+import static org.neo4j.gds.mem.MemoryEstimations.maxEstimation;
 import static org.neo4j.gds.ml.negativeSampling.NegativeSampler.NEGATIVE;
 import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkFeaturesAndLabelsExtractor.extractFeaturesAndLabels;
 import static org.neo4j.gds.ml.splitting.EdgeSplitter.POSITIVE;
@@ -326,7 +326,7 @@ public final class LinkPredictionTrain {
             .add("Outer train stats map", TrainingStatistics.memoryEstimationStatsMap(numberOfMetrics, 1, 1))
             .add("Test stats map", TrainingStatistics.memoryEstimationStatsMap(numberOfMetrics, 1, 1))
             .fixed("Best model stats", MemoryRange
-                .of(MemoryUsage.sizeOfInstance(ImmutableEvaluationScores.class))
+                .of(Estimate.sizeOfInstance(ImmutableEvaluationScores.class))
                 .times(2)
                 .add(Double.BYTES * 2)
                 .times(numberOfMetrics))

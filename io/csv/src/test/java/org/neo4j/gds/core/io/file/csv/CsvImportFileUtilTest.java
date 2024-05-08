@@ -69,15 +69,17 @@ class CsvImportFileUtilTest {
 
     @ParameterizedTest
     @MethodSource("nodeFileNames")
-    void shouldConstructNodeHeaderToDataFileMapping(List<String> fileNames) throws IOException {
+    void shouldConstructNodeHeaderToDataFileMapping(Iterable<String> fileNames) throws IOException {
         for (String fileName : fileNames) {
             Files.createFile(tempDir.resolve(fileName));
         }
-        Map<Path, List<Path>> headerToFileMapping = CsvImportFileUtil.nodeHeaderToFileMapping(tempDir);
+        Map<Path, List<Path>> headerToFileMapping = CsvImportFileUtil.nodeHeaderToFileMapping(
+            tempDir,
+            Stream.of("A_B", "A_C", "B", "Person", "House_Property", "")
+        );
         headerToFileMapping.values().forEach(paths -> paths.sort(Comparator.comparing(Path::toString)));
 
         Map<Path, List<Path>> expectedMapping = Map.of(
-            tempDir.resolve("nodes_header.csv"), List.of(tempDir.resolve("nodes_0.csv")),
             tempDir.resolve("nodes_A_B_header.csv"), List.of(tempDir.resolve("nodes_A_B_0.csv"), tempDir.resolve("nodes_A_B_1.csv")),
             tempDir.resolve("nodes_A_C_header.csv"), List.of(tempDir.resolve("nodes_A_C_0.csv"), tempDir.resolve("nodes_A_C_1.csv")),
             tempDir.resolve("nodes_B_header.csv"), List.of(tempDir.resolve("nodes_B_0.csv"), tempDir.resolve("nodes_B_1.csv"), tempDir.resolve("nodes_B_2.csv")),
@@ -99,7 +101,7 @@ class CsvImportFileUtilTest {
             .map(Path::toString)
             .collect(Collectors.toList());
 
-        assertThat(relationshipHeaderFiles).containsExactlyInAnyOrder("relationships_REL_header.csv", "relationships_REL1_header.csv", "relationships_REL2_header.csv");
+        assertThat(relationshipHeaderFiles).containsExactlyInAnyOrder("relationships_type_header.csv", "relationships_type1_header.csv", "relationships_type2_header.csv");
     }
 
     @ParameterizedTest
@@ -112,9 +114,9 @@ class CsvImportFileUtilTest {
         relationshipHeaderToFileMapping.values().forEach(paths -> paths.sort(Comparator.comparing(Path::toString)));
 
         Map<Path, List<Path>> expectedMapping = Map.of(
-            tempDir.resolve("relationships_REL_header.csv"), List.of(tempDir.resolve("relationships_REL_0.csv"), tempDir.resolve("relationships_REL_1.csv")),
-            tempDir.resolve("relationships_REL1_header.csv"), List.of(tempDir.resolve("relationships_REL1_0.csv"), tempDir.resolve("relationships_REL1_1.csv")),
-            tempDir.resolve("relationships_REL2_header.csv"), List.of(tempDir.resolve("relationships_REL2_0.csv"), tempDir.resolve("relationships_REL2_1.csv"), tempDir.resolve("relationships_REL2_2.csv"))
+            tempDir.resolve("relationships_type_header.csv"), List.of(tempDir.resolve("relationships_type_0.csv"), tempDir.resolve("relationships_type_1.csv")),
+            tempDir.resolve("relationships_type1_header.csv"), List.of(tempDir.resolve("relationships_type1_0.csv"), tempDir.resolve("relationships_type1_1.csv")),
+            tempDir.resolve("relationships_type2_header.csv"), List.of(tempDir.resolve("relationships_type2_0.csv"), tempDir.resolve("relationships_type2_1.csv"), tempDir.resolve("relationships_type2_2.csv"))
         );
         assertThat(relationshipHeaderToFileMapping).containsExactlyInAnyOrderEntriesOf(expectedMapping);
     }
@@ -179,7 +181,7 @@ class CsvImportFileUtilTest {
         var headerPath = tempDir.resolve("relationships_R_header.csv");
         FileUtils.writeLines(headerPath.toFile(), List.of(":START_ID,:END_ID,foo:long,bar:double"));
 
-        var parsedHeader = CsvImportFileUtil.parseRelationshipHeader(headerPath);
+        var parsedHeader = CsvImportFileUtil.parseRelationshipHeader(headerPath, Functions.identity());
 
         assertThat(parsedHeader.relationshipType()).isEqualTo("R");
         assertThat(parsedHeader.propertyMappings()).containsExactlyInAnyOrder(
@@ -246,16 +248,16 @@ class CsvImportFileUtilTest {
         return Stream.of(
             Arguments.of(
                 List.of(
-                    "relationships_REL_0.csv",
-                    "relationships_REL_1.csv",
-                    "relationships_REL1_0.csv",
-                    "relationships_REL1_1.csv",
-                    "relationships_REL2_0.csv",
-                    "relationships_REL2_1.csv",
-                    "relationships_REL2_2.csv",
-                    "relationships_REL_header.csv",
-                    "relationships_REL1_header.csv",
-                    "relationships_REL2_header.csv"
+                    "relationships_type_0.csv",
+                    "relationships_type_1.csv",
+                    "relationships_type1_0.csv",
+                    "relationships_type1_1.csv",
+                    "relationships_type2_0.csv",
+                    "relationships_type2_1.csv",
+                    "relationships_type2_2.csv",
+                    "relationships_type_header.csv",
+                    "relationships_type1_header.csv",
+                    "relationships_type2_header.csv"
                 )
             )
         );

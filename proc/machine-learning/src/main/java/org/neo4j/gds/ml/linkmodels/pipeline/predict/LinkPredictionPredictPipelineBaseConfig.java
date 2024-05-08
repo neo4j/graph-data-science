@@ -180,7 +180,7 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
         var knnBuilder = KnnBaseConfigImpl.builder()
             .sampleRate(sampleRate())
             .nodeProperties(List.of(new KnnNodePropertySpec("NotUsedInLP")))
-            .concurrency(concurrency());
+            .concurrency(concurrency().value());
 
         topK().ifPresent(knnBuilder::topK);
         deltaThreshold().ifPresent(knnBuilder::deltaThreshold);
@@ -211,7 +211,7 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
     default double thresholdOrDefault() {
         return threshold().orElse(DEFAULT_THRESHOLD);
     }
-    
+
 
     @Configuration.Ignore
     default boolean isApproximateStrategy() {

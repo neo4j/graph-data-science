@@ -23,6 +23,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -44,7 +45,7 @@ interface RandomWalkProbabilities {
     class Builder {
 
         private final long nodeCount;
-        private final int concurrency;
+        private final Concurrency concurrency;
         private final double positiveSamplingFactor;
         private final double negativeSamplingExponent;
         private final HugeAtomicLongArray nodeFrequencies;
@@ -52,7 +53,7 @@ interface RandomWalkProbabilities {
 
         Builder(
             long nodeCount,
-            int concurrency,
+            Concurrency concurrency,
             double positiveSamplingFactor,
             double negativeSamplingExponent
         ) {

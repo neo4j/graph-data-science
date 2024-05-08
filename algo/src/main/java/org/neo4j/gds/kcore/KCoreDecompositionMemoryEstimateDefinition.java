@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.kcore;
 
-import org.neo4j.gds.MemoryEstimateDefinition;
+import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.haa.HugeAtomicIntArray;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 
 public class KCoreDecompositionMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
@@ -42,7 +42,7 @@ public class KCoreDecompositionMemoryEstimateDefinition implements MemoryEstimat
                 (long) Math.ceil(graphDimensions.nodeCount() * KCoreDecomposition.REBUILD_CONSTANT)
             );
             var rebuildTask = RebuildTask.memoryEstimation(resizedNodeCount);
-            var totalRebuildTasks = rebuildTask * concurrency;
+            var totalRebuildTasks = rebuildTask * concurrency.value();
             var rebuildArray = HugeIntArray.memoryEstimation(resizedNodeCount);
             return MemoryRange.of(totalRebuildTasks + rebuildArray);
 

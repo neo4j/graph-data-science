@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.k1coloring;
 
-import org.neo4j.gds.MemoryEstimateDefinition;
+import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.Estimate;
 
 public final class K1ColoringMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
@@ -31,10 +31,10 @@ public final class K1ColoringMemoryEstimateDefinition implements MemoryEstimateD
     public MemoryEstimation memoryEstimation() {
         return MemoryEstimations.builder(K1Coloring.class)
             .perNode("colors", HugeLongArray::memoryEstimation)
-            .perNode("nodesToColor", MemoryUsage::sizeOfBitset)
+            .perNode("nodesToColor", Estimate::sizeOfBitset)
             .perThread("coloring", MemoryEstimations.builder()
                 .field("coloringStep", ColoringStep.class)
-                .perNode("forbiddenColors", MemoryUsage::sizeOfBitset)
+                .perNode("forbiddenColors", Estimate::sizeOfBitset)
                 .build())
             .build();
     }

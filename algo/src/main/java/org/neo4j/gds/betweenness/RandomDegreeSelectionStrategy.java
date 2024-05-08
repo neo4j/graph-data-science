@@ -22,6 +22,7 @@ package org.neo4j.gds.betweenness;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.BitSetIterator;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -55,7 +56,7 @@ public class RandomDegreeSelectionStrategy implements SelectionStrategy {
     }
 
     @Override
-    public void init(Graph graph, ExecutorService executorService, int concurrency) {
+    public void init(Graph graph, ExecutorService executorService, Concurrency concurrency) {
         assert samplingSize <= graph.nodeCount();
         this.sampleSet = new BitSet(graph.nodeCount());
         this.graphSize = graph.nodeCount();
@@ -80,7 +81,7 @@ public class RandomDegreeSelectionStrategy implements SelectionStrategy {
         Graph graph,
         Collection<Partition> partitions,
         ExecutorService executorService,
-        int concurrency
+        Concurrency concurrency
     ) {
         AtomicInteger maxDegree = new AtomicInteger(0);
 
@@ -111,7 +112,7 @@ public class RandomDegreeSelectionStrategy implements SelectionStrategy {
         Collection<Partition> partitions,
         int maxDegree,
         ExecutorService executorService,
-        int concurrency
+        Concurrency concurrency
     ) {
         var random = maybeRandomSeed.map(SplittableRandom::new).orElseGet(SplittableRandom::new);
         var selectionSize = new AtomicLong(0);

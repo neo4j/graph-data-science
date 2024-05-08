@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.similarity.nodesim;
 
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -35,10 +35,8 @@ import static org.neo4j.gds.similarity.nodesim.NodeSimilarityProc.NODE_SIMILARIT
 import static org.neo4j.procedure.Mode.READ;
 
 public class NodeSimilarityStreamProc {
-
     @Context
     public GraphDataScienceProcedures facade;
-
 
     @Procedure(value = "gds.nodeSimilarity.stream", mode = READ)
     @Description(NODE_SIMILARITY_DESCRIPTION)
@@ -46,8 +44,7 @@ public class NodeSimilarityStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-
-        return facade.similarity().nodeSimilarityStream(graphName, configuration);
+        return facade.algorithms().similarity().nodeSimilarityStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.nodeSimilarity.stream.estimate", mode = READ)
@@ -56,6 +53,6 @@ public class NodeSimilarityStreamProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.similarity().nodeSimilarityEstimateStream(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().similarity().nodeSimilarityStreamEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

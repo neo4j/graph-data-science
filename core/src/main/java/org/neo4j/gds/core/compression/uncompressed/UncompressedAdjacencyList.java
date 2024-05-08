@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.compression.uncompressed;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.RelationshipType;
@@ -33,13 +32,13 @@ import org.neo4j.gds.collections.PageUtil;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
 import org.neo4j.gds.core.loading.MutableIntValue;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.mem.BitUtil;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.gds.collections.PageUtil.indexInPage;
@@ -106,8 +105,8 @@ public final class UncompressedAdjacencyList implements AdjacencyList, Adjacency
     private static MemoryRange listSize(long avgDegree, long nodeCount) {
         long uncompressedAdjacencySize = nodeCount * avgDegree * Long.BYTES;
         int pages = PageUtil.numPagesFor(uncompressedAdjacencySize, BumpAllocator.PAGE_SHIFT, BumpAllocator.PAGE_MASK);
-        long bytesPerPage = MemoryUsage.sizeOfByteArray(BumpAllocator.PAGE_SIZE);
-        return MemoryRange.of(pages * bytesPerPage + MemoryUsage.sizeOfObjectArray(pages));
+        long bytesPerPage = Estimate.sizeOfByteArray(BumpAllocator.PAGE_SIZE);
+        return MemoryRange.of(pages * bytesPerPage + Estimate.sizeOfObjectArray(pages));
     }
 
     private final long[][] pages;
@@ -247,21 +246,6 @@ public final class UncompressedAdjacencyList implements AdjacencyList, Adjacency
         @Override
         public long peekVLong() {
             return currentPage[offset];
-        }
-
-        @Override
-        public @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination) {
-            var dest = destination instanceof Cursor
-                ? (Cursor) destination
-                : new Cursor(pages);
-
-            dest.currentPage = currentPage;
-
-            dest.degree = degree;
-            dest.limit = limit;
-            dest.offset = offset;
-
-            return dest;
         }
 
         @Override

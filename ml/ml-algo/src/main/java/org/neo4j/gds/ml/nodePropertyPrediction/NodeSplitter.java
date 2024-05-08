@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.nodePropertyPrediction;
 
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.paged.HugeMergeSort;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -36,14 +37,14 @@ import static org.neo4j.gds.ml.util.TrainingSetWarnings.warnForSmallNodeSets;
 
 public final class NodeSplitter {
 
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final long numberOfExamples;
     private final ProgressTracker progressTracker;
     private final LongUnaryOperator toOriginalId;
     private final LongUnaryOperator toMappedId;
 
     public NodeSplitter(
-        int concurrency,
+        Concurrency concurrency,
         long numberOfExamples,
         ProgressTracker progressTracker,
         LongUnaryOperator toOriginalId,

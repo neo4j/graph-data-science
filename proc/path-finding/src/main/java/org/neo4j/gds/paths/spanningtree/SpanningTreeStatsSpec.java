@@ -19,11 +19,12 @@
  */
 package org.neo4j.gds.paths.spanningtree;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeStatsResult;
 import org.neo4j.gds.spanningtree.Prim;
 import org.neo4j.gds.spanningtree.SpanningTree;
@@ -58,26 +59,8 @@ public class SpanningTreeStatsSpec implements AlgorithmSpec<Prim, SpanningTree, 
 
     }
 
+    @Override
     public ComputationResultConsumer<Prim, SpanningTree, SpanningTreeStatsConfig, Stream<SpanningTreeStatsResult>> computationResultConsumer() {
-
-        return (computationResult, executionContext) -> {
-
-            SpanningTreeStatsResult.Builder builder = new SpanningTreeStatsResult.Builder();
-
-            if (computationResult.result().isEmpty()) {
-                return Stream.of(builder.build());
-            }
-
-            SpanningTree spanningTree = computationResult.result().get();
-            SpanningTreeStatsConfig config = computationResult.config();
-
-            builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount());
-            builder.withTotalWeight(spanningTree.totalWeight());
-
-            builder.withComputeMillis(computationResult.computeMillis());
-            builder.withPreProcessingMillis(computationResult.preProcessingMillis());
-            builder.withConfig(config);
-            return Stream.of(builder.build());
-        };
+        return new NullComputationResultConsumer<>();
     }
 }

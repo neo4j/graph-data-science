@@ -22,6 +22,7 @@ package org.neo4j.gds.similarity.nodesim;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.huge.UnionGraph;
@@ -72,7 +73,7 @@ class SimilarityGraphBuilderTest {
 
         SimilarityGraphBuilder similarityGraphBuilder = new SimilarityGraphBuilder(
             unlabelledGraph,
-            1,
+            new Concurrency(1),
             DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
         );
@@ -95,7 +96,7 @@ class SimilarityGraphBuilderTest {
 
         SimilarityGraphBuilder similarityGraphBuilder = new SimilarityGraphBuilder(
             graph,
-            1,
+            new Concurrency(1),
             DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
         );
@@ -115,7 +116,7 @@ class SimilarityGraphBuilderTest {
     @Test
     void testConstructFromFilteredGraph() {
         NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder()
-            .concurrency(4)
+            .concurrency(new Concurrency(4))
             .hasLabelInformation(true)
             .maxOriginalId(3)
             .build();
@@ -126,11 +127,11 @@ class SimilarityGraphBuilderTest {
         nodesBuilder.addNode(3, NodeLabel.of("B"));
 
         var inputMapping = nodesBuilder.build().idMap();
-        var filteredIdMap = inputMapping.withFilteredLabels(NodeLabel.listOf("B"), 4).get();
+        var filteredIdMap = inputMapping.withFilteredLabels(NodeLabel.listOf("B"), new Concurrency(4)).get();
 
         SimilarityGraphBuilder similarityGraphBuilder = new SimilarityGraphBuilder(
             filteredIdMap,
-            1,
+            new Concurrency(1),
             DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
         );

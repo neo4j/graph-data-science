@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.pipeline.linkPipeline;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -58,7 +59,7 @@ class LinkFeatureExtractorTest {
         var actual = LinkFeatureExtractor.extractFeatures(
             graph,
             List.of(new HadamardFeatureStep(List.of("array"))),
-            1,
+            new Concurrency(1),
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         );
@@ -87,7 +88,7 @@ class LinkFeatureExtractorTest {
                 new HadamardFeatureStep(List.of("array")),
                 new CosineFeatureStep(List.of("noise", "z"))
             ),
-            1,
+            new Concurrency(1),
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         );

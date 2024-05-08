@@ -20,15 +20,13 @@
 package org.neo4j.gds.algorithms.centrality;
 
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
-import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
-import org.neo4j.gds.betweenness.BetweennessCentralityMemoryEstimateDefinition;
 import org.neo4j.gds.degree.DegreeCentralityAlgorithmEstimateDefinition;
 import org.neo4j.gds.degree.DegreeCentralityConfig;
 import org.neo4j.gds.influenceMaximization.CELFMemoryEstimateDefinition;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationBaseConfig;
 import org.neo4j.gds.pagerank.PageRankConfig;
 import org.neo4j.gds.pagerank.PageRankMemoryEstimateDefinition;
-import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 
 import java.util.Optional;
 
@@ -40,18 +38,6 @@ public class CentralityAlgorithmsEstimateBusinessFacade {
         AlgorithmEstimator algorithmEstimator
     ) {
         this.algorithmEstimator = algorithmEstimator;
-    }
-
-    public <C extends BetweennessCentralityBaseConfig> MemoryEstimateResult betweennessCentrality(
-        Object graphNameOrConfiguration,
-        C configuration
-    ) {
-        return algorithmEstimator.estimate(
-            graphNameOrConfiguration,
-            configuration,
-            configuration.relationshipWeightProperty(),
-            new BetweennessCentralityMemoryEstimateDefinition(configuration.hasRelationshipWeightProperty())
-        );
     }
 
     public <C extends DegreeCentralityConfig> MemoryEstimateResult degreeCentrality(

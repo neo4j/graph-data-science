@@ -27,16 +27,17 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.mem.MemoryTree;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryTree;
+import org.neo4j.gds.mem.Estimate;
 
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfIntArray;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfOpenHashContainer;
+import static org.neo4j.gds.mem.Estimate.sizeOfIntArray;
+import static org.neo4j.gds.mem.Estimate.sizeOfLongArray;
+import static org.neo4j.gds.mem.Estimate.sizeOfOpenHashContainer;
 
 class KnnMemoryEstimateDefinitionTest {
 
@@ -53,13 +54,11 @@ class KnnMemoryEstimateDefinitionTest {
     @ParameterizedTest
     @MethodSource("smallParameters")
     void memoryEstimationWithNodeProperty(long nodeCount, KnnSampler.SamplerType initialSampler) {
-
-
         var parameters = new KnnMemoryEstimationParametersBuilder(0.5, 10, initialSampler);
-
         var estimation = new KnnMemoryEstimateDefinition(parameters).memoryEstimation();
         GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
-        MemoryTree estimate = estimation.estimate(dimensions, 1);
+        var concurrency = new Concurrency(1);
+        MemoryTree estimate = estimation.estimate(dimensions, concurrency);
         MemoryRange actual = estimate.memoryUsage();
 
         assertEstimation(
@@ -84,10 +83,10 @@ class KnnMemoryEstimateDefinitionTest {
     @MethodSource("largeParameters")
     void memoryEstimationLargePagesWithProperty(long nodeCount, KnnSampler.SamplerType initialSampler) {
         var parameters = new KnnMemoryEstimationParametersBuilder(0.5, 10, initialSampler);
-
         var estimation = new KnnMemoryEstimateDefinition(parameters).memoryEstimation();
         GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
-        MemoryTree estimate = estimation.estimate(dimensions, 1);
+        var concurrency = new Concurrency(1);
+        MemoryTree estimate = estimation.estimate(dimensions, concurrency);
         MemoryRange actual = estimate.memoryUsage();
 
         assertEstimation(nodeCount, parameters.build(nodeCount).k(), initialSampler, actual);
@@ -99,15 +98,15 @@ class KnnMemoryEstimateDefinitionTest {
         KnnSampler.SamplerType initialSampler,
         MemoryRange actual
     ) {
-        long knnAlgo = MemoryUsage.sizeOfInstance(Knn.class);
+        long knnAlgo = Estimate.sizeOfInstance(Knn.class);
 
-        long topKNeighborList = MemoryUsage.sizeOfInstance(NeighborList.class) + sizeOfLongArray(k.value * 2L);
+        long topKNeighborList = Estimate.sizeOfInstance(NeighborList.class) + sizeOfLongArray(k.value * 2L);
         long topKNeighborsList = HugeObjectArray.memoryEstimation(nodeCount, topKNeighborList);
 
         long tempNeighborsListMin = HugeObjectArray.memoryEstimation(nodeCount, 0);
         long tempNeighborsListMax = HugeObjectArray.memoryEstimation(
             nodeCount,
-            MemoryUsage.sizeOfInstance(LongArrayList.class) + sizeOfLongArray(k.sampledValue)
+            Estimate.sizeOfInstance(LongArrayList.class) + sizeOfLongArray(k.sampledValue)
         );
 
         var randomList = KnnFactory.initialSamplerMemoryEstimation(initialSampler, k.value);

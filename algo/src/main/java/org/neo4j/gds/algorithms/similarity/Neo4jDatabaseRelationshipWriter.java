@@ -26,7 +26,9 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.ArrowConnectionInfo;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.RelationshipExporter;
@@ -49,18 +51,18 @@ public final class Neo4jDatabaseRelationshipWriter {
         Log log,
         String taskName,
         TerminationFlag algorithmTerminationFlag,
-        int concurrency,
+        Concurrency concurrency,
         Optional<ArrowConnectionInfo> arrowConnectionInfo,
         Optional<ResultStore> resultStore,
-        RelationshipWithPropertyConsumer relationshipConsumer
-
+        RelationshipWithPropertyConsumer relationshipConsumer,
+        JobId jobId
     ){
         var writeMillis = new AtomicLong();
         try (ProgressTimer ignored = ProgressTimer.start(writeMillis::set)) {
             var progressTracker = new TaskProgressTracker(
                 RelationshipExporter.baseTask(taskName, graph.relationshipCount()),
                 (org.neo4j.logging.Log) log.getNeo4jLog(),
-                RelationshipExporterBuilder.DEFAULT_WRITE_CONCURRENCY,
+                RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY,
                 taskRegistryFactory
             );
 
@@ -75,6 +77,7 @@ public final class Neo4jDatabaseRelationshipWriter {
                     graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                 )
                 .withResultStore(resultStore)
+                .withJobId(jobId)
                 .build();
 
             exporter.write(

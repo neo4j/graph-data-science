@@ -21,10 +21,10 @@ package org.neo4j.gds.pagerank;
 
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
-import static org.neo4j.gds.procedures.centrality.pagerank.PageRankProcCompanion.ARTICLE_RANK_DESCRIPTION;
+import static org.neo4j.gds.pagerank.Constants.ARTICLE_RANK_DESCRIPTION;
 
 @GdsCallable(name = "gds.eigenvector.mutate", description = ARTICLE_RANK_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class EigenVectorMutateSpec extends PageRankMutateSpec {

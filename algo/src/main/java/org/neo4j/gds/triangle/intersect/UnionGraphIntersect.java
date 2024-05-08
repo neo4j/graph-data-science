@@ -22,7 +22,6 @@ package org.neo4j.gds.triangle.intersect;
 import org.eclipse.collections.api.block.function.primitive.LongToLongFunction;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.annotations.service.ServiceProvider;
-import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.huge.CompositeAdjacencyCursor;
 import org.neo4j.gds.core.huge.CompositeAdjacencyList;
@@ -51,11 +50,6 @@ public final class UnionGraphIntersect extends GraphIntersect<CompositeAdjacency
     @Override
     protected int degree(long nodeId) {
         return degreeFunction.applyAsInt(nodeId);
-    }
-
-    @Override
-    protected CompositeAdjacencyCursor checkCursorInstance(AdjacencyCursor cursor) {
-        return (CompositeAdjacencyCursor) cursor;
     }
 
     @Override

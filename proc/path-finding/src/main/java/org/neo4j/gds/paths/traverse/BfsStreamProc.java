@@ -21,7 +21,7 @@ package org.neo4j.gds.paths.traverse;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.pathfinding.BfsStreamResult;
-import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -44,7 +44,7 @@ public class BfsStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().breadthFirstSearchStream(graphName, configuration);
+        return facade.algorithms().pathFinding().breadthFirstSearchStream(graphName, configuration);
     }
 
     @Procedure(name = "gds.bfs.stream.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class BfsStreamProc {
         @Name(value = "graphName") Object graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().breadthFirstSearchStreamEstimate(graphName, configuration);
+        return facade.algorithms().pathFinding().breadthFirstSearchStreamEstimate(graphName, configuration);
     }
 }

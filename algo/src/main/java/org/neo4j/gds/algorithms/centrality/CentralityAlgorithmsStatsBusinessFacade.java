@@ -28,8 +28,6 @@ import org.neo4j.gds.algorithms.centrality.specificfields.DefaultCentralitySpeci
 import org.neo4j.gds.algorithms.centrality.specificfields.PageRankSpecificFields;
 import org.neo4j.gds.algorithms.runner.AlgorithmResultWithTiming;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
-import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
-import org.neo4j.gds.closeness.ClosenessCentralityStatsConfig;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.degree.DegreeCentralityStatsConfig;
@@ -49,25 +47,6 @@ public class CentralityAlgorithmsStatsBusinessFacade {
         this.centralityAlgorithmsFacade = centralityAlgorithmsFacade;
     }
 
-
-    public StatsResult<DefaultCentralitySpecificFields> betweennessCentrality(
-        String graphName,
-        BetweennessCentralityStatsConfig configuration,
-        boolean shouldComputeCentralityDistribution
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> centralityAlgorithmsFacade.betweennessCentrality(graphName, configuration)
-        );
-
-        return statsResult(
-            intermediateResult.algorithmResult,
-            configuration,
-            shouldComputeCentralityDistribution,
-            intermediateResult.computeMilliseconds
-        );
-    }
-
     public StatsResult<DefaultCentralitySpecificFields> degreeCentrality(
         String graphName,
         DegreeCentralityStatsConfig configuration,
@@ -76,24 +55,6 @@ public class CentralityAlgorithmsStatsBusinessFacade {
         // 1. Run the algorithm and time the execution
         var intermediateResult = AlgorithmRunner.runWithTiming(
             () -> centralityAlgorithmsFacade.degreeCentrality(graphName, configuration)
-        );
-
-        return statsResult(
-            intermediateResult.algorithmResult,
-            configuration,
-            shouldComputeCentralityDistribution,
-            intermediateResult.computeMilliseconds
-        );
-    }
-
-    public StatsResult<DefaultCentralitySpecificFields> closenessCentrality(
-        String graphName,
-        ClosenessCentralityStatsConfig configuration,
-        boolean shouldComputeCentralityDistribution
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> centralityAlgorithmsFacade.closenessCentrality(graphName, configuration)
         );
 
         return statsResult(

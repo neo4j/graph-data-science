@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.similarity.nodesim;
 
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.similarity.SimilarityMutateResult;
-import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.procedures.algorithms.similarity.SimilarityMutateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -44,7 +44,7 @@ public class NodeSimilarityMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.similarity().nodeSimilarityMutate(graphName, configuration);
+        return facade.algorithms().similarity().nodeSimilarityMutateStub().execute(graphName, configuration);
     }
 
     @Procedure(value = "gds.nodeSimilarity.mutate.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class NodeSimilarityMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.similarity().nodeSimilarityEstimateMutate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().similarity().nodeSimilarityMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

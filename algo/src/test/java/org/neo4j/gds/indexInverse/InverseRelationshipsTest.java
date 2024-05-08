@@ -25,8 +25,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.config.ConcurrencyConfig;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -69,15 +72,11 @@ class InverseRelationshipsTest {
     void shouldCreateIndexedRelationships(int concurrency) {
         var relationshipType = RelationshipType.of("T1");
 
-        var config = InverseRelationshipsConfigImpl
-            .builder()
-            .concurrency(concurrency)
-            .relationshipTypes(relationshipType.name)
-            .build();
+        var parameters = new InverseRelationshipsParameters(new Concurrency(concurrency), List.of(relationshipType.name));
 
         var inverseRelationshipsPerType = new InverseRelationships(
             graphStore,
-            config,
+            parameters,
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE
         ).compute();
@@ -99,16 +98,13 @@ class InverseRelationshipsTest {
     @ParameterizedTest
     @MethodSource("multipleTypes")
     void shouldIndexMultipleTypes(Object relTypes) {
-        var config = InverseRelationshipsConfigImpl
-            .builder()
-            .relationshipTypes(relTypes)
-            .build();
+        var parameters = new InverseRelationshipsParameters(ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY, InverseRelationshipsConfig.parseRelTypes(relTypes));
 
-        var internalTypes = List.copyOf(config.internalRelationshipTypes(graphStore));
+        var internalTypes = List.copyOf(parameters.internalRelationshipTypes(graphStore));
 
         var inverseRelationshipsPerType = new InverseRelationships(
             graphStore,
-            config,
+            parameters,
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE
         ).compute();
@@ -133,18 +129,12 @@ class InverseRelationshipsTest {
     void logProgress() {
         var log = Neo4jProxy.testLog();
 
-        var config = InverseRelationshipsConfigImpl
-            .builder()
-            .concurrency(4)
-            .relationshipTypes(List.of("T1", "T2"))
-            .build();
+        var parameters = new InverseRelationshipsParameters(new Concurrency(4), List.of("T1", "T2"));
 
-        new InverseRelationshipsAlgorithmFactory().build(
-            graphStore,
-            config,
-            log,
-            EmptyTaskRegistryFactory.INSTANCE
-        ).compute();
+        var factory = new InverseRelationshipsAlgorithmFactory();
+        var task = factory.progressTask(graphStore.nodeCount(), parameters.internalRelationshipTypes(graphStore));
+        var progressTracker = new TestProgressTracker(task, log, parameters.concurrency(), EmptyTaskRegistryFactory.INSTANCE);
+        factory.build(graphStore, parameters, progressTracker).compute();
 
         assertThat(log.getMessages(INFO))
             .extracting(removingThreadId())

@@ -21,7 +21,7 @@ package org.neo4j.gds.paths.steiner;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SteinerStatsResult;
-import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -45,7 +45,7 @@ public class SteinerTreeStatsProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().steinerTreeStats(graphName, configuration);
+        return facade.algorithms().pathFinding().steinerTreeStats(graphName, configuration);
     }
 
     @Procedure(value = "gds.steinerTree.stats.estimate", mode = READ)
@@ -54,7 +54,7 @@ public class SteinerTreeStatsProc {
         @Name(value = "graphName") Object graphNameOrConfiguration,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().steinerTreeStatsEstimate(graphNameOrConfiguration, configuration);
+        return facade.algorithms().pathFinding().steinerTreeStatsEstimate(graphNameOrConfiguration, configuration);
     }
 
     @Deprecated

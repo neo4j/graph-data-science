@@ -19,11 +19,12 @@
  */
 package org.neo4j.gds.kcore;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionStatsResult;
 
 import java.util.stream.Stream;
@@ -50,21 +51,6 @@ public class KCoreDecompositionStatsSpec implements AlgorithmSpec<KCoreDecomposi
 
     @Override
     public ComputationResultConsumer<KCoreDecomposition, KCoreDecompositionResult, KCoreDecompositionStatsConfig, Stream<KCoreDecompositionStatsResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-
-            var builder = new KCoreDecompositionStatsResult.Builder();
-
-            computationResult.result().ifPresent(result -> builder.withDegeneracy(result.degeneracy()));
-
-            return Stream.of(
-                builder.withPreProcessingMillis(computationResult.preProcessingMillis())
-                    .withComputeMillis(computationResult.computeMillis())
-                    .withNodeCount(computationResult.graph().nodeCount())
-                    .withConfig(computationResult.config())
-                    .build()
-            );
-        };
+        return new NullComputationResultConsumer<>();
     }
-
-
 }

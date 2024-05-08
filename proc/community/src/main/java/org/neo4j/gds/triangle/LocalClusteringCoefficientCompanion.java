@@ -20,8 +20,7 @@
 package org.neo4j.gds.triangle;
 
 final class LocalClusteringCoefficientCompanion {
-
-    static final String DESCRIPTION = "The local clustering coefficient is a metric quantifying how connected the neighborhood of a node is.";
+    static final String LOCAL_CLUSTERING_COEFFICIENT_DESCRIPTION = "The local clustering coefficient is a metric quantifying how connected the neighborhood of a node is.";
 
     private LocalClusteringCoefficientCompanion() {}
 }

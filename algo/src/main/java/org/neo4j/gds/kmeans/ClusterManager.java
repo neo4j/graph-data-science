@@ -21,10 +21,10 @@ package org.neo4j.gds.kmeans;
 
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
+import org.neo4j.gds.mem.Estimate;
 
 import java.util.List;
 
@@ -80,7 +80,7 @@ abstract class ClusterManager {
             initialAssignCluster(currentId);
         }
     }
-    
+
     abstract double[][] getCentroids();
 
     public long[] getNodesInCluster() {
@@ -112,15 +112,14 @@ abstract class ClusterManager {
     static MemoryEstimation memoryEstimation(int k, int fakeDimensions) {
         var builder = MemoryEstimations.builder(ClusterManager.class);
         builder
-            .fixed("nodesInCluster", MemoryUsage.sizeOfLongArray(k))
-            .fixed("shouldReset", MemoryUsage.sizeOfArray(k, 1L))
+            .fixed("nodesInCluster", Estimate.sizeOfLongArray(k))
+            .fixed("shouldReset", Estimate.sizeOfArray(k, 1L))
             .add("centroidsSize", MemoryEstimations.of("centroidsSize", MemoryRange.of(
-                MemoryUsage.sizeOfFloatArray(fakeDimensions),
-                MemoryUsage.sizeOfDoubleArray(fakeDimensions)
+                Estimate.sizeOfFloatArray(fakeDimensions),
+                Estimate.sizeOfDoubleArray(fakeDimensions)
             )));
         return builder.build();
     }
 
     public abstract void assignSeededCentroids(List<List<Double>> seededCentroids);
 }
-

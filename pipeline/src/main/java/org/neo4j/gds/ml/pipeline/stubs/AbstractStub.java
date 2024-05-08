@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.ml.pipeline.stubs;
 
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.ml.pipeline.Stub;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.pathfinding.MutateStub;
+import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 import java.util.Map;
 

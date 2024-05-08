@@ -19,23 +19,8 @@
  */
 package org.neo4j.gds.similarity.knn;
 
-public class KnnMemoryEstimationParameters {
+import org.neo4j.gds.annotation.Parameters;
 
-    private  final K k;
-    private final KnnSampler.SamplerType samplerType;
-
-
-    public KnnMemoryEstimationParameters(K k, KnnSampler.SamplerType samplerType) {
-        this.k = k;
-        this.samplerType = samplerType;
-    }
-
-    public  K k(){
-        return k;
-    }
-
-    public KnnSampler.SamplerType samplerType(){
-        return  samplerType;
-    }
+@Parameters
+public record KnnMemoryEstimationParameters(K k, KnnSampler.SamplerType samplerType) {
 }
-

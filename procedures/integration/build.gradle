@@ -15,6 +15,7 @@ dependencies {
     compileOnly project(':annotations')
     compileOnly group: 'org.immutables', name: 'value', version: ver.'immutables'
 
+    implementation project(':algorithms-machinery')
     implementation project(':algorithms-procedure-facade')
     implementation project(':applications-facade')
     implementation project(':config-api')

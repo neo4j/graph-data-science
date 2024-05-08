@@ -20,11 +20,12 @@
 package org.neo4j.gds.k1coloring;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringWriteResult;
 
 public class K1ColoringWriteResultBuilder extends K1ColoringResultBuilder<K1ColoringWriteResult> {
 
-    K1ColoringWriteResultBuilder(ProcedureReturnColumns returnColumns, int concurrency) {
+    K1ColoringWriteResultBuilder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
         super(returnColumns, concurrency);
     }
 

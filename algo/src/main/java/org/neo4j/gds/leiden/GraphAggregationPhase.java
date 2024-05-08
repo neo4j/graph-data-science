@@ -33,12 +33,13 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -103,7 +104,7 @@ class GraphAggregationPhase {
     private final Direction direction;
     private final long maxCommunityId;
     private final ExecutorService executorService;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final TerminationFlag terminationFlag;
     private final ProgressTracker progressTracker;
 
@@ -113,7 +114,7 @@ class GraphAggregationPhase {
         HugeLongArray communities,
         long maxCommunityId,
         ExecutorService executorService,
-        int concurrency,
+        Concurrency concurrency,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker
     ) {
@@ -186,7 +187,7 @@ class GraphAggregationPhase {
         return GraphFactory.create(idMap, relationshipsBuilder.build());
     }
 
-    static HugeLongArray getNodesSortedByCommunity(HugeLongArray communities, int concurrency) {
+    static HugeLongArray getNodesSortedByCommunity(HugeLongArray communities, Concurrency concurrency) {
         long nodeCount = communities.size();
 
         var sortedNodesByCommunity = HugeLongArray.newArray(nodeCount);

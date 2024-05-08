@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.gdl.GdlFactory;
 
 import java.util.List;
@@ -48,7 +49,7 @@ class ScalePropertiesMemoryEstimateDefinitionTest {
             .memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
-            .memoryRange(gdlGraph.dimensions(),1)
+            .memoryRange(gdlGraph.dimensions(), new Concurrency(1))
             .hasSameMinAndMaxEqualTo(288);
     }
 
@@ -72,7 +73,7 @@ class ScalePropertiesMemoryEstimateDefinitionTest {
             .memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
-            .memoryRange(nodeCount,1)
+            .memoryRange(nodeCount, new Concurrency(1))
             .hasSameMinAndMaxEqualTo(expectedMemory);
     }
 

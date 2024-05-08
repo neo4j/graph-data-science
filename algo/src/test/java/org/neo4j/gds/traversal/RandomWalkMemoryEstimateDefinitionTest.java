@@ -21,6 +21,7 @@ package org.neo4j.gds.traversal;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 class RandomWalkMemoryEstimateDefinitionTest {
 
@@ -32,7 +33,7 @@ class RandomWalkMemoryEstimateDefinitionTest {
                 .memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
-            .memoryRange(100, 6000, 1)
+            .memoryRange(100, 6000, new Concurrency(1))
             .hasMin(4016)
             .hasMax(660032);
     }

@@ -38,6 +38,6 @@ public interface K1ColoringBaseConfig extends AlgoBaseConfig, IterationsConfig {
 
     @Configuration.Ignore
     default K1ColoringParameters toParameters() {
-        return K1ColoringParameters.create(concurrency(), maxIterations(), batchSize());
+        return new K1ColoringParameters(concurrency(), maxIterations(), batchSize());
     }
 }

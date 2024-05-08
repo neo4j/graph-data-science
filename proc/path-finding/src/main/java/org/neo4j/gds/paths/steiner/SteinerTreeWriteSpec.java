@@ -19,18 +19,13 @@
  */
 package org.neo4j.gds.paths.steiner;
 
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.write.RelationshipExporterBuilder;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SteinerWriteResult;
-import org.neo4j.gds.spanningtree.SpanningGraph;
-import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm;
 import org.neo4j.gds.steiner.SteinerTreeAlgorithmFactory;
 import org.neo4j.gds.steiner.SteinerTreeResult;
@@ -63,63 +58,8 @@ public class SteinerTreeWriteSpec implements
         return (__, config) -> SteinerTreeWriteConfig.of(config);
     }
 
+    @Override
     public ComputationResultConsumer<ShortestPathsSteinerAlgorithm, SteinerTreeResult, SteinerTreeWriteConfig, Stream<SteinerWriteResult>> computationResultConsumer() {
-
-        return (computationResult, executionContext) -> {
-            var config = computationResult.config();
-            var terminationFlag = computationResult.algorithm().getTerminationFlag();
-            var sourceNode = config.sourceNode();
-            var graph = computationResult.graph();
-
-            var builder = new SteinerWriteResult.Builder();
-
-            computationResult.result().ifPresent(steinerTreeResult -> {
-                builder
-                    .withEffectiveNodeCount(steinerTreeResult.effectiveNodeCount())
-                    .withEffectiveTargetNodeCount(steinerTreeResult.effectiveTargetNodesCount())
-                    .withTotalWeight(steinerTreeResult.totalCost());
-
-                try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
-                    var relationshipToParentCost = steinerTreeResult.relationshipToParentCost();
-                    var spanningTree = new SpanningTree(
-                        graph.toMappedNodeId(sourceNode),
-                        graph.nodeCount(),
-                        steinerTreeResult.effectiveNodeCount(),
-                        steinerTreeResult.parentArray(),
-                        nodeId -> relationshipToParentCost.get(nodeId),
-                        steinerTreeResult.totalCost()
-                    );
-                    var spanningGraph = new SpanningGraph(graph, spanningTree);
-
-                    RelationshipExporterBuilder relationshipExporterBuilder = executionContext
-                        .relationshipExporterBuilder();
-                    relationshipExporterBuilder
-                        .withGraph(spanningGraph)
-                        .withIdMappingOperator(spanningGraph::toOriginalNodeId)
-                        .withTerminationFlag(terminationFlag)
-                        .withProgressTracker(ProgressTracker.NULL_TRACKER)
-                        .withArrowConnectionInfo(
-                            config.arrowConnectionInfo(),
-                            computationResult.graphStore().databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
-                        )
-                        .withResultStore(config.resolveResultStore(computationResult.graphStore().resultStore()))
-                        .build()
-                        .write(
-                            config.writeRelationshipType(),
-                            config.writeProperty()
-                        );
-
-                }
-                builder.withRelationshipsWritten(steinerTreeResult.effectiveNodeCount() - 1);
-            });
-
-            return Stream.of(
-                builder
-                    .withComputeMillis(computationResult.computeMillis())
-                    .withPreProcessingMillis(computationResult.preProcessingMillis())
-                    .withConfig(config)
-                    .build()
-            );
-        };
+        return new NullComputationResultConsumer<>();
     }
 }

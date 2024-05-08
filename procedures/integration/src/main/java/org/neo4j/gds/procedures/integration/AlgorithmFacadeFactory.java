@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.procedures.integration;
 
-import org.neo4j.gds.ProcedureCallContextReturnColumns;
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsFacade;
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsMutateBusinessFacade;
@@ -48,87 +47,86 @@ import org.neo4j.gds.algorithms.misc.MiscAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmsFacade;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
-import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
-import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsEstimateBusinessFacade;
-import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsFacade;
-import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsMutateBusinessFacade;
-import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsStatsBusinessFacade;
-import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsStreamBusinessFacade;
-import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsWriteBusinessFacade;
-import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
-import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.NodeLookup;
-import org.neo4j.gds.api.User;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
-import org.neo4j.gds.configuration.DefaultsConfiguration;
-import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.modelcatalogservices.ModelCatalogService;
+import org.neo4j.gds.procedures.algorithms.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
-import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
+import org.neo4j.gds.procedures.algorithms.runners.StatsModeAlgorithmRunner;
+import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
+import org.neo4j.gds.procedures.algorithms.runners.WriteModeAlgorithmRunner;
+import org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.embeddings.NodeEmbeddingsProcedureFacade;
 import org.neo4j.gds.procedures.misc.MiscAlgorithmsProcedureFacade;
-import org.neo4j.gds.procedures.similarity.SimilarityProcedureFacade;
 
 class AlgorithmFacadeFactory {
-    // Global scoped dependencies
-    private final DefaultsConfiguration defaultsConfiguration;
-    private final LimitsConfiguration limitsConfiguration;
-
     // Request scoped parameters
-    private final CloseableResourceRegistry closeableResourceRegistry;
     private final ConfigurationCreator configurationCreator;
-    private final ConfigurationParser configurationParser;
     private final NodeLookup nodeLookup;
-    private final ProcedureCallContextReturnColumns returnColumns;
+    private final ProcedureReturnColumns procedureReturnColumns;
     private final MutateNodePropertyService mutateNodePropertyService;
     private final WriteNodePropertyService writeNodePropertyService;
-    private final MutateRelationshipService mutateRelationshipService;
-    private final WriteRelationshipService writeRelationshipService;
     private final AlgorithmEstimator algorithmEstimator;
     private final AlgorithmRunner algorithmRunner;
-    private final User user;
     private final ModelCatalogService modelCatalogService;
+    private final ApplicationsFacade applicationsFacade;
+    private final GenericStub genericStub;
+    private final EstimationModeRunner estimationModeRunner;
+    private final StreamModeAlgorithmRunner streamModeAlgorithmRunner;
+    private final StatsModeAlgorithmRunner statsModeAlgorithmRunner;
+    private final WriteModeAlgorithmRunner writeModeAlgorithmRunner;
 
     AlgorithmFacadeFactory(
-        DefaultsConfiguration defaultsConfiguration,
-        LimitsConfiguration limitsConfiguration,
-        CloseableResourceRegistry closeableResourceRegistry,
         ConfigurationCreator configurationCreator,
-        ConfigurationParser configurationParser,
         NodeLookup nodeLookup,
-        ProcedureCallContextReturnColumns returnColumns,
+        ProcedureReturnColumns procedureReturnColumns,
         MutateNodePropertyService mutateNodePropertyService,
         WriteNodePropertyService writeNodePropertyService,
-        MutateRelationshipService mutateRelationshipService,
-        WriteRelationshipService writeRelationshipService,
         AlgorithmRunner algorithmRunner,
         AlgorithmEstimator algorithmEstimator,
-        User user,
-        ModelCatalogService modelCatalogService
+        ModelCatalogService modelCatalogService,
+        ApplicationsFacade applicationsFacade,
+        GenericStub genericStub,
+        EstimationModeRunner estimationModeRunner,
+        StreamModeAlgorithmRunner streamModeAlgorithmRunner,
+        StatsModeAlgorithmRunner statsModeAlgorithmRunner,
+        WriteModeAlgorithmRunner writeModeAlgorithmRunner
     ) {
-        this.defaultsConfiguration = defaultsConfiguration;
-        this.limitsConfiguration = limitsConfiguration;
-
-        this.closeableResourceRegistry = closeableResourceRegistry;
         this.configurationCreator = configurationCreator;
-        this.configurationParser = configurationParser;
         this.nodeLookup = nodeLookup;
-        this.returnColumns = returnColumns;
-        this.user = user;
+        this.procedureReturnColumns = procedureReturnColumns;
         this.mutateNodePropertyService = mutateNodePropertyService;
         this.writeNodePropertyService = writeNodePropertyService;
-        this.mutateRelationshipService = mutateRelationshipService;
-        this.writeRelationshipService = writeRelationshipService;
         this.algorithmRunner = algorithmRunner;
         this.algorithmEstimator = algorithmEstimator;
         this.modelCatalogService = modelCatalogService;
+        this.applicationsFacade = applicationsFacade;
+        this.genericStub = genericStub;
+        this.estimationModeRunner = estimationModeRunner;
+        this.streamModeAlgorithmRunner = streamModeAlgorithmRunner;
+        this.statsModeAlgorithmRunner = statsModeAlgorithmRunner;
+        this.writeModeAlgorithmRunner = writeModeAlgorithmRunner;
     }
 
     CentralityProcedureFacade createCentralityProcedureFacade() {
+        return CentralityProcedureFacade.create(
+            genericStub,
+            applicationsFacade,
+            procedureReturnColumns,
+            estimationModeRunner,
+            statsModeAlgorithmRunner,
+            streamModeAlgorithmRunner,
+            writeModeAlgorithmRunner
+        );
+    }
+
+    org.neo4j.gds.procedures.centrality.CentralityProcedureFacade createOldCentralityProcedureFacade() {
 
         // algorithm facade
         var centralityAlgorithmsFacade = new CentralityAlgorithmsFacade(algorithmRunner);
@@ -147,9 +145,9 @@ class AlgorithmFacadeFactory {
         );
 
         // procedure facade
-        return new CentralityProcedureFacade(
+        return new org.neo4j.gds.procedures.centrality.CentralityProcedureFacade(
             configurationCreator,
-            returnColumns,
+            procedureReturnColumns,
             estimateBusinessFacade,
             mutateBusinessFacade,
             statsBusinessFacade,
@@ -178,7 +176,7 @@ class AlgorithmFacadeFactory {
         // procedure facade
         return new CommunityProcedureFacade(
             configurationCreator,
-            returnColumns,
+            procedureReturnColumns,
             estimateBusinessFacade,
             mutateBusinessFacade,
             statsBusinessFacade,
@@ -188,33 +186,15 @@ class AlgorithmFacadeFactory {
     }
 
     SimilarityProcedureFacade createSimilarityProcedureFacade() {
-        // algorithms facade
-        var similarityAlgorithmsFacade = new SimilarityAlgorithmsFacade(algorithmRunner);
-
-        // mode-specific facades
-        var estimateBusinessFacade = new SimilarityAlgorithmsEstimateBusinessFacade(algorithmEstimator);
-        var mutateBusinessFacade = new SimilarityAlgorithmsMutateBusinessFacade(
-            similarityAlgorithmsFacade,
-            mutateRelationshipService
+        return SimilarityProcedureFacade.create(
+            applicationsFacade,
+            genericStub,
+            procedureReturnColumns,
+            estimationModeRunner,
+            streamModeAlgorithmRunner,
+            statsModeAlgorithmRunner,
+            writeModeAlgorithmRunner
         );
-        var statsBusinessFacade = new SimilarityAlgorithmsStatsBusinessFacade(similarityAlgorithmsFacade);
-        var streamBusinessFacade = new SimilarityAlgorithmsStreamBusinessFacade(similarityAlgorithmsFacade);
-        var writeBusinessFacade = new SimilarityAlgorithmsWriteBusinessFacade(
-            similarityAlgorithmsFacade,
-            writeRelationshipService
-        );
-
-        // procedure facade
-        return new SimilarityProcedureFacade(
-            configurationCreator,
-            returnColumns,
-            estimateBusinessFacade,
-            mutateBusinessFacade,
-            statsBusinessFacade,
-            streamBusinessFacade,
-            writeBusinessFacade
-        );
-
     }
 
     MiscAlgorithmsProcedureFacade createMiscellaneousProcedureFacade() {
@@ -239,7 +219,7 @@ class AlgorithmFacadeFactory {
         // procedure facade
         return new MiscAlgorithmsProcedureFacade(
             configurationCreator,
-            returnColumns,
+            procedureReturnColumns,
             estimateBusinessFacade,
             mutateBusinessFacade,
             statsBusinessFacade,
@@ -248,17 +228,16 @@ class AlgorithmFacadeFactory {
         );
     }
 
-    PathFindingProcedureFacade createPathFindingProcedureFacade(ApplicationsFacade applicationsFacade) {
+    PathFindingProcedureFacade createPathFindingProcedureFacade() {
         return PathFindingProcedureFacade.create(
-            defaultsConfiguration,
-            limitsConfiguration,
-            closeableResourceRegistry,
-            configurationCreator,
-            configurationParser,
             nodeLookup,
-            returnColumns,
-            user,
-            applicationsFacade
+            procedureReturnColumns,
+            applicationsFacade,
+            genericStub,
+            estimationModeRunner,
+            streamModeAlgorithmRunner,
+            statsModeAlgorithmRunner,
+            writeModeAlgorithmRunner
         );
     }
 
@@ -295,7 +274,7 @@ class AlgorithmFacadeFactory {
         // procedure facade
         return new NodeEmbeddingsProcedureFacade(
             configurationCreator,
-            returnColumns,
+            procedureReturnColumns,
             estimateBusinessFacade,
             mutateBusinessFacade,
             statsBusinessFacade,

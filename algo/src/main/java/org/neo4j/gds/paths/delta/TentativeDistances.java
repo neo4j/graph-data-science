@@ -23,6 +23,7 @@ package org.neo4j.gds.paths.delta;
 import com.carrotsearch.hppc.predicates.DoubleDoublePredicate;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 
@@ -63,7 +64,7 @@ public interface TentativeDistances {
 
     static DistanceOnly distanceOnly(
         long size,
-        int concurrency
+        Concurrency concurrency
     ) {
         var distances = HugeAtomicDoubleArray.of(
             size,
@@ -74,14 +75,14 @@ public interface TentativeDistances {
 
     static DistanceAndPredecessor distanceAndPredecessors(
         long size,
-        int concurrency
+        Concurrency concurrency
     ) {
         return distanceAndPredecessors(size, concurrency, DIST_INF, (a, b) -> Double.compare(a, b) > 0);
     }
 
     static DistanceAndPredecessor distanceAndPredecessors(
         long size,
-        int concurrency,
+        Concurrency concurrency,
         double distanceDefault,
         DoubleDoublePredicate distanceComparator
     ) {

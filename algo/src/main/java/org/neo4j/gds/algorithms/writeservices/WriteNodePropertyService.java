@@ -19,12 +19,14 @@
  */
 package org.neo4j.gds.algorithms.writeservices;
 
-import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.config.ArrowConnectionInfo;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.logging.Log;
 
 import java.util.Optional;
@@ -42,11 +44,12 @@ public class WriteNodePropertyService {
         Graph graph,
         GraphStore graphStore,
         NodePropertyValues nodePropertyValues,
-        int writeConcurrency,
+        Concurrency writeConcurrency,
         String writeProperty,
         String procedureName,
         Optional<ArrowConnectionInfo> arrowConnectionInfo,
-        Optional<ResultStore> resultStore
+        Optional<ResultStore> resultStore,
+        JobId jobId
     ) {
         return Neo4jDatabaseNodePropertyWriter.writeNodeProperty(
             requestScopedDependencies.getNodePropertyExporterBuilder(),
@@ -59,6 +62,7 @@ public class WriteNodePropertyService {
             procedureName,
             arrowConnectionInfo,
             resultStore,
+            jobId,
             requestScopedDependencies.getTerminationFlag(),
             log
         );

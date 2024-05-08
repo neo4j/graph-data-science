@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.collections;
 
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 import java.util.Arrays;
 
@@ -239,7 +239,7 @@ public final class ArrayUtil {
         return false;
     }
 
-    private static final int MAX_ARRAY_LENGTH = Integer.MAX_VALUE - MemoryUsage.BYTES_ARRAY_HEADER;
+    private static final int MAX_ARRAY_LENGTH = Integer.MAX_VALUE - Estimate.BYTES_ARRAY_HEADER;
 
     /**
      * This is copied from Apache Lucene which is licensed under Apache License, Version 2.0.
@@ -297,7 +297,7 @@ public final class ArrayUtil {
             return MAX_ARRAY_LENGTH;
         }
 
-        if (MemoryUsage.BYTES_OBJECT_REF == 8) {
+        if (Estimate.BYTES_OBJECT_REF == 8) {
             // round up to 8 byte alignment in 64bit env
             switch (bytesPerElement) {
                 case 4:
@@ -364,7 +364,7 @@ public final class ArrayUtil {
 
         long newSize = minTargetSize + extra;
 
-        if (MemoryUsage.BYTES_OBJECT_REF == 8) {
+        if (Estimate.BYTES_OBJECT_REF == 8) {
             // round up to 8 byte alignment to match JVM pointer size
             switch (bytesPerElement) {
                 case 4:

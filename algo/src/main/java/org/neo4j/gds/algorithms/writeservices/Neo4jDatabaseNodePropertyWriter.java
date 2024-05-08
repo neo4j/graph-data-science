@@ -28,9 +28,11 @@ import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.config.ArrowConnectionInfo;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -65,11 +67,12 @@ final class Neo4jDatabaseNodePropertyWriter {
         Graph graph,
         GraphStore graphStore,
         NodePropertyValues nodePropertyValues,
-        int writeConcurrency,
+        Concurrency writeConcurrency,
         String writeProperty,
         String procedureName,
         Optional<ArrowConnectionInfo> arrowConnectionInfo,
         Optional<ResultStore> resultStore,
+        JobId jobId,
         TerminationFlag terminationFlag,
         Log log
     ) {
@@ -93,7 +96,8 @@ final class Neo4jDatabaseNodePropertyWriter {
                 writeMode,
                 nodePropertySchema,
                 nodeProperties,
-                arrowConnectionInfo.isPresent()
+                arrowConnectionInfo.isPresent(),
+                resultStore.isPresent()
             );
 
             var exporter = nodePropertyExporterBuilder
@@ -105,6 +109,7 @@ final class Neo4jDatabaseNodePropertyWriter {
                     graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                 )
                 .withResultStore(resultStore)
+                .withJobId(jobId)
                 .parallel(DefaultPool.INSTANCE, writeConcurrency)
                 .build();
 
@@ -122,7 +127,7 @@ final class Neo4jDatabaseNodePropertyWriter {
     private static ProgressTracker createProgressTracker(
         TaskRegistryFactory taskRegistryFactory,
         long taskVolume,
-        int writeConcurrency,
+        Concurrency writeConcurrency,
         String name,
         Log log
     ) {
@@ -138,9 +143,10 @@ final class Neo4jDatabaseNodePropertyWriter {
         Capabilities.WriteMode writeMode,
         Map<String, PropertySchema> propertySchemas,
         Collection<NodeProperty> nodeProperties,
-        boolean hasArrowConnectionInfo
+        boolean hasArrowConnectionInfo,
+        boolean useResultStore
     ) {
-        if (writeMode == Capabilities.WriteMode.REMOTE && !hasArrowConnectionInfo) {
+        if (writeMode == Capabilities.WriteMode.REMOTE && !(hasArrowConnectionInfo || useResultStore)) {
             throw new IllegalArgumentException("Missing arrow connection information");
         }
         if (writeMode == Capabilities.WriteMode.LOCAL && hasArrowConnectionInfo) {

@@ -22,6 +22,7 @@ package org.neo4j.gds.algorithms;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 
 import java.util.Optional;
 
@@ -39,23 +40,28 @@ public interface AlgorithmComputationResult<RESULT> {
 
     GraphStore graphStore();
 
+    ResultStore resultStore();
+
     static <R> AlgorithmComputationResult<R> of(
         R result,
         Graph graph,
-        GraphStore graphStore
+        GraphStore graphStore,
+        ResultStore resultStore
     ) {
         return ImmutableAlgorithmComputationResult.of(
             Optional.of(result),
             graph,
-            graphStore
+            graphStore,
+            resultStore
         );
     }
 
-    static <R> AlgorithmComputationResult<R> withoutAlgorithmResult(Graph graph, GraphStore graphStore) {
+    static <R> AlgorithmComputationResult<R> withoutAlgorithmResult(Graph graph, GraphStore graphStore, ResultStore resultStore) {
         return ImmutableAlgorithmComputationResult.of(
             Optional.empty(),
             graph,
-            graphStore
+            graphStore,
+            resultStore
         );
     }
 }

@@ -21,12 +21,13 @@ package org.neo4j.gds.procedures.algorithms.pathfinding.stubs;
 
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraMutateConfig;
-import org.neo4j.gds.procedures.algorithms.pathfinding.MutateStub;
+import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
+import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingResultBuilderForMutateMode;
-import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -59,7 +60,7 @@ public class SingleSourceShortestPathDijkstraMutateStub implements MutateStub<Al
             username,
             configuration,
             AllShortestPathsDijkstraMutateConfig::of,
-            estimationMode()::singleSourceShortestPathDijkstraEstimation
+            estimationMode()::singleSourceShortestPathDijkstra
         );
     }
 
@@ -69,7 +70,7 @@ public class SingleSourceShortestPathDijkstraMutateStub implements MutateStub<Al
             graphName,
             configuration,
             AllShortestPathsDijkstraMutateConfig::of,
-            estimationMode()::singleSourceShortestPathDijkstraEstimation
+            estimationMode()::singleSourceShortestPathDijkstra
         );
     }
 

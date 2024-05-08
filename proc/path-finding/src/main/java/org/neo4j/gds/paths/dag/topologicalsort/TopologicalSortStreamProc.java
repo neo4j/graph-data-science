@@ -42,6 +42,6 @@ public class TopologicalSortStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().topologicalSortStream(graphName, configuration);
+        return facade.algorithms().pathFinding().topologicalSortStream(graphName, configuration);
     }
 }

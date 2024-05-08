@@ -22,15 +22,16 @@ package org.neo4j.gds.steiner;
 import com.carrotsearch.hppc.BitSet;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.List;
 import java.util.concurrent.atomic.DoubleAdder;
@@ -49,7 +50,7 @@ public class SimpleRerouter extends ReroutingAlgorithm {
         var memoryEstimationBuilder = MemoryEstimations.builder(SimpleRerouter.class)
             .add("link cut tree", LinkCutTree.estimation())
             .perNode("queue", HugeLongArrayQueue::memoryEstimation)
-            .perThread("bitset", MemoryUsage::sizeOfBitset);
+            .perThread("bitset", Estimate::sizeOfBitset);
 
         return memoryEstimationBuilder.build();
     }
@@ -58,7 +59,7 @@ public class SimpleRerouter extends ReroutingAlgorithm {
         Graph graph,
         long sourceId,
         List<Long> terminals,
-        int concurrency,
+        Concurrency concurrency,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {

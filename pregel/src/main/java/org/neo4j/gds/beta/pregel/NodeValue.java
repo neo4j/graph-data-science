@@ -22,14 +22,15 @@ package org.neo4j.gds.beta.pregel;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.utils.StringFormatting;
 import org.neo4j.gds.utils.StringJoining;
 
@@ -54,7 +55,7 @@ public abstract class NodeValue {
             .collect(Collectors.toMap(Element::propertyKey, Element::propertyType));
     }
 
-    static NodeValue of(PregelSchema schema, long nodeCount, int concurrency) {
+    static NodeValue of(PregelSchema schema, long nodeCount, Concurrency concurrency) {
         var properties = schema.elements()
             .stream()
             .collect(Collectors.toMap(
@@ -89,18 +90,18 @@ public abstract class NodeValue {
                         builder.add(entry, MemoryEstimations.builder()
                             .fixed(
                                 HugeObjectArray.class.getSimpleName(),
-                                MemoryUsage.sizeOfInstance(HugeObjectArray.class)
+                                Estimate.sizeOfInstance(HugeObjectArray.class)
                             )
-                            .perNode("long[10]", nodeCount -> nodeCount * MemoryUsage.sizeOfLongArray(10))
+                            .perNode("long[10]", nodeCount -> nodeCount * Estimate.sizeOfLongArray(10))
                             .build());
                         break;
                     case DOUBLE_ARRAY:
                         builder.add(entry, MemoryEstimations.builder()
                             .fixed(
                                 HugeObjectArray.class.getSimpleName(),
-                                MemoryUsage.sizeOfInstance(HugeObjectArray.class)
+                                Estimate.sizeOfInstance(HugeObjectArray.class)
                             )
-                            .perNode("double[10]", nodeCount -> nodeCount * MemoryUsage.sizeOfDoubleArray(10))
+                            .perNode("double[10]", nodeCount -> nodeCount * Estimate.sizeOfDoubleArray(10))
                             .build());
                         break;
                     default:
@@ -183,7 +184,7 @@ public abstract class NodeValue {
         }
     }
 
-    private static Object initArray(Element element, long nodeCount, int concurrency) {
+    private static Object initArray(Element element, long nodeCount, Concurrency concurrency) {
         switch (element.propertyType()) {
             case DOUBLE:
                 var doubleNodeValues = HugeDoubleArray.newArray(nodeCount);

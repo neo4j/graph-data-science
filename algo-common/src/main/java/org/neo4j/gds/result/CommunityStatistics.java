@@ -26,6 +26,7 @@ import org.HdrHistogram.Histogram;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
 import org.neo4j.gds.core.ProcedureConstants;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -47,11 +48,11 @@ public final class CommunityStatistics {
         long nodeCount,
         LongUnaryOperator communityFunction,
         ExecutorService executorService,
-        int concurrency
+        Concurrency concurrency
     ) {
         var componentSizeBuilder = HugeSparseLongArray.builder(EMPTY_COMMUNITY);
 
-        if (concurrency == 1) {
+        if (concurrency.value() == 1) {
             // For one thread, we can just iterate through the node space
             // to avoid allocating thread-local buffers for each batch.
             for (long nodeId = 0L; nodeId < nodeCount; nodeId++) {
@@ -89,7 +90,7 @@ public final class CommunityStatistics {
         long nodeCount,
         LongUnaryOperator communityFunction,
         ExecutorService executorService,
-        int concurrency
+        Concurrency concurrency
     ) {
         var communitySizes = communitySizes(
             nodeCount,
@@ -103,7 +104,7 @@ public final class CommunityStatistics {
     public static long communityCount(
         HugeSparseLongArray communitySizes,
         ExecutorService executorService,
-        int concurrency
+        Concurrency concurrency
     ) {
         var capacity = communitySizes.capacity();
 
@@ -128,7 +129,7 @@ public final class CommunityStatistics {
         long nodeCount,
         LongUnaryOperator communityFunction,
         ExecutorService executorService,
-        int concurrency
+        Concurrency concurrency
     ) {
         var communitySizes = communitySizes(
             nodeCount,
@@ -143,7 +144,7 @@ public final class CommunityStatistics {
         long nodeCount,
         LongUnaryOperator communityFunction,
         ExecutorService executorService,
-        int concurrency,
+        Concurrency concurrency,
         StatisticsComputationInstructions statisticsComputationInstructions
     ) {
         long componentCount = 0;
@@ -192,12 +193,12 @@ public final class CommunityStatistics {
     public static CommunityCountAndHistogram communityCountAndHistogram(
         HugeSparseLongArray communitySizes,
         ExecutorService executorService,
-        int concurrency
+        Concurrency concurrency
     ) {
         Histogram histogram;
         var communityCount = 0L;
 
-        if (concurrency == 1) {
+        if (concurrency.value() == 1) {
             histogram = new Histogram(ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT);
             var capacity = communitySizes.capacity();
 

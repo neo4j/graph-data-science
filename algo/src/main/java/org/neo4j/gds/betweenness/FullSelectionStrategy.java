@@ -20,6 +20,7 @@
 package org.neo4j.gds.betweenness;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
@@ -30,7 +31,7 @@ public class FullSelectionStrategy implements SelectionStrategy {
     private long graphSize = 0;
 
     @Override
-    public void init(Graph graph, ExecutorService executorService, int concurrency) {
+    public void init(Graph graph, ExecutorService ignored, Concurrency unused) {
         this.graphSize = graph.nodeCount();
         nodeQueue.set(0);
     }

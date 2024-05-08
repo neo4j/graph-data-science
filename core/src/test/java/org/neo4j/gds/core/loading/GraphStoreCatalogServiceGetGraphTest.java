@@ -69,7 +69,7 @@ class GraphStoreCatalogServiceGetGraphTest {
     @Test
     void shouldWorkWithoutAnyFilters(SoftAssertions assertions) {
         var serviceSpy = spy(GraphStoreCatalogService.class);
-        var graphStoreWithConfigMock = mock(GraphStoreWithConfig.class);
+        var graphStoreWithConfigMock = mock(GraphStoreCatalogEntry.class);
         when(graphStoreWithConfigMock.graphStore()).thenReturn(graphStore);
         doReturn(graphStoreWithConfigMock).when(serviceSpy).get(any(), any());
 
@@ -77,7 +77,7 @@ class GraphStoreCatalogServiceGetGraphTest {
         when(configMock.nodeLabelsFilter()).thenReturn(Collections.emptySet());
         when(configMock.projectAllRelationshipTypes()).thenReturn(true);
 
-        var graphWithGraphStore = serviceSpy.getGraphWithGraphStore(
+        var graphResources = serviceSpy.getGraphResources(
             GraphName.parse("bogus"),
             configMock,
             Optional.empty(),
@@ -85,8 +85,8 @@ class GraphStoreCatalogServiceGetGraphTest {
             DatabaseId.EMPTY
         );
 
-        assertThat(graphWithGraphStore.getRight()).isSameAs(graphStore);
-        assertThat(graphWithGraphStore.getLeft())
+        assertThat(graphResources.graphStore()).isSameAs(graphStore);
+        assertThat(graphResources.graph())
             .isInstanceOf(Graph.class)
             .satisfies(graph -> {
                 assertions.assertThat(graph.isEmpty()).isFalse();
@@ -112,7 +112,7 @@ class GraphStoreCatalogServiceGetGraphTest {
     @Test
     void shouldWorkWithNodeLabels(SoftAssertions assertions) {
         var serviceSpy = spy(GraphStoreCatalogService.class);
-        var graphStoreWithConfigMock = mock(GraphStoreWithConfig.class);
+        var graphStoreWithConfigMock = mock(GraphStoreCatalogEntry.class);
         when(graphStoreWithConfigMock.graphStore()).thenReturn(graphStore);
         doReturn(graphStoreWithConfigMock).when(serviceSpy).get(any(), any());
 
@@ -120,7 +120,7 @@ class GraphStoreCatalogServiceGetGraphTest {
         when(configMock.nodeLabelsFilter()).thenReturn(Set.of(NodeLabel.of("N")));
         when(configMock.projectAllRelationshipTypes()).thenReturn(true);
 
-        var graphWithGraphStore = serviceSpy.getGraphWithGraphStore(
+        var graphResources = serviceSpy.getGraphResources(
             GraphName.parse("bogus"),
             configMock,
             Optional.empty(),
@@ -128,8 +128,8 @@ class GraphStoreCatalogServiceGetGraphTest {
             DatabaseId.EMPTY
         );
 
-        assertThat(graphWithGraphStore.getRight()).isSameAs(graphStore);
-        assertThat(graphWithGraphStore.getLeft())
+        assertThat(graphResources.graphStore()).isSameAs(graphStore);
+        assertThat(graphResources.graph())
             .isInstanceOf(Graph.class)
             .satisfies(graph -> {
                 assertions.assertThat(graph.isEmpty()).isFalse();
@@ -155,7 +155,7 @@ class GraphStoreCatalogServiceGetGraphTest {
     @Test
     void shouldWorkWithRelationshipTypes(SoftAssertions assertions) {
         var serviceSpy = spy(GraphStoreCatalogService.class);
-        var graphStoreWithConfigMock = mock(GraphStoreWithConfig.class);
+        var graphStoreWithConfigMock = mock(GraphStoreCatalogEntry.class);
         when(graphStoreWithConfigMock.graphStore()).thenReturn(graphStore);
         doReturn(graphStoreWithConfigMock).when(serviceSpy).get(any(), any());
 
@@ -163,7 +163,7 @@ class GraphStoreCatalogServiceGetGraphTest {
         when(configMock.nodeLabelsFilter()).thenReturn(Collections.emptySet());
         when(configMock.relationshipTypesFilter()).thenReturn(Set.of(RelationshipType.of("T")));
 
-        var graphWithGraphStore = serviceSpy.getGraphWithGraphStore(
+        var graphResources = serviceSpy.getGraphResources(
             GraphName.parse("bogus"),
             configMock,
             Optional.empty(),
@@ -171,8 +171,8 @@ class GraphStoreCatalogServiceGetGraphTest {
             DatabaseId.EMPTY
         );
 
-        assertThat(graphWithGraphStore.getRight()).isSameAs(graphStore);
-        assertThat(graphWithGraphStore.getLeft())
+        assertThat(graphResources.graphStore()).isSameAs(graphStore);
+        assertThat(graphResources.graph())
             .isInstanceOf(Graph.class)
             .satisfies(graph -> {
 
@@ -199,7 +199,7 @@ class GraphStoreCatalogServiceGetGraphTest {
     @Test
     void shouldWorkWithNodeLabelsAndRelationshipTypes(SoftAssertions assertions) {
         var serviceSpy = spy(GraphStoreCatalogService.class);
-        var graphStoreWithConfigMock = mock(GraphStoreWithConfig.class);
+        var graphStoreWithConfigMock = mock(GraphStoreCatalogEntry.class);
         when(graphStoreWithConfigMock.graphStore()).thenReturn(graphStore);
         doReturn(graphStoreWithConfigMock).when(serviceSpy).get(any(), any());
 
@@ -207,7 +207,7 @@ class GraphStoreCatalogServiceGetGraphTest {
         when(configMock.nodeLabelsFilter()).thenReturn(Set.of(NodeLabel.of("N")));
         when(configMock.relationshipTypesFilter()).thenReturn(Set.of(RelationshipType.of("T")));
 
-        var graphWithGraphStore = serviceSpy.getGraphWithGraphStore(
+        var graphResources = serviceSpy.getGraphResources(
             GraphName.parse("bogus"),
             configMock,
             Optional.empty(),
@@ -215,8 +215,8 @@ class GraphStoreCatalogServiceGetGraphTest {
             DatabaseId.EMPTY
         );
 
-        assertThat(graphWithGraphStore.getRight()).isSameAs(graphStore);
-        assertThat(graphWithGraphStore.getLeft())
+        assertThat(graphResources.graphStore()).isSameAs(graphStore);
+        assertThat(graphResources.graph())
             .isInstanceOf(Graph.class)
             .satisfies(graph -> {
 
@@ -243,7 +243,7 @@ class GraphStoreCatalogServiceGetGraphTest {
     @Test
     void shouldReturnGraphWithNoRelationshipsForEmptyRelationshipTypeFilter(SoftAssertions assertions) {
         var serviceSpy = spy(GraphStoreCatalogService.class);
-        var graphStoreWithConfigMock = mock(GraphStoreWithConfig.class);
+        var graphStoreWithConfigMock = mock(GraphStoreCatalogEntry.class);
         when(graphStoreWithConfigMock.graphStore()).thenReturn(graphStore);
         doReturn(graphStoreWithConfigMock).when(serviceSpy).get(any(), any());
 
@@ -252,7 +252,7 @@ class GraphStoreCatalogServiceGetGraphTest {
         when(configMock.projectAllRelationshipTypes()).thenReturn(false);
         when(configMock.relationshipTypes()).thenReturn(Collections.emptyList());
 
-        var graphWithGraphStore = serviceSpy.getGraphWithGraphStore(
+        var graphResources = serviceSpy.getGraphResources(
             GraphName.parse("bogus"),
             configMock,
             Optional.empty(),
@@ -260,8 +260,8 @@ class GraphStoreCatalogServiceGetGraphTest {
             DatabaseId.EMPTY
         );
 
-        assertThat(graphWithGraphStore.getRight()).isSameAs(graphStore);
-        assertThat(graphWithGraphStore.getLeft())
+        assertThat(graphResources.graphStore()).isSameAs(graphStore);
+        assertThat(graphResources.graph())
             .isInstanceOf(Graph.class)
             .satisfies(graph -> {
 

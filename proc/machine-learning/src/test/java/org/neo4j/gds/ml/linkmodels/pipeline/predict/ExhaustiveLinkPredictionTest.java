@@ -26,6 +26,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -114,7 +115,7 @@ class ExhaustiveLinkPredictionTest {
             graph,
             LPNodeFilter.of(graph, graphStore.getGraph(NodeLabel.of("N"))),
             LPNodeFilter.of(graph, graphStore.getGraph(NodeLabel.of("N"))),
-            concurrency,
+            new Concurrency(concurrency),
             topN,
             0D,
             ProgressTracker.NULL_TRACKER,
@@ -180,7 +181,7 @@ class ExhaustiveLinkPredictionTest {
             graph,
             LPNodeFilter.of(graph, graphStore.getGraph(NodeLabel.of("N"))),
             LPNodeFilter.of(graph, graphStore.getGraph(NodeLabel.of("N"))),
-            4,
+            new Concurrency(4),
             6,
             threshold,
             ProgressTracker.NULL_TRACKER,
@@ -221,7 +222,7 @@ class ExhaustiveLinkPredictionTest {
             multiLabelGraph,
             LPNodeFilter.of(multiLabelGraph, multiLabelGraphStore.getGraph(NodeLabel.of("A"))),
             LPNodeFilter.of(multiLabelGraph, multiLabelGraphStore.getGraph(NodeLabel.of("B"))),
-            4,
+            new Concurrency(4),
             topN,
             0D,
             ProgressTracker.NULL_TRACKER,

@@ -24,7 +24,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.collections.LongMultiSet;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;

@@ -21,20 +21,18 @@ package org.neo4j.gds.similarity.knn;
 
 public class KnnMemoryEstimationParametersBuilder {
 
-        private final  double sampleRate;
-        private final int rawK;
-        private final KnnSampler.SamplerType samplerType;
+    private final double sampleRate;
+    private final int rawK;
+    private final KnnSampler.SamplerType samplerType;
 
     public KnnMemoryEstimationParametersBuilder(double sampleRate, int rawK, KnnSampler.SamplerType samplerType) {
-            this.sampleRate=sampleRate;
-            this.rawK=rawK;
-            this.samplerType=samplerType;
-        }
+        this.sampleRate = sampleRate;
+        this.rawK = rawK;
+        this.samplerType = samplerType;
+    }
 
     public KnnMemoryEstimationParameters build(long nodeCount) {
-
-            return  new KnnMemoryEstimationParameters(K.create(rawK,nodeCount,sampleRate,0.5),samplerType);
-
+        return new KnnMemoryEstimationParameters(K.create(rawK, nodeCount, sampleRate, 0.5), samplerType);
     }
 
 }

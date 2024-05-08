@@ -21,6 +21,7 @@ package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -32,7 +33,7 @@ class ArrayIdMapBuilderOpsTest {
         var hugeSparseLongArray = ArrayIdMapBuilderOps.buildSparseIdMap(
             1,
             nodeId,
-            1,
+            new Concurrency(1),
             HugeLongArray.of(nodeId)
         );
 

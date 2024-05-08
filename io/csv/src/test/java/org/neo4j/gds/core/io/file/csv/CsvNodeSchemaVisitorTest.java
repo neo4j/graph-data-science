@@ -78,11 +78,7 @@ class CsvNodeSchemaVisitorTest extends CsvVisitorTest {
         assertCsvFiles(List.of(NODE_SCHEMA_FILE_NAME));
         assertDataContent(
             NODE_SCHEMA_FILE_NAME,
-            List.of(
-                defaultHeaderColumns(),
-                List.of("A"),
-                List.of("B")
-            )
+            List.of(defaultHeaderColumns(), List.of("A"), List.of("B"))
         );
     }
 

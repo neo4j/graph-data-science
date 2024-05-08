@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.decisiontree;
 
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.ml.models.Features;
@@ -28,7 +28,7 @@ import org.neo4j.gds.ml.models.Features;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.mem.Estimate.sizeOfInstance;
 
 public abstract class DecisionTreeTrainer<PREDICTION extends Number> {
 

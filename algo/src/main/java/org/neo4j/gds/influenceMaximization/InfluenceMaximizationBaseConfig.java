@@ -40,12 +40,12 @@ public interface InfluenceMaximizationBaseConfig extends AlgoBaseConfig, RandomS
 
     @Configuration.Ignore
     default CELFParameters toParameters() {
-        return CELFParameters.create(
+        return new CELFParameters(
             seedSetSize(),
             propagationProbability(),
             monteCarloSimulations(),
             concurrency(),
-            randomSeed(),
+            randomSeed().orElse(0L),
             CELFAlgorithmFactory.DEFAULT_BATCH_SIZE
         );
     }

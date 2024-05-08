@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.ml.models.randomforest;
 
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
 import org.neo4j.gds.ml.models.Regressor;
 
 import java.util.List;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.mem.Estimate.sizeOfInstance;
 
 public class RandomForestRegressor implements Regressor {
 

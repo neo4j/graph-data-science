@@ -20,11 +20,9 @@
 package org.neo4j.gds.core.io;
 
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.RelationshipPropertyStore;
-import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.schema.RelationshipSchema;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.io.file.RelationshipBuilderFromVisitor;
 import org.neo4j.gds.core.io.file.RelationshipVisitor;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -50,7 +48,7 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
         Map<String, RelationshipsBuilder> relationshipBuilders,
         List<RelationshipType> inverseIndexedRelationshipTypes
     ) {
-        super(relationshipSchema);
+        super(relationshipSchema, IdentifierMapper.biject(RelationshipType::name, RelationshipType::of));
         this.relationshipBuilderSupplier = relationshipBuilderSupplier;
         this.relationshipBuilders = relationshipBuilders;
         this.inverseIndexedRelationshipTypes = inverseIndexedRelationshipTypes;
@@ -90,7 +88,7 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
     public static final class Builder extends RelationshipVisitor.Builder<Builder, GraphStoreRelationshipVisitor> {
 
         Map<String, RelationshipsBuilder> relationshipBuildersByType;
-        int concurrency;
+        Concurrency concurrency;
         IdMap nodes;
         List<RelationshipType> inverseIndexedRelationshipTypes;
 
@@ -99,7 +97,7 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
             return this;
         }
 
-        public Builder withConcurrency(int concurrency) {
+        public Builder withConcurrency(Concurrency concurrency) {
             this.concurrency = concurrency;
             return this;
         }
@@ -137,12 +135,5 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
                 inverseIndexedRelationshipTypes
             );
         }
-    }
-
-    @ValueClass
-    interface RelationshipVisitorResult {
-        Map<RelationshipType, Topology> relationshipTypesWithTopology();
-        Map<RelationshipType, RelationshipPropertyStore> propertyStores();
-        long relationshipCount();
     }
 }

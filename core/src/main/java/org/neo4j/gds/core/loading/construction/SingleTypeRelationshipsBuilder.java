@@ -34,6 +34,7 @@ import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.ImmutableRelationshipPropertySchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchemaEntry;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.AdjacencyBuffer;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
@@ -58,7 +59,7 @@ abstract class SingleTypeRelationshipsBuilder {
     final Direction direction;
 
     private final ExecutorService executorService;
-    private final int concurrency;
+    private final Concurrency concurrency;
 
     @Builder.Factory
     static SingleTypeRelationshipsBuilder singleTypeRelationshipsBuilder(
@@ -72,10 +73,10 @@ abstract class SingleTypeRelationshipsBuilder {
         boolean loadRelationshipProperty,
         Direction direction,
         ExecutorService executorService,
-        int concurrency
+        Concurrency concurrency
     ) {
-        return inverseImporter.isPresent() ?
-            new Indexed(
+        return inverseImporter.isPresent()
+            ? new Indexed(
                 idMap,
                 importer,
                 inverseImporter.get(),
@@ -87,8 +88,8 @@ abstract class SingleTypeRelationshipsBuilder {
                 direction,
                 executorService,
                 concurrency
-            ) :
-            new NonIndexed(
+            )
+            : new NonIndexed(
                 idMap,
                 importer,
                 bufferSize,
@@ -111,7 +112,7 @@ abstract class SingleTypeRelationshipsBuilder {
         boolean loadRelationshipProperty,
         Direction direction,
         ExecutorService executorService,
-        int concurrency
+        Concurrency concurrency
     ) {
         this.idMap = idMap;
         this.bufferSize = bufferSize;
@@ -124,7 +125,7 @@ abstract class SingleTypeRelationshipsBuilder {
         this.concurrency = concurrency;
     }
 
-    abstract ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder();
+    abstract LocalRelationshipsBuilder threadLocalRelationshipsBuilder();
 
     abstract Collection<AdjacencyBuffer.AdjacencyListBuilderTask> adjacencyListBuilderTasks(
         Optional<AdjacencyCompressor.ValueMapper> mapper,
@@ -223,7 +224,7 @@ abstract class SingleTypeRelationshipsBuilder {
             boolean loadRelationshipProperty,
             Direction direction,
             ExecutorService executorService,
-            int concurrency
+            Concurrency concurrency
         ) {
             super(
                 idMap,
@@ -240,8 +241,8 @@ abstract class SingleTypeRelationshipsBuilder {
         }
 
         @Override
-        ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder() {
-            return new ThreadLocalRelationshipsBuilder.NonIndexed(importer, bufferSize, propertyConfigs.size());
+        LocalRelationshipsBuilder threadLocalRelationshipsBuilder() {
+            return new LocalRelationshipsBuilder.NonIndexed(importer, bufferSize, propertyConfigs.size());
         }
 
         @Override
@@ -295,7 +296,7 @@ abstract class SingleTypeRelationshipsBuilder {
             boolean loadRelationshipProperty,
             Direction direction,
             ExecutorService executorService,
-            int concurrency
+            Concurrency concurrency
         ) {
             super(
                 idMap,
@@ -313,10 +314,10 @@ abstract class SingleTypeRelationshipsBuilder {
         }
 
         @Override
-        ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder() {
-            return new ThreadLocalRelationshipsBuilder.Indexed(
-                new ThreadLocalRelationshipsBuilder.NonIndexed(forwardImporter, bufferSize, propertyConfigs.size()),
-                new ThreadLocalRelationshipsBuilder.NonIndexed(inverseImporter, bufferSize, propertyConfigs.size())
+        LocalRelationshipsBuilder threadLocalRelationshipsBuilder() {
+            return new LocalRelationshipsBuilder.Indexed(
+                new LocalRelationshipsBuilder.NonIndexed(forwardImporter, bufferSize, propertyConfigs.size()),
+                new LocalRelationshipsBuilder.NonIndexed(inverseImporter, bufferSize, propertyConfigs.size())
             );
         }
 

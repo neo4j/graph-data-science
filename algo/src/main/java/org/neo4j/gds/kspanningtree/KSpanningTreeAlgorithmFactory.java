@@ -43,7 +43,7 @@ public class KSpanningTreeAlgorithmFactory<CONFIG extends KSpanningTreeBaseConfi
 
     @Override
     public KSpanningTree build(Graph graph, KSpanningTreeBaseConfig configuration, ProgressTracker progressTracker) {
-        return build(graph, configuration.toParameters(), progressTracker);
+        return build(graph, configuration.toKSpanningTreeParameters(), progressTracker);
     }
 
         @Override

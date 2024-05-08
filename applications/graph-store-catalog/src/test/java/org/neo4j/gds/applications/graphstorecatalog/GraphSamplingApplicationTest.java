@@ -124,7 +124,6 @@ class GraphSamplingApplicationTest {
             GraphName.parse("sample"),
             mapConfiguration,
             RWR
-
         );
 
         assertThat(result.nodeCount).isEqualTo(expectedNodeCount);

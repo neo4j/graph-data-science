@@ -19,14 +19,11 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
-import org.apache.commons.lang3.tuple.Pair;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -39,28 +36,19 @@ class GraphListingService {
         this.graphStoreCatalogService = graphStoreCatalogService;
     }
 
-    List<Pair<GraphProjectConfig, GraphStore>> listGraphs(User user) {
-        Stream<Pair<GraphProjectConfig, GraphStore>> pairStream = user.isAdmin()
+    List<GraphStoreCatalogEntry> listGraphs(User user) {
+        var pairStream = user.isAdmin()
             ? listAll()
             : listForUser(user);
 
-        return pairStream.collect(Collectors.toList());
+        return pairStream.toList();
     }
 
-    private Stream<Pair<GraphProjectConfig, GraphStore>> listAll() {
-        return graphStoreCatalogService.getAllGraphStores()
-            .map(graphStore -> Pair.of(
-                    graphStore.config(),
-                    graphStore.graphStore()
-                )
-            );
+    private Stream<GraphStoreCatalogEntry> listAll() {
+        return graphStoreCatalogService.getAllGraphStores();
     }
 
-    private Stream<Pair<GraphProjectConfig, GraphStore>> listForUser(User user) {
-        return graphStoreCatalogService.getGraphStores(user).entrySet().stream()
-            .map(entry -> Pair.of(
-                entry.getKey(),
-                entry.getValue()
-            ));
+    private Stream<GraphStoreCatalogEntry> listForUser(User user) {
+        return graphStoreCatalogService.getGraphStores(user).stream();
     }
 }

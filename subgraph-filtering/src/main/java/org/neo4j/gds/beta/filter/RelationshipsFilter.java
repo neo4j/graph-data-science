@@ -26,6 +26,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.beta.filter.expression.EvaluationContext;
 import org.neo4j.gds.beta.filter.expression.Expression;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
@@ -54,7 +55,7 @@ public final class RelationshipsFilter {
         Expression expression,
         IdMap inputNodes,
         IdMap outputNodes,
-        int concurrency,
+        Concurrency concurrency,
         Map<String, Object> parameterMap,
         ExecutorService executorService,
         ProgressTracker progressTracker
@@ -99,7 +100,7 @@ public final class RelationshipsFilter {
         IdMap inputNodes,
         IdMap outputNodes,
         RelationshipType relType,
-        int concurrency,
+        Concurrency concurrency,
         Map<String, Object> parameterMap,
         ExecutorService executorService,
         ProgressTracker progressTracker
@@ -133,7 +134,7 @@ public final class RelationshipsFilter {
             .collect(Collectors.toMap(propertyKeys::get, Function.identity()));
 
         // computing the count is expected to be a lot cheaper than bad partitioning
-        var relevantRelationshipsCount = concurrency > 1
+        var relevantRelationshipsCount = concurrency.value() > 1
             ? ParallelUtil.parallelStream(
                 LongStream.range(0, outputNodes.nodeCount()),
                 concurrency,

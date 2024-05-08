@@ -21,16 +21,15 @@ package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.pathfinding.ResultBuilder;
-import org.neo4j.gds.applications.algorithms.pathfinding.SideEffectProcessingCounts;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.bellmanford.BellmanFordStatsConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class BellmanFordResultBuilderForStatsMode implements ResultBuilder<BellmanFordStatsConfig, BellmanFordResult, Stream<BellmanFordStatsResult>> {
+class BellmanFordResultBuilderForStatsMode implements ResultBuilder<BellmanFordStatsConfig, BellmanFordResult, Stream<BellmanFordStatsResult>, Void> {
     @Override
     public Stream<BellmanFordStatsResult> build(
         Graph graph,
@@ -38,7 +37,7 @@ class BellmanFordResultBuilderForStatsMode implements ResultBuilder<BellmanFordS
         BellmanFordStatsConfig configuration,
         Optional<BellmanFordResult> result,
         AlgorithmProcessingTimings timings,
-        SideEffectProcessingCounts counts
+        Optional<Void> metadata
     ) {
         var statsResult = new BellmanFordStatsResult(
             timings.preProcessingMillis,

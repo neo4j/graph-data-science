@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.community.modularityoptimization;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.Map;
 
@@ -63,7 +64,7 @@ public class ModularityOptimizationStatsResult {
 
     public static class Builder extends ModularityOptimizationResultBuilder<ModularityOptimizationStatsResult> {
 
-        public Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+        public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
             super(returnColumns, concurrency);
         }
 

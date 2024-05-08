@@ -19,12 +19,9 @@
  */
 package org.neo4j.gds.louvain;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.community.louvain.LouvainWriteResult;
-import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -33,21 +30,17 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.louvain.LouvainConstants.DESCRIPTION;
+import static org.neo4j.gds.louvain.LouvainConstants.LOUVAIN_DESCRIPTION;
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class LouvainWriteProc extends BaseProc {
-
+public class LouvainWriteProc {
     @Context
     public GraphDataScienceProcedures facade;
 
-    @Context
-    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
-
     @Procedure(value = "gds.louvain.write", mode = WRITE)
-    @Description(DESCRIPTION)
+    @Description(LOUVAIN_DESCRIPTION)
     public Stream<LouvainWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -62,10 +55,5 @@ public class LouvainWriteProc extends BaseProc {
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
         return facade.community().louvainEstimateWrite(graphName, configuration);
-    }
-
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
     }
 }

@@ -23,7 +23,7 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.GdsVersionInfoProvider;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -57,18 +57,34 @@ public final class GraphSageTrainAlgorithmFactory extends GraphAlgorithmFactory<
         }
 
         return configuration.isMultiLabel()
-        ? new MultiLabelGraphSageTrain(graph, configuration, executorService, progressTracker, gdsVersion)
-        : new SingleLabelGraphSageTrain(graph, configuration, executorService, progressTracker, gdsVersion);
+        ? new MultiLabelGraphSageTrain(graph, configuration.toParameters(), configuration.projectedFeatureDimension().get(), executorService, progressTracker, gdsVersion, configuration)
+        : new SingleLabelGraphSageTrain(graph, configuration.toParameters(), executorService, progressTracker, gdsVersion, configuration);
+    }
+
+    public MemoryEstimation memoryEstimation(GraphSageTrainMemoryEstimateParameters parameters) {
+        return new GraphSageTrainEstimateDefinition(parameters).memoryEstimation();
     }
 
     @Override
     public MemoryEstimation memoryEstimation(GraphSageTrainConfig configuration) {
-        return new GraphSageTrainEstimateDefinition(configuration.toMemoryEstimateParameters()).memoryEstimation();
+        return memoryEstimation(configuration.toMemoryEstimateParameters());
+    }
+
+    public Task progressTask(long nodeCount, GraphSageTrainParameters parameters) {
+        return Tasks.task(
+            taskName(),
+            GraphSageModelTrainer.progressTasks(
+                parameters.numberOfBatches(nodeCount),
+                parameters.batchesPerIteration(nodeCount),
+                parameters.maxIterations(),
+                parameters.epochs()
+            )
+        );
     }
 
     @Override
     public Task progressTask(Graph graph, GraphSageTrainConfig config) {
-        return Tasks.task(taskName(), GraphSageModelTrainer.progressTasks(config, graph.nodeCount()));
+        return progressTask(graph.nodeCount(), config.toParameters());
     }
 
 }

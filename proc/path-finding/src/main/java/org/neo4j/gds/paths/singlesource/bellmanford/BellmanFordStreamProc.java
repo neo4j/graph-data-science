@@ -21,7 +21,7 @@ package org.neo4j.gds.paths.singlesource.bellmanford;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.pathfinding.BellmanFordStreamResult;
-import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -44,7 +44,7 @@ public class BellmanFordStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().bellmanFordStream(graphName, configuration);
+        return facade.algorithms().pathFinding().bellmanFordStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.bellmanFord.stream.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class BellmanFordStreamProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.pathFinding().bellmanFordStreamEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().pathFinding().bellmanFordStreamEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

@@ -23,6 +23,7 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -92,7 +93,7 @@ class ClosenessCentralityTest {
 
         var algo = new ClosenessCentrality(
             graph,
-            4,
+            new Concurrency(4),
             new DefaultCentralityComputer(),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
@@ -111,11 +112,11 @@ class ClosenessCentralityTest {
     void shouldLogProgress() {
         var progressTask = new ClosenessCentralityAlgorithmFactory<>().progressTask(graph.nodeCount());
         var testLog = Neo4jProxy.testLog();
-        var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TestProgressTracker(progressTask, testLog, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
 
         var algo = new ClosenessCentrality(
             graph,
-            4,
+            new Concurrency(4),
             new DefaultCentralityComputer(),
             DefaultPool.INSTANCE,
             progressTracker

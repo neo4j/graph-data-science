@@ -23,17 +23,18 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.ml.decisiontree.ClassifierImpurityCriterionType;
 import org.neo4j.gds.ml.decisiontree.DecisionTreeClassifierTrainer;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
@@ -55,7 +56,7 @@ import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.mem.Estimate.sizeOfInstance;
 import static org.neo4j.gds.ml.metrics.classification.OutOfBagError.OUT_OF_BAG_ERROR;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -63,7 +64,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
 
     private final int numberOfClasses;
     private final RandomForestClassifierTrainerConfig config;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final SplittableRandom random;
     private final ProgressTracker progressTracker;
     private final LogLevel messageLogLevel;
@@ -72,7 +73,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
     private final ModelSpecificMetricsHandler metricsHandler;
 
     public RandomForestClassifierTrainer(
-        int concurrency,
+        Concurrency concurrency,
         int numberOfClasses,
         RandomForestClassifierTrainerConfig config,
         Optional<Long> randomSeed,
@@ -127,7 +128,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
                             maxNumberOfBaggedFeatures,
                             config.numberOfSamplesRatio()
                         )
-                    ).times(concurrency)
+                    ).times(concurrency.value())
             )
             .build();
     }
@@ -259,7 +260,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
 
             var bootstrappedDatasetEstimation = MemoryRange
                 .of(HugeLongArray.memoryEstimation(usedNumberOfTrainingSamples))
-                .add(MemoryUsage.sizeOfBitset(usedNumberOfTrainingSamples));
+                .add(Estimate.sizeOfBitset(usedNumberOfTrainingSamples));
 
             return MemoryRange.of(sizeOfInstance(TrainDecisionTreeTask.class))
                 .add(FeatureBagger.memoryEstimation(numberOfBaggedFeatures))

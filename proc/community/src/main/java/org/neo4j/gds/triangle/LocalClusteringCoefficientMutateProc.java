@@ -21,7 +21,7 @@ package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientMutateResult;
-import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
-import static org.neo4j.gds.triangle.LocalClusteringCoefficientCompanion.DESCRIPTION;
+import static org.neo4j.gds.triangle.LocalClusteringCoefficientCompanion.LOCAL_CLUSTERING_COEFFICIENT_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class LocalClusteringCoefficientMutateProc {
@@ -39,7 +39,7 @@ public class LocalClusteringCoefficientMutateProc {
     public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.localClusteringCoefficient.mutate", mode = READ)
-    @Description(DESCRIPTION)
+    @Description(LOCAL_CLUSTERING_COEFFICIENT_DESCRIPTION)
     public Stream<LocalClusteringCoefficientMutateResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

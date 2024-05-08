@@ -26,11 +26,11 @@ import org.neo4j.gds.collections.hsl.HugeSparseByteArrayList;
 import org.neo4j.gds.collections.hsl.HugeSparseIntList;
 import org.neo4j.gds.collections.hsl.HugeSparseLongArrayList;
 import org.neo4j.gds.collections.hsl.HugeSparseLongList;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.mem.BitUtil;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 import java.util.Arrays;
 import java.util.List;
@@ -84,7 +84,7 @@ public final class ChunkedAdjacencyLists {
         long firstAdjacencyIdAvgByteSize = (avgDegree > 0) ? ceilDiv(encodedVLongSize(nodeCount), 2) : 0L;
         int relationshipByteSize = encodedVLongSize(delta);
         long compressedAdjacencyByteSize = relationshipByteSize * Math.max(0, (avgDegree - 1));
-        return nodeCount * MemoryUsage.sizeOfByteArray(firstAdjacencyIdAvgByteSize + compressedAdjacencyByteSize);
+        return nodeCount * Estimate.sizeOfByteArray(firstAdjacencyIdAvgByteSize + compressedAdjacencyByteSize);
     }
 
     public static ChunkedAdjacencyLists of(int numberOfProperties, long initialCapacity) {

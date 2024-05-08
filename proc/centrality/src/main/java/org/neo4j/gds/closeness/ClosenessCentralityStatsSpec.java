@@ -19,19 +19,17 @@
  */
 package org.neo4j.gds.closeness;
 
-import org.neo4j.gds.StatsComputationResultConsumer;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.procedures.centrality.CentralityStatsResult;
-import org.neo4j.gds.result.AbstractCentralityResultBuilder;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.centrality.CentralityStatsResult;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.closeness.ClosenessCentrality.CLOSENESS_DESCRIPTION;
+import static org.neo4j.gds.closeness.Constants.CLOSENESS_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
 
 @GdsCallable(name = "gds.closeness.stats", aliases = {"gds.beta.closeness.stats"}, description = CLOSENESS_DESCRIPTION, executionMode = STATS)
@@ -54,26 +52,6 @@ public class ClosenessCentralityStatsSpec implements AlgorithmSpec<ClosenessCent
 
     @Override
     public ComputationResultConsumer<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityStatsConfig, Stream<CentralityStatsResult>> computationResultConsumer() {
-        return new StatsComputationResultConsumer<>(this::resultBuilder);
-
-    }
-
-
-    private AbstractCentralityResultBuilder<CentralityStatsResult> resultBuilder(
-        ComputationResult<ClosenessCentrality, ClosenessCentralityResult,
-            ClosenessCentralityStatsConfig> computationResult,
-        ExecutionContext executionContext
-    ) {
-        AbstractCentralityResultBuilder<CentralityStatsResult> builder = new CentralityStatsResult.Builder(
-            executionContext.returnColumns(),
-            computationResult.config().concurrency()
-        );
-
-        computationResult.result()
-            .ifPresent(result -> builder.withCentralityFunction(result.centralityScoreProvider()));
-
-
-        return builder;
-
+        return new NullComputationResultConsumer<>();
     }
 }

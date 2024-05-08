@@ -20,6 +20,7 @@
 package org.neo4j.gds.embeddings.node2vec;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -34,7 +35,7 @@ class NegativeSampleProducerTest {
     void shouldProduceSamplesAccordingToNodeDistribution() {
         var builder = new RandomWalkProbabilities.Builder(
             2,
-            4,
+            new Concurrency(4),
             0.001,
             0.75
         );

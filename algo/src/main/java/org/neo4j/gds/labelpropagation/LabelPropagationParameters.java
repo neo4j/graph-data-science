@@ -21,49 +21,13 @@ package org.neo4j.gds.labelpropagation;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Parameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 @Parameters
-public final class LabelPropagationParameters {
-
-    public static LabelPropagationParameters create(
-        int concurrency,
-        int maxIterations,
-        @Nullable String nodeWeightProperty,
-        @Nullable String seedProperty
-    ) {
-        return new LabelPropagationParameters(concurrency, maxIterations, nodeWeightProperty, seedProperty);
-    }
-    private final int concurrency;
-    private final int maxIterations;
-    private final String nodeWeightProperty;
-    private final String seedProperty;
-
-    private LabelPropagationParameters(
-        int concurrency,
-        int maxIterations,
-        @Nullable String nodeWeightProperty,
-        @Nullable String seedProperty
-    ) {
-
-        this.concurrency = concurrency;
-        this.maxIterations = maxIterations;
-        this.nodeWeightProperty = nodeWeightProperty;
-        this.seedProperty = seedProperty;
-    }
-
-    int concurrency() {
-        return concurrency;
-    }
-
-    int maxIterations() {
-        return maxIterations;
-    }
-
-    String nodeWeightProperty() {
-        return nodeWeightProperty;
-    }
-
-    String seedProperty() {
-        return seedProperty;
-    }
+public record LabelPropagationParameters(
+    Concurrency concurrency,
+    int maxIterations,
+    @Nullable String nodeWeightProperty,
+    @Nullable String seedProperty
+) {
 }

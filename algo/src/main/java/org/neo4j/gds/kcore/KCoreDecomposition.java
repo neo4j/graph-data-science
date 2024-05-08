@@ -23,6 +23,7 @@ import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicIntArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -41,7 +42,7 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
 
     public static final String KCORE_DESCRIPTION = "It computes the k-core values in a network";
     private final Graph graph;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private static final int CHUNK_SIZE = 64;
     private final int chunkSize;
     static int UNASSIGNED = -1;
@@ -49,7 +50,7 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
     //When only 2% nodes remain in the graph, we can create a smaller array to loop over these ones only
     static double REBUILD_CONSTANT = 0.02;
 
-    public KCoreDecomposition(Graph graph, int concurrency, ProgressTracker progressTracker) {
+    public KCoreDecomposition(Graph graph, Concurrency concurrency, ProgressTracker progressTracker) {
         super(progressTracker);
         this.graph = graph;
         this.concurrency = concurrency;
@@ -57,7 +58,7 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
     }
 
     @TestOnly
-    KCoreDecomposition(Graph graph, int concurrency, ProgressTracker progressTracker, int chunkSize) {
+    KCoreDecomposition(Graph graph, Concurrency concurrency, ProgressTracker progressTracker, int chunkSize) {
         super(progressTracker);
         this.graph = graph;
         this.concurrency = concurrency;
@@ -137,7 +138,7 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
 
                 RunWithConcurrency.builder().tasks(tasks).concurrency(concurrency).run();
                 scanningDegree++;
-                
+
             } else {
                 //this is a minor optimization not in paper:
                 // if we do not do any updates this round, let's skip directly to the smallest active degree remaining
@@ -160,7 +161,7 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
     ) {
         List<KCoreDecompositionTask> tasks = new ArrayList<>();
         var nodeProvider = new FullNodeProvider(graph.nodeCount());
-        for (int taskId = 0; taskId < concurrency; ++taskId) {
+        for (int taskId = 0; taskId < concurrency.value(); ++taskId) {
             tasks.add(new KCoreDecompositionTask(
                 graph.concurrentCopy(),
                 currentDegrees,

@@ -28,6 +28,7 @@ import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
@@ -38,7 +39,6 @@ import java.util.function.Consumer;
 
 public class BetweennessCentrality extends Algorithm<BetwennessCentralityResult> {
 
-    static final String BETWEENNESS_DESCRIPTION = "Betweenness centrality measures the relative information flow that passes through a node.";
     private final Graph graph;
     private final long nodeCount;
     private final double divisor;
@@ -48,7 +48,7 @@ public class BetweennessCentrality extends Algorithm<BetwennessCentralityResult>
     private final SelectionStrategy selectionStrategy;
 
     private final ExecutorService executorService;
-    private final int concurrency;
+    private final Concurrency concurrency;
 
 
     public BetweennessCentrality(
@@ -56,7 +56,7 @@ public class BetweennessCentrality extends Algorithm<BetwennessCentralityResult>
         SelectionStrategy selectionStrategy,
         ForwardTraverser.Factory traverserFactory,
         ExecutorService executorService,
-        int concurrency,
+        Concurrency concurrency,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);

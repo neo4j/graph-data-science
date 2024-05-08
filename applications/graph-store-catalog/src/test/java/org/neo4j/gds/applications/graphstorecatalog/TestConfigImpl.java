@@ -36,6 +36,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.JobId;
 
 @Generated("org.neo4j.gds.proc.ConfigurationProcessor")
@@ -50,7 +51,7 @@ public final class TestConfigImpl implements MemoryUsageValidatorTest.TestConfig
 
     private boolean logProgress;
 
-    private int concurrency;
+    private Concurrency concurrency;
 
     private JobId jobId;
 
@@ -82,7 +83,7 @@ public final class TestConfigImpl implements MemoryUsageValidatorTest.TestConfig
             errors.add(e);
         }
         try {
-            this.concurrency = config.getInt("concurrency", MemoryUsageValidatorTest.TestConfig.super.concurrency());
+            this.concurrency = CypherMapAccess.failOnNull("concurrency", config.getChecked("concurrency", MemoryUsageValidatorTest.TestConfig.super.concurrency(), Concurrency.class));
         } catch (IllegalArgumentException e) {
             errors.add(e);
         }
@@ -179,7 +180,7 @@ public final class TestConfigImpl implements MemoryUsageValidatorTest.TestConfig
     }
 
     @Override
-    public int concurrency() {
+    public Concurrency concurrency() {
         return this.concurrency;
     }
 
@@ -241,7 +242,7 @@ public final class TestConfigImpl implements MemoryUsageValidatorTest.TestConfig
             return this;
         }
 
-        public TestConfigImpl.Builder concurrency(int concurrency) {
+        public TestConfigImpl.Builder concurrency(Concurrency concurrency) {
             this.config.put("concurrency", concurrency);
             return this;
         }

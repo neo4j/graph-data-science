@@ -23,7 +23,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.Capabilities;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimation;
 
 /**
  * The Abstract Factory defines the construction of the graph

@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.pipeline;
 
 
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 

@@ -39,6 +39,7 @@ import org.neo4j.gds.core.DimensionsMap;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.Username;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
@@ -51,8 +52,8 @@ import org.neo4j.gds.core.loading.construction.ImmutablePropertyConfig;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.PropertyValues;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlSupportPerMethodExtension;
 import org.neo4j.values.storable.ArrayValue;
@@ -187,7 +188,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
             .schema(schema)
             .nodes(nodes)
             .relationshipImportResult(relationshipImportResult)
-            .concurrency(1)
+            .concurrency(new Concurrency(1))
             .build();
     }
 
@@ -198,7 +199,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
             .hasLabelInformation(true)
             .hasProperties(true)
             .deduplicateIds(false)
-            .concurrency(1)
+            .concurrency(new Concurrency(1))
             .propertyState(graphProjectConfig.propertyState())
             .idMapBuilderType(this.idMapBuilderType)
             .build();

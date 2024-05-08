@@ -40,7 +40,6 @@ import static org.neo4j.gds.utils.GdsFeatureToggles.ADJACENCY_PACKING_STRATEGY;
 import static org.neo4j.gds.utils.GdsFeatureToggles.ADJACENCY_PACKING_STRATEGY_DEFAULT_SETTING;
 import static org.neo4j.gds.utils.GdsFeatureToggles.ENABLE_ADJACENCY_COMPRESSION_MEMORY_TRACKING;
 import static org.neo4j.gds.utils.GdsFeatureToggles.ENABLE_ARROW_DATABASE_IMPORT;
-import static org.neo4j.gds.utils.GdsFeatureToggles.SKIP_ORPHANS;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_MIXED_ADJACENCY_LIST;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST;
@@ -51,25 +50,6 @@ class FeatureToggleProcTest extends BaseProcTest {
     @BeforeEach
     void setUp() throws Exception {
         registerProcedures(FeatureToggleProc.class);
-    }
-
-    @Test
-    void toggleSkipOrphanNodes() {
-        var skipOrphanNodes = SKIP_ORPHANS.isEnabled();
-        runQuery("CALL gds.features.importer.skipOrphanNodes($value)", Map.of("value", !skipOrphanNodes));
-        assertEquals(!skipOrphanNodes, SKIP_ORPHANS.isEnabled());
-        runQuery("CALL gds.features.importer.skipOrphanNodes($value)", Map.of("value", skipOrphanNodes));
-        assertEquals(skipOrphanNodes, SKIP_ORPHANS.isEnabled());
-    }
-
-    @Test
-    void resetSkipOrphanNodes() {
-        SKIP_ORPHANS.reset();
-        assertCypherResult(
-            "CALL gds.features.importer.skipOrphanNodes.reset()",
-            List.of(Map.of("enabled", false))
-        );
-        assertFalse(SKIP_ORPHANS.isEnabled());
     }
 
     @Test

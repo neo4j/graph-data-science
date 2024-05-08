@@ -22,6 +22,7 @@ package org.neo4j.gds.core.write;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
@@ -45,7 +46,7 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
     protected final TerminationFlag terminationFlag;
     protected final ExecutorService executorService;
     protected final ProgressTracker progressTracker;
-    protected final int concurrency;
+    protected final Concurrency concurrency;
     protected final long nodeCount;
     protected final LongUnaryOperator toOriginalId;
     protected final LongAdder propertiesWritten;
@@ -80,7 +81,7 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
         LongUnaryOperator toOriginalId,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker,
-        int concurrency,
+        Concurrency concurrency,
         ExecutorService executorService
     ) {
         super(tx);

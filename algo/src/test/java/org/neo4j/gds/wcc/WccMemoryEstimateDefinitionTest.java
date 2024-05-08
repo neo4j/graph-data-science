@@ -22,6 +22,7 @@ package org.neo4j.gds.wcc;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 class WccMemoryEstimateDefinitionTest {
 
@@ -36,7 +37,7 @@ class WccMemoryEstimateDefinitionTest {
         var memoryEstimation = new WccMemoryEstimateDefinition(false).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
-            .memoryRange(nodeCount, 4)
+            .memoryRange(nodeCount, new Concurrency(4))
             .hasSameMinAndMaxEqualTo(expectedMemoryUsage);
     }
 
@@ -51,7 +52,7 @@ class WccMemoryEstimateDefinitionTest {
         var memoryEstimation = new WccMemoryEstimateDefinition(true).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
-            .memoryRange(nodeCount, 4)
+            .memoryRange(nodeCount, new Concurrency(4))
             .hasSameMinAndMaxEqualTo(expectedMemoryUsage);
     }
 
@@ -66,7 +67,7 @@ class WccMemoryEstimateDefinitionTest {
         var memoryEstimation = new WccMemoryEstimateDefinition(false).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
-            .memoryRange(100, concurrency)
+            .memoryRange(100, new Concurrency(concurrency))
             .hasSameMinAndMaxEqualTo(expectedMemory);
     }
 
@@ -81,7 +82,7 @@ class WccMemoryEstimateDefinitionTest {
         var memoryEstimation = new WccMemoryEstimateDefinition(true).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
-            .memoryRange(100, concurrency)
+            .memoryRange(100, new Concurrency(concurrency))
             .hasSameMinAndMaxEqualTo(expectedMemory);
     }
 }

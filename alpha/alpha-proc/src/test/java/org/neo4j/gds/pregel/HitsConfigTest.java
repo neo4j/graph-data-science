@@ -25,7 +25,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class HitsConfigTest {
+class HitsConfigTest {
 
     @Test
     void shouldParsePartitioningParameter() {

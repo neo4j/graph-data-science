@@ -24,51 +24,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.NonReleasingTaskRegistry;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.TestProcedureRunner;
-import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
-import org.neo4j.gds.algorithms.RequestScopedDependencies;
-import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsFacade;
-import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsWriteBusinessFacade;
-import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
-import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.api.User;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
-import org.neo4j.gds.core.utils.progress.TaskRegistry;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.progress.TaskStore;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
-import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
-import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
-import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
-import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.GraphDataScienceProceduresBuilder;
-import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
-import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.transaction.DatabaseTransactionContext;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class DeprecatedTieredHarmonicCentralityWriteProcTest extends BaseProcTest {
 
@@ -134,87 +100,5 @@ class DeprecatedTieredHarmonicCentralityWriteProcTest extends BaseProcTest {
         assertThat( resultMap.get(idFunction.of("c")).doubleValue()).isCloseTo(0.375, Offset.offset(1e-5));
         assertThat( resultMap.get(idFunction.of("d")).doubleValue()).isCloseTo(0.25, Offset.offset(1e-5));
         assertThat( resultMap.get(idFunction.of("e")).doubleValue()).isCloseTo(0.25, Offset.offset(1e-5));
-    }
-
-    @Test
-    void testProgressTracking() {
-        TestProcedureRunner.applyOnProcedure(db, HarmonicCentralityWriteProc.class, proc -> {
-            var taskStore = new PerDatabaseTaskStore();
-
-            proc.taskRegistryFactory = jobId -> new NonReleasingTaskRegistry(new TaskRegistry(
-                getUsername(),
-                taskStore,
-                jobId
-            ));
-            var nodePropertyExporterBuilder = new NativeNodePropertiesExporterBuilder(
-                DatabaseTransactionContext.of(proc.databaseService, proc.procedureTransaction)
-            );
-
-            proc.facade = createFacade(nodePropertyExporterBuilder, proc.taskRegistryFactory);
-
-            proc.alphaWrite(
-                DEFAULT_GRAPH_NAME,
-                Map.of("writeProperty", "myProp")
-            );
-
-            assertThat(taskStore
-                .query()
-                .map(TaskStore.UserTask::task)
-                .map(Task::description)).containsExactlyInAnyOrder(
-                "HarmonicCentrality",
-                "HarmonicCentralityWrite :: WriteNodeProperties"
-            );
-        });
-    }
-
-    private GraphDataScienceProcedures createFacade(
-        NodePropertyExporterBuilder nodePropertyExporterBuilder,
-        TaskRegistryFactory taskRegistryFactory
-    ) {
-        var logMock = mock(org.neo4j.gds.logging.Log.class);
-        when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
-
-        final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
-        final AlgorithmMemoryValidationService memoryUsageValidator = new AlgorithmMemoryValidationService(
-            logMock,
-            false
-        );
-
-        var requestScopedDependencies = RequestScopedDependencies.builder()
-            .with(DatabaseId.of(db.databaseName()))
-            .with(nodePropertyExporterBuilder)
-            .with(taskRegistryFactory)
-            .with(TerminationFlag.RUNNING_TRUE)
-            .with(new User(getUsername(), false))
-            .with(EmptyUserLogRegistryFactory.INSTANCE)
-            .build();
-        var writeBusinessFacade = new CentralityAlgorithmsWriteBusinessFacade(
-            new CentralityAlgorithmsFacade(
-                new AlgorithmRunner(
-                    logMock,
-                    graphStoreCatalogService,
-                    new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
-                    memoryUsageValidator,
-                    requestScopedDependencies
-                )
-            ),
-            new WriteNodePropertyService(
-                logMock,
-                requestScopedDependencies
-            )
-        );
-
-        return new GraphDataScienceProceduresBuilder(Log.noOpLog())
-            .with(new CentralityProcedureFacade(
-                new ConfigurationCreator(ConfigurationParser.EMPTY, null, new User(getUsername(), false)),
-                ProcedureReturnColumns.EMPTY,
-                null,
-                null,
-                null,
-                null,
-                writeBusinessFacade
-            ))
-            .with(DeprecatedProceduresMetricService.PASSTHROUGH)
-            .build();
     }
 }

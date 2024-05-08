@@ -20,8 +20,7 @@
 package org.neo4j.gds.louvain;
 
 final class LouvainConstants {
-    static final String DESCRIPTION =
-        "The Louvain method for community detection is an algorithm for detecting communities in networks.";
+    static final String LOUVAIN_DESCRIPTION = "The Louvain method for community detection is an algorithm for detecting communities in networks.";
 
     private LouvainConstants() {}
 }

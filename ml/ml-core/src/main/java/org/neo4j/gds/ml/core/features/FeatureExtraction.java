@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.core.features;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.ml.core.EmbeddingUtils;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.functions.Constant;
@@ -106,6 +106,10 @@ public final class FeatureExtraction {
         return features;
     }
 
+    public static int featureCount(Graph graph, Collection<String> featureProperties) {
+        return featureCount(propertyExtractors(graph, featureProperties));
+    }
+
     public static int featureCount(Collection<FeatureExtractor> extractors) {
         return extractors.stream().mapToInt(FeatureExtractor::dimension).sum();
     }
@@ -149,8 +153,8 @@ public final class FeatureExtraction {
     }
 
     public static long memoryUsageInBytes(int numberOfFeatures) {
-        long sizeIfAllScalars = numberOfFeatures * MemoryUsage.sizeOfInstance(ScalarPropertyExtractor.class);
-        long sizeIfAllArrays = numberOfFeatures * MemoryUsage.sizeOfInstance(ArrayPropertyExtractor.class);
+        long sizeIfAllScalars = numberOfFeatures * Estimate.sizeOfInstance(ScalarPropertyExtractor.class);
+        long sizeIfAllArrays = numberOfFeatures * Estimate.sizeOfInstance(ArrayPropertyExtractor.class);
         return max(sizeIfAllScalars, sizeIfAllArrays); // they are identical :shrug:
     }
 }

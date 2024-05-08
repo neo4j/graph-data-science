@@ -25,8 +25,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
@@ -105,7 +106,7 @@ class RandomForestClassifierTest {
     @ValueSource(ints = {1, 4})
     void usingOneTree(int concurrency) {
         var randomForestTrainer = new RandomForestClassifierTrainer(
-            concurrency,
+            new Concurrency(concurrency),
             numberOfClasses,
             RandomForestClassifierTrainerConfigImpl.builder()
                 .maxDepth(1)
@@ -136,7 +137,7 @@ class RandomForestClassifierTest {
     @ValueSource(ints = {1, 4})
     void usingTwentyTrees(int concurrency) {
         var randomForestTrainer = new RandomForestClassifierTrainer(
-            concurrency,
+            new Concurrency(concurrency),
             numberOfClasses,
             RandomForestClassifierTrainerConfigImpl.builder()
                 .maxDepth(2)
@@ -168,7 +169,7 @@ class RandomForestClassifierTest {
     @ValueSource(ints = {1, 4})
     void usingTwentyTreesAndEntropyLoss(int concurrency) {
         var randomForestTrainer = new RandomForestClassifierTrainer(
-            concurrency,
+            new Concurrency(concurrency),
             numberOfClasses,
             RandomForestClassifierTrainerConfigImpl.builder()
                 .criterion("entropy")
@@ -201,7 +202,7 @@ class RandomForestClassifierTest {
     @ValueSource(ints = {1, 4})
     void shouldMakeSaneErrorEstimation(int concurrency) {
         var randomForestTrainer = new RandomForestClassifierTrainer(
-            concurrency,
+            new Concurrency(concurrency),
             numberOfClasses,
             RandomForestClassifierTrainerConfigImpl
                 .builder()
@@ -226,7 +227,7 @@ class RandomForestClassifierTest {
     @ValueSource(ints = {1, 4})
     void considerTrainSet(int concurrency) {
         var randomForestTrainer = new RandomForestClassifierTrainer(
-            concurrency,
+            new Concurrency(concurrency),
             numberOfClasses,
             RandomForestClassifierTrainerConfigImpl
                 .builder()
@@ -295,7 +296,7 @@ class RandomForestClassifierTest {
         long numberOfTrainingSamples,
         int numberOfClasses,
         int featureDimension,
-        int concurrency,
+        int concurrencyValue,
         int numTrees,
         double maxFeaturesRatio,
         double numberOfSamplesRatio,
@@ -314,6 +315,7 @@ class RandomForestClassifierTest {
             MemoryRange.of(featureDimension),
             config
         );
+        var concurrency = new Concurrency(concurrencyValue);
         // Does not depend on node count, only indirectly so with the size of the training set.
         var estimation = estimator.estimate(GraphDimensions.of(10), concurrency).memoryUsage();
 
@@ -349,7 +351,7 @@ class RandomForestClassifierTest {
             config
         );
         // Does not depend on node count, only indirectly so with the size of the training set.
-        var estimation = estimator.estimate(GraphDimensions.of(10), 4).memoryUsage();
+        var estimation = estimator.estimate(GraphDimensions.of(10), new Concurrency(4)).memoryUsage();
 
         assertMemoryRange(estimation, expectedMin, expectedMax);
     }

@@ -19,21 +19,14 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
-import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
-import org.neo4j.gds.algorithms.embeddings.FloatEmbeddingNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.EmptyFloatArrayNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.FloatArrayNodePropertyValues;
-import org.neo4j.gds.core.write.NodeProperty;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecWriteResult;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
@@ -62,40 +55,6 @@ public class Node2VecWriteSpec implements AlgorithmSpec<Node2Vec, Node2VecResult
 
     @Override
     public ComputationResultConsumer<Node2Vec, Node2VecResult, Node2VecWriteConfig, Stream<Node2VecWriteResult>> computationResultConsumer() {
-        return new WriteNodePropertiesComputationResultConsumer<>(
-            this::resultBuilder,
-            this::nodePropertyList,
-            name()
-        );
+        return new NullComputationResultConsumer<>();
     }
-
-    private List<NodeProperty> nodePropertyList(ComputationResult<Node2Vec, Node2VecResult, Node2VecWriteConfig> computationResult) {
-        return List.of(
-            NodeProperty.of(
-                computationResult.config().writeProperty(),
-                nodePropertyValues(computationResult)
-            )
-        );
-    }
-
-    @NotNull
-    private static FloatArrayNodePropertyValues nodePropertyValues(ComputationResult<Node2Vec, Node2VecResult, Node2VecWriteConfig> computationResult) {
-        return computationResult.result()
-            .map(result -> (FloatArrayNodePropertyValues) new FloatEmbeddingNodePropertyValues(result.embeddings()))
-            .orElse(EmptyFloatArrayNodePropertyValues.INSTANCE);
-    }
-
-    private Node2VecWriteResult.Builder resultBuilder(
-        ComputationResult<Node2Vec, Node2VecResult, Node2VecWriteConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        var builder = new Node2VecWriteResult.Builder();
-
-        computeResult.result()
-            .map(Node2VecResult::lossPerIteration)
-            .ifPresent(builder::withLossPerIteration);
-
-        return builder;
-    }
-
 }

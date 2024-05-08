@@ -19,24 +19,20 @@
  */
 package org.neo4j.gds.leiden;
 
-import org.neo4j.gds.CommunityProcCompanion;
-import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.community.leiden.LeidenStreamResult;
 
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.leiden.LeidenStreamProc.DESCRIPTION;
+import static org.neo4j.gds.leiden.Constants.LEIDEN_DESCRIPTION;
 
-@GdsCallable(name = "gds.leiden.stream", aliases = {"gds.beta.leiden.stream"}, description = DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.leiden.stream", aliases = {"gds.beta.leiden.stream"}, description = LEIDEN_DESCRIPTION, executionMode = STREAM)
 public class LeidenStreamSpec implements AlgorithmSpec<Leiden, LeidenResult, LeidenStreamConfig, Stream<LeidenStreamResult>, LeidenAlgorithmFactory<LeidenStreamConfig>> {
     @Override
     public String name() {
@@ -55,33 +51,6 @@ public class LeidenStreamSpec implements AlgorithmSpec<Leiden, LeidenResult, Lei
 
     @Override
     public ComputationResultConsumer<Leiden, LeidenResult, LeidenStreamConfig, Stream<LeidenStreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging(
-            "Result streaming failed",
-            executionContext.log(),
-            () -> computationResult.result()
-                .map(result -> {
-                    var graph = computationResult.graph();
-                    var nodeProperties = CommunityProcCompanion.nodeProperties(
-                        computationResult.config(),
-                        NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent())
-                    );
-                    var includeIntermediateCommunities = computationResult.config().includeIntermediateCommunities();
-
-                    return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
-                        .filter(nodeProperties::hasValue)
-                        .mapToObj(nodeId -> {
-                            long[] intermediateCommunityIds = includeIntermediateCommunities
-                                ? result.getIntermediateCommunities(nodeId)
-                                : null;
-                            long communityId = nodeProperties.longValue(nodeId);
-
-                            return new LeidenStreamResult(
-                                graph.toOriginalNodeId(nodeId),
-                                intermediateCommunityIds,
-                                communityId
-                            );
-                        });
-                }).orElseGet(Stream::empty)
-        );
+        return new NullComputationResultConsumer<>();
     }
 }

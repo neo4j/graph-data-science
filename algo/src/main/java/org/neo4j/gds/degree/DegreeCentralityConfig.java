@@ -35,7 +35,7 @@ public interface DegreeCentralityConfig extends AlgoBaseConfig, RelationshipWeig
 
     @Configuration.Ignore
     default DegreeCentralityParameters toParameters() {
-        return DegreeCentralityParameters.create(
+        return new DegreeCentralityParameters(
             concurrency(),
             orientation(),
             hasRelationshipWeightProperty(),

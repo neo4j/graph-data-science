@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -43,9 +43,9 @@ final class SignedProbabilitiesTest {
         var relevantRelationships = (long) (relationshipCount * relationshipFraction);
         long memory = SignedProbabilities.estimateMemory(relevantRelationships);
 
-        var expected = MemoryUsage.sizeOfInstance(SignedProbabilities.class) +
-                       MemoryUsage.sizeOfInstance(Optional.class) +
-                       MemoryUsage.sizeOfInstance(ArrayList.class) +
+        var expected = Estimate.sizeOfInstance(SignedProbabilities.class) +
+                       Estimate.sizeOfInstance(Optional.class) +
+                       Estimate.sizeOfInstance(ArrayList.class) +
                        relevantRelationships * (8 + 16);
         assertThat(memory).isEqualTo(expected);
 

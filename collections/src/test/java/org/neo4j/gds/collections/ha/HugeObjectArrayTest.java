@@ -24,12 +24,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
+import static org.neo4j.gds.mem.Estimate.sizeOfLongArray;
 
 final class HugeObjectArrayTest extends HugeArrayTestBase<String[], String, HugeObjectArray<String>> {
 
@@ -86,7 +86,7 @@ final class HugeObjectArrayTest extends HugeArrayTestBase<String[], String, Huge
 
     @Override
     long bufferSize(final int size) {
-        return MemoryUsage.sizeOfObjectArray(size);
+        return Estimate.sizeOfObjectArray(size);
     }
 
     @Override

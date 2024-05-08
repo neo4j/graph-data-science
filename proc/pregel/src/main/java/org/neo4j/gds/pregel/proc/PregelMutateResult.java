@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.pregel.proc;
 
-import org.neo4j.gds.results.StandardMutateResult;
+import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
 
 import java.util.Map;
 

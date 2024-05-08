@@ -25,6 +25,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -50,7 +51,7 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
         IdMap targetNodes,
         RelationshipType selectedRelationshipType,
         RelationshipType remainingRelationshipType,
-        int concurrency
+        Concurrency concurrency
     ) {
         super(maybeSeed,
             rootNodes,

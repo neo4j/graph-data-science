@@ -25,6 +25,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -36,7 +37,7 @@ import java.util.function.LongToDoubleFunction;
 
 public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoefficientResult> {
 
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final long maxDegree;
     private final NodePropertyValues triangleCountProperty;
 
@@ -48,7 +49,7 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
 
     LocalClusteringCoefficient(
         Graph graph,
-        int concurrency,
+        Concurrency concurrency,
         long maxDegree,
         @Nullable String seedProperty,
         ProgressTracker progressTracker

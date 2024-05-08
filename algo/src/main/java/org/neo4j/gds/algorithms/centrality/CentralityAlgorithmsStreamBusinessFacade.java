@@ -21,10 +21,6 @@ package org.neo4j.gds.algorithms.centrality;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
-import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
-import org.neo4j.gds.betweenness.BetwennessCentralityResult;
-import org.neo4j.gds.closeness.ClosenessCentralityResult;
-import org.neo4j.gds.closeness.ClosenessCentralityStreamConfig;
 import org.neo4j.gds.degree.DegreeCentralityResult;
 import org.neo4j.gds.degree.DegreeCentralityStreamConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
@@ -42,38 +38,12 @@ public class CentralityAlgorithmsStreamBusinessFacade {
         this.centralityAlgorithmsFacade = centralityAlgorithmsFacade;
     }
 
-    public StreamComputationResult<BetwennessCentralityResult> betweennessCentrality(
-        String graphName,
-        BetweennessCentralityStreamConfig config
-    ) {
-
-        var result = centralityAlgorithmsFacade.betweennessCentrality(
-            graphName,
-            config
-        );
-
-        return createStreamComputationResult(result);
-    }
-
     public StreamComputationResult<DegreeCentralityResult> degreeCentrality(
         String graphName,
         DegreeCentralityStreamConfig config
     ) {
 
         var result = centralityAlgorithmsFacade.degreeCentrality(
-            graphName,
-            config
-        );
-
-        return createStreamComputationResult(result);
-    }
-
-    public StreamComputationResult<ClosenessCentralityResult> closenessCentrality(
-        String graphName,
-        ClosenessCentralityStreamConfig config
-    ) {
-
-        var result = centralityAlgorithmsFacade.closenessCentrality(
             graphName,
             config
         );

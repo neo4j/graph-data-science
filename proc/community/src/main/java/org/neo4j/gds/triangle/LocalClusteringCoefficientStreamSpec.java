@@ -19,21 +19,20 @@
  */
 package org.neo4j.gds.triangle;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientStreamResult;
 
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.triangle.LocalClusteringCoefficientCompanion.DESCRIPTION;
+import static org.neo4j.gds.triangle.LocalClusteringCoefficientCompanion.LOCAL_CLUSTERING_COEFFICIENT_DESCRIPTION;
 
-@GdsCallable(name = "gds.localClusteringCoefficient.stream", description = DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.localClusteringCoefficient.stream", description = LOCAL_CLUSTERING_COEFFICIENT_DESCRIPTION, executionMode = STREAM)
 public class LocalClusteringCoefficientStreamSpec  implements AlgorithmSpec<LocalClusteringCoefficient, LocalClusteringCoefficientResult,LocalClusteringCoefficientStreamConfig,Stream<LocalClusteringCoefficientStreamResult>,LocalClusteringCoefficientFactory<LocalClusteringCoefficientStreamConfig>> {
     @Override
     public String name() {
@@ -52,18 +51,6 @@ public class LocalClusteringCoefficientStreamSpec  implements AlgorithmSpec<Loca
 
     @Override
     public ComputationResultConsumer<LocalClusteringCoefficient, LocalClusteringCoefficientResult, LocalClusteringCoefficientStreamConfig, Stream<LocalClusteringCoefficientStreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging(
-            "Result streaming failed",
-            executionContext.log(),
-            () -> computationResult.result()
-                .map(result -> {
-                    var graph = computationResult.graph();
-                    return LongStream.range(0, graph.nodeCount())
-                        .mapToObj(i -> new LocalClusteringCoefficientStreamResult(
-                            graph.toOriginalNodeId(i),
-                            result.localClusteringCoefficients().get(i)
-                        ));
-                }).orElseGet(Stream::empty)
-        );
+        return new NullComputationResultConsumer<>();
     }
 }

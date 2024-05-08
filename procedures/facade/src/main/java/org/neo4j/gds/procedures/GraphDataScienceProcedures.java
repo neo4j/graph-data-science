@@ -26,10 +26,8 @@ import org.neo4j.gds.procedures.catalog.CatalogProcedureFacade;
 import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.embeddings.NodeEmbeddingsProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
 import org.neo4j.gds.procedures.misc.MiscAlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.pipelines.PipelinesProcedureFacade;
-import org.neo4j.gds.procedures.similarity.SimilarityProcedureFacade;
 
 public class GraphDataScienceProcedures {
     private final Log log;
@@ -41,7 +39,6 @@ public class GraphDataScienceProcedures {
     private final MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade;
     private final NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade;
     private final PipelinesProcedureFacade pipelinesProcedureFacade;
-    private final SimilarityProcedureFacade similarityProcedureFacade;
 
     private final DeprecatedProceduresMetricService deprecatedProceduresMetricService;
 
@@ -57,7 +54,6 @@ public class GraphDataScienceProcedures {
         MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade,
         NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade,
         PipelinesProcedureFacade pipelinesProcedureFacade,
-        SimilarityProcedureFacade similarityProcedureFacade,
         DeprecatedProceduresMetricService deprecatedProceduresMetricService
     ) {
         this.log = log;
@@ -68,12 +64,15 @@ public class GraphDataScienceProcedures {
         this.miscAlgorithmsProcedureFacade = miscAlgorithmsProcedureFacade;
         this.nodeEmbeddingsProcedureFacade = nodeEmbeddingsProcedureFacade;
         this.pipelinesProcedureFacade = pipelinesProcedureFacade;
-        this.similarityProcedureFacade = similarityProcedureFacade;
         this.deprecatedProceduresMetricService = deprecatedProceduresMetricService;
     }
 
     public Log log() {
         return log;
+    }
+
+    public AlgorithmsProcedureFacade algorithms() {
+        return algorithmsProcedureFacade;
     }
 
     public CatalogProcedureFacade catalog() {
@@ -96,26 +95,11 @@ public class GraphDataScienceProcedures {
         return nodeEmbeddingsProcedureFacade;
     }
 
-    public PathFindingProcedureFacade pathFinding() {
-        return algorithmsProcedureFacade.pathFinding();
-    }
-
     public PipelinesProcedureFacade pipelines() {
         return pipelinesProcedureFacade;
     }
 
-    public SimilarityProcedureFacade similarity() {
-        return similarityProcedureFacade;
-    }
-
     public DeprecatedProceduresMetricService deprecatedProcedures() {
         return deprecatedProceduresMetricService;
-    }
-
-    /**
-     * This exists for reasons of dependency injection; business logic should not use it.
-     */
-    public AlgorithmsProcedureFacade algorithmsProcedureFacade() {
-        return algorithmsProcedureFacade;
     }
 }

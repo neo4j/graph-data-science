@@ -23,12 +23,13 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.AdjacencyListBehavior;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.concurrent.ExecutorService;
@@ -71,12 +72,12 @@ public class SimilarityGraphBuilder {
 
     private final IdMap idMap;
     private final TerminationFlag terminationFlag;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final ExecutorService executorService;
 
     public SimilarityGraphBuilder(
         IdMap idMap,
-        int concurrency,
+        Concurrency concurrency,
         ExecutorService executorService,
         TerminationFlag terminationFlag
     ) {

@@ -21,6 +21,7 @@ package org.neo4j.gds.api;
 
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.utils.progress.JobId;
 
 import java.util.List;
 import java.util.function.LongUnaryOperator;
@@ -35,6 +36,26 @@ import java.util.stream.Stream;
 public interface ResultStore {
 
     /**
+     * Stores a shallow entry representing result store data in this store given a {@link org.neo4j.gds.core.utils.progress.JobId}.
+     */
+    void add(JobId jobId, ResultStoreEntry entry);
+
+    /**
+     * Retrieves a {@link org.neo4j.gds.api.ResultStoreEntry} from this store.
+     */
+    ResultStoreEntry get(JobId jobId);
+
+    /**
+     * Checks if this store contains an entry for the given {@link org.neo4j.gds.core.utils.progress.JobId}.
+     */
+    boolean hasEntry(JobId jobId);
+
+    /**
+     * Removes a stored entry based on the given {@link org.neo4j.gds.core.utils.progress.JobId}.
+     */
+    void remove(JobId jobId);
+
+    /**
      * Stores node property values under the given property key.
      */
     void addNodePropertyValues(List<String> nodeLabels, String propertyKey, NodePropertyValues propertyValues);
@@ -43,6 +64,11 @@ public interface ResultStore {
      * Retrieves node property values from this store based on the property key.
      */
     NodePropertyValues getNodePropertyValues(List<String> nodeLabels, String propertyKey);
+
+    /**
+     * Removes node property values from this store based on the property key.
+     */
+    void removeNodePropertyValues(List<String> nodeLabels, String propertyKey);
 
     /**
      * Stores node id information for the given label in this store.
@@ -58,6 +84,11 @@ public interface ResultStore {
      * Retrieves node id information for the given label.
      */
     NodeLabelEntry getNodeIdsByLabel(String nodeLabel);
+
+    /**
+     * Removes node id information for the given label from this store.
+     */
+    void removeNodeLabel(String nodeLabel);
 
     /**
      * Stores a relationship information in this store, held by the given graph.
@@ -85,6 +116,16 @@ public interface ResultStore {
     RelationshipEntry getRelationship(String relationshipType, String propertyKey);
 
     /**
+     * Removes relationship information from this store based on the relationship type.
+     */
+    void removeRelationship(String relationshipType);
+
+    /**
+     * Removes relationship information from this store based on the relationship type and property key.
+     */
+    void removeRelationship(String relationshipType, String propertyKey);
+
+    /**
      * Stores a stream of relationships in this store.
      *
      * @param propertyKeys the property keys for the relationships
@@ -105,6 +146,39 @@ public interface ResultStore {
     RelationshipStreamEntry getRelationshipStream(String relationshipType, List<String> propertyKeys);
 
     /**
+     * Removes a stream of relationships from this store based on the relationship type and property keys.
+     */
+    void removeRelationshipStream(String relationshipType, List<String> propertyKeys);
+
+    /**
+     * Stores a composite relationship iterator in this store.
+     * Composite relationship iterators store multiple properties
+     * for a given adjacency cursor.
+     */
+    void addRelationshipIterator(
+        String relationshipType,
+        List<String> propertyKeys,
+        CompositeRelationshipIterator relationshipIterator,
+        LongUnaryOperator toOriginalId
+    );
+
+    /**
+     * Retrieves a relationship iterator representing the given relationship type and property keys.
+     */
+    RelationshipIteratorEntry getRelationshipIterator(
+        String relationshipType,
+        List<String> propertyKeys
+    );
+
+    /**
+     * Removes a relationship iterator from this store based on the relationship type and property keys.
+     */
+    void removeRelationshipIterator(
+        String relationshipType,
+        List<String> propertyKeys
+    );
+
+    /**
      * Checks if this store has a relationship of the given type.
      * Does not include relationship streams.
      */
@@ -112,19 +186,29 @@ public interface ResultStore {
 
     /**
      * Checks if this store has a relationship of the given type and property keys.
-     * Does not include relationship streams.
+     * Does not include other kinds of stored relationships.
      */
     boolean hasRelationship(String relationshipType, List<String> propertyKeys);
 
     /**
      * Checks if this store has a relationship stream of the given type and properties.
-     * Does not include non-stream relationships.
+     * Does not include other kinds of stored relationships.
      */
     boolean hasRelationshipStream(String relationshipType, List<String> propertyKeys);
+
+    /**
+     * Checks if this store has a relationship iterator of the given type and properties.
+     * Does not include other kinds of stored relationships.
+     */
+    boolean hasRelationshipIterator(String relationshipType, List<String> propertyKeys);
 
     record NodeLabelEntry(long nodeCount, LongUnaryOperator toOriginalId) {}
 
     record RelationshipEntry(Graph graph, LongUnaryOperator toOriginalId) {}
 
     record RelationshipStreamEntry(Stream<ExportedRelationship> relationshipStream, List<ValueType> propertyTypes, LongUnaryOperator toOriginalId) {}
+
+    record RelationshipIteratorEntry(CompositeRelationshipIterator relationshipIterator, LongUnaryOperator toOriginalId) {}
+
+    ResultStore EMPTY = new EmptyResultStore();
 }

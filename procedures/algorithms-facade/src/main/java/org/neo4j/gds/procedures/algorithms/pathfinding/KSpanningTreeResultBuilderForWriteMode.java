@@ -21,15 +21,14 @@ package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.pathfinding.ResultBuilder;
-import org.neo4j.gds.applications.algorithms.pathfinding.SideEffectProcessingCounts;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
 import org.neo4j.gds.spanningtree.SpanningTree;
 
 import java.util.Optional;
 
-class KSpanningTreeResultBuilderForWriteMode implements ResultBuilder<KSpanningTreeWriteConfig, SpanningTree, KSpanningTreeWriteResult> {
+class KSpanningTreeResultBuilderForWriteMode implements ResultBuilder<KSpanningTreeWriteConfig, SpanningTree, KSpanningTreeWriteResult, Void> {
     @Override
     public KSpanningTreeWriteResult build(
         Graph graph,
@@ -37,7 +36,7 @@ class KSpanningTreeResultBuilderForWriteMode implements ResultBuilder<KSpanningT
         KSpanningTreeWriteConfig configuration,
         Optional<SpanningTree> result,
         AlgorithmProcessingTimings timings,
-        SideEffectProcessingCounts counts
+        Optional<Void> metadata
     ) {
         var builder = new KSpanningTreeWriteResult.Builder();
 
@@ -51,7 +50,7 @@ class KSpanningTreeResultBuilderForWriteMode implements ResultBuilder<KSpanningT
 
         builder.withPreProcessingMillis(timings.preProcessingMillis);
         builder.withComputeMillis(timings.computeMillis);
-        builder.withWriteMillis(timings.postProcessingMillis);
+        builder.withWriteMillis(timings.mutateOrWriteMillis);
 
         //builder.withNodePropertiesWritten(...);
 

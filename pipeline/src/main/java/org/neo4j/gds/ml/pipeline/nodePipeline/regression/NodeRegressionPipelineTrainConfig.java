@@ -27,7 +27,6 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPipelineBaseTrainConfi
 import java.util.List;
 
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface NodeRegressionPipelineTrainConfig extends NodePropertyPipelineBaseTrainConfig {
 
     @Configuration.ConvertWith(method = "org.neo4j.gds.ml.metrics.regression.RegressionMetrics#parseList")

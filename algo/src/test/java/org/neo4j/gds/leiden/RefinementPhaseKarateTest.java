@@ -21,6 +21,7 @@ package org.neo4j.gds.leiden;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -57,8 +58,13 @@ class RefinementPhaseKarateTest {
 
         double gamma = 1.0 / graph.relationshipCount();
 
-        var localMovePhase = LocalMovePhase.create(graph,
-            originalCommunities, nodeVolumes, communityVolumes, gamma, 1
+        var localMovePhase = LocalMovePhase.create(
+            graph,
+            originalCommunities,
+            nodeVolumes,
+            communityVolumes,
+            gamma,
+            new Concurrency(1)
         );
 
         localMovePhase.run();
@@ -72,7 +78,7 @@ class RefinementPhaseKarateTest {
             gamma,
             0.01,
             19L,
-            1,
+            new Concurrency(1),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );

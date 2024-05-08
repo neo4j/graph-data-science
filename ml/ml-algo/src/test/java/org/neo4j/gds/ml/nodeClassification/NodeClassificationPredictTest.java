@@ -23,6 +23,7 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.JobId;
@@ -103,7 +104,7 @@ class NodeClassificationPredictTest {
             LogisticRegressionClassifier.from(modelData),
             FeaturesFactory.extractLazyFeatures(graph, featureProperties),
             1,
-            1,
+            new Concurrency(1),
             true,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
@@ -157,7 +158,7 @@ class NodeClassificationPredictTest {
             LogisticRegressionClassifier.from(modelData),
             FeaturesFactory.extractLazyFeatures(graph, featureProperties),
             1,
-            1,
+            new Concurrency(1),
             true,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
@@ -210,10 +211,11 @@ class NodeClassificationPredictTest {
             .build();
 
         var log = Neo4jProxy.testLog();
+        var concurrency = new Concurrency(1);
         var progressTracker = new TaskProgressTracker(
             NodeClassificationPredict.progressTask(graph.nodeCount()),
             log,
-            1,
+            concurrency,
             new JobId(),
             EmptyTaskRegistryFactory.INSTANCE,
             EmptyUserLogRegistryFactory.INSTANCE
@@ -223,7 +225,7 @@ class NodeClassificationPredictTest {
             ClassifierFactory.create(modelData),
             FeaturesFactory.extractLazyFeatures(graph, featureProperties),
             100,
-            1,
+            concurrency,
             false,
             progressTracker,
             TerminationFlag.RUNNING_TRUE
@@ -252,7 +254,7 @@ class NodeClassificationPredictTest {
         var classCount = 10;
         var produceProbabilities = false;
         var nodeCount = 1000;
-        var concurrency = 1;
+        var concurrency = new Concurrency(1);
 
         // one thousand longs, plus overhead of a HugeLongArray
         var predictedClasses = 8 * 1000 + 40;
@@ -272,6 +274,7 @@ class NodeClassificationPredictTest {
         var featureCount = 500;
         var classCount = 100;
         var produceProbabilities = true;
+        var concurrency = new Concurrency(1);
 
         var smallGraphNodeCount = 1_000_000;
         var smallToLargeFactor = 1000;
@@ -284,9 +287,9 @@ class NodeClassificationPredictTest {
         );
 
         var smallishGraphEstimation = estimation
-            .estimate(GraphDimensions.of(smallGraphNodeCount), 1);
+            .estimate(GraphDimensions.of(smallGraphNodeCount), concurrency);
         var largishGraphEstimation = estimation
-            .estimate(GraphDimensions.of(smallToLargeFactor * smallGraphNodeCount), 1);
+            .estimate(GraphDimensions.of(smallToLargeFactor * smallGraphNodeCount), concurrency);
 
         var smallGraphMax = smallishGraphEstimation.memoryUsage().max;
         var smallGraphMin = smallishGraphEstimation.memoryUsage().min;
@@ -304,8 +307,8 @@ class NodeClassificationPredictTest {
         var produceProbabilities = false;
 
         var nodeCount = 1_000_000;
-        var lessConcurrency = 1;
-        var moreConcurrency = 4;
+        var lessConcurrency = new Concurrency(1);
+        var moreConcurrency = new Concurrency(4);
 
         var estimation = NodeClassificationPredict.memoryEstimation(produceProbabilities, batchSize, featureCount, classCount);
 

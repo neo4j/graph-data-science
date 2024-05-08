@@ -31,6 +31,7 @@ import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
@@ -93,7 +94,7 @@ class WriteConfigTest {
             .schema(GraphSchema.mutable())
             .nodes(nodes)
             .relationshipImportResult(RelationshipImportResult.of(Map.of()))
-            .concurrency(1)
+            .concurrency(new Concurrency(1))
             .build();
 
         var assertion = assertThatCode(
@@ -148,6 +149,6 @@ class WriteConfigTest {
     }
 
     @Configuration
-    interface TestWriteConfig extends WriteConfig {
+    interface TestWriteConfig extends ConcurrencyConfig, WriteConfig {
     }
 }

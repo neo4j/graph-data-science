@@ -24,6 +24,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
 import org.neo4j.gds.collections.hsa.HugeSparseDoubleArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.utils.Neo4jValueConversion;
@@ -58,11 +59,11 @@ public class DoubleNodePropertiesBuilder implements InnerNodePropertiesBuilder {
 
     private final HugeSparseDoubleArray.Builder builder;
     private final double defaultValue;
-    private final int concurrency;
+    private final Concurrency concurrency;
 
     public DoubleNodePropertiesBuilder(
         DefaultValue defaultValue,
-        int concurrency
+        Concurrency concurrency
     ) {
         this.defaultValue = defaultValue.doubleValue();
         this.concurrency = concurrency;
@@ -93,7 +94,7 @@ public class DoubleNodePropertiesBuilder implements InnerNodePropertiesBuilder {
 
         var drainingIterator = propertiesByNeoIds.drainingIterator();
 
-        var tasks = IntStream.range(0, concurrency).mapToObj(threadId -> (Runnable) () -> {
+        var tasks = IntStream.range(0, concurrency.value()).mapToObj(threadId -> (Runnable) () -> {
             var batch = drainingIterator.drainingBatch();
 
             while (drainingIterator.next(batch)) {

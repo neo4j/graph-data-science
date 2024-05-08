@@ -32,7 +32,7 @@ import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.procedures.similarity.SimilarityWriteResult;
+import org.neo4j.gds.procedures.algorithms.similarity.SimilarityWriteResult;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -103,7 +103,7 @@ public class SimilarityWriteConsumer<ALGO extends Algorithm<ALGO_RESULT>, ALGO_R
                         var progressTracker = new TaskProgressTracker(
                             RelationshipExporter.baseTask(name, similarityGraph.relationshipCount()),
                             executionContext.log(),
-                            RelationshipExporterBuilder.DEFAULT_WRITE_CONCURRENCY,
+                            RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY,
                             executionContext.taskRegistryFactory()
                         );
                         var relationshipExporterBuilder = Optional
@@ -118,7 +118,8 @@ public class SimilarityWriteConsumer<ALGO extends Algorithm<ALGO_RESULT>, ALGO_R
                                 config.arrowConnectionInfo(),
                                 computationResult.graphStore().databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                             )
-                            .withResultStore(config.resolveResultStore(computationResult.graphStore().resultStore()))
+                            .withResultStore(config.resolveResultStore(computationResult.resultStore()))
+                            .withJobId(config.jobId())
                             .build();
 
                         if (SimilarityProc.shouldComputeHistogram(executionContext.returnColumns())) {

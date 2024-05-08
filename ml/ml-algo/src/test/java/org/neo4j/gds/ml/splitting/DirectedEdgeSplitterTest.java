@@ -31,6 +31,7 @@ import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.extension.GdlExtension;
@@ -135,7 +136,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             skewedGraphStore.nodes(),
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
-            4
+            new Concurrency(4)
         );
 
         EdgeSplitter.SplitResult result = splitter.splitPositiveExamples(skewedGraph, 1.0, Optional.of("foo"));
@@ -155,7 +156,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             multiGraphStore.nodes(),
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
-            4
+            new Concurrency(4)
         );
 
         EdgeSplitter.SplitResult result = splitter.splitPositiveExamples(multiGraph, 0.5, Optional.empty());
@@ -176,7 +177,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             graphStore.nodes(),
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
-            4
+            new Concurrency(4)
         );
 
         // select 40%, which is 2 rels in this graph
@@ -218,7 +219,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             huuuuugeDenseGraph,
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
-            4
+            new Concurrency(4)
         );
         var splitResult = splitter.splitPositiveExamples(huuuuugeDenseGraph, 0.9, Optional.empty());
         var graph = GraphFactory.create(
@@ -251,7 +252,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             graphStore.nodes(),
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
-            4
+            new Concurrency(4)
         );
 
         var sum = 0;
@@ -274,7 +275,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             multiLabelGraphStore.getGraph(targetNodeLabels),
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
-            4
+            new Concurrency(4)
         );
 
         // select 60%, which is 2*0.6 rounded down to 1 rel in this graph. 3 were invalid.
@@ -307,7 +308,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             graphStore.nodes(),
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
-            4
+            new Concurrency(4)
         );
 
         assertEquals(1, splitter.samplesPerNode(1, 100, 10));
@@ -323,7 +324,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             graphStore.nodes(),
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
-            4
+            new Concurrency(4)
         );
 
         EdgeSplitter.SplitResult split = splitter.splitPositiveExamples(graph, 0.01, Optional.of("foo"));

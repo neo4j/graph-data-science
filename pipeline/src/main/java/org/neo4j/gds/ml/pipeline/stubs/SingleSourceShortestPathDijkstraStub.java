@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.pipeline.stubs;
 
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraMutateConfig;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.pathfinding.MutateStub;
+import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
 
 public class SingleSourceShortestPathDijkstraStub extends AbstractStub<AllShortestPathsDijkstraMutateConfig, PathFindingMutateResult> {

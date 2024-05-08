@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.neo4j.gds.collections.haa.PageCreator;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.function.LongUnaryOperator;
@@ -29,10 +30,10 @@ import static org.neo4j.gds.core.concurrency.ParallelUtil.parallelStreamConsume;
 
 public final class ParalleLongPageCreator implements PageCreator.LongPageCreator {
 
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final LongUnaryOperator gen;
 
-    private ParalleLongPageCreator(int concurrency, LongUnaryOperator gen) {
+    private ParalleLongPageCreator(Concurrency concurrency, LongUnaryOperator gen) {
         this.concurrency = concurrency;
         this.gen = gen;
     }
@@ -67,15 +68,15 @@ public final class ParalleLongPageCreator implements PageCreator.LongPageCreator
         fillPage(page, base);
     }
 
-    public static ParalleLongPageCreator of(int concurrency, LongUnaryOperator gen) {
+    public static ParalleLongPageCreator of(Concurrency concurrency, LongUnaryOperator gen) {
         return new ParalleLongPageCreator(concurrency, gen);
     }
 
-    public static ParalleLongPageCreator identity(int concurrency) {
+    public static ParalleLongPageCreator identity(Concurrency concurrency) {
         return new ParalleLongPageCreator(concurrency, i -> i);
     }
 
-    public static ParalleLongPageCreator passThrough(int concurrency) {
+    public static ParalleLongPageCreator passThrough(Concurrency concurrency) {
         return new ParalleLongPageCreator(concurrency, null);
     }
 }

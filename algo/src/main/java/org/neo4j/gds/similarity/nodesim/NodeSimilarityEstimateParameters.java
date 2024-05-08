@@ -22,55 +22,13 @@ package org.neo4j.gds.similarity.nodesim;
 import org.neo4j.gds.annotation.Parameters;
 
 @Parameters
-public final class NodeSimilarityEstimateParameters {
-
-    public static NodeSimilarityEstimateParameters create(
-        int normalizedK,
-        int normalizedN,
-        boolean useComponents,
-        boolean runWCC,
-        boolean computeToGraph
-    ) {
-        return new NodeSimilarityEstimateParameters(
-            normalizedK,
-            normalizedN,
-            useComponents, runWCC, computeToGraph
-        );
-    }
-
-
-    private final int normalizedK;
-    private final int normalizedN;
-    private final boolean computeToGraph;
-    private final boolean useComponents;
-    private final boolean runWCC;
-
-    private NodeSimilarityEstimateParameters(
-        int normalizedK,
-        int normalizedN,
-        boolean useComponents,
-        boolean runWCC,
-        boolean computeToGraph
-    ) {
-
-        this.normalizedK = normalizedK;
-        this.normalizedN = normalizedN;
-        this.computeToGraph = computeToGraph;
-        this.useComponents = useComponents;
-        this.runWCC = runWCC;
-    }
-
-
-    public int normalizedK() {
-        return normalizedK;
-    }
-
-    public int normalizedN() {
-        return normalizedN;
-    }
-
-    public boolean computeToGraph() {return computeToGraph;}
-
+public record NodeSimilarityEstimateParameters(
+    int normalizedK,
+    int normalizedN,
+    boolean useComponents,
+    boolean runWCC,
+    boolean computeToGraph
+) {
     boolean hasTopK() {
         return normalizedK != 0;
     }
@@ -78,18 +36,4 @@ public final class NodeSimilarityEstimateParameters {
     boolean hasTopN() {
         return normalizedN != 0;
     }
-
-    // WCC specialization
-
-    public boolean useComponents() {
-        return useComponents;
-    }
-
-
-
-    boolean runWCC() {
-        return runWCC;
-    }
-
-
 }

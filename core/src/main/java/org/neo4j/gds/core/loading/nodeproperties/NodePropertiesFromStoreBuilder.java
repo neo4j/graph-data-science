@@ -24,10 +24,11 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.hsa.HugeSparseCollections;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.HighLimitIdMap;
 import org.neo4j.gds.core.loading.ValueConverter;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -55,18 +56,18 @@ public final class NodePropertiesFromStoreBuilder {
 
     public static NodePropertiesFromStoreBuilder of(
         DefaultValue defaultValue,
-        int concurrency
+        Concurrency concurrency
     ) {
         return new NodePropertiesFromStoreBuilder(defaultValue, concurrency);
     }
 
     private final DefaultValue defaultValue;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final AtomicReference<InnerNodePropertiesBuilder> innerBuilder;
 
     private NodePropertiesFromStoreBuilder(
         DefaultValue defaultValue,
-        int concurrency
+        Concurrency concurrency
     ) {
         this.defaultValue = defaultValue;
         this.concurrency = concurrency;

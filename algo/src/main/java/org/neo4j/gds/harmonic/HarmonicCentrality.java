@@ -22,6 +22,7 @@ package org.neo4j.gds.harmonic;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -34,7 +35,7 @@ import java.util.concurrent.ExecutorService;
 
 public class HarmonicCentrality extends Algorithm<HarmonicResult> {
 
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final long nodeCount;
     private final ExecutorService executorService;
     private final HugeAtomicDoubleArray inverseFarness;
@@ -43,7 +44,7 @@ public class HarmonicCentrality extends Algorithm<HarmonicResult> {
 
     public HarmonicCentrality(
         Graph graph,
-        int concurrency,
+        Concurrency concurrency,
         ExecutorService executorService,
         ProgressTracker progressTracker
     ) {

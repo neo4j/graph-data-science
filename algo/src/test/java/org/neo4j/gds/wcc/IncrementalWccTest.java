@@ -28,6 +28,7 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
@@ -73,7 +74,7 @@ class IncrementalWccTest {
     void shouldComputeComponentsFromSeedProperty() {
         Graph graph = createGraph();
 
-        var parameters = WccParameters.create( 0D, SEED_PROPERTY, ConcurrencyConfig.DEFAULT_CONCURRENCY);
+        var parameters = new WccParameters( 0D, Optional.of(SEED_PROPERTY), ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY);
 
         // We expect that UF connects pairs of communities
         DisjointSetStruct result = run(graph, parameters);
@@ -107,7 +108,7 @@ class IncrementalWccTest {
         );
 
         // When
-        var parameters = WccParameters.create(0D, "seed", ConcurrencyConfig.DEFAULT_CONCURRENCY);
+        var parameters = new WccParameters(0D, Optional.of("seed"), ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY);
 
         DisjointSetStruct result = run(graph, parameters);
 

@@ -30,7 +30,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.neo4j.gds.collections.CollectionStep;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 import javax.annotation.processing.Generated;
 import javax.lang.model.element.Modifier;
@@ -454,7 +454,7 @@ final class HugeSparseArrayGenerator implements CollectionStep.Generator<HugeSpa
             ClassName className
         ) {
             final CodeBlock newPagesBlock;
-            
+
             if (valueType.isPrimitive()) {
                 newPagesBlock = CodeBlock.of(
                     "$T newPages = new $T[numPages][]",
@@ -527,7 +527,7 @@ final class HugeSparseArrayGenerator implements CollectionStep.Generator<HugeSpa
                         pages.type,
                         pages.type,
                         ARRAY_UTIL,
-                        MemoryUsage.class
+                        Estimate.class
                     )
                     .beginControlFlow("for (int pageIndex = 0; pageIndex < $N.length(); pageIndex++)", pages)
                     .addStatement("$T page = $N.get(pageIndex)", ArrayTypeName.of(valueType), pages)

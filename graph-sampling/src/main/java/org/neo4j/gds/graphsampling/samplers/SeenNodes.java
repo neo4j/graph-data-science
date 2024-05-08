@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.LongLongHashMap;
 import com.carrotsearch.hppc.procedures.LongLongProcedure;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
@@ -40,7 +41,7 @@ public interface SeenNodes {
 
     static SeenNodes create(
         Graph inputGraph, ProgressTracker progressTracker, boolean nodeLabelStratification,
-        int concurrency, double samplingRatio
+        Concurrency concurrency, double samplingRatio
     ) {
         if (nodeLabelStratification) {
             var nodeLabelHistogram = NodeLabelHistogram.compute(

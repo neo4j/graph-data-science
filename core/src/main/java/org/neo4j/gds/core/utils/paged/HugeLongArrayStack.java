@@ -20,8 +20,8 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
 
 public final class HugeLongArrayStack {
 
@@ -63,7 +63,7 @@ public final class HugeLongArrayStack {
         }
         return array.get(size - 1);
     }
-    
+
     public long size() {
         return size;
     }

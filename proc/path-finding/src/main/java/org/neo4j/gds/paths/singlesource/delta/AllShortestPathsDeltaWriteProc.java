@@ -20,8 +20,8 @@
 package org.neo4j.gds.paths.singlesource.delta;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.results.StandardWriteRelationshipsResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.algorithms.results.StandardWriteRelationshipsResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -45,7 +45,7 @@ public class AllShortestPathsDeltaWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().deltaSteppingWrite(graphName, configuration);
+        return facade.algorithms().pathFinding().deltaSteppingWrite(graphName, configuration);
     }
 
     @Procedure(name = "gds.allShortestPaths.delta.write.estimate", mode = READ)
@@ -54,6 +54,6 @@ public class AllShortestPathsDeltaWriteProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.pathFinding().deltaSteppingWriteEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().pathFinding().deltaSteppingWriteEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

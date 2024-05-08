@@ -21,7 +21,7 @@ package org.neo4j.gds.influenceMaximization;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.centrality.celf.CELFWriteResult;
-import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -31,18 +31,17 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.BaseProc.ESTIMATE_DESCRIPTION;
-import static org.neo4j.gds.influenceMaximization.CELFStreamProc.DESCRIPTION;
+import static org.neo4j.gds.influenceMaximization.Constants.CELF_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class CELFWriteProc {
-
     @Context
     public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.influenceMaximization.celf.write", mode = WRITE)
-    @Description(DESCRIPTION)
+    @Description(CELF_DESCRIPTION)
     public Stream<CELFWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -51,7 +50,7 @@ public class CELFWriteProc {
     }
 
     @Procedure(name = "gds.influenceMaximization.celf.write.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
@@ -64,20 +63,19 @@ public class CELFWriteProc {
         mode = WRITE,
         deprecatedBy = "gds.influenceMaximization.celf.write"
     )
-    @Description(DESCRIPTION)
+    @Description(CELF_DESCRIPTION)
     @Internal
     @Deprecated
     public Stream<CELFWriteResult> betaWrite(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        facade
-            .deprecatedProcedures().called("gds.beta.influenceMaximization.celf.write");
-
+        facade.deprecatedProcedures().called("gds.beta.influenceMaximization.celf.write");
         facade
             .log()
             .warn(
                 "Procedure `gds.beta.influenceMaximization.celf.write has been deprecated, please use `gds.influenceMaximization.celf.write`.");
+
         return write(graphName, configuration);
     }
 
@@ -86,21 +84,19 @@ public class CELFWriteProc {
         mode = READ,
         deprecatedBy = "gds.influenceMaximization.celf.write.estimate"
     )
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     @Internal
     @Deprecated
     public Stream<MemoryEstimateResult> betaEstimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        facade
-            .deprecatedProcedures().called("gds.beta.influenceMaximization.celf.write.estimate");
-
+        facade.deprecatedProcedures().called("gds.beta.influenceMaximization.celf.write.estimate");
         facade
             .log()
             .warn(
                 "Procedure `gds.beta.influenceMaximization.celf.write.estimate has been deprecated, please use `gds.influenceMaximization.celf.write.estimate`.");
+
         return estimate(graphNameOrConfiguration, algoConfiguration);
     }
-
 }

@@ -22,16 +22,16 @@ package org.neo4j.gds.applications.graphstorecatalog;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphProjectResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -140,11 +140,12 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
                 transactionContext,
                 userLogRegistryFactory
             );
-            var graphStore = new GraphStoreFromDatabaseLoader(
+            var graphStoreCreator = new GraphStoreFromDatabaseLoader(
                 configuration,
                 configuration.username(),
                 graphLoaderContext
-            ).graphStore();
+            );
+            var graphStore = graphStoreCreator.graphStore();
 
             resultBuilder
                 .withNodeCount(graphStore.nodeCount())

@@ -31,8 +31,9 @@ import org.neo4j.gds.api.compress.LongArrayBuffer;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compression.common.AdjacencyCompression;
 import org.neo4j.gds.core.compression.common.ZigZagLongDecoding;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,7 +45,7 @@ import java.util.function.LongConsumer;
 
 import static org.neo4j.gds.core.loading.AdjacencyPreAggregation.preAggregate;
 import static org.neo4j.gds.mem.BitUtil.ceilDiv;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
+import static org.neo4j.gds.mem.Estimate.sizeOfObjectArray;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
 /**
@@ -93,7 +94,7 @@ public final class AdjacencyBuffer {
         long avgDegree,
         long nodeCount,
         int propertyCount,
-        int concurrency
+        Concurrency concurrency
     ) {
         var importSizing = ImportSizing.of(concurrency, nodeCount);
         var numberOfPages = importSizing.numberOfPages();

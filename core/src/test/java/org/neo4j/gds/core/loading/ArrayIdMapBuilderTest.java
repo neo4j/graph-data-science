@@ -19,12 +19,13 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.idmap.IdMapBuilderTest;
 
 public class ArrayIdMapBuilderTest extends IdMapBuilderTest {
 
     @Override
-    protected IdMapBuilder builder(long capacity, int concurrency) {
+    protected IdMapBuilder builder(long capacity, Concurrency concurrency) {
         return ArrayIdMapBuilder.of(capacity);
 
     }

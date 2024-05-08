@@ -23,16 +23,17 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.schema.Direction;
-import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.concurrency.ExecutorServiceUtil;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.concurrency.ExecutorServiceUtil;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
@@ -70,7 +71,7 @@ class GraphWithSelfLoopTest {
             communityVolumes,
             1.0 / graph.relationshipCount(),
             1.0 / graph.relationshipCount(),
-            4,
+            new Concurrency(4),
             DefaultPool.INSTANCE,
             ProgressTracker.EmptyProgressTracker.NULL_TRACKER
         );
@@ -88,7 +89,7 @@ class GraphWithSelfLoopTest {
             communities,
             2L,
             ExecutorServiceUtil.DEFAULT_SINGLE_THREAD_POOL,
-            4,
+            new Concurrency(4),
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
         );
@@ -123,7 +124,7 @@ class GraphWithSelfLoopTest {
             refinedCommunities,
             2,
             ExecutorServiceUtil.DEFAULT_SINGLE_THREAD_POOL,
-            1,
+            new Concurrency(1),
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
         );
@@ -166,7 +167,7 @@ class GraphWithSelfLoopTest {
             localCommunities,
             2,
             DefaultPool.INSTANCE,
-            1,
+            new Concurrency(1),
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
         ).run();
@@ -180,11 +181,11 @@ class GraphWithSelfLoopTest {
             communityVolumes2,
             1.0 / graph.relationshipCount(),
             1.0 / graph.relationshipCount(),
-            4,
+            new Concurrency(4),
             DefaultPool.INSTANCE,
             ProgressTracker.EmptyProgressTracker.NULL_TRACKER
         );
-        
+
         assertThat(modularity).isCloseTo(-0.0555555, Offset.offset(1e-4));
     }
 }

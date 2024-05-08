@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.EphemeralResultStore;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
@@ -30,6 +31,7 @@ import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.logging.Log;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
@@ -68,7 +70,7 @@ public final class GraphStoreCatalog {
         GraphStoreCatalog.log = Optional.of(log);
     }
 
-    public static GraphStoreWithConfig get(CatalogRequest request, String graphName) {
+    public static GraphStoreCatalogEntry get(CatalogRequest request, String graphName) {
         var userCatalogKey = UserCatalog.UserCatalogKey.of(request.databaseName(), graphName);
         var ownCatalog = getUserCatalog(request.username());
 
@@ -114,7 +116,7 @@ public final class GraphStoreCatalog {
     public static void remove(
         CatalogRequest request,
         String graphName,
-        Consumer<GraphStoreWithConfig> removedGraphConsumer,
+        Consumer<GraphStoreCatalogEntry> removedGraphConsumer,
         boolean failOnMissing
     ) {
         var userCatalogKey = UserCatalog.UserCatalogKey.of(request.databaseName(), graphName);
@@ -162,24 +164,16 @@ public final class GraphStoreCatalog {
     }
 
     @TestOnly
-    public static GraphStoreWithConfig get(String username, DatabaseId databaseId, String graphName) {
+    public static GraphStoreCatalogEntry get(String username, DatabaseId databaseId, String graphName) {
         return get(CatalogRequest.of(username, databaseId), graphName);
     }
 
     @TestOnly
-    public static GraphStoreWithConfig get(String username, String databaseName, String graphName) {
+    public static GraphStoreCatalogEntry get(String username, String databaseName, String graphName) {
         return get(CatalogRequest.of(username, databaseName), graphName);
     }
 
     public static void set(GraphProjectConfig config, GraphStore graphStore) {
-        set(config, graphStore, false);
-    }
-
-    public static void overwrite(GraphProjectConfig config, GraphStore graphStore) {
-        set(config, graphStore, true);
-    }
-
-    private static void set(GraphProjectConfig config, GraphStore graphStore, boolean overwrite) {
         userCatalogs.compute(config.username(), (user, userCatalog) -> {
             if (userCatalog == null) {
                 userCatalog = new UserCatalog();
@@ -187,8 +181,7 @@ public final class GraphStoreCatalog {
             userCatalog.set(
                 UserCatalog.UserCatalogKey.of(graphStore.databaseInfo().databaseId(), config.graphName()),
                 config,
-                graphStore,
-                overwrite
+                graphStore
             );
             return userCatalog;
         });
@@ -223,7 +216,7 @@ public final class GraphStoreCatalog {
         return userCatalogs
             .values()
             .stream()
-            .mapToInt(userCatalog -> userCatalog.getGraphStores().values().size())
+            .mapToInt(userCatalog -> userCatalog.getGraphStores().size())
             .sum();
     }
 
@@ -231,7 +224,7 @@ public final class GraphStoreCatalog {
         return userCatalogs
             .values()
             .stream()
-            .mapToInt(userCatalog -> userCatalog.getGraphStores(databaseId).values().size())
+            .mapToInt(userCatalog -> userCatalog.getGraphStores(databaseId).size())
             .sum();
     }
 
@@ -267,34 +260,29 @@ public final class GraphStoreCatalog {
         userCatalogs.forEach((user, userCatalog) -> userCatalog.remove(databaseId.databaseName()));
     }
 
-    public static Map<GraphProjectConfig, GraphStore> getGraphStores(String username) {
+    public static Collection<GraphStoreCatalogEntry> getGraphStores(String username) {
         return getUserCatalog(username).getGraphStores();
     }
 
-    public static Map<GraphProjectConfig, GraphStore> getGraphStores(String username, DatabaseId databaseId) {
+    public static Collection<GraphStoreCatalogEntry> getGraphStores(String username, DatabaseId databaseId) {
         return getUserCatalog(username).getGraphStores(databaseId);
     }
 
-    public static Stream<GraphStoreWithUserNameAndConfig> getAllGraphStores() {
+    public static Stream<GraphStoreCatalogEntryWithUsername> getAllGraphStores() {
         return userCatalogs
             .entrySet()
             .stream()
-            .flatMap(entry -> entry.getValue().streamGraphStores(entry.getKey()));
+            .flatMap(entry -> entry
+                .getValue()
+                .streamGraphStores(entry.getKey())
+            );
     }
 
     private static UserCatalog getUserCatalog(String username) {
         return userCatalogs.getOrDefault(username, UserCatalog.EMPTY);
     }
 
-    @ValueClass
-    public interface GraphStoreWithUserNameAndConfig {
-
-        GraphStore graphStore();
-
-        String userName();
-
-        GraphProjectConfig config();
-    }
+    public record GraphStoreCatalogEntryWithUsername(GraphStoreCatalogEntry catalogEntry, String username) {}
 
     static class UserCatalog {
 
@@ -316,22 +304,22 @@ public final class GraphStoreCatalog {
 
         private static final UserCatalog EMPTY = new UserCatalog();
 
-        private final Map<UserCatalogKey, GraphStoreWithConfig> graphsByName = new ConcurrentHashMap<>();
+        private final Map<UserCatalogKey, GraphStoreCatalogEntry> graphsByName = new ConcurrentHashMap<>();
 
         private final Map<UserCatalogKey, Map<String, Object>> degreeDistributionByName = new ConcurrentHashMap<>();
 
         private void set(
             UserCatalogKey userCatalogKey,
             GraphProjectConfig config,
-            GraphStore graphStore,
-            boolean overwrite
+            GraphStore graphStore
         ) {
             if (config.graphName() == null || graphStore == null) {
                 throw new IllegalArgumentException("Both name and graph store must be not null");
             }
-            GraphStoreWithConfig graphStoreWithConfig = GraphStoreWithConfig.of(graphStore, config);
 
-            if (!overwrite && graphsByName.containsKey(userCatalogKey)) {
+            GraphStoreCatalogEntry graphStoreCatalogEntry = new GraphStoreCatalogEntry(graphStore, config, new EphemeralResultStore());
+
+            if (graphsByName.containsKey(userCatalogKey)) {
                 throw new IllegalStateException(
                     formatWithLocale(
                         "Graph name %s already loaded",
@@ -339,7 +327,7 @@ public final class GraphStoreCatalog {
                     )
                 );
             }
-            graphsByName.put(userCatalogKey, graphStoreWithConfig);
+            graphsByName.put(userCatalogKey, graphStoreCatalogEntry);
         }
 
         private void setDegreeDistribution(UserCatalogKey userCatalogKey, Map<String, Object> degreeDistribution) {
@@ -362,7 +350,7 @@ public final class GraphStoreCatalog {
             degreeDistributionByName.remove(userCatalogKey);
         }
 
-        private @Nullable GraphStoreWithConfig get(UserCatalogKey userCatalogKey, boolean failOnMissing) {
+        private @Nullable GraphStoreCatalogEntry get(UserCatalogKey userCatalogKey, boolean failOnMissing) {
             var graphStoreWithConfig = graphsByName.get(userCatalogKey);
 
             if (graphStoreWithConfig == null && failOnMissing) {
@@ -397,7 +385,7 @@ public final class GraphStoreCatalog {
 
         private boolean remove(
             UserCatalogKey userCatalogKey,
-            Consumer<GraphStoreWithConfig> removedGraphConsumer,
+            Consumer<GraphStoreCatalogEntry> removedGraphConsumer,
             boolean failOnMissing
         ) {
             return Optional.ofNullable(get(userCatalogKey, failOnMissing))
@@ -414,40 +402,23 @@ public final class GraphStoreCatalog {
             graphsByName.keySet().removeIf(userCatalogKey -> userCatalogKey.databaseName().equals(databaseName));
         }
 
-        private Stream<GraphStoreWithUserNameAndConfig> streamGraphStores(String userName) {
+        private Stream<GraphStoreCatalogEntryWithUsername> streamGraphStores(String userName) {
             return graphsByName
                 .values()
                 .stream()
-                .map(
-                    graphStoreWithConfig -> ImmutableGraphStoreWithUserNameAndConfig.of(
-                        graphStoreWithConfig.graphStore(),
-                        userName,
-                        graphStoreWithConfig.config()
-                    )
-                );
+                .map(catalogEntry -> new GraphStoreCatalogEntryWithUsername(catalogEntry, userName));
         }
 
-        private Map<GraphProjectConfig, GraphStore> getGraphStores() {
-            return graphsByName.values()
-                .stream()
-                .collect(
-                    Collectors.toMap(
-                        GraphStoreWithConfig::config,
-                        GraphStoreWithConfig::graphStore
-                    )
-                );
+        private Collection<GraphStoreCatalogEntry> getGraphStores() {
+            return graphsByName.values();
         }
 
-        private Map<GraphProjectConfig, GraphStore> getGraphStores(DatabaseId databaseId) {
+        private Collection<GraphStoreCatalogEntry> getGraphStores(DatabaseId databaseId) {
             return graphsByName.entrySet()
                 .stream()
                 .filter(entry -> entry.getKey().databaseName().equals(databaseId.databaseName()))
-                .collect(
-                    Collectors.toMap(
-                        entry -> entry.getValue().config(),
-                        entry -> entry.getValue().graphStore()
-                    )
-                );
+                .map(Map.Entry::getValue)
+                .toList();
         }
     }
 

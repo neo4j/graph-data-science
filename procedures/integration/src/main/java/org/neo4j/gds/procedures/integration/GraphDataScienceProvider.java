@@ -20,13 +20,16 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.function.ThrowingFunction;
-import org.neo4j.gds.algorithms.RequestScopedDependencies;
+import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.applications.ApplicationsFacade;
-import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmEstimationTemplate;
-import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTemplate;
-import org.neo4j.gds.applications.algorithms.pathfinding.DefaultAlgorithmProcessingTemplate;
-import org.neo4j.gds.applications.algorithms.pathfinding.DefaultMemoryGuard;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.DefaultAlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.DefaultMemoryGuard;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
+import org.neo4j.gds.configuration.DefaultsConfiguration;
+import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.logging.Log;
@@ -40,6 +43,9 @@ import org.neo4j.gds.procedures.GraphDataScienceProceduresBuilder;
 import org.neo4j.gds.procedures.KernelTransactionAccessor;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.TerminationFlagAccessor;
+import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
+import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
+import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.services.DatabaseIdAccessor;
 import org.neo4j.gds.services.UserAccessor;
 import org.neo4j.gds.services.UserLogServices;
@@ -53,6 +59,7 @@ import java.util.function.Function;
  * We use this at request time to construct the facade that the procedures call.
  */
 public class GraphDataScienceProvider implements ThrowingFunction<Context, GraphDataScienceProcedures, ProcedureException> {
+    private final AlgorithmMetaDataSetterService algorithmMetaDataSetterService = new AlgorithmMetaDataSetterService();
     private final DatabaseIdAccessor databaseIdAccessor = new DatabaseIdAccessor();
     private final KernelTransactionAccessor kernelTransactionAccessor = new KernelTransactionAccessor();
     private final PipelinesProcedureFacadeProvider pipelinesProcedureFacadeProvider = new PipelinesProcedureFacadeProvider();
@@ -60,11 +67,14 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
     private final UserAccessor userAccessor = new UserAccessor();
 
     private final Log log;
+    private final DefaultsConfiguration defaultsConfiguration;
+    private final LimitsConfiguration limitsConfiguration;
     private final AlgorithmFacadeFactoryProvider algorithmFacadeFactoryProvider;
     private final AlgorithmMetricsService algorithmMetricsService;
     private final Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator;
     private final Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> catalogBusinessFacadeDecorator;
     private final CatalogFacadeProvider catalogFacadeProvider;
+    private final ConfigurationParser configurationParser;
     private final DeprecatedProceduresMetricService deprecatedProceduresMetricService;
     private final ExporterBuildersProviderService exporterBuildersProviderService;
     private final GraphStoreCatalogService graphStoreCatalogService;
@@ -76,11 +86,14 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
 
     GraphDataScienceProvider(
         Log log,
+        DefaultsConfiguration defaultsConfiguration,
+        LimitsConfiguration limitsConfiguration,
         AlgorithmFacadeFactoryProvider algorithmFacadeFactoryProvider,
         AlgorithmMetricsService algorithmMetricsService,
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
         Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> catalogBusinessFacadeDecorator,
         CatalogFacadeProvider catalogFacadeProvider,
+        ConfigurationParser configurationParser,
         DeprecatedProceduresMetricService deprecatedProceduresMetricService,
         ExporterBuildersProviderService exporterBuildersProviderService,
         GraphStoreCatalogService graphStoreCatalogService,
@@ -91,11 +104,14 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         UserLogServices userLogServices
     ) {
         this.log = log;
+        this.defaultsConfiguration = defaultsConfiguration;
+        this.limitsConfiguration = limitsConfiguration;
         this.algorithmFacadeFactoryProvider = algorithmFacadeFactoryProvider;
         this.algorithmMetricsService = algorithmMetricsService;
         this.algorithmProcessingTemplateDecorator = algorithmProcessingTemplateDecorator;
         this.catalogBusinessFacadeDecorator = catalogBusinessFacadeDecorator;
         this.catalogFacadeProvider = catalogFacadeProvider;
+        this.configurationParser = configurationParser;
         this.deprecatedProceduresMetricService = deprecatedProceduresMetricService;
         this.exporterBuildersProviderService = exporterBuildersProviderService;
         this.graphStoreCatalogService = graphStoreCatalogService;
@@ -158,6 +174,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
 
         var algorithmProcessingTemplate = buildAlgorithmProcessingTemplate(requestScopedDependencies);
 
+        var writeRelationshipService = new WriteRelationshipService(log, requestScopedDependencies);
         var applicationsFacade = ApplicationsFacade.create(
             log,
             catalogBusinessFacadeDecorator,
@@ -165,23 +182,42 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             projectionMetricsService,
             algorithmEstimationTemplate,
             algorithmProcessingTemplate,
-            requestScopedDependencies
+            requestScopedDependencies,
+            writeRelationshipService
         );
 
         var catalogProcedureFacade = catalogFacadeProvider.createCatalogProcedureFacade(applicationsFacade, context);
 
+        var algorithmMetaDataSetter = algorithmMetaDataSetterService.getAlgorithmMetaDataSetter(kernelTransaction);
+        var configurationCreator = new ConfigurationCreator(
+            configurationParser,
+            algorithmMetaDataSetter,
+            requestScopedDependencies.getUser()
+        );
+        var genericStub = new GenericStub(
+            defaultsConfiguration,
+            limitsConfiguration,
+            configurationCreator,
+            configurationParser,
+            user,
+            algorithmEstimationTemplate
+        );
         var algorithmFacadeFactory = algorithmFacadeFactoryProvider.createAlgorithmFacadeFactory(
             context,
+            configurationCreator,
             requestScopedDependencies,
             kernelTransaction,
             graphDatabaseService,
-            databaseGraphStoreEstimationService
+            databaseGraphStoreEstimationService,
+            applicationsFacade,
+            genericStub
         );
         var centralityProcedureFacade = algorithmFacadeFactory.createCentralityProcedureFacade();
+        var oldCentralityProcedureFacade = algorithmFacadeFactory.createOldCentralityProcedureFacade();
         var communityProcedureFacade = algorithmFacadeFactory.createCommunityProcedureFacade();
         var miscAlgorithmsProcedureFacade = algorithmFacadeFactory.createMiscellaneousProcedureFacade();
         var nodeEmbeddingsProcedureFacade = algorithmFacadeFactory.createNodeEmbeddingsProcedureFacade();
-        var pathFindingProcedureFacade = algorithmFacadeFactory.createPathFindingProcedureFacade(applicationsFacade);
+        var pathFindingProcedureFacade = algorithmFacadeFactory.createPathFindingProcedureFacade();
         var similarityProcedureFacade = algorithmFacadeFactory.createSimilarityProcedureFacade();
 
         var pipelinesProcedureFacade = pipelinesProcedureFacadeProvider.createPipelinesProcedureFacade(context);
@@ -189,6 +225,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         return new GraphDataScienceProceduresBuilder(log)
             .with(catalogProcedureFacade)
             .with(centralityProcedureFacade)
+            .with(oldCentralityProcedureFacade)
             .with(communityProcedureFacade)
             .with(miscAlgorithmsProcedureFacade)
             .with(nodeEmbeddingsProcedureFacade)

@@ -22,10 +22,9 @@ package org.neo4j.gds.applications.graphstorecatalog;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.core.loading.GraphStoreWithConfig;
+import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
 
 import java.util.List;
 import java.util.Map;
@@ -48,16 +47,16 @@ class ListGraphApplicationTest {
         var graphStore1 = new StubGraphStore();
         var graphStore2 = new StubGraphStore();
         var graphStore3 = new StubGraphStore();
-        List<Pair<GraphProjectConfig, GraphStore>> listOfConfigsWithStores = List.of(
-            Pair.of(config1, graphStore1),
-            Pair.of(config2, graphStore2),
-            Pair.of(config3, graphStore3)
+        List<GraphStoreCatalogEntry> listOfConfigsWithStores = List.of(
+            new GraphStoreCatalogEntry(graphStore1, config1, ResultStore.EMPTY),
+            new GraphStoreCatalogEntry(graphStore2, config2, ResultStore.EMPTY),
+            new GraphStoreCatalogEntry(graphStore3, config3, ResultStore.EMPTY)
         );
         when(graphListingService.listGraphs(new User("foo", false))).thenReturn(listOfConfigsWithStores);
-        var gswc1 = GraphStoreWithConfig.of(graphStore1, config1);
-        var gswc2 = GraphStoreWithConfig.of(graphStore2, config2);
-        var gswc3 = GraphStoreWithConfig.of(graphStore3, config3);
-        List<Pair<GraphStoreWithConfig, Map<String, Object>>> listOfGraphStoresWithConfigsSansDegreeDistributions = List.of(
+        var gswc1 = new GraphStoreCatalogEntry(graphStore1, config1, ResultStore.EMPTY);
+        var gswc2 = new GraphStoreCatalogEntry(graphStore2, config2, ResultStore.EMPTY);
+        var gswc3 = new GraphStoreCatalogEntry(graphStore3, config3, ResultStore.EMPTY);
+        List<Pair<GraphStoreCatalogEntry, Map<String, Object>>> listOfGraphStoresWithConfigsSansDegreeDistributions = List.of(
             Pair.of(gswc1, null),
             Pair.of(gswc2, null),
             Pair.of(gswc3, null)
@@ -86,21 +85,21 @@ class ListGraphApplicationTest {
         var graphStore1 = new StubGraphStore();
         var graphStore2 = new StubGraphStore();
         var graphStore3 = new StubGraphStore();
-        List<Pair<GraphProjectConfig, GraphStore>> listOfConfigsWithStores = List.of(
-            Pair.of(config1, graphStore1),
-            Pair.of(config2, graphStore2),
-            Pair.of(config3, graphStore3)
+        List<GraphStoreCatalogEntry> listOfConfigsWithStores = List.of(
+            new GraphStoreCatalogEntry(graphStore1, config1, ResultStore.EMPTY),
+            new GraphStoreCatalogEntry(graphStore2, config2, ResultStore.EMPTY),
+            new GraphStoreCatalogEntry(graphStore3, config3, ResultStore.EMPTY)
         );
         when(graphListingService.listGraphs(new User("foo", false))).thenReturn(listOfConfigsWithStores);
-        var gswc1 = GraphStoreWithConfig.of(graphStore1, config1);
-        var gswc2 = GraphStoreWithConfig.of(graphStore2, config2);
-        List<Pair<GraphStoreWithConfig, Map<String, Object>>> listOfGraphStoresWithConfigsSansDegreeDistributions = List.of(
+        var gswc1 = new GraphStoreCatalogEntry(graphStore1, config1, ResultStore.EMPTY);
+        var gswc2 = new GraphStoreCatalogEntry(graphStore2, config2, ResultStore.EMPTY);
+        List<Pair<GraphStoreCatalogEntry, Map<String, Object>>> listOfGraphStoresWithConfigsSansDegreeDistributions = List.of(
             Pair.of(gswc1, null),
             Pair.of(gswc2, null)
         );
         when(degreeDistributionApplier.process(List.of(
-            Pair.of(config1, graphStore1),
-            Pair.of(config2, graphStore2)
+            new GraphStoreCatalogEntry(graphStore1, config1, ResultStore.EMPTY),
+            new GraphStoreCatalogEntry(graphStore2, config2, ResultStore.EMPTY)
         ), false, null)).thenReturn(
             listOfGraphStoresWithConfigsSansDegreeDistributions);
         var result = application.list(

@@ -29,18 +29,24 @@ import org.neo4j.gds.core.io.GraphStoreExporterBaseConfig;
 public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBaseConfig, JobIdConfig {
 
     String DB_NAME_KEY = "dbName";
+    String DB_FORMAT_KEY = "dbFormat";
 
     @Configuration.Key(DB_NAME_KEY)
-    String dbName();
+    String databaseName();
 
     @Deprecated(forRemoval = true, since = "2.2")
     default boolean enableDebugLog() {
         return false;
     }
 
+    @Configuration.Key(DB_FORMAT_KEY)
+    default String databaseFormat() {
+        return Neo4jProxy.defaultDatabaseFormatSetting();
+    }
+
     @Configuration.Check
     default void validate() {
-        Neo4jProxy.validateExternalDatabaseName(dbName());
+        Neo4jProxy.validateExternalDatabaseName(databaseName());
     }
 
     static GraphStoreToDatabaseExporterConfig of(CypherMapWrapper config) {

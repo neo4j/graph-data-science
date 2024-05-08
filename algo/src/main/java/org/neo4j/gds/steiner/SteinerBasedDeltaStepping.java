@@ -26,14 +26,15 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.paths.ImmutablePathResult;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.delta.TentativeDistances;
@@ -67,7 +68,7 @@ public final class SteinerBasedDeltaStepping extends Algorithm<PathFindingResult
     private final Graph graph;
     private final long startNode;
     private final double delta;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final HugeLongArray frontier;
     private final TentativeDistances distances;
     private final ExecutorService executorService;
@@ -83,7 +84,7 @@ public final class SteinerBasedDeltaStepping extends Algorithm<PathFindingResult
         long startNode,
         double delta,
         BitSet isTerminal,
-        int concurrency,
+        Concurrency concurrency,
         int binSizeThreshold,
         ExecutorService executorService,
         ProgressTracker progressTracker
@@ -118,8 +119,8 @@ public final class SteinerBasedDeltaStepping extends Algorithm<PathFindingResult
                 return MemoryRange.of(lowerBound, Math.max(lowerBound, upperBound));
             })
             .rangePerGraphDimension("local bins", (dimensions, concurrency) -> {
-                var lowerBound = HugeLongArray.memoryEstimation(dimensions.nodeCount() / concurrency);
-                var upperBound = HugeLongArray.memoryEstimation(concurrency * dimensions.nodeCount());
+                var lowerBound = HugeLongArray.memoryEstimation(dimensions.nodeCount() / concurrency.value());
+                var upperBound = HugeLongArray.memoryEstimation(concurrency.value() * dimensions.nodeCount());
 
                 return MemoryRange.of(lowerBound, Math.max(lowerBound, upperBound));
             });
@@ -127,7 +128,7 @@ public final class SteinerBasedDeltaStepping extends Algorithm<PathFindingResult
         builder.perNode("distance array", HugeAtomicDoubleArray::memoryEstimation)
             .perNode("predecessor array", HugeAtomicLongArray::memoryEstimation);
 
-        builder.perNode("merged with source", MemoryUsage::sizeOfBitset);
+        builder.perNode("merged with source", Estimate::sizeOfBitset);
 
         return builder.build();
     }
@@ -306,7 +307,7 @@ public final class SteinerBasedDeltaStepping extends Algorithm<PathFindingResult
         HugeLongPriorityQueue terminalQueue = HugeLongPriorityQueue.min(unvisitedTerminal.size());
         var terminalQueueLock = new ReentrantLock();
         var tasks = IntStream
-            .range(0, concurrency)
+            .range(0, concurrency.value())
             .mapToObj(i -> new SteinerBasedDeltaTask(
                 graph.concurrentCopy(),
                 frontier,

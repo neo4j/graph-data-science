@@ -23,7 +23,7 @@ import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -36,13 +36,21 @@ import java.util.stream.Stream;
 
 public class InverseRelationshipsAlgorithmFactory extends GraphStoreAlgorithmFactory<InverseRelationships, InverseRelationshipsConfig> {
 
+    public InverseRelationships build(
+        GraphStore graphStore,
+        InverseRelationshipsParameters parameters,
+        ProgressTracker progressTracker
+    ) {
+        return new InverseRelationships(graphStore, parameters, progressTracker, DefaultPool.INSTANCE);
+    }
+
     @Override
     public InverseRelationships build(
         GraphStore graphStore,
         InverseRelationshipsConfig configuration,
         ProgressTracker progressTracker
     ) {
-        return new InverseRelationships(graphStore, configuration, progressTracker, DefaultPool.INSTANCE);
+        return build(graphStore, configuration.toParameters(), progressTracker);
     }
 
     @Override
@@ -50,18 +58,18 @@ public class InverseRelationshipsAlgorithmFactory extends GraphStoreAlgorithmFac
         return "IndexInverse";
     }
 
-    @Override
-    public Task progressTask(GraphStore graphStore, InverseRelationshipsConfig config) {
-        long nodeCount = graphStore.nodeCount();
-
-        Collection<RelationshipType> relationshipTypes = config.internalRelationshipTypes(graphStore);
-
+    public Task progressTask(long nodeCount, Collection<RelationshipType> relationshipTypes) {
         List<Task> tasks = relationshipTypes.stream().flatMap(type -> Stream.of(
             Tasks.leaf(String.format(Locale.US, "Create inverse relationships of type '%s'", type.name), nodeCount),
             Tasks.leaf("Build Adjacency list")
         )).collect(Collectors.toList());
 
         return Tasks.task(taskName(), tasks);
+    }
+
+    @Override
+    public Task progressTask(GraphStore graphStore, InverseRelationshipsConfig config) {
+        return progressTask(graphStore.nodeCount(), config.toParameters().internalRelationshipTypes(graphStore));
     }
 
     @Override

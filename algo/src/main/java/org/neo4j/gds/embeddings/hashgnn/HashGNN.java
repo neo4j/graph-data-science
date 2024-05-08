@@ -25,6 +25,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -48,12 +49,14 @@ public class HashGNN extends Algorithm<HashGNNResult> {
     private final Graph graph;
     private final SplittableRandom rng;
     private final HashGNNParameters parameters;
+    private final Concurrency concurrency;
     private final MutableLong currentTotalFeatureCount = new MutableLong();
 
     public HashGNN(Graph graph, HashGNNParameters parameters, ProgressTracker progressTracker) {
         super(progressTracker);
         this.graph = graph;
         this.parameters = parameters;
+        this.concurrency = parameters.concurrency();
 
         long tempRandomSeed = this.parameters.randomSeed().orElse((new SplittableRandom().nextLong()));
         this.randomSeed = new SplittableRandom(tempRandomSeed).nextLong();
@@ -64,15 +67,17 @@ public class HashGNN extends Algorithm<HashGNNResult> {
     public HashGNNResult compute() {
         progressTracker.beginSubTask("HashGNN");
 
+        // Since degree only very approximately reflect the min hash task workload per node we decrease the partition sizes.
+        int decreasedConcurrency = Math.toIntExact(Math.min(concurrency.value() * DEGREE_PARTITIONS_PER_THREAD, graph.nodeCount()));
+
         var degreePartition = PartitionUtils.degreePartition(
             graph,
-            // Since degree only very approximately reflect the min hash task workload per node we decrease the partition sizes.
-            Math.toIntExact(Math.min(parameters.concurrency() * DEGREE_PARTITIONS_PER_THREAD, graph.nodeCount())),
+            new Concurrency(decreasedConcurrency),
             Function.identity(),
             Optional.of(1)
         );
         var rangePartition = PartitionUtils.rangePartition(
-            parameters.concurrency(),
+            concurrency,
             graph.nodeCount(),
             Function.identity(),
             Optional.of(1)
@@ -125,7 +130,7 @@ public class HashGNN extends Algorithm<HashGNNResult> {
                 embeddingDimension,
                 scaledNeighborInfluence,
                 graphs.size(),
-                parameters.concurrency(),
+                concurrency,
                 parameters.embeddingDensity(),
                 randomSeed + parameters.embeddingDensity() * iteration,
                 terminationFlag,
@@ -135,7 +140,7 @@ public class HashGNN extends Algorithm<HashGNNResult> {
             MinHashTask.compute(
                 degreePartition,
                 graphs,
-                parameters.concurrency(),
+                concurrency,
                 parameters.embeddingDensity(),
                 embeddingDimension,
                 currentEmbeddings,
@@ -162,7 +167,7 @@ public class HashGNN extends Algorithm<HashGNNResult> {
             var denseVectors = DensifyTask.compute(
                 graph,
                 rangePartition,
-                parameters.concurrency(),
+                concurrency,
                 it,
                 rng,
                 binaryOutputVectors,
@@ -185,7 +190,7 @@ public class HashGNN extends Algorithm<HashGNNResult> {
                 parameters.generateFeatures().get(),
                 graph,
                 partition,
-                parameters.concurrency(),
+                concurrency,
                 randomSeed,
                 progressTracker,
                 terminationFlag,
@@ -196,7 +201,7 @@ public class HashGNN extends Algorithm<HashGNNResult> {
             BinarizeTask.compute(
                 graph,
                 partition,
-                parameters.concurrency(),
+                concurrency,
                 parameters.featureProperties(),
                 it,
                 rng,
@@ -206,7 +211,7 @@ public class HashGNN extends Algorithm<HashGNNResult> {
             )
         ).orElseGet(() ->
             RawFeaturesTask.compute(
-                parameters.concurrency(),
+                concurrency,
                 parameters.featureProperties(),
                 progressTracker,
                 graph,

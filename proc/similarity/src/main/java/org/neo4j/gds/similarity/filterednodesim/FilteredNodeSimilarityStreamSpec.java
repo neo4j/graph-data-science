@@ -19,22 +19,22 @@
  */
 package org.neo4j.gds.similarity.filterednodesim;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarity;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
-import static org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamProc.DESCRIPTION;
+import static org.neo4j.gds.similarity.filterednodesim.Constants.FILTERED_NODE_SIMILARITY_DESCRIPTION;
 
-@GdsCallable(name = "gds.nodeSimilarity.filtered.stream", aliases = {"gds.alpha.nodeSimilarity.filtered.stream"}, description = DESCRIPTION, executionMode = ExecutionMode.STREAM)
+@GdsCallable(name = "gds.nodeSimilarity.filtered.stream", aliases = {"gds.alpha.nodeSimilarity.filtered.stream"}, description = FILTERED_NODE_SIMILARITY_DESCRIPTION, executionMode = ExecutionMode.STREAM)
 public class FilteredNodeSimilarityStreamSpec implements AlgorithmSpec<
     NodeSimilarity,
     NodeSimilarityResult,
@@ -60,21 +60,6 @@ public class FilteredNodeSimilarityStreamSpec implements AlgorithmSpec<
 
     @Override
     public ComputationResultConsumer<NodeSimilarity, NodeSimilarityResult, FilteredNodeSimilarityStreamConfig, Stream<SimilarityResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging(
-            "Result streaming failed",
-            executionContext.log(),
-            () -> computationResult.result()
-                .map(result -> {
-                    var graph = computationResult.graph();
-                    var similarityResultStream = result.streamResult();
-                    return similarityResultStream.map(internalSimilarityResult -> {
-                        internalSimilarityResult.node1 = graph.toOriginalNodeId(internalSimilarityResult.node1);
-                        internalSimilarityResult.node2 = graph.toOriginalNodeId(internalSimilarityResult.node2);
-
-                        return internalSimilarityResult;
-                    });
-                }).orElseGet(Stream::empty)
-        );
+        return new NullComputationResultConsumer<>();
     }
-
 }

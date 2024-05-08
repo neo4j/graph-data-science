@@ -23,9 +23,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
 import org.neo4j.gds.core.GraphDimensions;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 class BFSMemoryEstimateDefinitionTest {
 
@@ -45,16 +43,12 @@ class BFSMemoryEstimateDefinitionTest {
         long expectedMin,
         long expectedMax
     ) {
-
         var dimensions = GraphDimensions.builder().nodeCount(nodeCount).relCountUpperBound(relationshipCount).build();
-
-        var config = mock(BfsBaseConfig.class);
-        when(config.concurrency()).thenReturn(concurrency);
 
         var memoryEstimation = new BfsMemoryEstimateDefinition();
 
         MemoryEstimationAssert.assertThat(memoryEstimation.memoryEstimation())
-            .memoryRange(dimensions, concurrency)
+            .memoryRange(dimensions, new Concurrency(concurrency))
             .hasMin(expectedMin)
             .hasMax(expectedMax);
     }

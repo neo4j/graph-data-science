@@ -23,6 +23,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -63,7 +64,7 @@ class ModularityCalculatorTest {
         var modularityCalculator = ModularityCalculator.create(
             graph,
             graphStore.nodeProperty(communityId).values()::longValue,
-            4
+            new Concurrency(4)
         );
 
         var result = modularityCalculator.compute();

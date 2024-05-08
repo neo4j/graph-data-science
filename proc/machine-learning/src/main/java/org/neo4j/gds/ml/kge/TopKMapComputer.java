@@ -25,6 +25,7 @@ import com.carrotsearch.hppc.predicates.LongLongPredicate;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.SetBitsIterable;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -46,7 +47,7 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
 
     private final String nodeEmbeddingProperty;
     private final DoubleArrayList relationshipTypeEmbedding;
-    private final int concurrency;
+    private final Concurrency concurrency;
 
     private final int topK;
     private final ScoreFunction scoreFunction;
@@ -61,7 +62,7 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
         List<Double> relationshipTypeEmbedding,
         ScoreFunction scoreFunction,
         int topK,
-        int concurrency,
+        Concurrency concurrency,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);

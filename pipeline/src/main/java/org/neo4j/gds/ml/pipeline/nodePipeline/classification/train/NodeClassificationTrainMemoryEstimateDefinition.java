@@ -25,9 +25,9 @@ import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.models.ClassifierTrainerFactory;
@@ -48,9 +48,9 @@ import java.util.Map;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.core.utils.mem.MemoryEstimations.delegateEstimation;
-import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.gds.mem.MemoryEstimations.delegateEstimation;
+import static org.neo4j.gds.mem.MemoryEstimations.maxEstimation;
+import static org.neo4j.gds.mem.Estimate.sizeOfDoubleArray;
 
 public class NodeClassificationTrainMemoryEstimateDefinition {
 

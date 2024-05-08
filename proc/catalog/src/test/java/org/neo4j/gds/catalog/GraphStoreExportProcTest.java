@@ -23,6 +23,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.configuration.Config;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
@@ -42,6 +44,7 @@ import org.neo4j.test.extension.ExtensionCallback;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -105,6 +108,28 @@ class GraphStoreExportProcTest extends BaseProcTest {
             assertEquals(6, row.getNumber("relationshipPropertyCount").longValue());
             assertThat(row.getNumber("writeMillis").longValue()).isGreaterThan(0L);
         });
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"aligned", "standard"})
+    void exportGraphWithCommunityDatabaseFormats(String databaseFormat) {
+        projectGraph();
+
+        var exportQuery = "CALL gds.graph.export('test-graph', {dbName: 'test-db', dbFormat: $databaseFormat})";
+
+        runQueryWithRowConsumer(
+            exportQuery,
+            Map.of("databaseFormat", databaseFormat),
+            row -> {
+                assertEquals("test-db", row.getString("dbName"));
+                assertEquals(4, row.getNumber("nodeCount").longValue());
+                assertEquals(6, row.getNumber("relationshipCount").longValue());
+                assertEquals(3, row.getNumber("relationshipTypeCount").longValue());
+                assertEquals(8, row.getNumber("nodePropertyCount").longValue());
+                assertEquals(6, row.getNumber("relationshipPropertyCount").longValue());
+                assertThat(row.getNumber("writeMillis").longValue()).isGreaterThan(0L);
+            }
+        );
     }
 
     @Test

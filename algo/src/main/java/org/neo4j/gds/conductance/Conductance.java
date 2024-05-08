@@ -26,6 +26,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.hsa.HugeSparseDoubleArray;
 import org.neo4j.gds.core.concurrency.AtomicDouble;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
@@ -44,7 +45,7 @@ public class Conductance extends Algorithm<ConductanceResult> {
     private static final double DEFAULT_WEIGHT = 0.0D;
 
     private final Graph graph;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final ExecutorService executor;
     private final int minBatchSize;
     private final WeightTransformer weightTransformer;
@@ -52,7 +53,7 @@ public class Conductance extends Algorithm<ConductanceResult> {
 
     public Conductance(
         Graph graph,
-        int concurrency,
+        Concurrency concurrency,
         int minBatchSize,
         boolean hasRelationshipWeightProperty,
         String communityProperty,
@@ -81,8 +82,8 @@ public class Conductance extends Algorithm<ConductanceResult> {
         var relCountTasks = countRelationships();
 
         long maxCommunityId = maxCommunityId(relCountTasks);
-        long communitiesPerBatch = maxCommunityId / concurrency;
-        long communitiesRemainder = Math.floorMod(maxCommunityId, concurrency);
+        long communitiesPerBatch = maxCommunityId / concurrency.value();
+        long communitiesRemainder = Math.floorMod(maxCommunityId, concurrency.value());
 
         var accumulatedCounts = accumulateCounts(
             communitiesPerBatch,
@@ -153,7 +154,7 @@ public class Conductance extends Algorithm<ConductanceResult> {
 
         var tasks = ParallelUtil.tasks(concurrency, index -> () -> {
             final long startOffset = index * communitiesPerBatch;
-            final long endOffset = index == concurrency - 1
+            final long endOffset = index == concurrency.value() - 1
                 ? startOffset + communitiesPerBatch + communitiesRemainder
                 : startOffset + communitiesPerBatch;
 
@@ -211,7 +212,7 @@ public class Conductance extends Algorithm<ConductanceResult> {
 
         var tasks = ParallelUtil.tasks(concurrency, index -> () -> {
             final long startOffset = index * communitiesPerBatch;
-            final long endOffset = index == concurrency - 1
+            final long endOffset = index == concurrency.value() - 1
                 ? startOffset + communitiesPerBatch + communitiesRemainder
                 : startOffset + communitiesPerBatch;
             double conductanceSum = 0.0;

@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -38,8 +39,8 @@ import java.util.concurrent.atomic.AtomicLong;
 public class Node2Vec extends Algorithm<Node2VecResult> {
 
     private final Graph graph;
-    private final int concurrency;
-    private final WalkParameters walkParameters;
+    private final Concurrency concurrency;
+    private final SamplingWalkParameters samplingWalkParameters;
     private final List<Long> sourceNodes;
     private final Optional<Long> maybeRandomSeed;
     private final TrainParameters trainParameters;
@@ -48,22 +49,21 @@ public class Node2Vec extends Algorithm<Node2VecResult> {
 
     public Node2Vec(
         Graph graph,
-        int concurrency,
+        Concurrency concurrency,
         List<Long> sourceNodes,
         Optional<Long> maybeRandomSeed,
         int walkBufferSize,
-        WalkParameters walkParameters,
-        TrainParameters trainParameters,
+        Node2VecParameters node2VecParameters,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;
         this.concurrency = concurrency;
-        this.walkParameters = walkParameters;
+        this.samplingWalkParameters = node2VecParameters.samplingWalkParameters();
         this.walkBufferSize = walkBufferSize;
         this.sourceNodes = sourceNodes;
         this.maybeRandomSeed = maybeRandomSeed;
-        this.trainParameters = trainParameters;
+        this.trainParameters = node2VecParameters.trainParameters();
     }
 
     @Override
@@ -83,10 +83,10 @@ public class Node2Vec extends Algorithm<Node2VecResult> {
         var probabilitiesBuilder = new RandomWalkProbabilities.Builder(
             graph.nodeCount(),
             concurrency,
-            walkParameters.positiveSamplingFactor,
-            walkParameters.negativeSamplingExponent
+            samplingWalkParameters.positiveSamplingFactor(),
+            samplingWalkParameters.negativeSamplingExponent()
         );
-        var walks = new CompressedRandomWalks(graph.nodeCount() * walkParameters.walksPerNode);
+        var walks = new CompressedRandomWalks(graph.nodeCount() * samplingWalkParameters.walksPerNode());
 
         progressTracker.beginSubTask("RandomWalk");
 
@@ -97,7 +97,7 @@ public class Node2Vec extends Algorithm<Node2VecResult> {
             maybeRandomSeed,
             concurrency,
             sourceNodes,
-            walkParameters,
+            samplingWalkParameters,
             walkBufferSize,
             DefaultPool.INSTANCE,
             progressTracker,
@@ -141,9 +141,9 @@ public class Node2Vec extends Algorithm<Node2VecResult> {
         RandomWalkProbabilities.Builder randomWalkPropabilitiesBuilder,
         Graph graph,
         Optional<Long> maybeRandomSeed,
-        int concurrency,
+        Concurrency concurrency,
         List<Long> sourceNodes,
-        WalkParameters walkParameters,
+        SamplingWalkParameters samplingWalkParameters,
         int walkBufferSize,
         ExecutorService executorService,
         ProgressTracker progressTracker,
@@ -160,11 +160,11 @@ public class Node2Vec extends Algorithm<Node2VecResult> {
         );
 
         AtomicLong index = new AtomicLong();
-        for (int i = 0; i < concurrency; ++i) {
+        for (int i = 0; i < concurrency.value(); ++i) {
             tasks.add(new Node2VecRandomWalkTask(
                 graph.concurrentCopy(),
                 nextNodeSupplier,
-                walkParameters.walksPerNode,
+                samplingWalkParameters.walksPerNode(),
                 cumulativeWeightsSupplier,
                 progressTracker,
                 terminationFlag,
@@ -173,9 +173,9 @@ public class Node2Vec extends Algorithm<Node2VecResult> {
                 randomWalkPropabilitiesBuilder,
                 walkBufferSize,
                 randomSeed,
-                walkParameters.walkLength,
-                walkParameters.returnFactor,
-                walkParameters.inOutFactor
+                samplingWalkParameters.walkLength(),
+                samplingWalkParameters.returnFactor(),
+                samplingWalkParameters.inOutFactor()
             ));
         }
         return tasks;

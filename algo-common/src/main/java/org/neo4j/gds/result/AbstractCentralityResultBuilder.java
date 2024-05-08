@@ -22,6 +22,7 @@ package org.neo4j.gds.result;
 import org.HdrHistogram.DoubleHistogram;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.scaling.LogScaler;
@@ -38,7 +39,7 @@ public abstract class AbstractCentralityResultBuilder<WRITE_RESULT> extends Abst
 
     static final String HISTOGRAM_ERROR_KEY = "Error";
 
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final boolean buildHistogram;
     private final Map<String, Object> histogramError;
 
@@ -50,7 +51,7 @@ public abstract class AbstractCentralityResultBuilder<WRITE_RESULT> extends Abst
 
     protected AbstractCentralityResultBuilder(
         ProcedureReturnColumns returnColumns,
-        int concurrency
+        Concurrency concurrency
     ) {
         this.buildHistogram = returnColumns.contains("centralityDistribution");
         this.concurrency = concurrency;

@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.core.tensor;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.mult.MatrixMatrixMult_DDRM;
 import org.neo4j.gds.collections.ArrayUtil;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.ml.core.Dimensions;
 
 import java.util.Arrays;
@@ -39,7 +39,7 @@ public class Matrix extends Tensor<Matrix> {
     private final int rows;
 
     public static long sizeInBytes(int rows, int cols) {
-        return MemoryUsage.sizeOfDoubleArray((long) rows * cols);
+        return Estimate.sizeOfDoubleArray((long) rows * cols);
     }
 
     public Matrix(double[] data, int rows, int cols) {

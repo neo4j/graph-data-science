@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.core.tensor;
 
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.ml.core.Dimensions;
 
 import java.util.Arrays;
@@ -148,7 +148,7 @@ public abstract class Tensor<SELF extends Tensor<SELF>> {
     }
 
     public static long sizeInBytes(int[] dimensions) {
-        return MemoryUsage.sizeOfDoubleArray(Dimensions.totalSize(dimensions));
+        return Estimate.sizeOfDoubleArray(Dimensions.totalSize(dimensions));
     }
 
     public boolean equals(Tensor<?> other, double tolerance) {

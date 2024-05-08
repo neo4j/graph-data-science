@@ -32,17 +32,10 @@ import org.neo4j.gds.core.CypherMapWrapper;
 public final class KeyRenamesConfig implements KeyRenames {
     private int lookupUnderAnotherKey;
 
-    private int whitespaceWillBeTrimmed;
-
     public KeyRenamesConfig(@NotNull CypherMapAccess config) {
         ArrayList<IllegalArgumentException> errors = new ArrayList<>();
         try {
             this.lookupUnderAnotherKey = config.requireInt("key could also be an invalid identifier");
-        } catch (IllegalArgumentException e) {
-            errors.add(e);
-        }
-        try {
-            this.whitespaceWillBeTrimmed = config.requireInt("whitespace will be trimmed");
         } catch (IllegalArgumentException e) {
             errors.add(e);
         }
@@ -69,11 +62,6 @@ public final class KeyRenamesConfig implements KeyRenames {
         return this.lookupUnderAnotherKey;
     }
 
-    @Override
-    public int whitespaceWillBeTrimmed() {
-        return this.whitespaceWillBeTrimmed;
-    }
-
     public static KeyRenamesConfig.Builder builder() {
         return new KeyRenamesConfig.Builder();
     }
@@ -88,17 +76,11 @@ public final class KeyRenamesConfig implements KeyRenames {
         public static KeyRenamesConfig.Builder from(KeyRenames baseConfig) {
             var builder = new KeyRenamesConfig.Builder();
             builder.lookupUnderAnotherKey(baseConfig.lookupUnderAnotherKey());
-            builder.whitespaceWillBeTrimmed(baseConfig.whitespaceWillBeTrimmed());
             return builder;
         }
 
         public KeyRenamesConfig.Builder lookupUnderAnotherKey(int lookupUnderAnotherKey) {
             this.config.put("key could also be an invalid identifier", lookupUnderAnotherKey);
-            return this;
-        }
-
-        public KeyRenamesConfig.Builder whitespaceWillBeTrimmed(int whitespaceWillBeTrimmed) {
-            this.config.put("whitespace will be trimmed", whitespaceWillBeTrimmed);
             return this;
         }
 

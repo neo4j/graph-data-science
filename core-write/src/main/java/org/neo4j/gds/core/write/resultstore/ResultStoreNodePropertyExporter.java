@@ -20,23 +20,31 @@
 package org.neo4j.gds.core.write.resultstore;
 
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.api.ResultStoreEntry;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.LongUnaryOperator;
 
 public class ResultStoreNodePropertyExporter implements NodePropertyExporter {
 
+    private final JobId jobId;
     private final ResultStore resultStore;
     private final List<String> nodeLabels;
+    private final LongUnaryOperator toOriginalId;
     private long writtenProperties;
 
-    ResultStoreNodePropertyExporter(ResultStore resultStore, List<String> nodeLabels) {
+    ResultStoreNodePropertyExporter(JobId jobId, ResultStore resultStore, List<String> nodeLabels, LongUnaryOperator toOriginalId) {
+        this.jobId = jobId;
         this.resultStore = resultStore;
         this.nodeLabels = nodeLabels;
+        this.toOriginalId = toOriginalId;
     }
 
     @Override
@@ -51,15 +59,20 @@ public class ResultStoreNodePropertyExporter implements NodePropertyExporter {
 
     @Override
     public void write(Collection<NodeProperty> nodeProperties) {
+        var propertyKeys = new ArrayList<String>();
+        var propertyValues = new ArrayList<NodePropertyValues>();
         nodeProperties.forEach(nodeProperty -> {
-            var propertyValues = nodeProperty.properties();
             resultStore.addNodePropertyValues(
                 nodeLabels,
                 nodeProperty.propertyKey(),
-                propertyValues
+                nodeProperty.properties()
             );
-            writtenProperties += propertyValues.nodeCount();
+            propertyKeys.add(nodeProperty.propertyKey());
+            propertyValues.add(nodeProperty.properties());
+            writtenProperties += nodeProperty.properties().nodeCount();
         });
+
+        resultStore.add(jobId, new ResultStoreEntry.NodeProperties(nodeLabels, propertyKeys, propertyValues, toOriginalId));
     }
 
     @Override

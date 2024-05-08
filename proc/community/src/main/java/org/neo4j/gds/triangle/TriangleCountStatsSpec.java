@@ -19,20 +19,19 @@
  */
 package org.neo4j.gds.triangle;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStatsResult;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.BaseProc.STATS_DESCRIPTION;
-import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
 
-@GdsCallable(name = "gds.triangleCount.stats", description = STATS_DESCRIPTION, executionMode = STATS)
+@GdsCallable(name = "gds.triangleCount.stats", description = TriangleCountCompanion.TRIANGLE_COUNT_DESCRIPTION, executionMode = STATS)
 public class TriangleCountStatsSpec implements AlgorithmSpec<IntersectingTriangleCount, TriangleCountResult, TriangleCountStatsConfig, Stream<TriangleCountStatsResult>, IntersectingTriangleCountFactory<TriangleCountStatsConfig>> {
 
     @Override
@@ -52,20 +51,6 @@ public class TriangleCountStatsSpec implements AlgorithmSpec<IntersectingTriangl
 
     @Override
     public ComputationResultConsumer<IntersectingTriangleCount, TriangleCountResult, TriangleCountStatsConfig, Stream<TriangleCountStatsResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging(
-            "Result streaming failed",
-            executionContext.log(),
-            () -> computationResult.result()
-                .map(result -> {
-                    var builder = new TriangleCountStatsResult.Builder();
-                    builder.withGlobalTriangleCount(result.globalTriangles());
-                    builder
-                        .withPreProcessingMillis(computationResult.preProcessingMillis())
-                        .withComputeMillis(computationResult.computeMillis())
-                        .withNodeCount(computationResult.graph().nodeCount())
-                        .withConfig(computationResult.config());
-                    return Stream.of(builder.build());
-                }).orElseGet(Stream::empty)
-        );
+        return new NullComputationResultConsumer<>();
     }
 }

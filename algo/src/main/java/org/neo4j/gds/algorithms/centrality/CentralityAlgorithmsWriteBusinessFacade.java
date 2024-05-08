@@ -31,10 +31,9 @@ import org.neo4j.gds.algorithms.runner.AlgorithmResultWithTiming;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
 import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
-import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ArrowConnectionInfo;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
 import org.neo4j.gds.harmonic.DeprecatedTieredHarmonicCentralityWriteConfig;
@@ -63,29 +62,6 @@ public class CentralityAlgorithmsWriteBusinessFacade {
         this.writeNodePropertyService = writeNodePropertyService;
     }
 
-    public NodePropertyWriteResult<DefaultCentralitySpecificFields> betweennessCentrality(
-        String graphName,
-        BetweennessCentralityWriteConfig configuration,
-        boolean shouldComputeCentralityDistribution
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
-            () -> centralityAlgorithmsFacade.betweennessCentrality(graphName, configuration)
-        );
-
-        return writeToDatabase(
-            intermediateResult.algorithmResult,
-            configuration,
-            shouldComputeCentralityDistribution,
-            intermediateResult.computeMilliseconds,
-            "BetweennessCentralityWrite",
-            configuration.writeConcurrency(),
-            configuration.writeProperty(),
-            configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(intermediateResult.algorithmResult.graphStore().resultStore())
-        );
-    }
-
     public NodePropertyWriteResult<DefaultCentralitySpecificFields> degreeCentrality(
         String graphName,
         DegreeCentralityWriteConfig configuration,
@@ -105,30 +81,7 @@ public class CentralityAlgorithmsWriteBusinessFacade {
             configuration.writeConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(intermediateResult.algorithmResult.graphStore().resultStore())
-        );
-    }
-
-    public NodePropertyWriteResult<DefaultCentralitySpecificFields> closenessCentrality(
-        String graphName,
-        ClosenessCentralityWriteConfig configuration,
-        boolean shouldComputeCentralityDistribution
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
-            () -> centralityAlgorithmsFacade.closenessCentrality(graphName, configuration)
-        );
-
-        return writeToDatabase(
-            intermediateResult.algorithmResult,
-            configuration,
-            shouldComputeCentralityDistribution,
-            intermediateResult.computeMilliseconds,
-            "ClosenessCentralityWrite",
-            configuration.writeConcurrency(),
-            configuration.writeProperty(),
-            configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(intermediateResult.algorithmResult.graphStore().resultStore())
+            configuration.resolveResultStore(intermediateResult.algorithmResult.resultStore())
         );
     }
 
@@ -199,7 +152,8 @@ public class CentralityAlgorithmsWriteBusinessFacade {
                 configuration.writeProperty(),
                 "PageRankWrite",
                 configuration.arrowConnectionInfo(),
-                configuration.resolveResultStore(graphStore.resultStore())
+                configuration.resolveResultStore(algorithmResult.resultStore()),
+                configuration.jobId()
             );
 
             var pageRankDistribution = PageRankDistributionComputer.computeDistribution(
@@ -244,7 +198,7 @@ public class CentralityAlgorithmsWriteBusinessFacade {
             configuration.writeConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(intermediateResult.algorithmResult.graphStore().resultStore())
+            configuration.resolveResultStore(intermediateResult.algorithmResult.resultStore())
         );
     }
 
@@ -275,7 +229,7 @@ public class CentralityAlgorithmsWriteBusinessFacade {
             configuration.writeConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
+            configuration.resolveResultStore(algorithmResult.resultStore())
         );
 
     }
@@ -307,7 +261,8 @@ public class CentralityAlgorithmsWriteBusinessFacade {
                     configuration.writeProperty(),
                     "CELFWrite",
                     configuration.arrowConnectionInfo(),
-                    configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
+                    configuration.resolveResultStore(algorithmResult.resultStore()),
+                    configuration.jobId()
                 );
                 writeResultBuilder.writeMillis(writeResult.writeMilliseconds());
                 writeResultBuilder.nodePropertiesWritten(writeResult.nodePropertiesWritten());
@@ -325,7 +280,7 @@ public class CentralityAlgorithmsWriteBusinessFacade {
         boolean shouldComputeCentralityDistribution,
         long computeMilliseconds,
         String procedureName,
-        int writeConcurrency,
+        Concurrency writeConcurrency,
         String writeProperty,
         Optional<ArrowConnectionInfo> arrowConnectionInfo,
         Optional<ResultStore> resultStore
@@ -365,7 +320,7 @@ public class CentralityAlgorithmsWriteBusinessFacade {
         long computeMilliseconds,
         Supplier<ASF> emptyASFSupplier,
         String procedureName,
-        int writeConcurrency,
+        Concurrency writeConcurrency,
         String writeProperty,
         Optional<ArrowConnectionInfo> arrowConnectionInfo,
         Optional<ResultStore> resultStore
@@ -387,7 +342,8 @@ public class CentralityAlgorithmsWriteBusinessFacade {
                 writeProperty,
                 procedureName,
                 arrowConnectionInfo,
-                resultStore
+                resultStore,
+                configuration.jobId()
             );
 
             // Compute result statistics

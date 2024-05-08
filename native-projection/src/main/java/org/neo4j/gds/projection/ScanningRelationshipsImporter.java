@@ -26,6 +26,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.ImmutableSingleTypeRelationshipImportContext;
 import org.neo4j.gds.core.loading.ImportSizing;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
@@ -53,7 +54,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         GraphDimensions dimensions,
         ProgressTracker progressTracker,
         IdMap idMap,
-        int concurrency
+        Concurrency concurrency
     ) {
         return new ScanningRelationshipsImporter(
             graphProjectConfig,
@@ -71,7 +72,7 @@ final class ScanningRelationshipsImporter extends ScanningRecordsImporter<Relati
         GraphDimensions dimensions,
         ProgressTracker progressTracker,
         IdMap idMap,
-        int concurrency
+        Concurrency concurrency
     ) {
         super(
             RelationshipScanCursorBasedScanner.factory(Math.max(dimensions.relationshipCounts()

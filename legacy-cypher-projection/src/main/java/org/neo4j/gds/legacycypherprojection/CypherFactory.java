@@ -35,7 +35,7 @@ import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskTreeProgressTracker;
@@ -163,40 +163,45 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
     public CSRGraphStore build() {
         // Temporarily override the security context to enforce read-only access during load
         return readOnlyTransaction().apply((tx, ktx) -> {
-            BatchLoadResult nodeCount = new CountingCypherRecordLoader(
-                cypherConfig.nodeQuery(),
-                CypherRecordLoader.QueryType.NODE,
-                cypherConfig,
-                loadingContext
-            ).load(ktx.internalTransaction());
+            try {
+                progressTracker.beginSubTask("Loading");
+                BatchLoadResult nodeCount = new CountingCypherRecordLoader(
+                    cypherConfig.nodeQuery(),
+                    CypherRecordLoader.QueryType.NODE,
+                    cypherConfig,
+                    loadingContext
+                ).load(ktx.internalTransaction());
 
-            progressTracker.beginSubTask("Loading");
-            var nodes = new CypherNodeLoader(
-                cypherConfig.nodeQuery(),
-                nodeCount.rows(),
-                cypherConfig,
-                loadingContext,
-                progressTracker
-            ).load(ktx.internalTransaction());
+                var nodes = new CypherNodeLoader(
+                    cypherConfig.nodeQuery(),
+                    nodeCount.rows(),
+                    cypherConfig,
+                    loadingContext,
+                    progressTracker
+                ).load(ktx.internalTransaction());
 
-            var relationshipImportResult = new CypherRelationshipLoader(
-                cypherConfig.relationshipQuery(),
-                nodes.idMap(),
-                cypherConfig,
-                loadingContext,
-                progressTracker
-            ).load(ktx.internalTransaction());
+                var relationshipImportResult = new CypherRelationshipLoader(
+                    cypherConfig.relationshipQuery(),
+                    nodes.idMap(),
+                    cypherConfig,
+                    loadingContext,
+                    progressTracker
+                ).load(ktx.internalTransaction());
 
-            var graphStore = createGraphStore(
-                nodes,
-                relationshipImportResult
-            );
+                var graphStore = createGraphStore(
+                    nodes,
+                    relationshipImportResult
+                );
 
-            progressTracker.endSubTask("Loading");
+                progressTracker.endSubTask("Loading");
 
-            logLoadingSummary(graphStore);
+                logLoadingSummary(graphStore);
 
-            return graphStore;
+                return graphStore;
+            } catch (RuntimeException ex) {
+                progressTracker.endSubTaskWithFailure();
+                throw ex;
+            }
         });
     }
 

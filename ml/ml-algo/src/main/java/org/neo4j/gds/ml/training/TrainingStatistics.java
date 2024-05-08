@@ -20,8 +20,8 @@
 package org.neo4j.gds.ml.training;
 
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.ml.metrics.EvaluationScores;
 import org.neo4j.gds.ml.metrics.ImmutableEvaluationScores;
 import org.neo4j.gds.ml.metrics.Metric;
@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.mem.Estimate.sizeOfInstance;
 
 public final class TrainingStatistics {
 

@@ -22,9 +22,9 @@ package org.neo4j.gds.ml.metrics.classification;
 import org.eclipse.collections.api.block.function.primitive.LongIntToObjectFunction;
 import org.intellij.lang.annotations.RegExp;
 import org.neo4j.gds.collections.LongMultiSet;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.Metric;
 
@@ -39,7 +39,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOf;
 import static org.neo4j.gds.ml.metrics.classification.OutOfBagError.OUT_OF_BAG_ERROR;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
@@ -89,7 +88,7 @@ public final class ClassificationMetricSpecification {
     public static MemoryEstimation memoryEstimation(int numberOfClasses) {
         return MemoryEstimations.builder()
             .rangePerNode("metrics", __ -> {
-                var sizeOfRepresentativeMetric = sizeOf(new F1Score(1, 1));
+                long sizeOfRepresentativeMetric = 8 + 8 + 8;
                 return MemoryRange.of(sizeOfRepresentativeMetric, numberOfClasses * sizeOfRepresentativeMetric);
             })
             .build();

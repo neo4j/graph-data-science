@@ -24,6 +24,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ExecutorServiceUtil;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -58,7 +59,7 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
     private final HugeAtomicLongArray inDegrees;
     private final Graph graph;
     private final long nodeCount;
-    private final int concurrency;
+    private final Concurrency concurrency;
 
     // Saves the maximal distance from a source node, which is also the longest path in DAG
     private final Optional<HugeAtomicDoubleArray> longestPathDistances;
@@ -66,7 +67,7 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
     public TopologicalSort(
         Graph graph,
         ProgressTracker progressTracker,
-        int concurrency,
+        Concurrency concurrency,
         boolean computeMaxDistanceFromSource
 
     ) {

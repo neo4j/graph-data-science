@@ -24,10 +24,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -46,12 +45,12 @@ import static org.assertj.core.api.Assertions.assertThat;
              .build()
              .generate();
 
-         var parameters = CELFParameters.create(
+         var parameters = new CELFParameters(
              seedSize,
              0.1,
              3,
-             1,
-             Optional.of(10l),
+             new Concurrency(1),
+             10L,
              5
          );
 
@@ -61,7 +60,7 @@ import static org.assertj.core.api.Assertions.assertThat;
              DefaultPool.INSTANCE,
              ProgressTracker.NULL_TRACKER
          ).compute().seedSetNodes();
-         
+
          for (var a : celf) {
              assertThat(a.value).isNotNegative();
          }

@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.kge;
 
 import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -73,7 +74,7 @@ class TopKMapComputerTest {
             List.of(3.0, -0.5),
             TRANSE,
             topK,
-            concurrency,
+            new Concurrency(concurrency),
             ProgressTracker.NULL_TRACKER
         );
 
@@ -106,7 +107,7 @@ class TopKMapComputerTest {
             List.of(0.5, -0.5),
             DISTMULT,
             topK,
-            concurrency,
+            new Concurrency(concurrency),
             ProgressTracker.NULL_TRACKER
         );
 
@@ -141,7 +142,7 @@ class TopKMapComputerTest {
             List.of(0.5, -0.5),
             TRANSE,
             topK,
-            concurrency,
+            new Concurrency(concurrency),
             ProgressTracker.NULL_TRACKER
         );
 

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.config;
 
-import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
@@ -36,7 +35,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface NodeWeightConfig {
 
-    @Value.Default
     @Configuration.ConvertWith(method = "validatePropertyName")
     default @Nullable String nodeWeightProperty() {
         return null;
@@ -47,7 +45,6 @@ public interface NodeWeightConfig {
     }
 
     @Configuration.GraphStoreValidationCheck
-    @Value.Default
     default void nodeWeightValidation(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,

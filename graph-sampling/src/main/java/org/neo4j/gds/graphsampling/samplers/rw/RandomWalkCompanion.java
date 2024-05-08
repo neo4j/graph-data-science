@@ -28,7 +28,7 @@ import java.util.Optional;
 public final class RandomWalkCompanion {
     public static final double TOTAL_WEIGHT_MISSING = -1.0;
 
-    public static Optional<HugeAtomicDoubleArray> initializeTotalWeights(RandomWalkWithRestartsConfig config,long nodeCount) {
+    public static Optional<HugeAtomicDoubleArray> initializeTotalWeights(RandomWalkWithRestartsConfig config, long nodeCount) {
         if (config.hasRelationshipWeightProperty()) {
             var totalWeights = HugeAtomicDoubleArray.of(
                 nodeCount,

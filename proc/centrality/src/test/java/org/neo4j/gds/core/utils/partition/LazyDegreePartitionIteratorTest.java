@@ -24,6 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -35,11 +36,11 @@ class LazyDegreePartitionIteratorTest {
     @ParameterizedTest
     @EnumSource(RelationshipDistribution.class)
     void testPartitionsComplete(RelationshipDistribution distribution) {
-        var concurrency = 4;
+        var concurrency = new Concurrency(4);
 
         var graph = RandomGraphGenerator.builder()
             .nodeCount(10_000)
-            .averageDegree(concurrency)
+            .averageDegree(concurrency.value())
             .seed(42)
             .relationshipDistribution(distribution)
             .build()
@@ -73,7 +74,7 @@ class LazyDegreePartitionIteratorTest {
         var partitions = LazyDegreePartitionIterator.of(
             nodeCount,
             Arrays.stream(degrees).sum(),
-            4,
+            new Concurrency(4),
             idx -> degrees[(int) idx]
         );
 

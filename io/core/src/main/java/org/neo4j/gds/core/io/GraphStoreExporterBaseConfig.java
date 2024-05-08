@@ -23,6 +23,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.ConcurrencyConfig;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 
 public interface GraphStoreExporterBaseConfig extends BaseConfig {
@@ -33,6 +34,10 @@ public interface GraphStoreExporterBaseConfig extends BaseConfig {
 
     default int writeConcurrency() {
         return ConcurrencyConfig.DEFAULT_CONCURRENCY;
+    }
+
+    default Concurrency typedWriteConcurrency() {
+        return new Concurrency(writeConcurrency());
     }
 
     default int batchSize() {

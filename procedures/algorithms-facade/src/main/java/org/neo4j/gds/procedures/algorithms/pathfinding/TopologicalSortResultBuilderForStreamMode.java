@@ -22,9 +22,8 @@ package org.neo4j.gds.procedures.algorithms.pathfinding;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.pathfinding.ResultBuilder;
-import org.neo4j.gds.applications.algorithms.pathfinding.SideEffectProcessingCounts;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
 
@@ -33,7 +32,7 @@ import java.util.function.LongFunction;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class TopologicalSortResultBuilderForStreamMode implements ResultBuilder<TopologicalSortStreamConfig, TopologicalSortResult, Stream<TopologicalSortStreamResult>> {
+class TopologicalSortResultBuilderForStreamMode implements ResultBuilder<TopologicalSortStreamConfig, TopologicalSortResult, Stream<TopologicalSortStreamResult>, Void> {
     @Override
     public Stream<TopologicalSortStreamResult> build(
         Graph graph,
@@ -41,7 +40,7 @@ class TopologicalSortResultBuilderForStreamMode implements ResultBuilder<Topolog
         TopologicalSortStreamConfig topologicalSortStreamConfig,
         Optional<TopologicalSortResult> result,
         AlgorithmProcessingTimings timings,
-        SideEffectProcessingCounts counts
+        Optional<Void> metadata
     ) {
         if (result.isEmpty()) return Stream.empty();
 

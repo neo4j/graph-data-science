@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
@@ -42,10 +41,8 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface LinkPredictionTrainConfig extends TrainBaseConfig, GraphNameConfig, RandomSeedConfig {
 
-    @Value.Default
     @Configuration.DoubleRange(min = 0, minInclusive = false)
     default double negativeClassWeight() {
         return 1.0;

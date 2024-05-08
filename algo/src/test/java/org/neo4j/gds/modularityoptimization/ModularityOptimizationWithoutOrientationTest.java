@@ -38,17 +38,18 @@ import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.mem.MemoryTree;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryTree;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.logging.Log;
 
 import java.util.Optional;
@@ -113,7 +114,7 @@ class ModularityOptimizationWithoutOrientationTest {
     void testUnweighted() {
         var graph = unweightedGraph();
 
-        var pmo = compute(graph, 3, null, 1, 10_000);
+        var pmo = compute(graph, 3, null, new Concurrency(1), 10_000);
 
         assertEquals(0.12244, pmo.modularity(), 0.001);
         CommunityHelper.assertCommunities(
@@ -126,7 +127,7 @@ class ModularityOptimizationWithoutOrientationTest {
 
     @Test
     void testWeighted() {
-        var pmo = compute(graph, 3, null, 3, 2);
+        var pmo = compute(graph, 3, null, new Concurrency(3), 2);
 
         assertEquals(0.4985, pmo.modularity(), 0.001);
         CommunityHelper.assertCommunities(
@@ -144,7 +145,7 @@ class ModularityOptimizationWithoutOrientationTest {
         var pmo = compute(
             graph,
             10, graph.nodeProperties("seed2"),
-            1,
+            new Concurrency(1),
             100
         );
 
@@ -170,7 +171,7 @@ class ModularityOptimizationWithoutOrientationTest {
         var pmo = compute(
             graph,
             10, graph.nodeProperties("seed1"),
-            1,
+            new Concurrency(1),
             100
         );
 
@@ -193,7 +194,7 @@ class ModularityOptimizationWithoutOrientationTest {
     void testLogging() {
         var log = Neo4jProxy.testLog();
 
-        compute(graph, K1COLORING_MAX_ITERATIONS, null, 3, 2, log);
+        compute(graph, K1COLORING_MAX_ITERATIONS, null, new Concurrency(3), 2, log);
 
         assertThat(log.getMessages(INFO))
             .extracting(Extractors.removingThreadId())
@@ -211,7 +212,8 @@ class ModularityOptimizationWithoutOrientationTest {
 
     @ParameterizedTest
     @MethodSource("memoryEstimationTuples")
-    void testMemoryEstimation(int concurrency, long min, long max) {
+    void testMemoryEstimation(int concurrencyValue, long min, long max) {
+        var concurrency = new Concurrency(concurrencyValue);
         GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(100_000L).build();
         MemoryTree memoryTree = MemoryEstimations.builder(ModularityOptimization.class)
             .perNode("currentCommunities", HugeLongArray::memoryEstimation)
@@ -219,7 +221,7 @@ class ModularityOptimizationWithoutOrientationTest {
             .perNode("cumulativeNodeWeights", HugeDoubleArray::memoryEstimation)
             .perNode("nodeCommunityInfluences", HugeDoubleArray::memoryEstimation)
             .perNode("communityWeights", HugeAtomicDoubleArray::memoryEstimation)
-            .perNode("colorsUsed", MemoryUsage::sizeOfBitset)
+            .perNode("colorsUsed", Estimate::sizeOfBitset)
             .perNode("colors", HugeLongArray::memoryEstimation)
             .rangePerNode(
                 "reversedSeedCommunityMapping", (nodeCount) ->
@@ -230,8 +232,8 @@ class ModularityOptimizationWithoutOrientationTest {
                 .rangePerNode(
                     "communityInfluences",
                     (nodeCount) -> MemoryRange.of(
-                        MemoryUsage.sizeOfLongDoubleHashMap(50),
-                        MemoryUsage.sizeOfLongDoubleHashMap(Math.max(50, nodeCount))
+                        Estimate.sizeOfLongDoubleHashMap(50),
+                        Estimate.sizeOfLongDoubleHashMap(Math.max(50, nodeCount))
                     )
                 )
                 .build()
@@ -255,7 +257,7 @@ class ModularityOptimizationWithoutOrientationTest {
         Graph graph,
         int maxIterations,
         NodePropertyValues properties,
-        int concurrency,
+        Concurrency concurrency,
         int minBatchSize
     ) {
         return compute(graph, maxIterations, properties, concurrency, minBatchSize, Neo4jProxy.testLog());
@@ -266,7 +268,7 @@ class ModularityOptimizationWithoutOrientationTest {
         Graph graph,
         int maxIterations,
         NodePropertyValues properties,
-        int concurrency,
+        Concurrency concurrency,
         int minBatchSize,
         Log log
     ) {

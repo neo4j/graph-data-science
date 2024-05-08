@@ -19,11 +19,10 @@
  */
 package org.neo4j.gds.config;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 
 public interface ConsecutiveIdsConfig {
-    @Value.Default
+
     default boolean consecutiveIds() {
         return false;
     }

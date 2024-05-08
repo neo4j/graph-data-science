@@ -39,6 +39,6 @@ public interface SpanningTreeBaseConfig extends
 
     @Configuration.Ignore
     default SpanningTreeParameters toParameters() {
-        return SpanningTreeParameters.create(objective(), sourceNode());
+        return new SpanningTreeParameters(objective(), sourceNode());
     }
 }

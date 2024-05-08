@@ -20,7 +20,7 @@
 package org.neo4j.gds.closeness;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.centrality.CentralityStatsResult;
+import org.neo4j.gds.procedures.algorithms.centrality.CentralityStatsResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -30,11 +30,10 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.closeness.ClosenessCentrality.CLOSENESS_DESCRIPTION;
+import static org.neo4j.gds.closeness.Constants.CLOSENESS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class ClosenessCentralityStatsProc {
-
     @Context
     public GraphDataScienceProcedures facade;
 
@@ -44,7 +43,7 @@ public class ClosenessCentralityStatsProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.centrality().closenessCentralityStats(graphName, configuration);
+        return facade.algorithms().centrality().closenessCentralityStats(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)
@@ -55,15 +54,11 @@ public class ClosenessCentralityStatsProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        facade
-            .deprecatedProcedures().called("gds.beta.closeness.stats");
-
+        facade.deprecatedProcedures().called("gds.beta.closeness.stats");
         facade.log()
             .warn(
                 "Procedure `gds.beta.closeness.stats` has been deprecated, please use `gds.closeness.stats`.");
 
         return stats(graphName, configuration);
     }
-
-
 }

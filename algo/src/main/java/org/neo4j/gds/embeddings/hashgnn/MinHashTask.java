@@ -22,6 +22,7 @@ package org.neo4j.gds.embeddings.hashgnn;
 import com.carrotsearch.hppc.BitSet;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
@@ -73,7 +74,7 @@ class MinHashTask implements Runnable {
     static void compute(
         List<DegreePartition> degreePartition,
         List<Graph> graphs,
-        int concurrency,
+        Concurrency concurrency,
         int embeddingDensity,
         int embeddingDimension,
         HugeObjectArray<HugeAtomicBitSet> currentEmbeddings,

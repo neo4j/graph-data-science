@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.paths.delta;
 
-import org.neo4j.gds.MemoryEstimateDefinition;
+import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 
 public class DeltaSteppingMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
@@ -50,11 +50,11 @@ public class DeltaSteppingMemoryEstimateDefinition implements MemoryEstimateDefi
                 // Assuming that each node is visited by at most one thread, it is stored in at most
                 // one thread-local bucket, hence the best case is dividing all the nodes across
                 // thread-local buckets.
-                var lowerBound = HugeLongArray.memoryEstimation(dimensions.nodeCount() / concurrency);
+                var lowerBound = HugeLongArray.memoryEstimation(dimensions.nodeCount() / concurrency.value());
 
                 // The worst case is again the fully-connected graph where we would replicate all nodes in
                 // thread-local buckets in a single iteration.
-                var upperBound = HugeLongArray.memoryEstimation(concurrency * dimensions.nodeCount());
+                var upperBound = HugeLongArray.memoryEstimation(concurrency.value() * dimensions.nodeCount());
 
                 return MemoryRange.of(lowerBound, Math.max(lowerBound, upperBound));
             })

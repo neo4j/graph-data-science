@@ -22,9 +22,8 @@ package org.neo4j.gds.procedures.algorithms.pathfinding;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
-import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.pathfinding.ResultBuilder;
-import org.neo4j.gds.applications.algorithms.pathfinding.SideEffectProcessingCounts;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.paths.traverse.DfsStreamConfig;
 import org.neo4j.graphdb.RelationshipType;
@@ -32,7 +31,7 @@ import org.neo4j.graphdb.RelationshipType;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class DfsStreamResultBuilder implements ResultBuilder<DfsStreamConfig, HugeLongArray, Stream<DfsStreamResult>> {
+class DfsStreamResultBuilder implements ResultBuilder<DfsStreamConfig, HugeLongArray, Stream<DfsStreamResult>, Void> {
     private final NodeLookup nodeLookup;
     private final boolean pathRequested;
 
@@ -48,7 +47,7 @@ class DfsStreamResultBuilder implements ResultBuilder<DfsStreamConfig, HugeLongA
         DfsStreamConfig dfsStreamConfig,
         Optional<HugeLongArray> result,
         AlgorithmProcessingTimings timings,
-        SideEffectProcessingCounts counts
+        Optional<Void> metadata
     ) {
         //noinspection OptionalIsPresent
         if (result.isEmpty()) return Stream.empty();

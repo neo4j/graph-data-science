@@ -30,6 +30,7 @@ import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -49,6 +50,7 @@ public class ToUndirected extends Algorithm<SingleTypeRelationships> {
     private final GraphStore graphStore;
     private final ToUndirectedConfig config;
     private final ExecutorService executorService;
+    private final Concurrency concurrency;
 
     protected ToUndirected(
         GraphStore graphStore,
@@ -61,6 +63,7 @@ public class ToUndirected extends Algorithm<SingleTypeRelationships> {
         this.graphStore = graphStore;
         this.config = config;
         this.executorService = executorService;
+        this.concurrency = config.concurrency();
     }
 
     @Override
@@ -87,7 +90,7 @@ public class ToUndirected extends Algorithm<SingleTypeRelationships> {
         RunWithConcurrency.
             builder()
             .tasks(tasks)
-            .concurrency(config.concurrency())
+            .concurrency(concurrency)
             .executor(executorService)
             .terminationFlag(terminationFlag)
             .build()
@@ -111,7 +114,7 @@ public class ToUndirected extends Algorithm<SingleTypeRelationships> {
     ) {
         RelationshipsBuilderBuilder relationshipsBuilderBuilder = GraphFactory.initRelationshipsBuilder()
             .relationshipType(relationshipType)
-            .concurrency(config.concurrency())
+            .concurrency(concurrency)
             .nodes(graphStore.nodes())
             .executorService(executorService)
             .orientation(Orientation.UNDIRECTED);
@@ -173,7 +176,7 @@ public class ToUndirected extends Algorithm<SingleTypeRelationships> {
 
         return PartitionUtils.degreePartition(
             graphStore.getGraph(fromRelationshipType),
-            config.concurrency(),
+            concurrency,
             taskCreator,
             Optional.empty()
         );

@@ -20,8 +20,8 @@
 package org.neo4j.gds.collections.hsa;
 
 import org.neo4j.gds.collections.PageUtil;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.MemoryRange;
+import org.neo4j.gds.mem.Estimate;
 
 public final class HugeSparseCollections {
 
@@ -181,14 +181,14 @@ public final class HugeSparseCollections {
         long maxEntriesForWorstCase = Math.min(maxIndex, expectedNumValues * pageSize);
         int numPagesForExpectedNumValuesWorstCase = PageUtil.numPagesFor(maxEntriesForWorstCase, pageShift, pageMask);
 
-        long classSize = MemoryUsage.sizeOfInstance(collectionAndElementSize.collectionClazz);
-        long pagesSize = MemoryUsage.sizeOfObjectArray(numPagesForSize);
+        long classSize = Estimate.sizeOfInstance(collectionAndElementSize.collectionClazz);
+        long pagesSize = Estimate.sizeOfObjectArray(numPagesForSize);
 
-        long minRequirements = numPagesForExpectedNumValuesBestCase * MemoryUsage.sizeOfArray(
+        long minRequirements = numPagesForExpectedNumValuesBestCase * Estimate.sizeOfArray(
             pageSize,
             collectionAndElementSize.elementSizeInBytes
         );
-        long maxRequirements = numPagesForExpectedNumValuesWorstCase * MemoryUsage.sizeOfArray(
+        long maxRequirements = numPagesForExpectedNumValuesWorstCase * Estimate.sizeOfArray(
             pageSize,
             collectionAndElementSize.elementSizeInBytes
         );
@@ -214,11 +214,11 @@ public final class HugeSparseCollections {
         long maxEntriesForWorstCase = Math.min(maxIndex, expectedNumValues * pageSize);
         int numPagesForExpectedNumValuesWorstCase = PageUtil.numPagesFor(maxEntriesForWorstCase, pageShift, pageMask);
 
-        long classSize = MemoryUsage.sizeOfInstance(collectionAndElementSize.collectionClazz);
-        long pagesSize = MemoryUsage.sizeOfObjectArray(numPagesForSize);
+        long classSize = Estimate.sizeOfInstance(collectionAndElementSize.collectionClazz);
+        long pagesSize = Estimate.sizeOfObjectArray(numPagesForSize);
 
-        var pagesSizeBestCase = numPagesForExpectedNumValuesBestCase * MemoryUsage.sizeOfObjectArray(pageSize);
-        var pagesSizeWorstCase = numPagesForExpectedNumValuesWorstCase * MemoryUsage.sizeOfObjectArray(pageSize);
+        var pagesSizeBestCase = numPagesForExpectedNumValuesBestCase * Estimate.sizeOfObjectArray(pageSize);
+        var pagesSizeWorstCase = numPagesForExpectedNumValuesWorstCase * Estimate.sizeOfObjectArray(pageSize);
 
         long valuesSize = expectedNumValues * collectionAndElementSize.elementSizeInBytes;
 
@@ -264,37 +264,37 @@ public final class HugeSparseCollections {
             if (valueClazz.isAssignableFrom(byte[].class)) {
                 return new CollectionAndElementSize(
                     HugeSparseByteArrayArraySon.class,
-                    MemoryUsage.sizeOfArray(averageEntryLength, Byte.BYTES)
+                    Estimate.sizeOfArray(averageEntryLength, Byte.BYTES)
                 );
             }
             if (valueClazz.isAssignableFrom(short[].class)) {
                 return new CollectionAndElementSize(
                     HugeSparseShortArrayArraySon.class,
-                    MemoryUsage.sizeOfArray(averageEntryLength, Short.BYTES)
+                    Estimate.sizeOfArray(averageEntryLength, Short.BYTES)
                 );
             }
             if (valueClazz.isAssignableFrom(int[].class)) {
                 return new CollectionAndElementSize(
                     HugeSparseIntArrayArraySon.class,
-                    MemoryUsage.sizeOfArray(averageEntryLength, Integer.BYTES)
+                    Estimate.sizeOfArray(averageEntryLength, Integer.BYTES)
                 );
             }
             if (valueClazz.isAssignableFrom(long[].class)) {
                 return new CollectionAndElementSize(
                     HugeSparseLongArrayArraySon.class,
-                    MemoryUsage.sizeOfArray(averageEntryLength, Long.BYTES)
+                    Estimate.sizeOfArray(averageEntryLength, Long.BYTES)
                 );
             }
             if (valueClazz.isAssignableFrom(float[].class)) {
                 return new CollectionAndElementSize(
                     HugeSparseFloatArrayArraySon.class,
-                    MemoryUsage.sizeOfArray(averageEntryLength, Float.BYTES)
+                    Estimate.sizeOfArray(averageEntryLength, Float.BYTES)
                 );
             }
             if (valueClazz.isAssignableFrom(double[].class)) {
                 return new CollectionAndElementSize(
                     HugeSparseDoubleArrayArraySon.class,
-                    MemoryUsage.sizeOfArray(averageEntryLength, Double.BYTES)
+                    Estimate.sizeOfArray(averageEntryLength, Double.BYTES)
                 );
             }
             throw new IllegalArgumentException("Unsupported primitive value class: " + valueClazz);

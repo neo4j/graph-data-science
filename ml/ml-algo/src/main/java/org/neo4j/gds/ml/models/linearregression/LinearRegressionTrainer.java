@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.models.linearregression;
 
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
@@ -33,14 +34,14 @@ import java.util.function.Supplier;
 
 public final class LinearRegressionTrainer implements RegressorTrainer {
 
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final TerminationFlag terminationFlag;
     private final ProgressTracker progressTracker;
     private final LogLevel messageLogLevel;
     private final LinearRegressionTrainConfig trainConfig;
 
     public LinearRegressionTrainer(
-        int concurrency,
+        Concurrency concurrency,
         LinearRegressionTrainConfig config,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker,

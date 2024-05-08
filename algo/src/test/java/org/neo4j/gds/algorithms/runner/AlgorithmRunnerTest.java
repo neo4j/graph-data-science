@@ -27,6 +27,7 @@ import org.neo4j.gds.metrics.ExecutionMetric;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 
 import static org.assertj.core.api.Assertions.assertThatException;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
@@ -61,7 +62,7 @@ class AlgorithmRunnerTest {
         verify(algorithmMetricsServiceMock, times(1)).create("TestingMetrics");
         verify(algorithmMetricMock, times(1)).start();
         verify(algorithmMetricMock, times(1)).close();
-        verify(algorithmMetricMock, times(0)).failed();
+        verify(algorithmMetricMock, times(0)).failed(any());
         verifyNoMoreInteractions(
             algorithmMetricsServiceMock,
             algorithmMetricMock
@@ -99,11 +100,12 @@ class AlgorithmRunnerTest {
         verify(algorithmMetricsServiceMock, times(1)).create("TestingMetrics");
         verify(algorithmMetricMock, times(1)).start();
         verify(algorithmMetricMock, times(1)).close();
-        verify(algorithmMetricMock, times(1)).failed();
+        verify(algorithmMetricMock, times(1)).failed(any());
         verifyNoMoreInteractions(
             algorithmMetricsServiceMock,
             algorithmMetricMock
         );
     }
+
 
 }

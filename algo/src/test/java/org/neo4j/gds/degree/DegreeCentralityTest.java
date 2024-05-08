@@ -28,6 +28,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -121,15 +122,15 @@ final class DegreeCentralityTest {
                     )
                 )
             ),
-            toArguments(() -> Stream.of(1, 4))
+            toArguments(() -> Stream.of(1, 4).map(Concurrency::new))
         );
     }
 
     @ParameterizedTest
     @MethodSource("degreeCentralityParameters")
-    void shouldComputeCorrectResults(boolean weighted, Orientation orientation, Map<String, Double> expected, int concurrency) {
+    void shouldComputeCorrectResults(boolean weighted, Orientation orientation, Map<String, Double> expected, Concurrency concurrency) {
         // Permit the algo to use a smaller batch size to really run in parallel.
-        var minBatchSize = concurrency > 1 ? 1 : ParallelUtil.DEFAULT_BATCH_SIZE;
+        var minBatchSize = concurrency.value() > 1 ? 1 : ParallelUtil.DEFAULT_BATCH_SIZE;
 
         var degreeCentrality = new DegreeCentrality(
             graph,
@@ -152,12 +153,12 @@ final class DegreeCentralityTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void testProgressLogging(boolean weighted) {
-        var concurrency = 4;
+        var concurrency = new Concurrency(4);
         var orientation = Orientation.NATURAL;
 
         var progressTask = DegreeCentralityFactory.degreeCentralityProgressTask(graph);
         var log = Neo4jProxy.testLog();
-        var progressTracker = new TestProgressTracker(progressTask, log, 1, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TestProgressTracker(progressTask, log, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
         var degreeCentrality = new DegreeCentrality(
             graph,
             DefaultPool.INSTANCE,
@@ -181,7 +182,7 @@ final class DegreeCentralityTest {
     @ParameterizedTest
     @EnumSource(Orientation.class)
     void shouldSupportAllOrientations(Orientation orientation) {
-        var concurrency = 4;
+        var concurrency = new Concurrency(4);
         var hasRelationshipProperty = false;
         var degreeCentrality = new DegreeCentrality(
             graph,

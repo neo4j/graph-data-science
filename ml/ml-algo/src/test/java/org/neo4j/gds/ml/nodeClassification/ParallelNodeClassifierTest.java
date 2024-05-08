@@ -26,6 +26,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.neo4j.gds.TestClassifier;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
@@ -92,7 +93,7 @@ class ParallelNodeClassifierTest {
             classifier,
             features,
             batchSize,
-            1,
+            new Concurrency(1),
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
         );
@@ -101,7 +102,7 @@ class ParallelNodeClassifierTest {
             classifier,
             features,
             batchSize,
-            4,
+            new Concurrency(4),
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
         );

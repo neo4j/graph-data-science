@@ -20,9 +20,11 @@
 package org.neo4j.gds.core.io;
 
 import org.neo4j.common.Validator;
-import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -36,10 +38,11 @@ public abstract class GraphStoreExporter {
 
     private final GraphStore graphStore;
     private final Map<String, LongFunction<Object>> neoNodeProperties;
-    private final Optional<NodeLabelMapping> nodeLabelMapping;
-    private final String defaultRelationshipType;
-    protected final int concurrency;
+    private final IdentifierMapper<NodeLabel> nodeLabelMapping;
+    private final RelationshipType defaultRelationshipType;
+    protected final Concurrency concurrency;
     private final int batchSize;
+    private final IdentifierMapper<RelationshipType> relationshipTypeMapping;
 
     public enum IdMappingType implements IdMapFunction {
         MAPPED {
@@ -85,11 +88,11 @@ public abstract class GraphStoreExporter {
     protected GraphStoreExporter(
         GraphStore graphStore,
         Optional<NeoNodeProperties> neoNodeProperties,
-        Optional<NodeLabelMapping> nodeLabelMapping,
-        String defaultRelationshipType,
-        int concurrency,
+        IdentifierMapper<NodeLabel> nodeLabelMapping,
+        IdentifierMapper<RelationshipType> relationshipTypeMapping,
+        RelationshipType defaultRelationshipType,
+        Concurrency concurrency,
         int batchSize
-
     ) {
         this.graphStore = graphStore;
         this.defaultRelationshipType = defaultRelationshipType;
@@ -99,6 +102,7 @@ public abstract class GraphStoreExporter {
             .map(NeoNodeProperties::neoNodeProperties)
             .orElse(Map.of());
         this.nodeLabelMapping = nodeLabelMapping;
+        this.relationshipTypeMapping = relationshipTypeMapping;
     }
 
     protected abstract void export(GraphStoreInput graphStoreInput);
@@ -112,7 +116,7 @@ public abstract class GraphStoreExporter {
             neoNodeProperties,
             nodeLabelMapping
         );
-        var relationshipStore = RelationshipStore.of(graphStore, defaultRelationshipType);
+        var relationshipStore = RelationshipStore.of(graphStore, defaultRelationshipType, relationshipTypeMapping);
         var graphProperties = graphStore
             .graphPropertyKeys()
             .stream()
@@ -134,16 +138,10 @@ public abstract class GraphStoreExporter {
 
         long importedNodeProperties = (nodeStore.propertyCount() + neoNodeProperties.size()) * graphStore.nodeCount();
         long importedRelationshipProperties = relationshipStore.propertyCount();
-        return ImmutableExportedProperties.of(importedNodeProperties, importedRelationshipProperties);
+        return new ExportedProperties(importedNodeProperties, importedRelationshipProperties);
     }
 
-    @ValueClass
-    public interface ExportedProperties {
-
-        long nodePropertyCount();
-
-        long relationshipPropertyCount();
-    }
+    public record ExportedProperties(long nodePropertyCount, long relationshipPropertyCount) {}
 
     public static final Validator<Path> DIRECTORY_IS_WRITABLE = value -> {
         try {

@@ -19,22 +19,16 @@
  */
 package org.neo4j.gds.wcc;
 
-import org.neo4j.gds.CommunityProcCompanion;
-import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
-import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.community.wcc.WccWriteResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 @GdsCallable(name = "gds.wcc.write", description = WccSpecification.WCC_DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
@@ -57,38 +51,7 @@ public class WccWriteSpecification implements AlgorithmSpec<Wcc, DisjointSetStru
 
     @Override
     public ComputationResultConsumer<Wcc, DisjointSetStruct, WccWriteConfig, Stream<WccWriteResult>> computationResultConsumer() {
-        return new WriteNodePropertiesComputationResultConsumer<>(
-            this::resultBuilder,
-            this::nodeProperties,
-            name()
-        );
-    }
-
-    private AbstractResultBuilder<WccWriteResult> resultBuilder(
-        ComputationResult<Wcc, DisjointSetStruct, WccWriteConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return WccSpecification.resultBuilder(
-            new WccWriteResult.Builder(executionContext.returnColumns(), computeResult.config().concurrency()),
-            computeResult
-        );
-    }
-
-    private List<NodeProperty> nodeProperties(ComputationResult<Wcc, DisjointSetStruct, WccWriteConfig> computationResult) {
-        var config = computationResult.config();
-        return List.of(
-            NodeProperty.of(
-                config.writeProperty(),
-                CommunityProcCompanion.nodeProperties(
-                    config,
-                    config.writeProperty(),
-                    computationResult.result()
-                        .map(DisjointSetStruct::asNodeProperties)
-                        .orElse(EmptyLongNodePropertyValues.INSTANCE),
-                    () -> computationResult.graphStore().nodeProperty(config.seedProperty())
-                )
-            )
-        );
+        return new NullComputationResultConsumer<>();
     }
 
 }

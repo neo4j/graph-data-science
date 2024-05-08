@@ -25,9 +25,9 @@ import org.neo4j.gds.PreconditionsProvider;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.AlgorithmMemoryEstimation;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
-import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.algorithms.validation.AfterLoadValidation;
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -81,7 +81,7 @@ public final class AlgorithmRunner {
         PreconditionsProvider.preconditions().check();
 
         // Go get the graph and graph store from the catalog
-        var graphWithGraphStore = graphStoreCatalogService.getGraphWithGraphStore(
+        var graphResources = graphStoreCatalogService.getGraphResources(
             GraphName.parse(graphName),
             config,
             relationshipProperty,
@@ -89,14 +89,15 @@ public final class AlgorithmRunner {
             requestScopedDependencies.getDatabaseId()
         );
 
-        var graph = graphWithGraphStore.getLeft();
-        var graphStore = graphWithGraphStore.getRight();
+        var graph = graphResources.graph();
+        var graphStore = graphResources.graphStore();
+        var resultStore = graphResources.resultStore();
 
         afterLoadValidationsList.forEach(afterLoadValidation -> afterLoadValidation.afterLoadValidations(graphStore));
 
         // No algorithm execution when the graph is empty
         if (graph.isEmpty()) {
-            return AlgorithmComputationResult.withoutAlgorithmResult(graph, graphStore);
+            return AlgorithmComputationResult.withoutAlgorithmResult(graph, graphStore, resultStore);
         }
 
         // create the algorithm
@@ -127,7 +128,7 @@ public final class AlgorithmRunner {
         // run the algorithm
         var algorithmResult = runAlgorithm(algorithm, algorithmFactory.taskName());
 
-        return AlgorithmComputationResult.of(algorithmResult, graph, graphStore);
+        return AlgorithmComputationResult.of(algorithmResult, graph, graphStore, resultStore);
     }
 
     <R> R runAlgorithm(Algorithm<R> algorithm, String algorithmName) {
@@ -138,7 +139,7 @@ public final class AlgorithmRunner {
         } catch (Exception e) {
             log.warn("Computation failed", e);
             algorithm.getProgressTracker().endSubTaskWithFailure();
-            algorithmMetric.failed();
+            algorithmMetric.failed(e);
             throw e;
         }
     }

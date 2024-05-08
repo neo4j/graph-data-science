@@ -24,6 +24,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
@@ -46,7 +47,7 @@ class LargeIntersectingTriangleCountTest {
         var mappedCenterId = graph.toMappedNodeId(centerId);
         var result = IntersectingTriangleCount.create(
             graph,
-            concurrency,
+            new Concurrency(concurrency),
             Long.MAX_VALUE,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
@@ -71,7 +72,7 @@ class LargeIntersectingTriangleCountTest {
 
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(nodeCount)
-            .concurrency(1)
+            .concurrency(new Concurrency(1))
             .build();
 
         for (var nodeId = 0; nodeId < nodeCount; ++nodeId) {

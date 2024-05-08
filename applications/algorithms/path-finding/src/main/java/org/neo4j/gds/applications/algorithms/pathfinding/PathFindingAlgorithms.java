@@ -19,13 +19,14 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
-import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.allshortestpaths.MSBFSASPAlgorithm;
 import org.neo4j.gds.allshortestpaths.MSBFSAllShortestPaths;
 import org.neo4j.gds.allshortestpaths.WeightedAllShortestPaths;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.pathfinding.traverse.BreadthFirstSearch;
 import org.neo4j.gds.applications.algorithms.pathfinding.traverse.DepthFirstSearch;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -33,8 +34,6 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.TaskTreeProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.dag.longestPath.DagLongestPath;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSort;
@@ -42,8 +41,7 @@ import org.neo4j.gds.dag.topologicalsort.TopologicalSortBaseConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.degree.DegreeCentralityFactory;
 import org.neo4j.gds.kspanningtree.KSpanningTree;
-import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
-import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.kspanningtree.KSpanningTreeBaseConfig;
 import org.neo4j.gds.paths.astar.AStar;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFord;
@@ -97,17 +95,17 @@ import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.
  */
 public class PathFindingAlgorithms {
     // global scoped dependencies
-    private final Log log;
 
     // request scoped parameters
     private final RequestScopedDependencies requestScopedDependencies;
+    private final ProgressTrackerCreator progressTrackerCreator;
 
     public PathFindingAlgorithms(
-        Log log,
-        RequestScopedDependencies requestScopedDependencies
+        RequestScopedDependencies requestScopedDependencies,
+        ProgressTrackerCreator progressTrackerCreator
     ) {
-        this.log = log;
         this.requestScopedDependencies = requestScopedDependencies;
+        this.progressTrackerCreator = progressTrackerCreator;
     }
 
     Stream<AllShortestPathsStreamResult> allShortestPaths(Graph graph, AllShortestPathsConfig configuration) {
@@ -175,13 +173,13 @@ public class PathFindingAlgorithms {
         );
     }
 
-    SpanningTree kSpanningTree(Graph graph, KSpanningTreeWriteConfig configuration) {
+    SpanningTree kSpanningTree(Graph graph, KSpanningTreeBaseConfig configuration) {
         if (!graph.schema().isUndirected()) {
             throw new IllegalArgumentException(
                 "The K-Spanning Tree algorithm works only with undirected graphs. Please orient the edges properly");
         }
 
-        var parameters = configuration.toParameters();
+        var parameters = configuration.toKSpanningTreeParameters();
 
         var progressTracker = createProgressTracker(configuration, Tasks.task(
             K_SPANNING_TREE,
@@ -291,6 +289,7 @@ public class PathFindingAlgorithms {
         var yens = Yens.sourceTarget(
             graph,
             configuration,
+            configuration.concurrency(),
             progressTracker,
             requestScopedDependencies.getTerminationFlag()
         );
@@ -398,26 +397,8 @@ public class PathFindingAlgorithms {
 
     private ProgressTracker createProgressTracker(
         AlgoBaseConfig configuration,
-        Task progressTask
+        Task task
     ) {
-        if (configuration.logProgress()) {
-            return new TaskProgressTracker(
-                progressTask,
-                (org.neo4j.logging.Log) log.getNeo4jLog(),
-                configuration.concurrency(),
-                configuration.jobId(),
-                requestScopedDependencies.getTaskRegistryFactory(),
-                requestScopedDependencies.getUserLogRegistryFactory()
-            );
-        }
-
-        return new TaskTreeProgressTracker(
-            progressTask,
-            (org.neo4j.logging.Log) log.getNeo4jLog(),
-            configuration.concurrency(),
-            configuration.jobId(),
-            requestScopedDependencies.getTaskRegistryFactory(),
-            requestScopedDependencies.getUserLogRegistryFactory()
-        );
+        return progressTrackerCreator.createProgressTracker(configuration, task);
     }
 }

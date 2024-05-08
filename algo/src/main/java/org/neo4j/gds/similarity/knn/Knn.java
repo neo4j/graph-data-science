@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.LongArrayList;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -64,7 +65,7 @@ public class Knn extends Algorithm<KnnResult> {
     }
 
     private final Graph graph;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final int maxIterations;
     private final double similarityCutoff;
     private final int minBatchSize;
@@ -81,7 +82,7 @@ public class Knn extends Algorithm<KnnResult> {
         ProgressTracker progressTracker,
         ExecutorService executorService,
         K k,
-        int concurrency,
+        Concurrency concurrency,
         int minBatchSize,
         int maxIterations,
         double similarityCutoff,
@@ -280,7 +281,7 @@ public class Knn extends Algorithm<KnnResult> {
         HugeObjectArray<LongArrayList> allNewNeighbors,
         HugeObjectArray<LongArrayList> reverseOldNeighbors,
         HugeObjectArray<LongArrayList> reverseNewNeighbors,
-        int concurrency,
+        Concurrency concurrency,
         int minBatchSize,
         ProgressTracker progressTracker
     ) {

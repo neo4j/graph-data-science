@@ -33,7 +33,7 @@ import org.neo4j.gds.procedures.embeddings.DefaultNodeEmbeddingsComputationalRes
 import org.neo4j.gds.procedures.embeddings.FastRPComputationalResultTransformer;
 import org.neo4j.gds.procedures.embeddings.results.DefaultNodeEmbeddingMutateResult;
 import org.neo4j.gds.procedures.embeddings.results.DefaultNodeEmbeddingsWriteResult;
-import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 
 import java.util.Map;
 import java.util.stream.Stream;

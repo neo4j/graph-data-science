@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.config;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
@@ -37,7 +36,6 @@ public interface SourceNodesConfig {
 
     String SOURCE_NODES_KEY = "sourceNodes";
 
-    @Value.Default
     @Configuration.ConvertWith(method = "org.neo4j.gds.config.SourceNodesConfig#parseSourceNodes")
     default List<Long> sourceNodes() {
         return Collections.emptyList();

@@ -25,7 +25,7 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.PageUtil;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
@@ -40,7 +40,7 @@ final class HugeGraphWeightTest extends BaseTest {
 
     @Test
     void shouldLoadCorrectWeights() {
-        int nodeCount = PageUtil.pageSizeFor(PageUtil.PAGE_SIZE_32KB, MemoryUsage.BYTES_OBJECT_REF) * 2;
+        int nodeCount = PageUtil.pageSizeFor(PageUtil.PAGE_SIZE_32KB, Estimate.BYTES_OBJECT_REF) * 2;
         mkDb(nodeCount, 2);
 
         Graph graph = loadGraph(db);
@@ -62,7 +62,7 @@ final class HugeGraphWeightTest extends BaseTest {
 
     @Test
     void shouldLoadMoreWeights() {
-        int nodeCount = PageUtil.pageSizeFor(PageUtil.PAGE_SIZE_32KB, MemoryUsage.BYTES_OBJECT_REF);
+        int nodeCount = PageUtil.pageSizeFor(PageUtil.PAGE_SIZE_32KB, Estimate.BYTES_OBJECT_REF);
         mkDb(nodeCount, 4);
         loadGraph(db);
     }
@@ -74,7 +74,7 @@ final class HugeGraphWeightTest extends BaseTest {
             for (int i = 0; i < nodes; i++) {
                 nodeIds[i] = tx.createNode().getId();
             }
-            int pageSize = PageUtil.pageSizeFor(PageUtil.PAGE_SIZE_32KB, MemoryUsage.BYTES_OBJECT_REF);
+            int pageSize = PageUtil.pageSizeFor(PageUtil.PAGE_SIZE_32KB, Estimate.BYTES_OBJECT_REF);
             for (int i = 0; i < nodes; i += pageSize) {
                 int max = Math.min(pageSize, nodes - i);
                 for (int j = 0; j < max; j++) {

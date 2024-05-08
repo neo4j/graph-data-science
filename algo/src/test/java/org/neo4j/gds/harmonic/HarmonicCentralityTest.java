@@ -22,6 +22,7 @@ package org.neo4j.gds.harmonic;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -43,7 +44,7 @@ public class HarmonicCentralityTest {
         ", (c:Node)" +
         ", (d:Node)" +
         ", (e:Node)" +
-        
+
         ", (a)-[:TYPE]->(b)" +
         ", (b)-[:TYPE]->(c)" +
         ", (d)-[:TYPE]->(e)";
@@ -60,7 +61,7 @@ public class HarmonicCentralityTest {
 
         var harmonicCentrality = new HarmonicCentrality(
             graph,
-            1,
+            new Concurrency(1),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -73,5 +74,5 @@ public class HarmonicCentralityTest {
         assertThat(result.applyAsDouble(mappedId.of("d"))).isEqualTo(0.25, within(0.1));
         assertThat(result.applyAsDouble(mappedId.of("e"))).isEqualTo(0.25, within(0.1));
     }
-    
+
 }

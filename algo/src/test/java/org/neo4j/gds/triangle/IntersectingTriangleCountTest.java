@@ -27,6 +27,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
@@ -348,7 +349,7 @@ class IntersectingTriangleCountTest {
             ", (n0)-[:REL]->(n6)"
         );
 
-        TriangleCountResult result = compute(graph, 4, 3);
+        TriangleCountResult result = compute(graph, new Concurrency(4), 3);
 
         assertEquals(1, result.globalTriangles());
         assertEquals(7, result.localTriangles().size());
@@ -375,7 +376,7 @@ class IntersectingTriangleCountTest {
             ", (n3)-[:REL]->(n6)"
         );
 
-        TriangleCountResult result = compute(graph, 4, 3);
+        TriangleCountResult result = compute(graph, new Concurrency(4), 3);
 
         assertEquals(1, result.globalTriangles());
         assertEquals(7, result.localTriangles().size());
@@ -438,7 +439,7 @@ class IntersectingTriangleCountTest {
             " ,(g)-[:T]->(e)"
         );
 
-        TriangleCountResult result = compute(graph, 4, 2);
+        TriangleCountResult result = compute(graph, new Concurrency(4), 2);
 
         assertEquals(EXCLUDED_NODE_TRIANGLE_COUNT, result.localTriangles().get(0)); // a (deg = 3)
         assertEquals(EXCLUDED_NODE_TRIANGLE_COUNT, result.localTriangles().get(1)); // b (deg = 3)
@@ -466,7 +467,7 @@ class IntersectingTriangleCountTest {
             " ,(g)-[:T1]->(e)"
         );
 
-        TriangleCountResult result = compute(graph, 4, 2);
+        TriangleCountResult result = compute(graph, new Concurrency(4), 2);
 
         assertEquals(EXCLUDED_NODE_TRIANGLE_COUNT, result.localTriangles().get(0)); // a (deg = 3)
         assertEquals(EXCLUDED_NODE_TRIANGLE_COUNT, result.localTriangles().get(1)); // b (deg = 3)
@@ -494,7 +495,7 @@ class IntersectingTriangleCountTest {
             UNDIRECTED
         );
 
-        var result = compute(testGraph.graph(), 4, Long.MAX_VALUE);
+        var result = compute(testGraph.graph(), new Concurrency(4), Long.MAX_VALUE);
 
         assertThat(result.globalTriangles()).isEqualTo(0L);
         assertThat(result.localTriangles())
@@ -506,10 +507,10 @@ class IntersectingTriangleCountTest {
     }
 
     private TriangleCountResult compute(Graph graph) {
-        return compute(graph, 4, Long.MAX_VALUE);
+        return compute(graph, new Concurrency(4), Long.MAX_VALUE);
     }
 
-    private TriangleCountResult compute(Graph graph, int concurrency, long maxDegree) {
+    private TriangleCountResult compute(Graph graph, Concurrency concurrency, long maxDegree) {
         return IntersectingTriangleCount.create(
             graph,
             concurrency,

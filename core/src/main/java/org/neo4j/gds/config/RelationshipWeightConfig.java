@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.config;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
@@ -39,7 +38,6 @@ public interface RelationshipWeightConfig {
 
     Optional<String> relationshipWeightProperty();
 
-    @Value.Derived
     @Configuration.Ignore
     default boolean hasRelationshipWeightProperty() {
         return relationshipWeightProperty().isPresent();
@@ -54,7 +52,6 @@ public interface RelationshipWeightConfig {
     }
 
     @Configuration.GraphStoreValidationCheck
-    @Value.Default
     default void relationshipWeightValidation(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,

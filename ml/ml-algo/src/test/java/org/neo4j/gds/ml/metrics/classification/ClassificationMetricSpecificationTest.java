@@ -24,7 +24,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.collections.LongMultiSet;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
 import java.util.List;
@@ -140,8 +141,9 @@ class ClassificationMetricSpecificationTest {
     void shouldEstimateMemoryUsage() {
         var nodeCount = 1_000_000_000;
         var numberOfClasses = 1000;
-        var actual = ClassificationMetricSpecification
-            .memoryEstimation(numberOfClasses).estimate(GraphDimensions.of(nodeCount), 1).memoryUsage();
+        var actual = ClassificationMetricSpecification.memoryEstimation(numberOfClasses).
+            estimate(GraphDimensions.of(nodeCount), new Concurrency(1))
+            .memoryUsage();
         var expected = MemoryRange.of(1, numberOfClasses).times(24);
         assertThat(actual).isEqualTo(expected);
     }

@@ -20,13 +20,15 @@
 package org.neo4j.gds.betweenness;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
+
 import java.util.concurrent.ExecutorService;
 
 public interface SelectionStrategy {
 
     int NONE_SELECTED = -1;
 
-    void init(Graph graph, ExecutorService executorService, int concurrency);
+    void init(Graph graph, ExecutorService executorService, Concurrency concurrency);
 
     long next();
 

@@ -32,7 +32,7 @@ public final class WriteRelationshipResult {
         this.writeMilliseconds = writeMilliseconds;
     }
 
-    long relationshipsWritten() {
+    public long relationshipsWritten() {
         return relationshipsWritten;
     }
 

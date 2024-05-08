@@ -25,6 +25,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -188,7 +189,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             idFunction.of("a0"),
             List.of(idFunction.of("a3"), idFunction.of("a4")),
             2.0,
-            1,
+            new Concurrency(1),
             false,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
@@ -202,7 +203,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             idFunction.of("a0"),
             List.of(idFunction.of("a3"), idFunction.of("a4")),
             2.0,
-            1,
+            new Concurrency(1),
             true,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
@@ -222,7 +223,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             invIdFunction.of("a0"),
             List.of(invIdFunction.of("a3"), invIdFunction.of("a4")),
             2.0,
-            1,
+            new Concurrency(1),
             true,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
@@ -241,7 +242,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             noRerouteIdFunction.of("a0"),
             List.of(noRerouteIdFunction.of("a3")),
             2.0,
-            1,
+            new Concurrency(1),
             true,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
@@ -266,7 +267,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             invnoRerouteIdFunction.of("a0"),
             List.of(invnoRerouteIdFunction.of("a3")),
             2.0,
-            1,
+            new Concurrency(1),
             true,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
@@ -293,7 +294,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
                 idFunction.of("a0"),
                 List.of(idFunction.of("a3"), idFunction.of("a4"), idFunction.of("a5")),
                 2.0,
-                1,
+                new Concurrency(1),
                 true,
                 DefaultPool.INSTANCE,
                 ProgressTracker.NULL_TRACKER
@@ -314,7 +315,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
                 idFunction.of("a0"),
                 List.of(idFunction.of("a5")),
                 2.0,
-                1,
+                new Concurrency(1),
                 true,
                 DefaultPool.INSTANCE,
                 ProgressTracker.NULL_TRACKER
@@ -335,10 +336,11 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
         var steinerTreeAlgorithmFactory = new SteinerTreeAlgorithmFactory<>();
         var log = Neo4jProxy.testLog();
         var baseTask = steinerTreeAlgorithmFactory.progressTask(graph, targetNodes.size(), false);
+        var concurrency = new Concurrency(4);
         var progressTracker = new TestProgressTracker(
             baseTask,
             log,
-            4,
+            concurrency,
             EmptyTaskRegistryFactory.INSTANCE
         );
 
@@ -347,7 +349,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             graph.toMappedNodeId(sourceId),
             targetNodes.stream().map(graph::safeToMappedNodeId).collect(Collectors.toList()),
             2.0,
-            4,
+            concurrency,
             false,
             DefaultPool.INSTANCE,
             progressTracker
@@ -379,10 +381,11 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
         var steinerTreeAlgorithmFactory = new SteinerTreeAlgorithmFactory<>();
         var log = Neo4jProxy.testLog();
         Task baseTask = steinerTreeAlgorithmFactory.progressTask(graph, targetNodes.size(), applyRerouting);
+        var concurrency = new Concurrency(4);
         var progressTracker = new TestProgressTracker(
             baseTask,
             log,
-            4,
+            concurrency,
             EmptyTaskRegistryFactory.INSTANCE
         );
 
@@ -391,7 +394,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             graph.toMappedNodeId(sourceId),
             targetNodes.stream().map(graph::safeToMappedNodeId).collect(Collectors.toList()),
             2.0,
-            4,
+            concurrency,
             applyRerouting,
             DefaultPool.INSTANCE,
             progressTracker
@@ -428,11 +431,12 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
 
         var steinerTreeAlgorithmFactory = new SteinerTreeAlgorithmFactory<>();
         var log = Neo4jProxy.testLog();
+        var concurrency = new Concurrency(4);
         Task baseTask = steinerTreeAlgorithmFactory.progressTask(invGraph, targetNodes.size(), applyRerouting);
         var progressTracker = new TestProgressTracker(
             baseTask,
             log,
-            4,
+            concurrency,
             EmptyTaskRegistryFactory.INSTANCE
         );
 
@@ -441,7 +445,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             invGraph.toMappedNodeId(sourceId),
             targetNodes.stream().map(invGraph::safeToMappedNodeId).collect(Collectors.toList()),
             2.0,
-            4,
+            concurrency,
             applyRerouting,
             DefaultPool.INSTANCE,
             progressTracker
@@ -482,7 +486,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
                 twoReroutesIdFunction.of("a7")
             ),
             2.0,
-            1,
+            new Concurrency(1),
             true,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
@@ -506,7 +510,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
                 invtwoReroutesIdFunction.of("a7")
             ),
             2.0,
-            1,
+            new Concurrency(1),
             true,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
@@ -530,7 +534,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
                 invcrossRoadIdFunction.of("a6")
             ),
             2.0,
-            1,
+            new Concurrency(1),
             true,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
@@ -554,7 +558,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
                 docsIdFunction.of("a5")
             ),
             2.0,
-            1,
+            new Concurrency(1),
             true,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER

@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.paths.traverse;
 
-import org.neo4j.gds.MemoryEstimateDefinition;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.MemoryEstimateDefinition;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.Estimate;
 
 public class DfsMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
@@ -30,11 +30,11 @@ public class DfsMemoryEstimateDefinition implements MemoryEstimateDefinition {
     public MemoryEstimation memoryEstimation() {
 
         MemoryEstimations.Builder builder = MemoryEstimations.builder(DFS.class);
-        builder.perNode("visited ", MemoryUsage::sizeOfBitset);
-        builder.perNode("nodes", MemoryUsage::sizeOfLongArrayList);
-        builder.perNode("sources", MemoryUsage::sizeOfLongArrayList);
-        builder.perNode("weights", MemoryUsage::sizeOfDoubleArrayList);
-        builder.perNode("resultNodes", MemoryUsage::sizeOfLongArray);
+        builder.perNode("visited ", Estimate::sizeOfBitset);
+        builder.perNode("nodes", Estimate::sizeOfLongArrayList);
+        builder.perNode("sources", Estimate::sizeOfLongArrayList);
+        builder.perNode("weights", Estimate::sizeOfDoubleArrayList);
+        builder.perNode("resultNodes", Estimate::sizeOfLongArray);
 
         return builder.build();
     }

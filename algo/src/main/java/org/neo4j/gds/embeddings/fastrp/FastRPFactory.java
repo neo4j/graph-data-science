@@ -22,7 +22,8 @@ package org.neo4j.gds.embeddings.fastrp;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -42,7 +43,7 @@ public class FastRPFactory<CONFIG extends FastRPBaseConfig> extends GraphAlgorit
     public FastRP build(
         Graph graph,
         FastRPParameters parameters,
-        int concurrency,
+        Concurrency concurrency,
         int minBatchSize,
         Optional<Long> randomSeed,
         ProgressTracker progressTracker

@@ -30,6 +30,7 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ExecutorServiceUtil;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
@@ -94,7 +95,7 @@ class LeidenTest {
             19L,
             null,
             TOLERANCE_DEFAULT,
-            1,
+            new Concurrency(1),
             ProgressTracker.NULL_TRACKER
         );
 
@@ -129,7 +130,7 @@ class LeidenTest {
             19L,
             graph.nodeProperties("optimal"),
             TOLERANCE_DEFAULT,
-            1,
+            new Concurrency(1),
             ProgressTracker.NULL_TRACKER
         );
 
@@ -167,7 +168,7 @@ class LeidenTest {
             19L,
             graph.nodeProperties("seed"),
             TOLERANCE_DEFAULT,
-            1,
+            new Concurrency(1),
             ProgressTracker.NULL_TRACKER
         );
 
@@ -202,7 +203,7 @@ class LeidenTest {
             19L,
             graph.nodeProperties("seed2"),
             TOLERANCE_DEFAULT,
-            1,
+            new Concurrency(1),
             ProgressTracker.NULL_TRACKER
         );
 
@@ -220,7 +221,7 @@ class LeidenTest {
             refinedCommunities,
             4,
             ExecutorServiceUtil.DEFAULT_SINGLE_THREAD_POOL,
-            1,
+            new Concurrency(1),
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
         );
@@ -283,7 +284,7 @@ class LeidenTest {
             42,
             null,
             0.1,
-            1,
+            new Concurrency(1),
             ProgressTracker.NULL_TRACKER
         );
         var leidenResult = leiden.compute();
@@ -299,7 +300,7 @@ class LeidenTest {
         var progressTracker = new TestProgressTracker(
             factory.progressTask(graph, config),
             log,
-            4,
+            new Concurrency(4),
             EmptyTaskRegistryFactory.INSTANCE
         );
         factory.build(graph, config, progressTracker).compute();
@@ -380,7 +381,7 @@ class LeidenTest {
             42,
             null,
             0.1,
-            1,
+            new Concurrency(1),
             ProgressTracker.NULL_TRACKER
         ).compute();
         var communities = result.communities();

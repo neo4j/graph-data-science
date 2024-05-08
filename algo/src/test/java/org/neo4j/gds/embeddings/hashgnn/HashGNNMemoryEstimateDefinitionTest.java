@@ -25,6 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.List;
 import java.util.Optional;
@@ -70,7 +71,7 @@ class HashGNNMemoryEstimateDefinitionTest {
         var memoryEstimation = new HashGNNMemoryEstimateDefinition(params).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
-            .memoryRange(nodeCount,relationshipCount,concurrency)
+            .memoryRange(nodeCount,relationshipCount,new Concurrency(concurrency))
             .hasMin(expectedMinMemory)
             .hasMax(expectedMaxMemory);
 
@@ -78,7 +79,7 @@ class HashGNNMemoryEstimateDefinitionTest {
 
     @Test
     void shouldEstimateMemoryWithOutputDimension(){
-      
+
         var params = mock(HashGNNParameters.class);
         when(params.embeddingDensity()).thenReturn(10);
         when(params.heterogeneous()).thenReturn(false);
@@ -89,7 +90,7 @@ class HashGNNMemoryEstimateDefinitionTest {
         var memoryEstimation = new HashGNNMemoryEstimateDefinition(params).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
-            .memoryRange(10_000,20_000,8)
+            .memoryRange(10_000,20_000,new Concurrency(8))
             .hasSameMinAndMaxEqualTo(12_404_072);
     }
 
@@ -98,9 +99,9 @@ class HashGNNMemoryEstimateDefinitionTest {
         var inputDimension = 1000;
         var inputRatio = 0.1;
         var graphDims = GraphDimensions.of((long) 1e6);
-        var concurrency = 4;
+        var concurrency = new Concurrency(4);
 
-        var bigParameters = HashGNNParameters.create(
+        var bigParameters = new HashGNNParameters(
             concurrency,
             3,
             100,
@@ -117,7 +118,7 @@ class HashGNNMemoryEstimateDefinitionTest {
             .estimate(graphDims, concurrency)
             .memoryUsage();
 
-        var smallParameters = HashGNNParameters.create(
+        var smallParameters = new HashGNNParameters(
             concurrency,
             3,
             100,

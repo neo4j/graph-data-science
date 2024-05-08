@@ -21,9 +21,9 @@ package org.neo4j.gds.ml.models.logisticregression;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.functions.Weights;

@@ -19,26 +19,8 @@
  */
 package org.neo4j.gds.louvain;
 
-public final class LouvainMemoryEstimationParameters {
+import org.neo4j.gds.annotation.Parameters;
 
-    public static final LouvainMemoryEstimationParameters DEFAULTS = new LouvainMemoryEstimationParameters(10, false);
-
-    private final int maxLevels;
-    private final boolean includeIntermediateCommunities;
-
-    public LouvainMemoryEstimationParameters(
-        int maxLevels,
-        boolean includeIntermediateCommunities
-    ) {
-        this.maxLevels = maxLevels;
-        this.includeIntermediateCommunities = includeIntermediateCommunities;
-    }
-
-    int maxLevels() {
-        return maxLevels;
-    }
-
-    boolean includeIntermediateCommunities() {
-        return includeIntermediateCommunities;
-    }
+@Parameters
+public record LouvainMemoryEstimationParameters(int maxLevels, boolean includeIntermediateCommunities) {
 }

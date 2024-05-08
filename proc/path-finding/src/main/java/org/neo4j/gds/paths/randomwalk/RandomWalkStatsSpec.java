@@ -19,12 +19,13 @@
  */
 package org.neo4j.gds.paths.randomwalk;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.results.StandardModeResult;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.results.StandardModeResult;
 import org.neo4j.gds.traversal.RandomWalk;
 import org.neo4j.gds.traversal.RandomWalkAlgorithmFactory;
 import org.neo4j.gds.traversal.RandomWalkStatsConfig;
@@ -54,12 +55,7 @@ public class RandomWalkStatsSpec implements AlgorithmSpec<RandomWalk, Stream<lon
 
     @Override
     public ComputationResultConsumer<RandomWalk, Stream<long[]>, RandomWalkStatsConfig, Stream<StandardModeResult>> computationResultConsumer() {
-        return (computationResult, executionContext) ->
-            Stream.of(new StandardModeResult(
-                computationResult.preProcessingMillis(),
-                computationResult.computeMillis(),
-                computationResult.config().toMap()
-            ));
+        return new NullComputationResultConsumer<>();
     }
 
     @Override

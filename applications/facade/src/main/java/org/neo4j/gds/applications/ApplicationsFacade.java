@@ -19,9 +19,11 @@
  */
 package org.neo4j.gds.applications;
 
-import org.neo4j.gds.algorithms.RequestScopedDependencies;
-import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmEstimationTemplate;
-import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTemplate;
+import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.applications.graphstorecatalog.DefaultCatalogBusinessFacade;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -40,11 +42,20 @@ import java.util.function.Function;
  */
 public final class ApplicationsFacade {
     private final CatalogBusinessFacade catalogBusinessFacade;
+    private final CentralityApplications centralityApplications;
     private final PathFindingApplications pathFindingApplications;
+    private final SimilarityApplications similarityApplications;
 
-    ApplicationsFacade(CatalogBusinessFacade catalogBusinessFacade, PathFindingApplications pathFindingApplications) {
+    ApplicationsFacade(
+        CatalogBusinessFacade catalogBusinessFacade,
+        CentralityApplications centralityApplications,
+        PathFindingApplications pathFindingApplications,
+        SimilarityApplications similarityApplications
+    ) {
         this.catalogBusinessFacade = catalogBusinessFacade;
+        this.centralityApplications = centralityApplications;
         this.pathFindingApplications = pathFindingApplications;
+        this.similarityApplications = similarityApplications;
     }
 
     /**
@@ -57,7 +68,8 @@ public final class ApplicationsFacade {
         ProjectionMetricsService projectionMetricsService,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
-        RequestScopedDependencies requestScopedDependencies
+        RequestScopedDependencies requestScopedDependencies,
+        WriteRelationshipService writeRelationshipService
     ) {
         var catalogBusinessFacade = createCatalogBusinessFacade(
             log,
@@ -66,16 +78,37 @@ public final class ApplicationsFacade {
             projectionMetricsService
         );
 
+        var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
+
+        var centralityApplications = CentralityApplications.create(
+            log,
+            requestScopedDependencies,
+            algorithmEstimationTemplate,
+            algorithmProcessingTemplate,
+            progressTrackerCreator
+        );
+
         var pathFindingApplications = PathFindingApplications.create(
             log,
             requestScopedDependencies,
             algorithmProcessingTemplate,
-            algorithmEstimationTemplate
+            algorithmEstimationTemplate,
+            progressTrackerCreator
+        );
+
+        var similarityApplications = SimilarityApplications.create(
+            log,
+            algorithmEstimationTemplate,
+            algorithmProcessingTemplate,
+            progressTrackerCreator,
+            writeRelationshipService
         );
 
         return new ApplicationsFacadeBuilder()
             .with(catalogBusinessFacade)
+            .with(centralityApplications)
             .with(pathFindingApplications)
+            .with(similarityApplications)
             .build();
     }
 
@@ -100,7 +133,15 @@ public final class ApplicationsFacade {
         return catalogBusinessFacade;
     }
 
+    public CentralityApplications centrality() {
+        return centralityApplications;
+    }
+
     public PathFindingApplications pathFinding() {
         return pathFindingApplications;
+    }
+
+    public SimilarityApplications similarity() {
+        return similarityApplications;
     }
 }

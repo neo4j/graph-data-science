@@ -26,7 +26,9 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.config.ArrowConnectionInfo;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -52,6 +54,7 @@ public class WriteRelationshipsApplication {
         TerminationFlag terminationFlag,
         UserLogRegistryFactory userLogRegistryFactory,
         GraphStore graphStore,
+        ResultStore resultStore,
         GraphName graphName,
         GraphWriteRelationshipConfig configuration
     ) {
@@ -61,7 +64,7 @@ public class WriteRelationshipsApplication {
         var progressTracker = new TaskProgressTracker(
             RelationshipExporter.baseTask("Graph", relationshipCount),
             (org.neo4j.logging.Log) log.getNeo4jLog(),
-            RelationshipExporterBuilder.DEFAULT_WRITE_CONCURRENCY,
+            RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY,
             configuration.jobId(),
             taskRegistryFactory,
             userLogRegistryFactory
@@ -80,12 +83,13 @@ public class WriteRelationshipsApplication {
                     relationshipExporterBuilder,
                     terminationFlag,
                     progressTracker,
-                    configuration.writeConcurrency(),
+                    configuration.concurrency(),
                     configuration.arrowConnectionInfo(),
-                    configuration.resolveResultStore(graphStore.resultStore()),
+                    configuration.resolveResultStore(resultStore),
                     graphStore,
                     relationshipType,
-                    configuration.relationshipProperty()
+                    configuration.relationshipProperty(),
+                    configuration.jobId()
                 );
 
                 builder.withRelationshipsWritten(relationshipsWritten);
@@ -103,12 +107,13 @@ public class WriteRelationshipsApplication {
         RelationshipExporterBuilder relationshipExporterBuilder,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker,
-        int concurrency,
+        Concurrency concurrency,
         Optional<ArrowConnectionInfo> arrowConnectionInfo,
         Optional<ResultStore> resultStore,
         GraphStore graphStore,
         RelationshipType relationshipType,
-        Optional<String> relationshipProperty
+        Optional<String> relationshipProperty,
+        JobId jobId
     ) {
         var graph = graphStore.getGraph(relationshipType, relationshipProperty);
 
@@ -119,6 +124,7 @@ public class WriteRelationshipsApplication {
             .withConcurrency(concurrency)
             .withArrowConnectionInfo(arrowConnectionInfo, graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName))
             .withResultStore(resultStore)
+            .withJobId(jobId)
             .withProgressTracker(progressTracker);
 
         if (relationshipProperty.isPresent()) {

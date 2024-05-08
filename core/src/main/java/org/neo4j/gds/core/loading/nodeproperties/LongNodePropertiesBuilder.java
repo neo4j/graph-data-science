@@ -25,6 +25,7 @@ import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.utils.Neo4jValueConversion;
@@ -46,7 +47,7 @@ public final class LongNodePropertiesBuilder implements InnerNodePropertiesBuild
     private static final VarHandle MAX_VALUE;
     private final HugeSparseLongArray.Builder builder;
     private final long defaultValue;
-    private final int concurrency;
+    private final Concurrency concurrency;
 
     static {
         VarHandle maxValueHandle;
@@ -63,7 +64,7 @@ public final class LongNodePropertiesBuilder implements InnerNodePropertiesBuild
     private LongNodePropertiesBuilder(
         HugeSparseLongArray.Builder builder,
         long defaultValue,
-        int concurrency
+        Concurrency concurrency
     ) {
         this.builder = builder;
         this.defaultValue = defaultValue;
@@ -73,7 +74,7 @@ public final class LongNodePropertiesBuilder implements InnerNodePropertiesBuild
 
     public static LongNodePropertiesBuilder of(
         DefaultValue defaultValue,
-        int concurrency
+        Concurrency concurrency
     ) {
         var defaultLongValue = defaultValue.longValue();
         var builder = HugeSparseLongArray.builder(defaultLongValue);
@@ -101,7 +102,7 @@ public final class LongNodePropertiesBuilder implements InnerNodePropertiesBuild
 
         var drainingIterator = propertiesByNeoIds.drainingIterator();
 
-        var tasks = IntStream.range(0, concurrency).mapToObj(threadId -> (Runnable) () -> {
+        var tasks = IntStream.range(0, concurrency.value()).mapToObj(threadId -> (Runnable) () -> {
             var batch = drainingIterator.drainingBatch();
 
             while (drainingIterator.next(batch)) {

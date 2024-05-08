@@ -30,7 +30,6 @@ import org.neo4j.gds.annotation.CustomProcedure;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Collection;
@@ -192,24 +191,23 @@ class ProcedureSyntaxAutoChecker extends Postprocessor {
     }
 
     private static Stream<? extends Member> findResultFields(Class<?> resultClass) {
-        return resultClass.isInterface()
-            ? resultFieldsFromInterfaceMethods(resultClass)
+        return resultClass.isAnnotationPresent(CustomProcedure.ResultType.class)
+            ? resultFieldsFromCustomType(resultClass)
             : resultFieldsFromClassFields(resultClass);
     }
 
-    private static Stream<Method> resultFieldsFromInterfaceMethods(Class<?> resultClass) {
-        return Arrays
-            .stream(resultClass.getDeclaredMethods())
-            .filter(ProcedureSyntaxAutoChecker::includeMethodInResult);
+    private static Stream<? extends Member> resultFieldsFromCustomType(Class<?> resultClass) {
+        return Arrays.stream(resultClass.getDeclaredMethods())
+            .filter(ProcedureSyntaxAutoChecker::includeFromCustomType);
     }
 
     private static Stream<Field> resultFieldsFromClassFields(Class<?> resultClass) {
         return Arrays
-            .stream(resultClass.getFields())
+            .stream(resultClass.isRecord() ? resultClass.getDeclaredFields() : resultClass.getFields())
             .filter(ProcedureSyntaxAutoChecker::includeFieldInResult);
     }
 
-    private static boolean includeMethodInResult(AnnotatedElement method) {
+    private static boolean includeFromCustomType(AnnotatedElement method) {
         return method.isAnnotationPresent(CustomProcedure.ResultField.class);
     }
 

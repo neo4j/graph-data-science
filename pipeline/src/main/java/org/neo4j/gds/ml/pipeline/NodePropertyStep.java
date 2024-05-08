@@ -24,12 +24,13 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
-import org.neo4j.gds.executor.AlgoConfigParser;
+import org.neo4j.gds.procedures.algorithms.configuration.AlgoConfigParser;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallableFinder;
 import org.neo4j.gds.executor.ProcedureExecutor;
@@ -142,7 +143,7 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
         String graphName,
         Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relTypes,
-        int trainConcurrency,
+        Concurrency trainConcurrency,
         Stub stub
     ) {
         var configCopy = new HashMap<>(config);
@@ -150,7 +151,7 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
         var relTypeStrings = relTypes.stream().map(ElementIdentifier::name).collect(Collectors.toList());
         configCopy.put("nodeLabels", nodeLabelStrings);
         configCopy.put("relationshipTypes", relTypeStrings);
-        configCopy.putIfAbsent("concurrency", trainConcurrency);
+        configCopy.putIfAbsent("concurrency", trainConcurrency.value());
 
         var algorithmSpec = callableDefinition
             .algorithmSpec();

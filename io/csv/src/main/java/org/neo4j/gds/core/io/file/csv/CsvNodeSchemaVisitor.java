@@ -37,6 +37,14 @@ public class CsvNodeSchemaVisitor extends NodeSchemaVisitor {
 
     public static final String NODE_SCHEMA_FILE_NAME = "node-schema.csv";
 
+    public static final String[] NODE_SCHEMA_COLUMNS = {
+        LABEL_COLUMN_NAME,
+        PROPERTY_KEY_COLUMN_NAME,
+        VALUE_TYPE_COLUMN_NAME,
+        DEFAULT_VALUE_COLUMN_NAME,
+        STATE_COLUMN_NAME
+    };
+
     private final CsvWriter csvWriter;
 
     public CsvNodeSchemaVisitor(Path fileLocation) {
@@ -51,7 +59,8 @@ public class CsvNodeSchemaVisitor extends NodeSchemaVisitor {
     @Override
     protected void export() {
         var row = new ArrayList<String>();
-        row.add(nodeLabel().name());
+        var label = nodeLabel();
+        row.add(label.name());
         if (key() != null) {
             row.add(key());
             row.add(valueType().csvName());
@@ -71,12 +80,6 @@ public class CsvNodeSchemaVisitor extends NodeSchemaVisitor {
     }
 
     private void writeHeader() {
-        csvWriter.writeRecord(
-            LABEL_COLUMN_NAME,
-            PROPERTY_KEY_COLUMN_NAME,
-            VALUE_TYPE_COLUMN_NAME,
-            DEFAULT_VALUE_COLUMN_NAME,
-            STATE_COLUMN_NAME
-        );
+        csvWriter.writeRecord(NODE_SCHEMA_COLUMNS);
     }
 }

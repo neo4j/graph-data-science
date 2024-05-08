@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.gradientdescent;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.Variable;
@@ -59,8 +60,8 @@ class TrainingTest {
 
         Supplier<BatchQueue> queueSupplier = () -> BatchQueue.consecutive(100, 10);
 
-        training.train(objective, queueSupplier, 4);
-        singleThreadedTraining.train(singleThreadedObjective, queueSupplier, 1);
+        training.train(objective, queueSupplier, new Concurrency(4));
+        singleThreadedTraining.train(singleThreadedObjective, queueSupplier, new Concurrency(1));
 
         assertThat(objective.weights()).usingRecursiveComparison().isEqualTo(singleThreadedObjective.weights());
     }
@@ -78,7 +79,7 @@ class TrainingTest {
 
         var objective = new TestTrainingObjective();
 
-        assertThatThrownBy(() -> training.train(objective, () -> BatchQueue.consecutive(100, 10), 4))
+        assertThatThrownBy(() -> training.train(objective, () -> BatchQueue.consecutive(100, 10), new Concurrency(4)))
             .isInstanceOf(TerminatedException.class)
             .hasMessageContaining("The execution has been terminated.");
     }

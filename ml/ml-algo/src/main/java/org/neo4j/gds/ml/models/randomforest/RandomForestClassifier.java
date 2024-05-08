@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.models.randomforest;
 
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
@@ -28,9 +28,9 @@ import org.neo4j.gds.ml.models.Features;
 
 import java.util.List;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfIntArray;
+import static org.neo4j.gds.mem.Estimate.sizeOfDoubleArray;
+import static org.neo4j.gds.mem.Estimate.sizeOfInstance;
+import static org.neo4j.gds.mem.Estimate.sizeOfIntArray;
 
 public class RandomForestClassifier implements Classifier {
 

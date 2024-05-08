@@ -20,56 +20,15 @@
 package org.neo4j.gds.betweenness;
 
 import org.neo4j.gds.annotation.Parameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.Optional;
 
 @Parameters
-public final class BetweennessCentralityParameters {
-
-    public static BetweennessCentralityParameters create(
-        int concurrency,
-        Optional<Long> samplingSize,
-        Optional<Long> samplingSeed,
-        boolean hasRelationshipWeightProperty
-    ) {
-        return new BetweennessCentralityParameters(
-            concurrency,
-            samplingSize,
-            samplingSeed,
-            hasRelationshipWeightProperty
-        );
-    }
-
-    private final int concurrency;
-    private final Optional<Long> samplingSize;
-    private final Optional<Long> samplingSeed;
-    private final boolean hasRelationshipWeightProperty;
-
-    private BetweennessCentralityParameters(
-        int concurrency,
-        Optional<Long> samplingSize,
-        Optional<Long> samplingSeed,
-        boolean hasRelationshipWeightProperty
-    ) {
-        this.concurrency = concurrency;
-        this.samplingSize = samplingSize;
-        this.samplingSeed = samplingSeed;
-        this.hasRelationshipWeightProperty = hasRelationshipWeightProperty;
-    }
-
-    int concurrency() {
-        return concurrency;
-    }
-
-    public Optional<Long> samplingSize() {
-        return samplingSize;
-    }
-
-    public Optional<Long> samplingSeed() {
-        return samplingSeed;
-    }
-
-    boolean hasRelationshipWeightProperty() {
-        return hasRelationshipWeightProperty;
-    }
+public record BetweennessCentralityParameters(
+    Concurrency concurrency,
+    Optional<Long> samplingSize,
+    Optional<Long> samplingSeed,
+    boolean hasRelationshipWeightProperty
+) {
 }

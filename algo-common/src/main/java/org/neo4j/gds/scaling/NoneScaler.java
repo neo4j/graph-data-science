@@ -21,6 +21,7 @@ package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
@@ -43,7 +44,7 @@ public class NoneScaler extends ScalarScaler {
             public ScalarScaler create(
                 NodePropertyValues properties,
                 long nodeCount,
-                int concurrency,
+                Concurrency concurrency,
                 ProgressTracker progressTracker,
                 ExecutorService executor
             ) {

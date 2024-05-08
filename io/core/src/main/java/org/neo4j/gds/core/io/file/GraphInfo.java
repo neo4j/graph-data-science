@@ -20,23 +20,22 @@
 package org.neo4j.gds.core.io.file;
 
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.annotation.GenerateBuilder;
 import org.neo4j.gds.api.DatabaseInfo;
 
 import java.util.List;
 import java.util.Map;
 
-@ValueClass
-public interface GraphInfo {
-    DatabaseInfo databaseInfo();
-
-    String idMapBuilderType();
-
-    long nodeCount();
-
-    long maxOriginalId();
-
-    Map<RelationshipType, Long> relationshipTypeCounts();
-
-    List<RelationshipType> inverseIndexedRelationshipTypes();
+@GenerateBuilder
+public record GraphInfo(
+    DatabaseInfo databaseInfo,
+    String idMapBuilderType,
+    long nodeCount,
+    long maxOriginalId,
+    Map<RelationshipType, Long> relationshipTypeCounts,
+    List<RelationshipType> inverseIndexedRelationshipTypes
+) {
+    public static GraphInfoBuilder builder() {
+        return GraphInfoBuilder.builder();
+    }
 }

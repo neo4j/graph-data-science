@@ -21,6 +21,7 @@ package org.neo4j.gds.paths.yens;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -42,6 +43,7 @@ public final class Yens extends Algorithm<PathFindingResult> {
 
     private final Graph graph;
     private final ShortestPathYensBaseConfig config;
+    private final Concurrency concurrency;
     private final boolean trackRelationships;
 
     /**
@@ -51,9 +53,10 @@ public final class Yens extends Algorithm<PathFindingResult> {
     public static Yens sourceTarget(
         Graph graph,
         ShortestPathYensBaseConfig config,
+        Concurrency concurrency,
         ProgressTracker progressTracker
     ) {
-        return sourceTarget(graph, config, progressTracker, TerminationFlag.RUNNING_TRUE);
+        return sourceTarget(graph, config, concurrency, progressTracker, TerminationFlag.RUNNING_TRUE);
     }
 
     /**
@@ -62,6 +65,7 @@ public final class Yens extends Algorithm<PathFindingResult> {
     public static Yens sourceTarget(
         Graph graph,
         ShortestPathYensBaseConfig config,
+        Concurrency concurrency,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
@@ -71,13 +75,21 @@ public final class Yens extends Algorithm<PathFindingResult> {
         //If not, we need to track which is the next neighbor.
         boolean shouldTrackRelationships = graph.isMultiGraph();
 
-        return new Yens(graph, config, shouldTrackRelationships, progressTracker, terminationFlag);
+        return new Yens(graph, config, concurrency, shouldTrackRelationships, progressTracker, terminationFlag);
     }
 
-    private Yens(Graph graph, ShortestPathYensBaseConfig config, boolean trackRelationships, ProgressTracker progressTracker, TerminationFlag terminationFlag) {
+    private Yens(
+        Graph graph,
+        ShortestPathYensBaseConfig config,
+        Concurrency concurrency,
+        boolean trackRelationships,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
+    ) {
         super(progressTracker);
         this.graph = graph;
         this.config = config;
+        this.concurrency = concurrency;
         this.terminationFlag = terminationFlag;
         this.trackRelationships = trackRelationships;
     }
@@ -112,7 +124,7 @@ public final class Yens extends Algorithm<PathFindingResult> {
             }
 
             RunWithConcurrency.builder()
-                .concurrency(config.concurrency())
+                .concurrency(concurrency)
                 .tasks(tasks)
                 .executor(DefaultPool.INSTANCE)
                 .run();
@@ -152,7 +164,7 @@ public final class Yens extends Algorithm<PathFindingResult> {
         AtomicInteger currentSpurIndexId
     ) {
         var tasks = new ArrayList<YensTask>();
-        for (int concurrentId = 0; concurrentId < config.concurrency(); ++concurrentId) {
+        for (int concurrentId = 0; concurrentId < concurrency.value(); ++concurrentId) {
             tasks.add(new YensTask(
                 graph.concurrentCopy(),
                 config.targetNode(),

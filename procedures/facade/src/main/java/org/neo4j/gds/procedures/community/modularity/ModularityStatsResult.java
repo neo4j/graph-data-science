@@ -20,8 +20,9 @@
 package org.neo4j.gds.procedures.community.modularity;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
-import org.neo4j.gds.results.StandardStatsResult;
+import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 
 import java.util.Map;
 
@@ -54,7 +55,7 @@ public class ModularityStatsResult extends StandardStatsResult {
         private long relationshipCount;
         private long communityCount;
 
-        public StatsBuilder(ProcedureReturnColumns returnColumns, int concurrency) {
+        public StatsBuilder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
             super(returnColumns, concurrency);
         }
 

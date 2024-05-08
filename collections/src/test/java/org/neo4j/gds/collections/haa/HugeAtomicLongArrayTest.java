@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 import org.opentest4j.AssertionFailedError;
 
 import java.util.ArrayList;
@@ -309,7 +309,7 @@ final class HugeAtomicLongArrayTest {
     @Test
     void shouldFreeMemoryUsed() {
         int size = integer(10, 20);
-        long expected = MemoryUsage.sizeOfLongArray(size);
+        long expected = Estimate.sizeOfLongArray(size);
         testArray(size, array -> {
             long freed = array.release();
             assertThat(freed).matches(v -> v == expected || v == expected + 24);

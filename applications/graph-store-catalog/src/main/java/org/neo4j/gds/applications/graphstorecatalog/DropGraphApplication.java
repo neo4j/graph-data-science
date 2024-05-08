@@ -24,8 +24,8 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.loading.CatalogRequest;
+import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.loading.ImmutableCatalogRequest;
 
 import java.util.LinkedList;
@@ -50,7 +50,7 @@ public class DropGraphApplication {
      * @param shouldFailIfMissing If true, do an initial check that all graphs exist, fail otherwise
      * @return metadata for the graphs that were removed
      */
-    public List<GraphStoreWithConfig> compute(
+    public List<GraphStoreCatalogEntry> compute(
         Iterable<GraphName> graphNames,
         boolean shouldFailIfMissing,
         DatabaseId databaseId,
@@ -111,12 +111,12 @@ public class DropGraphApplication {
         return exception;
     }
 
-    private List<GraphStoreWithConfig> dropGraphs(
+    private List<GraphStoreCatalogEntry> dropGraphs(
         CatalogRequest request,
         Iterable<GraphName> graphNames,
         boolean shouldFailIfMissing
     ) {
-        var results = new LinkedList<GraphStoreWithConfig>();
+        var results = new LinkedList<GraphStoreCatalogEntry>();
         for (GraphName graphName : graphNames) {
             var result = graphStoreCatalogService.removeGraph(
                 request,

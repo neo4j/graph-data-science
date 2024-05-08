@@ -28,6 +28,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.IdMapBuilder;
@@ -53,11 +54,11 @@ public abstract class IdMapBuilderTest {
     // Runs per property test
     private static final int TRIES = 42;
 
-    protected abstract IdMapBuilder builder(long capacity, int concurrency);
+    protected abstract IdMapBuilder builder(long capacity, Concurrency concurrency);
 
     @Provide
-    Arbitrary<Integer> concurrencies() {
-        return Arbitraries.of(1, 2, 4, 8);
+    Arbitrary<Concurrency> concurrencies() {
+        return Arbitraries.of(new Concurrency(1), new Concurrency(2), new Concurrency(4), new Concurrency(8));
     }
 
     @Provide
@@ -75,7 +76,7 @@ public abstract class IdMapBuilderTest {
         long capacity = 4096;
         int allocation = 1337;
 
-        var builder = builder(capacity, 1);
+        var builder = builder(capacity, new Concurrency(1));
         var idMapAllocator = builder.allocate(allocation);
 
         assertThat(idMapAllocator.allocatedSize()).as("allocated size").isEqualTo(allocation);
@@ -83,7 +84,7 @@ public abstract class IdMapBuilderTest {
 
     @Test
     void testSingleElement() {
-        var idMap = buildIdMapFrom(new long[]{42L}, 1);
+        var idMap = buildIdMapFrom(new long[]{42L}, new Concurrency(1));
 
         assertThat(idMap.nodeCount()).isEqualTo(1);
         assertThat(idMap.toMappedNodeId(42)).isEqualTo(0);
@@ -95,7 +96,7 @@ public abstract class IdMapBuilderTest {
     void testNodeCount(
         @ForAll("nodeCounts") int nodeCount,
         @ForAll("idOffsets") int idOffset,
-        @ForAll("concurrencies") int concurrency,
+        @ForAll("concurrencies") Concurrency concurrency,
         @ForAll long seed
     ) {
         var originalIds = generateShuffledIds(idOffset, nodeCount, seed);
@@ -107,7 +108,7 @@ public abstract class IdMapBuilderTest {
     void testContains(
         @ForAll("nodeCounts") int nodeCount,
         @ForAll("idOffsets") int idOffset,
-        @ForAll("concurrencies") int concurrency,
+        @ForAll("concurrencies") Concurrency concurrency,
         @ForAll long seed
     ) {
         var originalIds = generateShuffledIds(idOffset, nodeCount, seed);
@@ -135,7 +136,7 @@ public abstract class IdMapBuilderTest {
     void testHighestOriginalId(
         @ForAll("nodeCounts") int nodeCount,
         @ForAll("idOffsets") int idOffset,
-        @ForAll("concurrencies") int concurrency,
+        @ForAll("concurrencies") Concurrency concurrency,
         @ForAll long seed
     ) {
         var originalIds = generateShuffledIds(idOffset, nodeCount, seed);
@@ -148,7 +149,7 @@ public abstract class IdMapBuilderTest {
     void testToMappedNodeId(
         @ForAll("nodeCounts") int nodeCount,
         @ForAll("idOffsets") int idOffset,
-        @ForAll("concurrencies") int concurrency,
+        @ForAll("concurrencies") Concurrency concurrency,
         @ForAll long seed
     ) {
         var originalIds = generateShuffledIds(idOffset, nodeCount, seed);
@@ -173,7 +174,7 @@ public abstract class IdMapBuilderTest {
     void testToRootNodeId(
         @ForAll("nodeCounts") int nodeCount,
         @ForAll("idOffsets") int idOffset,
-        @ForAll("concurrencies") int concurrency,
+        @ForAll("concurrencies") Concurrency concurrency,
         @ForAll long seed
     ) {
         var originalIds = generateShuffledIds(idOffset, nodeCount, seed);
@@ -198,7 +199,7 @@ public abstract class IdMapBuilderTest {
     void testToOriginalNodeId(
         @ForAll("nodeCounts") int nodeCount,
         @ForAll("idOffsets") int idOffset,
-        @ForAll("concurrencies") int concurrency,
+        @ForAll("concurrencies") Concurrency concurrency,
         @ForAll long seed
     ) {
         var originalIds = generateShuffledIds(idOffset, nodeCount, seed);
@@ -219,7 +220,7 @@ public abstract class IdMapBuilderTest {
     void testBuildParallel(
         @ForAll("nodeCounts") int nodeCount,
         @ForAll("idOffsets") int idOffset,
-        @ForAll("concurrencies") int concurrency,
+        @ForAll("concurrencies") Concurrency concurrency,
         @ForAll long seed
     ) {
         var originalIds = generateShuffledIds(idOffset, nodeCount, seed);
@@ -257,7 +258,7 @@ public abstract class IdMapBuilderTest {
     void testLabels(
         @ForAll("nodeCounts") int nodeCount,
         @ForAll("idOffsets") int idOffset,
-        @ForAll("concurrencies") int concurrency,
+        @ForAll("concurrencies") Concurrency concurrency,
         @ForAll long seed
     ) {
         var originalIds = generateShuffledIds(idOffset, nodeCount, seed);
@@ -286,7 +287,7 @@ public abstract class IdMapBuilderTest {
         }
     }
 
-    private IdMapBuilder builderFromHighestOriginalId(long highestOriginalId, int concurrency) {
+    private IdMapBuilder builderFromHighestOriginalId(long highestOriginalId, Concurrency concurrency) {
         return builder(highestOriginalId + 1, concurrency);
     }
 
@@ -297,17 +298,17 @@ public abstract class IdMapBuilderTest {
         long highestOriginalId();
     }
 
-    private IdMap buildIdMapFrom(long[] originalIds, int concurrency) {
+    private IdMap buildIdMapFrom(long[] originalIds, Concurrency concurrency) {
         return buildFrom(originalIds, concurrency).idMap();
     }
 
-    private IdMapAndHighestId buildFrom(long[] originalIds, int concurrency) {
+    private IdMapAndHighestId buildFrom(long[] originalIds, Concurrency concurrency) {
         return buildFromWithLabels(originalIds, concurrency, Optional.empty());
     }
 
     private IdMapAndHighestId buildFromWithLabels(
         long[] originalIds,
-        int concurrency,
+        Concurrency concurrency,
         IntFunction<List<NodeLabel>> labelFn
     ) {
         return buildFromWithLabels(originalIds, concurrency, Optional.ofNullable(labelFn));
@@ -315,7 +316,7 @@ public abstract class IdMapBuilderTest {
 
     private IdMapAndHighestId buildFromWithLabels(
         long[] originalIds,
-        int concurrency,
+        Concurrency concurrency,
         Optional<IntFunction<List<NodeLabel>>> labelFn
     ) {
         // number of ids we want to insert at once
@@ -323,7 +324,7 @@ public abstract class IdMapBuilderTest {
         // the highest original id defines the size of the specific IdMap data structures
         long highestOriginalId = max(originalIds);
 
-        var builder = builderFromHighestOriginalId(highestOriginalId, 1);
+        var builder = builderFromHighestOriginalId(highestOriginalId, new Concurrency(1));
         var idMapAllocator = builder.allocate(batchLength);
 
         idMapAllocator.insert(originalIds);

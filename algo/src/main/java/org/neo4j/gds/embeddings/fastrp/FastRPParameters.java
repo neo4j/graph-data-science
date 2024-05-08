@@ -24,81 +24,14 @@ import org.neo4j.gds.annotation.Parameters;
 import java.util.List;
 import java.util.Optional;
 
-
 @Parameters
-public final class FastRPParameters {
-
-    public static FastRPParameters create(
-        List<String> featureProperties,
-        List<Number> iterationWeights,
-        int embeddingDimension,
-        int propertyDimension,
-        Optional<String> relationshipWeightProperty,
-        float normalizationStrength,
-        Number nodeSelfInfluence
-    ) {
-        return new FastRPParameters(
-            featureProperties,
-            iterationWeights,
-            embeddingDimension,
-            propertyDimension,
-            relationshipWeightProperty,
-            normalizationStrength,
-            nodeSelfInfluence
-        );
-    }
-
-    private final List<String> featureProperties;
-    private final List<Number> iterationWeights;
-    private final int embeddingDimension;
-    private final int propertyDimension;
-    private final Optional<String> relationshipWeightProperty;
-    private final float normalizationStrength;
-    private final Number nodeSelfInfluence;
-
-    private FastRPParameters(
-        List<String> featureProperties,
-        List<Number> iterationWeights,
-        int embeddingDimension,
-        int propertyDimension,
-        Optional<String> relationshipWeightProperty,
-        float normalizationStrength,
-        Number nodeSelfInfluence
-    ) {
-        this.featureProperties = featureProperties;
-        this.iterationWeights = iterationWeights;
-        this.embeddingDimension = embeddingDimension;
-        this.propertyDimension = propertyDimension;
-        this.relationshipWeightProperty = relationshipWeightProperty;
-        this.normalizationStrength = normalizationStrength;
-        this.nodeSelfInfluence = nodeSelfInfluence;
-    }
-
-    public List<String> featureProperties() {
-        return featureProperties;
-    }
-
-    List<Number> iterationWeights() {
-        return iterationWeights;
-    }
-
-    int embeddingDimension() {
-        return embeddingDimension;
-    }
-
-    int propertyDimension() {
-        return propertyDimension;
-    }
-
-    Optional<String> relationshipWeightProperty() {
-        return relationshipWeightProperty;
-    }
-
-    float normalizationStrength() {
-        return normalizationStrength;
-    }
-
-    Number nodeSelfInfluence() {
-        return nodeSelfInfluence;
-    }
+public record FastRPParameters(
+    List<String> featureProperties,
+    List<Number> iterationWeights,
+    int embeddingDimension,
+    int propertyDimension,
+    Optional<String> relationshipWeightProperty,
+    float normalizationStrength,
+    Number nodeSelfInfluence
+) {
 }

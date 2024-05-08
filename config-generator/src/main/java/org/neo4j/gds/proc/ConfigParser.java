@@ -19,19 +19,14 @@
  */
 package org.neo4j.gds.proc;
 
-import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.TypeName;
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.Configuration.CollectKeys;
 import org.neo4j.gds.annotation.Configuration.Ignore;
 import org.neo4j.gds.annotation.Configuration.Key;
 import org.neo4j.gds.annotation.Configuration.Parameter;
 import org.neo4j.gds.annotation.Configuration.ToMap;
-import org.neo4j.gds.annotation.ValueClass;
 
 import javax.annotation.processing.Messager;
-import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
@@ -41,20 +36,13 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
-import java.lang.annotation.Annotation;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static com.google.auto.common.MoreElements.asType;
 import static com.google.auto.common.MoreElements.isAnnotationPresent;
 import static com.google.auto.common.MoreTypes.asTypeElement;
 import static javax.lang.model.util.ElementFilter.methodsIn;
@@ -73,21 +61,26 @@ final class ConfigParser {
 
     Spec process(TypeMirror configType) {
         TypeElement configElement = asTypeElement(configType);
-        ImmutableSpec.Builder config = ImmutableSpec.builder().root(configElement).rootType(configType);
+        SpecBuilder config = SpecBuilder.builder().root(configElement).rootType(configType);
         process(config, new HashSet<>(), configElement, configElement);
         return config.build();
     }
 
-    private void process(ImmutableSpec.Builder output, Set<ExecutableElement> seen, TypeElement configElement, TypeElement root) {
+    private void process(
+        SpecBuilder output,
+        Set<ExecutableElement> seen,
+        TypeElement configElement,
+        TypeElement root
+    ) {
         var members = methodsIn(configElement.getEnclosedElements())
             .stream()
             .map(m -> validateMember(seen, root, m))
             .flatMap(Optional::stream)
             .map(this::validateParameters)
             .flatMap(Optional::stream)
-            .collect(Collectors.toList());
+            .toList();
 
-        if (members.stream().filter(Member::graphStoreValidation).count() > 1) {
+        if (members.stream().filter(Spec.Member::graphStoreValidation).count() > 1) {
             messager.printMessage(
                 Diagnostic.Kind.ERROR,
                 "[ConfigParser]: Only one GraphStoreValidation-annotated method allowed"
@@ -95,14 +88,14 @@ final class ConfigParser {
             return;
         }
 
-        members.forEach(output::addMember);
+        members.forEach(output::addMembers);
 
         for (TypeMirror implemented : configElement.getInterfaces()) {
             process(output, seen, asTypeElement(implemented), root);
         }
     }
 
-    private Optional<Member> validateParameters(Member member) {
+    private Optional<Spec.Member> validateParameters(Spec.Member member) {
         var method = member.method();
         if (member.graphStoreValidation() || member.graphStoreValidationCheck()) {
             if (method.getParameters().size() != 3) {
@@ -126,8 +119,13 @@ final class ConfigParser {
         return Optional.of(member);
     }
 
-    private Optional<Member> validateMember(Set<ExecutableElement> seenMembers, TypeElement root, ExecutableElement method) {
-        var seenMembersWithSameName = seenMembers.stream().filter(m -> m.getSimpleName().equals(method.getSimpleName()));
+    private Optional<Spec.Member> validateMember(
+        Set<ExecutableElement> seenMembers,
+        TypeElement root,
+        ExecutableElement method
+    ) {
+        var seenMembersWithSameName = seenMembers.stream().filter(m -> m.getSimpleName()
+            .equals(method.getSimpleName()));
 
         // check Ignore corner cases
         if (isAnnotationPresent(method, Ignore.class)) {
@@ -153,9 +151,12 @@ final class ConfigParser {
             return Optional.empty();
         }
 
-        var seenMembersList = seenMembersWithSameName.collect(Collectors.toList());
+        var seenMembersList = seenMembersWithSameName.toList();
         if (!seenMembersList.isEmpty()) {
-            var anyRelatedIgnoredSeenMember = seenMembersList.stream().anyMatch(m -> isAnnotationPresent(m, Ignore.class) );
+            var anyRelatedIgnoredSeenMember = seenMembersList.stream().anyMatch(m -> isAnnotationPresent(
+                m,
+                Ignore.class
+            ));
             if (anyRelatedIgnoredSeenMember && !methodMarkedAsInput(method)) {
                 // for inheritance must clarify the status of the member to avoid exposing ignored fields from the parent
                 messager.printMessage(
@@ -202,7 +203,7 @@ final class ConfigParser {
             return Optional.empty();
         }
 
-        ImmutableMember.Builder memberBuilder = ImmutableMember
+        MemberBuilder memberBuilder = MemberBuilder
             .builder()
             .owner(root)
             .method(method);
@@ -238,7 +239,7 @@ final class ConfigParser {
 
         try {
             return Optional.of(memberBuilder.build());
-        } catch (InvalidMemberException invalid) {
+        } catch (Spec.InvalidMemberException invalid) {
             messager.printMessage(Diagnostic.Kind.ERROR, invalid.getMessage(), method);
             return Optional.empty();
         }
@@ -246,13 +247,13 @@ final class ConfigParser {
 
     private static boolean methodMarkedAsInput(ExecutableElement method) {
         return isAnnotationPresent(method, Key.class)
-                || isAnnotationPresent(method, Parameter.class)
-                || isAnnotationPresent(method, Configuration.ConvertWith.class)
-                || isAnnotationPresent(method, Configuration.DoubleRange.class)
-                || isAnnotationPresent(method, Configuration.IntegerRange.class);
+            || isAnnotationPresent(method, Parameter.class)
+            || isAnnotationPresent(method, Configuration.ConvertWith.class)
+            || isAnnotationPresent(method, Configuration.DoubleRange.class)
+            || isAnnotationPresent(method, Configuration.IntegerRange.class);
     }
 
-    private void validateToMap(ExecutableElement method, ImmutableMember.Builder memberBuilder) {
+    private void validateToMap(ExecutableElement method, MemberBuilder memberBuilder) {
         if (isAnnotationPresent(method, ToMap.class)) {
             TypeElement mapType = elementUtils.getTypeElement(Map.class.getTypeName());
             TypeMirror stringType = elementUtils.getTypeElement(String.class.getTypeName()).asType();
@@ -271,7 +272,7 @@ final class ConfigParser {
         }
     }
 
-    private void validateCollectKeys(ExecutableElement method, ImmutableMember.Builder memberBuilder) {
+    private void validateCollectKeys(ExecutableElement method, MemberBuilder memberBuilder) {
         if (isAnnotationPresent(method, CollectKeys.class)) {
             TypeElement collectionType = elementUtils.getTypeElement(Collection.class.getTypeName());
             TypeMirror stringType = elementUtils.getTypeElement(String.class.getTypeName()).asType();
@@ -289,7 +290,10 @@ final class ConfigParser {
         }
     }
 
-    private void validateGraphStoreValidationAndChecks(ExecutableElement method, ImmutableMember.Builder memberBuilder) {
+    private void validateGraphStoreValidationAndChecks(
+        ExecutableElement method,
+        MemberBuilder memberBuilder
+    ) {
         if (isAnnotationPresent(method, Configuration.GraphStoreValidation.class)) {
             requireVoidReturnType(method);
             requireDefaultModifier(method);
@@ -324,7 +328,7 @@ final class ConfigParser {
         }
     }
 
-    private static void validateValueCheck(ExecutableElement method, ImmutableMember.Builder memberBuilder) {
+    private static void validateValueCheck(ExecutableElement method, MemberBuilder memberBuilder) {
         if (isAnnotationPresent(method, Configuration.Check.class)) {
             if (method.getReturnType().getKind() == TypeKind.VOID) {
                 memberBuilder.validates(true);
@@ -334,134 +338,4 @@ final class ConfigParser {
         }
     }
 
-    @ValueClass
-    interface Spec {
-        TypeElement root();
-
-        TypeMirror rootType();
-
-        List<Member> members();
-    }
-
-    @ValueClass
-    abstract static class Member {
-        public abstract TypeElement owner();
-
-        public abstract ExecutableElement method();
-
-        @Value.Default
-        public String lookupKey() {
-            return methodName();
-        }
-
-        @Value.Default
-        public boolean collectsKeys() {
-            return false;
-        }
-
-        @Value.Default
-        public boolean toMap() {
-            return false;
-        }
-
-        @Value.Default
-        public boolean validatesIntegerRange() { return false; }
-
-        @Value.Default
-        public boolean validatesLongRange() { return false; }
-
-        @Value.Default
-        public boolean validatesDoubleRange() { return false; }
-
-        @Value.Default
-        public boolean validates() {
-            return false;
-        }
-
-        @Value.Default
-        public boolean graphStoreValidation() { return false; }
-
-        @Value.Default
-        public boolean graphStoreValidationCheck() { return false; }
-
-        @Value.Default
-        public boolean normalizes() {
-            return false;
-        }
-
-        final boolean isConfigValue() {
-            return !collectsKeys() && !toMap() && !validates() && !normalizes() && !graphStoreValidation() && !graphStoreValidationCheck();
-        }
-
-        final boolean isConfigMapEntry() {
-            return isConfigValue() && !isAnnotationPresent(method(), Parameter.class);
-        }
-
-        final boolean isConfigParameter() {
-            return isConfigValue() && isAnnotationPresent(method(), Parameter.class);
-        }
-
-        @Value.Derived
-        public String methodName() {
-            return method().getSimpleName().toString();
-        }
-
-        public Set<AnnotationMirror> annotations(Class<? extends Annotation> annotationType) {
-            return Stream.concat(
-                method().getReturnType().getAnnotationMirrors().stream(),
-                method().getAnnotationMirrors().stream()
-            )
-                .filter(am ->
-                    asType(am.getAnnotationType().asElement())
-                        .getQualifiedName()
-                        .contentEquals(annotationType.getName()))
-                .collect(Collectors.toCollection(() -> new TreeSet<>(
-                    Comparator.comparing(am -> asType(am.getAnnotationType().asElement()).getQualifiedName().toString())
-                )));
-        }
-
-        public TypeName typeSpecWithAnnotation(Class<? extends Annotation> annotationType) {
-            Set<AnnotationMirror> annotations = annotations(annotationType);
-            TypeName typeName = TypeName.get(method().getReturnType());
-            List<AnnotationSpec> annotationsToAddToType = annotations
-                .stream()
-                .map(AnnotationSpec::get)
-                .collect(Collectors.toList());
-            return typeName.annotated(annotationsToAddToType);
-        }
-
-        @Value.Check
-        final Member normalize() {
-            String trimmedKey = lookupKey().trim();
-            if (trimmedKey.isEmpty()) {
-                throw new InvalidMemberException("The key must not be empty");
-            }
-            if (collectsKeys() && (validates() || normalizes())) {
-                throw new InvalidMemberException(String.format(
-                    Locale.ENGLISH,
-                    "Cannot combine @%s with @%s",
-                    CollectKeys.class.getSimpleName(),
-                    Configuration.Check.class.getSimpleName()
-                ));
-            }
-            if (toMap() && (validates() || normalizes())) {
-                throw new InvalidMemberException(String.format(
-                    Locale.ENGLISH,
-                    "Cannot combine @%s with @%s",
-                    ToMap.class.getSimpleName(),
-                    Configuration.Check.class.getSimpleName()
-                ));
-            }
-            if (trimmedKey.equals(lookupKey())) {
-                return this;
-            }
-            return ((ImmutableMember) this).withLookupKey(trimmedKey);
-        }
-    }
-
-    private static final class InvalidMemberException extends RuntimeException {
-        InvalidMemberException(String message) {
-            super(message);
-        }
-    }
 }

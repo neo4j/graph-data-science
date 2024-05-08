@@ -20,90 +20,25 @@
 package org.neo4j.gds.kmeans;
 
 import org.neo4j.gds.annotation.Parameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.List;
 import java.util.Optional;
 
 @Parameters
-public class KmeansParameters  {
-
-    private final int k;
-    private final int maxIterations;
-    private final double deltaThreshold;
-    private final int numberOfRestarts;
-    private final  boolean computeSilhouette;
-    private final int concurrency;
-    private final  String  nodeProperty;
-    private final KmeansSampler.SamplerType samplerType;
-    private final List<List<Double>> seedCentroids;
-    private final Optional<Long> randomSeed;
-
-    public KmeansParameters(
-        int k,
-        int maxIterations,
-        double deltaThreshold,
-        int numberOfRestarts,
-        boolean computeSilhouette,
-        int concurrency,
-        String nodeProperty,
-        KmeansSampler.SamplerType samplerType,
-        List<List<Double>> seedCentroids,
-        Optional<Long> randomSeed
-    ) {
-        this.k = k;
-        this.maxIterations = maxIterations;
-        this.deltaThreshold = deltaThreshold;
-        this.numberOfRestarts = numberOfRestarts;
-        this.computeSilhouette = computeSilhouette;
-        this.concurrency = concurrency;
-        this.nodeProperty = nodeProperty;
-        this.samplerType = samplerType;
-        this.seedCentroids = seedCentroids;
-        this.randomSeed = randomSeed;
-    }
-
-    public  int k(){
-        return  k;
-    }
-
-    public  int maxIterations(){
-        return  maxIterations;
-    }
-
-    public  double deltaThreshold(){
-        return  deltaThreshold;
-    }
-
-    public  int numberOfRestarts(){
-        return  numberOfRestarts;
-    }
-
-    public  boolean computeSilhouette(){
-        return  computeSilhouette;
-    }
-
-    public int concurrency(){
-        return concurrency;
-    }
-
-    public String nodeProperty(){
-        return  nodeProperty;
-    }
-
-    public Optional<Long> randomSeed(){
-        return  randomSeed;
-    }
-
-    public KmeansSampler.SamplerType samplerType(){
-        return samplerType;
-    }
-
-    public List<List<Double>> seedCentroids(){
-        return  seedCentroids;
-    }
-
+public record KmeansParameters(
+    int k,
+    int maxIterations,
+    double deltaThreshold,
+    int numberOfRestarts,
+    boolean computeSilhouette,
+    Concurrency concurrency,
+    String nodeProperty,
+    KmeansSampler.SamplerType samplerType,
+    List<List<Double>> seedCentroids,
+    Optional<Long> randomSeed
+) {
     public boolean isSeeded() {
         return !seedCentroids().isEmpty();
     }
-
 }

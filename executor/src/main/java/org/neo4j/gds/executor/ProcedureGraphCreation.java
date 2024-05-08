@@ -25,12 +25,13 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreLoader;
 import org.neo4j.gds.applications.graphstorecatalog.MemoryUsageValidator;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryRange;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -58,6 +59,11 @@ public class ProcedureGraphCreation<
     @Override
     public GraphStore graphStore() {
         return graphStoreLoader.graphStore();
+    }
+
+    @Override
+    public ResultStore resultStore() {
+        return graphStoreLoader.resultStore();
     }
 
     @Override

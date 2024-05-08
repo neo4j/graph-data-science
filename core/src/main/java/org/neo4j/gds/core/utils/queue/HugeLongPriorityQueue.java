@@ -20,8 +20,8 @@
 package org.neo4j.gds.core.utils.queue;
 
 import org.neo4j.gds.collections.primitive.PrimitiveLongIterable;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 
@@ -135,7 +135,7 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
      * Returns the element with the minimum cost from the queue in constant time.
      */
     public long top() {
-       
+
         if (isEmpty()) {
             throw new IndexOutOfBoundsException("Priority Queue is empty");
         }

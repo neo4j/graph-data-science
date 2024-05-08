@@ -21,16 +21,17 @@ package org.neo4j.gds.ml.models.randomforest;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
 import org.neo4j.gds.ml.decisiontree.DecisionTreeRegressorTrainer;
 import org.neo4j.gds.ml.decisiontree.DecisionTreeTrainerConfig;
@@ -48,20 +49,20 @@ import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.mem.Estimate.sizeOfInstance;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class RandomForestRegressorTrainer implements RegressorTrainer {
 
     private final RandomForestRegressorTrainerConfig config;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final SplittableRandom random;
     private final TerminationFlag terminationFlag;
     private final ProgressTracker progressTracker;
     private final LogLevel messageLogLevel;
 
     public RandomForestRegressorTrainer(
-        int concurrency,
+        Concurrency concurrency,
         RandomForestRegressorTrainerConfig config,
         Optional<Long> randomSeed,
         TerminationFlag terminationFlag,
@@ -105,7 +106,7 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
                             maxNumberOfBaggedFeatures,
                             config.numberOfSamplesRatio()
                         )
-                    ).times(concurrency)
+                    ).times(concurrency.value())
             )
             .build();
     }
@@ -198,7 +199,7 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
 
             var bootstrappedDatasetEstimation = MemoryRange
                 .of(HugeLongArray.memoryEstimation(usedNumberOfTrainingSamples))
-                .add(MemoryUsage.sizeOfBitset(usedNumberOfTrainingSamples));
+                .add(Estimate.sizeOfBitset(usedNumberOfTrainingSamples));
 
             return MemoryRange.of(sizeOfInstance(TrainDecisionTreeTask.class))
                 .add(FeatureBagger.memoryEstimation(numberOfBaggedFeatures))

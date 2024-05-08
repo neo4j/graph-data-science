@@ -26,6 +26,7 @@ import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -111,7 +112,7 @@ class CollapseMultiPathsTest {
             pathTemplates,
             false,
             RelationshipType.of("REL"),
-            2,
+            new Concurrency(2),
             DefaultPool.INSTANCE
 
         ).compute();
@@ -173,7 +174,7 @@ class CollapseMultiPathsTest {
             ),
             false,
             RelationshipType.of("REL"),
-            2,
+            new Concurrency(2),
             DefaultPool.INSTANCE
 
         ).compute();

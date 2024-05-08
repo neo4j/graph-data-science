@@ -19,12 +19,14 @@
  */
 package org.neo4j.gds.kmeans;
 
-import org.neo4j.gds.MemoryEstimateDefinition;
+import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeIntArray;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.Estimate;
+
+import java.util.List;
 
 public class KmeansMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
@@ -41,9 +43,9 @@ public class KmeansMemoryEstimateDefinition implements MemoryEstimateDefinition 
             .perNode("bestCommunities", HugeIntArray::memoryEstimation)
             .fixed(
                 "bestCentroids",
-                MemoryUsage.sizeOfArray(parameters.k(), MemoryUsage.sizeOfDoubleArray(fakeLength))
+                Estimate.sizeOfArray(parameters.k(), Estimate.sizeOfDoubleArray(fakeLength))
             )
-            .perNode("nodesInCluster", MemoryUsage::sizeOfLongArray)
+            .perNode("nodesInCluster", Estimate::sizeOfLongArray)
             .perNode("distanceFromCentroid", HugeDoubleArray::memoryEstimation)
             .add(ClusterManager.memoryEstimation(
                 parameters.k(),
@@ -56,11 +58,15 @@ public class KmeansMemoryEstimateDefinition implements MemoryEstimateDefinition 
         }
 
         if (parameters.isSeeded()) {
+            var sizeOfBoxedDouble = 8 + 8 + 8; // Double.BYTES + field + object
+            var sizeOfList = Estimate.sizeOfInstance(List.class);
             var centroids = parameters.seedCentroids();
-            builder.fixed("seededCentroids", MemoryUsage.sizeOf(centroids));
+            var sizeOfCentroids = centroids.stream()
+                .mapToLong(listOfDoubles -> sizeOfList + (long) listOfDoubles.size() * sizeOfBoxedDouble)
+                .sum();
+            builder.fixed("seededCentroids", sizeOfList + sizeOfCentroids);
         }
 
         return builder.build();
     }
-
 }

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.io.file.csv;
 
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.io.file.FileInput;
 import org.neo4j.gds.core.io.file.FileToGraphStoreImporter;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -29,7 +30,7 @@ import java.nio.file.Path;
 public class CsvToGraphStoreImporter extends FileToGraphStoreImporter {
 
     public CsvToGraphStoreImporter(
-        int concurrency,
+        Concurrency concurrency,
         Path importPath,
         Log log,
         TaskRegistryFactory taskRegistryFactory

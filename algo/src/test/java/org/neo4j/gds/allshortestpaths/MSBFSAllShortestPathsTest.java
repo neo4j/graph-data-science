@@ -95,7 +95,7 @@ class MSBFSAllShortestPathsTest {
 
         var hugeMSBFSAllShortestPaths = new MSBFSAllShortestPaths(
             graph,
-            ConcurrencyConfig.DEFAULT_CONCURRENCY,
+            ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY,
             DefaultPool.INSTANCE
         );
 

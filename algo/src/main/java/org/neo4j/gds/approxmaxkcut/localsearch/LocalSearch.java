@@ -25,6 +25,7 @@ import org.neo4j.gds.collections.ha.HugeByteArray;
 import org.neo4j.gds.collections.haa.HugeAtomicByteArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.concurrency.AtomicDouble;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.ParallelBytePageCreator;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
@@ -53,13 +54,13 @@ public class LocalSearch {
     private final List<Partition> degreePartition;
     private final ProgressTracker progressTracker;
     private final byte k;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final List<Long> minCommunitySizes;
 
     public LocalSearch(
         Graph graph,
         ApproxMaxKCut.Comparator comparator,
-        int concurrency,
+        Concurrency concurrency,
         byte k,
         List<Long> minCommunitySizes,
         int minBatchSize,

@@ -27,6 +27,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -57,7 +58,7 @@ public final class Louvain extends Algorithm<LouvainResult> {
 
     private final int maxLevels;
 
-    private final int concurrency;
+    private final Concurrency concurrency;
 
     private final int maxIterations;
 
@@ -67,7 +68,7 @@ public final class Louvain extends Algorithm<LouvainResult> {
 
     public Louvain(
         Graph graph,
-        int concurrency,
+        Concurrency concurrency,
         int maxIterations,
         double tolerance,
         int maxLevels,
