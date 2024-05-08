@@ -64,7 +64,7 @@ INCLUDED_ALGORITHMS = {
     "Fast Random Projection",
     "GraphSAGE",
     "Node2Vec",
-    "HashGNN"
+    "HashGNN",
 }
 
 conf_filename = "algorithms-conf.json"
@@ -74,23 +74,31 @@ with open(conf_filename) as conf_file:
     conf_json = json.load(conf_file)
 
     for algo in conf_json["algorithms"]:
-        # TODO: remove when all algorithms are included
+        # TODO: remove when all algorithms are included
         if algo["name"] not in INCLUDED_ALGORITHMS:
             continue
 
         adoc_filename = adoc_root / algo["page_path"] / "specific-configuration.adoc"
 
         with open(adoc_filename, "w") as adoc_file:
-            adoc_file.write(f"// DO NOT EDIT: File generated automatically by the {Path(__file__).name} script\n")
-            
+            adoc_file.write(
+                f"// DO NOT EDIT: File generated automatically by the {Path(__file__).name} script\n"
+            )
+
             for conf in algo["config"]:
-                name, type_, default, optional, description = conf["name"], conf["type"], conf["default"], conf["optional"], conf["description"]
+                name, type_, default, optional, description = (
+                    conf["name"],
+                    conf["type"],
+                    conf["default"],
+                    conf["optional"],
+                    conf["description"],
+                )
                 if name in LINKS:
                     name = BASE_LINK + LINKS[name] + f"[{name}]"
                 type_ = " or ".join(type_) if isinstance(type_, list) else type_
                 optional = "yes" if optional else "no"
                 default = "null" if default is None else default
-                
+
                 line = f"| {name} | {type_} | {default} | {optional} | {description}"
                 adoc_file.write(line + "\n")
 
