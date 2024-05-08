@@ -6,67 +6,21 @@ group = 'org.neo4j.gds'
 
 dependencies {
     annotationProcessor project(':annotations')
-//    annotationProcessor project(':config-generator')
-//    annotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
     annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
-//    annotationProcessor group: 'org.neo4j',                name: 'annotations',        version: ver.'neo4j'
-//
-//    compileOnly         group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
-    compileOnly         group: 'org.immutables',           name: 'value-annotations',  version: ver.'immutables'
-    compileOnly         group: 'org.jetbrains',            name: 'annotations',        version: ver.'jetbrains-annotations'
+
+    compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
+    compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
+    compileOnly group: 'org.neo4j',      name: 'neo4j-common',      version: ver.'neo4j'
     compileOnly project(':annotations')
-//    compileOnly project(':progress-tracking')
-//
-//    compileOnly group: 'org.neo4j', name: 'annotations', version: ver.'neo4j'
-    compileOnly group: 'org.neo4j', name: 'neo4j-common', version: ver.'neo4j'
-//    compileOnly group: 'org.neo4j', name: 'neo4j-unsafe', version: ver.'neo4j'
-//
-//    implementation project(':annotations')
-//    implementation project(':config-api')
+
     implementation project(':core-utils')
-//    implementation project(':licensing')
-//    implementation project(':logging')
-//    implementation project(':graph-schema-api')
-//    implementation project(':memory-usage')
-//    implementation project(':open-licensing')
     implementation project(':string-formatting')
-//    implementation project':collections')
-//    implementation project(':collections-memory-estimation')
-//    implementation project(':transaction')
     implementation project(':termination')
-//
     implementation project(':concurrency-validation-api')
-//
-    api(
-//            project(':neo4j-kernel-adapter'),
-//            project(':graph-projection-api'),
-//            project(':graph-dimensions'),
-//            project(':collections'),
-//
-            [group: 'org.agrona',              name: 'agrona',                   version: ver.'agrona'],
-//            [group: 'org.apache.commons',      name: 'commons-text',             version: ver.'commons-text'],
-//            [group: 'org.eclipse.collections', name: 'eclipse-collections-api',  version: ver.'eclipse-collections'],
-//            [group: 'org.eclipse.collections', name: 'eclipse-collections',      version: ver.'eclipse-collections'],
-//            [group: 'com.carrotsearch',        name: 'hppc',                     version: ver.'hppc'],
-//            [group: 'org.hdrhistogram',        name: 'HdrHistogram',             version: ver.'HdrHistogram'],
-    )
-//
-//    // TEST DEPENDENCIES
-//
-//    testCompileOnly group: 'org.immutables', name: 'builder', version: ver.'immutables'
-//
-//    testAnnotationProcessor project(':annotations')
-//    testAnnotationProcessor project(':config-generator')
-//    testAnnotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
-//
-//    testImplementation project(':legacy-cypher-projection')
-//    testImplementation project(':edition-api')
-//    testImplementation project(':progress-tracking')
-//    testImplementation project(':test-graph-loaders')
+
+    api group: 'org.agrona',              name: 'agrona',                   version: ver.'agrona'
+
+    // TEST DEPENDENCIES
     testImplementation project(':test-utils')
-//
-//    testImplementation group: 'net.jqwik',          name: 'jqwik',                  version: ver.'jqwik'
-//    testImplementation group: 'io.qala.datagen',    name: 'qala-datagen-junit5',    version: ver.'qala-datagen'
-//    testImplementation group: 'org.junit-pioneer',  name: 'junit-pioneer',          version: ver.'junit-pioneer'
     testImplementation group: 'net.jqwik',          name: 'jqwik',                  version: ver.'jqwik'
 }
