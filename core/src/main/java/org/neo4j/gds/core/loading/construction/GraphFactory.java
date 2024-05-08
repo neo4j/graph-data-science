@@ -92,7 +92,8 @@ public final class GraphFactory {
     ) {
         boolean labelInformation = nodeSchema
             .map(schema -> !(schema.availableLabels().isEmpty() && schema.containsOnlyAllNodesLabel()))
-            .or(() -> hasLabelInformation).orElse(false);
+            .or(() -> hasLabelInformation)
+            .orElse(false);
         var threadCount = concurrency.orElse(new Concurrency(1));
 
         var idMapBehavior = IdMapBehaviorServiceProvider.idMapBehavior();
@@ -128,7 +129,7 @@ public final class GraphFactory {
 
         return nodeSchema.isPresent()
             ? fromSchema(
-            maxOriginalNodeId,
+                maxOriginalNodeId,
                 maxIntermediateId,
                 idMapBuilder,
                 threadCount,
@@ -222,7 +223,8 @@ public final class GraphFactory {
         Optional<Boolean> skipDanglingRelationships,
         Optional<Concurrency> concurrency,
         Optional<Boolean> indexInverse,
-        Optional<ExecutorService> executorService
+        Optional<ExecutorService> executorService,
+        Optional<Boolean> usePooledBuilderProvider
     ) {
         var loadRelationshipProperties = !propertyConfigs.isEmpty();
 
@@ -242,12 +244,14 @@ public final class GraphFactory {
             .orientation(actualOrientation)
             .indexInverse(indexInverse.orElse(false));
 
-        propertyConfigs.forEach(propertyConfig -> projectionBuilder.addProperty(
-            propertyConfig.propertyKey(),
-            propertyConfig.propertyKey(),
-            DefaultValue.of(propertyConfig.defaultValue()),
-            propertyConfig.aggregation()
-        ));
+        propertyConfigs.forEach(
+            propertyConfig -> projectionBuilder.addProperty(
+                propertyConfig.propertyKey(),
+                propertyConfig.propertyKey(),
+                DefaultValue.of(propertyConfig.defaultValue()),
+                propertyConfig.aggregation()
+            )
+        );
 
         var projection = projectionBuilder.build();
 
@@ -319,7 +323,15 @@ public final class GraphFactory {
             singleTypeRelationshipsBuilderBuilder.inverseImporter(inverseImporter);
         }
 
-        return new RelationshipsBuilder(singleTypeRelationshipsBuilderBuilder.build(), skipDangling);
+        var singleTypeRelationshipsBuilder = singleTypeRelationshipsBuilderBuilder.build();
+
+        var localBuilderProvider = usePooledBuilderProvider.orElse(false)
+            ? LocalRelationshipsBuilderProvider
+                .pooled(singleTypeRelationshipsBuilder::threadLocalRelationshipsBuilder, finalConcurrency)
+            : LocalRelationshipsBuilderProvider
+                .threadLocal(singleTypeRelationshipsBuilder::threadLocalRelationshipsBuilder);
+
+        return new RelationshipsBuilder(singleTypeRelationshipsBuilder, localBuilderProvider, skipDangling);
     }
 
     /**
@@ -335,7 +347,8 @@ public final class GraphFactory {
         idMap.availableNodeLabels().forEach(nodeSchema::getOrCreateLabel);
 
         relationships.properties().ifPresent(relationshipPropertyStore -> {
-            assert relationshipPropertyStore.values().size() == 1: "Cannot instantiate graph with more than one relationship property.";
+            assert relationshipPropertyStore.values()
+                .size() == 1 : "Cannot instantiate graph with more than one relationship property.";
         });
 
         var relationshipSchema = MutableRelationshipSchema.empty();
@@ -359,11 +372,13 @@ public final class GraphFactory {
         var inverseTopology = relationships.inverseTopology();
 
         var properties = relationships.properties().map(relationshipPropertyStore -> {
-            assert relationshipPropertyStore.values().size() == 1: "Cannot instantiate graph with more than one relationship property.";
+            assert relationshipPropertyStore.values()
+                .size() == 1 : "Cannot instantiate graph with more than one relationship property.";
             return relationshipPropertyStore.values().iterator().next().values();
         });
         var inverseProperties = relationships.inverseProperties().map(relationshipPropertyStore -> {
-            assert relationshipPropertyStore.values().size() == 1: "Cannot instantiate graph with more than one relationship property.";
+            assert relationshipPropertyStore.values()
+                .size() == 1 : "Cannot instantiate graph with more than one relationship property.";
             return relationshipPropertyStore.values().iterator().next().values();
         });
 

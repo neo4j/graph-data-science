@@ -170,11 +170,13 @@ public final class GraphImporter {
             .nodeCount(graphStore.nodeCount())
             .relationshipCount(graphStore.relationshipCount())
             .projectMillis(projectMillis)
-            .configuration(this.config.asProcedureResultConfigurationField()
-                .entrySet()
-                .stream()
-                .filter(e -> e.getValue() != null)
-                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue)))
+            .configuration(
+                this.config.asProcedureResultConfigurationField()
+                    .entrySet()
+                    .stream()
+                    .filter(e -> e.getValue() != null)
+                    .collect(toMap(Map.Entry::getKey, Map.Entry::getValue))
+            )
             .query(this.query)
             .build();
     }
@@ -196,7 +198,8 @@ public final class GraphImporter {
             .orientation(orientation)
             .aggregation(Aggregation.NONE)
             .indexInverse(indexInverse)
-            .concurrency(this.config.readConcurrency());
+            .concurrency(this.config.readConcurrency())
+            .usePooledBuilderProvider(true);
 
         if (properties != null) {
             for (String propertyKey : properties.propertyKeys()) {

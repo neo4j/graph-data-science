@@ -22,7 +22,6 @@ package org.neo4j.gds.core.loading.construction;
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.compress.AdjacencyCompressor;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
-import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.ArrayList;
@@ -39,13 +38,17 @@ public class RelationshipsBuilder {
 
     private final PartialIdMap idMap;
     private final SingleTypeRelationshipsBuilder singleTypeRelationshipsBuilder;
-    private final AutoCloseableThreadLocal<ThreadLocalRelationshipsBuilder> threadLocalRelationshipsBuilders;
+    private final LocalRelationshipsBuilderProvider localBuilderProvider;
     private final boolean skipDanglingRelationships;
 
-    RelationshipsBuilder(SingleTypeRelationshipsBuilder singleTypeRelationshipsBuilder, boolean skipDanglingRelationships) {
+    RelationshipsBuilder(
+        SingleTypeRelationshipsBuilder singleTypeRelationshipsBuilder,
+        LocalRelationshipsBuilderProvider localBuilderProvider,
+        boolean skipDanglingRelationships
+    ) {
         this.singleTypeRelationshipsBuilder = singleTypeRelationshipsBuilder;
         this.idMap = singleTypeRelationshipsBuilder.partialIdMap();
-        this.threadLocalRelationshipsBuilders = AutoCloseableThreadLocal.withInitial(singleTypeRelationshipsBuilder::threadLocalRelationshipsBuilder);
+        this.localBuilderProvider = localBuilderProvider;
         this.skipDanglingRelationships = skipDanglingRelationships;
     }
 
@@ -96,7 +99,16 @@ public class RelationshipsBuilder {
 
     public boolean addFromInternal(long mappedSourceId, long mappedTargetId) {
         if (validateRelationships(mappedSourceId, mappedTargetId)) {
-            this.threadLocalRelationshipsBuilders.get().addRelationship(mappedSourceId, mappedTargetId);
+            LocalRelationshipsBuilderProvider.LocalRelationshipsBuilderSlot threadLocalBuilder = null;
+            try {
+                threadLocalBuilder = localBuilderProvider.acquire();
+                threadLocalBuilder.get().addRelationship(mappedSourceId, mappedTargetId);
+            } finally {
+                if (threadLocalBuilder != null) {
+                    threadLocalBuilder.release();
+                }
+            }
+
             return true;
         }
         return false;
@@ -104,11 +116,15 @@ public class RelationshipsBuilder {
 
     public boolean addFromInternal(long mappedSourceId, long mappedTargetId, double relationshipPropertyValue) {
         if (validateRelationships(mappedSourceId, mappedTargetId)) {
-            this.threadLocalRelationshipsBuilders.get().addRelationship(
-                mappedSourceId,
-                mappedTargetId,
-                relationshipPropertyValue
-            );
+            LocalRelationshipsBuilderProvider.LocalRelationshipsBuilderSlot threadLocalBuilder = null;
+            try {
+                threadLocalBuilder = localBuilderProvider.acquire();
+                threadLocalBuilder.get().addRelationship(mappedSourceId, mappedTargetId, relationshipPropertyValue);
+            } finally {
+                if (threadLocalBuilder != null) {
+                    threadLocalBuilder.release();
+                }
+            }
             return true;
         }
         return false;
@@ -116,11 +132,15 @@ public class RelationshipsBuilder {
 
     public boolean addFromInternal(long source, long target, double[] relationshipPropertyValues) {
         if (validateRelationships(source, target)) {
-            this.threadLocalRelationshipsBuilders.get().addRelationship(
-                source,
-                target,
-                relationshipPropertyValues
-            );
+            LocalRelationshipsBuilderProvider.LocalRelationshipsBuilderSlot threadLocalBuilder = null;
+            try {
+                threadLocalBuilder = localBuilderProvider.acquire();
+                threadLocalBuilder.get().addRelationship(source, target, relationshipPropertyValues);
+            } finally {
+                if (threadLocalBuilder != null) {
+                    threadLocalBuilder.release();
+                }
+            }
             return true;
         }
         return false;
@@ -143,7 +163,8 @@ public class RelationshipsBuilder {
         }
 
         var message = String.format(
-            Locale.US, "The following node ids are not present in the node id space: %s",
+            Locale.US,
+            "The following node ids are not present in the node id space: %s",
             StringJoining.join(strings)
         );
 
@@ -164,7 +185,11 @@ public class RelationshipsBuilder {
         Optional<AdjacencyCompressor.ValueMapper> mapper,
         Optional<LongConsumer> drainCountConsumer
     ) {
-        this.threadLocalRelationshipsBuilders.close();
+        try {
+            this.localBuilderProvider.close();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         return this.singleTypeRelationshipsBuilder.build(mapper, drainCountConsumer);
     }
 
