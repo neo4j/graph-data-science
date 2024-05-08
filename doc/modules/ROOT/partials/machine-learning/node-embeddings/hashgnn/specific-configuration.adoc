@@ -1,4 +1,4 @@
-// DO NOT EDIT: File generated automatically
+// DO NOT EDIT: File generated automatically by process_conf.py script
 | featureProperties | List of String | [] | yes | The names of the node properties that should be used as input features. All property names must exist in the projected graph and be of type Float or List of Float.
 | iterations | Integer | n/a | no | The number of iterations to run HashGNN. Must be at least 1.
 | embeddingDensity | Integer | n/a | no | The number of features to sample per node in each iteration. Called `K` in the original paper. Must be at least 1.

@@ -1,4 +1,4 @@
-// DO NOT EDIT: File generated automatically
+// DO NOT EDIT: File generated automatically by process_conf.py script
 | walkLength | Integer | 80 | yes | The number of steps in a single random walk.
 | walksPerNode | Integer | 10 | yes | The number of random walks generated for each node.
 | inOutFactor | Float | 1.0 | yes | Tendency of the random walk to stay close to the start node or fan out in the graph. Higher value means stay local.
