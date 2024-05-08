@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.compat;
 
-import org.neo4j.common.DependencyResolver;
 import org.neo4j.configuration.Config;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
@@ -29,21 +28,13 @@ import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
-import org.neo4j.io.pagecache.context.CursorContextFactory;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.scheduler.JobScheduler;
 
-import java.util.Optional;
 import java.util.function.Function;
 
 public interface Neo4jProxyApi {
-
-    @CompatSince(Neo4jVersion.V_5_12)
-    CursorContextFactory cursorContextFactory(Optional<PageCacheTracer> pageCacheTracer);
-
-    @CompatSince(Neo4jVersion.V_5_12)
-    DependencyResolver emptyDependencyResolver();
 
     @CompatSince(Neo4jVersion.V_5_14)
     String neo4jArrowServerAddressHeader();

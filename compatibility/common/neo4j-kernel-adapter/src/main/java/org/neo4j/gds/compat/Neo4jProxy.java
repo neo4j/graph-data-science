@@ -66,10 +66,7 @@ import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.internal.recordstorage.RecordIdType;
 import org.neo4j.io.fs.FileSystemAbstraction;
-import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.layout.Neo4jLayout;
-import org.neo4j.io.layout.recordstorage.RecordDatabaseLayout;
-import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.io.pagecache.context.CursorContextFactory;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
@@ -87,8 +84,6 @@ import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
 import org.neo4j.kernel.impl.query.QueryExecutionConfiguration;
 import org.neo4j.kernel.impl.query.TransactionalContext;
 import org.neo4j.kernel.impl.query.TransactionalContextFactory;
-import org.neo4j.kernel.impl.store.format.RecordFormatSelector;
-import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.transaction.log.EmptyLogTailMetadata;
 import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
 import org.neo4j.logging.Log;
@@ -134,7 +129,17 @@ public final class Neo4jProxy {
     }
 
     public static DependencyResolver emptyDependencyResolver() {
-        return IMPL.emptyDependencyResolver();
+        return new DependencyResolver() {
+            @Override
+            public <T> T resolveDependency(Class<T> type, SelectionStrategy selector) {
+                return null;
+            }
+
+            @Override
+            public boolean containsDependency(Class<?> type) {
+                return false;
+            }
+        };
     }
 
     public static String neo4jArrowServerAddressHeader() {
@@ -151,10 +156,6 @@ public final class Neo4jProxy {
 
     public static String metricsManagerClass() {
         return IMPL.metricsManagerClass();
-    }
-
-    private static CursorContextFactory cursorContextFactory(Optional<PageCacheTracer> pageCacheTracer) {
-        return IMPL.cursorContextFactory(pageCacheTracer);
     }
 
     public static CompatExecutionContext executionContext(KernelTransaction ktx) {
@@ -444,7 +445,7 @@ public final class Neo4jProxy {
                 TransactionLogInitializer.getLogFilesInitializer(),
                 new IndexImporterFactoryImpl(),
                 EmptyMemoryTracker.INSTANCE,
-                cursorContextFactory(Optional.empty())
+                CursorContextFactory.NULL_CONTEXT_FACTORY
             );
     }
 
@@ -634,23 +635,6 @@ public final class Neo4jProxy {
         return new GdsDatabaseManagementServiceBuilderImpl(storeDir);
     }
 
-    @SuppressForbidden(reason = "This is the compat specific use")
-    public static RecordFormats selectRecordFormatForStore(
-        DatabaseLayout databaseLayout,
-        FileSystemAbstraction fs,
-        PageCache pageCache,
-        LogService logService,
-        PageCacheTracer pageCacheTracer
-    ) {
-        return RecordFormatSelector.selectForStore(
-            (RecordDatabaseLayout) databaseLayout,
-            fs,
-            pageCache,
-            logService.getInternalLogProvider(),
-            cursorContextFactory(Optional.ofNullable(pageCacheTracer))
-        );
-    }
-
     public static String defaultDatabaseFormatSetting() {
         return GraphDatabaseSettings.db_format.defaultValue();
     }
@@ -683,26 +667,6 @@ public final class Neo4jProxy {
         LogService logService
     ) {
         return SslPolicyLoader.create(fileSystem, config, logService.getInternalLogProvider());
-    }
-
-    @SuppressForbidden(reason = "This is the compat specific use")
-    public static RecordFormats recordFormatSelector(
-        String databaseName,
-        Config databaseConfig,
-        FileSystemAbstraction fs,
-        LogService logService,
-        GraphDatabaseService databaseService
-    ) {
-        var neo4jLayout = Neo4jLayout.of(databaseConfig);
-        var recordDatabaseLayout = RecordDatabaseLayout.of(neo4jLayout, databaseName);
-        return RecordFormatSelector.selectForStoreOrConfigForNewDbs(
-            databaseConfig,
-            recordDatabaseLayout,
-            fs,
-            GraphDatabaseApiProxy.resolveDependency(databaseService, PageCache.class),
-            logService.getInternalLogProvider(),
-            GraphDatabaseApiProxy.resolveDependency(databaseService, CursorContextFactory.class)
-        );
     }
 
     public static UserFunctionSignature userFunctionSignature(

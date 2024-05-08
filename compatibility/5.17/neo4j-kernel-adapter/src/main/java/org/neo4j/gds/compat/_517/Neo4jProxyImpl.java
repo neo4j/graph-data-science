@@ -19,43 +19,13 @@
  */
 package org.neo4j.gds.compat._517;
 
-import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.compat.Neo4jProxyApi;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.Read;
-import org.neo4j.io.pagecache.context.CursorContextFactory;
-import org.neo4j.io.pagecache.context.FixedVersionContextSupplier;
-import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 
-import java.util.Optional;
 import java.util.function.Function;
 
 public final class Neo4jProxyImpl implements Neo4jProxyApi {
-
-    private static final DependencyResolver EMPTY_DEPENDENCY_RESOLVER = new DependencyResolver() {
-        @Override
-        public <T> T resolveDependency(Class<T> type, SelectionStrategy selector) {
-            return null;
-        }
-
-        @Override
-        public boolean containsDependency(Class<?> type) {
-            return false;
-        }
-    };
-
-    @Override
-    public DependencyResolver emptyDependencyResolver() {
-        return EMPTY_DEPENDENCY_RESOLVER;
-    }
-
-    @Override
-    public CursorContextFactory cursorContextFactory(Optional<PageCacheTracer> pageCacheTracer) {
-        return pageCacheTracer.map(cacheTracer -> new CursorContextFactory(
-            cacheTracer,
-            FixedVersionContextSupplier.EMPTY_CONTEXT_SUPPLIER
-        )).orElse(CursorContextFactory.NULL_CONTEXT_FACTORY);
-    }
 
     @Override
     public String neo4jArrowServerAddressHeader() {
