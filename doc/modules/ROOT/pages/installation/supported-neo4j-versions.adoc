@@ -16,6 +16,5 @@ If your version of GDS or Neo4j is not listed in the matrix, you should upgrade.
 | `5.16`           | `2.7`, `2.6`
 | `5.15`           | `2.7`, `2.6`
 | `5.14`           | `2.7`, `2.6`
-| `5.13`           | `2.7`, `2.6`
 | `4.4.9` or later | `2.6`
 |===
