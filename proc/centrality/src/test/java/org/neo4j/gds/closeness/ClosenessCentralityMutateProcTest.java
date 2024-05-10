@@ -36,6 +36,7 @@ import java.util.Map;
 
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class ClosenessCentralityMutateProcTest extends BaseProcTest {
@@ -138,17 +139,19 @@ class ClosenessCentralityMutateProcTest extends BaseProcTest {
 
             assertThat(row.get("configuration")).isNotNull();
 
-            assertThat(row.get("centralityDistribution")).isEqualTo(Map.of(
-                "max", 1.0000038146972656,
-                "mean", 0.6256675720214844,
-                "min", 0.5882339477539062,
-                "p50", 0.5882339477539062,
-                "p75", 0.5882339477539062,
-                "p90", 0.5882339477539062,
-                "p95", 1.0000038146972656,
-                "p99", 1.0000038146972656,
-                "p999", 1.0000038146972656
-            ));
+            assertThat(row.get("centralityDistribution"))
+                .asInstanceOf(MAP)
+                .containsExactlyInAnyOrderEntriesOf(Map.of(
+                    "max", 1.000007629394531,
+                    "mean", 0.6256675720214844,
+                    "min", 0.5882339477539062,
+                    "p50", 0.5882339477539062,
+                    "p75", 0.5882339477539062,
+                    "p90", 0.5882339477539062,
+                    "p95", 1.0000038146972656,
+                    "p99", 1.0000038146972656,
+                    "p999", 1.0000038146972656
+                ));
         });
 
         String mutateValidationQuery = formatWithLocale(

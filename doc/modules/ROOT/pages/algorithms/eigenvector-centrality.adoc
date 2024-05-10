@@ -368,7 +368,7 @@ RETURN centralityDistribution.max AS max
 [opts="header",cols="1"]
 |===
 | max
-| 0.7465581893920898
+| 0.7465591431
 |===
 --
 

@@ -28,6 +28,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 
 class HarmonicCentralityStatsProcTest extends BaseProcTest {
 
@@ -61,17 +62,19 @@ class HarmonicCentralityStatsProcTest extends BaseProcTest {
                 .isNotNull()
                 .isInstanceOf(Map.class);
 
-            assertThat(row.get("centralityDistribution")).isEqualTo(Map.of(
-                "max", 0.375,
-                "mean", 0.175,
-                "min", 0.0,
-                "p50", 0.25,
-                "p75", 0.25,
-                "p90", 0.375,
-                "p95", 0.375,
-                "p99", 0.375,
-                "p999", 0.375
-            ));
+            assertThat(row.get("centralityDistribution"))
+                .asInstanceOf(MAP)
+                .containsExactlyInAnyOrderEntriesOf(Map.of(
+                    "max", 0.37500190734863276,
+                    "mean", 0.175,
+                    "min", 0.0,
+                    "p50", 0.25,
+                    "p75", 0.25,
+                    "p90", 0.375,
+                    "p95", 0.375,
+                    "p99", 0.375,
+                    "p999", 0.375
+                ));
         });
 
         assertThat(rowCount)
