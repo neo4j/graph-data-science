@@ -1,0 +1,12 @@
+# Configuration parameters
+
+The files in this folder contain details about configurations parameters.
+They are meant to be used to partially generate documentation.
+
+At this moment, only algorithm configurations are covered.
+
+## How to
+
+Run the `process_conf.py` script with `python process_conf.py`.
+If there are no changes in the configuration files, running this script will have no effect. 
+Check for any changes for example by running `git status`.
