@@ -84,7 +84,7 @@ ext {
         'jetbrains-annotations': '24.1.0',
         'jjwt'                 : '0.12.5',
         'jol'                  : '0.17',
-        'jqwik'                : '1.8.3',
+        'jqwik'                : '1.8.4',
         'junit-pioneer'        : '2.2.0',
         'junit5bom'            : '5.10.2',
         'log4j'                : log4js[neo4j_minor],
