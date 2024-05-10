@@ -93,7 +93,7 @@ ext {
         'mockito-junit-jupiter': '5.11.0',
         'neo4j'                : properties.getOrDefault('neo4jVersion', neo4jDefault),
         'opencypher-front-end' : '9.0.20210312',
-        'picocli'              : '4.7.5',
+        'picocli'              : '4.7.6',
         'qala-datagen'         : '2.5.1',
         'record-builder'       : '41',
         'sb-contrib'           : '7.6.3',
