@@ -29,13 +29,12 @@ class ManyTargets implements Targets{
      private int targetCount;
      public  ManyTargets(List<Long> targetNodesList){
 
-            long maxNodeId = 0;
-            for (var targetNode : targetNodesList){
-                maxNodeId = Math.max(targetNode, maxNodeId);
-            }
+         long maxNodeId = 0;
+         for (var targetNode : targetNodesList) {
+             maxNodeId = Math.max(targetNode, maxNodeId);
+         }
          bitSet = new BitSet(maxNodeId + 1);
-
-            targetNodesList.forEach(bitSet::set);
+         targetNodesList.forEach(bitSet::set);
          targetCount = targetNodesList.size();
      }
      @Override
