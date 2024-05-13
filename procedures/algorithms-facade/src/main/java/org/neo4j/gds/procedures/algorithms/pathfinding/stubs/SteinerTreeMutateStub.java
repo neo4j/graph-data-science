@@ -44,11 +44,6 @@ public class SteinerTreeMutateStub implements MutateStub<SteinerTreeMutateConfig
     }
 
     @Override
-    public void validateConfiguration(Map<String, Object> configuration) {
-        genericStub.validateConfiguration(SteinerTreeMutateConfig::of, configuration);
-    }
-
-    @Override
     public SteinerTreeMutateConfig parseConfiguration(Map<String, Object> configuration) {
         return genericStub.parseConfiguration(SteinerTreeMutateConfig::of, configuration);
     }

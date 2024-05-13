@@ -44,11 +44,6 @@ public class DepthFirstSearchMutateStub implements MutateStub<DfsMutateConfig, P
     }
 
     @Override
-    public void validateConfiguration(Map<String, Object> configuration) {
-        genericStub.validateConfiguration(DfsMutateConfig::of, configuration);
-    }
-
-    @Override
     public DfsMutateConfig parseConfiguration(Map<String, Object> configuration) {
         return genericStub.parseConfiguration(DfsMutateConfig::of, configuration);
     }

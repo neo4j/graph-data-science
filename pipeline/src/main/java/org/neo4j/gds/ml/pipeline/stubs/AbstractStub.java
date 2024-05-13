@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.ml.pipeline.stubs;
 
-import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
+import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.ml.pipeline.Stub;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
@@ -32,14 +32,6 @@ import java.util.Map;
  * Look at how regular the implementations are: can prolly be generated.
  */
 abstract class AbstractStub<CONFIGURATION, RESULT> implements Stub {
-    @Override
-    public void validateBeforeCreatingNodePropertyStep(
-        AlgorithmsProcedureFacade facade,
-        Map<String, Object> configuration
-    ) {
-        stub(facade).validateConfiguration(configuration);
-    }
-
     @Override
     public MemoryEstimation getMemoryEstimation(
         AlgorithmsProcedureFacade facade,

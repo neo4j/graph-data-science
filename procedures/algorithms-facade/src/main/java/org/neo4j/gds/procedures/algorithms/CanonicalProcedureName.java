@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline;
+package org.neo4j.gds.procedures.algorithms;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -26,7 +26,7 @@ import java.util.Locale;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-final class CanonicalProcedureName {
+public final class CanonicalProcedureName {
     private final String value;
 
     private CanonicalProcedureName(String value) {
@@ -34,7 +34,7 @@ final class CanonicalProcedureName {
     }
 
     /**
-     * Canonical form: gds.shortestpath.dijkstra.mutate (notice the lower case p in shortestpath)
+     * Canonical form: gds.shortestpath.dijkstra (notice the lower case p in shortestpath)
      * Can come from:
      * <ul>
      *     <li>gds.shortestPath.dijkstra.mutate</li>
@@ -43,15 +43,15 @@ final class CanonicalProcedureName {
      *     <li>gds.shortestPath.dijkstra</li>
      * </ul>
      */
-    static CanonicalProcedureName parse(String input) {
+    public static CanonicalProcedureName parse(String input) {
         input = input.toLowerCase(Locale.ROOT);
         input = !input.startsWith("gds.") ? formatWithLocale("gds.%s", input) : input;
         input = !input.endsWith(".mutate") ? formatWithLocale("%s.mutate", input) : input;
 
-        return new CanonicalProcedureName(input);
+        return new CanonicalProcedureName(input.substring(0, input.length() - ".mutate".length()));
     }
 
-    String getValue() {
+    public String getValue() {
         return value;
     }
 
@@ -63,5 +63,9 @@ final class CanonicalProcedureName {
     @Override
     public boolean equals(Object obj) {
         return EqualsBuilder.reflectionEquals(this, obj);
+    }
+
+    boolean matches(String identifier) {
+        return value.equals(identifier);
     }
 }

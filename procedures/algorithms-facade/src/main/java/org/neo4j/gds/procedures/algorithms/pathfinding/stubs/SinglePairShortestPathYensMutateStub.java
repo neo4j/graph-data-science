@@ -45,11 +45,6 @@ public class SinglePairShortestPathYensMutateStub implements MutateStub<Shortest
     }
 
     @Override
-    public void validateConfiguration(Map<String, Object> configuration) {
-        genericStub.validateConfiguration(ShortestPathYensMutateConfig::of, configuration);
-    }
-
-    @Override
     public ShortestPathYensMutateConfig parseConfiguration(Map<String, Object> configuration) {
         return genericStub.parseConfiguration(ShortestPathYensMutateConfig::of, configuration);
     }

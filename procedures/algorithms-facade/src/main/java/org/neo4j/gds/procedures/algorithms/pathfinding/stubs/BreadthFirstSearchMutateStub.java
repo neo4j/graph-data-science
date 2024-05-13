@@ -44,11 +44,6 @@ public class BreadthFirstSearchMutateStub implements MutateStub<BfsMutateConfig,
     }
 
     @Override
-    public void validateConfiguration(Map<String, Object> configuration) {
-        genericStub.validateConfiguration(BfsMutateConfig::of, configuration);
-    }
-
-    @Override
     public BfsMutateConfig parseConfiguration(Map<String, Object> configuration) {
         return genericStub.parseConfiguration(BfsMutateConfig::of, configuration);
     }

@@ -47,11 +47,6 @@ public class FilteredNodeSimilarityMutateStub implements MutateStub<FilteredNode
     }
 
     @Override
-    public void validateConfiguration(Map<String, Object> configuration) {
-        genericStub.validateConfiguration(FilteredNodeSimilarityMutateConfig::of, configuration);
-    }
-
-    @Override
     public FilteredNodeSimilarityMutateConfig parseConfiguration(Map<String, Object> configuration) {
         return genericStub.parseConfiguration(FilteredNodeSimilarityMutateConfig::of, configuration);
     }

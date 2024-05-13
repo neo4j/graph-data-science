@@ -19,36 +19,25 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
-import org.neo4j.gds.ml.pipeline.stubs.BellmanFordStub;
-import org.neo4j.gds.ml.pipeline.stubs.BetaClosenessCentralityStub;
-import org.neo4j.gds.ml.pipeline.stubs.BetweennessCentralityStub;
-import org.neo4j.gds.ml.pipeline.stubs.BreadthFirstSearchStub;
-import org.neo4j.gds.ml.pipeline.stubs.ClosenessCentralityStub;
-import org.neo4j.gds.ml.pipeline.stubs.DepthFirstSearchStub;
-import org.neo4j.gds.ml.pipeline.stubs.FilteredKnnStub;
-import org.neo4j.gds.ml.pipeline.stubs.FilteredNodeSimilarityStub;
-import org.neo4j.gds.ml.pipeline.stubs.KnnStub;
-import org.neo4j.gds.ml.pipeline.stubs.NodeSimilarityStub;
-import org.neo4j.gds.ml.pipeline.stubs.SinglePairShortestPathAStarStub;
-import org.neo4j.gds.ml.pipeline.stubs.SinglePairShortestPathDijkstraStub;
-import org.neo4j.gds.ml.pipeline.stubs.SinglePairShortestPathYensStub;
-import org.neo4j.gds.ml.pipeline.stubs.SingleSourceShortestPathDeltaStub;
-import org.neo4j.gds.ml.pipeline.stubs.SingleSourceShortestPathDijkstraStub;
-import org.neo4j.gds.ml.pipeline.stubs.SpanningTreeStub;
-import org.neo4j.gds.ml.pipeline.stubs.SteinerTreeStub;
-import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+import org.neo4j.gds.configuration.DefaultsConfiguration;
+import org.neo4j.gds.configuration.LimitsConfiguration;
+import org.neo4j.gds.procedures.algorithms.Algorithm;
+import org.neo4j.gds.procedures.algorithms.CanonicalProcedureName;
+import org.neo4j.gds.procedures.algorithms.LabelForProgressTracking;
+import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 final class NodePropertyStepFactoryUsingStubs {
     private static volatile NodePropertyStepFactoryUsingStubs INSTANCE = null;
 
-    private final Map<CanonicalProcedureName, Stub> supportedProcedures;
+    private final StubbyHolder stubbyHolder = new StubbyHolder();
 
-    private NodePropertyStepFactoryUsingStubs(Map<CanonicalProcedureName, Stub> supportedProcedures) {
-        this.supportedProcedures = supportedProcedures;
+    private final ValidationService validationService;
+
+    private NodePropertyStepFactoryUsingStubs(ValidationService validationService) {
+        this.validationService = validationService;
     }
 
     /**
@@ -77,27 +66,15 @@ final class NodePropertyStepFactoryUsingStubs {
     }
 
     private static NodePropertyStepFactoryUsingStubs create() {
-        Map<CanonicalProcedureName, Stub> supportedProcedures = new HashMap<>();
+        // not great, one day these should be injected
+        var configurationParser = new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance);
+        var validationService = new ValidationService(
+            DefaultsConfiguration.Instance,
+            LimitsConfiguration.Instance,
+            configurationParser
+        );
 
-        supportedProcedures.put(CanonicalProcedureName.parse("gds.allshortestpaths.delta.mutate"), new SingleSourceShortestPathDeltaStub());
-        supportedProcedures.put(CanonicalProcedureName.parse("gds.allshortestpaths.dijkstra.mutate"), new SingleSourceShortestPathDijkstraStub());
-        supportedProcedures.put(CanonicalProcedureName.parse("gds.bellmanford.mutate"), new BellmanFordStub());
-        supportedProcedures.put(CanonicalProcedureName.parse("gds.betweenness.mutate"), new BetweennessCentralityStub());
-        supportedProcedures.put(CanonicalProcedureName.parse("gds.beta.closeness.mutate"), new BetaClosenessCentralityStub());
-        supportedProcedures.put(CanonicalProcedureName.parse("gds.bfs.mutate"), new BreadthFirstSearchStub());
-        supportedProcedures.put(CanonicalProcedureName.parse("gds.closeness.mutate"), new ClosenessCentralityStub());
-        supportedProcedures.put(CanonicalProcedureName.parse("gds.dfs.mutate"), new DepthFirstSearchStub());
-        supportedProcedures.put(CanonicalProcedureName.parse("gds.knn.mutate"), new KnnStub());
-        supportedProcedures.put(CanonicalProcedureName.parse("gds.knn.filtered.mutate"), new FilteredKnnStub());
-        supportedProcedures.put(CanonicalProcedureName.parse("gds.nodesimilarity.filtered.mutate"), new FilteredNodeSimilarityStub());
-        supportedProcedures.put(CanonicalProcedureName.parse("gds.nodesimilarity.mutate"), new NodeSimilarityStub());
-        supportedProcedures.put(CanonicalProcedureName.parse("gds.shortestpath.astar.mutate"), new SinglePairShortestPathAStarStub());
-        supportedProcedures.put(CanonicalProcedureName.parse("gds.shortestpath.dijkstra.mutate"), new SinglePairShortestPathDijkstraStub());
-        supportedProcedures.put(CanonicalProcedureName.parse("gds.shortestpath.yens.mutate"), new SinglePairShortestPathYensStub());
-        supportedProcedures.put(CanonicalProcedureName.parse("gds.spanningtree.mutate"), new SpanningTreeStub());
-        supportedProcedures.put(CanonicalProcedureName.parse("gds.steinertree.mutate"), new SteinerTreeStub());
-
-        return new NodePropertyStepFactoryUsingStubs(supportedProcedures);
+        return new NodePropertyStepFactoryUsingStubs(validationService);
     }
 
     /**
@@ -108,11 +85,16 @@ final class NodePropertyStepFactoryUsingStubs {
     boolean handles(String procedureName) {
         var canonicalProcedureName = CanonicalProcedureName.parse(procedureName);
 
-        return supportedProcedures.containsKey(canonicalProcedureName);
+        try {
+            Algorithm.from(canonicalProcedureName);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+
+        return true;
     }
 
     ExecutableNodePropertyStep createNodePropertyStep(
-        AlgorithmsProcedureFacade facade,
         String procedureName,
         Map<String, Object> configuration,
         List<String> contextNodeLabels,
@@ -120,22 +102,27 @@ final class NodePropertyStepFactoryUsingStubs {
     ) {
         var canonicalProcedureName = CanonicalProcedureName.parse(procedureName);
 
-        // identify stub
-        var stub = supportedProcedures.get(canonicalProcedureName);
+        var algorithm = Algorithm.from(canonicalProcedureName);
 
-        // parse/ validate
-        stub.validateBeforeCreatingNodePropertyStep(facade, configuration);
+        validationService.validate(algorithm, configuration);
+
+        var label = LabelForProgressTracking.from(algorithm);
 
         // create step
         return new StubPoweredNodePropertyStep(
             canonicalProcedureName,
             configuration,
             contextNodeLabels,
-            contextRelationshipTypes
+            contextRelationshipTypes,
+            label
         );
     }
 
     Stub getStub(String procedureName) {
-        return supportedProcedures.get(CanonicalProcedureName.parse(procedureName));
+        var canonicalProcedureName = CanonicalProcedureName.parse(procedureName);
+
+        var algorithm = Algorithm.from(canonicalProcedureName);
+
+        return stubbyHolder.get(algorithm);
     }
 }

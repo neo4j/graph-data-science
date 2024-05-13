@@ -23,7 +23,6 @@ import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
-import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraMutateConfig;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
@@ -43,11 +42,6 @@ public class SinglePairShortestPathAStarMutateStub implements MutateStub<Shortes
     ) {
         this.genericStub = genericStub;
         this.applicationsFacade = applicationsFacade;
-    }
-
-    @Override
-    public void validateConfiguration(Map<String, Object> configuration) {
-        genericStub.validateConfiguration(ShortestPathDijkstraMutateConfig::of, configuration);
     }
 
     @Override

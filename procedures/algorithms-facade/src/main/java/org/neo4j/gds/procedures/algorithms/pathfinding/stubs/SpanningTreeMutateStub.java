@@ -44,11 +44,6 @@ public class SpanningTreeMutateStub implements MutateStub<SpanningTreeMutateConf
     }
 
     @Override
-    public void validateConfiguration(Map<String, Object> configuration) {
-        genericStub.validateConfiguration(SpanningTreeMutateConfig::of, configuration);
-    }
-
-    @Override
     public SpanningTreeMutateConfig parseConfiguration(Map<String, Object> configuration) {
         return genericStub.parseConfiguration(SpanningTreeMutateConfig::of, configuration);
     }

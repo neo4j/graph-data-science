@@ -47,11 +47,6 @@ public class FilteredKnnMutateStub implements MutateStub<FilteredKnnMutateConfig
     }
 
     @Override
-    public void validateConfiguration(Map<String, Object> configuration) {
-        genericStub.validateConfiguration(FilteredKnnMutateConfig::of, configuration);
-    }
-
-    @Override
     public FilteredKnnMutateConfig parseConfiguration(Map<String, Object> configuration) {
         return genericStub.parseConfiguration(FilteredKnnMutateConfig::of, configuration);
     }

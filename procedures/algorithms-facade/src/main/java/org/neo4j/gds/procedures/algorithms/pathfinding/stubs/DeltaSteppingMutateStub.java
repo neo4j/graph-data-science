@@ -45,11 +45,6 @@ public class DeltaSteppingMutateStub implements MutateStub<AllShortestPathsDelta
     }
 
     @Override
-    public void validateConfiguration(Map<String, Object> configuration) {
-        genericStub.validateConfiguration(AllShortestPathsDeltaMutateConfig::of, configuration);
-    }
-
-    @Override
     public AllShortestPathsDeltaMutateConfig parseConfiguration(Map<String, Object> configuration) {
         return genericStub.parseConfiguration(AllShortestPathsDeltaMutateConfig::of, configuration);
     }

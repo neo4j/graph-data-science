@@ -44,11 +44,6 @@ public class BellmanFordMutateStub implements MutateStub<BellmanFordMutateConfig
     }
 
     @Override
-    public void validateConfiguration(Map<String, Object> configuration) {
-        genericStub.validateConfiguration(BellmanFordMutateConfig::of, configuration);
-    }
-
-    @Override
     public BellmanFordMutateConfig parseConfiguration(Map<String, Object> configuration) {
         return genericStub.parseConfiguration(BellmanFordMutateConfig::of, configuration);
     }

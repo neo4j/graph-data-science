@@ -30,12 +30,6 @@ import java.util.stream.Stream;
  */
 public interface MutateStub<CONFIGURATION, RESULT> {
     /**
-     * For pipelines, when adding steps, we need to validate them without considering the current user.
-     * So we effectively get validation against global defaults and limits.
-     */
-    void validateConfiguration(Map<String, Object> configuration);
-
-    /**
      * Bog-standard configuration parsing with implicit validation,
      * using the current user and globally configured defaults and limits
      */

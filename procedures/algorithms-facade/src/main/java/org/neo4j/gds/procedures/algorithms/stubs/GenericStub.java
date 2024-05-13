@@ -27,7 +27,6 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.Username;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.AlgorithmHandle;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
@@ -60,22 +59,6 @@ public class GenericStub {
         this.configurationParser = configurationParser;
         this.user = user;
         this.algorithmEstimationTemplate = algorithmEstimationTemplate;
-    }
-
-    /**
-     * @see org.neo4j.gds.procedures.algorithms.stubs.MutateStub#validateConfiguration(java.util.Map)
-     */
-    public <CONFIGURATION extends AlgoBaseConfig> void validateConfiguration(
-        Function<CypherMapWrapper, CONFIGURATION> parser,
-        Map<String, Object> configuration
-    ) {
-        configurationParser.parse(
-            defaultsConfiguration,
-            limitsConfiguration,
-            Username.EMPTY_USERNAME.username(),
-            configuration,
-            (__, cmw) -> parser.apply(cmw)
-        );
     }
 
     /**

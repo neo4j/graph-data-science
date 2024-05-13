@@ -45,11 +45,6 @@ public class SinglePairShortestPathDijkstraMutateStub implements MutateStub<Shor
     }
 
     @Override
-    public void validateConfiguration(Map<String, Object> configuration) {
-        genericStub.validateConfiguration(ShortestPathDijkstraMutateConfig::of, configuration);
-    }
-
-    @Override
     public ShortestPathDijkstraMutateConfig parseConfiguration(Map<String, Object> configuration) {
         return genericStub.parseConfiguration(ShortestPathDijkstraMutateConfig::of, configuration);
     }

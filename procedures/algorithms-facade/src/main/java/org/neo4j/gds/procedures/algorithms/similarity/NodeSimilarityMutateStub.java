@@ -47,11 +47,6 @@ public class NodeSimilarityMutateStub implements MutateStub<NodeSimilarityMutate
     }
 
     @Override
-    public void validateConfiguration(Map<String, Object> configuration) {
-        genericStub.validateConfiguration(NodeSimilarityMutateConfig::of, configuration);
-    }
-
-    @Override
     public NodeSimilarityMutateConfig parseConfiguration(Map<String, Object> configuration) {
         return genericStub.parseConfiguration(NodeSimilarityMutateConfig::of, configuration);
     }

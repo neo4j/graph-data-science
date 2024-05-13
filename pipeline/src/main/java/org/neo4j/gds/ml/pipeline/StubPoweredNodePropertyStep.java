@@ -30,6 +30,8 @@ import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.CanonicalProcedureName;
+import org.neo4j.gds.procedures.algorithms.LabelForProgressTracking;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -47,17 +49,20 @@ class StubPoweredNodePropertyStep implements ExecutableNodePropertyStep {
     private final Map<String, Object> configuration;
     private final List<String> contextNodeLabels;
     private final List<String> contextRelationshipTypes;
+    private final LabelForProgressTracking labelForProgressTracking;
 
     StubPoweredNodePropertyStep(
         CanonicalProcedureName canonicalProcedureName,
         Map<String, Object> configuration,
         List<String> contextNodeLabels,
-        List<String> contextRelationshipTypes
+        List<String> contextRelationshipTypes,
+        LabelForProgressTracking labelForProgressTracking
     ) {
         this.canonicalProcedureName = canonicalProcedureName;
         this.configuration = configuration;
         this.contextNodeLabels = contextNodeLabels;
         this.contextRelationshipTypes = contextRelationshipTypes;
+        this.labelForProgressTracking = labelForProgressTracking;
     }
 
     @Override
@@ -84,9 +89,12 @@ class StubPoweredNodePropertyStep implements ExecutableNodePropertyStep {
         return configuration;
     }
 
+    /**
+     * We happen to know that these are always mutate mode procedures
+     */
     @Override
     public String procName() {
-        return canonicalProcedureName.getValue();
+        return canonicalProcedureName.getValue() + ".mutate";
     }
 
     @Override
@@ -107,7 +115,7 @@ class StubPoweredNodePropertyStep implements ExecutableNodePropertyStep {
             return stub.getMemoryEstimation(algorithmsProcedureFacade, username, configCopy);
         } catch (MemoryEstimationNotImplementedException exception) {
             // If a single node property step cannot be estimated, we ignore this step in the estimation
-            return MemoryEstimations.of(canonicalProcedureName.getValue(), MemoryRange.of(0));
+            return MemoryEstimations.of(canonicalProcedureName.getValue() + ".mutate", MemoryRange.of(0));
         }
     }
 
@@ -123,5 +131,20 @@ class StubPoweredNodePropertyStep implements ExecutableNodePropertyStep {
         configWithContext.put(CONTEXT_RELATIONSHIP_TYPES, contextRelationshipTypes);
 
         return Map.of("name", procName(), "config", configWithContext);
+    }
+
+    @Override
+    public List<String> contextNodeLabels() {
+        return contextNodeLabels;
+    }
+
+    @Override
+    public List<String> contextRelationshipTypes() {
+        return contextRelationshipTypes;
+    }
+
+    @Override
+    public String rootTaskName() {
+        return labelForProgressTracking.value;
     }
 }

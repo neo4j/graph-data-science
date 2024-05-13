@@ -48,11 +48,6 @@ public class ClosenessCentralityMutateStub implements MutateStub<ClosenessCentra
     }
 
     @Override
-    public void validateConfiguration(Map<String, Object> configuration) {
-        genericStub.validateConfiguration(ClosenessCentralityMutateConfig::of, configuration);
-    }
-
-    @Override
     public ClosenessCentralityMutateConfig parseConfiguration(Map<String, Object> configuration) {
         return genericStub.parseConfiguration(ClosenessCentralityMutateConfig::of, configuration);
     }

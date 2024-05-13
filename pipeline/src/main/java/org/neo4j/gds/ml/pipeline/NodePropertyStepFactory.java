@@ -27,14 +27,12 @@ import org.neo4j.gds.procedures.algorithms.configuration.AlgoConfigParser;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallableFinder;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
-import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.neo4j.gds.ml.pipeline.NodePropertyStepContextConfig.CONTEXT_NODE_LABELS;
 import static org.neo4j.gds.ml.pipeline.NodePropertyStepContextConfig.CONTEXT_RELATIONSHIP_TYPES;
@@ -65,7 +63,6 @@ public final class NodePropertyStepFactory {
         var contextConfig = NodePropertyStepContextConfig.of(contextConfigMap);
 
         return createNodePropertyStep(
-            Optional.empty(),
             procConfigMap,
             taskName,
             contextConfig.contextNodeLabels(),
@@ -80,7 +77,6 @@ public final class NodePropertyStepFactory {
         List<String> contextRelationshipTypes
     ) {
         return createNodePropertyStep(
-            Optional.empty(),
             procConfigMap,
             taskName,
             contextNodeLabels,
@@ -88,11 +84,7 @@ public final class NodePropertyStepFactory {
         );
     }
 
-    /**
-     * @param facade optional that needs to be present when needed :shrug: short term thinking, will improve
-     */
     private static ExecutableNodePropertyStep createNodePropertyStep(
-        Optional<AlgorithmsProcedureFacade> facade,
         Map<String, Object> procConfigMap,
         String taskName,
         List<String> contextNodeLabels,
@@ -104,9 +96,7 @@ public final class NodePropertyStepFactory {
 
         // this is the last possible moment to decide to use the new approach
         if (nodePropertyStepFactoryUsingStubs.handles(taskName)) {
-            //noinspection OptionalGetWithoutIsPresent
             return nodePropertyStepFactoryUsingStubs.createNodePropertyStep(
-                facade.get(),
                 taskName,
                 procConfigMap,
                 contextNodeLabels,

@@ -1,0 +1,69 @@
+/*
+ * Copyright (c) "Neo4j"
+ * Neo4j Sweden AB [http://neo4j.com]
+ *
+ * This file is part of Neo4j.
+ *
+ * Neo4j is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.neo4j.gds.ml.pipeline;
+
+import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
+import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
+import org.neo4j.gds.paths.bellmanford.BellmanFordMutateConfig;
+import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaMutateConfig;
+import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraMutateConfig;
+import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraMutateConfig;
+import org.neo4j.gds.paths.traverse.BfsMutateConfig;
+import org.neo4j.gds.paths.traverse.DfsMutateConfig;
+import org.neo4j.gds.paths.yens.config.ShortestPathYensMutateConfig;
+import org.neo4j.gds.procedures.algorithms.Algorithm;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnMutateConfig;
+import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityMutateConfig;
+import org.neo4j.gds.similarity.knn.KnnMutateConfig;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateConfig;
+import org.neo4j.gds.spanningtree.SpanningTreeMutateConfig;
+import org.neo4j.gds.steiner.SteinerTreeMutateConfig;
+
+import java.util.function.Function;
+
+/**
+ * One-stop shop for how to turn user input into configuration for a given algorithm.
+ */
+public class ConfigurationParsers {
+    public Function<CypherMapWrapper, AlgoBaseConfig> lookup(Algorithm algorithm) {
+        return switch (algorithm) {
+            case AStar -> ShortestPathAStarMutateConfig::of;
+            case BellmanFord -> BellmanFordMutateConfig::of;
+            case BetaClosenessCentrality -> ClosenessCentralityMutateConfig::of;
+            case BetweennessCentrality -> BetweennessCentralityMutateConfig::of;
+            case BFS -> BfsMutateConfig::of;
+            case ClosenessCentrality -> ClosenessCentralityMutateConfig::of;
+            case DeltaStepping -> AllShortestPathsDeltaMutateConfig::of;
+            case DFS -> DfsMutateConfig::of;
+            case Dijkstra -> ShortestPathDijkstraMutateConfig::of;
+            case FilteredKNN -> FilteredKnnMutateConfig::of;
+            case FilteredNodeSimilarity -> FilteredNodeSimilarityMutateConfig::of;
+            case KNN -> KnnMutateConfig::of;
+            case NodeSimilarity -> NodeSimilarityMutateConfig::of;
+            case SingleSourceDijkstra -> AllShortestPathsDijkstraMutateConfig::of;
+            case SpanningTree -> SpanningTreeMutateConfig::of;
+            case SteinerTree -> SteinerTreeMutateConfig::of;
+            case Yens -> ShortestPathYensMutateConfig::of;
+        };
+    }
+}

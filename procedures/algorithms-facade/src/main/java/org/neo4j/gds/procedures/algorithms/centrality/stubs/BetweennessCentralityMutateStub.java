@@ -48,11 +48,6 @@ public class BetweennessCentralityMutateStub implements MutateStub<BetweennessCe
     }
 
     @Override
-    public void validateConfiguration(Map<String, Object> configuration) {
-        genericStub.validateConfiguration(BetweennessCentralityMutateConfig::of, configuration);
-    }
-
-    @Override
     public BetweennessCentralityMutateConfig parseConfiguration(Map<String, Object> configuration) {
         return genericStub.parseConfiguration(BetweennessCentralityMutateConfig::of, configuration);
     }
