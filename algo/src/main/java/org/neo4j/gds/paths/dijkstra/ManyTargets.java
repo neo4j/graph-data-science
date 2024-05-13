@@ -27,7 +27,7 @@ class ManyTargets implements Targets{
 
      private final BitSet bitSet;
      private int targetCount;
-     public  ManyTargets(List<Long> targetNodesList){
+     ManyTargets(List<Long> targetNodesList){
 
          long maxNodeId = 0;
          for (var targetNode : targetNodesList) {
