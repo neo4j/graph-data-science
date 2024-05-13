@@ -1,1 +1,2 @@
-| batchSize            | Integer       | 100       | yes      | The number of nodes per batch.
+// DO NOT EDIT: File generated automatically by the process_conf.py script
+| batchSize | Integer | 100 | yes | The number of nodes per batch.

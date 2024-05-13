@@ -1,1 +1,2 @@
-| triangleCountProperty | String  | n/a     | Yes      | Node property that contains pre-computed triangle count.
+// DO NOT EDIT: File generated automatically by the process_conf.py script
+| triangleCountProperty | String | n/a | yes | Node property that contains pre-computed triangle count.

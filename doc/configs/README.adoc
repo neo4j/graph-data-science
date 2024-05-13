@@ -1,0 +1,18 @@
+# Configuration parameters
+
+The files in this folder contain details about configurations parameters.
+
+These files are meant to be used to partially generate documentation.
+In this repository, they are used to incrementally generate the Asciidoc partials that make up the _Syntax_ section of each algorithm.
+
+[NOTE]
+====
+At this moment, only algorithm configurations are covered.
+====
+
+## How to
+
+Run the `process_conf.py` script with `python process_conf.py`.
+
+If there are no changes in the configuration files, running this script will have no effect on Asciidoc files.
+Check for any changes by running `git status`.
