@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.paths.dijkstra;
 
-enum TraversalState {
+public enum TraversalState {
     EMIT_AND_STOP,
     EMIT_AND_CONTINUE,
     CONTINUE,
