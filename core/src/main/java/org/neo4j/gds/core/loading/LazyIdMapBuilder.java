@@ -46,12 +46,23 @@ public final class LazyIdMapBuilder implements PartialIdMap {
         boolean hasProperties,
         PropertyState propertyState
     ) {
+        this(concurrency, hasLabelInformation, hasProperties, false, propertyState);
+    }
+
+    public LazyIdMapBuilder(
+        Concurrency concurrency,
+        boolean hasLabelInformation,
+        boolean hasProperties,
+        boolean usePooledLocalNodesBuilder,
+        PropertyState propertyState
+    ) {
         this.intermediateIdMapBuilder = ShardedLongLongMap.builder(concurrency);
         this.nodesBuilder = GraphFactory.initNodesBuilder()
             .concurrency(concurrency)
             .hasLabelInformation(hasLabelInformation)
             .hasProperties(hasProperties)
             .deduplicateIds(false)
+            .usePooledBuilderProvider(usePooledLocalNodesBuilder)
             .propertyState(propertyState)
             .build();
     }
