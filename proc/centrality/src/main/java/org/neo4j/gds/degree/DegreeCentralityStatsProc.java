@@ -44,7 +44,7 @@ public class DegreeCentralityStatsProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.centrality().degreeCentralityStats(graphName, configuration);
+        return facade.algorithms().centrality().degreeCentralityStats(graphName, configuration);
     }
 
     @Procedure(value = "gds.degree.stats.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class DegreeCentralityStatsProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.centrality().degreeCentralityStatsEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().centrality().degreeCentralityStatsEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

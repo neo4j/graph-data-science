@@ -27,7 +27,7 @@ public enum LabelForProgressTracking {
     BetweennessCentrality("Betweenness Centrality"),
     BFS("BFS"),
     ClosenessCentrality("Closeness Centrality"),
-    DegreeCentrality("Degree Centrality"),
+    DegreeCentrality("DegreeCentrality"),
     DeltaStepping("Delta Stepping"),
     DFS("DFS"),
     Dijkstra("Dijkstra"),

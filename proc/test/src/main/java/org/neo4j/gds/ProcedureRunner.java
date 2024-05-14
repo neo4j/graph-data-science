@@ -19,25 +19,51 @@
  */
 package org.neo4j.gds;
 
+import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
+import org.neo4j.gds.api.AlgorithmMetaDataSetter;
+import org.neo4j.gds.api.GraphLoaderContext;
+import org.neo4j.gds.api.User;
+import org.neo4j.gds.applications.ApplicationsFacade;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.DefaultAlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.configuration.DefaultsConfiguration;
+import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.Username;
+import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.GraphDataScienceProceduresBuilder;
+import org.neo4j.gds.procedures.algorithms.centrality.CentralityProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
+import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
+import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
+import org.neo4j.gds.procedures.algorithms.runners.StatsModeAlgorithmRunner;
+import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
+import org.neo4j.gds.procedures.algorithms.runners.WriteModeAlgorithmRunner;
+import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
+import org.neo4j.gds.procedures.integration.LogAdapter;
+import org.neo4j.gds.services.DatabaseIdAccessor;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
+import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.logging.Log;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public final class ProcedureRunner {
 
     private ProcedureRunner() {}
 
+    @SuppressWarnings("WeakerAccess") // needs to be public, or a test gets unhappy
     public static <P extends BaseProc> P instantiateProcedure(
         GraphDatabaseService databaseService,
         Class<P> procClass,
@@ -46,6 +72,7 @@ public final class ProcedureRunner {
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory,
         Transaction tx,
+        KernelTransaction kernelTransaction,
         Username username,
         MetricsFacade metricsFacade,
         GraphDataScienceProcedures graphDataScienceProcedures
@@ -58,7 +85,7 @@ public final class ProcedureRunner {
         }
 
         proc.procedureTransaction = tx;
-        proc.transaction = GraphDatabaseApiProxy.kernelTransaction(tx);
+        proc.transaction = kernelTransaction;
         proc.databaseService = databaseService;
         proc.callContext = procedureCallContext;
         proc.log = log;
@@ -82,6 +109,17 @@ public final class ProcedureRunner {
         Username username,
         Consumer<P> func
     ) {
+        var kernelTransaction = GraphDatabaseApiProxy.kernelTransaction(tx);
+
+        var graphDataScienceProcedures = createGraphDataScienceProcedures(
+            log,
+            kernelTransaction,
+            databaseService,
+            procedureCallContext,
+            taskRegistryFactory,
+            username
+        );
+
         var proc = instantiateProcedure(
             databaseService,
             procClass,
@@ -90,27 +128,96 @@ public final class ProcedureRunner {
             taskRegistryFactory,
             EmptyUserLogRegistryFactory.INSTANCE,
             tx,
+            kernelTransaction,
             username,
             MetricsFacade.PASSTHROUGH_METRICS_FACADE,
-            /*
-             * So, procedure runner needs _something_ to satisfy some down stream code. Null is not good enough,
-             * I already tried but failed. At the same time,
-             * it is clear that _probably_ we can get away with less than the full gamut,
-             * just like the other dependencies here that are faked out. Honestly, the whole thing is big, unwieldy,
-             *  and largely opaque to me.
-             * I'm going to go with a blanket statement of, if you run into problems with this,
-             * it is because you are trying to test some intricacies way down in the bowels of GDS,
-             * but driving from the top of Neo4j Procedures, and that this creates a very unhelpful coupling.
-             * At this juncture, better to move/ formulate those tests at the local level of the code you care about,
-             * instead of trying to fake up a big massive stack.
-             * Everything on the inside of this GDS facade is meant to be simple POJO style,
-             * direct dependency injected code that is easy to new up and in turn fake out,
-             * so testing granular bits should be a doozy.
-             * Happy to be proved wrong, so come talk to me if you get in trouble ;)
-             */
-            new GraphDataScienceProceduresBuilder(org.neo4j.gds.logging.Log.noOpLog()).build()
+            graphDataScienceProcedures
         );
         func.accept(proc);
         return proc;
+    }
+
+    /**
+     * I'm going to go with a blanket statement of, if you run into problems with this,
+     * it is because you are trying to test some intricacies way down in the bowels of GDS,
+     * but driving from the top of Neo4j Procedures, and that this creates a very unhelpful coupling.
+     * At this juncture, better to move/ formulate those tests at the local level of the code you care about,
+     * instead of trying to fake up a big massive stack.
+     * Everything on the inside of this GDS facade is meant to be simple POJO style,
+     * direct dependency injected code that is easy to new up and in turn fake out,
+     * so testing granular bits should be a doozy.
+     * Happy to be proved wrong, so come talk to me if you get in trouble ;)
+     */
+    private static GraphDataScienceProcedures createGraphDataScienceProcedures(
+        Log log,
+        KernelTransaction kernelTransaction,
+        GraphDatabaseService graphDatabaseService,
+        ProcedureCallContext procedureCallContext,
+        TaskRegistryFactory taskRegistryFactory,
+        Username username
+    ) {
+        var gdsLog = new LogAdapter(log);
+
+        var configurationParser = new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance);
+        var graphStoreCatalogService = new GraphStoreCatalogService();
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .with(new DatabaseIdAccessor().getDatabaseId(graphDatabaseService))
+            .with(taskRegistryFactory)
+            .with(new User(username.username(), false))
+            .with(EmptyUserLogRegistryFactory.INSTANCE)
+            .build();
+
+        var configurationCreator = new ConfigurationCreator(
+            configurationParser,
+            AlgorithmMetaDataSetter.EMPTY,
+            requestScopedDependencies.getUser()
+        );
+
+        var algorithmEstimationTemplate = new AlgorithmEstimationTemplate(
+            graphStoreCatalogService,
+            new DatabaseGraphStoreEstimationService(
+                GraphLoaderContext.NULL_CONTEXT,
+                requestScopedDependencies.getUser()
+            ),
+            requestScopedDependencies
+        );
+
+        var closeableResourceRegistry = new TransactionCloseableResourceRegistry(kernelTransaction);
+
+        var centralityProcedureFacade = CentralityProcedureFacade.create(
+            new GenericStub(
+                DefaultsConfiguration.Instance,
+                LimitsConfiguration.Instance,
+                configurationCreator,
+                configurationParser,
+                requestScopedDependencies.getUser(),
+                algorithmEstimationTemplate
+            ),
+            ApplicationsFacade.create(
+                gdsLog,
+                Optional.empty(),
+                graphStoreCatalogService,
+                MetricsFacade.PASSTHROUGH_METRICS_FACADE.projectionMetrics(),
+                algorithmEstimationTemplate,
+                new DefaultAlgorithmProcessingTemplate(
+                    gdsLog,
+                    MetricsFacade.PASSTHROUGH_METRICS_FACADE.algorithmMetrics(),
+                    graphStoreCatalogService,
+                    MemoryGuard.DISABLED,
+                    requestScopedDependencies
+                ),
+                requestScopedDependencies,
+                new WriteRelationshipService(gdsLog, requestScopedDependencies)
+            ),
+            new ProcedureCallContextReturnColumns(procedureCallContext),
+            new EstimationModeRunner(configurationCreator),
+            new StatsModeAlgorithmRunner(configurationCreator),
+            new StreamModeAlgorithmRunner(closeableResourceRegistry, configurationCreator),
+            new WriteModeAlgorithmRunner(configurationCreator)
+        );
+
+        return new GraphDataScienceProceduresBuilder(gdsLog)
+            .with(centralityProcedureFacade)
+            .build();
     }
 }

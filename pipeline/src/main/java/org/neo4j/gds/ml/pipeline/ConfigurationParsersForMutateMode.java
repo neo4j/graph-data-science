@@ -24,6 +24,7 @@ import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordMutateConfig;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaMutateConfig;
@@ -57,6 +58,7 @@ public class ConfigurationParsersForMutateMode {
             case BetweennessCentrality -> BetweennessCentralityMutateConfig::of;
             case BFS -> BfsMutateConfig::of;
             case ClosenessCentrality -> ClosenessCentralityMutateConfig::of;
+            case DegreeCentrality -> DegreeCentralityMutateConfig::of;
             case DeltaStepping -> AllShortestPathsDeltaMutateConfig::of;
             case DFS -> DfsMutateConfig::of;
             case Dijkstra -> ShortestPathDijkstraMutateConfig::of;

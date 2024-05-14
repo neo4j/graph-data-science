@@ -33,6 +33,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -57,11 +58,16 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationT
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfigImpl;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.centrality.CentralityProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
+import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.test.TestProc;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -397,7 +403,8 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             .modelUser("user")
             .build();
 
-        var memoryEstimation = NodeClassificationPredictPipelineExecutor.estimate(model, config, new OpenModelCatalog(), null);
+        var algorithmsProcedureFacade = createAlgorithmsProcedureFacade();
+        var memoryEstimation = NodeClassificationPredictPipelineExecutor.estimate(model, config, new OpenModelCatalog(), algorithmsProcedureFacade);
         assertMemoryEstimation(
             () -> memoryEstimation,
             graphStore.getGraph(NodeLabel.of("N")).nodeCount(),
@@ -406,6 +413,29 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             MemoryRange.of(824)
         );
 
+    }
+
+    /**
+     * We talk about software smells, here is one.
+     * Root cause is, you are trying to test something at the wrong level.
+     * And the effect is, we have to build up soooo much scaffolding to achieve it.
+     * We _should_ fix it, by moving the test down to where it is relevant.
+     * But let's be honest, there is enough work in front of us that such a fix is lower priority right now.
+     */
+    private static AlgorithmsProcedureFacade createAlgorithmsProcedureFacade() {
+        var applicationsFacade = ApplicationsFacade.create(null, Optional.empty(), null, null, null, null, null, null);
+        var configurationParser = new ConfigurationParser(null, null);
+        var genericStub = new GenericStub(null, null, null, configurationParser, null, null);
+        var centralityProcedureFacade = CentralityProcedureFacade.create(
+            genericStub,
+            applicationsFacade,
+            null,
+            null,
+            null,
+            null,
+            null
+        );
+        return new AlgorithmsProcedureFacade(centralityProcedureFacade, null, null);
     }
 
 

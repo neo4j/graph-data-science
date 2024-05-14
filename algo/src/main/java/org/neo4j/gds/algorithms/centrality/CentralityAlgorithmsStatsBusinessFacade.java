@@ -30,7 +30,6 @@ import org.neo4j.gds.algorithms.runner.AlgorithmResultWithTiming;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.degree.DegreeCentralityStatsConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityStatsConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
@@ -45,24 +44,6 @@ public class CentralityAlgorithmsStatsBusinessFacade {
 
     public CentralityAlgorithmsStatsBusinessFacade(CentralityAlgorithmsFacade centralityAlgorithmsFacade) {
         this.centralityAlgorithmsFacade = centralityAlgorithmsFacade;
-    }
-
-    public StatsResult<DefaultCentralitySpecificFields> degreeCentrality(
-        String graphName,
-        DegreeCentralityStatsConfig configuration,
-        boolean shouldComputeCentralityDistribution
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> centralityAlgorithmsFacade.degreeCentrality(graphName, configuration)
-        );
-
-        return statsResult(
-            intermediateResult.algorithmResult,
-            configuration,
-            shouldComputeCentralityDistribution,
-            intermediateResult.computeMilliseconds
-        );
     }
 
     public StatsResult<DefaultCentralitySpecificFields> harmonicCentrality(

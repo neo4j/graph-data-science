@@ -25,6 +25,7 @@ import org.neo4j.gds.ml.pipeline.stubs.BetaClosenessCentralityStub;
 import org.neo4j.gds.ml.pipeline.stubs.BetweennessCentralityStub;
 import org.neo4j.gds.ml.pipeline.stubs.BreadthFirstSearchStub;
 import org.neo4j.gds.ml.pipeline.stubs.ClosenessCentralityStub;
+import org.neo4j.gds.ml.pipeline.stubs.DegreeCentralityStub;
 import org.neo4j.gds.ml.pipeline.stubs.DepthFirstSearchStub;
 import org.neo4j.gds.ml.pipeline.stubs.FilteredKnnStub;
 import org.neo4j.gds.ml.pipeline.stubs.FilteredNodeSimilarityStub;
@@ -56,6 +57,7 @@ class StubbyHolder {
             case BetweennessCentrality -> new BetweennessCentralityStub();
             case BFS -> new BreadthFirstSearchStub();
             case ClosenessCentrality -> new ClosenessCentralityStub();
+            case DegreeCentrality -> new DegreeCentralityStub();
             case DeltaStepping -> new SingleSourceShortestPathDeltaStub();
             case DFS -> new DepthFirstSearchStub();
             case Dijkstra -> new SinglePairShortestPathDijkstraStub();

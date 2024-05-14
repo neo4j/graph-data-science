@@ -65,6 +65,7 @@ final class MutateModeAlgorithmLibrary {
             case BetweennessCentrality -> CanonicalProcedureName.parse("gds.betweenness");
             case BFS -> CanonicalProcedureName.parse("gds.bfs");
             case ClosenessCentrality -> CanonicalProcedureName.parse("gds.closeness");
+            case DegreeCentrality -> CanonicalProcedureName.parse("gds.degree");
             case DeltaStepping -> CanonicalProcedureName.parse("gds.allshortestpaths.delta");
             case DFS -> CanonicalProcedureName.parse("gds.dfs");
             case Dijkstra -> CanonicalProcedureName.parse("gds.shortestpath.dijkstra");
