@@ -37,6 +37,34 @@ The following image shows the client-server interaction for exporting data using
 image::arrow/export-protocol.png[Client-server protocol for Arrow export in GDS,align="center"]
 
 
+== Stream all node labels
+
+To stream node labels for each node in a graph, the client needs to provide the following ticket:
+
+----
+{
+    name: "GET_COMMAND",
+    version: "v1",
+    body: {
+        graph_name: "my_graph",
+        database_name: "database_name",
+        procedure_name: "gds.graph.nodeLabels.stream",
+        configuration: {}
+    }
+}
+----
+
+The schema of the result records is as follows:
+
+.Results
+[opts="header",cols="1m,1,1"]
+|===
+| Name           | Type            | Description  | Optional
+| nodeId         | Integer         | The id of the node. | false
+| labels         | List of Strings | The labels of the node. | false
+|===
+
+
 == Stream a single node property
 
 To stream a single node property, the client needs to encode that information in the ticket as follows:
