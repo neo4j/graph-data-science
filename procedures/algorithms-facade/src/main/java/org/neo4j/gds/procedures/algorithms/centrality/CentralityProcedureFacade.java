@@ -35,6 +35,7 @@ import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetaClosenessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetweennessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.ClosenessCentralityMutateStub;
+import org.neo4j.gds.procedures.algorithms.centrality.stubs.DegreeCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
 import org.neo4j.gds.procedures.algorithms.runners.StatsModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
@@ -46,10 +47,14 @@ import java.util.stream.Stream;
 
 public final class CentralityProcedureFacade {
     private final ProcedureReturnColumns procedureReturnColumns;
+
     private final BetaClosenessCentralityMutateStub betaClosenessCentralityMutateStub;
     private final BetweennessCentralityMutateStub betweennessCentralityMutateStub;
     private final ClosenessCentralityMutateStub closenessCentralityMutateStub;
+    private final DegreeCentralityMutateStub degreeCentralityMutateStub;
+
     private final ApplicationsFacade applicationsFacade;
+
     private final EstimationModeRunner estimationModeRunner;
     private final StatsModeAlgorithmRunner statsModeRunner;
     private final StreamModeAlgorithmRunner streamModeRunner;
@@ -60,6 +65,7 @@ public final class CentralityProcedureFacade {
         BetaClosenessCentralityMutateStub betaClosenessCentralityMutateStub,
         BetweennessCentralityMutateStub betweennessCentralityMutateStub,
         ClosenessCentralityMutateStub closenessCentralityMutateStub,
+        DegreeCentralityMutateStub degreeCentralityMutateStub,
         ApplicationsFacade applicationsFacade,
         EstimationModeRunner estimationModeRunner,
         StatsModeAlgorithmRunner statsModeRunner,
@@ -70,6 +76,7 @@ public final class CentralityProcedureFacade {
         this.betaClosenessCentralityMutateStub = betaClosenessCentralityMutateStub;
         this.betweennessCentralityMutateStub = betweennessCentralityMutateStub;
         this.closenessCentralityMutateStub = closenessCentralityMutateStub;
+        this.degreeCentralityMutateStub = degreeCentralityMutateStub;
         this.applicationsFacade = applicationsFacade;
         this.estimationModeRunner = estimationModeRunner;
         this.statsModeRunner = statsModeRunner;
@@ -101,12 +108,18 @@ public final class CentralityProcedureFacade {
             applicationsFacade,
             procedureReturnColumns
         );
+        var degreeCentralityMutateStub = new DegreeCentralityMutateStub(
+            genericStub,
+            applicationsFacade,
+            procedureReturnColumns
+        );
 
         return new CentralityProcedureFacade(
             procedureReturnColumns,
             betaClosenessCentralityMutateStub,
             betweennessCentralityMutateStub,
             closenessCentralityMutateStub,
+            degreeCentralityMutateStub,
             applicationsFacade,
             estimationModeRunner,
             statsModeRunner,
@@ -277,6 +290,10 @@ public final class CentralityProcedureFacade {
             writeMode()::closenessCentrality,
             resultBuilder
         );
+    }
+
+    public DegreeCentralityMutateStub degreeCentralityMutateStub() {
+        return degreeCentralityMutateStub;
     }
 
     private CentralityAlgorithmsEstimationModeBusinessFacade estimationMode() {

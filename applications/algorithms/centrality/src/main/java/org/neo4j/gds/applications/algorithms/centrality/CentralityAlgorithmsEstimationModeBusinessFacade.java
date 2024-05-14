@@ -25,6 +25,7 @@ import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityMemoryEstimateDefinition;
 import org.neo4j.gds.closeness.ClosenessCentralityBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
+import org.neo4j.gds.degree.DegreeCentralityAlgorithmEstimateDefinition;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.mem.MemoryEstimation;
 
@@ -54,5 +55,9 @@ public class CentralityAlgorithmsEstimationModeBusinessFacade {
 
     public MemoryEstimation closenessCentrality(ClosenessCentralityBaseConfig ignored) {
         throw new MemoryEstimationNotImplementedException();
+    }
+
+    public MemoryEstimation degreeCentrality(RelationshipWeightConfig configuration) {
+        return new DegreeCentralityAlgorithmEstimateDefinition(configuration.hasRelationshipWeightProperty()).memoryEstimation();
     }
 }

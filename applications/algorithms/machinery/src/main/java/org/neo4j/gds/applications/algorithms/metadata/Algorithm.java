@@ -34,6 +34,7 @@ public enum Algorithm {
     BetweennessCentrality,
     BFS,
     ClosenessCentrality,
+    DegreeCentrality,
     DeltaStepping,
     DFS,
     Dijkstra,

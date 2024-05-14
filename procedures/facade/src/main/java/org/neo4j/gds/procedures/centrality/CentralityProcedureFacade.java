@@ -25,7 +25,6 @@ import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsStatsBusinessFaca
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
 import org.neo4j.gds.degree.DegreeCentralityStatsConfig;
 import org.neo4j.gds.degree.DegreeCentralityStreamConfig;
 import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
@@ -120,22 +119,6 @@ public class CentralityProcedureFacade {
         return Stream.of(DefaultCentralityComputationalResultTransformer.toStatsResult(computationResult, config));
     }
 
-    public Stream<CentralityMutateResult> degreeCentralityMutate(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, DegreeCentralityMutateConfig::of);
-
-        var computationResult = mutateBusinessFacade.degreeCentrality(
-            graphName,
-            config,
-            procedureReturnColumns.contains("centralityDistribution")
-        );
-
-        return Stream.of(DefaultCentralityComputationalResultTransformer.toMutateResult(computationResult));
-    }
-
-
     public Stream<CentralityWriteResult> degreeCentralityWrite(
         String graphName,
         Map<String, Object> configuration
@@ -167,16 +150,6 @@ public class CentralityProcedureFacade {
         Map<String, Object> configuration
     ) {
         var config = configurationCreator.createConfiguration(configuration, DegreeCentralityStatsConfig::of);
-
-        return Stream.of(estimateBusinessFacade.degreeCentrality(graphNameOrConfiguration, config));
-
-    }
-
-    public Stream<MemoryEstimateResult> degreeCentralityMutateEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, DegreeCentralityMutateConfig::of);
 
         return Stream.of(estimateBusinessFacade.degreeCentrality(graphNameOrConfiguration, config));
 

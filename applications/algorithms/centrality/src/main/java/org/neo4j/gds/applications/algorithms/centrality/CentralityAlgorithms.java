@@ -35,6 +35,9 @@ import org.neo4j.gds.closeness.DefaultCentralityComputer;
 import org.neo4j.gds.closeness.WassermanFaustCentralityComputer;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.degree.DegreeCentrality;
+import org.neo4j.gds.degree.DegreeCentralityConfig;
+import org.neo4j.gds.degree.DegreeCentralityResult;
 
 public class CentralityAlgorithms {
     private final ProgressTrackerCreator progressTrackerCreator;
@@ -90,6 +93,25 @@ public class CentralityAlgorithms {
             parameters.concurrency(),
             centralityComputer,
             DefaultPool.INSTANCE,
+            progressTracker
+        );
+
+        return algorithm.compute();
+    }
+
+    DegreeCentralityResult degreeCentrality(Graph graph, DegreeCentralityConfig configuration) {
+        var parameters = configuration.toParameters();
+
+        var task = Tasks.leaf(LabelForProgressTracking.DegreeCentrality.value, graph.nodeCount());
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var algorithm = new DegreeCentrality(
+            graph,
+            DefaultPool.INSTANCE,
+            parameters.concurrency(),
+            parameters.orientation(),
+            parameters.hasRelationshipWeightProperty(),
+            parameters.minBatchSize(),
             progressTracker
         );
 

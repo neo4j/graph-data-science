@@ -27,11 +27,14 @@ import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
+import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
+import org.neo4j.gds.degree.DegreeCentralityResult;
 
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BetweennessCentrality;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ClosenessCentrality;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.DegreeCentrality;
 
 public class CentralityAlgorithmsMutateModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimation;
@@ -88,6 +91,27 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
             ClosenessCentrality,
             () -> estimation.closenessCentrality(configuration),
             graph -> algorithms.closenessCentrality(graph, configuration),
+            Optional.of(mutateStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT degreeCentrality(
+        GraphName graphName,
+        DegreeCentralityMutateConfig configuration,
+        ResultBuilder<DegreeCentralityMutateConfig, DegreeCentralityResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var mutateStep = new DegreeCentralityMutateStep(
+            mutateNodeProperty,
+            configuration
+        );
+
+        return template.processAlgorithm(
+            graphName,
+            configuration,
+            DegreeCentrality,
+            () -> estimation.degreeCentrality(configuration),
+            graph -> algorithms.degreeCentrality(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
         );

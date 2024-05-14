@@ -30,7 +30,6 @@ import org.neo4j.gds.algorithms.runner.AlgorithmResultWithTiming;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityMutateConfig;
 import org.neo4j.gds.influenceMaximization.CELFNodeProperties;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationMutateConfig;
@@ -53,24 +52,6 @@ public class CentralityAlgorithmsMutateBusinessFacade {
     ) {
         this.centralityAlgorithmsFacade = centralityAlgorithmsFacade;
         this.mutateNodePropertyService = mutateNodePropertyService;
-    }
-
-    public NodePropertyMutateResult<DefaultCentralitySpecificFields> degreeCentrality(
-        String graphName,
-        DegreeCentralityMutateConfig configuration,
-        boolean shouldComputeCentralityDistribution
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
-            () -> centralityAlgorithmsFacade.degreeCentrality(graphName, configuration)
-        );
-
-        return mutateNodeProperty(
-            intermediateResult.algorithmResult,
-            configuration,
-            shouldComputeCentralityDistribution,
-            intermediateResult.computeMilliseconds
-        );
     }
 
     public NodePropertyMutateResult<DefaultCentralitySpecificFields> harmonicCentrality(
