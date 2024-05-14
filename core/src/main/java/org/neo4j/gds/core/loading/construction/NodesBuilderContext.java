@@ -27,8 +27,10 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.NodeLabelTokenSet;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
@@ -45,6 +47,7 @@ final class NodesBuilderContext {
     private final Supplier<NodeLabelTokenToPropertyKeys> nodeLabelTokenToPropertyKeysSupplier;
     // Thread-global mapping as all threads need to write to the same property builders.
     private final ConcurrentMap<String, NodePropertiesFromStoreBuilder> propertyKeyToPropertyBuilder;
+    private final Set<NodeLabelTokenToPropertyKeys> threadLocalNodeLabelTokenToPropertyKeys;
 
     private final Concurrency concurrency;
 
@@ -81,6 +84,10 @@ final class NodesBuilderContext {
         return this.propertyKeyToPropertyBuilder;
     }
 
+    Collection<NodeLabelTokenToPropertyKeys> nodeLabelTokenToPropertyKeys() {
+        return threadLocalNodeLabelTokenToPropertyKeys;
+    }
+
     private NodesBuilderContext(
         Supplier<TokenToNodeLabels> tokenToNodeLabelSupplier,
         Supplier<NodeLabelTokenToPropertyKeys> nodeLabelTokenToPropertyKeysSupplier,
@@ -91,6 +98,7 @@ final class NodesBuilderContext {
         this.nodeLabelTokenToPropertyKeysSupplier = nodeLabelTokenToPropertyKeysSupplier;
         this.propertyKeyToPropertyBuilder = propertyKeyToPropertyBuilder;
         this.concurrency = concurrency;
+        this.threadLocalNodeLabelTokenToPropertyKeys = ConcurrentHashMap.newKeySet();
     }
 
     ThreadLocalContext threadLocalContext() {
@@ -98,9 +106,12 @@ final class NodesBuilderContext {
             ? this::getOrCreatePropertyBuilder
             : this::getPropertyBuilder;
 
+        NodeLabelTokenToPropertyKeys nodeLabelTokenToPropertyKeys = nodeLabelTokenToPropertyKeysSupplier.get();
+        threadLocalNodeLabelTokenToPropertyKeys.add(nodeLabelTokenToPropertyKeys);
+
         return new ThreadLocalContext(
             tokenToNodeLabelSupplier.get(),
-            nodeLabelTokenToPropertyKeysSupplier.get(),
+            nodeLabelTokenToPropertyKeys,
             propertyBuilderFn
         );
     }
@@ -134,10 +145,6 @@ final class NodesBuilderContext {
 
         NodePropertiesFromStoreBuilder nodePropertyBuilder(String propertyKey) {
             return this.propertyBuilderFn.apply(propertyKey);
-        }
-
-        NodeLabelTokenToPropertyKeys nodeLabelTokenToPropertyKeys() {
-            return this.nodeLabelTokenToPropertyKeys;
         }
 
         IntObjectMap<List<NodeLabel>> threadLocalTokenToNodeLabels() {

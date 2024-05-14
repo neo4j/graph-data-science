@@ -94,11 +94,6 @@ final class LocalNodesBuilder implements AutoCloseable {
         }
     }
 
-    public void flush() {
-        flushBuffer();
-        reset();
-    }
-
     private void reset() {
         buffer.reset();
         batchNodeProperties.clear();
@@ -130,9 +125,7 @@ final class LocalNodesBuilder implements AutoCloseable {
     }
 
     @Override
-    public void close() {}
-
-    NodesBuilderContext.ThreadLocalContext threadLocalContext() {
-        return threadLocalContext;
+    public void close() {
+        flushBuffer();
     }
 }
