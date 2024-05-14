@@ -19,14 +19,26 @@
  */
 package org.neo4j.gds.core.loading.construction;
 
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.utils.AutoCloseableThreadLocal;
+import stormpot.Pool;
+import stormpot.Poolable;
+import stormpot.Timeout;
 
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 abstract class LocalNodesBuilderProvider {
 
     static LocalNodesBuilderProvider threadLocal(Supplier<LocalNodesBuilder> builderSupplier) {
         return new ThreadLocalProvider(builderSupplier);
+    }
+
+    static LocalNodesBuilderProvider pooled(
+        Supplier<LocalNodesBuilder> builderSupplier,
+        Concurrency concurrency
+    ) {
+        return PooledProvider.create(builderSupplier, concurrency);
     }
 
     abstract LocalNodesBuilderSlot acquire();
@@ -69,6 +81,74 @@ abstract class LocalNodesBuilderProvider {
             @Override
             public void close() {
                 builder.close();
+            }
+        }
+    }
+
+    private static final class PooledProvider extends LocalNodesBuilderProvider {
+        private final Pool<Slot> pool;
+        private final Timeout timeout = new Timeout(1, TimeUnit.HOURS);
+
+        static LocalNodesBuilderProvider create(
+            Supplier<LocalNodesBuilder> builderSupplier,
+            Concurrency concurrency
+        ) {
+            var pool = Pool
+                .fromInline(new Allocator(builderSupplier))
+                .setSize(concurrency.value())
+                .build();
+
+            return new PooledProvider(pool);
+        }
+
+        private PooledProvider(Pool<Slot> pool) {
+            this.pool = pool;
+        }
+
+        @Override
+        LocalNodesBuilderSlot acquire() {
+            try {
+                return pool.claim(timeout);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        public void close() {
+            try {
+                pool.shutdown().await(timeout);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        private record Slot(stormpot.Slot slot, LocalNodesBuilder builder) implements Poolable, LocalNodesBuilderSlot {
+            @Override
+            public LocalNodesBuilder get() {
+                return builder;
+            }
+
+            @Override
+            public void release() {
+                slot.release(this);
+            }
+        }
+
+        private static final class Allocator implements stormpot.Allocator<Slot> {
+            private final Supplier<LocalNodesBuilder> builderSupplier;
+
+            Allocator(Supplier<LocalNodesBuilder> builderSupplier) {
+                this.builderSupplier = builderSupplier;
+            }
+
+            @Override
+            public Slot allocate(stormpot.Slot slot) {
+                return new Slot(slot, builderSupplier.get());
+            }
+
+            @Override
+            public void deallocate(Slot slot) {
+                slot.builder.close();
             }
         }
     }

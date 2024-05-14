@@ -88,7 +88,8 @@ public final class GraphFactory {
         Optional<Boolean> deduplicateIds,
         Optional<Concurrency> concurrency,
         Optional<PropertyState> propertyState,
-        Optional<String> idMapBuilderType
+        Optional<String> idMapBuilderType,
+        Optional<Boolean> usePooledBuilderProvider
     ) {
         boolean labelInformation = nodeSchema
             .map(schema -> !(schema.availableLabels().isEmpty() && schema.containsOnlyAllNodesLabel()))
@@ -108,6 +109,7 @@ public final class GraphFactory {
 
         long maxOriginalNodeId = maxOriginalId.orElse(NodesBuilder.UNKNOWN_MAX_ID);
         boolean deduplicate = deduplicateIds.orElse(true);
+        boolean usePooled = usePooledBuilderProvider.orElse(false);
         long maxIntermediateId = maxOriginalNodeId;
 
         if (HighLimitIdMap.isHighLimitIdMap(idMapType)) {
@@ -135,7 +137,8 @@ public final class GraphFactory {
                 threadCount,
                 nodeSchema.get(),
                 labelInformation,
-                deduplicate
+                deduplicate,
+                usePooled
             )
             : new NodesBuilder(
                 maxOriginalNodeId,
@@ -146,6 +149,7 @@ public final class GraphFactory {
                 labelInformation,
                 hasProperties.orElse(false),
                 deduplicate,
+                usePooled,
                 __ -> propertyState.orElse(PropertyState.PERSISTENT)
             );
     }
@@ -157,7 +161,8 @@ public final class GraphFactory {
         Concurrency concurrency,
         NodeSchema nodeSchema,
         boolean hasLabelInformation,
-        boolean deduplicateIds
+        boolean deduplicateIds,
+        boolean usePooledBuilderProvider
     ) {
         return new NodesBuilder(
             maxOriginalId,
@@ -168,6 +173,7 @@ public final class GraphFactory {
             hasLabelInformation,
             nodeSchema.hasProperties(),
             deduplicateIds,
+            usePooledBuilderProvider,
             propertyKey -> nodeSchema.unionProperties().get(propertyKey).state()
         );
     }

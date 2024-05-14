@@ -77,6 +77,7 @@ public final class NodesBuilder {
         boolean hasLabelInformation,
         boolean hasProperties,
         boolean deduplicateIds,
+        boolean usePooledBuilderProvider,
         Function<String, PropertyState> propertyStates
     ) {
         this.maxOriginalId = maxOriginalId;
@@ -97,16 +98,26 @@ public final class NodesBuilder {
 
         LongPredicate seenNodeIdPredicate = seenNodesPredicate(deduplicateIds, maxOriginalId);
 
-        this.localNodesBuilderProvider = LocalNodesBuilderProvider.threadLocal(
-            () -> new LocalNodesBuilder(
-                importedNodes,
-                nodeImporter,
-                seenNodeIdPredicate,
-                hasLabelInformation,
-                hasProperties,
-                nodesBuilderContext.threadLocalContext()
-            )
-        );
+        this.localNodesBuilderProvider = usePooledBuilderProvider
+            ? LocalNodesBuilderProvider.pooled(
+                () -> new LocalNodesBuilder(
+                    importedNodes,
+                    nodeImporter,
+                    seenNodeIdPredicate,
+                    hasLabelInformation,
+                    hasProperties,
+                    nodesBuilderContext.threadLocalContext()
+            ), concurrency)
+            : LocalNodesBuilderProvider.threadLocal(
+                () -> new LocalNodesBuilder(
+                    importedNodes,
+                    nodeImporter,
+                    seenNodeIdPredicate,
+                    hasLabelInformation,
+                    hasProperties,
+                    nodesBuilderContext.threadLocalContext()
+                )
+            );
     }
 
     private static LongPredicate seenNodesPredicate(
