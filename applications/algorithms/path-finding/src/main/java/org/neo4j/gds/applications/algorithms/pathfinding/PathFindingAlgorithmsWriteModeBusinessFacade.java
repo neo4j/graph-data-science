@@ -25,13 +25,14 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTempla
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
-import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.paths.WritePathOptionsConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarWriteConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
@@ -49,14 +50,14 @@ import org.neo4j.gds.steiner.SteinerTreeWriteConfig;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.A_STAR;
-import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.BELLMAN_FORD;
-import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DELTA_STEPPING;
-import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DIJKSTRA;
-import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.K_SPANNING_TREE;
-import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.SPANNING_TREE;
-import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.STEINER;
-import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.YENS;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.AStar;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BellmanFord;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.DeltaStepping;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Dijkstra;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KSpanningTree;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.SingleSourceDijkstra;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.SteinerTree;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Yens;
 
 /**
  * Here is the top level business facade for all your path finding write needs.
@@ -99,7 +100,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         return runAlgorithmAndWrite(
             graphName,
             configuration,
-            BELLMAN_FORD,
+            BellmanFord,
             () -> estimationFacade.bellmanFord(configuration),
             graph -> pathFindingAlgorithms.bellmanFord(graph, configuration),
             writeStep,
@@ -115,7 +116,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         return runAlgorithmAndWrite(
             graphName,
             configuration,
-            DELTA_STEPPING,
+            DeltaStepping,
             estimationFacade::deltaStepping,
             graph -> pathFindingAlgorithms.deltaStepping(graph, configuration),
             resultBuilder
@@ -136,7 +137,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         return runAlgorithmAndWrite(
             graphName,
             configuration,
-            K_SPANNING_TREE,
+            KSpanningTree,
             estimationFacade::kSpanningTree,
             graph -> pathFindingAlgorithms.kSpanningTree(graph, configuration),
             writeStep,
@@ -152,7 +153,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         return runAlgorithmAndWrite(
             graphName,
             configuration,
-            A_STAR,
+            AStar,
             estimationFacade::singlePairShortestPathAStar,
             graph -> pathFindingAlgorithms.singlePairShortestPathAStar(graph, configuration),
             resultBuilder
@@ -167,7 +168,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         return runAlgorithmAndWrite(
             graphName,
             configuration,
-            DIJKSTRA,
+            Dijkstra,
             () -> estimationFacade.singlePairShortestPathDijkstra(configuration),
             graph -> pathFindingAlgorithms.singlePairShortestPathDijkstra(graph, configuration),
             resultBuilder
@@ -182,7 +183,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         return runAlgorithmAndWrite(
             graphName,
             configuration,
-            YENS,
+            Yens,
             () -> estimationFacade.singlePairShortestPathYens(configuration),
             graph -> pathFindingAlgorithms.singlePairShortestPathYens(graph, configuration),
             resultBuilder
@@ -197,7 +198,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         return runAlgorithmAndWrite(
             graphName,
             configuration,
-            DIJKSTRA,
+            SingleSourceDijkstra,
             () -> estimationFacade.singleSourceShortestPathDijkstra(configuration),
             graph -> pathFindingAlgorithms.singleSourceShortestPathDijkstra(graph, configuration),
             resultBuilder
@@ -218,7 +219,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         return runAlgorithmAndWrite(
             graphName,
             configuration,
-            SPANNING_TREE,
+            LabelForProgressTracking.SpanningTree,
             estimationFacade::spanningTree,
             graph -> pathFindingAlgorithms.spanningTree(graph, configuration),
             writeStep,
@@ -236,7 +237,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         return runAlgorithmAndWrite(
             graphName,
             configuration,
-            STEINER,
+            SteinerTree,
             () -> estimationFacade.steinerTree(configuration),
             graph -> pathFindingAlgorithms.steinerTree(graph, configuration),
             writeStep,
@@ -250,7 +251,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     private <CONFIGURATION extends AlgoBaseConfig & RelationshipWeightConfig & WriteRelationshipConfig & WritePathOptionsConfig, RESULT_TO_CALLER> RESULT_TO_CALLER runAlgorithmAndWrite(
         GraphName graphName,
         CONFIGURATION configuration,
-        String label,
+        LabelForProgressTracking label,
         Supplier<MemoryEstimation> memoryEstimation,
         AlgorithmComputation<PathFindingResult> algorithm,
         ResultBuilder<CONFIGURATION, PathFindingResult, RESULT_TO_CALLER, RelationshipsWritten> resultBuilder
@@ -275,7 +276,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     private <CONFIGURATION extends AlgoBaseConfig & RelationshipWeightConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER runAlgorithmAndWrite(
         GraphName graphName,
         CONFIGURATION configuration,
-        String label,
+        LabelForProgressTracking label,
         Supplier<MemoryEstimation> memoryEstimation,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithm,
         MutateOrWriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> writeStep,

@@ -25,14 +25,13 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.spanningtree.SpanningTree;
-
-import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.K_SPANNING_TREE;
 
 class KSpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree, Void> {
     private final Log log;
@@ -60,7 +59,7 @@ class KSpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree, Void> {
         var properties = new SpanningTreeBackedNodePropertyValues(spanningTree, graph.nodeCount());
 
         var progressTracker = new TaskProgressTracker(
-            NodePropertyExporter.baseTask(K_SPANNING_TREE, graph.nodeCount()),
+            NodePropertyExporter.baseTask(LabelForProgressTracking.KSpanningTree.value, graph.nodeCount()),
             (org.neo4j.logging.Log) log.getNeo4jLog(),
             configuration.writeConcurrency(),
             requestScopedDependencies.getTaskRegistryFactory()

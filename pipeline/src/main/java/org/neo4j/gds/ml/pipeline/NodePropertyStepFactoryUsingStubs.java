@@ -19,17 +19,18 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
+import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
-import org.neo4j.gds.procedures.algorithms.Algorithm;
 import org.neo4j.gds.procedures.algorithms.CanonicalProcedureName;
-import org.neo4j.gds.procedures.algorithms.LabelForProgressTracking;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 
 import java.util.List;
 import java.util.Map;
 
 final class NodePropertyStepFactoryUsingStubs {
+    private final MutateModeAlgorithmLibrary mutateModeAlgorithmLibrary = MutateModeAlgorithmLibrary.create();
+
     private static volatile NodePropertyStepFactoryUsingStubs INSTANCE = null;
 
     private final StubbyHolder stubbyHolder = new StubbyHolder();
@@ -85,13 +86,7 @@ final class NodePropertyStepFactoryUsingStubs {
     boolean handles(String procedureName) {
         var canonicalProcedureName = CanonicalProcedureName.parse(procedureName);
 
-        try {
-            Algorithm.from(canonicalProcedureName);
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
-
-        return true;
+        return mutateModeAlgorithmLibrary.contains(canonicalProcedureName);
     }
 
     ExecutableNodePropertyStep createNodePropertyStep(
@@ -102,7 +97,11 @@ final class NodePropertyStepFactoryUsingStubs {
     ) {
         var canonicalProcedureName = CanonicalProcedureName.parse(procedureName);
 
-        var algorithm = Algorithm.from(canonicalProcedureName);
+        var algorithm = mutateModeAlgorithmLibrary.lookup(canonicalProcedureName);
+
+        // The invariant is, you would have called "handles" above first, and you would have been turned away there
+        if (algorithm == null) throw new IllegalStateException(
+            "If you managed to get here, there was a programmer error somewhere");
 
         validationService.validate(algorithm, configuration);
 
@@ -121,7 +120,7 @@ final class NodePropertyStepFactoryUsingStubs {
     Stub getStub(String procedureName) {
         var canonicalProcedureName = CanonicalProcedureName.parse(procedureName);
 
-        var algorithm = Algorithm.from(canonicalProcedureName);
+        var algorithm = mutateModeAlgorithmLibrary.lookup(canonicalProcedureName);
 
         return stubbyHolder.get(algorithm);
     }

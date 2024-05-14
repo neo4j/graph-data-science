@@ -23,6 +23,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
@@ -42,15 +43,15 @@ import org.neo4j.gds.steiner.SteinerTreeResult;
 
 import java.util.Optional;
 
-import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.A_STAR;
-import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.BELLMAN_FORD;
-import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.BFS;
-import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DELTA_STEPPING;
-import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DFS;
-import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DIJKSTRA;
-import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.SPANNING_TREE;
-import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.STEINER;
-import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.YENS;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.AStar;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BFS;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BellmanFord;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.DFS;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.DeltaStepping;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Dijkstra;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.SingleSourceDijkstra;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.SteinerTree;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Yens;
 
 /**
  * Here is the top level business facade for all your path finding mutate needs.
@@ -81,7 +82,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
-            BELLMAN_FORD,
+            BellmanFord,
             () -> estimationFacade.bellmanFord(configuration),
             graph -> pathFindingAlgorithms.bellmanFord(graph, configuration),
             Optional.of(mutateStep),
@@ -118,7 +119,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
-            DELTA_STEPPING,
+            DeltaStepping,
             estimationFacade::deltaStepping,
             graph -> pathFindingAlgorithms.deltaStepping(graph, configuration),
             Optional.of(mutateStep),
@@ -155,7 +156,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
-            A_STAR,
+            AStar,
             estimationFacade::singlePairShortestPathAStar,
             graph -> pathFindingAlgorithms.singlePairShortestPathAStar(graph, configuration),
             Optional.of(mutateStep),
@@ -173,7 +174,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
-            DIJKSTRA,
+            Dijkstra,
             () -> estimationFacade.singlePairShortestPathDijkstra(configuration),
             graph -> pathFindingAlgorithms.singlePairShortestPathDijkstra(graph, configuration),
             Optional.of(mutateStep),
@@ -191,7 +192,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
-            YENS,
+            Yens,
             () -> estimationFacade.singlePairShortestPathYens(configuration),
             graph -> pathFindingAlgorithms.singlePairShortestPathYens(graph, configuration),
             Optional.of(mutateStep),
@@ -209,7 +210,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
-            DIJKSTRA,
+            SingleSourceDijkstra,
             () -> estimationFacade.singleSourceShortestPathDijkstra(configuration),
             graph -> pathFindingAlgorithms.singleSourceShortestPathDijkstra(graph, configuration),
             Optional.of(mutateStep),
@@ -227,7 +228,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
-            SPANNING_TREE,
+            LabelForProgressTracking.SpanningTree,
             estimationFacade::spanningTree,
             graph -> pathFindingAlgorithms.spanningTree(graph, configuration),
             Optional.of(mutateOrWriteStep),
@@ -245,7 +246,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
-            STEINER,
+            SteinerTree,
             () -> estimationFacade.steinerTree(configuration),
             graph -> pathFindingAlgorithms.steinerTree(graph, configuration),
             Optional.of(mutateOrWriteStep),

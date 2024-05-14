@@ -31,7 +31,7 @@ import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.CanonicalProcedureName;
-import org.neo4j.gds.procedures.algorithms.LabelForProgressTracking;
+import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 
 import java.util.Collection;
 import java.util.HashMap;

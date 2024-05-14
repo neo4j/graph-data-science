@@ -20,6 +20,7 @@
 package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
 
@@ -56,7 +57,7 @@ public interface AlgorithmProcessingTemplate {
     RESULT_TO_CALLER processAlgorithm(
         GraphName graphName,
         CONFIGURATION configuration,
-        String humanReadableAlgorithmName,
+        LabelForProgressTracking label,
         Supplier<MemoryEstimation> estimationFactory,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
         Optional<MutateOrWriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA>> mutateOrWriteStep,

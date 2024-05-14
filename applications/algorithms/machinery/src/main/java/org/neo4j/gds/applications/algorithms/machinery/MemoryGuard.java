@@ -20,6 +20,7 @@
 package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
 
@@ -35,7 +36,7 @@ public interface MemoryGuard {
     MemoryGuard DISABLED = new MemoryGuard() {
         @Override
         public <CONFIGURATION extends ConcurrencyConfig> void assertAlgorithmCanRun(
-            String humanReadableAlgorithmName,
+            LabelForProgressTracking label,
             CONFIGURATION configuration,
             Graph graph,
             Supplier<MemoryEstimation> estimationFactory
@@ -50,7 +51,7 @@ public interface MemoryGuard {
      * @throws IllegalStateException when there is not enough memory available to run the algorithm in the given configuration on the given graph
      */
     <CONFIGURATION extends ConcurrencyConfig> void assertAlgorithmCanRun(
-        String humanReadableAlgorithmName,
+        LabelForProgressTracking label,
         CONFIGURATION configuration,
         Graph graph,
         Supplier<MemoryEstimation> estimationFactory

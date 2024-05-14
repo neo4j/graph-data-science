@@ -32,10 +32,10 @@ import org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamConfig;
 
 import java.util.Optional;
 
-import static org.neo4j.gds.applications.algorithms.similarity.AlgorithmLabels.FILTERED_KNN;
-import static org.neo4j.gds.applications.algorithms.similarity.AlgorithmLabels.FILTERED_NODE_SIMILARITY;
-import static org.neo4j.gds.applications.algorithms.similarity.AlgorithmLabels.KNN;
-import static org.neo4j.gds.applications.algorithms.similarity.AlgorithmLabels.NODE_SIMILARITY;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FilteredKNN;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FilteredNodeSimilarity;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KNN;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.NodeSimilarity;
 
 public class SimilarityAlgorithmsStreamModeBusinessFacade {
     private final SimilarityAlgorithmsEstimationModeBusinessFacade estimationFacade;
@@ -60,7 +60,7 @@ public class SimilarityAlgorithmsStreamModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
-            FILTERED_KNN,
+            FilteredKNN,
             () -> estimationFacade.filteredKnn(configuration),
             graph -> similarityAlgorithms.filteredKnn(graph, configuration),
             Optional.empty(),
@@ -76,7 +76,7 @@ public class SimilarityAlgorithmsStreamModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
-            FILTERED_NODE_SIMILARITY,
+            FilteredNodeSimilarity,
             () -> estimationFacade.filteredNodeSimilarity(configuration),
             graph -> similarityAlgorithms.filteredNodeSimilarity(graph, configuration),
             Optional.empty(),
@@ -108,7 +108,7 @@ public class SimilarityAlgorithmsStreamModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
-            NODE_SIMILARITY,
+            NodeSimilarity,
             () -> estimationFacade.nodeSimilarity(configuration),
             graph -> similarityAlgorithms.nodeSimilarity(graph, configuration),
             Optional.empty(),

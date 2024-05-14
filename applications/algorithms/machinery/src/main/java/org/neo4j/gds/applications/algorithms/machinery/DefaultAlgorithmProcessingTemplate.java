@@ -23,6 +23,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.loading.GraphResources;
@@ -64,7 +65,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
     public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER processAlgorithm(
         GraphName graphName,
         CONFIGURATION configuration,
-        String humanReadableAlgorithmName,
+        LabelForProgressTracking label,
         Supplier<MemoryEstimation> estimationFactory,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
         Optional<MutateOrWriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA>> mutateOrWriteStep,
@@ -92,12 +93,12 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             Optional.empty()
         );
 
-        memoryGuard.assertAlgorithmCanRun(humanReadableAlgorithmName, configuration, graph, estimationFactory);
+        memoryGuard.assertAlgorithmCanRun(label, configuration, graph, estimationFactory);
 
         // do the actual computation
         var result = computeWithTiming(
             timingsBuilder,
-            humanReadableAlgorithmName,
+            label,
             algorithmComputation,
             graph
         );
@@ -172,21 +173,21 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
 
     <RESULT_FROM_ALGORITHM> RESULT_FROM_ALGORITHM computeWithTiming(
         AlgorithmProcessingTimingsBuilder timingsBuilder,
-        String humanReadableAlgorithmName,
+        LabelForProgressTracking label,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
         Graph graph
     ) {
         try (ProgressTimer ignored = ProgressTimer.start(timingsBuilder::withComputeMillis)) {
-            return computeWithMetric(humanReadableAlgorithmName, algorithmComputation, graph);
+            return computeWithMetric(label, algorithmComputation, graph);
         }
     }
 
     private <RESULT_FROM_ALGORITHM> RESULT_FROM_ALGORITHM computeWithMetric(
-        String humanReadableAlgorithmName,
+        LabelForProgressTracking label,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
         Graph graph
     ) {
-        var executionMetric = algorithmMetricsService.create(humanReadableAlgorithmName);
+        var executionMetric = algorithmMetricsService.create(label.value);
 
         try (executionMetric) {
             executionMetric.start();

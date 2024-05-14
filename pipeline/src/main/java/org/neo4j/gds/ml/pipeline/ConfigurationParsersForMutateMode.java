@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
+import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -31,7 +32,6 @@ import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraMutateConfig;
 import org.neo4j.gds.paths.traverse.BfsMutateConfig;
 import org.neo4j.gds.paths.traverse.DfsMutateConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensMutateConfig;
-import org.neo4j.gds.procedures.algorithms.Algorithm;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnMutateConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityMutateConfig;
 import org.neo4j.gds.similarity.knn.KnnMutateConfig;
@@ -42,11 +42,15 @@ import org.neo4j.gds.steiner.SteinerTreeMutateConfig;
 import java.util.function.Function;
 
 /**
- * One-stop shop for how to turn user input into configuration for a given algorithm.
+ * One-stop shop for how to turn user input into configuration for a given algorithm in mutate mode.
  */
-public class ConfigurationParsers {
+public class ConfigurationParsersForMutateMode {
+    /**
+     * @return the appropriate parser, or null if this algorithm doesn't have a mutate mode
+     */
     public Function<CypherMapWrapper, AlgoBaseConfig> lookup(Algorithm algorithm) {
         return switch (algorithm) {
+            case AllShortestPaths -> null;
             case AStar -> ShortestPathAStarMutateConfig::of;
             case BellmanFord -> BellmanFordMutateConfig::of;
             case BetaClosenessCentrality -> ClosenessCentralityMutateConfig::of;
@@ -59,10 +63,14 @@ public class ConfigurationParsers {
             case FilteredKNN -> FilteredKnnMutateConfig::of;
             case FilteredNodeSimilarity -> FilteredNodeSimilarityMutateConfig::of;
             case KNN -> KnnMutateConfig::of;
+            case KSpanningTree -> null;
+            case LongestPath -> null;
             case NodeSimilarity -> NodeSimilarityMutateConfig::of;
+            case RandomWalk -> null;
             case SingleSourceDijkstra -> AllShortestPathsDijkstraMutateConfig::of;
             case SpanningTree -> SpanningTreeMutateConfig::of;
             case SteinerTree -> SteinerTreeMutateConfig::of;
+            case TopologicalSort -> null;
             case Yens -> ShortestPathYensMutateConfig::of;
         };
     }

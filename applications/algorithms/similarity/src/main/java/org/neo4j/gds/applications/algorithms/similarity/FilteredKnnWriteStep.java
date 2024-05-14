@@ -32,7 +32,7 @@ import org.neo4j.gds.similarity.filteredknn.FilteredKnnWriteConfig;
 
 import java.util.Map;
 
-import static org.neo4j.gds.applications.algorithms.similarity.AlgorithmLabels.FILTERED_KNN;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FilteredKNN;
 
 final class FilteredKnnWriteStep implements MutateOrWriteStep<FilteredKnnResult, Pair<RelationshipsWritten, Map<String, Object>>> {
     private final FilteredKnnWriteConfig configuration;
@@ -81,7 +81,7 @@ final class FilteredKnnWriteStep implements MutateOrWriteStep<FilteredKnnResult,
             shouldComputeSimilarityDistribution,
             configuration.resolveResultStore(resultStore),
             result.similarityResultStream(),
-            FILTERED_KNN,
+            FilteredKNN,
             jobId
         );
     }

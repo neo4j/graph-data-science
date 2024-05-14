@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.algorithms.similarity;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -44,9 +45,8 @@ import org.neo4j.gds.wcc.WccAlgorithmFactory;
 
 import java.util.List;
 
-import static org.neo4j.gds.applications.algorithms.similarity.AlgorithmLabels.FILTERED_NODE_SIMILARITY;
-import static org.neo4j.gds.applications.algorithms.similarity.AlgorithmLabels.KNN;
-import static org.neo4j.gds.applications.algorithms.similarity.AlgorithmLabels.NODE_SIMILARITY;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FilteredNodeSimilarity;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KNN;
 
 public class SimilarityAlgorithms {
     private final ProgressTrackerCreator progressTrackerCreator;
@@ -77,7 +77,7 @@ public class SimilarityAlgorithms {
         var targetNodeFilter = configuration.targetNodeFilter().toNodeFilter(graph);
 
         var task = Tasks.task(
-            FILTERED_NODE_SIMILARITY,
+            FilteredNodeSimilarity.value,
             filteredNodeSimilarityProgressTask(graph, configuration.useComponents().computeComponents()),
             Tasks.leaf("compare node pairs")
         );
@@ -103,7 +103,7 @@ public class SimilarityAlgorithms {
         long nodeCount = graph.nodeCount();
 
         Task task = Tasks.task(
-            KNN,
+            KNN.value,
             Tasks.leaf("Initialize random neighbors", nodeCount),
             Tasks.iterativeDynamic(
                 "Iteration",
@@ -136,7 +136,7 @@ public class SimilarityAlgorithms {
 
     NodeSimilarityResult nodeSimilarity(Graph graph, NodeSimilarityBaseConfig configuration) {
         Task task = Tasks.task(
-            NODE_SIMILARITY,
+            LabelForProgressTracking.NodeSimilarity.value,
             configuration.useComponents().computeComponents()
                 ? Tasks.task(
                 "prepare",

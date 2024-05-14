@@ -25,6 +25,7 @@ import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.WriteConfig;
@@ -57,7 +58,7 @@ class SimilarityWrite {
         boolean shouldComputeSimilarityDistribution,
         Optional<ResultStore> resultStore,
         Stream<SimilarityResult> similarityResultStream,
-        String taskName,
+        LabelForProgressTracking label,
         JobId jobId
     ) {
         var similarityGraphResult = similarityResultStreamDelegate.computeSimilarityGraph(
@@ -73,7 +74,7 @@ class SimilarityWrite {
             writeRelationshipConfiguration,
             shouldComputeSimilarityDistribution,
             resultStore,
-            taskName,
+            label,
             similarityGraphResult,
             jobId
         );
@@ -86,7 +87,7 @@ class SimilarityWrite {
         WriteRelationshipConfig writeRelationshipConfiguration,
         boolean shouldComputeSimilarityDistribution,
         Optional<ResultStore> resultStore,
-        String taskName,
+        LabelForProgressTracking label,
         SimilarityGraphResult similarityGraphResult,
         JobId jobId
     ) {
@@ -104,7 +105,7 @@ class SimilarityWrite {
             similarityGraph,
             graphStore,
             rootIdMap,
-            taskName,
+            label.value,
             writeConfiguration.writeConcurrency(),
             writeConfiguration.arrowConnectionInfo(),
             resultStore,

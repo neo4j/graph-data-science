@@ -32,8 +32,8 @@ import org.neo4j.gds.logging.Log;
 
 import java.util.Optional;
 
-import static org.neo4j.gds.applications.algorithms.centrality.AlgorithmLabels.BETWEENNESS_CENTRALITY;
-import static org.neo4j.gds.applications.algorithms.centrality.AlgorithmLabels.CLOSENESS_CENTRALITY;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BetweennessCentrality;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ClosenessCentrality;
 
 public final class CentralityAlgorithmsWriteModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
@@ -81,7 +81,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
-            BETWEENNESS_CENTRALITY,
+            BetweennessCentrality,
             () -> estimationFacade.betweennessCentrality(configuration),
             graph -> centralityAlgorithms.betweennessCentrality(graph, configuration),
             Optional.of(writeStep),
@@ -99,7 +99,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
-            CLOSENESS_CENTRALITY,
+            ClosenessCentrality,
             () -> estimationFacade.closenessCentrality(configuration),
             graph -> centralityAlgorithms.closenessCentrality(graph, configuration),
             Optional.of(writeStep),

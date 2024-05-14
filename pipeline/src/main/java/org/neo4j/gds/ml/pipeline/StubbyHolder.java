@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
+import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.ml.pipeline.stubs.BellmanFordStub;
 import org.neo4j.gds.ml.pipeline.stubs.BetaClosenessCentralityStub;
 import org.neo4j.gds.ml.pipeline.stubs.BetweennessCentralityStub;
@@ -36,15 +37,19 @@ import org.neo4j.gds.ml.pipeline.stubs.SingleSourceShortestPathDeltaStub;
 import org.neo4j.gds.ml.pipeline.stubs.SingleSourceShortestPathDijkstraStub;
 import org.neo4j.gds.ml.pipeline.stubs.SpanningTreeStub;
 import org.neo4j.gds.ml.pipeline.stubs.SteinerTreeStub;
-import org.neo4j.gds.procedures.algorithms.Algorithm;
 
 /**
  * :flag-au:
  * The mapping of procedure name -> algorithm identifier -> stub
+ * NB: only for algorithms that have a mutate mode - otherwise they could not form part of a pipeline
  */
 class StubbyHolder {
+    /**
+     * @return a handy stub, or null if the algorithm does not have a mutate mode
+     */
     Stub get(Algorithm algorithm) {
         return switch (algorithm) {
+            case AllShortestPaths -> null;
             case AStar -> new SinglePairShortestPathAStarStub();
             case BellmanFord -> new BellmanFordStub();
             case BetaClosenessCentrality -> new BetaClosenessCentralityStub();
@@ -57,10 +62,14 @@ class StubbyHolder {
             case FilteredKNN -> new FilteredKnnStub();
             case FilteredNodeSimilarity -> new FilteredNodeSimilarityStub();
             case KNN -> new KnnStub();
+            case KSpanningTree -> null;
+            case LongestPath -> null;
             case NodeSimilarity -> new NodeSimilarityStub();
+            case RandomWalk -> null;
             case SingleSourceDijkstra -> new SingleSourceShortestPathDijkstraStub();
             case SpanningTree -> new SpanningTreeStub();
             case SteinerTree -> new SteinerTreeStub();
+            case TopologicalSort -> null;
             case Yens -> new SinglePairShortestPathYensStub();
         };
     }

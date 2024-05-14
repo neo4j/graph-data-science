@@ -30,7 +30,8 @@ import org.neo4j.gds.closeness.ClosenessCentralityResult;
 
 import java.util.Optional;
 
-import static org.neo4j.gds.applications.algorithms.centrality.AlgorithmLabels.BETWEENNESS_CENTRALITY;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BetweennessCentrality;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ClosenessCentrality;
 
 public class CentralityAlgorithmsMutateModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimation;
@@ -63,7 +64,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         return template.processAlgorithm(
             graphName,
             configuration,
-            BETWEENNESS_CENTRALITY,
+            BetweennessCentrality,
             () -> estimation.betweennessCentrality(configuration),
             graph -> algorithms.betweennessCentrality(graph, configuration),
             Optional.of(mutateStep),
@@ -84,7 +85,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         return template.processAlgorithm(
             graphName,
             configuration,
-            BETWEENNESS_CENTRALITY,
+            ClosenessCentrality,
             () -> estimation.closenessCentrality(configuration),
             graph -> algorithms.closenessCentrality(graph, configuration),
             Optional.of(mutateStep),

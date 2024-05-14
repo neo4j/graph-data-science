@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.algorithms.centrality;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 import org.neo4j.gds.betweenness.BetweennessCentrality;
 import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
@@ -34,9 +35,6 @@ import org.neo4j.gds.closeness.DefaultCentralityComputer;
 import org.neo4j.gds.closeness.WassermanFaustCentralityComputer;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-
-import static org.neo4j.gds.applications.algorithms.centrality.AlgorithmLabels.BETWEENNESS_CENTRALITY;
-import static org.neo4j.gds.applications.algorithms.centrality.AlgorithmLabels.CLOSENESS_CENTRALITY;
 
 public class CentralityAlgorithms {
     private final ProgressTrackerCreator progressTrackerCreator;
@@ -59,7 +57,7 @@ public class CentralityAlgorithms {
             ? ForwardTraverser.Factory.weighted()
             : ForwardTraverser.Factory.unweighted();
 
-        var task = Tasks.leaf(BETWEENNESS_CENTRALITY, samplingSize.orElse(graph.nodeCount()));
+        var task = Tasks.leaf(LabelForProgressTracking.BetweennessCentrality.value, samplingSize.orElse(graph.nodeCount()));
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
         var algorithm = new BetweennessCentrality(
@@ -82,7 +80,7 @@ public class CentralityAlgorithms {
             : new DefaultCentralityComputer();
 
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, Tasks.task(
-            CLOSENESS_CENTRALITY,
+            LabelForProgressTracking.ClosenessCentrality.value,
             Tasks.leaf("Farness computation", graph.nodeCount() * graph.nodeCount()),
             Tasks.leaf("Closeness computation", graph.nodeCount())
         ));

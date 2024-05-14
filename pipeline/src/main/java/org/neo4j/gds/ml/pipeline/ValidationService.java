@@ -19,19 +19,19 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
+import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.Username;
-import org.neo4j.gds.procedures.algorithms.Algorithm;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 
 import java.util.Map;
 import java.util.function.Function;
 
 class ValidationService {
-    private final ConfigurationParsers configurationParsers = new ConfigurationParsers();
+    private final ConfigurationParsersForMutateMode configurationParsersForMutateMode = new ConfigurationParsersForMutateMode();
 
     private final DefaultsConfiguration defaultsConfiguration;
     private final LimitsConfiguration limitsConfiguration;
@@ -54,7 +54,7 @@ class ValidationService {
      * @throws IllegalArgumentException if the procedure name did not match an algorithm
      */
     void validate(Algorithm algorithm, Map<String, Object> configuration) {
-        var parser = configurationParsers.lookup(algorithm);
+        var parser = configurationParsersForMutateMode.lookup(algorithm);
 
         validateAnonymously(parser, configuration);
     }

@@ -22,6 +22,7 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.bellmanford.BellmanFordStatsConfig;
@@ -37,12 +38,11 @@ import org.neo4j.gds.traversal.RandomWalkStatsConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.BELLMAN_FORD;
-import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.BFS;
-import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DELTA_STEPPING;
-import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.RANDOM_WALK;
-import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.SPANNING_TREE;
-import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.STEINER;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BFS;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BellmanFord;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.DeltaStepping;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.RandomWalk;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.SteinerTree;
 
 public class PathFindingAlgorithmsStatsModeBusinessFacade {
     private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
@@ -68,7 +68,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
-            BELLMAN_FORD,
+            BellmanFord,
             () -> estimationFacade.bellmanFord(configuration),
             graph -> pathFindingAlgorithms.bellmanFord(graph, configuration),
             Optional.empty(),
@@ -100,7 +100,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
-            DELTA_STEPPING,
+            DeltaStepping,
             estimationFacade::deltaStepping,
             graph -> pathFindingAlgorithms.deltaStepping(graph, configuration),
             Optional.empty(),
@@ -116,7 +116,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
-            RANDOM_WALK,
+            RandomWalk,
             () -> estimationFacade.randomWalk(configuration),
             graph -> pathFindingAlgorithms.randomWalk(graph, configuration),
             Optional.empty(),
@@ -132,7 +132,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
-            SPANNING_TREE,
+            LabelForProgressTracking.SpanningTree,
             estimationFacade::spanningTree,
             graph -> pathFindingAlgorithms.spanningTree(graph, configuration),
             Optional.empty(),
@@ -148,7 +148,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
-            STEINER,
+            SteinerTree,
             () -> estimationFacade.steinerTree(configuration),
             graph -> pathFindingAlgorithms.steinerTree(graph, configuration),
             Optional.empty(),

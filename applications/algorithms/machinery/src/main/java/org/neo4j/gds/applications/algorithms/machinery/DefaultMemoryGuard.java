@@ -20,11 +20,12 @@
 package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryGauge;
 import org.neo4j.gds.utils.StringFormatting;
 
@@ -43,7 +44,7 @@ public class DefaultMemoryGuard implements MemoryGuard {
 
     @Override
     public <CONFIGURATION extends ConcurrencyConfig> void assertAlgorithmCanRun(
-        String humanReadableAlgorithmName,
+        LabelForProgressTracking label,
         CONFIGURATION configuration,
         Graph graph,
         Supplier<MemoryEstimation> estimationFactory
@@ -59,20 +60,20 @@ public class DefaultMemoryGuard implements MemoryGuard {
 
             var bytesRequired = useMaxMemoryEstimation ? memoryRange.max : memoryRange.min;
 
-            assertAlgorithmCanRun(humanReadableAlgorithmName, bytesRequired);
+            assertAlgorithmCanRun(label, bytesRequired);
         } catch (MemoryEstimationNotImplementedException e) {
-            log.info("Memory usage estimate not available for " + humanReadableAlgorithmName + ", skipping guard");
+            log.info("Memory usage estimate not available for " + label + ", skipping guard");
         }
     }
 
-    private void assertAlgorithmCanRun(String humanReadableAlgorithmName, long bytesRequired)
+    private void assertAlgorithmCanRun(LabelForProgressTracking label, long bytesRequired)
     throws IllegalStateException {
         long bytesAvailable = memoryGauge.availableMemory();
 
         if (bytesRequired > bytesAvailable) {
             var message = StringFormatting.formatWithLocale(
                 "Memory required to run %s (%db) exceeds available memory (%db)",
-                humanReadableAlgorithmName,
+                label,
                 bytesRequired,
                 bytesAvailable
             );

@@ -24,9 +24,9 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryGauge;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.mem.MemoryTree;
-import org.neo4j.gds.mem.MemoryGauge;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -34,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Dijkstra;
 
 /**
  * This is a saga of mocks. In my defense,
@@ -57,7 +58,7 @@ class DefaultMemoryGuardTest {
 
         // there is enough memory available
         memoryGuard.assertAlgorithmCanRun(
-            "Duckstra",
+            Dijkstra,
             new ExampleConfiguration(),
             graph,
             () -> memoryEstimation
@@ -80,7 +81,7 @@ class DefaultMemoryGuardTest {
         // uh oh
         try {
             memoryGuard.assertAlgorithmCanRun(
-                "Duckstra",
+                Dijkstra,
                 new ExampleConfiguration(),
                 graph,
                 () -> memoryEstimation
@@ -88,7 +89,7 @@ class DefaultMemoryGuardTest {
 
             fail();
         } catch (IllegalStateException e) {
-            assertThat(e).hasMessage("Memory required to run Duckstra (117b) exceeds available memory (42b)");
+            assertThat(e).hasMessage("Memory required to run Dijkstra (117b) exceeds available memory (42b)");
         }
     }
 
@@ -108,7 +109,7 @@ class DefaultMemoryGuardTest {
         // uh oh
         try {
             memoryGuard.assertAlgorithmCanRun(
-                "Duckstra",
+                Dijkstra,
                 new ExampleConfiguration(),
                 graph,
                 () -> memoryEstimation
@@ -116,7 +117,7 @@ class DefaultMemoryGuardTest {
 
             fail();
         } catch (IllegalStateException e) {
-            assertThat(e).hasMessage("Memory required to run Duckstra (243b) exceeds available memory (42b)");
+            assertThat(e).hasMessage("Memory required to run Dijkstra (243b) exceeds available memory (42b)");
         }
     }
 }

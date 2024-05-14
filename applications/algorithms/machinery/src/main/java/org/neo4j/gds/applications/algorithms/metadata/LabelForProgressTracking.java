@@ -17,9 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms;
+package org.neo4j.gds.applications.algorithms.metadata;
 
 public enum LabelForProgressTracking {
+    AllShortestPaths("All Shortest Paths"),
     AStar("AStar"),
     BellmanFord("Bellman-Ford"),
     BetaClosenessCentrality("Closeness Centrality (beta)"),
@@ -32,10 +33,14 @@ public enum LabelForProgressTracking {
     FilteredKNN("Filtered K-Nearest Neighbours"),
     FilteredNodeSimilarity("Filtered Node Similarity"),
     KNN("K-Nearest Neighbours"),
+    KSpanningTree("K Spanning Tree"),
+    LongestPath("LongestPath"),
     NodeSimilarity("Node Similarity"),
+    RandomWalk("RandomWalk"),
     SingleSourceDijkstra("All Shortest Paths"),
     SpanningTree("SpanningTree"),
     SteinerTree("SteinerTree"),
+    TopologicalSort("TopologicalSort"),
     Yens("Yens");
 
     public final String value;
@@ -44,6 +49,7 @@ public enum LabelForProgressTracking {
 
     public static LabelForProgressTracking from(Algorithm algorithm) {
         return switch (algorithm) {
+            case AllShortestPaths -> AllShortestPaths;
             case AStar -> AStar;
             case BellmanFord -> BellmanFord;
             case BetaClosenessCentrality -> BetaClosenessCentrality;
@@ -56,11 +62,20 @@ public enum LabelForProgressTracking {
             case FilteredKNN -> FilteredKNN;
             case FilteredNodeSimilarity -> FilteredNodeSimilarity;
             case KNN -> KNN;
+            case KSpanningTree -> KSpanningTree;
+            case LongestPath -> LongestPath;
             case NodeSimilarity -> NodeSimilarity;
+            case RandomWalk -> RandomWalk;
             case SingleSourceDijkstra -> SingleSourceDijkstra;
             case SpanningTree -> SpanningTree;
             case SteinerTree -> SteinerTree;
+            case TopologicalSort -> TopologicalSort;
             case Yens -> Yens;
         };
+    }
+
+    @Override
+    public String toString() {
+        return value;
     }
 }
