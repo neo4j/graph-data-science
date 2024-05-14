@@ -50,6 +50,7 @@ final class NodesBuilderContext {
     private final Set<NodeLabelTokenToPropertyKeys> threadLocalNodeLabelTokenToPropertyKeys;
 
     private final Concurrency concurrency;
+    private final boolean isFixed;
 
     /**
      * Used if no node schema information is available and needs to be inferred from the input data.
@@ -59,7 +60,8 @@ final class NodesBuilderContext {
             TokenToNodeLabels::lazy,
             NodeLabelTokenToPropertyKeys::lazy,
             new ConcurrentHashMap<>(),
-            concurrency
+            concurrency,
+            false
         );
     }
 
@@ -76,7 +78,8 @@ final class NodesBuilderContext {
             () -> TokenToNodeLabels.fixed(nodeSchema.availableLabels()),
             () -> NodeLabelTokenToPropertyKeys.fixed(nodeSchema),
             new ConcurrentHashMap<>(propertyBuildersByPropertyKey),
-            concurrency
+            concurrency,
+            true
         );
     }
 
@@ -92,19 +95,21 @@ final class NodesBuilderContext {
         Supplier<TokenToNodeLabels> tokenToNodeLabelSupplier,
         Supplier<NodeLabelTokenToPropertyKeys> nodeLabelTokenToPropertyKeysSupplier,
         ConcurrentMap<String, NodePropertiesFromStoreBuilder> propertyKeyToPropertyBuilder,
-        Concurrency concurrency
+        Concurrency concurrency,
+        boolean isFixed
     ) {
         this.tokenToNodeLabelSupplier = tokenToNodeLabelSupplier;
         this.nodeLabelTokenToPropertyKeysSupplier = nodeLabelTokenToPropertyKeysSupplier;
         this.propertyKeyToPropertyBuilder = propertyKeyToPropertyBuilder;
         this.concurrency = concurrency;
+        this.isFixed = isFixed;
         this.threadLocalNodeLabelTokenToPropertyKeys = ConcurrentHashMap.newKeySet();
     }
 
     ThreadLocalContext threadLocalContext() {
-        Function<String, NodePropertiesFromStoreBuilder> propertyBuilderFn = this.propertyKeyToPropertyBuilder.isEmpty()
-            ? this::getOrCreatePropertyBuilder
-            : this::getPropertyBuilder;
+        Function<String, NodePropertiesFromStoreBuilder> propertyBuilderFn = isFixed
+            ? this::getPropertyBuilder
+            : this::getOrCreatePropertyBuilder;
 
         NodeLabelTokenToPropertyKeys nodeLabelTokenToPropertyKeys = nodeLabelTokenToPropertyKeysSupplier.get();
         threadLocalNodeLabelTokenToPropertyKeys.add(nodeLabelTokenToPropertyKeys);
