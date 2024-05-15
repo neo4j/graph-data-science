@@ -28,6 +28,7 @@ import org.neo4j.gds.core.loading.NodeLabelTokenSet;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,7 +39,7 @@ import java.util.function.Supplier;
 
 import static java.util.stream.Collectors.toMap;
 
-final class NodesBuilderContext {
+abstract class NodesBuilderContext {
 
     private static final DefaultValue NO_PROPERTY_VALUE = DefaultValue.DEFAULT;
 
@@ -46,22 +47,20 @@ final class NodesBuilderContext {
     private final Supplier<TokenToNodeLabels> tokenToNodeLabelSupplier;
     private final Supplier<NodeLabelTokenToPropertyKeys> nodeLabelTokenToPropertyKeysSupplier;
     // Thread-global mapping as all threads need to write to the same property builders.
-    private final ConcurrentMap<String, NodePropertiesFromStoreBuilder> propertyKeyToPropertyBuilder;
     private final Set<NodeLabelTokenToPropertyKeys> threadLocalNodeLabelTokenToPropertyKeys;
 
-    private final Concurrency concurrency;
-    private final boolean isFixed;
+    protected final Map<String, NodePropertiesFromStoreBuilder> propertyKeyToPropertyBuilder;
+    protected final Concurrency concurrency;
 
     /**
      * Used if no node schema information is available and needs to be inferred from the input data.
      */
     static NodesBuilderContext lazy(Concurrency concurrency) {
-        return new NodesBuilderContext(
+        return new Lazy(
             TokenToNodeLabels::lazy,
             NodeLabelTokenToPropertyKeys::lazy,
             new ConcurrentHashMap<>(),
-            concurrency,
-            false
+            concurrency
         );
     }
 
@@ -74,12 +73,11 @@ final class NodesBuilderContext {
             e -> NodePropertiesFromStoreBuilder.of(e.getValue().defaultValue(), concurrency)
         ));
 
-        return new NodesBuilderContext(
+        return new Fixed(
             () -> TokenToNodeLabels.fixed(nodeSchema.availableLabels()),
             () -> NodeLabelTokenToPropertyKeys.fixed(nodeSchema),
-            new ConcurrentHashMap<>(propertyBuildersByPropertyKey),
-            concurrency,
-            true
+            new HashMap<>(propertyBuildersByPropertyKey),
+            concurrency
         );
     }
 
@@ -94,42 +92,62 @@ final class NodesBuilderContext {
     private NodesBuilderContext(
         Supplier<TokenToNodeLabels> tokenToNodeLabelSupplier,
         Supplier<NodeLabelTokenToPropertyKeys> nodeLabelTokenToPropertyKeysSupplier,
-        ConcurrentMap<String, NodePropertiesFromStoreBuilder> propertyKeyToPropertyBuilder,
-        Concurrency concurrency,
-        boolean isFixed
+        Map<String, NodePropertiesFromStoreBuilder> propertyKeyToPropertyBuilder,
+        Concurrency concurrency
     ) {
         this.tokenToNodeLabelSupplier = tokenToNodeLabelSupplier;
         this.nodeLabelTokenToPropertyKeysSupplier = nodeLabelTokenToPropertyKeysSupplier;
         this.propertyKeyToPropertyBuilder = propertyKeyToPropertyBuilder;
         this.concurrency = concurrency;
-        this.isFixed = isFixed;
         this.threadLocalNodeLabelTokenToPropertyKeys = ConcurrentHashMap.newKeySet();
     }
 
     ThreadLocalContext threadLocalContext() {
-        Function<String, NodePropertiesFromStoreBuilder> propertyBuilderFn = isFixed
-            ? this::getPropertyBuilder
-            : this::getOrCreatePropertyBuilder;
-
         NodeLabelTokenToPropertyKeys nodeLabelTokenToPropertyKeys = nodeLabelTokenToPropertyKeysSupplier.get();
         threadLocalNodeLabelTokenToPropertyKeys.add(nodeLabelTokenToPropertyKeys);
 
         return new ThreadLocalContext(
             tokenToNodeLabelSupplier.get(),
             nodeLabelTokenToPropertyKeys,
-            propertyBuilderFn
+            this::getPropertyBuilder
         );
     }
 
-    private NodePropertiesFromStoreBuilder getOrCreatePropertyBuilder(String propertyKey) {
-        return this.propertyKeyToPropertyBuilder.computeIfAbsent(
-            propertyKey,
-            __ -> NodePropertiesFromStoreBuilder.of(NO_PROPERTY_VALUE, concurrency)
-        );
+    abstract NodePropertiesFromStoreBuilder getPropertyBuilder(String propertyKey);
+
+    private static final class Fixed extends NodesBuilderContext {
+        Fixed(
+            Supplier<TokenToNodeLabels> tokenToNodeLabelSupplier,
+            Supplier<NodeLabelTokenToPropertyKeys> nodeLabelTokenToPropertyKeysSupplier,
+            Map<String, NodePropertiesFromStoreBuilder> propertyKeyToPropertyBuilder,
+            Concurrency concurrency
+        ) {
+            super(tokenToNodeLabelSupplier, nodeLabelTokenToPropertyKeysSupplier, propertyKeyToPropertyBuilder, concurrency);
+        }
+
+        @Override
+        NodePropertiesFromStoreBuilder getPropertyBuilder(String propertyKey) {
+            return propertyKeyToPropertyBuilder.get(propertyKey);
+        }
     }
 
-    private NodePropertiesFromStoreBuilder getPropertyBuilder(String propertyKey) {
-        return this.propertyKeyToPropertyBuilder.get(propertyKey);
+    private static final class Lazy extends NodesBuilderContext {
+        Lazy(
+            Supplier<TokenToNodeLabels> tokenToNodeLabelSupplier,
+            Supplier<NodeLabelTokenToPropertyKeys> nodeLabelTokenToPropertyKeysSupplier,
+            ConcurrentMap<String, NodePropertiesFromStoreBuilder> propertyKeyToPropertyBuilder,
+            Concurrency concurrency
+        ) {
+            super(tokenToNodeLabelSupplier, nodeLabelTokenToPropertyKeysSupplier, propertyKeyToPropertyBuilder, concurrency);
+        }
+
+        @Override
+        NodePropertiesFromStoreBuilder getPropertyBuilder(String propertyKey) {
+            return this.propertyKeyToPropertyBuilder.computeIfAbsent(
+                propertyKey,
+                __ -> NodePropertiesFromStoreBuilder.of(NO_PROPERTY_VALUE, this.concurrency)
+            );
+        }
     }
 
     static class ThreadLocalContext {

@@ -32,7 +32,6 @@ import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.loading.ImmutableNodes;
 import org.neo4j.gds.core.loading.LabelInformation;
 import org.neo4j.gds.core.loading.LabelInformationBuilders;
-import org.neo4j.gds.core.loading.NodeImporter;
 import org.neo4j.gds.core.loading.NodeImporterBuilder;
 import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
@@ -46,6 +45,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Function;
 import java.util.function.LongPredicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toMap;
@@ -63,8 +63,6 @@ public final class NodesBuilder {
 
     private final LongAdder importedNodes;
     private final LocalNodesBuilderProvider localNodesBuilderProvider;
-
-    private final NodeImporter nodeImporter;
 
     private final NodesBuilderContext nodesBuilderContext;
 
@@ -90,7 +88,7 @@ public final class NodesBuilder {
             : LabelInformationBuilders.multiLabelWithCapacity(maxIntermediateId + 1);
 
         this.importedNodes = new LongAdder();
-        this.nodeImporter = new NodeImporterBuilder()
+        var nodeImporter = new NodeImporterBuilder()
             .idMapBuilder(idMapBuilder)
             .labelInformationBuilder(labelInformationBuilder)
             .importProperties(hasProperties)
@@ -98,26 +96,17 @@ public final class NodesBuilder {
 
         LongPredicate seenNodeIdPredicate = seenNodesPredicate(deduplicateIds, maxOriginalId);
 
+        Supplier<LocalNodesBuilder> nodesBuilderSupplier = () -> new LocalNodesBuilder(
+            importedNodes,
+            nodeImporter,
+            seenNodeIdPredicate,
+            hasLabelInformation,
+            hasProperties,
+            nodesBuilderContext.threadLocalContext()
+        );
         this.localNodesBuilderProvider = usePooledBuilderProvider
-            ? LocalNodesBuilderProvider.pooled(
-                () -> new LocalNodesBuilder(
-                    importedNodes,
-                    nodeImporter,
-                    seenNodeIdPredicate,
-                    hasLabelInformation,
-                    hasProperties,
-                    nodesBuilderContext.threadLocalContext()
-            ), concurrency)
-            : LocalNodesBuilderProvider.threadLocal(
-                () -> new LocalNodesBuilder(
-                    importedNodes,
-                    nodeImporter,
-                    seenNodeIdPredicate,
-                    hasLabelInformation,
-                    hasProperties,
-                    nodesBuilderContext.threadLocalContext()
-                )
-            );
+            ? LocalNodesBuilderProvider.pooled(nodesBuilderSupplier,concurrency)
+            : LocalNodesBuilderProvider.threadLocal(nodesBuilderSupplier);
     }
 
     private static LongPredicate seenNodesPredicate(

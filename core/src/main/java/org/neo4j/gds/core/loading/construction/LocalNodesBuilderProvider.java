@@ -28,6 +28,27 @@ import stormpot.Timeout;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
+/**
+ We offer two ways to access thread local NodesBuilder instances:
+ - ThreadLocalProvider: This uses a ThreadLocal to store the NodesBuilder instance.
+ - PooledProvider: This provider uses an object to store the NodesBuilder instances
+
+ The thread provider is the default one. It is the fastest variant and should be used if there is a known fixed amount of threads accessing the NodesBuilder.
+ The pooled provider is useful if the there is a large and varying amount of threads accessing the NodesBuilder. The access is slower than the thread provider.
+
+ The access pattern is the same for both providers:
+
+ <pre>
+ LocalNodesBuilderProvider provider = ...
+ var slot = provider.acquire();
+ try {
+ var builder = slot.get();
+ // use the builder
+ } finally {
+ slot.release();
+ }
+ </pre>
+ **/
 abstract class LocalNodesBuilderProvider {
 
     static LocalNodesBuilderProvider threadLocal(Supplier<LocalNodesBuilder> builderSupplier) {
