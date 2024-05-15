@@ -40,7 +40,7 @@ public enum Neo4jVersion {
     V_5_20,
     V_RC;
 
-    private static final int MINOR_DEV_VERSION = 20;
+    private static final int MINOR_DEV_VERSION = 21;
 
     static Neo4jVersion parse(String version) {
         var versionSegments = Pattern.compile("[.-]")
@@ -84,6 +84,9 @@ public enum Neo4jVersion {
                 case 19:
                     return Neo4jVersion.V_5_19;
                 case 20:
+                    return Neo4jVersion.V_5_20;
+                case 21:
+                    // todo: this is trying to work around a release ops bug. if you read this after more than a week, scream
                     return Neo4jVersion.V_5_20;
                 default:
                     if (minorVersion >= MINOR_DEV_VERSION) {
