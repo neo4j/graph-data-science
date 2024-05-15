@@ -33,6 +33,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.LazyIdMapBuilder;
+import org.neo4j.gds.core.loading.LazyIdMapBuilderBuilder;
 import org.neo4j.gds.core.loading.construction.NodeLabelToken;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.PropertyValues;
@@ -197,7 +198,12 @@ abstract class GraphAggregator implements CompatUserAggregator {
     }
 
     private static LazyIdMapBuilder idMapBuilder(Concurrency readConcurrency) {
-        return new LazyIdMapBuilder(readConcurrency, true, true, PropertyState.PERSISTENT);
+        return new LazyIdMapBuilderBuilder()
+            .concurrency(readConcurrency)
+            .hasLabelInformation(true)
+            .hasProperties(true)
+            .propertyState(PropertyState.PERSISTENT)
+            .build();
     }
 
     private static void validateGraphName(String graphName, String username, DatabaseId databaseId) {
