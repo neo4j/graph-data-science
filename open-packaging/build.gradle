@@ -50,6 +50,7 @@ shadowJar {
     relocate('javassist', 'org.neo4j.gds.shaded.javassist')
 
     relocate('javax.annotation.', 'com.neo4j.gds.shaded.javax.annotation.')
+    relocate('stormpot', 'com.neo4j.gds.shaded.stormpot')
 
     mergeServiceFiles()
     archiveBaseName.set("open-gds")
