@@ -132,10 +132,25 @@ class ClosenessCentralityTest {
         assertThat(messagesInOrder)
             // avoid asserting on the thread id
             .extracting(removingThreadId())
-            .hasSize(8)
-            .containsSequence(
+            .containsExactly(
                 "ClosenessCentrality :: Start",
                 "ClosenessCentrality :: Farness computation :: Start",
+                "ClosenessCentrality :: Farness computation 4%",
+                "ClosenessCentrality :: Farness computation 12%",
+                "ClosenessCentrality :: Farness computation 20%",
+                "ClosenessCentrality :: Farness computation 28%",
+                "ClosenessCentrality :: Farness computation 32%",
+                "ClosenessCentrality :: Farness computation 36%",
+                "ClosenessCentrality :: Farness computation 40%",
+                "ClosenessCentrality :: Farness computation 48%",
+                "ClosenessCentrality :: Farness computation 52%",
+                "ClosenessCentrality :: Farness computation 56%",
+                "ClosenessCentrality :: Farness computation 60%",
+                "ClosenessCentrality :: Farness computation 64%",
+                "ClosenessCentrality :: Farness computation 68%",
+                "ClosenessCentrality :: Farness computation 72%",
+                "ClosenessCentrality :: Farness computation 76%",
+                "ClosenessCentrality :: Farness computation 80%",
                 "ClosenessCentrality :: Farness computation 100%",
                 "ClosenessCentrality :: Farness computation :: Finished",
                 "ClosenessCentrality :: Closeness computation :: Start",

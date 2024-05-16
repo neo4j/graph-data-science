@@ -80,9 +80,10 @@ public class CentralityAlgorithms {
         var centralityComputer = parameters.useWassermanFaust()
             ? new WassermanFaustCentralityComputer(graph.nodeCount())
             : new DefaultCentralityComputer();
+
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, Tasks.task(
             CLOSENESS_CENTRALITY,
-            Tasks.leaf("Farness computation"),
+            Tasks.leaf("Farness computation", graph.nodeCount() * graph.nodeCount()),
             Tasks.leaf("Closeness computation", graph.nodeCount())
         ));
 

@@ -83,7 +83,7 @@ public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResu
             int len = sourceNodeIds.size();
             farness.getAndAdd(nodeId, len * depth);
             component.getAndAdd(nodeId, len);
-            progressTracker.logProgress();
+            progressTracker.logProgress(len);
         };
         MultiSourceBFSAccessMethods
             .aggregatedNeighborProcessing(nodeCount, graph, consumer,Optional.empty())

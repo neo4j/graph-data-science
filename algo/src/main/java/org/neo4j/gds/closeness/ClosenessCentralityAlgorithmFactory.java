@@ -56,7 +56,7 @@ public class ClosenessCentralityAlgorithmFactory<CONFIG extends ClosenessCentral
     public Task progressTask(long nodeCount) {
         return Tasks.task(
             taskName(),
-            Tasks.leaf("Farness computation"),
+            Tasks.leaf("Farness computation", nodeCount * nodeCount),
             Tasks.leaf("Closeness computation", nodeCount)
         );
     }
