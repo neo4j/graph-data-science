@@ -63,6 +63,7 @@ import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
+import org.neo4j.internal.kernel.api.security.AuthenticationResult;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.internal.recordstorage.RecordIdType;
 import org.neo4j.io.fs.FileSystemAbstraction;
@@ -279,7 +280,22 @@ public final class Neo4jProxy {
         String databaseName
     ) {
         return new SecurityContext(
-            new CompatUsernameAuthSubjectImpl(username, authSubject),
+            new AuthSubject() {
+                @Override
+                public AuthenticationResult getAuthenticationResult() {
+                    return authSubject.getAuthenticationResult();
+                }
+
+                @Override
+                public boolean hasUsername(String s) {
+                    return s.equals(username);
+                }
+
+                @Override
+                public String executingUser() {
+                    return username;
+                }
+            },
             mode,
             // GDS is always operating from an embedded context
             ClientConnectionInfo.EMBEDDED_CONNECTION,
