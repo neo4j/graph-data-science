@@ -24,6 +24,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.msbfs.MultiSourceBFSAccessMethods;
 
+import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -88,7 +89,7 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
 
         @Override
         public void run() {
-            MultiSourceBFSAccessMethods.aggregatedNeighborProcessingWithoutSourceNodes(
+            MultiSourceBFSAccessMethods.aggregatedNeighborProcessing(
                     graph.nodeCount(),
                     graph,
                     (target, distance, sources) -> {
@@ -108,7 +109,8 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
                             }
                         }
                         progressTracker.logProgress();
-                    }
+                    },
+                Optional.empty()
             ).run(concurrency, executorService);
 
             resultQueue.add(AllShortestPathsStreamResult.DONE);
