@@ -22,10 +22,10 @@ package org.neo4j.gds.msbfs;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipIterator;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 
 import java.util.Arrays;
@@ -85,11 +85,14 @@ public final class MultiSourceBFSAccessMethods {
         RelationshipIterator relationships,
         BfsConsumer perNodeAction
     ) {
-        return createWithoutSeensNextOrSourceNodesOrStartNodeTraversal(
+        return createMultiSourceBFS(
             nodeCount,
             relationships,
-            new ANPStrategy(perNodeAction)
+            new ANPStrategy(perNodeAction),
+            new MultiSourceBFSInitializationSpecBuilder()
+                .build()
         );
+
     }
 
     public static MultiSourceBFSAccessMethods aggregatedNeighborProcessing(
@@ -98,11 +101,13 @@ public final class MultiSourceBFSAccessMethods {
         BfsConsumer perNodeAction,
         long[] sourceNodes
     ) {
-        return createWithoutSeensNextOrStartNodeTraversal(
+        return createMultiSourceBFS(
             nodeCount,
             relationships,
             new ANPStrategy(perNodeAction),
-            sourceNodes
+            new MultiSourceBFSInitializationSpecBuilder()
+                .sourceNodes(sourceNodes)
+                .build()
         );
     }
 
@@ -112,10 +117,13 @@ public final class MultiSourceBFSAccessMethods {
         BfsConsumer perNodeAction,
         BfsWithPredecessorConsumer perNeighborAction
     ) {
-        return createWithoutSourceNodesOrStartNodeTraversal(
+        return createMultiSourceBFS(
             graph.nodeCount(),
             graph,
-            new PredecessorStrategy(perNodeAction, perNeighborAction)
+            new PredecessorStrategy(perNodeAction, perNeighborAction),
+            new MultiSourceBFSInitializationSpecBuilder()
+                .seenNext(true)
+                .build()
         );
     }
 
@@ -125,108 +133,37 @@ public final class MultiSourceBFSAccessMethods {
         BfsWithPredecessorConsumer perNeighborAction,
         long[] sourceNodes
     ) {
-        return createWithoutStartNodeTraversal(
+        return createMultiSourceBFS(
             graph.nodeCount(),
             graph,
             new PredecessorStrategy(perNodeAction, perNeighborAction),
-            sourceNodes
+            new MultiSourceBFSInitializationSpecBuilder()
+                .seenNext(true)
+                .inspectSourceNodes(true)
+                .sourceNodes(sourceNodes)
+                .build()
         );
     }
 
-    private static MultiSourceBFSAccessMethods createWithoutSeensNextOrSourceNodesOrStartNodeTraversal(
-        long nodeCount,
-        RelationshipIterator relationships,
-        ExecutionStrategy strategy
-    ) {
-        var visits = new LocalHugeLongArray(nodeCount);
-        var visitsNext = new LocalHugeLongArray(nodeCount);
-        var seens = new LocalHugeLongArray(nodeCount);
-
-        return new MultiSourceBFSAccessMethods(
-            visits,
-            visitsNext,
-            seens,
-            null,
-            nodeCount,
-            relationships,
-            strategy,
-            false,
-            null,
-            0,
-            0
-            );
-    }
-
-    private static MultiSourceBFSAccessMethods createWithoutSeensNextOrStartNodeTraversal(
+    private static MultiSourceBFSAccessMethods createMultiSourceBFS(
         long nodeCount,
         RelationshipIterator relationships,
         ExecutionStrategy strategy,
-        long[] sourceNodes
+        MultiSourceBFSInitializationSpec spec
     ) {
         var visits = new LocalHugeLongArray(nodeCount);
         var visitsNext = new LocalHugeLongArray(nodeCount);
         var seens = new LocalHugeLongArray(nodeCount);
+        var seensNext = spec.seenNext() ? new LocalHugeLongArray(nodeCount) : null;
 
-        return new MultiSourceBFSAccessMethods(
-            visits,
-            visitsNext,
-            seens,
-            null,
-            nodeCount,
-            relationships,
-            strategy,
-            false,
-            sourceNodes,
-            0,
-            0
-            );
-    }
-
-    private static MultiSourceBFSAccessMethods createWithoutSourceNodesOrStartNodeTraversal(
-        long nodeCount,
-        RelationshipIterator relationships,
-        ExecutionStrategy strategy
-    ) {
-        var visits = new LocalHugeLongArray(nodeCount);
-        var visitsNext = new LocalHugeLongArray(nodeCount);
-        var seens = new LocalHugeLongArray(nodeCount);
-        var seensNext = new LocalHugeLongArray(nodeCount);
-
-        return new MultiSourceBFSAccessMethods(
-            visits,
-            visitsNext,
-            seens,
-            seensNext,
-            nodeCount,
-            relationships,
-            strategy,
-            false,
-            null,
-            0,
-            0
-            );
-    }
-
-    /**
-     * @param sourceNodes at least one source node must be provided
-     */
-    private static MultiSourceBFSAccessMethods createWithoutStartNodeTraversal(
-        long nodeCount,
-        RelationshipIterator relationships,
-        ExecutionStrategy strategy,
-        long[] sourceNodes
-    ) {
-        if (sourceNodes.length == 0) {
-            throw new IllegalArgumentException("You must provide source nodes");
+        var sourceNodes = spec.sourceNodes();
+        if (spec.inspectSourceNodes()) {
+            if (sourceNodes == null || sourceNodes.length == 0) {
+                throw new IllegalArgumentException("You must provide source nodes");
+            }
+            Arrays.sort(sourceNodes);
         }
 
-        Arrays.sort(sourceNodes);
-
-        var visits = new LocalHugeLongArray(nodeCount);
-        var visitsNext = new LocalHugeLongArray(nodeCount);
-        var seens = new LocalHugeLongArray(nodeCount);
-        var seensNext = new LocalHugeLongArray(nodeCount);
-
         return new MultiSourceBFSAccessMethods(
             visits,
             visitsNext,
@@ -235,11 +172,12 @@ public final class MultiSourceBFSAccessMethods {
             nodeCount,
             relationships,
             strategy,
-            false,
+            spec.allowStartNodeTraversal(),
             sourceNodes,
             0,
             0
-            );
+        );
+
     }
 
     /**
@@ -355,13 +293,13 @@ public final class MultiSourceBFSAccessMethods {
     public String toString() {
         if (sourceNodes != null && sourceNodes.length > 0) {
             return "MSBFS{" + sourceNodes[0] +
-                   " .. " + (sourceNodes[sourceNodes.length - 1] + 1) +
-                   " (" + sourceNodes.length +
-                   ")}";
+                " .. " + (sourceNodes[sourceNodes.length - 1] + 1) +
+                " (" + sourceNodes.length +
+                ")}";
         }
         return "MSBFS{" + nodeOffset +
-                " .. " + (nodeOffset + sourceNodeCount) +
-                " (" + sourceNodeCount +
-                ")}";
+            " .. " + (nodeOffset + sourceNodeCount) +
+            " (" + sourceNodeCount +
+            ")}";
     }
 }
