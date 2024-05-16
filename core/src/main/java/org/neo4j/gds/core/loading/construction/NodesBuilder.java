@@ -28,39 +28,30 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.loading.ImmutableNodes;
 import org.neo4j.gds.core.loading.LabelInformation;
 import org.neo4j.gds.core.loading.LabelInformationBuilders;
-import org.neo4j.gds.core.loading.NodeImporter;
 import org.neo4j.gds.core.loading.NodeImporterBuilder;
-import org.neo4j.gds.core.loading.NodeLabelTokenSet;
 import org.neo4j.gds.core.loading.Nodes;
-import org.neo4j.gds.core.loading.NodesBatchBuffer;
-import org.neo4j.gds.core.loading.NodesBatchBufferBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
-import org.neo4j.gds.core.utils.RawValues;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeAtomicGrowingBitSet;
-import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.virtual.MapValue;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Function;
 import java.util.function.LongPredicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toMap;
 
 public final class NodesBuilder {
-    private static final Integer NO_PROPERTY = -1;
+    static final Integer NO_PROPERTY = -1;
     public static final long UNKNOWN_MAX_ID = -1L;
 
     private final long maxOriginalId;
@@ -71,9 +62,7 @@ public final class NodesBuilder {
     private final LabelInformation.Builder labelInformationBuilder;
 
     private final LongAdder importedNodes;
-    private final AutoCloseableThreadLocal<ThreadLocalBuilder> threadLocalBuilders;
-
-    private final NodeImporter nodeImporter;
+    private final LocalNodesBuilderProvider localNodesBuilderProvider;
 
     private final NodesBuilderContext nodesBuilderContext;
 
@@ -86,6 +75,7 @@ public final class NodesBuilder {
         boolean hasLabelInformation,
         boolean hasProperties,
         boolean deduplicateIds,
+        boolean usePooledBuilderProvider,
         Function<String, PropertyState> propertyStates
     ) {
         this.maxOriginalId = maxOriginalId;
@@ -98,7 +88,7 @@ public final class NodesBuilder {
             : LabelInformationBuilders.multiLabelWithCapacity(maxIntermediateId + 1);
 
         this.importedNodes = new LongAdder();
-        this.nodeImporter = new NodeImporterBuilder()
+        var nodeImporter = new NodeImporterBuilder()
             .idMapBuilder(idMapBuilder)
             .labelInformationBuilder(labelInformationBuilder)
             .importProperties(hasProperties)
@@ -106,16 +96,17 @@ public final class NodesBuilder {
 
         LongPredicate seenNodeIdPredicate = seenNodesPredicate(deduplicateIds, maxOriginalId);
 
-        this.threadLocalBuilders = AutoCloseableThreadLocal.withInitial(
-            () -> new NodesBuilder.ThreadLocalBuilder(
-                importedNodes,
-                nodeImporter,
-                seenNodeIdPredicate,
-                hasLabelInformation,
-                hasProperties,
-                nodesBuilderContext.threadLocalContext()
-            )
+        Supplier<LocalNodesBuilder> nodesBuilderSupplier = () -> new LocalNodesBuilder(
+            importedNodes,
+            nodeImporter,
+            seenNodeIdPredicate,
+            hasLabelInformation,
+            hasProperties,
+            nodesBuilderContext.threadLocalContext()
         );
+        this.localNodesBuilderProvider = usePooledBuilderProvider
+            ? LocalNodesBuilderProvider.pooled(nodesBuilderSupplier,concurrency)
+            : LocalNodesBuilderProvider.threadLocal(nodesBuilderSupplier);
     }
 
     private static LongPredicate seenNodesPredicate(
@@ -140,7 +131,12 @@ public final class NodesBuilder {
     }
 
     public void addNode(long originalId, NodeLabelToken nodeLabels) {
-        this.threadLocalBuilders.get().addNode(originalId, nodeLabels);
+        var slot = this.localNodesBuilderProvider.acquire();
+        try {
+            slot.get().addNode(originalId, nodeLabels);
+        } finally {
+            slot.release();
+        }
     }
 
     public void addNode(long originalId, NodeLabel... nodeLabels) {
@@ -172,7 +168,12 @@ public final class NodesBuilder {
     }
 
     public void addNode(long originalId, NodeLabelToken nodeLabels, PropertyValues properties) {
-        this.threadLocalBuilders.get().addNode(originalId, nodeLabels, properties);
+        var slot = this.localNodesBuilderProvider.acquire();
+        try {
+            slot.get().addNode(originalId, nodeLabels, properties);
+        } finally {
+            slot.release();
+        }
     }
 
     public long importedNodes() {
@@ -184,11 +185,12 @@ public final class NodesBuilder {
     }
 
     public Nodes build(long highestNeoId) {
-        var localLabelTokenToPropertyKeys = closeThreadLocalBuilders();
+        // Flush remaining buffer contents
+        this.localNodesBuilderProvider.close();
 
         var idMap = this.idMapBuilder.build(labelInformationBuilder, highestNeoId, concurrency);
         var nodeProperties = buildProperties(idMap);
-        var nodeSchema = buildNodeSchema(idMap, localLabelTokenToPropertyKeys, nodeProperties);
+        var nodeSchema = buildNodeSchema(idMap, nodeProperties);
         var nodePropertyStore = NodePropertyStore.builder().properties(nodeProperties).build();
 
         return ImmutableNodes.builder()
@@ -198,25 +200,12 @@ public final class NodesBuilder {
             .build();
     }
 
-    private List<NodeLabelTokenToPropertyKeys> closeThreadLocalBuilders() {
-        // Flush remaining buffer contents
-        this.threadLocalBuilders.forEach(ThreadLocalBuilder::flush);
-        // Collect token to property keys for final union
-        var labelTokenToPropertyKeys = new ArrayList<NodeLabelTokenToPropertyKeys>();
-        this.threadLocalBuilders.forEach(
-            threadLocalBuilder -> labelTokenToPropertyKeys.add(threadLocalBuilder.threadLocalContext.nodeLabelTokenToPropertyKeys())
-        );
-        // Clean up resources held by local builders
-        this.threadLocalBuilders.close();
-
-        return labelTokenToPropertyKeys;
-    }
-
     private MutableNodeSchema buildNodeSchema(
         IdMap idMap,
-        Collection<NodeLabelTokenToPropertyKeys> localLabelTokenToPropertyKeys,
         Map<String, NodeProperty> nodeProperties
     ) {
+        var localLabelTokenToPropertyKeys = this.nodesBuilderContext.nodeLabelTokenToPropertyKeys();
+
         // Collect the property schemas from the imported property values.
         var propertyKeysToSchema = nodeProperties
             .entrySet()
@@ -268,116 +257,8 @@ public final class NodesBuilder {
             .build();
     }
 
-    /**
-     * Closes the NodesBuilder without flushing the internal buffers.
-     * The given exception is thrown, once the thread local builders
-     * are closed.
-     * <p>
-     * This method must be called in case of an error while using the
-     * NodesBuilder.
-     */
     public void close(RuntimeException exception) {
-        this.threadLocalBuilders.close();
+        this.localNodesBuilderProvider.close();
         throw exception;
-    }
-
-    private static class ThreadLocalBuilder implements AutoCloseable {
-
-        private final LongAdder importedNodes;
-        private final LongPredicate seenNodeIdPredicate;
-        private final NodesBatchBuffer<Integer> buffer;
-        private final NodeImporter nodeImporter;
-        private final List<PropertyValues> batchNodeProperties;
-        private final NodesBuilderContext.ThreadLocalContext threadLocalContext;
-
-        ThreadLocalBuilder(
-            LongAdder importedNodes,
-            NodeImporter nodeImporter,
-            LongPredicate seenNodeIdPredicate,
-            boolean hasLabelInformation,
-            boolean hasProperties,
-            NodesBuilderContext.ThreadLocalContext threadLocalContext
-        ) {
-            this.importedNodes = importedNodes;
-            this.seenNodeIdPredicate = seenNodeIdPredicate;
-            this.threadLocalContext = threadLocalContext;
-
-            this.buffer = new NodesBatchBufferBuilder<Integer>()
-                .capacity(ParallelUtil.DEFAULT_BATCH_SIZE)
-                .hasLabelInformation(hasLabelInformation)
-                .readProperty(hasProperties)
-                .propertyReferenceClass(Integer.class)
-                .build();
-
-            this.nodeImporter = nodeImporter;
-            this.batchNodeProperties = new ArrayList<>(buffer.capacity());
-        }
-
-        public void addNode(long originalId, NodeLabelToken nodeLabelToken) {
-            if (!seenNodeIdPredicate.test(originalId)) {
-                var threadLocalTokens = threadLocalContext.addNodeLabelToken(nodeLabelToken);
-
-                buffer.add(originalId, NO_PROPERTY, threadLocalTokens);
-                if (buffer.isFull()) {
-                    flushBuffer();
-                    reset();
-                }
-            }
-        }
-
-        public void addNode(long originalId, NodeLabelToken nodeLabelToken, PropertyValues properties) {
-            if (!seenNodeIdPredicate.test(originalId)) {
-                var threadLocalTokens = threadLocalContext.addNodeLabelTokenAndPropertyKeys(
-                    nodeLabelToken,
-                    properties.propertyKeys()
-                );
-                int propertyReference = batchNodeProperties.size();
-                batchNodeProperties.add(properties);
-
-                buffer.add(originalId, propertyReference, threadLocalTokens);
-                if (buffer.isFull()) {
-                    flushBuffer();
-                    reset();
-                }
-            }
-        }
-
-        public void flush() {
-            flushBuffer();
-            reset();
-        }
-
-        private void reset() {
-            buffer.reset();
-            batchNodeProperties.clear();
-        }
-
-        private void flushBuffer() {
-            var importedNodesAndProperties = this.nodeImporter.importNodes(
-                this.buffer,
-                this.threadLocalContext.threadLocalTokenToNodeLabels(),
-                this::importProperties
-            );
-            int importedNodes = RawValues.getHead(importedNodesAndProperties);
-            this.importedNodes.add(importedNodes);
-        }
-
-        private int importProperties(long nodeReference, NodeLabelTokenSet labelTokens, int propertyValueIndex) {
-            if (propertyValueIndex != NO_PROPERTY) {
-                var properties = this.batchNodeProperties.get(propertyValueIndex);
-
-                properties.forEach((propertyKey, propertyValue) -> {
-                    var nodePropertyBuilder = this.threadLocalContext.nodePropertyBuilder(propertyKey);
-                    assert nodePropertyBuilder != null : "observed property key that is not present in schema";
-                    nodePropertyBuilder.set(nodeReference, propertyValue);
-
-                });
-                return properties.size();
-            }
-            return 0;
-        }
-
-        @Override
-        public void close() {}
     }
 }

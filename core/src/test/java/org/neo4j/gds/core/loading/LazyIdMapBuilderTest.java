@@ -42,7 +42,12 @@ class LazyIdMapBuilderTest {
         long idCount = 100_000;
         var rng = new Random(42);
 
-        var lazyIdMapBuilder = new LazyIdMapBuilder(concurrency, false, false, PropertyState.PERSISTENT);
+        var lazyIdMapBuilder = new LazyIdMapBuilderBuilder()
+            .concurrency(concurrency)
+            .hasLabelInformation(false)
+            .hasProperties(false)
+            .propertyState(PropertyState.PERSISTENT)
+            .build();
 
         var idList = LongStream.rangeClosed(1, idCount)
             .flatMap(id -> rng.nextBoolean() ? LongStream.of(id, id) : LongStream.of(id))
