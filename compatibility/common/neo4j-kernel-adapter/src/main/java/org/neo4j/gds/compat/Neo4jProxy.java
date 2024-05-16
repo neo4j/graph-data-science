@@ -701,11 +701,6 @@ public final class Neo4jProxy {
         return new CallableProcedureImpl(procedure);
     }
 
-    @SuppressForbidden(reason = "This is the compat API")
-    public static CallableUserAggregationFunction callableUserAggregationFunction(CompatUserAggregationFunction function) {
-        return new CallableUserAggregationFunctionImpl(function);
-    }
-
     public static long transactionId(KernelTransactionHandle kernelTransactionHandle) {
         return kernelTransactionHandle.getTransactionSequenceNumber();
     }

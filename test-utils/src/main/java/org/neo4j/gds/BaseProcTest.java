@@ -27,7 +27,6 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.compat.CompatUserAggregationFunction;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.ExceptionMessageMatcher;
@@ -63,10 +62,6 @@ public class BaseProcTest extends BaseTest {
 
     protected void registerAggregationFunctions(Class<?>... functionClasses) throws Exception {
         GraphDatabaseApiProxy.registerAggregationFunctions(db, functionClasses);
-    }
-
-    protected void registerAggregationFunction(CompatUserAggregationFunction function) throws Exception {
-        GraphDatabaseApiProxy.register(db, Neo4jProxy.callableUserAggregationFunction(function));
     }
 
     protected void registerFunctions(GraphDatabaseService db, Class<?>... functionClasses) throws Exception {
