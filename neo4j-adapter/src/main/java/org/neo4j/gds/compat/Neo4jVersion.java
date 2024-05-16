@@ -85,9 +85,6 @@ public enum Neo4jVersion {
                     return Neo4jVersion.V_5_19;
                 case 20:
                     return Neo4jVersion.V_5_20;
-                case 21:
-                    // todo: this is trying to work around a release ops bug. if you read this after more than a week, scream
-                    return Neo4jVersion.V_5_20;
                 default:
                     if (minorVersion >= MINOR_DEV_VERSION) {
                         return Neo4jVersion.V_RC;
