@@ -1200,20 +1200,4 @@ class CypherAggregationTest extends BaseProcTest {
             assertThat(graph.relationshipCount()).isEqualTo(relCount);
         }
     }
-
-    private static class Foo implements CallableUserAggregationFunction {
-
-        @org.neo4j.procedure.Context
-        Transaction tx;
-
-        @Override
-        public UserFunctionSignature signature() {
-            return null;
-        }
-
-        @Override
-        public UserAggregationReducer createReducer(Context context) throws ProcedureException {
-            return null;
-        }
-    }
 }
