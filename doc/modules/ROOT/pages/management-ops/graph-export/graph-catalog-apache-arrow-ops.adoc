@@ -49,10 +49,21 @@ To stream node labels for each node in a graph, the client needs to provide the 
         graph_name: "my_graph",
         database_name: "database_name",
         procedure_name: "gds.graph.nodeLabels.stream",
-        configuration: {}
+        configuration: {
+            consecutive_ids: false
+        }
     }
 }
 ----
+
+The specific command configuration supports the following keys:
+
+[[arrow-node-labels-export]]
+[opts=header,cols="1m,1,1"]
+|===
+| Name              | Type    | Description
+| consecutive_ids   | Boolean | Returns node ids mapped to a consecutive id space, i.e. `[0..nodeCount)` (default: `false`).
+|===
 
 The schema of the result records is as follows:
 
@@ -80,7 +91,8 @@ To stream a single node property, the client needs to encode that information in
         configuration: {
             node_labels: ["*"],
             node_property: "foo",
-            list_node_labels: true
+            list_node_labels: true,
+            consecutive_ids: false
         }
     }
 }
@@ -96,6 +108,7 @@ The specific configuration needs to include the following keys:
 | node_labels       | String or List of Strings | Stream only properties for nodes with the given labels.
 | node_property     | String                    | The node property in the graph to stream.
 | list_node_labels  | Boolean                   | Whether to include node labels of the respective nodes in the result.
+| consecutive_ids   | Boolean                   | Returns node ids mapped to a consecutive id space, i.e. `[0..nodeCount)` (default: `false`) .
 |===
 
 The schema of the result records is identical to the corresponding procedure:
@@ -129,7 +142,8 @@ To stream multiple node properties, the client needs to encode that information 
         configuration: {
             node_labels: ["*"],
             node_properties: ["foo", "bar", "baz"],
-            list_node_labels: true
+            list_node_labels: true,
+            consecutive_ids: false
         }
     }
 }
@@ -145,6 +159,7 @@ The specific configuration needs to include the following keys:
 | node_labels       | String or List of Strings | Stream only properties for nodes with the given labels.
 | node_properties   | String or List of Strings | The node properties in the graph to stream.
 | list_node_labels  | Boolean                   | Whether to include node labels of the respective nodes in the result.
+| consecutive_ids   | Boolean                   | Returns node ids mapped to a consecutive id space, i.e. `[0..nodeCount)` (default: `false`).
 |===
 
 Note that the schema of the result records is not identical to the corresponding procedure.
@@ -174,7 +189,8 @@ To stream a single relationship property, the client needs to encode that inform
         procedure_name: "gds.graph.relationshipProperty.stream",
         configuration: {
             relationship_types: "REL",
-            relationship_property: "foo"
+            relationship_property: "foo",
+            consecutive_ids: false
         }
     }
 }
@@ -189,6 +205,7 @@ The specific configuration needs to include the following keys:
 | Name                  | Type                      | Description
 | relationship_types    | String or List of Strings | Stream only properties for relationships with the given type.
 | relationship_property | String                    | The relationship property in the graph to stream.
+| consecutive_ids       | Boolean                   | Returns node ids mapped to a consecutive id space, i.e. `[0..nodeCount)` (default: `false`).
 |===
 
 The schema of the result records is identical to the corresponding procedure:
@@ -222,7 +239,8 @@ To stream multiple relationship properties, the client needs to encode that info
         procedure_name: "gds.graph.relationshipProperties.stream",
         configuration: {
             relationship_types: "REL",
-            relationship_property: ["foo", "bar"]
+            relationship_property: ["foo", "bar"],
+            consecutive_ids: false
         }
     }
 }
@@ -237,6 +255,7 @@ The specific configuration needs to include the following keys:
 | Name                    | Type                      | Description
 | relationship_types      | String or List of Strings | Stream only properties for relationships with the given type.
 | relationship_properties | String or List of String  | The relationship properties in the graph to stream.
+| consecutive_ids         | Boolean                   | Returns node ids mapped to a consecutive id space, i.e. `[0..nodeCount)` (default: `false`).
 |===
 
 Note that the schema of the result records is not identical to the corresponding procedure.
@@ -270,7 +289,8 @@ To stream the topology of one or more relationship types, the client needs to en
         database_name: "database_name",
         procedure_name: "gds.graph.relationships.stream",
         configuration: {
-            relationship_types: "REL"
+            relationship_types: "REL",
+            consecutive_ids: false
         }
     }
 }
@@ -284,6 +304,7 @@ The specific configuration needs to include the following keys:
 |===
 | Name                    | Type                      | Description
 | relationship_types      | String or List of Strings | Stream only properties for relationships with the given type.
+| consecutive_ids         | Boolean                   | Returns node ids mapped to a consecutive id space, i.e. `[0..nodeCount)` (default: `false`).
 |===
 
 The schema of the result records is identical to the corresponding procedure:
