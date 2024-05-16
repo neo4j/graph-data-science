@@ -19,34 +19,27 @@
  */
 package org.neo4j.gds.projection;
 
-import org.neo4j.gds.annotation.CustomProcedure;
 import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.compat.CompatUserAggregationFunction;
-import org.neo4j.gds.compat.CompatUserAggregator;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.metrics.MetricsFacade;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
 import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
+import org.neo4j.internal.kernel.api.procs.UserAggregationReducer;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
+import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.impl.api.KernelTransactions;
-import org.neo4j.procedure.Name;
-import org.neo4j.values.AnyValue;
-import org.neo4j.values.storable.TextValue;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.neo4j.internal.kernel.api.procs.DefaultParameterValue.nullValue;
 
-public class CypherAggregation implements CompatUserAggregationFunction {
+public class CypherAggregation implements CallableUserAggregationFunction {
 
     // NOTE: keep in sync with `procedureSyntax`
     static final QualifiedName FUNCTION_NAME = new QualifiedName(
@@ -87,28 +80,12 @@ public class CypherAggregation implements CompatUserAggregationFunction {
         );
     }
 
-    // NOTE: keep in sync with `FUNCTION_NAME` and `signature`
-    @CustomProcedure(value = "gds.graph.project", namespace = CustomProcedure.Namespace.AGGREGATION_FUNCTION)
-    public AggregationResult procedureSyntax(
-        @Name("graphName") TextValue graphName,
-        @Name("sourceNode") AnyValue sourceNode,
-        @Name("targetNode") AnyValue targetNode,
-        @Name("dataConfig") AnyValue dataConfig,
-        @Name("configuration") AnyValue config
-    ) {
-        throw new UnsupportedOperationException("This method is only used to document the procedure syntax.");
-    }
-
-    public static CompatUserAggregationFunction newInstance() {
-        return new CypherAggregation();
-    }
-
     @Override
-    public CompatUserAggregator create(Context ctx) throws ProcedureException {
-        var databaseService = Neo4jProxy.lookupComponentProvider(ctx, GraphDatabaseService.class, true);
+    public UserAggregationReducer createReducer(Context ctx) throws ProcedureException {
+        var databaseService = ctx.graphDatabaseAPI();
         var metricsFacade = Neo4jProxy.lookupComponentProvider(ctx, MetricsFacade.class, true);
-        var username = Neo4jProxy.lookupComponentProvider(ctx, Username.class, true);
-        var transaction = Neo4jProxy.lookupComponentProvider(ctx, Transaction.class, true);
+        var username = ctx.kernelTransaction().securityContext().subject().executingUser();
+        var transaction = ctx.transaction();
 
         var runsOnCompositeDatabase = Neo4jProxy.isCompositeDatabase(databaseService);
 
@@ -127,7 +104,7 @@ public class CypherAggregation implements CompatUserAggregationFunction {
 
         return new ProductGraphAggregator(
             DatabaseId.of(databaseService.databaseName()),
-            username.username(),
+            username,
             writeMode,
             queryProvider,
             metricsFacade.projectionMetrics()

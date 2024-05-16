@@ -40,6 +40,7 @@ import org.neo4j.gds.settings.Neo4jSettings;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import org.neo4j.io.layout.Neo4jLayout;
+import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.Inject;
 
@@ -84,8 +85,8 @@ public abstract class MultiFileDocTestBase {
         registerProcedures(defaultDb, procedures().toArray(clazzArray));
         registerFunctions(defaultDb, functions().toArray(clazzArray));
 
-        for (CompatUserAggregationFunction func : aggregationFunctions()) {
-            GraphDatabaseApiProxy.register(defaultDb, Neo4jProxy.callableUserAggregationFunction(func));
+        for (CallableUserAggregationFunction func : aggregationFunctions()) {
+            GraphDatabaseApiProxy.register(defaultDb, func);
         }
 
 
@@ -243,7 +244,7 @@ public abstract class MultiFileDocTestBase {
         return List.of();
     }
 
-    protected List<CompatUserAggregationFunction> aggregationFunctions() {
+    protected List<CallableUserAggregationFunction> aggregationFunctions() {
         return List.of();
     }
 

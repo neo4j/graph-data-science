@@ -27,7 +27,6 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
 import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.api.PropertyState;
-import org.neo4j.gds.compat.CompatUserAggregator;
 import org.neo4j.gds.core.ConfigKeyValidation;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
@@ -40,6 +39,8 @@ import org.neo4j.gds.core.loading.construction.PropertyValues;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
+import org.neo4j.internal.kernel.api.procs.UserAggregationReducer;
+import org.neo4j.internal.kernel.api.procs.UserAggregationUpdater;
 import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.impl.util.ValueUtils;
 import org.neo4j.values.AnyValue;
@@ -60,7 +61,7 @@ import java.util.stream.StreamSupport;
 import static org.neo4j.gds.projection.GraphImporter.NO_TARGET_NODE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-abstract class GraphAggregator implements CompatUserAggregator {
+abstract class GraphAggregator implements UserAggregationReducer, UserAggregationUpdater {
 
     static final String SOURCE_NODE_PROPERTIES = "sourceNodeProperties";
     static final String SOURCE_NODE_LABELS = "sourceNodeLabels";
@@ -231,6 +232,16 @@ abstract class GraphAggregator implements CompatUserAggregator {
         }
 
         return nodeLabelToken;
+    }
+
+    @Override
+    public GraphAggregator newUpdater() {
+        return this;
+    }
+
+    @Override
+    public void applyUpdates() {
+
     }
 
     @Override

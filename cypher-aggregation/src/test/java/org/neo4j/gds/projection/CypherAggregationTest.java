@@ -54,6 +54,12 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Result;
+import org.neo4j.graphdb.Transaction;
+import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
+import org.neo4j.internal.kernel.api.procs.UserAggregationReducer;
+import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
+import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
+import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 
 import java.time.ZonedDateTime;
@@ -96,7 +102,7 @@ class CypherAggregationTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerUserAggregationFunction(db, CypherAggregation.newInstance());
+        registerUserAggregationFunction(db, new CypherAggregation());
         registerProcedures(GraphDropProc.class, GraphListProc.class, WccStreamProc.class);
     }
 
@@ -105,7 +111,7 @@ class CypherAggregationTest extends BaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-    private static void registerUserAggregationFunction(GraphDatabaseService db, CompatUserAggregationFunction function)
+    private static void registerUserAggregationFunction(GraphDatabaseService db, CallableUserAggregationFunction function)
         throws KernelException {
         var globalProcedures = GraphDatabaseApiProxy.resolveDependency(db, GlobalProcedures.class);
         var alreadyExists = Neo4jProxy.globalProcedureRegistry(globalProcedures)
@@ -113,7 +119,7 @@ class CypherAggregationTest extends BaseProcTest {
             .anyMatch(e -> e.equals(function.signature()));
 
         if (!alreadyExists) {
-            GraphDatabaseApiProxy.register(db, Neo4jProxy.callableUserAggregationFunction(function));
+            GraphDatabaseApiProxy.register(db, function);
         }
     }
 
@@ -1189,6 +1195,22 @@ class CypherAggregationTest extends BaseProcTest {
             var graph = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore().getUnion();
             assertThat(graph.nodeCount()).isEqualTo(nodeCount);
             assertThat(graph.relationshipCount()).isEqualTo(relCount);
+        }
+    }
+
+    private static class Foo implements CallableUserAggregationFunction {
+
+        @org.neo4j.procedure.Context
+        Transaction tx;
+
+        @Override
+        public UserFunctionSignature signature() {
+            return null;
+        }
+
+        @Override
+        public UserAggregationReducer createReducer(Context context) throws ProcedureException {
+            return null;
         }
     }
 }
