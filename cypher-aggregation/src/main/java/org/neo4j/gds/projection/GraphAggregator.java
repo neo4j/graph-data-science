@@ -248,7 +248,7 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
     public AnyValue result() throws ProcedureException {
         var projectionMetric = projectionMetricsService.createCypherV2();
         AggregationResult result;
-        try(projectionMetric) {
+        try (projectionMetric) {
             projectionMetric.start();
             result = buildGraph();
         } catch (Exception e) {

@@ -110,7 +110,10 @@ class CypherAggregationTest extends BaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-    private static void registerUserAggregationFunction(GraphDatabaseService db, CallableUserAggregationFunction function)
+    private static void registerUserAggregationFunction(
+        GraphDatabaseService db,
+        CallableUserAggregationFunction function
+    )
         throws KernelException {
         var globalProcedures = GraphDatabaseApiProxy.resolveDependency(db, GlobalProcedures.class);
         var alreadyExists = Neo4jProxy.globalProcedureRegistry(globalProcedures)
@@ -347,7 +350,8 @@ class CypherAggregationTest extends BaseProcTest {
 
         var graphStore = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore();
 
-        assertThat(graphStore.relationshipTypes()).containsExactlyInAnyOrderElementsOf(graphStore.schema().relationshipSchema().availableTypes());
+        assertThat(graphStore.relationshipTypes())
+            .containsExactlyInAnyOrderElementsOf(graphStore.schema().relationshipSchema().availableTypes());
 
         assertThat(graphStore.nodeLabels()).extracting(NodeLabel::name).containsExactly("A", "B");
     }

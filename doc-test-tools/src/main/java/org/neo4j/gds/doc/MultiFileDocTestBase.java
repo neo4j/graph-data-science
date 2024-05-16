@@ -88,7 +88,6 @@ public abstract class MultiFileDocTestBase {
         }
 
 
-
         var treeProcessor = new QueryCollectingTreeProcessor();
         var includeProcessor = new PartialsIncludeProcessor();
 
@@ -166,7 +165,8 @@ public abstract class MultiFileDocTestBase {
     private void runDocQuery(DocQuery docQuery) {
         try {
             if (docQuery.runAsOperator()) {
-                QueryRunner.runQuery(dbms.database(docQuery.database()), docQuery.operator(), docQuery.query(), Map.of());
+                QueryRunner
+                    .runQuery(dbms.database(docQuery.database()), docQuery.operator(), docQuery.query(), Map.of());
             } else {
                 QueryRunner.runQuery(dbms.database(docQuery.database()), docQuery.query());
             }
@@ -203,7 +203,8 @@ public abstract class MultiFileDocTestBase {
                 dbms.database(queryExample.database()),
                 queryExample.query(),
                 Map.of(),
-                check);
+                check
+            );
         }
     }
 
@@ -254,19 +255,19 @@ public abstract class MultiFileDocTestBase {
         return resultsFromDoc
             .stream()
             .map(list -> list.stream().map(string -> {
-                    try {
-                        if (string.startsWith("[")) {
-                            return formatListOfNumbers(string);
-                        }
-                        if (string.contains(".")) {
-                            return DocumentationTestToolsConstants.FLOAT_FORMAT.format(Double.parseDouble(string));
-                        } else {
-                            return string;
-                        }
-                    } catch (NumberFormatException e) {
+                try {
+                    if (string.startsWith("[")) {
+                        return formatListOfNumbers(string);
+                    }
+                    if (string.contains(".")) {
+                        return DocumentationTestToolsConstants.FLOAT_FORMAT.format(Double.parseDouble(string));
+                    } else {
                         return string;
                     }
-                }).collect(Collectors.toList())
+                } catch (NumberFormatException e) {
+                    return string;
+                }
+            }).collect(Collectors.toList())
             )
             .collect(Collectors.toList());
     }
@@ -297,12 +298,13 @@ public abstract class MultiFileDocTestBase {
             return "null";
         } else if (value instanceof String) {
             return "\"" + value + "\"";
-        } else if (value instanceof Double || value instanceof Float ) {
+        } else if (value instanceof Double || value instanceof Float) {
             return DocumentationTestToolsConstants.FLOAT_FORMAT.format(value);
         } else if (value instanceof List<?>) {
             return ((List<?>) value).stream()
                 .map(v -> valueToString(v))
-                .collect(Collectors.toList()).toString();
+                .collect(Collectors.toList())
+                .toString();
         } else if (value instanceof Map<?, ?>) {
             var mappedMap = ((Map<?, ?>) value).entrySet()
                 .stream()

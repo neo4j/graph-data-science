@@ -28,7 +28,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.ExceptionMessageMatcher;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -107,9 +106,11 @@ public class BaseProcTest extends BaseTest {
         assertError(
             query,
             queryParameters,
-            allOf(messageSubstrings.stream()
-                .map(ExceptionMessageMatcher::containsMessage)
-                .collect(Collectors.toList()))
+            allOf(
+                messageSubstrings.stream()
+                    .map(ExceptionMessageMatcher::containsMessage)
+                    .collect(Collectors.toList())
+            )
         );
     }
 

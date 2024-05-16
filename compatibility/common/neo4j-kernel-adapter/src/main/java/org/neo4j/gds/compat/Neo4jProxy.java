@@ -74,7 +74,6 @@ import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.KernelTransactionHandle;
 import org.neo4j.kernel.api.procedure.CallableProcedure;
-import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.database.DatabaseReferenceImpl;
@@ -228,13 +227,14 @@ public final class Neo4jProxy {
     public static boolean isCompositeDatabase(GraphDatabaseService databaseService) {
         var databaseId = GraphDatabaseApiProxy.databaseId(databaseService);
         var repo = GraphDatabaseApiProxy.resolveDependency(databaseService, DatabaseReferenceRepository.class);
-        return repo.getCompositeDatabaseReferences().stream()
+        return repo.getCompositeDatabaseReferences()
+            .stream()
             .map(DatabaseReferenceImpl.Internal::databaseId)
             .anyMatch(databaseId::equals);
     }
 
     public static <T> T lookupComponentProvider(Context ctx, Class<T> component, boolean safe)
-    throws ProcedureException {
+        throws ProcedureException {
         var globalProcedures = GraphDatabaseApiProxy.resolveDependency(
             ctx.dependencyResolver(),
             GlobalProcedures.class
@@ -612,11 +612,13 @@ public final class Neo4jProxy {
         var bits = ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN).putLong(storeVersion).rewind();
         int length = bits.get() & 0xFF;
         if (length == 0 || length > 7) {
-            throw new IllegalArgumentException(format(
-                Locale.ENGLISH,
-                "The read version string length %d is not proper.",
-                length
-            ));
+            throw new IllegalArgumentException(
+                format(
+                    Locale.ENGLISH,
+                    "The read version string length %d is not proper.",
+                    length
+                )
+            );
         }
         char[] result = new char[length];
         for (int i = 0; i < length; i++) {
