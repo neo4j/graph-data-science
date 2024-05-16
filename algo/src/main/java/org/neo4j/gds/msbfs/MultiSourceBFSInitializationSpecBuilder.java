@@ -22,7 +22,7 @@ package org.neo4j.gds.msbfs;
 class MultiSourceBFSInitializationSpecBuilder {
 
     private boolean seenNext = false;
-    private boolean inspectSourceNodes = false;
+    private boolean sortSourceNodes = false;
     private long[] sourceNodes = null;
     private boolean allowStartNodeTraversal = false;
 
@@ -31,8 +31,8 @@ class MultiSourceBFSInitializationSpecBuilder {
         return this;
     }
 
-    MultiSourceBFSInitializationSpecBuilder inspectSourceNodes(boolean inspectSourceNodes) {
-        this.inspectSourceNodes = inspectSourceNodes;
+    MultiSourceBFSInitializationSpecBuilder sortSourceNodes(boolean sortSourceNodes) {
+        this.sortSourceNodes = sortSourceNodes;
         return this;
 
     }
@@ -51,7 +51,7 @@ class MultiSourceBFSInitializationSpecBuilder {
     MultiSourceBFSInitializationSpec build() {
         return new MultiSourceBFSInitializationSpec(
             seenNext,
-            inspectSourceNodes,
+            sortSourceNodes,
             sourceNodes,
             allowStartNodeTraversal
         );
