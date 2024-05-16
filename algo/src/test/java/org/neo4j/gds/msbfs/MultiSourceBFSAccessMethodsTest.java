@@ -37,6 +37,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.LongUnaryOperator;
 
@@ -87,7 +88,7 @@ final class MultiSourceBFSAccessMethodsTest {
                 graph,
                 (i, d, s) -> bfsConsumerMock.accept(i + 1, d, toList(s, x -> x + 1)),
                 (i, p, d, s) -> bfsWithPredecessorConsumerMock.accept(i + 1, p + 1, d, toList(s, x -> x + 1)),
-                new long[]{0, 1}
+                Optional.of(new long[]{0, 1})
             );
 
             msbfs.run(ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY, DefaultPool.INSTANCE);
@@ -126,7 +127,7 @@ final class MultiSourceBFSAccessMethodsTest {
                 graph.nodeCount(),
                 graph,
                 (i, d, s) -> mock.accept(i + 1, d, toList(s, x -> x + 1)),
-                new long[]{0, 1}
+                Optional.of(new long[]{0, 1})
             );
 
             msbfs.run(ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY, DefaultPool.INSTANCE);
@@ -144,10 +145,11 @@ final class MultiSourceBFSAccessMethodsTest {
         @Test
         void testPredecessorWithAllSources() {
             BfsWithPredecessorConsumer mock = mock(BfsWithPredecessorConsumer.class);
-            MultiSourceBFSAccessMethods msbfs = MultiSourceBFSAccessMethods.predecessorProcessingWithoutSourceNodes(
+            MultiSourceBFSAccessMethods msbfs = MultiSourceBFSAccessMethods.predecessorProcessing(
                 graph,
                 (i, d, s) -> {},
-                (i, p, d, s) -> mock.accept(i + 1, p + 1, d, toList(s, x -> x + 1))
+                (i, p, d, s) -> mock.accept(i + 1, p + 1, d, toList(s, x -> x + 1)),
+                Optional.empty()
             );
 
             msbfs.run(ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY, DefaultPool.INSTANCE);
@@ -195,10 +197,11 @@ final class MultiSourceBFSAccessMethodsTest {
         void testANPWithAllSources() {
 
             BfsConsumer mock = mock(BfsConsumer.class);
-            MultiSourceBFSAccessMethods msbfs = MultiSourceBFSAccessMethods.aggregatedNeighborProcessingWithoutSourceNodes(
+            MultiSourceBFSAccessMethods msbfs = MultiSourceBFSAccessMethods.aggregatedNeighborProcessing(
                 graph.nodeCount(),
                 graph,
-                (i, d, s) -> mock.accept(i + 1, d, toList(s, x -> x + 1))
+                (i, d, s) -> mock.accept(i + 1, d, toList(s, x -> x + 1)),
+                Optional.empty()
             );
 
             msbfs.run(ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY, DefaultPool.INSTANCE);
@@ -275,7 +278,7 @@ final class MultiSourceBFSAccessMethodsTest {
             //gb -> gb.newGridBuilder().createGrid(8, 4);
             var graph = grid(8, 4);
             Set<Pair<Long, Integer>> seen = new HashSet<>();
-            MultiSourceBFSAccessMethods msbfs = MultiSourceBFSAccessMethods.aggregatedNeighborProcessingWithoutSourceNodes(
+            MultiSourceBFSAccessMethods msbfs = MultiSourceBFSAccessMethods.aggregatedNeighborProcessing(
                 graph.nodeCount(),
                 graph,
                 (i, d, s) -> {
@@ -285,7 +288,8 @@ final class MultiSourceBFSAccessMethodsTest {
                         d
                     );
                     assertTrue(seen.add(Pair.of(i, d)), message);
-                }
+                },
+                Optional.empty()
             );
             msbfs.run(new Concurrency(1), null);
 
@@ -327,7 +331,7 @@ final class MultiSourceBFSAccessMethodsTest {
             int[][] seen = new int[maxNodes][maxNodes];
             var graph = completeGraph(maxNodes);
 
-            var msbfs = MultiSourceBFSAccessMethods.aggregatedNeighborProcessingWithoutSourceNodes(
+            var msbfs = MultiSourceBFSAccessMethods.aggregatedNeighborProcessing(
                 graph.nodeCount(),
                 graph,
                 (i, d, s) -> {
@@ -337,7 +341,8 @@ final class MultiSourceBFSAccessMethodsTest {
                             seen[(int) s.nextLong()][(int) i] += 1;
                         }
                     }
-                }
+                },
+                Optional.empty()
             );
             msbfs.run(ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY, DefaultPool.INSTANCE);
 
@@ -359,7 +364,7 @@ final class MultiSourceBFSAccessMethodsTest {
 
             var graph = completeGraph(maxNodes);
 
-            var msbfs = MultiSourceBFSAccessMethods.aggregatedNeighborProcessingWithoutSourceNodes(
+            var msbfs = MultiSourceBFSAccessMethods.aggregatedNeighborProcessing(
                 graph.nodeCount(),
                 graph,
                 (i, d, s) -> {
@@ -384,7 +389,8 @@ final class MultiSourceBFSAccessMethodsTest {
                     }
 
                     assertEquals(expectedSize, s.size());
-                }
+                },
+                Optional.empty()
             );
             // run sequentially to guarantee order
             msbfs.run(new Concurrency(1), null);
@@ -416,7 +422,7 @@ final class MultiSourceBFSAccessMethodsTest {
                 nodeCount,
                 iter,
                 bfsConsumer,
-                sources
+                Optional.of(sources)
             );
             msbfs.run(ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY, DefaultPool.INSTANCE);
 

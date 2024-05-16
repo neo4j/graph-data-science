@@ -30,6 +30,7 @@ import org.neo4j.gds.utils.CloseableThreadLocal;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -80,68 +81,42 @@ public final class MultiSourceBFSAccessMethods {
     private final int sourceNodeCount;
     private final long nodeOffset;
 
-    public static MultiSourceBFSAccessMethods aggregatedNeighborProcessingWithoutSourceNodes(
-        long nodeCount,
-        RelationshipIterator relationships,
-        BfsConsumer perNodeAction
-    ) {
-        return createMultiSourceBFS(
-            nodeCount,
-            relationships,
-            new ANPStrategy(perNodeAction),
-            new MultiSourceBFSInitializationSpecBuilder()
-                .build()
-        );
-
-    }
 
     public static MultiSourceBFSAccessMethods aggregatedNeighborProcessing(
         long nodeCount,
         RelationshipIterator relationships,
         BfsConsumer perNodeAction,
-        long[] sourceNodes
+        Optional<long[]> sourceNodes
     ) {
+
+        var builder =  new MultiSourceBFSInitializationSpecBuilder();
+        sourceNodes.ifPresent(builder::sourceNodes);
+
         return createMultiSourceBFS(
             nodeCount,
             relationships,
             new ANPStrategy(perNodeAction),
-            new MultiSourceBFSInitializationSpecBuilder()
-                .sourceNodes(sourceNodes)
-                .build()
+            builder.build()
         );
     }
 
-    // only used from tests
-    public static MultiSourceBFSAccessMethods predecessorProcessingWithoutSourceNodes(
-        Graph graph,
-        BfsConsumer perNodeAction,
-        BfsWithPredecessorConsumer perNeighborAction
-    ) {
-        return createMultiSourceBFS(
-            graph.nodeCount(),
-            graph,
-            new PredecessorStrategy(perNodeAction, perNeighborAction),
-            new MultiSourceBFSInitializationSpecBuilder()
-                .seenNext(true)
-                .build()
-        );
-    }
 
     public static MultiSourceBFSAccessMethods predecessorProcessing(
         Graph graph,
         BfsConsumer perNodeAction,
         BfsWithPredecessorConsumer perNeighborAction,
-        long[] sourceNodes
+        Optional<long[]> sourceNodes
     ) {
+        MultiSourceBFSInitializationSpecBuilder builder = new MultiSourceBFSInitializationSpecBuilder()
+            .seenNext(true);
+
+        sourceNodes.ifPresent(sources -> builder.sourceNodes(sources).sortSourceNodes(true));
+
         return createMultiSourceBFS(
             graph.nodeCount(),
             graph,
             new PredecessorStrategy(perNodeAction, perNeighborAction),
-            new MultiSourceBFSInitializationSpecBuilder()
-                .seenNext(true)
-                .sortSourceNodes(true)
-                .sourceNodes(sourceNodes)
-                .build()
+            builder.build()
         );
     }
 

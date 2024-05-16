@@ -65,10 +65,11 @@ public class HarmonicCentrality extends Algorithm<HarmonicResult> {
             inverseFarness.update(nodeId, currentValue -> currentValue + (len * (1.0 / depth)));
         };
 
-        MultiSourceBFSAccessMethods.aggregatedNeighborProcessingWithoutSourceNodes(
+        MultiSourceBFSAccessMethods.aggregatedNeighborProcessing(
             graph.nodeCount(),
             graph,
-            consumer
+            consumer,
+            Optional.empty()
         ).run(concurrency, executorService);
 
         var tasks = PartitionUtils.rangePartition(
