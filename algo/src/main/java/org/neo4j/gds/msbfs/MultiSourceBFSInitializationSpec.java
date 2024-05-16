@@ -19,5 +19,5 @@
  */
 package org.neo4j.gds.msbfs;
 
-record MultiSourceBFSInitializationSpec(boolean seenNext, boolean inspectSourceNodes, long[] sourceNodes, boolean allowStartNodeTraversal){}
+record MultiSourceBFSInitializationSpec(boolean seenNext, boolean sortSourceNodes, long[] sourceNodes, boolean allowStartNodeTraversal){}
 

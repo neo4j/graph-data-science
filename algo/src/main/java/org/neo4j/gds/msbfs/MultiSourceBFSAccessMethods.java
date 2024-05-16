@@ -139,7 +139,7 @@ public final class MultiSourceBFSAccessMethods {
             new PredecessorStrategy(perNodeAction, perNeighborAction),
             new MultiSourceBFSInitializationSpecBuilder()
                 .seenNext(true)
-                .inspectSourceNodes(true)
+                .sortSourceNodes(true)
                 .sourceNodes(sourceNodes)
                 .build()
         );
@@ -157,7 +157,7 @@ public final class MultiSourceBFSAccessMethods {
         var seensNext = spec.seenNext() ? new LocalHugeLongArray(nodeCount) : null;
 
         var sourceNodes = spec.sourceNodes();
-        if (spec.inspectSourceNodes()) {
+        if (spec.sortSourceNodes()) {
             if (sourceNodes == null || sourceNodes.length == 0) {
                 throw new IllegalArgumentException("You must provide source nodes");
             }
