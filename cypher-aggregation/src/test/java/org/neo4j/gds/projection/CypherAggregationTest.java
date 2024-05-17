@@ -53,12 +53,7 @@ import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Result;
-import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
-import org.neo4j.internal.kernel.api.procs.UserAggregationReducer;
-import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
-import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 
 import java.time.ZonedDateTime;
@@ -798,15 +793,27 @@ class CypherAggregationTest extends BaseProcTest {
             "RETURN g.configuration AS config";
         assertCypherResult(
             query,
-            List.of(Map.of("config", Map.of(
-                "creationTime", any(ZonedDateTime.class),
-                "inverseIndexedRelationshipTypes", List.of(),
-                "jobId", any(String.class),
-                "logProgress", true,
-                "query", query,
-                "readConcurrency", 4,
-                "undirectedRelationshipTypes", List.of()
-            )))
+            List.of(
+                Map.of(
+                    "config",
+                    Map.of(
+                        "creationTime",
+                        any(ZonedDateTime.class),
+                        "inverseIndexedRelationshipTypes",
+                        List.of(),
+                        "jobId",
+                        any(String.class),
+                        "logProgress",
+                        true,
+                        "query",
+                        query,
+                        "readConcurrency",
+                        4,
+                        "undirectedRelationshipTypes",
+                        List.of()
+                    )
+                )
+            )
         );
     }
 
