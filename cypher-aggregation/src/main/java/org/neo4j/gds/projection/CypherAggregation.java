@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.projection;
 
+import org.neo4j.gds.annotation.CustomProcedure;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
@@ -33,6 +34,9 @@ import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.impl.api.KernelTransactions;
+import org.neo4j.procedure.Name;
+import org.neo4j.values.AnyValue;
+import org.neo4j.values.storable.TextValue;
 
 import java.util.List;
 import java.util.Optional;
@@ -78,6 +82,18 @@ public class CypherAggregation implements CallableUserAggregationFunction {
             // not deprecated
             Optional.empty()
         );
+    }
+
+    // NOTE: keep in sync with `FUNCTION_NAME` and `signature`
+    @CustomProcedure(value = "gds.graph.project", namespace = CustomProcedure.Namespace.AGGREGATION_FUNCTION)
+    public AggregationResult procedureSyntax(
+        @Name("graphName") TextValue graphName,
+        @Name("sourceNode") AnyValue sourceNode,
+        @Name("targetNode") AnyValue targetNode,
+        @Name("dataConfig") AnyValue dataConfig,
+        @Name("configuration") AnyValue config
+    ) {
+        throw new UnsupportedOperationException("This method is only used to document the procedure syntax.");
     }
 
     @Override
