@@ -33,7 +33,7 @@ public class MemoryEstimateResult {
     public final String treeView;
     public final Map<String, Object> mapView;
     public final long bytesMin, bytesMax;
-    public long nodeCount, relationshipCount;
+    public final long nodeCount, relationshipCount;
     public final double heapPercentageMin;
     public final double heapPercentageMax;
 
