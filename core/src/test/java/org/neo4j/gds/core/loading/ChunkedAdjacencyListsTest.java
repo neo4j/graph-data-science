@@ -20,10 +20,13 @@
 package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.compression.common.AdjacencyCompression;
 import org.neo4j.gds.core.compression.common.ZigZagLongDecoding;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.fail;
 import static org.neo4j.gds.core.compression.common.ZigZagLongDecoding.Identity.INSTANCE;
 import static org.neo4j.gds.core.loading.AdjacencyPreAggregation.IGNORE_VALUE;
@@ -231,5 +234,20 @@ class ChunkedAdjacencyListsTest {
             assertThat(actualProperties).hasNumberOfRows(1);
             assertThat(actualProperties[0]).containsSequence(3L, 3L, 4L);
         });
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {
+        110_000_000_0,
+        210_000_000_9,
+        214_000_000_5
+    })
+    void shouldComputeNewLength(int minLength) {
+        assertThatNoException().isThrownBy(
+            () ->
+                assertThat(ChunkedAdjacencyLists.getNewLength(minLength))
+                    .isPositive()
+                    .isLessThan(Integer.MAX_VALUE)
+        );
     }
 }

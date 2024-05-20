@@ -198,8 +198,7 @@ public final class ChunkedAdjacencyLists {
                 )
             );
         } else if (compressedTargets.length <= targetLength) {
-            int newLength = BitUtil.nextHighestPowerOfTwo(targetLength);
-//            int newLength = ArrayUtil.oversize(pos + required, Byte.BYTES);
+            int newLength = getNewLength(targetLength);
             compressedTargets = Arrays.copyOf(compressedTargets, newLength);
             this.targetLists.set(index, compressedTargets);
         }
