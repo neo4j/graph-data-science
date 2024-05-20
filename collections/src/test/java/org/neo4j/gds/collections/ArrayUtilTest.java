@@ -22,6 +22,7 @@ package org.neo4j.gds.collections;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
@@ -29,6 +30,7 @@ import java.util.Locale;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -189,5 +191,22 @@ class ArrayUtilTest {
         var actual = oversizeHuge(42, Byte.BYTES);
         // 42 + (42/8) == 47, which gets aligned to 48
         assertEquals(48, actual);
+    }
+
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("bytesPerElement")
+    void oversizeThrowsOnIntegerMaxValue(int bytesPerElement, String label) {
+        assertThatIllegalArgumentException().isThrownBy(
+                () -> ArrayUtil.oversize(Integer.MAX_VALUE, bytesPerElement)
+            )
+            .withMessageContaining("requested array size")
+            .withMessageContaining("exceeds maximum array in java ");
+    }
+
+    private static Stream<Arguments> bytesPerElement() {
+        return Stream.of(
+            Arguments.of(Byte.BYTES, "Byte.BYTES"),
+            Arguments.of(Integer.BYTES, "Integer.BYTES")
+        );
     }
 }
