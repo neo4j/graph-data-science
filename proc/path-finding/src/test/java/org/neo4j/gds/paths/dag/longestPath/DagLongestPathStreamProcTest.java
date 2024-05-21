@@ -134,6 +134,5 @@ class DagLongestPathStreamProcTest extends BaseProcTest {
                 }
             }
         );
-
     }
 }
