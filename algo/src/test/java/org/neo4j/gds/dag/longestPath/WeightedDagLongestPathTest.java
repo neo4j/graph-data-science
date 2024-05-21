@@ -202,4 +202,83 @@ class WeightedDagLongestPathTest {
             assertThat(counter).isEqualTo(7L);
         }
     }
+
+    @GdlExtension
+    @Nested
+    class GraphWithZeroWeights {
+        @GdlGraph
+        private static final String DB_QUERY =
+            "CREATE" +
+                "  (n0)" +
+                ", (n1)" +
+                ", (n2)" +
+                ", (n3)" +
+                ", (n0)-[:T {prop: 0.0}]->(n1)" +
+                ", (n1)-[:T {prop: 0.0}]->(n2)" +
+                ", (n2)-[:T {prop: 8.0}]->(n3)";
+
+        @Inject
+        private TestGraph graph;
+
+        @Test
+        void shouldWorkWithZeroWeights() {
+            IdFunction idFunction = graph::toMappedNodeId;
+
+            long[] a = new long[]{
+                idFunction.of("n0"),
+                idFunction.of("n1"),
+                idFunction.of("n2"),
+                idFunction.of("n3"),
+            };
+
+            var longestPath = new DagLongestPathFactory().build(
+                graph,
+                CONFIG,
+                ProgressTracker.NULL_TRACKER
+            );
+
+            PathFindingResult result = longestPath.compute();
+
+            long[][] EXPECTED_PATHS = new long[4][];
+            EXPECTED_PATHS[(int) a[0]] = new long[]{a[0]};
+            EXPECTED_PATHS[(int) a[1]] = new long[]{a[0], a[1]};
+            EXPECTED_PATHS[(int) a[2]] = new long[]{a[0], a[1], a[2]};
+            EXPECTED_PATHS[(int) a[3]] = new long[]{a[0], a[1], a[2], a[3]};
+            double[] EXPECTED_COSTS = new double[4];
+            EXPECTED_COSTS[(int) a[0]] = 0;
+            EXPECTED_COSTS[(int) a[1]] = 0;
+            EXPECTED_COSTS[(int) a[2]] = 0;
+            EXPECTED_COSTS[(int) a[3]] = 8;
+
+            long counter = 0;
+            for (var path : result.pathSet()) {
+                counter++;
+                int currentTargetNode = (int) path.targetNode();
+                assertThat(path.nodeIds()).isEqualTo(EXPECTED_PATHS[currentTargetNode]);
+                assertThat(path.totalCost()).isEqualTo(EXPECTED_COSTS[currentTargetNode]);
+            }
+            assertThat(counter).isEqualTo(4L);
+        }
+
+        @Test
+        void shouldLogProgress() {
+            var lpFactory = new DagLongestPathFactory<>();
+            var progressTask = lpFactory.progressTask(graph, CONFIG);
+            var log = Neo4jProxy.testLog();
+            var testTracker = new TestProgressTracker(
+                progressTask,
+                log,
+                CONFIG.concurrency(),
+                EmptyTaskRegistryFactory.INSTANCE
+            );
+
+            var lp = lpFactory.build(graph, CONFIG, testTracker);
+            lp.compute().pathSet();
+
+            String taskName = lpFactory.taskName();
+
+            assertTrue(log.containsMessage(TestLog.INFO, taskName + " :: Start"));
+            assertTrue(log.containsMessage(TestLog.INFO, taskName + " :: Finished"));
+        }
+    }
 }
