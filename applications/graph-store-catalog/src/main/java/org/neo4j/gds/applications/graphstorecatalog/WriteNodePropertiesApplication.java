@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
@@ -29,7 +29,6 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
@@ -39,7 +38,6 @@ import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -62,10 +60,17 @@ public class WriteNodePropertiesApplication {
         GraphWriteNodePropertiesConfig configuration
     ) {
         var validNodeLabels = configuration.validNodeLabels(graphStore);
+        var subGraph = graphStore.getGraph(
+            validNodeLabels,
+            graphStore.relationshipTypes(),
+            Optional.empty()
+        );
+
+
         var task = Tasks.iterativeFixed(
             "Graph :: NodeProperties :: Write",
             () -> List.of(
-                NodePropertyExporter.innerTask("Label", Task.UNKNOWN_VOLUME)
+                NodePropertyExporter.innerTask("Label", subGraph.nodeCount())
             ),
             validNodeLabels.size()
         );
@@ -95,7 +100,7 @@ public class WriteNodePropertiesApplication {
                     graphStore,
                     resultStore,
                     configuration,
-                    validNodeLabels,
+                    subGraph,
                     nodePropertyExporterBuilder,
                     terminationFlag,
                     progressTracker
@@ -115,53 +120,42 @@ public class WriteNodePropertiesApplication {
         GraphStore graphStore,
         ResultStore resultStore,
         GraphWriteNodePropertiesConfig config,
-        Iterable<NodeLabel> validNodeLabels,
+        Graph subGraph,
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker
     ) {
-        var propertiesWritten = 0L;
-
         progressTracker.beginSubTask();
         try {
-            for (var label : validNodeLabels) {
-                var subGraph = graphStore.getGraph(
-                    Collections.singletonList(label),
-                    graphStore.relationshipTypes(),
-                    Optional.empty()
-                );
+            var exporter = nodePropertyExporterBuilder
+                .withIdMap(subGraph)
+                .withTerminationFlag(terminationFlag)
+                .parallel(DefaultPool.INSTANCE, config.writeConcurrency())
+                .withProgressTracker(progressTracker)
+                .withArrowConnectionInfo(
+                    config.arrowConnectionInfo(),
+                    graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
+                )
+                .withResultStore(config.resolveResultStore(resultStore))
+                .withJobId(config.jobId())
+                .build();
 
-                var exporter = nodePropertyExporterBuilder
-                    .withIdMap(subGraph)
-                    .withTerminationFlag(terminationFlag)
-                    .parallel(DefaultPool.INSTANCE, config.writeConcurrency())
-                    .withProgressTracker(progressTracker)
-                    .withArrowConnectionInfo(
-                        config.arrowConnectionInfo(),
-                        graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
+            var writeNodeProperties = config.nodeProperties()
+                .stream()
+                .map(
+                    nodePropertyKey -> ImmutableNodeProperty.of(
+                        nodePropertyKey.writeProperty(),
+                        subGraph.nodeProperties(nodePropertyKey.nodeProperty())
                     )
-                    .withResultStore(config.resolveResultStore(resultStore))
-                    .withJobId(config.jobId())
-                    .build();
+                )
+                .collect(Collectors.toList());
 
-                var writeNodeProperties = config.nodeProperties()
-                    .stream()
-                    .map(
-                        nodePropertyKey -> ImmutableNodeProperty.of(
-                            nodePropertyKey.writeProperty(),
-                            subGraph.nodeProperties(nodePropertyKey.nodeProperty())
-                        )
-                    )
-                    .collect(Collectors.toList());
+            exporter.write(writeNodeProperties);
 
-                exporter.write(writeNodeProperties);
+            return exporter.propertiesWritten();
 
-                propertiesWritten += exporter.propertiesWritten();
-            }
         } finally {
             progressTracker.endSubTask();
         }
-
-        return propertiesWritten;
     }
 }

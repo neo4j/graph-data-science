@@ -138,10 +138,10 @@ class WriteNodePropertiesApplicationTest {
         assertThat(writeResult.writeMillis).isGreaterThan(-1);
         assertThat(writeResult.graphName).isEqualTo("g");
         assertThat(writeResult.nodeProperties).containsExactly("nodeProp1", "nodeProp2");
-        assertThat(writeResult.propertiesWritten).isEqualTo(19L);
+        assertThat(writeResult.propertiesWritten).isEqualTo(8L);
 
-        verify(nodePropertyExporterMock, times(2)).propertiesWritten();
-        verify(nodePropertyExporterMock, times(2)).write(captor.capture());
+        verify(nodePropertyExporterMock, times(1)).propertiesWritten();
+        verify(nodePropertyExporterMock, times(1)).write(captor.capture());
         verifyNoMoreInteractions(nodePropertyExporterMock);
         assertThat(captor.getValue()).hasSize(2).satisfiesExactlyInAnyOrder(
             nodeProperty -> assertThat(nodeProperty.propertyKey()).isEqualTo("nodeProp1"),
@@ -258,8 +258,8 @@ class WriteNodePropertiesApplicationTest {
         assertThat(writeResult.graphName).isEqualTo("g");
         assertThat(writeResult.nodeProperties).containsExactly("foo");
 
-        verify(nodePropertyExporterMock, times(2)).propertiesWritten();
-        verify(nodePropertyExporterMock, times(2)).write(captor.capture());
+        verify(nodePropertyExporterMock, times(1)).propertiesWritten();
+        verify(nodePropertyExporterMock, times(1)).write(captor.capture());
         verifyNoMoreInteractions(nodePropertyExporterMock);
         assertThat(captor.getValue())
             .hasSize(1)
