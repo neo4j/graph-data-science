@@ -36,7 +36,7 @@ public enum Neo4jVersion {
     V_5_20,
     V_Dev;
 
-    private static final int MINOR_DEV_VERSION = 20;
+    private static final int MINOR_DEV_VERSION = 21;
 
     static Neo4jVersion parse(String version) {
         var versionSegments = Pattern.compile("[.-]")
