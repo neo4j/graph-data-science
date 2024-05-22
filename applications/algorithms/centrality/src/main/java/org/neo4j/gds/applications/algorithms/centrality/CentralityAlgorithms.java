@@ -38,12 +38,15 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.degree.DegreeCentrality;
 import org.neo4j.gds.degree.DegreeCentralityConfig;
 import org.neo4j.gds.degree.DegreeCentralityResult;
+import org.neo4j.gds.termination.TerminationFlag;
 
 public class CentralityAlgorithms {
     private final ProgressTrackerCreator progressTrackerCreator;
+    private final TerminationFlag terminationFlag;
 
-    public CentralityAlgorithms(ProgressTrackerCreator progressTrackerCreator) {
+    public CentralityAlgorithms(ProgressTrackerCreator progressTrackerCreator, TerminationFlag terminationFlag) {
         this.progressTrackerCreator = progressTrackerCreator;
+        this.terminationFlag = terminationFlag;
     }
 
     BetwennessCentralityResult betweennessCentrality(Graph graph, BetweennessCentralityBaseConfig configuration) {
@@ -60,7 +63,10 @@ public class CentralityAlgorithms {
             ? ForwardTraverser.Factory.weighted()
             : ForwardTraverser.Factory.unweighted();
 
-        var task = Tasks.leaf(LabelForProgressTracking.BetweennessCentrality.value, samplingSize.orElse(graph.nodeCount()));
+        var task = Tasks.leaf(
+            LabelForProgressTracking.BetweennessCentrality.value,
+            samplingSize.orElse(graph.nodeCount())
+        );
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
         var algorithm = new BetweennessCentrality(
@@ -69,7 +75,8 @@ public class CentralityAlgorithms {
             traverserFactory,
             DefaultPool.INSTANCE,
             parameters.concurrency(),
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
 
         return algorithm.compute();

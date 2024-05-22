@@ -33,6 +33,7 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 import java.util.Optional;
@@ -139,7 +140,8 @@ class BetweennessCentralityTest {
             ForwardTraverser.Factory.unweighted(),
             DefaultPool.INSTANCE,
             new Concurrency(concurrency),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).compute().centralities();
 
         assertEquals(expectedResult.size(), actualResult.size());
@@ -158,7 +160,8 @@ class BetweennessCentralityTest {
             ForwardTraverser.Factory.unweighted(),
             DefaultPool.INSTANCE,
             new Concurrency(concurrency),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).compute().centralities();
 
         assertEquals(5, actualResult.size(), "Expected 5 centrality values");

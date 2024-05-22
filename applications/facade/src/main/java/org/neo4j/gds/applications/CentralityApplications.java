@@ -62,7 +62,7 @@ public final class CentralityApplications {
         ProgressTrackerCreator progressTrackerCreator
     ) {
         var estimation = new CentralityAlgorithmsEstimationModeBusinessFacade(estimationTemplate);
-        var algorithms = new CentralityAlgorithms(progressTrackerCreator);
+        var algorithms = new CentralityAlgorithms(progressTrackerCreator, requestScopedDependencies.getTerminationFlag());
         var mutateNodePropertyService = new MutateNodePropertyService(log);
         var mutateNodeProperty = new MutateNodeProperty(mutateNodePropertyService);
         var mutation = new CentralityAlgorithmsMutateModeBusinessFacade(

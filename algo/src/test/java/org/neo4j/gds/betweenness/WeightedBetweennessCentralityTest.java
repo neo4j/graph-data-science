@@ -30,6 +30,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 
@@ -80,7 +81,8 @@ class WeightedBetweennessCentralityTest {
             ForwardTraverser.Factory.weighted(),
             DefaultPool.INSTANCE,
             new Concurrency(8),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
         var algoUnweighted = new BetweennessCentrality(
             equallyWeightedGraph,
@@ -88,7 +90,8 @@ class WeightedBetweennessCentralityTest {
             ForwardTraverser.Factory.unweighted(),
             DefaultPool.INSTANCE,
             new Concurrency(8),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
         var resultWeighted = algoWeighted.compute().centralities();
         var resultUnweighted = algoUnweighted.compute().centralities();
@@ -114,7 +117,8 @@ class WeightedBetweennessCentralityTest {
              ForwardTraverser.Factory.weighted(),
              DefaultPool.INSTANCE,
              new Concurrency(8),
-             ProgressTracker.NULL_TRACKER
+             ProgressTracker.NULL_TRACKER,
+             TerminationFlag.RUNNING_TRUE
          );
         var result = bc.compute().centralities();
         var softAssertions = new SoftAssertions();

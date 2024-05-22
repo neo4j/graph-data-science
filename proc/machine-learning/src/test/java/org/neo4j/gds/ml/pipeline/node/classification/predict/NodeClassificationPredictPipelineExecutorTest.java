@@ -34,6 +34,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.applications.ApplicationsFacade;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -62,6 +63,7 @@ import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.test.TestProc;
 
 import java.util.ArrayList;
@@ -423,7 +425,17 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
      * But let's be honest, there is enough work in front of us that such a fix is lower priority right now.
      */
     private static AlgorithmsProcedureFacade createAlgorithmsProcedureFacade() {
-        var applicationsFacade = ApplicationsFacade.create(null, Optional.empty(), null, null, null, null, null, null);
+        var applicationsFacade = ApplicationsFacade.create(
+            null,
+            Optional.empty(),
+            null,
+            null,
+            null,
+            null,
+            RequestScopedDependencies.builder().with(
+                TerminationFlag.RUNNING_TRUE).build(),
+            null
+        );
         var configurationParser = new ConfigurationParser(null, null);
         var genericStub = new GenericStub(null, null, null, configurationParser, null, null);
         var centralityProcedureFacade = CentralityProcedureFacade.create(

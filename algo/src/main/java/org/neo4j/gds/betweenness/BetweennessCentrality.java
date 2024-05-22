@@ -33,6 +33,7 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
@@ -57,7 +58,8 @@ public class BetweennessCentrality extends Algorithm<BetwennessCentralityResult>
         ForwardTraverser.Factory traverserFactory,
         ExecutorService executorService,
         Concurrency concurrency,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -69,7 +71,7 @@ public class BetweennessCentrality extends Algorithm<BetwennessCentralityResult>
         this.selectionStrategy.init(graph, executorService, concurrency);
         this.divisor = graph.schema().isUndirected() ? 2.0 : 1.0;
         this.traverserFactory = traverserFactory;
-
+        this.terminationFlag = terminationFlag;
     }
 
     @Override
