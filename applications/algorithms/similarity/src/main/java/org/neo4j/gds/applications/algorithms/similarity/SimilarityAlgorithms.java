@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.algorithms.similarity;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -50,9 +51,11 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 
 public class SimilarityAlgorithms {
     private final ProgressTrackerCreator progressTrackerCreator;
+    private final RequestScopedDependencies requestScopedDependencies;
 
-    public SimilarityAlgorithms(ProgressTrackerCreator progressTrackerCreator) {
+    public SimilarityAlgorithms(ProgressTrackerCreator progressTrackerCreator, RequestScopedDependencies requestScopedDependencies) {
         this.progressTrackerCreator = progressTrackerCreator;
+        this.requestScopedDependencies = requestScopedDependencies;
     }
 
     FilteredKnnResult filteredKnn(Graph graph, FilteredKnnBaseConfig configuration) {
@@ -91,7 +94,8 @@ public class SimilarityAlgorithms {
             DefaultPool.INSTANCE,
             progressTracker,
             sourceNodeFilter,
-            targetNodeFilter
+            targetNodeFilter,
+            requestScopedDependencies.getTerminationFlag()
         );
 
         return algorithm.compute();
@@ -128,7 +132,8 @@ public class SimilarityAlgorithms {
                 .builder()
                 .progressTracker(progressTracker)
                 .executor(DefaultPool.INSTANCE)
-                .build()
+                .build(),
+            requestScopedDependencies.getTerminationFlag()
         );
 
         return algorithm.compute();
@@ -156,7 +161,8 @@ public class SimilarityAlgorithms {
             DefaultPool.INSTANCE,
             progressTracker,
             NodeFilter.ALLOW_EVERYTHING,
-            NodeFilter.ALLOW_EVERYTHING
+            NodeFilter.ALLOW_EVERYTHING,
+            requestScopedDependencies.getTerminationFlag()
         );
 
         return algorithm.compute();
@@ -173,15 +179,15 @@ public class SimilarityAlgorithms {
         return Tasks.leaf("prepare", graph.relationshipCount());
     }
 
-    private static FilteredKnn selectAlgorithmConfiguration(
+    private FilteredKnn selectAlgorithmConfiguration(
         Graph graph,
         FilteredKnnBaseConfig configuration,
         KnnContext knnContext
     ) {
         if (configuration.seedTargetNodes()) {
-            return FilteredKnn.createWithDefaultSeeding(graph, configuration, knnContext);
+            return FilteredKnn.createWithDefaultSeeding(graph, configuration, knnContext, requestScopedDependencies.getTerminationFlag());
         }
 
-        return FilteredKnn.createWithoutSeeding(graph, configuration, knnContext);
+        return FilteredKnn.createWithoutSeeding(graph, configuration, knnContext, requestScopedDependencies.getTerminationFlag());
     }
 }

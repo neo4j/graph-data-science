@@ -27,6 +27,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.similarity.filtering.NodeFilterSpecFactory;
 import org.neo4j.gds.similarity.knn.KnnContext;
 import org.neo4j.gds.similarity.knn.KnnNodePropertySpec;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -65,7 +66,7 @@ public class FilteredKnnIdMappingTest {
             .sourceNodeFilter(NodeFilterSpecFactory.create(lowestOriginalId))
             .build();
 
-        var knn = FilteredKnn.createWithoutSeeding(graph, config, KnnContext.empty());
+        var knn = FilteredKnn.createWithoutSeeding(graph, config, KnnContext.empty(), TerminationFlag.RUNNING_TRUE);
 
         var result = knn.compute();
 

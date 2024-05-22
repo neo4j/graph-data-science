@@ -98,6 +98,7 @@ public final class ApplicationsFacade {
 
         var similarityApplications = SimilarityApplications.create(
             log,
+            requestScopedDependencies,
             algorithmEstimationTemplate,
             algorithmProcessingTemplate,
             progressTrackerCreator,

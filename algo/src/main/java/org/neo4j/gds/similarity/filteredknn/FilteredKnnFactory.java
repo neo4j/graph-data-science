@@ -29,6 +29,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.similarity.knn.ImmutableKnnContext;
 import org.neo4j.gds.similarity.knn.KnnContext;
 import org.neo4j.gds.similarity.knn.KnnFactory;
+import org.neo4j.gds.termination.TerminationFlag;
 
 public class FilteredKnnFactory<CONFIG extends FilteredKnnBaseConfig> extends GraphAlgorithmFactory<FilteredKnn, CONFIG> {
     private static final String FILTERED_KNN_TASK_NAME = "Filtered KNN";
@@ -37,7 +38,20 @@ public class FilteredKnnFactory<CONFIG extends FilteredKnnBaseConfig> extends Gr
     private final TriFunction<Graph, CONFIG, KnnContext, FilteredKnn> seededFilteredKnnSupplier;
 
     public FilteredKnnFactory() {
-        this(FilteredKnn::createWithoutSeeding, FilteredKnn::createWithDefaultSeeding);
+        this(
+            (graph, config, knnContext) -> FilteredKnn.createWithoutSeeding(
+                graph,
+                config,
+                knnContext,
+                TerminationFlag.RUNNING_TRUE
+            ),
+            (graph, config, knnContext) -> FilteredKnn.createWithDefaultSeeding(
+                graph,
+                config,
+                knnContext,
+                TerminationFlag.RUNNING_TRUE
+            )
+        );
     }
 
     FilteredKnnFactory(

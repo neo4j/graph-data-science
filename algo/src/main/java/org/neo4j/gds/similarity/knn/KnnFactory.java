@@ -28,6 +28,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 
@@ -54,7 +55,8 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends GraphAlgorithmFact
                 .builder()
                 .progressTracker(progressTracker)
                 .executor(DefaultPool.INSTANCE)
-                .build()
+                .build(),
+            TerminationFlag.RUNNING_TRUE
         );
     }
 

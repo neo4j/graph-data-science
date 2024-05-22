@@ -37,6 +37,7 @@ import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.wcc.Wcc;
 import org.neo4j.gds.wcc.WccAlgorithmFactory;
 import org.neo4j.gds.wcc.WccParameters;
@@ -74,6 +75,10 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     private Function<Long, LongStream> sourceNodesStream;
     private BiFunction<Long, Long, LongStream> targetNodesStream;
 
+    /**
+     * @deprecated Don't use this, use the one that injects termination flag directly
+     */
+    @Deprecated
     public NodeSimilarity(
         Graph graph,
         NodeSimilarityParameters parameters,
@@ -88,7 +93,53 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             executorService,
             progressTracker,
             NodeFilter.ALLOW_EVERYTHING,
-            NodeFilter.ALLOW_EVERYTHING
+            NodeFilter.ALLOW_EVERYTHING,
+            TerminationFlag.RUNNING_TRUE
+        );
+    }
+
+    public NodeSimilarity(
+        Graph graph,
+        NodeSimilarityParameters parameters,
+        Concurrency concurrency,
+        ExecutorService executorService,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
+    ) {
+        this(
+            graph,
+            parameters,
+            concurrency,
+            executorService,
+            progressTracker,
+            NodeFilter.ALLOW_EVERYTHING,
+            NodeFilter.ALLOW_EVERYTHING,
+            terminationFlag
+        );
+    }
+
+    /**
+     * @deprecated Don't use this, use the one that injects termination flag directly
+     */
+    @Deprecated
+    public NodeSimilarity(
+        Graph graph,
+        NodeSimilarityParameters parameters,
+        Concurrency concurrency,
+        ExecutorService executorService,
+        ProgressTracker progressTracker,
+        NodeFilter sourceNodeFilter,
+        NodeFilter targetNodeFilter
+    ) {
+        this(
+            graph,
+            parameters,
+            concurrency,
+            executorService,
+            progressTracker,
+            sourceNodeFilter,
+            targetNodeFilter,
+            TerminationFlag.RUNNING_TRUE
         );
     }
 
@@ -99,7 +150,8 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         ExecutorService executorService,
         ProgressTracker progressTracker,
         NodeFilter sourceNodeFilter,
-        NodeFilter targetNodeFilter
+        NodeFilter targetNodeFilter,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -113,6 +165,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         this.sourceNodes = new BitSet(graph.nodeCount());
         this.targetNodes = new BitSet(graph.nodeCount());
         this.weighted = this.parameters.hasRelationshipWeightProperty();
+        this.terminationFlag = terminationFlag;
     }
 
     @Override

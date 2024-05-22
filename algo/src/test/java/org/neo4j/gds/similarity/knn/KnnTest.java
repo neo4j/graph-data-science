@@ -48,6 +48,7 @@ import org.neo4j.gds.nodeproperties.DoubleArrayTestPropertyValues;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
 import org.neo4j.gds.nodeproperties.FloatArrayTestPropertyValues;
 import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Comparator;
 import java.util.List;
@@ -117,7 +118,8 @@ class KnnTest {
             KnnSampler.SamplerType.UNIFORM,
             similarityFunction,
             new KnnNeighborFilterFactory(graph.nodeCount()),
-            NeighbourConsumers.no_op
+            NeighbourConsumers.no_op,
+            TerminationFlag.RUNNING_TRUE
         );
         var result = knn.compute();
 
@@ -154,7 +156,8 @@ class KnnTest {
             KnnSampler.SamplerType.UNIFORM,
             similarityFunction,
             new KnnNeighborFilterFactory(graph.nodeCount()),
-            NeighbourConsumers.no_op
+            NeighbourConsumers.no_op,
+            TerminationFlag.RUNNING_TRUE
         );
         var result = knn.compute();
 
@@ -207,7 +210,8 @@ class KnnTest {
             KnnSampler.SamplerType.UNIFORM,
             similarityFunction,
             new KnnNeighborFilterFactory(graph.nodeCount()),
-            NeighbourConsumers.no_op
+            NeighbourConsumers.no_op,
+            TerminationFlag.RUNNING_TRUE
         );
         var result = knn.compute();
 
@@ -253,7 +257,8 @@ class KnnTest {
             KnnSampler.SamplerType.UNIFORM,
             similarityFunction,
             new KnnNeighborFilterFactory(multPropMissingGraph.nodeCount()),
-            NeighbourConsumers.no_op
+            NeighbourConsumers.no_op,
+            TerminationFlag.RUNNING_TRUE
         );
         var result = knn.compute();
 
@@ -296,7 +301,8 @@ class KnnTest {
             KnnSampler.SamplerType.UNIFORM,
             similarityFunction,
             new KnnNeighborFilterFactory(simThresholdGraph.nodeCount()),
-            NeighbourConsumers.no_op
+            NeighbourConsumers.no_op,
+            TerminationFlag.RUNNING_TRUE
         );
         var result = knn.compute();
 
@@ -334,7 +340,8 @@ class KnnTest {
             KnnSampler.SamplerType.UNIFORM,
             similarityFunction,
             new KnnNeighborFilterFactory(graph.nodeCount()),
-            NeighbourConsumers.no_op
+            NeighbourConsumers.no_op,
+            TerminationFlag.RUNNING_TRUE
         );
         var result = knn.compute();
         assertThat(result)
@@ -375,7 +382,8 @@ class KnnTest {
             KnnSampler.SamplerType.UNIFORM,
             similarityFunction,
             new KnnNeighborFilterFactory(graph.nodeCount()),
-            NeighbourConsumers.no_op
+            NeighbourConsumers.no_op,
+            TerminationFlag.RUNNING_TRUE
         );
         var result = knn.compute();
 
@@ -481,7 +489,8 @@ class KnnTest {
             KnnSampler.SamplerType.UNIFORM,
             similarityFunction,
             new KnnNeighborFilterFactory(graph.nodeCount()),
-            NeighbourConsumers.no_op
+            NeighbourConsumers.no_op,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var result = knn.compute();
@@ -515,7 +524,8 @@ class KnnTest {
             KnnSampler.SamplerType.UNIFORM,
             similarityFunction,
             new KnnNeighborFilterFactory(graph.nodeCount()),
-            NeighbourConsumers.no_op
+            NeighbourConsumers.no_op,
+            TerminationFlag.RUNNING_TRUE
         );
         knn.compute();
 
@@ -564,7 +574,8 @@ class KnnTest {
             KnnSampler.SamplerType.UNIFORM,
             similarityFunction,
             new KnnNeighborFilterFactory(graphWithNegativeNodePropertyValues.nodeCount()),
-            NeighbourConsumers.no_op
+            NeighbourConsumers.no_op,
+            TerminationFlag.RUNNING_TRUE
         );
         var result = knn.compute();
         assertThat(result.streamSimilarityResult())
@@ -614,7 +625,8 @@ class KnnTest {
                 KnnSampler.SamplerType.UNIFORM,
                 similarityFunction,
                 new KnnNeighborFilterFactory(graph.nodeCount()),
-                NeighbourConsumers.no_op
+                NeighbourConsumers.no_op,
+                TerminationFlag.RUNNING_TRUE
             );
             var result = knn.compute();
 
@@ -651,7 +663,8 @@ class KnnTest {
                 KnnSampler.SamplerType.UNIFORM,
                 similarityFunction,
                 new KnnNeighborFilterFactory(graph.nodeCount()),
-                NeighbourConsumers.no_op
+                NeighbourConsumers.no_op,
+                TerminationFlag.RUNNING_TRUE
             );
             var result = knn.compute();
 
@@ -713,7 +726,8 @@ class KnnTest {
                 KnnSampler.SamplerType.RANDOMWALK,
                 similarityFunction,
                 new KnnNeighborFilterFactory(graph.nodeCount()),
-                NeighbourConsumers.no_op
+                NeighbourConsumers.no_op,
+                TerminationFlag.RUNNING_TRUE
             );
             var result = knn.compute();
 

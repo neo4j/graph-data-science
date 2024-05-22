@@ -29,6 +29,7 @@ import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.SplittableRandom;
@@ -42,7 +43,8 @@ public class Knn extends Algorithm<KnnResult> {
         KnnParameters parameters,
         SimilarityComputer similarityComputer,
         NeighborFilterFactory neighborFilterFactory,
-        KnnContext context
+        KnnContext context,
+        TerminationFlag terminationFlag
     ) {
         var similarityFunction = new SimilarityFunction(similarityComputer);
         return new Knn(
@@ -60,7 +62,8 @@ public class Knn extends Algorithm<KnnResult> {
             parameters.samplerType(),
             similarityFunction,
             neighborFilterFactory,
-            NeighbourConsumers.no_op
+            NeighbourConsumers.no_op,
+            terminationFlag
         );
     }
 
@@ -92,7 +95,8 @@ public class Knn extends Algorithm<KnnResult> {
         KnnSampler.SamplerType initialSamplerType,
         SimilarityFunction similarityFunction,
         NeighborFilterFactory neighborFilterFactory,
-        NeighbourConsumers neighborConsumers
+        NeighbourConsumers neighborConsumers,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -136,6 +140,8 @@ public class Knn extends Algorithm<KnnResult> {
             splittableRandom,
             progressTracker
         );
+
+        this.terminationFlag = terminationFlag;
     }
 
     public ExecutorService executorService() {

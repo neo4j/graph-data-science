@@ -32,18 +32,16 @@ import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.knn.NeighborList;
 import org.neo4j.gds.similarity.knn.SimilarityFunction;
 import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 /**
  * Filtered KNN is the same as ordinary KNN, _but_ we allow users to regulate final output in two ways.
- *
  * Consider each result item to be a relationship from one node to another, with a score.
- *
  * Firstly, we enable source node filtering. This limits the result to only contain relationships where the source node matches the filter.
  * Secondly, we enable target node filtering. This limits the result to only contain relationships where the target node matches the filter.
- *
  * In both cases the source or target node set can be actual specified nodes, or it could be all nodes with a label.
  */
 @SuppressWarnings("ClassWithOnlyPrivateConstructors")
@@ -56,15 +54,15 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
     private final TargetNodeFiltering targetNodeFiltering;
     private final NodeFilter sourceNodeFilter;
 
-    public static FilteredKnn createWithoutSeeding(Graph graph, FilteredKnnBaseConfig config, KnnContext context) {
-        return create(graph, config, context, Optional.empty());
+    public static FilteredKnn createWithoutSeeding(Graph graph, FilteredKnnBaseConfig config, KnnContext context, TerminationFlag terminationFlag) {
+        return create(graph, config, context, Optional.empty(), terminationFlag);
     }
 
     // a bit speculative, but we imagine this being used as entrypoint for seeding
-    public static FilteredKnn createWithDefaultSeeding(Graph graph, FilteredKnnBaseConfig config, KnnContext context) {
+    public static FilteredKnn createWithDefaultSeeding(Graph graph, FilteredKnnBaseConfig config, KnnContext context, TerminationFlag terminationFlag) {
         var similarityFunction = new SimilarityFunction(SimilarityComputer.ofProperties(graph, config.nodeProperties()));
 
-        return create(graph, config, context, Optional.of(similarityFunction));
+        return create(graph, config, context, Optional.of(similarityFunction), terminationFlag);
     }
 
     /**
@@ -74,7 +72,13 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
      *
      * @param optionalSimilarityFunction An actual similarity function if you want seeding, empty otherwise
      */
-    static FilteredKnn create(Graph graph, FilteredKnnBaseConfig config, KnnContext context, Optional<SimilarityFunction> optionalSimilarityFunction) {
+    static FilteredKnn create(
+        Graph graph,
+        FilteredKnnBaseConfig config,
+        KnnContext context,
+        Optional<SimilarityFunction> optionalSimilarityFunction,
+        TerminationFlag terminationFlag
+    ) {
         var targetNodeFilter = config.targetNodeFilter().toNodeFilter(graph);
         var sourceNodeFilter = config.sourceNodeFilter().toNodeFilter(graph);
 
@@ -107,22 +111,25 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
             config.initialSampler(),
             similarityFunction,
             new KnnNeighborFilterFactory(graph.nodeCount()),
-            targetNodeFiltering
+            targetNodeFiltering,
+            terminationFlag
         );
 
-        return new FilteredKnn(context.progressTracker(), knn, targetNodeFiltering, sourceNodeFilter);
+        return new FilteredKnn(context.progressTracker(), knn, targetNodeFiltering, sourceNodeFilter, terminationFlag);
     }
 
     private FilteredKnn(
         ProgressTracker progressTracker,
         Knn delegate,
         TargetNodeFiltering targetNodeFiltering,
-        NodeFilter sourceNodeFilter
+        NodeFilter sourceNodeFilter,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.delegate = delegate;
         this.targetNodeFiltering = targetNodeFiltering;
         this.sourceNodeFilter = sourceNodeFilter;
+        this.terminationFlag = terminationFlag;
     }
 
     @Override

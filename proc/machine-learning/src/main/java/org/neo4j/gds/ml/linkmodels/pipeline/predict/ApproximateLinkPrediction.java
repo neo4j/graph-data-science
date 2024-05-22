@@ -81,7 +81,8 @@ public class ApproximateLinkPrediction extends LinkPrediction {
             ImmutableKnnContext.of(
                 DefaultPool.INSTANCE,
                 progressTracker
-            )
+            ),
+            TerminationFlag.RUNNING_TRUE
         );
 
         knn.setTerminationFlag(terminationFlag);
