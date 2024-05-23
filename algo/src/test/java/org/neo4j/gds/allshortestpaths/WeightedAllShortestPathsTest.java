@@ -30,6 +30,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -100,7 +101,7 @@ class WeightedAllShortestPathsTest {
 
         TriConsumer<Long, Long, Double> mock = mock(TriConsumer.class);
 
-        new WeightedAllShortestPaths(graph, DefaultPool.INSTANCE, new Concurrency(4))
+        new WeightedAllShortestPaths(graph, DefaultPool.INSTANCE, new Concurrency(4), TerminationFlag.RUNNING_TRUE)
                 .compute()
                 .forEach(r -> {
                     assertNotEquals(Double.POSITIVE_INFINITY, r.distance);
@@ -125,7 +126,7 @@ class WeightedAllShortestPathsTest {
         var gdlGraph = GdlFactory.of("(a)-[:r]->(b)").build().getUnion();
 
         UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class, () -> {
-            new WeightedAllShortestPaths(gdlGraph, DefaultPool.INSTANCE, new Concurrency(4));
+            new WeightedAllShortestPaths(gdlGraph, DefaultPool.INSTANCE, new Concurrency(4), TerminationFlag.RUNNING_TRUE);
         });
 
         assertTrue(exception.getMessage().contains("not supported"));

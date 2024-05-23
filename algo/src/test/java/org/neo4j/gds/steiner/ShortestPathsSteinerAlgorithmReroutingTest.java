@@ -35,6 +35,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -192,7 +193,8 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             new Concurrency(1),
             false,
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
         assertThat(steinerResult.totalCost()).isEqualTo(7.0);
         assertThat(steinerResult.effectiveNodeCount()).isEqualTo(5);
@@ -206,7 +208,8 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             new Concurrency(1),
             true,
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
         assertThat(steinerResultWithReroute.totalCost()).isEqualTo(4.0);
         assertThat(steinerResultWithReroute.effectiveNodeCount()).isEqualTo(3);
@@ -226,7 +229,8 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             new Concurrency(1),
             true,
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
         assertThat(steinerResultWithReroute.totalCost()).isEqualTo(4.0);
         assertThat(steinerResultWithReroute.effectiveNodeCount()).isEqualTo(3);
@@ -245,7 +249,8 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             new Concurrency(1),
             true,
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
         var parent = steinerResult.parentArray().toArray();
 
@@ -270,7 +275,8 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             new Concurrency(1),
             true,
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
         var parent = steinerResult.parentArray().toArray();
 
@@ -297,7 +303,8 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
                 new Concurrency(1),
                 true,
                 DefaultPool.INSTANCE,
-                ProgressTracker.NULL_TRACKER
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE
             ).compute();
             assertThat(steinerTreeResult.effectiveTargetNodesCount()).isEqualTo(2);
         });
@@ -318,7 +325,8 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
                 new Concurrency(1),
                 true,
                 DefaultPool.INSTANCE,
-                ProgressTracker.NULL_TRACKER
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE
             ).compute();
             assertThat(steinerTreeResult.effectiveTargetNodesCount()).isEqualTo(0);
             assertThat(steinerTreeResult.effectiveNodeCount()).isEqualTo(1);
@@ -352,7 +360,8 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             concurrency,
             false,
             DefaultPool.INSTANCE,
-            progressTracker
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
 
         assertThat(log.getMessages(TestLog.INFO))
@@ -397,7 +406,8 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             concurrency,
             applyRerouting,
             DefaultPool.INSTANCE,
-            progressTracker
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
 
         assertThat(log.getMessages(TestLog.INFO))
@@ -448,7 +458,8 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             concurrency,
             applyRerouting,
             DefaultPool.INSTANCE,
-            progressTracker
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
 
         assertThat(log.getMessages(TestLog.INFO))
@@ -489,7 +500,8 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             new Concurrency(1),
             true,
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
         assertThat(steinerResultWithReroute.totalCost()).isEqualTo(25.0);
         assertThat(steinerResultWithReroute.effectiveNodeCount()).isEqualTo(8);
@@ -513,7 +525,8 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             new Concurrency(1),
             true,
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
         assertThat(steinerResultWithReroute.totalCost()).isEqualTo(22.0);
         assertThat(steinerResultWithReroute.effectiveNodeCount()).isEqualTo(5);
@@ -537,7 +550,8 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             new Concurrency(1),
             true,
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
         assertThat(steinerResultWithReroute.totalCost()).isEqualTo(170.0 - 19);
         assertThat(steinerResultWithReroute.effectiveNodeCount()).isEqualTo(6);
@@ -561,7 +575,8 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             new Concurrency(1),
             true,
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
         assertThat(steinerResultWithReroute.totalCost()).isEqualTo(20);
 

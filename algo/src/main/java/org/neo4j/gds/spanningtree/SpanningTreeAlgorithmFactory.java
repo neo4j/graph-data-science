@@ -25,6 +25,7 @@ import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.termination.TerminationFlag;
 
 public class SpanningTreeAlgorithmFactory<CONFIG extends SpanningTreeBaseConfig> extends GraphAlgorithmFactory<Prim, CONFIG> {
 
@@ -37,7 +38,8 @@ public class SpanningTreeAlgorithmFactory<CONFIG extends SpanningTreeBaseConfig>
             graph,
             parameters.objective(),
             graph.toMappedNodeId(parameters.sourceNode()),
-            progressTracker
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         );
     }
 

@@ -23,6 +23,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Arrays;
 import java.util.concurrent.BlockingQueue;
@@ -63,7 +64,7 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
 
     private volatile boolean outputStreamOpen;
 
-    public WeightedAllShortestPaths(Graph graph, ExecutorService executorService, Concurrency concurrency) {
+    public WeightedAllShortestPaths(Graph graph, ExecutorService executorService, Concurrency concurrency, TerminationFlag terminationFlag) {
         super(ProgressTracker.NULL_TRACKER);
         if (!graph.hasRelationshipProperty()) {
             throw new UnsupportedOperationException("WeightedAllShortestPaths is not supported on graphs without a weight property");
@@ -74,6 +75,7 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
         this.executorService = executorService;
         this.concurrency = concurrency;
         this.counter = new AtomicInteger();
+        this.terminationFlag = terminationFlag;
     }
 
     /**

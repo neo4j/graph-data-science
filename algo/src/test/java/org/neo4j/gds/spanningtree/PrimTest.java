@@ -37,6 +37,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.stream.Stream;
 
@@ -126,7 +127,8 @@ class PrimTest {
             graph,
             Prim.MAX_OPERATOR,
             idFunction.of(nodeId),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
         assertThat(mst.totalWeight()).isEqualTo(17L);
         assertTreeIsCorrect(mst, parentA, parentB, parentC, parentD, parentE);
@@ -139,7 +141,8 @@ class PrimTest {
             graph,
             Prim.MIN_OPERATOR,
             idFunction.of(nodeId),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
         assertThat(mst.totalWeight()).isEqualTo(12L);
         assertTreeIsCorrect(mst, parentA, parentB, parentC, parentD, parentE);

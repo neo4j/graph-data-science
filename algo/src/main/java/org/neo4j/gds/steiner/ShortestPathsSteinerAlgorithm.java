@@ -30,6 +30,7 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -59,7 +60,8 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         Concurrency concurrency,
         boolean applyRerouting,
         ExecutorService executorService,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -73,6 +75,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         this.binSizeThreshold = SteinerBasedDeltaStepping.BIN_SIZE_THRESHOLD;
         this.examinationQueue = createExaminationQueue(graph, applyRerouting, terminals.size());
         this.indexQueue = new LongAdder();
+        this.terminationFlag = terminationFlag;
     }
 
     @TestOnly

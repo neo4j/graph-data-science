@@ -68,7 +68,8 @@ public class DagLongestPath extends Algorithm<PathFindingResult> {
     public DagLongestPath(
         Graph graph,
         ProgressTracker progressTracker,
-        Concurrency concurrency
+        Concurrency concurrency,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -76,6 +77,7 @@ public class DagLongestPath extends Algorithm<PathFindingResult> {
         this.concurrency = concurrency;
         this.inDegrees = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(this.concurrency));
         this.parentsAndDistances = TentativeDistances.distanceAndPredecessors(nodeCount, concurrency, -Double.MIN_VALUE, (a, b) -> Double.compare(a, b) < 0);
+        this.terminationFlag = terminationFlag;
     }
 
     @Override

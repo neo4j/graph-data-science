@@ -24,6 +24,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 
@@ -33,7 +34,8 @@ public class DagLongestPathFactory<CONFIG extends DagLongestPathBaseConfig> exte
         return new DagLongestPath(
             graph,
             progressTracker,
-            configuration.concurrency()
+            configuration.concurrency(),
+            TerminationFlag.RUNNING_TRUE
         );
     }
 

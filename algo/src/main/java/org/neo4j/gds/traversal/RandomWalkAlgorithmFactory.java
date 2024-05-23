@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.degree.DegreeCentralityFactory;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.ArrayList;
 
@@ -50,7 +51,8 @@ public class RandomWalkAlgorithmFactory<CONFIG extends RandomWalkBaseConfig> ext
             configuration.walkBufferSize(),
             configuration.randomSeed(),
             progressTracker,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         );
     }
 

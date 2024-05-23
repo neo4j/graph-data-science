@@ -26,6 +26,7 @@ import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
@@ -48,7 +49,8 @@ public class SteinerTreeAlgorithmFactory<CONFIG extends SteinerTreeBaseConfig> e
             parameters.concurrency(),
             parameters.applyRerouting(),
             DefaultPool.INSTANCE,
-            progressTracker
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         );
     }
 

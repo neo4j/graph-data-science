@@ -68,8 +68,8 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
         Graph graph,
         ProgressTracker progressTracker,
         Concurrency concurrency,
-        boolean computeMaxDistanceFromSource
-
+        boolean computeMaxDistanceFromSource,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -80,6 +80,7 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
             ? Optional.of(HugeAtomicDoubleArray.of(nodeCount, ParallelDoublePageCreator.passThrough(this.concurrency)))
             : Optional.empty();
         this.result = new TopologicalSortResult(nodeCount, longestPathDistances);
+        this.terminationFlag = terminationFlag;
     }
 
     @Override

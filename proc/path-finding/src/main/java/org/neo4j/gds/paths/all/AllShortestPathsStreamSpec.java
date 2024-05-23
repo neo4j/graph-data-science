@@ -35,6 +35,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.stream.Stream;
 
@@ -71,7 +72,8 @@ public class AllShortestPathsStreamSpec implements AlgorithmSpec<MSBFSASPAlgorit
                     return new WeightedAllShortestPaths(
                         graph,
                         DefaultPool.INSTANCE,
-                        configuration.concurrency()
+                        configuration.concurrency(),
+                        TerminationFlag.RUNNING_TRUE
                     );
                 } else {
                     return new MSBFSAllShortestPaths(

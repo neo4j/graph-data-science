@@ -29,6 +29,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 import org.neo4j.gds.spanningtree.Prim;
 import org.neo4j.gds.spanningtree.SpanningTree;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.function.DoubleUnaryOperator;
 
@@ -53,7 +54,8 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         DoubleUnaryOperator minMax,
         long startNodeId,
         long k,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -61,6 +63,8 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         this.startNodeId = startNodeId;
 
         this.k = k;
+
+        this.terminationFlag = terminationFlag;
     }
 
     @Override
@@ -70,10 +74,10 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
             graph,
             minMax,
             startNodeId,
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
 
-        prim.setTerminationFlag(getTerminationFlag());
         SpanningTree spanningTree = prim.compute();
 
         var outputTree = growApproach(spanningTree);

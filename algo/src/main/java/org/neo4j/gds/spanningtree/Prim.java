@@ -25,6 +25,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.function.DoubleUnaryOperator;
 
@@ -53,12 +54,14 @@ public class Prim extends Algorithm<SpanningTree> {
         Graph graph,
         DoubleUnaryOperator minMax,
         long startNodeId,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.graph = graph;
         this.minMax = minMax;
         this.startNodeId = startNodeId;
+        this.terminationFlag = terminationFlag;
     }
 
     @Override

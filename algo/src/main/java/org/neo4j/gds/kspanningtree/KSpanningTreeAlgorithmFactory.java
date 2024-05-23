@@ -24,6 +24,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.termination.TerminationFlag;
 
 public class KSpanningTreeAlgorithmFactory<CONFIG extends KSpanningTreeBaseConfig> extends GraphAlgorithmFactory<KSpanningTree, CONFIG> {
 
@@ -37,7 +38,8 @@ public class KSpanningTreeAlgorithmFactory<CONFIG extends KSpanningTreeBaseConfi
             parameters.objective(),
             graph.toMappedNodeId(parameters.sourceNode()),
             parameters.k(),
-            progressTracker
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         );
     }
 

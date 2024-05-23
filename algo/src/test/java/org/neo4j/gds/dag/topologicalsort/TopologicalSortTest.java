@@ -32,6 +32,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Random;
@@ -71,7 +72,8 @@ class TopologicalSortTest {
             basicGraph,
             ProgressTracker.NULL_TRACKER,
             CONFIG.concurrency(),
-            CONFIG.computeMaxDistanceFromSource()
+            CONFIG.computeMaxDistanceFromSource(),
+            TerminationFlag.RUNNING_TRUE
         );
         TopologicalSortResult result = ts.compute();
         HugeLongArray nodes = result.sortedNodes();
@@ -119,7 +121,8 @@ class TopologicalSortTest {
             allCycleGraph,
             ProgressTracker.NULL_TRACKER,
             BASIC_CONFIG.concurrency(),
-            BASIC_CONFIG.computeMaxDistanceFromSource()
+            BASIC_CONFIG.computeMaxDistanceFromSource(),
+            TerminationFlag.RUNNING_TRUE
         );
         TopologicalSortResult result = ts.compute();
         HugeLongArray nodes = result.sortedNodes();
@@ -133,7 +136,8 @@ class TopologicalSortTest {
             allCycleGraph,
             ProgressTracker.NULL_TRACKER,
             BASIC_CONFIG.concurrency(),
-            BASIC_CONFIG.computeMaxDistanceFromSource()
+            BASIC_CONFIG.computeMaxDistanceFromSource(),
+            TerminationFlag.RUNNING_TRUE
         );
         TopologicalSortResult result = ts.compute();
 
@@ -158,7 +162,8 @@ class TopologicalSortTest {
         TopologicalSort ts = new TopologicalSort(selfLoopGraph,
             ProgressTracker.NULL_TRACKER,
             CONFIG.concurrency(),
-            CONFIG.computeMaxDistanceFromSource()
+            CONFIG.computeMaxDistanceFromSource(),
+            TerminationFlag.RUNNING_TRUE
         );
         TopologicalSortResult result = ts.compute();
         HugeLongArray nodes = result.sortedNodes();
@@ -241,7 +246,8 @@ class TopologicalSortTest {
         TopologicalSort ts = new TopologicalSort(lastGraph,
             ProgressTracker.NULL_TRACKER,
             CONFIG.concurrency(),
-            CONFIG.computeMaxDistanceFromSource()
+            CONFIG.computeMaxDistanceFromSource(),
+            TerminationFlag.RUNNING_TRUE
         );
         TopologicalSortResult result = ts.compute();
         HugeLongArray nodes = result.sortedNodes();
@@ -330,7 +336,8 @@ class TopologicalSortTest {
         TopologicalSort ts = new TopologicalSort(cyclesGraph,
             ProgressTracker.NULL_TRACKER,
             CONFIG.concurrency(),
-            CONFIG.computeMaxDistanceFromSource()
+            CONFIG.computeMaxDistanceFromSource(),
+            TerminationFlag.RUNNING_TRUE
         );
         TopologicalSortResult result = ts.compute();
         HugeLongArray nodes = result.sortedNodes();
@@ -372,7 +379,8 @@ class TopologicalSortTest {
         TopologicalSort ts = new TopologicalSort(graph,
             ProgressTracker.NULL_TRACKER,
             BASIC_CONFIG.concurrency(),
-            BASIC_CONFIG.computeMaxDistanceFromSource()
+            BASIC_CONFIG.computeMaxDistanceFromSource(),
+            TerminationFlag.RUNNING_TRUE
         );
         TopologicalSortResult result = ts.compute();
         assertEquals(100, result.size());

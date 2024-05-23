@@ -34,6 +34,7 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.paths.PathResult;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -177,7 +178,8 @@ class ShortestPathSteinerAlgorithmExtendedTest {
             new Concurrency(1),
             false,
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         )
             .compute();
 
@@ -231,7 +233,8 @@ class ShortestPathSteinerAlgorithmExtendedTest {
             new Concurrency(1),
             false,
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
 
         long[] parentArray = new long[]{
@@ -260,7 +263,8 @@ class ShortestPathSteinerAlgorithmExtendedTest {
             new Concurrency(1),
             false,
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
 
         long[] parentArray = new long[]{ShortestPathsSteinerAlgorithm.ROOT_NODE, a[0], a[1], a[2]};

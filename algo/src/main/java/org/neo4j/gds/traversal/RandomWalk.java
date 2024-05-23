@@ -64,7 +64,8 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         int walkBufferSize,
         Optional<Long> randomSeed,
         ProgressTracker progressTracker,
-        ExecutorService executorService
+        ExecutorService executorService,
+        TerminationFlag terminationFlag
     ) {
         if (graph.hasRelationshipProperty()) {
             EmbeddingUtils.validateRelationshipWeightPropertyValue(
@@ -84,7 +85,8 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
             sourceNodes,
             walkBufferSize,
             randomSeed,
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
     }
 
@@ -96,7 +98,8 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         List<Long> sourceNodes,
         int walkBufferSize,
         Optional<Long> maybeRandomSeed,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.concurrency = concurrency;
@@ -107,6 +110,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         this.walkParameters = walkParameters;
         this.sourceNodes = sourceNodes;
         this.randomSeed = maybeRandomSeed.orElseGet(() -> new Random().nextLong());
+        this.terminationFlag = terminationFlag;
     }
 
     @Override

@@ -42,6 +42,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -95,7 +96,8 @@ class RandomWalkTest {
             1000,
             Optional.empty(),
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         );
 
         List<long[]> result = randomWalk.compute().collect(Collectors.toList());
@@ -128,7 +130,8 @@ class RandomWalkTest {
             walkBufferSize,
             randomSeed,
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         ).compute().collect(Collectors.toList());
 
         var secondResult = RandomWalk.create(
@@ -139,7 +142,8 @@ class RandomWalkTest {
             walkBufferSize,
             randomSeed,
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         ).compute().collect(Collectors.toList());
 
         var firstResultAsSet = new TreeSet<long[]>(Arrays::compare);
@@ -164,7 +168,8 @@ class RandomWalkTest {
             1000,
             Optional.empty(),
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         );
 
         int expectedNumberOfWalks = walkParameters.walksPerNode() * 3;
@@ -201,7 +206,8 @@ class RandomWalkTest {
             1000,
             Optional.of(42L),
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var nodeCounter = new HashMap<Long, Long>();
@@ -257,7 +263,8 @@ class RandomWalkTest {
             1000,
             Optional.of(87L),
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var nodeCounter = new HashMap<Long, Long>();
@@ -302,7 +309,8 @@ class RandomWalkTest {
             100,
             Optional.of(23L),
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var nodeCounter = new HashMap<Long, Long>();
@@ -335,7 +343,8 @@ class RandomWalkTest {
                 100,
                 Optional.of(23L),
                 ProgressTracker.NULL_TRACKER,
-                DefaultPool.INSTANCE
+                DefaultPool.INSTANCE,
+                TerminationFlag.RUNNING_TRUE
             )
         ).isInstanceOf(RuntimeException.class)
             .hasMessage(
@@ -368,7 +377,8 @@ class RandomWalkTest {
             100,
             Optional.of(23L),
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         );
 
         assertThat(randomWalk.compute().collect(Collectors.toList()))
@@ -397,7 +407,8 @@ class RandomWalkTest {
             1000,
             Optional.empty(),
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         );
 
         assertThat(randomWalk.compute().collect(Collectors.toList()))
@@ -421,7 +432,8 @@ class RandomWalkTest {
                     1,
                     Optional.empty(),
                     ProgressTracker.NULL_TRACKER,
-                    DefaultPool.INSTANCE
+                    DefaultPool.INSTANCE,
+                TerminationFlag.RUNNING_TRUE
             );
 
             var stream = randomWalk.compute();

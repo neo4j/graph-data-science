@@ -24,6 +24,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 
@@ -34,7 +35,8 @@ public class TopologicalSortFactory<CONFIG extends TopologicalSortBaseConfig> ex
             graph,
             progressTracker,
             configuration.concurrency(),
-            configuration.computeMaxDistanceFromSource()
+            configuration.computeMaxDistanceFromSource(),
+            TerminationFlag.RUNNING_TRUE
         );
     }
 

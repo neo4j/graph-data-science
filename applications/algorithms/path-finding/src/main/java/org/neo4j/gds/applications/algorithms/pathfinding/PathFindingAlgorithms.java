@@ -180,7 +180,8 @@ public class PathFindingAlgorithms {
             parameters.objective(),
             graph.toMappedNodeId(parameters.sourceNode()),
             parameters.k(),
-            progressTracker
+            progressTracker,
+            requestScopedDependencies.getTerminationFlag()
         );
 
         return algorithm.compute();
@@ -195,7 +196,8 @@ public class PathFindingAlgorithms {
         var algorithm = new DagLongestPath(
             graph,
             progressTracker,
-            configuration.concurrency()
+            configuration.concurrency(),
+            requestScopedDependencies.getTerminationFlag()
         );
 
         return algorithm.compute();
@@ -218,7 +220,8 @@ public class PathFindingAlgorithms {
             configuration.walkBufferSize(),
             configuration.randomSeed(),
             progressTracker,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            requestScopedDependencies.getTerminationFlag()
         );
 
         return algorithm.compute();
@@ -317,7 +320,8 @@ public class PathFindingAlgorithms {
             graph,
             parameters.objective(),
             graph.toMappedNodeId(parameters.sourceNode()),
-            progressTracker
+            progressTracker,
+            requestScopedDependencies.getTerminationFlag()
         );
 
         return prim.compute();
@@ -349,7 +353,8 @@ public class PathFindingAlgorithms {
             parameters.concurrency(),
             parameters.applyRerouting(),
             DefaultPool.INSTANCE,
-            progressTracker
+            progressTracker,
+            requestScopedDependencies.getTerminationFlag()
         );
 
         return steiner.compute();
@@ -368,7 +373,8 @@ public class PathFindingAlgorithms {
             graph,
             progressTracker,
             configuration.concurrency(),
-            configuration.computeMaxDistanceFromSource()
+            configuration.computeMaxDistanceFromSource(),
+            requestScopedDependencies.getTerminationFlag()
         );
 
         return algorithm.compute();
@@ -379,7 +385,8 @@ public class PathFindingAlgorithms {
             return new WeightedAllShortestPaths(
                 graph,
                 DefaultPool.INSTANCE,
-                configuration.concurrency()
+                configuration.concurrency(),
+                requestScopedDependencies.getTerminationFlag()
             );
         } else {
             return new MSBFSAllShortestPaths(
