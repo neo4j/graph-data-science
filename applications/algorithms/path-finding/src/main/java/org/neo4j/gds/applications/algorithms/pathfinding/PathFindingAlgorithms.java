@@ -25,6 +25,7 @@ import org.neo4j.gds.allshortestpaths.MSBFSASPAlgorithm;
 import org.neo4j.gds.allshortestpaths.MSBFSAllShortestPaths;
 import org.neo4j.gds.allshortestpaths.WeightedAllShortestPaths;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
@@ -82,7 +83,7 @@ import java.util.stream.Stream;
  * Associated mode-specific validation is also done in layers above.
  */
 public class PathFindingAlgorithms {
-    // global scoped dependencies
+    private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
 
     // request scoped parameters
     private final RequestScopedDependencies requestScopedDependencies;
@@ -121,9 +122,15 @@ public class PathFindingAlgorithms {
             configuration.concurrency()
         );
 
-        return algorithm.compute();
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, false);
     }
 
+    /**
+     * Here is an example of how resource management and structure collide.
+     * Progress tracker is constructed here for BreadthFirstSearch, then inside it is delegated to BFS.
+     * Ergo we apply the progress tracker resource machinery inside.
+     * But it is not great innit.
+     */
     HugeLongArray breadthFirstSearch(Graph graph, BfsBaseConfig configuration) {
         var progressTracker = createProgressTracker(configuration, Tasks.leaf(LabelForProgressTracking.BFS.value));
 
@@ -132,7 +139,8 @@ public class PathFindingAlgorithms {
         return algorithm.compute(
             graph,
             configuration,
-            progressTracker
+            progressTracker,
+            requestScopedDependencies.getTerminationFlag()
         );
     }
 
@@ -146,9 +154,15 @@ public class PathFindingAlgorithms {
         );
         var progressTracker = createProgressTracker(configuration, iterativeTask);
         var algorithm = DeltaStepping.of(graph, configuration, DefaultPool.INSTANCE, progressTracker);
-        return algorithm.compute();
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, false);
     }
 
+    /**
+     * Moar resource shenanigans
+     *
+     * @see #breadthFirstSearch(org.neo4j.gds.api.Graph, org.neo4j.gds.paths.traverse.BfsBaseConfig)
+     */
     HugeLongArray depthFirstSearch(Graph graph, DfsBaseConfig configuration) {
         var progressTracker = createProgressTracker(configuration, Tasks.leaf(LabelForProgressTracking.DFS.value));
 
@@ -184,7 +198,7 @@ public class PathFindingAlgorithms {
             requestScopedDependencies.getTerminationFlag()
         );
 
-        return algorithm.compute();
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
     PathFindingResult longestPath(Graph graph, AlgoBaseConfig configuration) {
@@ -200,7 +214,7 @@ public class PathFindingAlgorithms {
             requestScopedDependencies.getTerminationFlag()
         );
 
-        return algorithm.compute();
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, false);
     }
 
     Stream<long[]> randomWalk(Graph graph, RandomWalkBaseConfig configuration) {
@@ -224,7 +238,7 @@ public class PathFindingAlgorithms {
             requestScopedDependencies.getTerminationFlag()
         );
 
-        return algorithm.compute();
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, false);
     }
 
     PathFindingResult singlePairShortestPathAStar(Graph graph, ShortestPathAStarBaseConfig configuration) {
@@ -240,7 +254,7 @@ public class PathFindingAlgorithms {
             requestScopedDependencies.getTerminationFlag()
         );
 
-        return algorithm.compute();
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, false);
     }
 
     /**
@@ -255,7 +269,7 @@ public class PathFindingAlgorithms {
             Tasks.leaf(LabelForProgressTracking.Dijkstra.value, graph.relationshipCount())
         );
 
-        var dijkstra = Dijkstra.sourceTarget(
+        var algorithm = Dijkstra.sourceTarget(
             graph,
             configuration.sourceNode(),
             configuration.targetsList(),
@@ -265,7 +279,7 @@ public class PathFindingAlgorithms {
             requestScopedDependencies.getTerminationFlag()
         );
 
-        return dijkstra.compute();
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, false);
     }
 
     PathFindingResult singlePairShortestPathYens(Graph graph, ShortestPathYensBaseConfig configuration) {
@@ -278,7 +292,7 @@ public class PathFindingAlgorithms {
             yensTask
         );
 
-        var yens = Yens.sourceTarget(
+        var algorithm = Yens.sourceTarget(
             graph,
             configuration,
             configuration.concurrency(),
@@ -286,7 +300,7 @@ public class PathFindingAlgorithms {
             requestScopedDependencies.getTerminationFlag()
         );
 
-        return yens.compute();
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, false);
     }
 
     PathFindingResult singleSourceShortestPathDijkstra(Graph graph, DijkstraBaseConfig configuration) {
@@ -295,7 +309,7 @@ public class PathFindingAlgorithms {
             Tasks.leaf(LabelForProgressTracking.SingleSourceDijkstra.value, graph.relationshipCount())
         );
 
-        var dijkstra = Dijkstra.singleSource(
+        var algorithm = Dijkstra.singleSource(
             graph,
             configuration.sourceNode(),
             false,
@@ -304,7 +318,7 @@ public class PathFindingAlgorithms {
             requestScopedDependencies.getTerminationFlag()
         );
 
-        return dijkstra.compute();
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, false);
     }
 
     SpanningTree spanningTree(Graph graph, SpanningTreeBaseConfig configuration) {
@@ -314,9 +328,12 @@ public class PathFindingAlgorithms {
         }
 
         var parameters = configuration.toParameters();
-        var progressTracker = createProgressTracker(configuration, Tasks.leaf(LabelForProgressTracking.SpanningTree.value));
+        var progressTracker = createProgressTracker(
+            configuration,
+            Tasks.leaf(LabelForProgressTracking.SpanningTree.value)
+        );
 
-        var prim = new Prim(
+        var algorithm = new Prim(
             graph,
             parameters.objective(),
             graph.toMappedNodeId(parameters.sourceNode()),
@@ -324,7 +341,7 @@ public class PathFindingAlgorithms {
             requestScopedDependencies.getTerminationFlag()
         );
 
-        return prim.compute();
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
     SteinerTreeResult steinerTree(Graph graph, SteinerTreeBaseConfig configuration) {
@@ -345,7 +362,7 @@ public class PathFindingAlgorithms {
             Tasks.task(LabelForProgressTracking.SteinerTree.value, subtasks)
         );
 
-        var steiner = new ShortestPathsSteinerAlgorithm(
+        var algorithm = new ShortestPathsSteinerAlgorithm(
             graph,
             mappedSourceNodeId,
             mappedTargetNodeIds,
@@ -357,7 +374,7 @@ public class PathFindingAlgorithms {
             requestScopedDependencies.getTerminationFlag()
         );
 
-        return steiner.compute();
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
     public TopologicalSortResult topologicalSort(Graph graph, TopologicalSortBaseConfig configuration) {
@@ -377,7 +394,7 @@ public class PathFindingAlgorithms {
             requestScopedDependencies.getTerminationFlag()
         );
 
-        return algorithm.compute();
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
     private MSBFSASPAlgorithm selectAlgorithm(Graph graph, AllShortestPathsConfig configuration) {

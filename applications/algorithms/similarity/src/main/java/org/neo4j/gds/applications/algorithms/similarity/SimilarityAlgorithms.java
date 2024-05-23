@@ -20,6 +20,7 @@
 package org.neo4j.gds.applications.algorithms.similarity;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
@@ -50,10 +51,15 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KNN;
 
 public class SimilarityAlgorithms {
+    private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
+
     private final ProgressTrackerCreator progressTrackerCreator;
     private final RequestScopedDependencies requestScopedDependencies;
 
-    public SimilarityAlgorithms(ProgressTrackerCreator progressTrackerCreator, RequestScopedDependencies requestScopedDependencies) {
+    public SimilarityAlgorithms(
+        ProgressTrackerCreator progressTrackerCreator,
+        RequestScopedDependencies requestScopedDependencies
+    ) {
         this.progressTrackerCreator = progressTrackerCreator;
         this.requestScopedDependencies = requestScopedDependencies;
     }
@@ -70,9 +76,9 @@ public class SimilarityAlgorithms {
             .executor(DefaultPool.INSTANCE)
             .build();
 
-        var filteredKnn = selectAlgorithmConfiguration(graph, configuration, knnContext);
+        var algorithm = selectAlgorithmConfiguration(graph, configuration, knnContext);
 
-        return filteredKnn.compute();
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
     NodeSimilarityResult filteredNodeSimilarity(Graph graph, FilteredNodeSimilarityBaseConfig configuration) {
@@ -98,7 +104,7 @@ public class SimilarityAlgorithms {
             requestScopedDependencies.getTerminationFlag()
         );
 
-        return algorithm.compute();
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
     KnnResult knn(Graph graph, KnnBaseConfig configuration) {
@@ -136,7 +142,7 @@ public class SimilarityAlgorithms {
             requestScopedDependencies.getTerminationFlag()
         );
 
-        return algorithm.compute();
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
     NodeSimilarityResult nodeSimilarity(Graph graph, NodeSimilarityBaseConfig configuration) {
@@ -165,7 +171,7 @@ public class SimilarityAlgorithms {
             requestScopedDependencies.getTerminationFlag()
         );
 
-        return algorithm.compute();
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
     private Task filteredNodeSimilarityProgressTask(Graph graph, boolean runWcc) {
@@ -185,9 +191,19 @@ public class SimilarityAlgorithms {
         KnnContext knnContext
     ) {
         if (configuration.seedTargetNodes()) {
-            return FilteredKnn.createWithDefaultSeeding(graph, configuration, knnContext, requestScopedDependencies.getTerminationFlag());
+            return FilteredKnn.createWithDefaultSeeding(
+                graph,
+                configuration,
+                knnContext,
+                requestScopedDependencies.getTerminationFlag()
+            );
         }
 
-        return FilteredKnn.createWithoutSeeding(graph, configuration, knnContext, requestScopedDependencies.getTerminationFlag());
+        return FilteredKnn.createWithoutSeeding(
+            graph,
+            configuration,
+            knnContext,
+            requestScopedDependencies.getTerminationFlag()
+        );
     }
 }

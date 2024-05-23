@@ -31,6 +31,7 @@ import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -93,7 +94,8 @@ public final class BFS extends Algorithm<HugeLongArray> {
         Aggregator aggregatorFunction,
         Concurrency concurrency,
         ProgressTracker progressTracker,
-        long maximumDepth
+        long maximumDepth,
+        TerminationFlag terminationFlag
     ) {
         return create(
             graph,
@@ -103,7 +105,8 @@ public final class BFS extends Algorithm<HugeLongArray> {
             concurrency,
             progressTracker,
             DEFAULT_DELTA,
-            maximumDepth
+            maximumDepth,
+            terminationFlag
         );
     }
 
@@ -115,7 +118,8 @@ public final class BFS extends Algorithm<HugeLongArray> {
         Concurrency concurrency,
         ProgressTracker progressTracker,
         int delta,
-        long maximumDepth
+        long maximumDepth,
+        TerminationFlag terminationFlag
     ) {
 
         var nodeCount = graph.nodeCount();
@@ -135,7 +139,8 @@ public final class BFS extends Algorithm<HugeLongArray> {
             concurrency,
             progressTracker,
             delta,
-            maximumDepth
+            maximumDepth,
+            terminationFlag
         );
     }
 
@@ -150,7 +155,8 @@ public final class BFS extends Algorithm<HugeLongArray> {
         Concurrency concurrency,
         ProgressTracker progressTracker,
         int delta,
-        long maximumDepth
+        long maximumDepth,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -163,6 +169,7 @@ public final class BFS extends Algorithm<HugeLongArray> {
         this.traversedNodes = traversedNodes;
         this.weights = weights;
         this.visited = visited;
+        this.terminationFlag = terminationFlag;
     }
 
     @Override

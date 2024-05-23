@@ -20,6 +20,7 @@
 package org.neo4j.gds.applications.algorithms.centrality;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 import org.neo4j.gds.betweenness.BetweennessCentrality;
@@ -41,6 +42,8 @@ import org.neo4j.gds.degree.DegreeCentralityResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
 public class CentralityAlgorithms {
+    private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
+
     private final ProgressTrackerCreator progressTrackerCreator;
     private final TerminationFlag terminationFlag;
 
@@ -79,7 +82,7 @@ public class CentralityAlgorithms {
             terminationFlag
         );
 
-        return algorithm.compute();
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
     ClosenessCentralityResult closenessCentrality(Graph graph, ClosenessCentralityBaseConfig configuration) {
@@ -103,7 +106,7 @@ public class CentralityAlgorithms {
             progressTracker
         );
 
-        return algorithm.compute();
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
     DegreeCentralityResult degreeCentrality(Graph graph, DegreeCentralityConfig configuration) {
@@ -122,6 +125,6 @@ public class CentralityAlgorithms {
             progressTracker
         );
 
-        return algorithm.compute();
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 }

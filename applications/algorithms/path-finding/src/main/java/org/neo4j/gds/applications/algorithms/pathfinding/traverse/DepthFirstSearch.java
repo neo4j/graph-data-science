@@ -20,6 +20,7 @@
 package org.neo4j.gds.applications.algorithms.pathfinding.traverse;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.paths.traverse.Aggregator;
@@ -63,6 +64,7 @@ public class DepthFirstSearch {
             maxDepth,
             progressTracker
         );
-        return dfs.compute();
+
+        return new AlgorithmMachinery().runAlgorithmsAndManageProgressTracker(dfs, progressTracker, true);
     }
 }

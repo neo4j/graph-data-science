@@ -33,6 +33,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.paths.traverse.ExitPredicate.Result;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.stream.Stream;
 
@@ -107,7 +108,8 @@ class BFSTest {
             (s, t, w) -> 1.,
             new Concurrency(concurrency),
             ProgressTracker.NULL_TRACKER,
-            BFS.ALL_DEPTHS_ALLOWED
+            BFS.ALL_DEPTHS_ALLOWED,
+            TerminationFlag.RUNNING_TRUE
         ).compute().toArray();
 
         // algorithms return mapped ids
@@ -133,7 +135,8 @@ class BFSTest {
             Aggregator.NO_AGGREGATION,
             new Concurrency(concurrency),
             ProgressTracker.NULL_TRACKER,
-            BFS.ALL_DEPTHS_ALLOWED
+            BFS.ALL_DEPTHS_ALLOWED,
+            TerminationFlag.RUNNING_TRUE
         ).compute().toArray();
         assertEquals(7, nodes.length);
     }
@@ -156,7 +159,8 @@ class BFSTest {
             (s, t, w) -> w + 1.,
             new Concurrency(concurrency),
             ProgressTracker.NULL_TRACKER,
-            maxHops - 1
+            maxHops - 1,
+            TerminationFlag.RUNNING_TRUE
         ).compute().toArray();
 
         assertThat(nodes).isEqualTo(
@@ -172,7 +176,8 @@ class BFSTest {
             Aggregator.NO_AGGREGATION,
             new Concurrency(concurrency),
             ProgressTracker.NULL_TRACKER,
-            BFS.ALL_DEPTHS_ALLOWED
+            BFS.ALL_DEPTHS_ALLOWED,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
     }
 
@@ -189,7 +194,8 @@ class BFSTest {
             Aggregator.NO_AGGREGATION,
             new Concurrency(concurrency),
             progressTracker,
-            BFS.ALL_DEPTHS_ALLOWED
+            BFS.ALL_DEPTHS_ALLOWED,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
         var messagesInOrder = testLog.getMessages(INFO);
 
