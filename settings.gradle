@@ -164,9 +164,6 @@ project(':neo4j-adapter').projectDir = file('neo4j-adapter')
 include('neo4j-kernel-adapter')
 project(':neo4j-kernel-adapter').projectDir = file('compatibility/common/neo4j-kernel-adapter')
 
-include('neo4j-kernel-adapter-5.14')
-project(':neo4j-kernel-adapter-5.14').projectDir = file('compatibility/5.14/neo4j-kernel-adapter')
-
 include('neo4j-kernel-adapter-api')
 project(':neo4j-kernel-adapter-api').projectDir = file('compatibility/api/neo4j-kernel-adapter')
 
