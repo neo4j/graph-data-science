@@ -17,25 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.procedures;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
+import org.neo4j.gds.api.CloseableResourceRegistry;
+import org.neo4j.kernel.api.KernelTransaction;
 
-import java.util.function.Supplier;
-import java.util.stream.Stream;
+public class TransactionCloseableResourceRegistry implements CloseableResourceRegistry {
+    private final KernelTransaction kernelTransaction;
 
-public class ProcedureCallContextReturnColumns implements ProcedureReturnColumns {
-
-    private final Supplier<Stream<String>> returnColumnsSupplier;
-
-    public ProcedureCallContextReturnColumns(ProcedureCallContext procedureCallContext) {
-        this.returnColumnsSupplier = procedureCallContext::outputFields;
+    public TransactionCloseableResourceRegistry(KernelTransaction kernelTransaction) {
+        this.kernelTransaction = kernelTransaction;
     }
 
     @Override
-    public boolean contains(String fieldName) {
-        return returnColumnsSupplier.get().anyMatch(column -> column.equals(fieldName));
+    public void register(AutoCloseable resource, Runnable action) {
+        try(var statement = kernelTransaction.acquireStatement()) {
+            statement.registerCloseableResource(resource);
+            action.run();
+        }
     }
-
 }

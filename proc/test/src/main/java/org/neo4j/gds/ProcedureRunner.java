@@ -19,12 +19,9 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.applications.ApplicationsFacade;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.DefaultAlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -36,18 +33,8 @@ import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
-import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.GraphDataScienceProceduresBuilder;
-import org.neo4j.gds.procedures.algorithms.centrality.CentralityProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
-import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
-import org.neo4j.gds.procedures.algorithms.runners.StatsModeAlgorithmRunner;
-import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
-import org.neo4j.gds.procedures.algorithms.runners.WriteModeAlgorithmRunner;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.integration.LogAdapter;
 import org.neo4j.gds.services.DatabaseIdAccessor;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -158,66 +145,35 @@ public final class ProcedureRunner {
     ) {
         var gdsLog = new LogAdapter(log);
 
-        var configurationParser = new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance);
-        var graphStoreCatalogService = new GraphStoreCatalogService();
         var requestScopedDependencies = RequestScopedDependencies.builder()
             .with(new DatabaseIdAccessor().getDatabaseId(graphDatabaseService))
             .with(taskRegistryFactory)
             .with(new User(username.username(), false))
             .with(EmptyUserLogRegistryFactory.INSTANCE)
             .build();
+        var graphStoreCatalogService = new GraphStoreCatalogService();
 
-        var configurationCreator = new ConfigurationCreator(
-            configurationParser,
-            AlgorithmMetaDataSetter.EMPTY,
-            requestScopedDependencies.getUser()
-        );
-
-        var algorithmEstimationTemplate = new AlgorithmEstimationTemplate(
+        var algorithmProcessingTemplate = new DefaultAlgorithmProcessingTemplate(
+            gdsLog,
+            MetricsFacade.PASSTHROUGH_METRICS_FACADE.algorithmMetrics(),
             graphStoreCatalogService,
-            new DatabaseGraphStoreEstimationService(
-                GraphLoaderContext.NULL_CONTEXT,
-                requestScopedDependencies.getUser()
-            ),
+            MemoryGuard.DISABLED,
             requestScopedDependencies
         );
 
-        var closeableResourceRegistry = new TransactionCloseableResourceRegistry(kernelTransaction);
-
-        var centralityProcedureFacade = CentralityProcedureFacade.create(
-            new GenericStub(
-                DefaultsConfiguration.Instance,
-                LimitsConfiguration.Instance,
-                configurationCreator,
-                configurationParser,
-                requestScopedDependencies.getUser(),
-                algorithmEstimationTemplate
-            ),
-            ApplicationsFacade.create(
-                gdsLog,
-                Optional.empty(),
-                graphStoreCatalogService,
-                MetricsFacade.PASSTHROUGH_METRICS_FACADE.projectionMetrics(),
-                algorithmEstimationTemplate,
-                new DefaultAlgorithmProcessingTemplate(
-                    gdsLog,
-                    MetricsFacade.PASSTHROUGH_METRICS_FACADE.algorithmMetrics(),
-                    graphStoreCatalogService,
-                    MemoryGuard.DISABLED,
-                    requestScopedDependencies
-                ),
-                requestScopedDependencies,
-                new WriteRelationshipService(gdsLog, requestScopedDependencies)
-            ),
-            new ProcedureCallContextReturnColumns(procedureCallContext),
-            new EstimationModeRunner(configurationCreator),
-            new StatsModeAlgorithmRunner(configurationCreator),
-            new StreamModeAlgorithmRunner(closeableResourceRegistry, configurationCreator),
-            new WriteModeAlgorithmRunner(configurationCreator)
+        return GraphDataScienceProcedures.create(
+            gdsLog,
+            DefaultsConfiguration.Instance,
+            LimitsConfiguration.Instance,
+            Optional.empty(),
+            graphStoreCatalogService,
+            MetricsFacade.PASSTHROUGH_METRICS_FACADE.projectionMetrics(),
+            AlgorithmMetaDataSetter.EMPTY,
+            algorithmProcessingTemplate,
+            kernelTransaction,
+            GraphLoaderContext.NULL_CONTEXT,
+            procedureCallContext,
+            requestScopedDependencies
         );
-
-        return new GraphDataScienceProceduresBuilder(gdsLog)
-            .with(centralityProcedureFacade)
-            .build();
     }
 }

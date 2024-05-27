@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.procedures.integration;
 
-import org.neo4j.gds.ProcedureCallContextReturnColumns;
+import org.neo4j.gds.procedures.ProcedureCallContextReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.graphstorecatalog.GraphProjectMemoryUsageService;
 import org.neo4j.gds.compat.Neo4jProxy;

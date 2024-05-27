@@ -32,6 +32,7 @@ dependencies {
     implementation project(':graph-store-catalog-applications')
     implementation project(':legacy-cypher-projection')
     implementation project(':logging')
+    implementation project(':memory-estimation')
     implementation project(':memory-usage')
     implementation project(':metrics-api')
     implementation project(':ml-algo')

@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.integration;
 
-import org.neo4j.gds.ProcedureCallContextReturnColumns;
-import org.neo4j.gds.TransactionCloseableResourceRegistry;
+import org.neo4j.gds.procedures.ProcedureCallContextReturnColumns;
+import org.neo4j.gds.procedures.TransactionCloseableResourceRegistry;
 import org.neo4j.gds.TransactionNodeLookup;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
