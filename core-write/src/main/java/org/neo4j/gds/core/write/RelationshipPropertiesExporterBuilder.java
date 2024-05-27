@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.write;
 
-import org.neo4j.gds.api.ExportedRelationship;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.ArrowConnectionInfo;
@@ -30,8 +29,6 @@ import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.values.storable.Values;
 
 import java.util.Optional;
-import java.util.function.LongUnaryOperator;
-import java.util.stream.Stream;
 
 public abstract class RelationshipPropertiesExporterBuilder {
 
@@ -41,8 +38,6 @@ public abstract class RelationshipPropertiesExporterBuilder {
     protected RelationshipPropertyTranslator propertyTranslator = Values::doubleValue;
 
     // FIXME: These four are only used by the Arrow builder; keeping this aligned with the existing builders but has to be changed.
-    protected Stream<ExportedRelationship> relationships;
-    protected LongUnaryOperator toOriginalId;
     protected long relationshipCount = -1L;
     protected Concurrency concurrency = new Concurrency(Runtime.getRuntime().availableProcessors());
     protected long batchSize = NativeNodePropertyExporter.MIN_BATCH_SIZE;
@@ -85,16 +80,6 @@ public abstract class RelationshipPropertiesExporterBuilder {
 
     // FIXME: Below are methods that should only be valid for Arrow builder;
     // Putting these here so we don't have to refactor each and every Builder
-    public RelationshipPropertiesExporterBuilder withIdMappingOperator(LongUnaryOperator toOriginalNodeId) {
-        this.toOriginalId = toOriginalNodeId;
-        return this;
-    }
-
-
-    public RelationshipPropertiesExporterBuilder withRelationships(Stream<ExportedRelationship> relationships) {
-        this.relationships = relationships;
-        return this;
-    }
 
     public RelationshipPropertiesExporterBuilder withRelationshipCount(long relationshipCount) {
         this.relationshipCount = relationshipCount;
