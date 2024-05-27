@@ -174,9 +174,12 @@ public class GraphDataScienceProcedures {
             new WriteModeAlgorithmRunner(configurationCreator)
         );
 
+        var pipelinesProcedureFacade = new PipelinesProcedureFacade(requestScopedDependencies.getUser());
+
         return new GraphDataScienceProceduresBuilder(log)
             .with(catalogProcedureFacade)
             .with(centralityProcedureFacade)
+            .with(pipelinesProcedureFacade)
             .build();
     }
 
