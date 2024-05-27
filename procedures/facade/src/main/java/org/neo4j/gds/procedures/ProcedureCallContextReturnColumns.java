@@ -17,11 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.integration;
+package org.neo4j.gds.procedures;
 
-import org.neo4j.gds.core.write.ExportBuildersProvider;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
-public interface ExporterBuildersProviderService {
-    ExportBuildersProvider identifyExportBuildersProvider(GraphDatabaseService graphDatabaseService);
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
+public class ProcedureCallContextReturnColumns implements ProcedureReturnColumns {
+    private final Supplier<Stream<String>> returnColumnsSupplier;
+
+    public ProcedureCallContextReturnColumns(ProcedureCallContext procedureCallContext) {
+        this.returnColumnsSupplier = procedureCallContext::outputFields;
+    }
+
+    @Override
+    public boolean contains(String fieldName) {
+        return returnColumnsSupplier.get().anyMatch(column -> column.equals(fieldName));
+    }
 }

@@ -17,21 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.integration;
+package org.neo4j.gds.procedures;
 
-import org.neo4j.gds.procedures.pipelines.PipelinesProcedureFacade;
-import org.neo4j.gds.services.UserAccessor;
-import org.neo4j.kernel.api.procedure.Context;
+import org.neo4j.gds.core.write.ExportBuildersProvider;
+import org.neo4j.graphdb.GraphDatabaseService;
 
-/**
- * Lifecycle: global
- */
-class PipelinesProcedureFacadeProvider {
-    private final UserAccessor userAccessor = new UserAccessor();
-
-    PipelinesProcedureFacade createPipelinesProcedureFacade(Context context) {
-        var user = userAccessor.getUser(context.securityContext());
-
-        return new PipelinesProcedureFacade(user);
-    }
+public interface ExporterBuildersProviderService {
+    ExportBuildersProvider identifyExportBuildersProvider(GraphDatabaseService graphDatabaseService);
 }

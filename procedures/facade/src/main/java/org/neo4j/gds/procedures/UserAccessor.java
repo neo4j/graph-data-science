@@ -17,16 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.services;
+package org.neo4j.gds.procedures;
 
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.gds.api.User;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.internal.kernel.api.security.SecurityContext;
 
 /**
- * Database id is request scoped
+ * An abstraction that allows us to stack off Neo4j concerns cleanly.
  */
-public class DatabaseIdAccessor {
-    public DatabaseId getDatabaseId(GraphDatabaseService databaseService) {
-        return DatabaseId.of(databaseService.databaseName());
+public class UserAccessor {
+    public User getUser(SecurityContext securityContext) {
+        String username = Neo4jProxy.username(securityContext.subject());
+        boolean isAdmin = securityContext.roles().contains("admin");
+        return new User(username, isAdmin);
     }
 }

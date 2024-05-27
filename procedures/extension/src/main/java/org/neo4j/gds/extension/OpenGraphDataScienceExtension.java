@@ -24,7 +24,7 @@ import org.neo4j.configuration.Config;
 import org.neo4j.gds.core.model.OpenModelCatalogProvider;
 import org.neo4j.gds.core.write.NativeExportBuildersProvider;
 import org.neo4j.gds.metrics.MetricsFacade;
-import org.neo4j.gds.procedures.integration.ExporterBuildersProviderService;
+import org.neo4j.gds.procedures.ExporterBuildersProviderService;
 import org.neo4j.gds.procedures.integration.GraphDataScienceExtensionBuilder;
 import org.neo4j.gds.procedures.integration.LogAccessor;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;

@@ -19,22 +19,46 @@
  */
 package org.neo4j.gds.procedures;
 
+import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
+import org.neo4j.gds.api.AlgorithmMetaDataSetter;
+import org.neo4j.gds.api.GraphLoaderContext;
+import org.neo4j.gds.applications.ApplicationsFacade;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
+import org.neo4j.gds.configuration.DefaultsConfiguration;
+import org.neo4j.gds.configuration.LimitsConfiguration;
+import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
+import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
+import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
+import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.catalog.CatalogProcedureFacade;
-import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.embeddings.NodeEmbeddingsProcedureFacade;
 import org.neo4j.gds.procedures.misc.MiscAlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.pipelines.PipelinesProcedureFacade;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Transaction;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
+import org.neo4j.internal.kernel.api.security.SecurityContext;
+import org.neo4j.kernel.api.KernelTransaction;
+
+import java.util.Optional;
+import java.util.function.Function;
 
 public class GraphDataScienceProcedures {
     private final Log log;
 
     private final AlgorithmsProcedureFacade algorithmsProcedureFacade;
     private final CatalogProcedureFacade catalogProcedureFacade;
-    private final CentralityProcedureFacade centralityProcedureFacade;
+    private final org.neo4j.gds.procedures.centrality.CentralityProcedureFacade centralityProcedureFacade;
     private final CommunityProcedureFacade communityProcedureFacade;
     private final MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade;
     private final NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade;
@@ -49,7 +73,7 @@ public class GraphDataScienceProcedures {
         Log log,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
         CatalogProcedureFacade catalogProcedureFacade,
-        CentralityProcedureFacade centralityProcedureFacade,
+        org.neo4j.gds.procedures.centrality.CentralityProcedureFacade centralityProcedureFacade,
         CommunityProcedureFacade communityProcedureFacade,
         MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade,
         NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade,
@@ -67,6 +91,109 @@ public class GraphDataScienceProcedures {
         this.deprecatedProceduresMetricService = deprecatedProceduresMetricService;
     }
 
+    public static GraphDataScienceProcedures create(
+        Log log,
+        DefaultsConfiguration defaultsConfiguration,
+        LimitsConfiguration limitsConfiguration,
+        Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> catalogBusinessFacadeDecorator,
+        GraphStoreCatalogService graphStoreCatalogService,
+        ProjectionMetricsService projectionMetricsService,
+        AlgorithmMetaDataSetter algorithmMetaDataSetter,
+        AlgorithmProcessingTemplate algorithmProcessingTemplate,
+        KernelTransaction kernelTransaction,
+        GraphLoaderContext graphLoaderContext,
+        ProcedureCallContext procedureCallContext,
+        RequestScopedDependencies requestScopedDependencies,
+        CatalogProcedureFacadeFactory catalogProcedureFacadeFactory,
+        SecurityContext securityContext,
+        ExporterContext exporterContext,
+        GraphDatabaseService graphDatabaseService,
+        Transaction transaction,
+        AlgorithmFacadeBuilderFactory algorithmFacadeBuilderFactory,
+        DeprecatedProceduresMetricService deprecatedProceduresMetricService
+    ) {
+        var configurationParser = new ConfigurationParser(defaultsConfiguration, limitsConfiguration);
+        var configurationCreator = new ConfigurationCreator(
+            configurationParser,
+            algorithmMetaDataSetter,
+            requestScopedDependencies.getUser()
+        );
+        var databaseGraphStoreEstimationService = new DatabaseGraphStoreEstimationService(
+            graphLoaderContext,
+            requestScopedDependencies.getUser()
+        );
+        var algorithmEstimationTemplate = new AlgorithmEstimationTemplate(
+            graphStoreCatalogService,
+            databaseGraphStoreEstimationService,
+            requestScopedDependencies
+        );
+        var genericStub = new GenericStub(
+            defaultsConfiguration,
+            limitsConfiguration,
+            configurationCreator,
+            configurationParser,
+            requestScopedDependencies.getUser(),
+            algorithmEstimationTemplate
+        );
+
+        var writeRelationshipService = new WriteRelationshipService(log, requestScopedDependencies);
+
+        var applicationsFacade = ApplicationsFacade.create(
+            log,
+            catalogBusinessFacadeDecorator,
+            graphStoreCatalogService,
+            projectionMetricsService,
+            algorithmEstimationTemplate,
+            algorithmProcessingTemplate,
+            requestScopedDependencies,
+            writeRelationshipService
+        );
+
+        var catalogProcedureFacade = catalogProcedureFacadeFactory.createCatalogProcedureFacade(
+            applicationsFacade,
+            graphDatabaseService,
+            kernelTransaction,
+            transaction,
+            procedureCallContext,
+            securityContext,
+            exporterContext
+        );
+
+        var algorithmFacadeBuilder = algorithmFacadeBuilderFactory.create(
+            configurationCreator,
+            requestScopedDependencies,
+            kernelTransaction,
+            graphDatabaseService,
+            databaseGraphStoreEstimationService,
+            applicationsFacade,
+            genericStub,
+            procedureCallContext
+        );
+
+        var centralityProcedureFacade = algorithmFacadeBuilder.createCentralityProcedureFacade();
+        var oldCentralityProcedureFacade = algorithmFacadeBuilder.createOldCentralityProcedureFacade();
+        var communityProcedureFacade = algorithmFacadeBuilder.createCommunityProcedureFacade();
+        var miscAlgorithmsProcedureFacade = algorithmFacadeBuilder.createMiscellaneousProcedureFacade();
+        var nodeEmbeddingsProcedureFacade = algorithmFacadeBuilder.createNodeEmbeddingsProcedureFacade();
+        var pathFindingProcedureFacade = algorithmFacadeBuilder.createPathFindingProcedureFacade();
+        var similarityProcedureFacade = algorithmFacadeBuilder.createSimilarityProcedureFacade();
+
+        var pipelinesProcedureFacade = new PipelinesProcedureFacade(requestScopedDependencies.getUser());
+
+        return new GraphDataScienceProceduresBuilder(log)
+            .with(catalogProcedureFacade)
+            .with(centralityProcedureFacade)
+            .with(oldCentralityProcedureFacade)
+            .with(communityProcedureFacade)
+            .with(miscAlgorithmsProcedureFacade)
+            .with(nodeEmbeddingsProcedureFacade)
+            .with(pathFindingProcedureFacade)
+            .with(pipelinesProcedureFacade)
+            .with(similarityProcedureFacade)
+            .with(deprecatedProceduresMetricService)
+            .build();
+    }
+
     public Log log() {
         return log;
     }
@@ -79,7 +206,7 @@ public class GraphDataScienceProcedures {
         return catalogProcedureFacade;
     }
 
-    public CentralityProcedureFacade centrality() {
+    public org.neo4j.gds.procedures.centrality.CentralityProcedureFacade centrality() {
         return centralityProcedureFacade;
     }
 

@@ -19,12 +19,11 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.applications.ApplicationsFacade;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.DefaultAlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -33,27 +32,32 @@ import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
-import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
+import org.neo4j.gds.core.write.ExporterContext;
+import org.neo4j.gds.core.write.NativeExportBuildersProvider;
 import org.neo4j.gds.metrics.MetricsFacade;
+import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
+import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
+import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
+import org.neo4j.gds.modelcatalogservices.ModelCatalogServiceProvider;
+import org.neo4j.gds.procedures.AlgorithmFacadeBuilderFactory;
+import org.neo4j.gds.procedures.CatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.GraphDataScienceProceduresBuilder;
-import org.neo4j.gds.procedures.algorithms.centrality.CentralityProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
-import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
-import org.neo4j.gds.procedures.algorithms.runners.StatsModeAlgorithmRunner;
-import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
-import org.neo4j.gds.procedures.algorithms.runners.WriteModeAlgorithmRunner;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
+import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.integration.LogAdapter;
-import org.neo4j.gds.services.DatabaseIdAccessor;
+import org.neo4j.gds.procedures.DatabaseIdAccessor;
+import org.neo4j.gds.procedures.UserLogServices;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
+import org.neo4j.internal.kernel.api.security.AuthSubject;
+import org.neo4j.internal.kernel.api.security.AuthenticationResult;
+import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.logging.Log;
 
 import java.util.Optional;
@@ -117,6 +121,7 @@ public final class ProcedureRunner {
             databaseService,
             procedureCallContext,
             taskRegistryFactory,
+            tx,
             username
         );
 
@@ -154,70 +159,103 @@ public final class ProcedureRunner {
         GraphDatabaseService graphDatabaseService,
         ProcedureCallContext procedureCallContext,
         TaskRegistryFactory taskRegistryFactory,
+        Transaction procedureTransaction,
         Username username
     ) {
         var gdsLog = new LogAdapter(log);
 
-        var configurationParser = new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance);
-        var graphStoreCatalogService = new GraphStoreCatalogService();
         var requestScopedDependencies = RequestScopedDependencies.builder()
             .with(new DatabaseIdAccessor().getDatabaseId(graphDatabaseService))
             .with(taskRegistryFactory)
             .with(new User(username.username(), false))
             .with(EmptyUserLogRegistryFactory.INSTANCE)
             .build();
+        var graphStoreCatalogService = new GraphStoreCatalogService();
 
-        var configurationCreator = new ConfigurationCreator(
-            configurationParser,
-            AlgorithmMetaDataSetter.EMPTY,
-            requestScopedDependencies.getUser()
-        );
-
-        var algorithmEstimationTemplate = new AlgorithmEstimationTemplate(
+        var algorithmProcessingTemplate = new DefaultAlgorithmProcessingTemplate(
+            gdsLog,
+            MetricsFacade.PASSTHROUGH_METRICS_FACADE.algorithmMetrics(),
             graphStoreCatalogService,
-            new DatabaseGraphStoreEstimationService(
-                GraphLoaderContext.NULL_CONTEXT,
-                requestScopedDependencies.getUser()
-            ),
+            MemoryGuard.DISABLED,
             requestScopedDependencies
         );
 
-        var closeableResourceRegistry = new TransactionCloseableResourceRegistry(kernelTransaction);
-
-        var centralityProcedureFacade = CentralityProcedureFacade.create(
-            new GenericStub(
-                DefaultsConfiguration.Instance,
-                LimitsConfiguration.Instance,
-                configurationCreator,
-                configurationParser,
-                requestScopedDependencies.getUser(),
-                algorithmEstimationTemplate
-            ),
-            ApplicationsFacade.create(
-                gdsLog,
-                Optional.empty(),
-                graphStoreCatalogService,
-                MetricsFacade.PASSTHROUGH_METRICS_FACADE.projectionMetrics(),
-                algorithmEstimationTemplate,
-                new DefaultAlgorithmProcessingTemplate(
-                    gdsLog,
-                    MetricsFacade.PASSTHROUGH_METRICS_FACADE.algorithmMetrics(),
-                    graphStoreCatalogService,
-                    MemoryGuard.DISABLED,
-                    requestScopedDependencies
-                ),
-                requestScopedDependencies,
-                new WriteRelationshipService(gdsLog, requestScopedDependencies)
-            ),
-            new ProcedureCallContextReturnColumns(procedureCallContext),
-            new EstimationModeRunner(configurationCreator),
-            new StatsModeAlgorithmRunner(configurationCreator),
-            new StreamModeAlgorithmRunner(closeableResourceRegistry, configurationCreator),
-            new WriteModeAlgorithmRunner(configurationCreator)
+        var catalogProcedureFacadeFactory = new CatalogProcedureFacadeFactory(
+            gdsLog,
+            __ -> new NativeExportBuildersProvider(), // procedure runner is OpenGDS
+            new TaskRegistryFactoryService(false, null) {
+                @Override
+                public TaskRegistryFactory getTaskRegistryFactory(DatabaseId databaseId, User user) {
+                    return taskRegistryFactory;
+                }
+            },
+            new UserLogServices()
         );
 
-        return new GraphDataScienceProceduresBuilder(gdsLog)
-            .with(centralityProcedureFacade)
-            .build();
+        var securityContext = new SecurityContext(new AuthSubject() {
+            @Override
+            public AuthenticationResult getAuthenticationResult() {
+                throw new UnsupportedOperationException("TODO");
+            }
+
+            @Override
+            public boolean hasUsername(String username) {
+                throw new UnsupportedOperationException("TODO");
+            }
+
+            @Override
+            public String executingUser() {
+                return username.username();
+            }
+        }, null, null, null);
+
+        var exporterContext = new ExporterContext() {
+            @Override
+            public GraphDatabaseService graphDatabaseAPI() {
+                return graphDatabaseService;
+            }
+
+            @Override
+            public @Nullable InternalTransaction internalTransaction() {
+                return (InternalTransaction) procedureTransaction;
+            }
+
+            @Override
+            public SecurityContext securityContext() {
+                return securityContext;
+            }
+        };
+
+        var modelCatalog = new OpenModelCatalog();
+
+        var algorithmFacadeBuilderFactory = new AlgorithmFacadeBuilderFactory(
+            gdsLog,
+            graphStoreCatalogService,
+            false,
+            new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
+            new ModelCatalogServiceProvider(modelCatalog)
+        );
+
+        return GraphDataScienceProcedures.create(
+            gdsLog,
+            DefaultsConfiguration.Instance,
+            LimitsConfiguration.Instance,
+            Optional.empty(),
+            graphStoreCatalogService,
+            MetricsFacade.PASSTHROUGH_METRICS_FACADE.projectionMetrics(),
+            AlgorithmMetaDataSetter.EMPTY,
+            algorithmProcessingTemplate,
+            kernelTransaction,
+            GraphLoaderContext.NULL_CONTEXT,
+            procedureCallContext,
+            requestScopedDependencies,
+            catalogProcedureFacadeFactory,
+            securityContext,
+            exporterContext,
+            graphDatabaseService,
+            procedureTransaction,
+            algorithmFacadeBuilderFactory,
+            DeprecatedProceduresMetricService.PASSTHROUGH
+        );
     }
 }

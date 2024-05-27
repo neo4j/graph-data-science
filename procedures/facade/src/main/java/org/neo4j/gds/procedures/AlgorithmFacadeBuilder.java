@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.integration;
+package org.neo4j.gds.procedures;
 
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsFacade;
@@ -65,7 +65,7 @@ import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.embeddings.NodeEmbeddingsProcedureFacade;
 import org.neo4j.gds.procedures.misc.MiscAlgorithmsProcedureFacade;
 
-class AlgorithmFacadeFactory {
+class AlgorithmFacadeBuilder {
     // Request scoped parameters
     private final ConfigurationCreator configurationCreator;
     private final NodeLookup nodeLookup;
@@ -82,7 +82,7 @@ class AlgorithmFacadeFactory {
     private final StatsModeAlgorithmRunner statsModeAlgorithmRunner;
     private final WriteModeAlgorithmRunner writeModeAlgorithmRunner;
 
-    AlgorithmFacadeFactory(
+    AlgorithmFacadeBuilder(
         ConfigurationCreator configurationCreator,
         NodeLookup nodeLookup,
         ProcedureReturnColumns procedureReturnColumns,

@@ -22,11 +22,11 @@ package org.neo4j.gds.executor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ProcedureCallContextReturnColumns;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -133,7 +133,7 @@ class ProcedureExecutorTest {
             .builder()
             .databaseId(graphStore.databaseInfo().databaseId())
             .log(Neo4jProxy.testLog())
-            .returnColumns(ProcedureCallContextReturnColumns.EMPTY)
+            .returnColumns(ProcedureReturnColumns.EMPTY)
             .taskRegistryFactory(jobId -> new TaskRegistry("", taskStore, jobId))
             .username("")
             .terminationMonitor(TerminationMonitor.EMPTY)

@@ -17,24 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.procedures;
 
-import org.neo4j.gds.api.CloseableResourceRegistry;
-import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.graphdb.GraphDatabaseService;
 
-public class TransactionCloseableResourceRegistry implements CloseableResourceRegistry {
-
-    private final KernelTransaction kernelTransaction;
-
-    public TransactionCloseableResourceRegistry(KernelTransaction kernelTransaction) {
-        this.kernelTransaction = kernelTransaction;
-    }
-
-    @Override
-    public void register(AutoCloseable resource, Runnable action) {
-        try(var statement = kernelTransaction.acquireStatement()) {
-            statement.registerCloseableResource(resource);
-            action.run();
-        }
+/**
+ * Database id is request scoped
+ */
+public class DatabaseIdAccessor {
+    public DatabaseId getDatabaseId(GraphDatabaseService databaseService) {
+        return DatabaseId.of(databaseService.databaseName());
     }
 }
