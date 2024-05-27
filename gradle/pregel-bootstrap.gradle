@@ -19,6 +19,6 @@
  */
 
 tasks.register("testPregelBootstrap", GradleBuild) {
-    buildFile = "${publicDir}/examples/pregel-bootstrap/build.gradle"
+    dir = "${publicDir}/examples/pregel-bootstrap"
     tasks = ['test']
 }
