@@ -36,13 +36,8 @@ import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
-import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
-import org.neo4j.gds.procedures.algorithms.runners.StatsModeAlgorithmRunner;
-import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
-import org.neo4j.gds.procedures.algorithms.runners.WriteModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.catalog.CatalogProcedureFacade;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
@@ -113,7 +108,9 @@ public class GraphDataScienceProcedures {
         SecurityContext securityContext,
         ExporterContext exporterContext,
         GraphDatabaseService graphDatabaseService,
-        Transaction transaction
+        Transaction transaction,
+        AlgorithmFacadeBuilderFactory algorithmFacadeBuilderFactory,
+        DeprecatedProceduresMetricService deprecatedProceduresMetricService
     ) {
         var configurationParser = new ConfigurationParser(defaultsConfiguration, limitsConfiguration);
         var configurationCreator = new ConfigurationCreator(
@@ -162,24 +159,38 @@ public class GraphDataScienceProcedures {
             exporterContext
         );
 
-        var closeableResourceRegistry = new TransactionCloseableResourceRegistry(kernelTransaction);
-
-        var centralityProcedureFacade = CentralityProcedureFacade.create(
-            genericStub,
+        var algorithmFacadeBuilder = algorithmFacadeBuilderFactory.create(
+            configurationCreator,
+            requestScopedDependencies,
+            kernelTransaction,
+            graphDatabaseService,
+            databaseGraphStoreEstimationService,
             applicationsFacade,
-            new ProcedureCallContextReturnColumns(procedureCallContext),
-            new EstimationModeRunner(configurationCreator),
-            new StatsModeAlgorithmRunner(configurationCreator),
-            new StreamModeAlgorithmRunner(closeableResourceRegistry, configurationCreator),
-            new WriteModeAlgorithmRunner(configurationCreator)
+            genericStub,
+            procedureCallContext
         );
+
+        var centralityProcedureFacade = algorithmFacadeBuilder.createCentralityProcedureFacade();
+        var oldCentralityProcedureFacade = algorithmFacadeBuilder.createOldCentralityProcedureFacade();
+        var communityProcedureFacade = algorithmFacadeBuilder.createCommunityProcedureFacade();
+        var miscAlgorithmsProcedureFacade = algorithmFacadeBuilder.createMiscellaneousProcedureFacade();
+        var nodeEmbeddingsProcedureFacade = algorithmFacadeBuilder.createNodeEmbeddingsProcedureFacade();
+        var pathFindingProcedureFacade = algorithmFacadeBuilder.createPathFindingProcedureFacade();
+        var similarityProcedureFacade = algorithmFacadeBuilder.createSimilarityProcedureFacade();
 
         var pipelinesProcedureFacade = new PipelinesProcedureFacade(requestScopedDependencies.getUser());
 
         return new GraphDataScienceProceduresBuilder(log)
             .with(catalogProcedureFacade)
             .with(centralityProcedureFacade)
+            .with(oldCentralityProcedureFacade)
+            .with(communityProcedureFacade)
+            .with(miscAlgorithmsProcedureFacade)
+            .with(nodeEmbeddingsProcedureFacade)
+            .with(pathFindingProcedureFacade)
             .with(pipelinesProcedureFacade)
+            .with(similarityProcedureFacade)
+            .with(deprecatedProceduresMetricService)
             .build();
     }
 

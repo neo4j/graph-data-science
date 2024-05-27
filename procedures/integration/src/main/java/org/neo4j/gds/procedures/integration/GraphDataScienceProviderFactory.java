@@ -29,10 +29,10 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryGauge;
 import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.modelcatalogservices.ModelCatalogServiceProvider;
+import org.neo4j.gds.procedures.AlgorithmFacadeBuilderFactory;
 import org.neo4j.gds.procedures.CatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
-import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 import org.neo4j.gds.procedures.UserLogServices;
 
 import java.util.Optional;
@@ -97,8 +97,6 @@ final class GraphDataScienceProviderFactory {
             useMaxMemoryEstimation
         );
 
-        var configurationParser = new ConfigurationParser(defaultsConfiguration, limitsConfiguration);
-
         return new GraphDataScienceProvider(
             log,
             defaultsConfiguration,
@@ -108,7 +106,6 @@ final class GraphDataScienceProviderFactory {
             algorithmProcessingTemplateDecorator,
             catalogBusinessFacadeDecorator,
             catalogProcedureFacadeFactory,
-            configurationParser,
             metricsFacade.deprecatedProcedures(),
             exporterBuildersProviderService,
             graphStoreCatalogService,
@@ -140,14 +137,14 @@ final class GraphDataScienceProviderFactory {
         );
     }
 
-    private AlgorithmFacadeFactoryProvider createAlgorithmService(
+    private AlgorithmFacadeBuilderFactory createAlgorithmService(
         GraphStoreCatalogService graphStoreCatalogService,
         boolean useMaxMemoryEstimation
     ) {
         // Defaults and limits is a big shared thing (or, will be)
         var modelCatalogServiceProvider = new ModelCatalogServiceProvider(modelCatalog);
 
-        return new AlgorithmFacadeFactoryProvider(
+        return new AlgorithmFacadeBuilderFactory(
             log,
             graphStoreCatalogService,
             useMaxMemoryEstimation,

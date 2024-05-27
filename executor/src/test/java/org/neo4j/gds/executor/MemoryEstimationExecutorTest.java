@@ -25,12 +25,12 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeProjections;
-import org.neo4j.gds.ProcedureCallContextReturnColumns;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.NodeLookup;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
@@ -75,7 +75,7 @@ class MemoryEstimationExecutorTest extends BaseTest {
             .builder()
             .databaseId(DatabaseId.of(db.databaseName()))
             .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
-            .returnColumns(ProcedureCallContextReturnColumns.EMPTY)
+            .returnColumns(ProcedureReturnColumns.EMPTY)
             .log(Neo4jProxy.testLog())
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)

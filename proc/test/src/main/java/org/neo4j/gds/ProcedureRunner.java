@@ -32,12 +32,18 @@ import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.core.write.NativeExportBuildersProvider;
 import org.neo4j.gds.metrics.MetricsFacade;
+import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
+import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
+import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
+import org.neo4j.gds.modelcatalogservices.ModelCatalogServiceProvider;
+import org.neo4j.gds.procedures.AlgorithmFacadeBuilderFactory;
 import org.neo4j.gds.procedures.CatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
@@ -47,6 +53,8 @@ import org.neo4j.gds.procedures.UserLogServices;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
+import org.neo4j.internal.kernel.api.security.AuthSubject;
+import org.neo4j.internal.kernel.api.security.AuthenticationResult;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
@@ -184,7 +192,22 @@ public final class ProcedureRunner {
             new UserLogServices()
         );
 
-        var securityContext = new FakeSecurityContext();
+        var securityContext = new SecurityContext(new AuthSubject() {
+            @Override
+            public AuthenticationResult getAuthenticationResult() {
+                throw new UnsupportedOperationException("TODO");
+            }
+
+            @Override
+            public boolean hasUsername(String username) {
+                throw new UnsupportedOperationException("TODO");
+            }
+
+            @Override
+            public String executingUser() {
+                return username.username();
+            }
+        }, null, null, null);
 
         var exporterContext = new ExporterContext() {
             @Override
@@ -203,6 +226,16 @@ public final class ProcedureRunner {
             }
         };
 
+        var modelCatalog = new OpenModelCatalog();
+
+        var algorithmFacadeBuilderFactory = new AlgorithmFacadeBuilderFactory(
+            gdsLog,
+            graphStoreCatalogService,
+            false,
+            new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
+            new ModelCatalogServiceProvider(modelCatalog)
+        );
+
         return GraphDataScienceProcedures.create(
             gdsLog,
             DefaultsConfiguration.Instance,
@@ -220,7 +253,9 @@ public final class ProcedureRunner {
             securityContext,
             exporterContext,
             graphDatabaseService,
-            procedureTransaction
+            procedureTransaction,
+            algorithmFacadeBuilderFactory,
+            DeprecatedProceduresMetricService.PASSTHROUGH
         );
     }
 }

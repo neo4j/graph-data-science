@@ -17,11 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.integration;
+package org.neo4j.gds.procedures;
 
-import org.neo4j.gds.procedures.ProcedureCallContextReturnColumns;
-import org.neo4j.gds.procedures.TransactionCloseableResourceRegistry;
-import org.neo4j.gds.TransactionNodeLookup;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
@@ -42,10 +39,10 @@ import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.runners.WriteModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.api.procedure.Context;
 
-class AlgorithmFacadeFactoryProvider {
+public class AlgorithmFacadeBuilderFactory {
     // dull utilities
     private final FictitiousGraphStoreEstimationService fictitiousGraphStoreEstimationService = new FictitiousGraphStoreEstimationService();
 
@@ -58,7 +55,7 @@ class AlgorithmFacadeFactoryProvider {
     private final AlgorithmMetricsService algorithmMetricsService;
     private final ModelCatalogServiceProvider modelCatalogServiceProvider;
 
-    AlgorithmFacadeFactoryProvider(
+    public AlgorithmFacadeBuilderFactory(
         Log log,
         GraphStoreCatalogService graphStoreCatalogService,
         boolean useMaxMemoryEstimation,
@@ -73,15 +70,15 @@ class AlgorithmFacadeFactoryProvider {
         this.modelCatalogServiceProvider = modelCatalogServiceProvider;
     }
 
-    AlgorithmFacadeFactory createAlgorithmFacadeFactory(
-        Context context,
+    AlgorithmFacadeBuilder create(
         ConfigurationCreator configurationCreator,
         RequestScopedDependencies requestScopedDependencies,
         KernelTransaction kernelTransaction,
         GraphDatabaseService graphDatabaseService,
         DatabaseGraphStoreEstimationService databaseGraphStoreEstimationService,
         ApplicationsFacade applicationsFacade,
-        GenericStub genericStub
+        GenericStub genericStub,
+        ProcedureCallContext procedureCallContext
     ) {
         /*
          * GDS services derived from Procedure Context.
@@ -92,7 +89,7 @@ class AlgorithmFacadeFactoryProvider {
         var algorithmMemoryValidationService = new AlgorithmMemoryValidationService(log, useMaxMemoryEstimation);
         var mutateNodePropertyService = new MutateNodePropertyService(log);
         var nodeLookup = new TransactionNodeLookup(kernelTransaction);
-        var procedureReturnColumns = new ProcedureCallContextReturnColumns(context.procedureCallContext());
+        var procedureReturnColumns = new ProcedureCallContextReturnColumns(procedureCallContext);
 
         // Second layer
         var writeNodePropertyService = new WriteNodePropertyService(log, requestScopedDependencies);
@@ -119,7 +116,7 @@ class AlgorithmFacadeFactoryProvider {
         var writeModeAlgorithmRunner = new WriteModeAlgorithmRunner(configurationCreator);
 
         // procedure facade
-        return new AlgorithmFacadeFactory(
+        return new AlgorithmFacadeBuilder(
             configurationCreator,
             nodeLookup,
             procedureReturnColumns,
