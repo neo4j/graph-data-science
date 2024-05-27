@@ -42,7 +42,7 @@ dependencies {
 tasks.register('unpackDocs', Copy) {
     dependsOn project(':doc').tasks.assembleDocs
     from tarTree(project(':doc').tasks.assembleDocs.archiveFile)
-    into "$buildDir/doc-sources"
+    into "${layout.buildDirectory.get()}/doc-sources"
 }
 
 processTestResources.dependsOn tasks.named('unpackDocs')

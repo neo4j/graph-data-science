@@ -13,12 +13,12 @@ description = 'Neo4j Graph Data Science :: OpenGDS'
 group = 'org.neo4j.gds'
 
 ext {
-    distributionDir = "$buildDir/distributions"
-    cliDistributionDir = "$buildDir/distributions/estimation-cli"
+    distributionDir = "${layout.buildDirectory.get()}/distributions"
+    cliDistributionDir = "${layout.buildDirectory.get()}/distributions/estimation-cli"
     distributionLicenseFile = file('LICENSE.txt')
     publicDir = "${project.rootDir}"
 
-    checkstyleReportsDir = "${buildDir}/reports/checkstyle/"
+    checkstyleReportsDir = "${layout.buildDirectory.get()}/reports/checkstyle/"
 
     compatibilityModules = [
             'kernel-adapter': [

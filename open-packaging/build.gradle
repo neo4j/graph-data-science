@@ -27,7 +27,7 @@ tasks.register("checkLicensesFile") {
 
     doLast {
         def licenceHeader = rootProject.file("$publicDir/etc/licenses/headers/LICENSES-header.txt").text
-        def generatedLicenseFile = file("$buildDir/reports/license/LICENSES.txt").text
+        def generatedLicenseFile = file("${layout.buildDirectory.get()}/reports/license/LICENSES.txt").text
         if (generatedLicenseFile.equals(licenceHeader)) {
             throw new GradleException("LICENSES.txt file is empty!")
         }
