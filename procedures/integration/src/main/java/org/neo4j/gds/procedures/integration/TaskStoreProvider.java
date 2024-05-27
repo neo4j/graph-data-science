@@ -23,7 +23,7 @@ import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
-import org.neo4j.gds.services.DatabaseIdAccessor;
+import org.neo4j.gds.procedures.DatabaseIdAccessor;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 

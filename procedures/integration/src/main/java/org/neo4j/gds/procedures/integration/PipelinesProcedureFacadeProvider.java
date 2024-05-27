@@ -20,8 +20,8 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.gds.procedures.pipelines.PipelinesProcedureFacade;
-import org.neo4j.gds.services.UserAccessor;
-import org.neo4j.kernel.api.procedure.Context;
+import org.neo4j.gds.procedures.UserAccessor;
+import org.neo4j.internal.kernel.api.security.SecurityContext;
 
 /**
  * Lifecycle: global
@@ -29,8 +29,8 @@ import org.neo4j.kernel.api.procedure.Context;
 class PipelinesProcedureFacadeProvider {
     private final UserAccessor userAccessor = new UserAccessor();
 
-    PipelinesProcedureFacade createPipelinesProcedureFacade(Context context) {
-        var user = userAccessor.getUser(context.securityContext());
+    PipelinesProcedureFacade createPipelinesProcedureFacade(SecurityContext securityContext) {
+        var user = userAccessor.getUser(securityContext);
 
         return new PipelinesProcedureFacade(user);
     }

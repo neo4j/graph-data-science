@@ -17,24 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.integration;
+package org.neo4j.gds.procedures;
 
-import org.neo4j.gds.procedures.ProcedureCallContextReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.graphstorecatalog.GraphProjectMemoryUsageService;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.procedures.KernelTransactionAccessor;
-import org.neo4j.gds.procedures.ProcedureTransactionAccessor;
-import org.neo4j.gds.procedures.TaskRegistryFactoryService;
-import org.neo4j.gds.procedures.TerminationFlagAccessor;
-import org.neo4j.gds.procedures.TransactionContextAccessor;
 import org.neo4j.gds.procedures.catalog.CatalogProcedureFacade;
-import org.neo4j.gds.services.DatabaseIdAccessor;
-import org.neo4j.gds.services.UserAccessor;
-import org.neo4j.gds.services.UserLogServices;
-import org.neo4j.kernel.api.procedure.Context;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Transaction;
+import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
+import org.neo4j.internal.kernel.api.security.SecurityContext;
+import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.function.Consumer;
 
@@ -43,14 +38,10 @@ import java.util.function.Consumer;
  * from a {@link org.neo4j.kernel.api.procedure.Context}, at request time.
  * <p>
  * We can resolve things like user and database id here, construct termination flags, and such.
- * <p>
- * We call it a provider because it is used as a sub-provider to the {@link org.neo4j.gds.procedures.GraphDataScienceProcedures} provider.
  */
-class CatalogFacadeProvider {
+public class CatalogProcedureFacadeFactory {
     // dull bits
     private final DatabaseIdAccessor databaseIdAccessor = new DatabaseIdAccessor();
-    private final KernelTransactionAccessor kernelTransactionAccessor = new KernelTransactionAccessor();
-    private final ProcedureTransactionAccessor procedureTransactionAccessor = new ProcedureTransactionAccessor();
     private final TerminationFlagAccessor terminationFlagAccessor = new TerminationFlagAccessor();
     private final TransactionContextAccessor transactionContextAccessor = new TransactionContextAccessor();
     private final UserAccessor userAccessor = new UserAccessor();
@@ -65,11 +56,11 @@ class CatalogFacadeProvider {
 
     /**
      * We inject services here so that we may control and isolate access to dependencies.
-     * Take {@link org.neo4j.gds.services.UserAccessor} for example.
+     * Take {@link org.neo4j.gds.procedures.UserAccessor} for example.
      * Without it, I would have to stub out Neo4j's {@link org.neo4j.kernel.api.procedure.Context}, in a non-trivial,
      * ugly way. Now instead I can inject the user by stubbing out GDS' own little POJO service.
      */
-    CatalogFacadeProvider(
+    public CatalogProcedureFacadeFactory(
         Log log,
         ExporterBuildersProviderService exporterBuildersProviderService,
         TaskRegistryFactoryService taskRegistryFactoryService,
@@ -86,16 +77,19 @@ class CatalogFacadeProvider {
      * We construct the catalog facade at request time. At this point things like user and database id are set in stone.
      * And we can readily construct things like termination flags.
      */
-    CatalogProcedureFacade createCatalogProcedureFacade(ApplicationsFacade applicationsFacade, Context context) {
-        // Neo4j's basic request scoped services
-        var graphDatabaseService = context.graphDatabaseAPI();
-        var kernelTransaction = kernelTransactionAccessor.getKernelTransaction(context);
-        var procedureTransaction = procedureTransactionAccessor.getProcedureTransaction(context);
-
+    CatalogProcedureFacade createCatalogProcedureFacade(
+        ApplicationsFacade applicationsFacade,
+        GraphDatabaseService graphDatabaseService,
+        KernelTransaction kernelTransaction,
+        Transaction procedureTransaction,
+        ProcedureCallContext procedureCallContext,
+        SecurityContext securityContext,
+        ExporterContext exporterContext
+    ) {
         // Derived data and services
         var databaseId = databaseIdAccessor.getDatabaseId(graphDatabaseService);
         var graphProjectMemoryUsageService = new GraphProjectMemoryUsageService(log, graphDatabaseService);
-        var procedureReturnColumns = new ProcedureCallContextReturnColumns(context.procedureCallContext());
+        var procedureReturnColumns = new ProcedureCallContextReturnColumns(procedureCallContext);
         var streamCloser = new Consumer<AutoCloseable>() {
             @Override
             public void accept(AutoCloseable autoCloseable) {
@@ -107,7 +101,7 @@ class CatalogFacadeProvider {
             graphDatabaseService,
             procedureTransaction
         );
-        var user = userAccessor.getUser(context.securityContext());
+        var user = userAccessor.getUser(securityContext);
         var userLogStore = userLogServices.getUserLogStore(databaseId);
 
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
@@ -115,7 +109,6 @@ class CatalogFacadeProvider {
 
         // Exporter builders
         var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(graphDatabaseService);
-        var exporterContext = new ExporterContext.ProcedureContextWrapper(context);
         var nodeLabelExporterBuilder = exportBuildersProvider.nodeLabelExporterBuilder(exporterContext);
         var nodePropertyExporterBuilder = exportBuildersProvider.nodePropertyExporterBuilder(exporterContext);
         var relationshipExporterBuilder = exportBuildersProvider.relationshipExporterBuilder(exporterContext);

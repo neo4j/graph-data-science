@@ -30,6 +30,7 @@ import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
@@ -48,7 +49,10 @@ import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.embeddings.NodeEmbeddingsProcedureFacade;
 import org.neo4j.gds.procedures.misc.MiscAlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.pipelines.PipelinesProcedureFacade;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
+import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.Optional;
@@ -104,7 +108,12 @@ public class GraphDataScienceProcedures {
         KernelTransaction kernelTransaction,
         GraphLoaderContext graphLoaderContext,
         ProcedureCallContext procedureCallContext,
-        RequestScopedDependencies requestScopedDependencies
+        RequestScopedDependencies requestScopedDependencies,
+        CatalogProcedureFacadeFactory catalogProcedureFacadeFactory,
+        SecurityContext securityContext,
+        ExporterContext exporterContext,
+        GraphDatabaseService graphDatabaseService,
+        Transaction transaction
     ) {
         var configurationParser = new ConfigurationParser(defaultsConfiguration, limitsConfiguration);
         var configurationCreator = new ConfigurationCreator(
@@ -143,6 +152,16 @@ public class GraphDataScienceProcedures {
             writeRelationshipService
         );
 
+        var catalogProcedureFacade = catalogProcedureFacadeFactory.createCatalogProcedureFacade(
+            applicationsFacade,
+            graphDatabaseService,
+            kernelTransaction,
+            transaction,
+            procedureCallContext,
+            securityContext,
+            exporterContext
+        );
+
         var closeableResourceRegistry = new TransactionCloseableResourceRegistry(kernelTransaction);
 
         var centralityProcedureFacade = CentralityProcedureFacade.create(
@@ -156,6 +175,7 @@ public class GraphDataScienceProcedures {
         );
 
         return new GraphDataScienceProceduresBuilder(log)
+            .with(catalogProcedureFacade)
             .with(centralityProcedureFacade)
             .build();
     }

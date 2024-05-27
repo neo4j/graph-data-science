@@ -29,9 +29,11 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryGauge;
 import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.modelcatalogservices.ModelCatalogServiceProvider;
+import org.neo4j.gds.procedures.CatalogProcedureFacadeFactory;
+import org.neo4j.gds.procedures.ExporterBuildersProviderService;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
-import org.neo4j.gds.services.UserLogServices;
+import org.neo4j.gds.procedures.UserLogServices;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -83,7 +85,7 @@ final class GraphDataScienceProviderFactory {
         boolean useMaxMemoryEstimation,
         UserLogServices userLogServices
     ) {
-        var catalogFacadeProvider = new CatalogFacadeProvider(
+        var catalogProcedureFacadeFactory = new CatalogProcedureFacadeFactory(
             log,
             exporterBuildersProviderService,
             taskRegistryFactoryService,
@@ -105,7 +107,7 @@ final class GraphDataScienceProviderFactory {
             metricsFacade.algorithmMetrics(),
             algorithmProcessingTemplateDecorator,
             catalogBusinessFacadeDecorator,
-            catalogFacadeProvider,
+            catalogProcedureFacadeFactory,
             configurationParser,
             metricsFacade.deprecatedProcedures(),
             exporterBuildersProviderService,

@@ -21,9 +21,9 @@ package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
-import org.neo4j.gds.services.DatabaseIdAccessor;
-import org.neo4j.gds.services.UserAccessor;
-import org.neo4j.gds.services.UserLogServices;
+import org.neo4j.gds.procedures.DatabaseIdAccessor;
+import org.neo4j.gds.procedures.UserAccessor;
+import org.neo4j.gds.procedures.UserLogServices;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 

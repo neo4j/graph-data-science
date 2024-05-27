@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.DefaultAlgorithmProcessingTemplate;
@@ -33,14 +35,21 @@ import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.write.ExporterContext;
+import org.neo4j.gds.core.write.NativeExportBuildersProvider;
 import org.neo4j.gds.metrics.MetricsFacade;
+import org.neo4j.gds.procedures.CatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.integration.LogAdapter;
-import org.neo4j.gds.services.DatabaseIdAccessor;
+import org.neo4j.gds.procedures.DatabaseIdAccessor;
+import org.neo4j.gds.procedures.UserLogServices;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
+import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.logging.Log;
 
 import java.util.Optional;
@@ -104,6 +113,7 @@ public final class ProcedureRunner {
             databaseService,
             procedureCallContext,
             taskRegistryFactory,
+            tx,
             username
         );
 
@@ -141,6 +151,7 @@ public final class ProcedureRunner {
         GraphDatabaseService graphDatabaseService,
         ProcedureCallContext procedureCallContext,
         TaskRegistryFactory taskRegistryFactory,
+        Transaction procedureTransaction,
         Username username
     ) {
         var gdsLog = new LogAdapter(log);
@@ -161,6 +172,37 @@ public final class ProcedureRunner {
             requestScopedDependencies
         );
 
+        var catalogProcedureFacadeFactory = new CatalogProcedureFacadeFactory(
+            gdsLog,
+            __ -> new NativeExportBuildersProvider(), // procedure runner is OpenGDS
+            new TaskRegistryFactoryService(false, null) {
+                @Override
+                public TaskRegistryFactory getTaskRegistryFactory(DatabaseId databaseId, User user) {
+                    return taskRegistryFactory;
+                }
+            },
+            new UserLogServices()
+        );
+
+        var securityContext = new FakeSecurityContext();
+
+        var exporterContext = new ExporterContext() {
+            @Override
+            public GraphDatabaseService graphDatabaseAPI() {
+                return graphDatabaseService;
+            }
+
+            @Override
+            public @Nullable InternalTransaction internalTransaction() {
+                return (InternalTransaction) procedureTransaction;
+            }
+
+            @Override
+            public SecurityContext securityContext() {
+                return securityContext;
+            }
+        };
+
         return GraphDataScienceProcedures.create(
             gdsLog,
             DefaultsConfiguration.Instance,
@@ -173,7 +215,12 @@ public final class ProcedureRunner {
             kernelTransaction,
             GraphLoaderContext.NULL_CONTEXT,
             procedureCallContext,
-            requestScopedDependencies
+            requestScopedDependencies,
+            catalogProcedureFacadeFactory,
+            securityContext,
+            exporterContext,
+            graphDatabaseService,
+            procedureTransaction
         );
     }
 }
