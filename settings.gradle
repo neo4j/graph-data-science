@@ -320,3 +320,8 @@ include('neo4j-kernel-adapter-5.19')
 project(':neo4j-kernel-adapter-5.19').projectDir = file('compatibility/5.19/neo4j-kernel-adapter')
 include('storage-engine-adapter-5.19')
 project(':storage-engine-adapter-5.19').projectDir = file('compatibility/5.19/storage-engine-adapter')
+
+include('neo4j-kernel-adapter-5.20')
+project(':neo4j-kernel-adapter-5.20').projectDir = file('compatibility/5.20/neo4j-kernel-adapter')
+include('storage-engine-adapter-5.20')
+project(':storage-engine-adapter-5.20').projectDir = file('compatibility/5.20/storage-engine-adapter')
