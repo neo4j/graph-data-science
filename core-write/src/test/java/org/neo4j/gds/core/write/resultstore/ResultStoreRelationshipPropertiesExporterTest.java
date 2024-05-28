@@ -23,11 +23,11 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.EphemeralResultStore;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ResultStoreEntry;
 import org.neo4j.gds.core.utils.progress.JobId;
 
 import java.util.List;
-import java.util.function.LongUnaryOperator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,15 +41,15 @@ class ResultStoreRelationshipPropertiesExporterTest {
         var jobId = new JobId("test");
         var resultStore = new EphemeralResultStore();
         var graphStore = mock(GraphStore.class);
+        var idMap = mock(IdMap.class);
+        when(graphStore.nodes()).thenReturn(idMap);
         var relationshipIterator = mock(CompositeRelationshipIterator.class);
         when(graphStore.getCompositeRelationshipIterator(any(), any())).thenReturn(relationshipIterator);
-        var toOriginalId = mock(LongUnaryOperator.class);
-        new ResultStoreRelationshipPropertiesExporter(jobId, graphStore, resultStore, toOriginalId)
+        new ResultStoreRelationshipPropertiesExporter(jobId, graphStore, resultStore)
             .write("TYPE", List.of("foo", "bar"));
 
         var relationshipIteratorEntry = resultStore.getRelationshipIterator("TYPE", List.of("foo", "bar"));
         assertThat(relationshipIteratorEntry.relationshipIterator()).isEqualTo(relationshipIterator);
-        assertThat(relationshipIteratorEntry.toOriginalId()).isEqualTo(toOriginalId);
 
         var entry = resultStore.get(jobId);
         assertThat(entry).isInstanceOf(ResultStoreEntry.RelationshipIterators.class);
@@ -57,6 +57,5 @@ class ResultStoreRelationshipPropertiesExporterTest {
         assertThat(jobIdRelationshipIteratorEntry.relationshipType()).isEqualTo("TYPE");
         assertThat(jobIdRelationshipIteratorEntry.propertyKeys()).isEqualTo(List.of("foo", "bar"));
         assertThat(jobIdRelationshipIteratorEntry.relationshipIterator()).isEqualTo(relationshipIterator);
-        assertThat(jobIdRelationshipIteratorEntry.toOriginalId()).isEqualTo(toOriginalId);
     }
 }

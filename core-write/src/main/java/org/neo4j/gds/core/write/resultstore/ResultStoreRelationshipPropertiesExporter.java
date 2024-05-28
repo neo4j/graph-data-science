@@ -28,25 +28,21 @@ import org.neo4j.gds.core.write.RelationshipPropertiesExporter;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.LongUnaryOperator;
 
 public class ResultStoreRelationshipPropertiesExporter implements RelationshipPropertiesExporter {
 
     private final JobId jobId;
     private final GraphStore graphStore;
     private final ResultStore resultStore;
-    private final LongUnaryOperator toOriginalId;
 
     ResultStoreRelationshipPropertiesExporter(
         JobId jobId,
         GraphStore graphStore,
-        ResultStore resultStore,
-        LongUnaryOperator toOriginalId
+        ResultStore resultStore
     ) {
         this.jobId = jobId;
         this.graphStore = graphStore;
         this.resultStore = resultStore;
-        this.toOriginalId = toOriginalId;
     }
 
     @Override
@@ -62,13 +58,13 @@ public class ResultStoreRelationshipPropertiesExporter implements RelationshipPr
             resultStore.add(jobId, new ResultStoreEntry.RelationshipsFromGraph(relationshipType, propertyKey, graph, graph::toOriginalNodeId));
         } else {
             var relationshipIterator = graphStore.getCompositeRelationshipIterator(RelationshipType.of(relationshipType), propertyKeys);
-            resultStore.addRelationshipIterator(relationshipType, propertyKeys, relationshipIterator, toOriginalId);
+            resultStore.addRelationshipIterator(relationshipType, propertyKeys, relationshipIterator, graphStore.nodes()::toOriginalNodeId);
             resultStore.add(
                 jobId,
                 new ResultStoreEntry.RelationshipIterators(relationshipType,
                     propertyKeys,
                     relationshipIterator,
-                    toOriginalId,
+                    graphStore.nodes()::toOriginalNodeId,
                     graphStore.nodeCount()
                 )
             );
