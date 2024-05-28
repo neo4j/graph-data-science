@@ -42,6 +42,6 @@ public class HarmonicCentralityMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.centrality().harmonicCentralityMutate(graphName, configuration);
+        return facade.algorithms().centrality().harmonicCentralityMutateStub().execute(graphName, configuration);
     }
 }

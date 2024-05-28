@@ -29,12 +29,15 @@ import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
 import org.neo4j.gds.degree.DegreeCentralityResult;
+import org.neo4j.gds.harmonic.HarmonicCentralityMutateConfig;
+import org.neo4j.gds.harmonic.HarmonicResult;
 
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BetweennessCentrality;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ClosenessCentrality;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.DegreeCentrality;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.HarmonicCentrality;
 
 public class CentralityAlgorithmsMutateModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimation;
@@ -112,6 +115,27 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
             DegreeCentrality,
             () -> estimation.degreeCentrality(configuration),
             graph -> algorithms.degreeCentrality(graph, configuration),
+            Optional.of(mutateStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT harmonicCentrality(
+        GraphName graphName,
+        HarmonicCentralityMutateConfig configuration,
+        ResultBuilder<HarmonicCentralityMutateConfig, HarmonicResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var mutateStep = new HarmonicCentralityMutateStep(
+            mutateNodeProperty,
+            configuration
+        );
+
+        return template.processAlgorithm(
+            graphName,
+            configuration,
+            HarmonicCentrality,
+            estimation::harmonicCentrality,
+            graph -> algorithms.harmonicCentrality(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
         );

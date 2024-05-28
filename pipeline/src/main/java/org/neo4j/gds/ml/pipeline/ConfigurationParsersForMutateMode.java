@@ -25,6 +25,7 @@ import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
+import org.neo4j.gds.harmonic.HarmonicCentralityMutateConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordMutateConfig;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaMutateConfig;
@@ -64,6 +65,7 @@ public class ConfigurationParsersForMutateMode {
             case Dijkstra -> ShortestPathDijkstraMutateConfig::of;
             case FilteredKNN -> FilteredKnnMutateConfig::of;
             case FilteredNodeSimilarity -> FilteredNodeSimilarityMutateConfig::of;
+            case HarmonicCentrality -> HarmonicCentralityMutateConfig::of;
             case KNN -> KnnMutateConfig::of;
             case KSpanningTree -> null;
             case LongestPath -> null;

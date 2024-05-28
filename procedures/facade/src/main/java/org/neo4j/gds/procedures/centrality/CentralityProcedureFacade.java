@@ -28,7 +28,6 @@ import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.degree.DegreeCentralityStreamConfig;
 import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
 import org.neo4j.gds.harmonic.DeprecatedTieredHarmonicCentralityWriteConfig;
-import org.neo4j.gds.harmonic.HarmonicCentralityMutateConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityStatsConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
@@ -40,7 +39,6 @@ import org.neo4j.gds.pagerank.PageRankMutateConfig;
 import org.neo4j.gds.pagerank.PageRankStatsConfig;
 import org.neo4j.gds.pagerank.PageRankStreamConfig;
 import org.neo4j.gds.pagerank.PageRankWriteConfig;
-import org.neo4j.gds.procedures.algorithms.centrality.CentralityMutateResult;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityStatsResult;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityStreamResult;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityWriteResult;
@@ -170,22 +168,6 @@ public class CentralityProcedureFacade {
 
         return Stream.of(DefaultCentralityComputationalResultTransformer.toStatsResult(computationResult, config));
     }
-
-    public Stream<CentralityMutateResult> harmonicCentralityMutate(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, HarmonicCentralityMutateConfig::of);
-
-        var computationResult = mutateBusinessFacade.harmonicCentrality(
-            graphName,
-            config,
-            procedureReturnColumns.contains("centralityDistribution")
-        );
-
-        return Stream.of(DefaultCentralityComputationalResultTransformer.toMutateResult(computationResult));
-    }
-
 
     public Stream<CentralityWriteResult> harmonicCentralityWrite(
         String graphName,

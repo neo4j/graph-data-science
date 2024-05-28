@@ -37,6 +37,7 @@ import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetaClosenessCentral
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetweennessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.ClosenessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.DegreeCentralityMutateStub;
+import org.neo4j.gds.procedures.algorithms.centrality.stubs.HarmonicCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
 import org.neo4j.gds.procedures.algorithms.runners.StatsModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
@@ -54,6 +55,7 @@ public final class CentralityProcedureFacade {
     private final ClosenessCentralityMutateStub closenessCentralityMutateStub;
     private final DegreeCentralityMutateStub degreeCentralityMutateStub;
 
+    private final HarmonicCentralityMutateStub harmonicCentralityMutateStub;
     private final ApplicationsFacade applicationsFacade;
 
     private final EstimationModeRunner estimationModeRunner;
@@ -67,6 +69,7 @@ public final class CentralityProcedureFacade {
         BetweennessCentralityMutateStub betweennessCentralityMutateStub,
         ClosenessCentralityMutateStub closenessCentralityMutateStub,
         DegreeCentralityMutateStub degreeCentralityMutateStub,
+        HarmonicCentralityMutateStub harmonicCentralityMutateStub,
         ApplicationsFacade applicationsFacade,
         EstimationModeRunner estimationModeRunner,
         StatsModeAlgorithmRunner statsModeRunner,
@@ -78,6 +81,7 @@ public final class CentralityProcedureFacade {
         this.betweennessCentralityMutateStub = betweennessCentralityMutateStub;
         this.closenessCentralityMutateStub = closenessCentralityMutateStub;
         this.degreeCentralityMutateStub = degreeCentralityMutateStub;
+        this.harmonicCentralityMutateStub = harmonicCentralityMutateStub;
         this.applicationsFacade = applicationsFacade;
         this.estimationModeRunner = estimationModeRunner;
         this.statsModeRunner = statsModeRunner;
@@ -114,6 +118,11 @@ public final class CentralityProcedureFacade {
             applicationsFacade,
             procedureReturnColumns
         );
+        var harmonicCentralityMutateStub = new HarmonicCentralityMutateStub(
+            genericStub,
+            applicationsFacade,
+            procedureReturnColumns
+        );
 
         return new CentralityProcedureFacade(
             procedureReturnColumns,
@@ -121,6 +130,7 @@ public final class CentralityProcedureFacade {
             betweennessCentralityMutateStub,
             closenessCentralityMutateStub,
             degreeCentralityMutateStub,
+            harmonicCentralityMutateStub,
             applicationsFacade,
             estimationModeRunner,
             statsModeRunner,
@@ -324,6 +334,10 @@ public final class CentralityProcedureFacade {
         );
 
         return Stream.of(result);
+    }
+
+    public HarmonicCentralityMutateStub harmonicCentralityMutateStub() {
+        return harmonicCentralityMutateStub;
     }
 
     private CentralityAlgorithmsEstimationModeBusinessFacade estimationMode() {

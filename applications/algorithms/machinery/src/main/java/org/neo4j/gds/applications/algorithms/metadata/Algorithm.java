@@ -40,6 +40,7 @@ public enum Algorithm {
     Dijkstra,
     FilteredKNN,
     FilteredNodeSimilarity,
+    HarmonicCentrality,
     KNN,
     KSpanningTree,
     LongestPath,

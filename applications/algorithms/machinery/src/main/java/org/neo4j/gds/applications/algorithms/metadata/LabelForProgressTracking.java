@@ -33,6 +33,7 @@ public enum LabelForProgressTracking {
     Dijkstra("Dijkstra"),
     FilteredKNN("Filtered K-Nearest Neighbours"),
     FilteredNodeSimilarity("Filtered Node Similarity"),
+    HarmonicCentrality("HarmonicCentrality"),
     KNN("K-Nearest Neighbours"),
     KSpanningTree("K Spanning Tree"),
     LongestPath("LongestPath"),
@@ -63,6 +64,7 @@ public enum LabelForProgressTracking {
             case Dijkstra -> Dijkstra;
             case FilteredKNN -> FilteredKNN;
             case FilteredNodeSimilarity -> FilteredNodeSimilarity;
+            case HarmonicCentrality -> HarmonicCentrality;
             case KNN -> KNN;
             case KSpanningTree -> KSpanningTree;
             case LongestPath -> LongestPath;

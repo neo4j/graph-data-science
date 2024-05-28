@@ -29,6 +29,7 @@ import org.neo4j.gds.ml.pipeline.stubs.DegreeCentralityStub;
 import org.neo4j.gds.ml.pipeline.stubs.DepthFirstSearchStub;
 import org.neo4j.gds.ml.pipeline.stubs.FilteredKnnStub;
 import org.neo4j.gds.ml.pipeline.stubs.FilteredNodeSimilarityStub;
+import org.neo4j.gds.ml.pipeline.stubs.HarmonicCentralityStub;
 import org.neo4j.gds.ml.pipeline.stubs.KnnStub;
 import org.neo4j.gds.ml.pipeline.stubs.NodeSimilarityStub;
 import org.neo4j.gds.ml.pipeline.stubs.SinglePairShortestPathAStarStub;
@@ -63,6 +64,7 @@ class StubbyHolder {
             case Dijkstra -> new SinglePairShortestPathDijkstraStub();
             case FilteredKNN -> new FilteredKnnStub();
             case FilteredNodeSimilarity -> new FilteredNodeSimilarityStub();
+            case HarmonicCentrality -> new HarmonicCentralityStub();
             case KNN -> new KnnStub();
             case KSpanningTree -> null;
             case LongestPath -> null;

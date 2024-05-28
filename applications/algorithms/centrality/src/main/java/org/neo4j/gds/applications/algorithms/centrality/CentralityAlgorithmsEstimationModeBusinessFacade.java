@@ -74,4 +74,8 @@ public class CentralityAlgorithmsEstimationModeBusinessFacade {
             memoryEstimation
         );
     }
+
+    public MemoryEstimation harmonicCentrality() {
+        throw new MemoryEstimationNotImplementedException();
+    }
 }

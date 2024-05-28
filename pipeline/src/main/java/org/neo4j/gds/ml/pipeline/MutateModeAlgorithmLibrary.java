@@ -71,6 +71,7 @@ final class MutateModeAlgorithmLibrary {
             case Dijkstra -> CanonicalProcedureName.parse("gds.shortestpath.dijkstra");
             case FilteredKNN -> CanonicalProcedureName.parse("gds.knn.filtered");
             case FilteredNodeSimilarity -> CanonicalProcedureName.parse("gds.nodesimilarity.filtered");
+            case HarmonicCentrality -> CanonicalProcedureName.parse("gds.closeness.harmonic.mutate");
             case KNN -> CanonicalProcedureName.parse("gds.knn");
             case KSpanningTree -> null;
             case LongestPath -> null;

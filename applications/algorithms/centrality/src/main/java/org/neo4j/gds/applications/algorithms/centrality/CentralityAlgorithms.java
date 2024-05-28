@@ -39,6 +39,9 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.degree.DegreeCentrality;
 import org.neo4j.gds.degree.DegreeCentralityConfig;
 import org.neo4j.gds.degree.DegreeCentralityResult;
+import org.neo4j.gds.harmonic.HarmonicCentrality;
+import org.neo4j.gds.harmonic.HarmonicCentralityBaseConfig;
+import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
 public class CentralityAlgorithms {
@@ -122,6 +125,20 @@ public class CentralityAlgorithms {
             parameters.orientation(),
             parameters.hasRelationshipWeightProperty(),
             parameters.minBatchSize(),
+            progressTracker
+        );
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+    }
+
+    HarmonicResult harmonicCentrality(Graph graph, HarmonicCentralityBaseConfig configuration) {
+        var task = Tasks.leaf(LabelForProgressTracking.HarmonicCentrality.value);
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var algorithm = new HarmonicCentrality(
+            graph,
+            configuration.concurrency(),
+            DefaultPool.INSTANCE,
             progressTracker
         );
 
