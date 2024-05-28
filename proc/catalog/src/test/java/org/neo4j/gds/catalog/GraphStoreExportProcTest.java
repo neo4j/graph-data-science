@@ -337,8 +337,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
 
     @Test
     void shouldNotFailCsvExportWhenRunningOnCluster() {
-        var config = GraphDatabaseApiProxy.resolveDependency(db, Config.class);
-        SettingProxy.setDatabaseMode(config, DatabaseMode.READ_REPLICA, db);
+        SettingProxy.setDatabaseMode(DatabaseMode.READ_REPLICA, db);
 
         projectGraph();
 
@@ -350,8 +349,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
     @Test
     void failsDatabaseExportWhenRunningOnCluster() {
         var exportName = "export";
-        var config = GraphDatabaseApiProxy.resolveDependency(db, Config.class);
-        SettingProxy.setDatabaseMode(config, DatabaseMode.READ_REPLICA, db);
+        SettingProxy.setDatabaseMode(DatabaseMode.READ_REPLICA, db);
 
         projectGraph();
 
@@ -396,8 +394,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
 
     @Test
     void shouldNotFailCsvEstimationWhenRunningOnCluster() {
-        var config = GraphDatabaseApiProxy.resolveDependency(db, Config.class);
-        SettingProxy.setDatabaseMode(config, DatabaseMode.READ_REPLICA, db);
+        SettingProxy.setDatabaseMode(DatabaseMode.READ_REPLICA, db);
 
         projectGraph();
 

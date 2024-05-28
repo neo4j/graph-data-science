@@ -21,7 +21,6 @@ package org.neo4j.gds;
 
 
 import org.neo4j.annotations.service.ServiceProvider;
-import org.neo4j.configuration.Config;
 import org.neo4j.gds.core.write.AbstractExportBuildersExtension;
 import org.neo4j.gds.core.write.ExportBuildersProviderSelector;
 import org.neo4j.gds.core.write.NativeExportBuildersProvider;
@@ -32,8 +31,7 @@ public class OpenGdsExportBuildersExtension extends AbstractExportBuildersExtens
 
     @Override
     protected ExportBuildersProviderSelector exportBuildersProviderSelector(
-        GraphDatabaseService graphDatabaseService,
-        Config config
+        GraphDatabaseService graphDatabaseService
     ) {
         return NativeExportBuildersProvider::new;
     }

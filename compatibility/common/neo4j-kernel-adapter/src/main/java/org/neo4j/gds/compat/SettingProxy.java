@@ -21,36 +21,60 @@ package org.neo4j.gds.compat;
 
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.configuration.Config;
+import org.neo4j.configuration.SettingBuilder;
 import org.neo4j.configuration.SettingValueParser;
+import org.neo4j.dbms.systemgraph.TopologyGraphDbmsModel;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.kernel.impl.factory.GraphDatabaseFacade;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 public final class SettingProxy {
 
-    private static final SettingProxyApi IMPL = ProxyUtil.findProxy(
-        SettingProxyFactory.class,
-        ProxyUtil.MayLogToStdout.NO
-    );
-
-    public static <T> Setting.Builder<T> newBuilder(
+    public static <T> SettingBuilder<T> newBuilder(
         String name,
         SettingValueParser<T> parser,
         @Nullable T defaultValue
     ) {
-        return ImmutableSetting.builder(name, parser, defaultValue).convert(IMPL::setting);
+        return SettingBuilder.newBuilder(name, parser, defaultValue);
     }
 
-    public static DatabaseMode databaseMode(Config config, GraphDatabaseService databaseService) {
-        return IMPL.databaseMode(config, databaseService);
+    public static DatabaseMode databaseMode(GraphDatabaseService databaseService) {
+        return switch (((GraphDatabaseAPI) databaseService).mode()) {
+            case RAFT -> DatabaseMode.CORE;
+            case REPLICA -> DatabaseMode.READ_REPLICA;
+            case SINGLE -> DatabaseMode.SINGLE;
+            case VIRTUAL -> DatabaseMode.VIRTUAL;
+        };
     }
 
     @TestOnly
-    public static void setDatabaseMode(Config config, DatabaseMode databaseMode, GraphDatabaseService databaseService) {
-        IMPL.setDatabaseMode(config, databaseMode, databaseService);
+    public static void setDatabaseMode(DatabaseMode databaseMode, GraphDatabaseService databaseService) {
+        // super hacky, there is no way to set the mode of a database without restarting it
+        if (!(databaseService instanceof GraphDatabaseFacade db)) {
+            throw new IllegalArgumentException(
+                "Cannot set database mode on a database that is not a GraphDatabaseFacade");
+        }
+        try {
+            var modeField = GraphDatabaseFacade.class.getDeclaredField("mode");
+            modeField.setAccessible(true);
+            modeField.set(db, switch (databaseMode) {
+                case CORE -> TopologyGraphDbmsModel.HostedOnMode.RAFT;
+                case READ_REPLICA -> TopologyGraphDbmsModel.HostedOnMode.REPLICA;
+                case SINGLE -> TopologyGraphDbmsModel.HostedOnMode.SINGLE;
+                case VIRTUAL -> TopologyGraphDbmsModel.HostedOnMode.VIRTUAL;
+            });
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException(
+                "Could not set the mode field because it no longer exists. This compat layer needs to be updated.",
+                e
+            );
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException("Could not get the permissions to set the mode field.", e);
+        }
     }
 
     public static String secondaryModeName() {
-        return IMPL.secondaryModeName();
+        return "Secondary";
     }
 
     private SettingProxy() {}

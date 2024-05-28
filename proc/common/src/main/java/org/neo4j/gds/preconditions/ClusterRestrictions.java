@@ -19,9 +19,7 @@
  */
 package org.neo4j.gds.preconditions;
 
-import org.neo4j.configuration.Config;
 import org.neo4j.gds.compat.DatabaseMode;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.SettingProxy;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -30,8 +28,7 @@ public final class ClusterRestrictions {
     private ClusterRestrictions() {}
 
     public static void disallowRunningOnCluster(GraphDatabaseService databaseService, String detail) throws IllegalStateException {
-        var config = GraphDatabaseApiProxy.resolveDependency(databaseService, Config.class);
-        var neo4jMode = SettingProxy.databaseMode(config, databaseService);
+        var neo4jMode = SettingProxy.databaseMode(databaseService);
         if (neo4jMode == DatabaseMode.CORE || neo4jMode == DatabaseMode.READ_REPLICA) {
             throw new IllegalStateException(
                 "The requested operation (" + detail +
