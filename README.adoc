@@ -26,9 +26,11 @@ When installing GDS manually, please refer to the below compatibility matrix:
 .Compatibility matrix
 |===
 |GDS version | Neo4j version | Java Version
-.9+<.^|GDS 2.6.x
+.11+<.^|GDS 2.6.x
+|Neo4j 5.20.0
+.8+.^|Java 21 & Java 17
+|Neo4j 5.19.0
 |Neo4j 5.18.0, 5.18.1
-.6+.^|Java 21 & Java 17
 |Neo4j 5.17.0
 |Neo4j 5.16.0
 |Neo4j 5.15.0
@@ -82,7 +84,7 @@ For the most basic set of features, like graph loading and the graph representat
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>core</artifactId>
-  <version>2.6.6</version>
+  <version>2.6.7</version>
 </dependency>
 ----
 
@@ -94,21 +96,21 @@ The algorithms are located in the `algo-common`, `algo` and `alpha-algo` modules
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>algo-common</artifactId>
-  <version>2.6.6</version>
+  <version>2.6.7</version>
 </dependency>
 
 <!-- Contains the productized algorithms -->
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>algo</artifactId>
-  <version>2.6.6</version>
+  <version>2.6.7</version>
 </dependency>
 
 <!-- Contains some alpha algorithms -->
 <dependency>
     <groupId>org.neo4j.gds</groupId>
     <artifactId>alpha-algo</artifactId>
-    <version>2.6.6</version>
+    <version>2.6.7</version>
 </dependency>
 ----
 
@@ -120,28 +122,28 @@ The procedures are located in the `proc-common`, `proc` and `alpha-proc` modules
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>proc-common</artifactId>
-  <version>2.6.6</version>
+  <version>2.6.7</version>
 </dependency>
 
 <!-- Contains the productized algorithm procedures -->
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>proc</artifactId>
-  <version>2.6.6</version>
+  <version>2.6.7</version>
 </dependency>
 
 <!-- Contains some alpha algorithm procedures-->
 <dependency>
     <groupId>org.neo4j.gds</groupId>
     <artifactId>alpha-proc</artifactId>
-    <version>2.6.6</version>
+    <version>2.6.7</version>
 </dependency>
 
 <!-- Required by the write execution modes, this artifact is responsible for providing the various exporters -->
 <dependency>
   <groupId>org.neo4j.gds</groupId>
   <artifactId>open-write-services</artifactId>
-  <version>2.6.6</version>
+  <version>2.6.7</version>
 </dependency>
 ----
 
