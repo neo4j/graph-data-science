@@ -33,6 +33,7 @@ import org.neo4j.gds.closeness.ClosenessCentralityStatsConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityStreamConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
 import org.neo4j.gds.degree.DegreeCentralityStatsConfig;
+import org.neo4j.gds.harmonic.HarmonicCentralityStatsConfig;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetaClosenessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetweennessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.ClosenessCentralityMutateStub;
@@ -338,6 +339,19 @@ public final class CentralityProcedureFacade {
 
     public HarmonicCentralityMutateStub harmonicCentralityMutateStub() {
         return harmonicCentralityMutateStub;
+    }
+
+    public Stream<CentralityStatsResult> harmonicCentralityStats(String graphName, Map<String, Object> configuration) {
+        var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("centralityDistribution");
+        var resultBuilder = new HarmonicCentralityResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
+
+        return statsModeRunner.runStatsModeAlgorithm(
+            graphName,
+            configuration,
+            HarmonicCentralityStatsConfig::of,
+            resultBuilder,
+            statsMode()::harmonicCentrality
+        );
     }
 
     private CentralityAlgorithmsEstimationModeBusinessFacade estimationMode() {

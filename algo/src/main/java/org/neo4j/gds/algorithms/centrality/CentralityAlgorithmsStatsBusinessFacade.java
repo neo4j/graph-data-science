@@ -24,13 +24,11 @@ import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.centrality.specificfields.CELFSpecificFields;
 import org.neo4j.gds.algorithms.centrality.specificfields.CentralityStatisticsSpecificFields;
-import org.neo4j.gds.algorithms.centrality.specificfields.DefaultCentralitySpecificFields;
 import org.neo4j.gds.algorithms.centrality.specificfields.PageRankSpecificFields;
 import org.neo4j.gds.algorithms.runner.AlgorithmResultWithTiming;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.harmonic.HarmonicCentralityStatsConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankStatsConfig;
@@ -44,24 +42,6 @@ public class CentralityAlgorithmsStatsBusinessFacade {
 
     public CentralityAlgorithmsStatsBusinessFacade(CentralityAlgorithmsFacade centralityAlgorithmsFacade) {
         this.centralityAlgorithmsFacade = centralityAlgorithmsFacade;
-    }
-
-    public StatsResult<DefaultCentralitySpecificFields> harmonicCentrality(
-        String graphName,
-        HarmonicCentralityStatsConfig configuration,
-        boolean shouldComputeCentralityDistribution
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> centralityAlgorithmsFacade.harmonicCentrality(graphName, configuration)
-        );
-
-        return statsResult(
-            intermediateResult.algorithmResult,
-            configuration,
-            shouldComputeCentralityDistribution,
-            intermediateResult.computeMilliseconds
-        );
     }
 
     public StatsResult<PageRankSpecificFields> pageRank(
@@ -167,31 +147,6 @@ public class CentralityAlgorithmsStatsBusinessFacade {
                 ));
 
         return statsResultBuilder.build();
-    }
-
-
-
-    private <RESULT extends CentralityAlgorithmResult, CONFIG extends AlgoBaseConfig> StatsResult<DefaultCentralitySpecificFields> statsResult(
-        AlgorithmComputationResult<RESULT> algorithmResult,
-        CONFIG configuration,
-        boolean shouldComputeCentralityDistribution,
-        long computeMilliseconds
-    ) {
-        CentralityFunctionSupplier<RESULT> centralityFunctionSupplier = CentralityAlgorithmResult::centralityScoreProvider;
-        SpecificFieldsWithCentralityDistributionSupplier<RESULT, DefaultCentralitySpecificFields> specificFieldsSupplier =
-            (r, c) -> new DefaultCentralitySpecificFields(c);
-
-        Supplier<DefaultCentralitySpecificFields> emptyASFSupplier = () -> DefaultCentralitySpecificFields.EMPTY;
-
-        return statsResult(
-            algorithmResult,
-            configuration,
-            centralityFunctionSupplier,
-            specificFieldsSupplier,
-            shouldComputeCentralityDistribution,
-            computeMilliseconds,
-            emptyASFSupplier
-        );
     }
 
     <RESULT, CONFIG extends AlgoBaseConfig, ASF extends CentralityStatisticsSpecificFields> StatsResult<ASF> statsResult(

@@ -42,6 +42,6 @@ public class HarmonicCentralityStatsProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.centrality().harmonicCentralityStats(graphName, configuration);
+        return facade.algorithms().centrality().harmonicCentralityStats(graphName, configuration);
     }
 }

@@ -26,12 +26,14 @@ import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityStatsConfig;
 import org.neo4j.gds.degree.DegreeCentralityStatsConfig;
+import org.neo4j.gds.harmonic.HarmonicCentralityStatsConfig;
 
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BetweennessCentrality;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ClosenessCentrality;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.DegreeCentrality;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.HarmonicCentrality;
 
 public class CentralityAlgorithmsStatsModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
@@ -91,6 +93,22 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
             DegreeCentrality,
             () -> estimationFacade.degreeCentrality(configuration),
             graph -> centralityAlgorithms.degreeCentrality(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT harmonicCentrality(
+        GraphName graphName,
+        HarmonicCentralityStatsConfig configuration,
+        ResultBuilder<HarmonicCentralityStatsConfig, CentralityAlgorithmResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            HarmonicCentrality,
+            estimationFacade::harmonicCentrality,
+            graph -> centralityAlgorithms.harmonicCentrality(graph, configuration),
             Optional.empty(),
             resultBuilder
         );
