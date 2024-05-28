@@ -19,6 +19,7 @@ dependencies {
     implementation project(':memory-estimation')
     implementation project(':memory-usage')
     implementation project(':metrics-api')
+    implementation project(':neo4j-api')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':termination')

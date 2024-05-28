@@ -19,9 +19,7 @@
  */
 package org.neo4j.gds;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
-import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.DefaultAlgorithmProcessingTemplate;
@@ -35,9 +33,8 @@ import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogStore;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
-import org.neo4j.gds.core.write.ExporterContext;
-import org.neo4j.gds.core.write.NativeExportBuildersProvider;
 import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
@@ -45,19 +42,14 @@ import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.modelcatalogservices.ModelCatalogServiceProvider;
 import org.neo4j.gds.procedures.AlgorithmFacadeBuilderFactory;
 import org.neo4j.gds.procedures.CatalogProcedureFacadeFactory;
-import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.TaskRegistryFactoryService;
-import org.neo4j.gds.procedures.integration.LogAdapter;
 import org.neo4j.gds.procedures.DatabaseIdAccessor;
-import org.neo4j.gds.procedures.UserLogServices;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.ProcedureCallContextReturnColumns;
+import org.neo4j.gds.procedures.integration.LogAdapter;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
-import org.neo4j.internal.kernel.api.security.AuthSubject;
-import org.neo4j.internal.kernel.api.security.AuthenticationResult;
-import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.logging.Log;
 
 import java.util.Optional;
@@ -166,9 +158,11 @@ public final class ProcedureRunner {
 
         var requestScopedDependencies = RequestScopedDependencies.builder()
             .with(new DatabaseIdAccessor().getDatabaseId(graphDatabaseService))
+            .with(new ProcedureCallContextReturnColumns(procedureCallContext))
             .with(taskRegistryFactory)
             .with(new User(username.username(), false))
             .with(EmptyUserLogRegistryFactory.INSTANCE)
+            .with(EmptyUserLogStore.INSTANCE)
             .build();
         var graphStoreCatalogService = new GraphStoreCatalogService();
 
@@ -180,51 +174,7 @@ public final class ProcedureRunner {
             requestScopedDependencies
         );
 
-        var catalogProcedureFacadeFactory = new CatalogProcedureFacadeFactory(
-            gdsLog,
-            __ -> new NativeExportBuildersProvider(), // procedure runner is OpenGDS
-            new TaskRegistryFactoryService(false, null) {
-                @Override
-                public TaskRegistryFactory getTaskRegistryFactory(DatabaseId databaseId, User user) {
-                    return taskRegistryFactory;
-                }
-            },
-            new UserLogServices()
-        );
-
-        var securityContext = new SecurityContext(new AuthSubject() {
-            @Override
-            public AuthenticationResult getAuthenticationResult() {
-                throw new UnsupportedOperationException("TODO");
-            }
-
-            @Override
-            public boolean hasUsername(String username) {
-                throw new UnsupportedOperationException("TODO");
-            }
-
-            @Override
-            public String executingUser() {
-                return username.username();
-            }
-        }, null, null, null);
-
-        var exporterContext = new ExporterContext() {
-            @Override
-            public GraphDatabaseService graphDatabaseAPI() {
-                return graphDatabaseService;
-            }
-
-            @Override
-            public @Nullable InternalTransaction internalTransaction() {
-                return (InternalTransaction) procedureTransaction;
-            }
-
-            @Override
-            public SecurityContext securityContext() {
-                return securityContext;
-            }
-        };
+        var catalogProcedureFacadeFactory = new CatalogProcedureFacadeFactory(gdsLog);
 
         var modelCatalog = new OpenModelCatalog();
 
@@ -247,11 +197,8 @@ public final class ProcedureRunner {
             algorithmProcessingTemplate,
             kernelTransaction,
             GraphLoaderContext.NULL_CONTEXT,
-            procedureCallContext,
             requestScopedDependencies,
             catalogProcedureFacadeFactory,
-            securityContext,
-            exporterContext,
             graphDatabaseService,
             procedureTransaction,
             algorithmFacadeBuilderFactory,

@@ -85,12 +85,7 @@ final class GraphDataScienceProviderFactory {
         boolean useMaxMemoryEstimation,
         UserLogServices userLogServices
     ) {
-        var catalogProcedureFacadeFactory = new CatalogProcedureFacadeFactory(
-            log,
-            exporterBuildersProviderService,
-            taskRegistryFactoryService,
-            userLogServices
-        );
+        var catalogProcedureFacadeFactory = new CatalogProcedureFacadeFactory(log);
 
         var algorithmFacadeService = createAlgorithmService(
             graphStoreCatalogService,

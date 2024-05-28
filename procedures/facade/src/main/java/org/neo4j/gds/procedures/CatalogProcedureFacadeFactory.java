@@ -20,15 +20,13 @@
 package org.neo4j.gds.procedures;
 
 import org.neo4j.gds.applications.ApplicationsFacade;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.graphstorecatalog.GraphProjectMemoryUsageService;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.procedures.catalog.CatalogProcedureFacade;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
-import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.function.Consumer;
@@ -41,18 +39,10 @@ import java.util.function.Consumer;
  */
 public class CatalogProcedureFacadeFactory {
     // dull bits
-    private final DatabaseIdAccessor databaseIdAccessor = new DatabaseIdAccessor();
-    private final TerminationFlagAccessor terminationFlagAccessor = new TerminationFlagAccessor();
     private final TransactionContextAccessor transactionContextAccessor = new TransactionContextAccessor();
-    private final UserAccessor userAccessor = new UserAccessor();
 
     // Global scoped/ global state/ stateless things
     private final Log log;
-
-    // Request scoped things
-    private final ExporterBuildersProviderService exporterBuildersProviderService;
-    private final TaskRegistryFactoryService taskRegistryFactoryService;
-    private final UserLogServices userLogServices;
 
     /**
      * We inject services here so that we may control and isolate access to dependencies.
@@ -60,17 +50,8 @@ public class CatalogProcedureFacadeFactory {
      * Without it, I would have to stub out Neo4j's {@link org.neo4j.kernel.api.procedure.Context}, in a non-trivial,
      * ugly way. Now instead I can inject the user by stubbing out GDS' own little POJO service.
      */
-    public CatalogProcedureFacadeFactory(
-        Log log,
-        ExporterBuildersProviderService exporterBuildersProviderService,
-        TaskRegistryFactoryService taskRegistryFactoryService,
-        UserLogServices userLogServices
-    ) {
+    public CatalogProcedureFacadeFactory(Log log) {
         this.log = log;
-
-        this.exporterBuildersProviderService = exporterBuildersProviderService;
-        this.taskRegistryFactoryService = taskRegistryFactoryService;
-        this.userLogServices = userLogServices;
     }
 
     /**
@@ -82,55 +63,27 @@ public class CatalogProcedureFacadeFactory {
         GraphDatabaseService graphDatabaseService,
         KernelTransaction kernelTransaction,
         Transaction procedureTransaction,
-        ProcedureCallContext procedureCallContext,
-        SecurityContext securityContext,
-        ExporterContext exporterContext
+        RequestScopedDependencies requestScopedDependencies
     ) {
         // Derived data and services
-        var databaseId = databaseIdAccessor.getDatabaseId(graphDatabaseService);
         var graphProjectMemoryUsageService = new GraphProjectMemoryUsageService(log, graphDatabaseService);
-        var procedureReturnColumns = new ProcedureCallContextReturnColumns(procedureCallContext);
         var streamCloser = new Consumer<AutoCloseable>() {
             @Override
             public void accept(AutoCloseable autoCloseable) {
                 Neo4jProxy.registerCloseableResource(kernelTransaction, autoCloseable);
             }
         };
-        var terminationFlag = terminationFlagAccessor.createTerminationFlag(kernelTransaction);
         var transactionContext = transactionContextAccessor.transactionContext(
             graphDatabaseService,
             procedureTransaction
         );
-        var user = userAccessor.getUser(securityContext);
-        var userLogStore = userLogServices.getUserLogStore(databaseId);
-
-        var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
-        var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
-
-        // Exporter builders
-        var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(graphDatabaseService);
-        var nodeLabelExporterBuilder = exportBuildersProvider.nodeLabelExporterBuilder(exporterContext);
-        var nodePropertyExporterBuilder = exportBuildersProvider.nodePropertyExporterBuilder(exporterContext);
-        var relationshipExporterBuilder = exportBuildersProvider.relationshipExporterBuilder(exporterContext);
-        var relationshipPropertiesExporterBuilder = exportBuildersProvider.relationshipPropertiesExporterBuilder(
-            exporterContext);
 
         return new CatalogProcedureFacade(
+            requestScopedDependencies,
             streamCloser,
-            databaseId,
             graphDatabaseService,
             graphProjectMemoryUsageService,
-            nodeLabelExporterBuilder,
-            nodePropertyExporterBuilder,
-            procedureReturnColumns,
-            relationshipExporterBuilder,
-            relationshipPropertiesExporterBuilder,
-            taskRegistryFactory,
-            terminationFlag,
             transactionContext,
-            user,
-            userLogRegistryFactory,
-            userLogStore,
             applicationsFacade
         );
     }

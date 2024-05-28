@@ -39,7 +39,6 @@ import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.runners.WriteModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.api.KernelTransaction;
 
 public class AlgorithmFacadeBuilderFactory {
@@ -77,8 +76,7 @@ public class AlgorithmFacadeBuilderFactory {
         GraphDatabaseService graphDatabaseService,
         DatabaseGraphStoreEstimationService databaseGraphStoreEstimationService,
         ApplicationsFacade applicationsFacade,
-        GenericStub genericStub,
-        ProcedureCallContext procedureCallContext
+        GenericStub genericStub
     ) {
         /*
          * GDS services derived from Procedure Context.
@@ -89,7 +87,7 @@ public class AlgorithmFacadeBuilderFactory {
         var algorithmMemoryValidationService = new AlgorithmMemoryValidationService(log, useMaxMemoryEstimation);
         var mutateNodePropertyService = new MutateNodePropertyService(log);
         var nodeLookup = new TransactionNodeLookup(kernelTransaction);
-        var procedureReturnColumns = new ProcedureCallContextReturnColumns(procedureCallContext);
+        var procedureReturnColumns = requestScopedDependencies.getProcedureReturnColumns();
 
         // Second layer
         var writeNodePropertyService = new WriteNodePropertyService(log, requestScopedDependencies);

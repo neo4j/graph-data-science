@@ -45,6 +45,7 @@ import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.applications.ApplicationsFacadeBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.Capabilities;
@@ -73,19 +74,12 @@ class CatalogProcedureFacadeTest {
     void shouldDetermineIfGraphExists() {
         var businessFacade = mock(CatalogBusinessFacade.class);
         var catalogFacade = new CatalogProcedureFacade(
-            null,
-            DatabaseId.of("current database"),
-            null,
-            null,
-            null,
-            null,
+            RequestScopedDependencies.builder()
+                .with(DatabaseId.of("current database"))
+                .with(new User("current user", false))
+                .build(),
             null,
             null,
-            null,
-            null,
-            null,
-            null,
-            new User("current user", false),
             null,
             null,
             new ApplicationsFacadeBuilder().with(businessFacade).build()
@@ -114,21 +108,15 @@ class CatalogProcedureFacadeTest {
         var userLogStore = mock(UserLogStore.class);
         var businessFacade = mock(CatalogBusinessFacade.class);
         var catalogFacade = new CatalogProcedureFacade(
-            null,
-            DatabaseId.of("current database"),
-            null,
-            null,
-            null,
-            null,
-            null,
+            RequestScopedDependencies.builder()
+                .with(DatabaseId.of("current database"))
+                .with(new User("current user", false))
+                .with(userLogStore)
+                .build(),
             null,
             null,
             null,
             null,
-            null,
-            new User("current user", false),
-            null,
-            userLogStore,
             new ApplicationsFacadeBuilder().with(businessFacade).build()
         );
 
@@ -148,19 +136,12 @@ class CatalogProcedureFacadeTest {
         var procedureReturnColumns = mock(ProcedureReturnColumns.class);
         var businessFacade = mock(CatalogBusinessFacade.class);
         var catalogFacade = new CatalogProcedureFacade(
+            RequestScopedDependencies.builder()
+                .with(procedureReturnColumns)
+                .with(new User("Bob", false))
+                .build(),
             null,
             null,
-            null,
-            null,
-            null,
-            null,
-            procedureReturnColumns,
-            null,
-            null,
-            null,
-            null,
-            null,
-            new User("Bob", false),
             null,
             null,
             new ApplicationsFacadeBuilder().with(businessFacade).build()
@@ -188,19 +169,12 @@ class CatalogProcedureFacadeTest {
         var procedureReturnColumns = mock(ProcedureReturnColumns.class);
         var businessFacade = mock(CatalogBusinessFacade.class);
         var catalogFacade = new CatalogProcedureFacade(
+            RequestScopedDependencies.builder()
+                .with(procedureReturnColumns)
+                .with(new User("Bob", false))
+                .build(),
             null,
             null,
-            null,
-            null,
-            null,
-            null,
-            procedureReturnColumns,
-            null,
-            null,
-            null,
-            null,
-            null,
-            new User("Bob", false),
             null,
             null,
             new ApplicationsFacadeBuilder().with(businessFacade).build()
@@ -211,7 +185,11 @@ class CatalogProcedureFacadeTest {
             .thenReturn(
                 List.of(
                     Pair.of(
-                        new GraphStoreCatalogEntry(new StubGraphStore(), mock(GraphProjectConfig.class), ResultStore.EMPTY),
+                        new GraphStoreCatalogEntry(
+                            new StubGraphStore(),
+                            mock(GraphProjectConfig.class),
+                            ResultStore.EMPTY
+                        ),
                         Map.of("deg", 117, "ree", 23, "dist", 512)
                     )
                 )
@@ -236,19 +214,12 @@ class CatalogProcedureFacadeTest {
         var procedureReturnColumns = mock(ProcedureReturnColumns.class);
         var businessFacade = mock(CatalogBusinessFacade.class);
         var catalogFacade = new CatalogProcedureFacade(
+            RequestScopedDependencies.builder()
+                .with(procedureReturnColumns)
+                .with(new User("Bob", false))
+                .build(),
             null,
             null,
-            null,
-            null,
-            null,
-            null,
-            procedureReturnColumns,
-            null,
-            null,
-            null,
-            null,
-            null,
-            new User("Bob", false),
             null,
             null,
             new ApplicationsFacadeBuilder().with(businessFacade).build()
@@ -279,19 +250,12 @@ class CatalogProcedureFacadeTest {
         var procedureReturnColumns = mock(ProcedureReturnColumns.class);
         var businessFacade = mock(CatalogBusinessFacade.class);
         var catalogFacade = new CatalogProcedureFacade(
+            RequestScopedDependencies.builder()
+                .with(procedureReturnColumns)
+                .with(new User("Bob", false))
+                .build(),
             null,
             null,
-            null,
-            null,
-            null,
-            null,
-            procedureReturnColumns,
-            null,
-            null,
-            null,
-            null,
-            null,
-            new User("Bob", false),
             null,
             null,
             new ApplicationsFacadeBuilder().with(businessFacade).build()

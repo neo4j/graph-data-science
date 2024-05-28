@@ -30,7 +30,6 @@ import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
@@ -46,8 +45,6 @@ import org.neo4j.gds.procedures.misc.MiscAlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.pipelines.PipelinesProcedureFacade;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
-import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.Optional;
@@ -102,11 +99,8 @@ public class GraphDataScienceProcedures {
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
         KernelTransaction kernelTransaction,
         GraphLoaderContext graphLoaderContext,
-        ProcedureCallContext procedureCallContext,
         RequestScopedDependencies requestScopedDependencies,
         CatalogProcedureFacadeFactory catalogProcedureFacadeFactory,
-        SecurityContext securityContext,
-        ExporterContext exporterContext,
         GraphDatabaseService graphDatabaseService,
         Transaction transaction,
         AlgorithmFacadeBuilderFactory algorithmFacadeBuilderFactory,
@@ -154,9 +148,7 @@ public class GraphDataScienceProcedures {
             graphDatabaseService,
             kernelTransaction,
             transaction,
-            procedureCallContext,
-            securityContext,
-            exporterContext
+            requestScopedDependencies
         );
 
         var algorithmFacadeBuilder = algorithmFacadeBuilderFactory.create(
@@ -166,8 +158,7 @@ public class GraphDataScienceProcedures {
             graphDatabaseService,
             databaseGraphStoreEstimationService,
             applicationsFacade,
-            genericStub,
-            procedureCallContext
+            genericStub
         );
 
         var centralityProcedureFacade = algorithmFacadeBuilder.createCentralityProcedureFacade();
