@@ -22,10 +22,8 @@ package org.neo4j.gds.algorithms.centrality;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
-import org.neo4j.gds.algorithms.centrality.specificfields.AlphaHarmonicSpecificFields;
 import org.neo4j.gds.algorithms.centrality.specificfields.CELFSpecificFields;
 import org.neo4j.gds.algorithms.centrality.specificfields.CentralityStatisticsSpecificFields;
-import org.neo4j.gds.algorithms.centrality.specificfields.DefaultCentralitySpecificFields;
 import org.neo4j.gds.algorithms.centrality.specificfields.PageRankSpecificFields;
 import org.neo4j.gds.algorithms.runner.AlgorithmResultWithTiming;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
@@ -35,8 +33,6 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.harmonic.DeprecatedTieredHarmonicCentralityWriteConfig;
-import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
 import org.neo4j.gds.influenceMaximization.CELFNodeProperties;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationWriteConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
@@ -155,61 +151,6 @@ public class CentralityAlgorithmsWriteBusinessFacade {
         }).orElseGet(() -> NodePropertyWriteResult.empty(PageRankSpecificFields.EMPTY, configuration));
     }
 
-    public NodePropertyWriteResult<DefaultCentralitySpecificFields> harmonicCentrality(
-        String graphName,
-        HarmonicCentralityWriteConfig configuration,
-        boolean shouldComputeCentralityDistribution
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
-            () -> centralityAlgorithmsFacade.harmonicCentrality(graphName, configuration)
-        );
-
-        return writeToDatabase(
-            intermediateResult.algorithmResult,
-            configuration,
-            shouldComputeCentralityDistribution,
-            intermediateResult.computeMilliseconds,
-            "HarmonicCentralityWrite",
-            configuration.writeConcurrency(),
-            configuration.writeProperty(),
-            configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(intermediateResult.algorithmResult.resultStore())
-        );
-    }
-
-    public NodePropertyWriteResult<AlphaHarmonicSpecificFields> alphaHarmonicCentrality(
-        String graphName,
-        DeprecatedTieredHarmonicCentralityWriteConfig configuration,
-        boolean shouldComputeCentralityDistribution
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
-            () -> centralityAlgorithmsFacade.harmonicCentrality(graphName, configuration)
-        );
-
-        var algorithmResult = intermediateResult.algorithmResult;
-        return writeToDatabase(
-            algorithmResult,
-            configuration,
-            CentralityAlgorithmResult::centralityScoreProvider,
-            CentralityAlgorithmResult::nodePropertyValues,
-            (result, centralityDistribution) -> new AlphaHarmonicSpecificFields(
-                centralityDistribution,
-                intermediateResult.algorithmResult.graph().nodeCount()
-            ),
-            shouldComputeCentralityDistribution,
-            intermediateResult.computeMilliseconds,
-            () -> AlphaHarmonicSpecificFields.EMPTY,
-            "HarmonicCentralityWrite",
-            configuration.writeConcurrency(),
-            configuration.writeProperty(),
-            configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(algorithmResult.resultStore())
-        );
-
-    }
-
     public NodePropertyWriteResult<CELFSpecificFields> celf(
         String graphName,
         InfluenceMaximizationWriteConfig configuration
@@ -248,42 +189,6 @@ public class CentralityAlgorithmsWriteBusinessFacade {
         );
 
         return writeResultBuilder.build();
-    }
-
-    private <RESULT extends CentralityAlgorithmResult, CONFIG extends AlgoBaseConfig> NodePropertyWriteResult<DefaultCentralitySpecificFields> writeToDatabase(
-        AlgorithmComputationResult<RESULT> algorithmResult,
-        CONFIG configuration,
-        boolean shouldComputeCentralityDistribution,
-        long computeMilliseconds,
-        String procedureName,
-        Concurrency writeConcurrency,
-        String writeProperty,
-        Optional<ArrowConnectionInfo> arrowConnectionInfo,
-        Optional<ResultStore> resultStore
-    ) {
-
-        CentralityFunctionSupplier<RESULT> centralityFunctionSupplier = CentralityAlgorithmResult::centralityScoreProvider;
-        SpecificFieldsWithCentralityDistributionSupplier<RESULT, DefaultCentralitySpecificFields> specificFieldsSupplier = (r, c) -> new DefaultCentralitySpecificFields(
-            c);
-        Supplier<DefaultCentralitySpecificFields> emptyASFSupplier = () -> DefaultCentralitySpecificFields.EMPTY;
-
-        NodePropertyValuesMapper<RESULT> nodePropertyValuesMapper = CentralityAlgorithmResult::nodePropertyValues;
-
-        return writeToDatabase(
-            algorithmResult,
-            configuration,
-            centralityFunctionSupplier,
-            nodePropertyValuesMapper,
-            specificFieldsSupplier,
-            shouldComputeCentralityDistribution,
-            computeMilliseconds,
-            emptyASFSupplier,
-            procedureName,
-            writeConcurrency,
-            writeProperty,
-            arrowConnectionInfo,
-            resultStore
-        );
     }
 
     <RESULT, CONFIG extends AlgoBaseConfig, ASF extends CentralityStatisticsSpecificFields> NodePropertyWriteResult<ASF> writeToDatabase(

@@ -21,7 +21,7 @@ package org.neo4j.gds.harmonic;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityWriteResult;
-import org.neo4j.gds.procedures.centrality.alphaharmonic.AlphaHarmonicWriteResult;
+import org.neo4j.gds.procedures.algorithms.centrality.AlphaHarmonicWriteResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -45,7 +45,7 @@ public class HarmonicCentralityWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.centrality().harmonicCentralityWrite(graphName, configuration);
+        return facade.algorithms().centrality().harmonicCentralityWrite(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)
@@ -61,6 +61,6 @@ public class HarmonicCentralityWriteProc {
             .log()
             .warn("Procedure `gds.alpha.closeness.harmonic.write` has been deprecated, please use `gds.closeness.harmonic.write`.");
 
-        return facade.centrality().alphaHarmonicCentralityWrite(graphName, configuration);
+        return facade.algorithms().centrality().alphaHarmonicCentralityWrite(graphName, configuration);
     }
 }

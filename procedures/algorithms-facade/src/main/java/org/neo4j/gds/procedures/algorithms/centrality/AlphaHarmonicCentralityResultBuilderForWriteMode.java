@@ -19,45 +19,53 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.config.ConcurrencyConfig;
-import org.neo4j.gds.config.ToMapConvertible;
+import org.neo4j.gds.harmonic.DeprecatedTieredHarmonicCentralityWriteConfig;
+import org.neo4j.gds.harmonic.HarmonicResult;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
-class GenericCentralityResultBuilderForWriteMode {
+class AlphaHarmonicCentralityResultBuilderForWriteMode implements ResultBuilder<DeprecatedTieredHarmonicCentralityWriteConfig, HarmonicResult, Stream<AlphaHarmonicWriteResult>, NodePropertiesWritten> {
     private final CentralityDistributionComputer centralityDistributionComputer = new CentralityDistributionComputer();
 
-    <CONFIGURATION extends ConcurrencyConfig & ToMapConvertible> CentralityWriteResult build(
-        IdMap idMap,
-        CONFIGURATION configuration,
-        Optional<? extends CentralityAlgorithmResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<NodePropertiesWritten> nodePropertiesWritten,
-        boolean shouldComputeCentralityDistribution
-    ) {
-        var configurationMap = configuration.toMap();
+    private final boolean shouldComputeCentralityDistribution;
 
-        if (result.isEmpty()) return CentralityWriteResult.emptyFrom(timings, configurationMap);
+    AlphaHarmonicCentralityResultBuilderForWriteMode(boolean shouldComputeCentralityDistribution) {
+        this.shouldComputeCentralityDistribution = shouldComputeCentralityDistribution;
+    }
+
+    @Override
+    public Stream<AlphaHarmonicWriteResult> build(
+        Graph graph,
+        GraphStore graphStore,
+        DeprecatedTieredHarmonicCentralityWriteConfig configuration,
+        Optional<HarmonicResult> result,
+        AlgorithmProcessingTimings timings,
+        Optional<NodePropertiesWritten> metadata
+    ) {
+        if (result.isEmpty()) return Stream.of(AlphaHarmonicWriteResult.emptyFrom(timings, configuration));
 
         var centralityDistributionAndTiming = centralityDistributionComputer.compute(
-            idMap,
+            graph,
             result.get().centralityScoreProvider(),
             configuration,
             shouldComputeCentralityDistribution
         );
 
-        return new CentralityWriteResult(
-            nodePropertiesWritten.orElseThrow().value,
+        var alphaHarmonicWriteResult = new AlphaHarmonicWriteResult(
+            graph.nodeCount(),
             timings.preProcessingMillis,
             timings.computeMillis,
-            centralityDistributionAndTiming.getRight(),
             timings.mutateOrWriteMillis,
-            centralityDistributionAndTiming.getLeft(),
-            configurationMap
+            configuration.writeProperty(),
+            centralityDistributionAndTiming.getLeft()
         );
+
+        return Stream.of(alphaHarmonicWriteResult);
     }
 }

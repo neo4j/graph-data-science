@@ -21,12 +21,6 @@ package org.neo4j.gds.algorithms.centrality;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
-import org.neo4j.gds.degree.DegreeCentralityConfig;
-import org.neo4j.gds.degree.DegreeCentralityFactory;
-import org.neo4j.gds.degree.DegreeCentralityResult;
-import org.neo4j.gds.harmonic.HarmonicCentralityAlgorithmFactory;
-import org.neo4j.gds.harmonic.HarmonicCentralityBaseConfig;
-import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.pagerank.PageRankAlgorithmFactory;
 import org.neo4j.gds.pagerank.PageRankConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
@@ -42,34 +36,6 @@ public class CentralityAlgorithmsFacade {
 
     public CentralityAlgorithmsFacade(AlgorithmRunner algorithmRunner) {
         this.algorithmRunner = algorithmRunner;
-    }
-
-    AlgorithmComputationResult<DegreeCentralityResult> degreeCentrality(
-        String graphName,
-        DegreeCentralityConfig config
-
-    ) {
-        return algorithmRunner.run(
-            graphName,
-            config,
-            config.relationshipWeightProperty(),
-            new DegreeCentralityFactory<>()
-
-        );
-    }
-
-    AlgorithmComputationResult<HarmonicResult> harmonicCentrality(
-        String graphName,
-        HarmonicCentralityBaseConfig config
-
-    ) {
-        return algorithmRunner.run(
-            graphName,
-            config,
-            Optional.empty(),
-            new HarmonicCentralityAlgorithmFactory<>()
-
-        );
     }
 
     AlgorithmComputationResult<CELFResult> celf(

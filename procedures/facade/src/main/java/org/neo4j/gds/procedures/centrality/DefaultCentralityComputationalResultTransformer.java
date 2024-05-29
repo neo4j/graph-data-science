@@ -19,18 +19,10 @@
  */
 package org.neo4j.gds.procedures.centrality;
 
-import org.neo4j.gds.algorithms.NodePropertyMutateResult;
-import org.neo4j.gds.algorithms.NodePropertyWriteResult;
-import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
-import org.neo4j.gds.algorithms.centrality.specificfields.DefaultCentralitySpecificFields;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.procedures.algorithms.centrality.CentralityMutateResult;
-import org.neo4j.gds.procedures.algorithms.centrality.CentralityStatsResult;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityStreamResult;
-import org.neo4j.gds.procedures.algorithms.centrality.CentralityWriteResult;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -57,46 +49,4 @@ final class DefaultCentralityComputationalResultTransformer {
 
         }).orElseGet(Stream::empty);
     }
-
-    static CentralityStatsResult toStatsResult(
-        StatsResult<DefaultCentralitySpecificFields> computationResult,
-        AlgoBaseConfig configuration
-    ) {
-        return new CentralityStatsResult(
-            computationResult.algorithmSpecificFields().centralityDistribution(),
-            computationResult.preProcessingMillis(),
-            computationResult.computeMillis(),
-            computationResult.postProcessingMillis(),
-            configuration.toMap()
-        );
-    }
-
-    static CentralityMutateResult toMutateResult(
-        NodePropertyMutateResult<DefaultCentralitySpecificFields> computationResult
-    ) {
-        return new CentralityMutateResult(
-            computationResult.nodePropertiesWritten(),
-            computationResult.preProcessingMillis(),
-            computationResult.computeMillis(),
-            computationResult.postProcessingMillis(),
-            computationResult.mutateMillis(),
-            computationResult.algorithmSpecificFields().centralityDistribution(),
-            computationResult.configuration().toMap()
-        );
-    }
-
-    static CentralityWriteResult toWriteResult(
-        NodePropertyWriteResult<DefaultCentralitySpecificFields> computationResult
-    ) {
-        return new CentralityWriteResult(
-            computationResult.nodePropertiesWritten(),
-            computationResult.preProcessingMillis(),
-            computationResult.computeMillis(),
-            computationResult.postProcessingMillis(),
-            computationResult.writeMillis(),
-            computationResult.algorithmSpecificFields().centralityDistribution(),
-            computationResult.configuration().toMap()
-        );
-    }
-
 }
