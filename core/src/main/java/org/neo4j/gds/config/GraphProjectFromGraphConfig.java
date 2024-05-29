@@ -65,13 +65,20 @@ public interface GraphProjectFromGraphConfig extends GraphProjectConfig {
         return new Concurrency(concurrency());
     }
 
-    default Map<String, Object> parameters() {
-        return Collections.emptyMap();
+    @Configuration.Check
+    default void validateConcurrency() {
+        ConcurrencyValidatorService.validator().validate(concurrency(), "concurrency", ConcurrencyConfig.CONCURRENCY_LIMITATION);
     }
 
-    @Configuration.Check
-    default void validateReadConcurrency() {
-        ConcurrencyValidatorService.validator().validate(concurrency(), "concurrency", ConcurrencyConfig.CONCURRENCY_LIMITATION);
+    @Override
+    // We override the base method and ignore it to not expose it to the user.
+    @Configuration.Ignore
+    default Concurrency readConcurrency() {
+        return typedConcurrency();
+    }
+
+    default Map<String, Object> parameters() {
+        return Collections.emptyMap();
     }
 
     @Configuration.Ignore

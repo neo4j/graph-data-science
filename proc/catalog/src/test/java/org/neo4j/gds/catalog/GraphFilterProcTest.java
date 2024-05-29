@@ -123,6 +123,15 @@ class GraphFilterProcTest extends BaseProcTest {
     }
 
     @Test
+    void throwsOnSpecifiedReadConcurrency() {
+        var subGraphQuery = "CALL gds.graph.filter('subgraph', 'graph', 'true', 'true', { readConcurrency: 42 })";
+
+        assertThatThrownBy(() -> runQuery(subGraphQuery))
+            .rootCause()
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Unexpected configuration key: readConcurrency");
+    }
+    @Test
     void throwsOnParserError() {
         var subGraphQuery = "CALL gds.graph.filter('subgraph', 'graph', 'GIMME NODES, JOANNA, GIMME NODES', 'true')";
 
