@@ -33,6 +33,7 @@ public enum Algorithm {
     BetaClosenessCentrality,
     BetweennessCentrality,
     BFS,
+    CELF,
     ClosenessCentrality,
     DegreeCentrality,
     DeltaStepping,

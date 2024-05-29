@@ -42,6 +42,9 @@ import org.neo4j.gds.degree.DegreeCentralityResult;
 import org.neo4j.gds.harmonic.HarmonicCentrality;
 import org.neo4j.gds.harmonic.HarmonicCentralityBaseConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
+import org.neo4j.gds.influenceMaximization.CELF;
+import org.neo4j.gds.influenceMaximization.CELFResult;
+import org.neo4j.gds.influenceMaximization.InfluenceMaximizationBaseConfig;
 import org.neo4j.gds.termination.TerminationFlag;
 
 public class CentralityAlgorithms {
@@ -141,6 +144,19 @@ public class CentralityAlgorithms {
             DefaultPool.INSTANCE,
             progressTracker
         );
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+    }
+
+    CELFResult celf(Graph graph, InfluenceMaximizationBaseConfig configuration) {
+        var task = Tasks.task(
+            LabelForProgressTracking.CELF.value,
+            Tasks.leaf("Greedy", graph.nodeCount()),
+            Tasks.leaf("LazyForwarding", configuration.seedSetSize() - 1)
+        );
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var algorithm = new CELF(graph, configuration.toParameters(), DefaultPool.INSTANCE, progressTracker);
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }

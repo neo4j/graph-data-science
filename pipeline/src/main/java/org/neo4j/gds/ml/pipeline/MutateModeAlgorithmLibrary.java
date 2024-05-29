@@ -64,6 +64,7 @@ final class MutateModeAlgorithmLibrary {
             case BetaClosenessCentrality -> CanonicalProcedureName.parse("gds.beta.closeness");
             case BetweennessCentrality -> CanonicalProcedureName.parse("gds.betweenness");
             case BFS -> CanonicalProcedureName.parse("gds.bfs");
+            case CELF -> CanonicalProcedureName.parse("gds.influenceMaximization.celf");
             case ClosenessCentrality -> CanonicalProcedureName.parse("gds.closeness");
             case DegreeCentrality -> CanonicalProcedureName.parse("gds.degree");
             case DeltaStepping -> CanonicalProcedureName.parse("gds.allshortestpaths.delta");
@@ -71,7 +72,7 @@ final class MutateModeAlgorithmLibrary {
             case Dijkstra -> CanonicalProcedureName.parse("gds.shortestpath.dijkstra");
             case FilteredKNN -> CanonicalProcedureName.parse("gds.knn.filtered");
             case FilteredNodeSimilarity -> CanonicalProcedureName.parse("gds.nodesimilarity.filtered");
-            case HarmonicCentrality -> CanonicalProcedureName.parse("gds.closeness.harmonic.mutate");
+            case HarmonicCentrality -> CanonicalProcedureName.parse("gds.closeness.harmonic");
             case KNN -> CanonicalProcedureName.parse("gds.knn");
             case KSpanningTree -> null;
             case LongestPath -> null;

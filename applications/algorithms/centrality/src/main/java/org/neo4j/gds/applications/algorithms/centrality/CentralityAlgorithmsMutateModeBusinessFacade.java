@@ -31,10 +31,13 @@ import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
 import org.neo4j.gds.degree.DegreeCentralityResult;
 import org.neo4j.gds.harmonic.HarmonicCentralityMutateConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
+import org.neo4j.gds.influenceMaximization.CELFResult;
+import org.neo4j.gds.influenceMaximization.InfluenceMaximizationMutateConfig;
 
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BetweennessCentrality;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.CELF;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ClosenessCentrality;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.DegreeCentrality;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.HarmonicCentrality;
@@ -136,6 +139,24 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
             HarmonicCentrality,
             estimation::harmonicCentrality,
             graph -> algorithms.harmonicCentrality(graph, configuration),
+            Optional.of(mutateStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT celf(
+        GraphName graphName,
+        InfluenceMaximizationMutateConfig configuration,
+        ResultBuilder<InfluenceMaximizationMutateConfig, CELFResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var mutateStep = new CelfMutateStep(mutateNodeProperty, configuration);
+
+        return template.processAlgorithm(
+            graphName,
+            configuration,
+            CELF,
+            () -> estimation.celf(configuration),
+            graph -> algorithms.celf(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
         );

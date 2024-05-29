@@ -24,6 +24,7 @@ import org.neo4j.gds.ml.pipeline.stubs.BellmanFordStub;
 import org.neo4j.gds.ml.pipeline.stubs.BetaClosenessCentralityStub;
 import org.neo4j.gds.ml.pipeline.stubs.BetweennessCentralityStub;
 import org.neo4j.gds.ml.pipeline.stubs.BreadthFirstSearchStub;
+import org.neo4j.gds.ml.pipeline.stubs.CelfStub;
 import org.neo4j.gds.ml.pipeline.stubs.ClosenessCentralityStub;
 import org.neo4j.gds.ml.pipeline.stubs.DegreeCentralityStub;
 import org.neo4j.gds.ml.pipeline.stubs.DepthFirstSearchStub;
@@ -57,6 +58,7 @@ class StubbyHolder {
             case BetaClosenessCentrality -> new BetaClosenessCentralityStub();
             case BetweennessCentrality -> new BetweennessCentralityStub();
             case BFS -> new BreadthFirstSearchStub();
+            case CELF -> new CelfStub();
             case ClosenessCentrality -> new ClosenessCentralityStub();
             case DegreeCentrality -> new DegreeCentralityStub();
             case DeltaStepping -> new SingleSourceShortestPathDeltaStub();

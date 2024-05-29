@@ -19,14 +19,12 @@
  */
 package org.neo4j.gds.procedures.centrality;
 
-import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.centrality.specificfields.CELFSpecificFields;
 import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
-import org.neo4j.gds.procedures.centrality.celf.CELFMutateResult;
 import org.neo4j.gds.procedures.centrality.celf.CELFStatsResult;
 import org.neo4j.gds.procedures.centrality.celf.CELFStreamResult;
 import org.neo4j.gds.procedures.centrality.celf.CELFWriteResult;
@@ -64,19 +62,6 @@ final class CELFComputationalResultTransformer {
             statsResult.algorithmSpecificFields().totalSpread(),
             statsResult.algorithmSpecificFields().nodeCount(),
             configuration.toMap()
-        );
-    }
-
-    static CELFMutateResult toMutateResult(
-        NodePropertyMutateResult<CELFSpecificFields> mutateResult
-    ) {
-        return new CELFMutateResult(
-            mutateResult.mutateMillis(),
-            mutateResult.nodePropertiesWritten(),
-            mutateResult.computeMillis(),
-            mutateResult.algorithmSpecificFields().totalSpread(),
-            mutateResult.algorithmSpecificFields().nodeCount(),
-            mutateResult.configuration().toMap()
         );
     }
 

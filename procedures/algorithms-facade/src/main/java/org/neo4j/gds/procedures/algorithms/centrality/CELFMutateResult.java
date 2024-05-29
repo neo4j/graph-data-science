@@ -17,8 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.centrality.celf;
+package org.neo4j.gds.procedures.algorithms.centrality;
 
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
@@ -31,7 +32,7 @@ public final class CELFMutateResult {
     public final long nodeCount;
     public final Map<String, Object> configuration;
 
-    public CELFMutateResult(
+    private CELFMutateResult(
         long mutateMillis,
         long nodePropertiesWritten,
         long computeMillis,
@@ -51,8 +52,18 @@ public final class CELFMutateResult {
         return new Builder();
     }
 
-    public static class Builder extends AbstractResultBuilder<CELFMutateResult> {
+    public static CELFMutateResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+        return new CELFMutateResult(
+            timings.mutateOrWriteMillis,
+            0,
+            timings.computeMillis,
+            0,
+            0,
+            configurationMap
+        );
+    }
 
+    public static class Builder extends AbstractResultBuilder<CELFMutateResult> {
         private double totalSpread;
 
         public Builder withTotalSpread(double totalSpread) {

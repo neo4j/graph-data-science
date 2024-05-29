@@ -26,6 +26,7 @@ public enum LabelForProgressTracking {
     BetaClosenessCentrality("Closeness Centrality (beta)"),
     BetweennessCentrality("Betweenness Centrality"),
     BFS("BFS"),
+    CELF("CELF"),
     ClosenessCentrality("Closeness Centrality"),
     DegreeCentrality("DegreeCentrality"),
     DeltaStepping("Delta Stepping"),
@@ -57,6 +58,7 @@ public enum LabelForProgressTracking {
             case BetaClosenessCentrality -> BetaClosenessCentrality;
             case BetweennessCentrality -> BetweennessCentrality;
             case BFS -> BFS;
+            case CELF -> CELF;
             case ClosenessCentrality -> ClosenessCentrality;
             case DegreeCentrality -> DegreeCentrality;
             case DeltaStepping -> DeltaStepping;
