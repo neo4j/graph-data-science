@@ -42,7 +42,6 @@ public class ResultStoreNodeLabelExporter implements NodeLabelExporter {
 
     @Override
     public void write(String nodeLabel) {
-        resultStore.addNodeLabel(nodeLabel, nodeCount, toOriginalId);
         resultStore.add(jobId, new ResultStoreEntry.NodeLabel(nodeLabel, nodeCount, toOriginalId));
     }
 

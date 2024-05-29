@@ -48,9 +48,6 @@ class ResultStoreRelationshipPropertiesExporterTest {
         new ResultStoreRelationshipPropertiesExporter(jobId, graphStore, resultStore)
             .write("TYPE", List.of("foo", "bar"));
 
-        var relationshipIteratorEntry = resultStore.getRelationshipIterator("TYPE", List.of("foo", "bar"));
-        assertThat(relationshipIteratorEntry.relationshipIterator()).isEqualTo(relationshipIterator);
-
         var entry = resultStore.get(jobId);
         assertThat(entry).isInstanceOf(ResultStoreEntry.RelationshipIterators.class);
         var jobIdRelationshipIteratorEntry = (ResultStoreEntry.RelationshipIterators) entry;
