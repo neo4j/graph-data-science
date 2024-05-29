@@ -21,7 +21,6 @@ package org.neo4j.gds.core.write.resultstore;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.EphemeralResultStore;
-import org.neo4j.gds.api.ExportedRelationship;
 import org.neo4j.gds.api.ImmutableExportedRelationship;
 import org.neo4j.gds.api.ResultStoreEntry;
 import org.neo4j.gds.api.nodeproperties.ValueType;
@@ -52,49 +51,16 @@ class ResultStoreRelationshipStreamExporterTest {
                 List.of("doubleProp", "doubleArrayProp"),
                 List.of(ValueType.DOUBLE, ValueType.DOUBLE_ARRAY)
             );
-        var relationshipStreamEntry = resultStore.getRelationshipStream("REL", List.of("doubleProp", "doubleArrayProp"));
-        assertThat(relationshipStreamEntry).isNotNull();
-        assertRelationshipEntryWithProperties(
-            relationshipStreamEntry.propertyTypes(),
-            relationshipStreamEntry.relationshipStream(),
-            relationshipStreamEntry.toOriginalId(),
-            mappingOperator
-        );
 
         var entry = resultStore.get(jobId);
         assertThat(entry).isInstanceOf(ResultStoreEntry.RelationshipStream.class);
 
         var jobIdRelationshipStreamEntry = (ResultStoreEntry.RelationshipStream) entry;
+
         assertThat(jobIdRelationshipStreamEntry.relationshipType()).isEqualTo("REL");
         assertThat(jobIdRelationshipStreamEntry.propertyKeys()).containsExactly("doubleProp", "doubleArrayProp");
-        assertThat(jobIdRelationshipStreamEntry.propertyTypes()).isEqualTo(relationshipStreamEntry.propertyTypes());
-        assertThat(jobIdRelationshipStreamEntry.relationshipStream()).isEqualTo(relationshipStreamEntry.relationshipStream());
-    }
-
-    private static void assertRelationshipEntryWithProperties(
-        List<ValueType> propertyTypes,
-        Stream<ExportedRelationship> relationshipStream,
-        LongUnaryOperator actualOperator,
-        LongUnaryOperator expectedOperator
-    ) {
-        assertThat(propertyTypes).isEqualTo(List.of(ValueType.DOUBLE, ValueType.DOUBLE_ARRAY));
-        assertThat(actualOperator).isEqualTo(expectedOperator);
-
-        var relationshipIterator = relationshipStream.iterator();
-
-        assertThat(relationshipIterator).hasNext();
-        var firstRelationship = relationshipIterator.next();
-        assertThat(firstRelationship.sourceNode()).isEqualTo(0L);
-        assertThat(firstRelationship.targetNode()).isEqualTo(1L);
-        assertThat(firstRelationship.values()).containsExactly(Values.doubleValue(42.0), Values.doubleArray(new double[]{ 43.0, 44.0 }));
-
-        assertThat(relationshipIterator).hasNext();
-        var secondRelationship = relationshipIterator.next();
-        assertThat(secondRelationship.sourceNode()).isEqualTo(1L);
-        assertThat(secondRelationship.targetNode()).isEqualTo(2L);
-        assertThat(secondRelationship.values()).containsExactly(Values.doubleValue(45.0), Values.doubleArray(new double[]{ 46.0, 47.0 }));
-
-        assertThat(relationshipIterator).isExhausted();
+        assertThat(jobIdRelationshipStreamEntry.propertyTypes()).containsExactly(ValueType.DOUBLE, ValueType.DOUBLE_ARRAY);
+        assertThat(jobIdRelationshipStreamEntry.relationshipStream()).isEqualTo(relationshipStream);
     }
 
     @Test
@@ -111,47 +77,13 @@ class ResultStoreRelationshipStreamExporterTest {
             List.of(),
             List.of()
         );
-        var relationshipStreamEntry = resultStore.getRelationshipStream("REL", List.of());
-        assertThat(relationshipStreamEntry).isNotNull();
-        assertRelationshipEntryWithoutProperties(
-            relationshipStreamEntry.propertyTypes(),
-            relationshipStreamEntry.relationshipStream(),
-            relationshipStreamEntry.toOriginalId(),
-            mappingOperator
-        );
 
         var entry = resultStore.get(jobId);
         assertThat(entry).isInstanceOf(ResultStoreEntry.RelationshipStream.class);
         var jobIdRelationshipStreamEntry = (ResultStoreEntry.RelationshipStream) entry;
         assertThat(jobIdRelationshipStreamEntry.relationshipType()).isEqualTo("REL");
         assertThat(jobIdRelationshipStreamEntry.propertyKeys()).isEmpty();
-        assertThat(jobIdRelationshipStreamEntry.propertyTypes()).isEqualTo(relationshipStreamEntry.propertyTypes());
-        assertThat(jobIdRelationshipStreamEntry.relationshipStream()).isEqualTo(relationshipStreamEntry.relationshipStream());
-    }
-
-    private static void assertRelationshipEntryWithoutProperties(
-        List<ValueType> propertyTypes,
-        Stream<ExportedRelationship> relationshipStream,
-        LongUnaryOperator actualOperator,
-        LongUnaryOperator expectedOperator
-    ) {
-        assertThat(propertyTypes).isEqualTo(List.of());
-        assertThat(actualOperator).isEqualTo(expectedOperator);
-
-        var relationshipIterator = relationshipStream.iterator();
-
-        assertThat(relationshipIterator).hasNext();
-        var firstRelationship = relationshipIterator.next();
-        assertThat(firstRelationship.sourceNode()).isEqualTo(0L);
-        assertThat(firstRelationship.targetNode()).isEqualTo(1L);
-        assertThat(firstRelationship.values()).isEmpty();
-
-        assertThat(relationshipIterator).hasNext();
-        var secondRelationship = relationshipIterator.next();
-        assertThat(secondRelationship.sourceNode()).isEqualTo(1L);
-        assertThat(secondRelationship.targetNode()).isEqualTo(2L);
-        assertThat(secondRelationship.values()).isEmpty();
-
-        assertThat(relationshipIterator).isExhausted();
+        assertThat(jobIdRelationshipStreamEntry.propertyTypes()).isEmpty();
+        assertThat(jobIdRelationshipStreamEntry.relationshipStream()).isEqualTo(relationshipStream);
     }
 }

@@ -40,13 +40,6 @@ class ResultStoreNodeLabelExporterTest {
 
         assertThat(nodeLabelExporter.nodeLabelsWritten()).isEqualTo(5);
 
-        var nodeLabelEntry = resultStore.getNodeIdsByLabel("label");
-        assertThat(nodeLabelEntry.nodeCount()).isEqualTo(5);
-
-        for (int i = 0; i < 5; i++) {
-            assertThat(nodeLabelEntry.toOriginalId().applyAsLong(i)).isEqualTo(i + 42);
-        }
-
         var entry = resultStore.get(jobId);
         assertThat(entry).isInstanceOf(ResultStoreEntry.NodeLabel.class);
 
