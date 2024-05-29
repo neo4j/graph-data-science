@@ -41,6 +41,7 @@ import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetaClosenessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetweennessCentralityMutateStub;
+import org.neo4j.gds.procedures.algorithms.centrality.stubs.CelfMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.ClosenessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.DegreeCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.HarmonicCentralityMutateStub;
@@ -58,6 +59,7 @@ public final class CentralityProcedureFacade {
 
     private final BetaClosenessCentralityMutateStub betaClosenessCentralityMutateStub;
     private final BetweennessCentralityMutateStub betweennessCentralityMutateStub;
+    private final CelfMutateStub celfMutateStub;
     private final ClosenessCentralityMutateStub closenessCentralityMutateStub;
     private final DegreeCentralityMutateStub degreeCentralityMutateStub;
 
@@ -73,6 +75,7 @@ public final class CentralityProcedureFacade {
         ProcedureReturnColumns procedureReturnColumns,
         BetaClosenessCentralityMutateStub betaClosenessCentralityMutateStub,
         BetweennessCentralityMutateStub betweennessCentralityMutateStub,
+        CelfMutateStub celfMutateStub,
         ClosenessCentralityMutateStub closenessCentralityMutateStub,
         DegreeCentralityMutateStub degreeCentralityMutateStub,
         HarmonicCentralityMutateStub harmonicCentralityMutateStub,
@@ -85,6 +88,7 @@ public final class CentralityProcedureFacade {
         this.procedureReturnColumns = procedureReturnColumns;
         this.betaClosenessCentralityMutateStub = betaClosenessCentralityMutateStub;
         this.betweennessCentralityMutateStub = betweennessCentralityMutateStub;
+        this.celfMutateStub = celfMutateStub;
         this.closenessCentralityMutateStub = closenessCentralityMutateStub;
         this.degreeCentralityMutateStub = degreeCentralityMutateStub;
         this.harmonicCentralityMutateStub = harmonicCentralityMutateStub;
@@ -114,6 +118,10 @@ public final class CentralityProcedureFacade {
             applicationsFacade,
             procedureReturnColumns
         );
+        var celfMutateStub = new CelfMutateStub(
+            genericStub,
+            applicationsFacade
+        );
         var closenessCentralityMutateStub = new ClosenessCentralityMutateStub(
             genericStub,
             applicationsFacade,
@@ -134,6 +142,7 @@ public final class CentralityProcedureFacade {
             procedureReturnColumns,
             betaClosenessCentralityMutateStub,
             betweennessCentralityMutateStub,
+            celfMutateStub,
             closenessCentralityMutateStub,
             degreeCentralityMutateStub,
             harmonicCentralityMutateStub,
@@ -277,6 +286,10 @@ public final class CentralityProcedureFacade {
         );
 
         return Stream.of(result);
+    }
+
+    public CelfMutateStub celfMutateStub() {
+        return celfMutateStub;
     }
 
     public ClosenessCentralityMutateStub closenessCentralityMutateStub() {
