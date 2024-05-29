@@ -45,7 +45,7 @@ public class DegreeCentralityWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.centrality().degreeCentralityWrite(graphName, configuration);
+        return facade.algorithms().centrality().degreeCentralityWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.degree.write.estimate", mode = READ)
@@ -54,6 +54,6 @@ public class DegreeCentralityWriteProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.centrality().degreeCentralityWriteEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().centrality().degreeCentralityWriteEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

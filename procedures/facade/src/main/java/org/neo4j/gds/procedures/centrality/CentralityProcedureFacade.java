@@ -25,10 +25,7 @@ import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsStatsBusinessFaca
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.degree.DegreeCentralityStreamConfig;
-import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
 import org.neo4j.gds.harmonic.DeprecatedTieredHarmonicCentralityWriteConfig;
-import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationMutateConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
@@ -41,7 +38,6 @@ import org.neo4j.gds.pagerank.PageRankWriteConfig;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityStreamResult;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityWriteResult;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.centrality.alphaharmonic.AlphaHarmonicStreamResult;
 import org.neo4j.gds.procedures.centrality.alphaharmonic.AlphaHarmonicWriteResult;
 import org.neo4j.gds.procedures.centrality.celf.CELFMutateResult;
 import org.neo4j.gds.procedures.centrality.celf.CELFStatsResult;
@@ -85,73 +81,6 @@ public class CentralityProcedureFacade {
         this.estimateBusinessFacade = estimateBusinessFacade;
     }
 
-    public Stream<CentralityStreamResult> degreeCentralityStream(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfigurationForStream(configuration, DegreeCentralityStreamConfig::of);
-
-        var computationResult = streamBusinessFacade.degreeCentrality(
-            graphName,
-            config
-        );
-
-        return DefaultCentralityComputationalResultTransformer.toStreamResult(computationResult);
-    }
-
-    public Stream<CentralityWriteResult> degreeCentralityWrite(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, DegreeCentralityWriteConfig::of);
-
-        var computationResult = writeBusinessFacade.degreeCentrality(
-            graphName,
-            config,
-            procedureReturnColumns.contains("centralityDistribution")
-        );
-
-        return Stream.of(DefaultCentralityComputationalResultTransformer.toWriteResult(computationResult));
-    }
-
-
-    public Stream<MemoryEstimateResult> degreeCentralityStreamEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, DegreeCentralityStreamConfig::of);
-
-        return Stream.of(estimateBusinessFacade.degreeCentrality(graphNameOrConfiguration, config));
-
-    }
-
-    public Stream<MemoryEstimateResult> degreeCentralityWriteEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, DegreeCentralityWriteConfig::of);
-
-        return Stream.of(estimateBusinessFacade.degreeCentrality(graphNameOrConfiguration, config));
-
-    }
-
-    public Stream<CentralityStreamResult> harmonicCentralityStream(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfigurationForStream(
-            configuration,
-            HarmonicCentralityStreamConfig::of
-        );
-
-        var computationResult = streamBusinessFacade.harmonicCentrality(
-            graphName,
-            config
-        );
-
-        return DefaultCentralityComputationalResultTransformer.toStreamResult(computationResult);
-    }
-
     public Stream<CentralityWriteResult> harmonicCentralityWrite(
         String graphName,
         Map<String, Object> configuration
@@ -165,20 +94,6 @@ public class CentralityProcedureFacade {
         );
 
         return Stream.of(DefaultCentralityComputationalResultTransformer.toWriteResult(computationResult));
-    }
-
-    public Stream<AlphaHarmonicStreamResult> alphaHarmonicCentralityStream(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, HarmonicCentralityStreamConfig::of);
-
-        var computationResult = streamBusinessFacade.harmonicCentrality(
-            graphName,
-            config
-        );
-
-        return AlphaHarmonicCentralityComputationalResultTransformer.toStreamResult(computationResult);
     }
 
     public Stream<AlphaHarmonicWriteResult> alphaHarmonicCentralityWrite(

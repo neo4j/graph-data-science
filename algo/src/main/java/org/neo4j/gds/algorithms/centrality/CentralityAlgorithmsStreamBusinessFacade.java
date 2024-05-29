@@ -21,14 +21,10 @@ package org.neo4j.gds.algorithms.centrality;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
-import org.neo4j.gds.degree.DegreeCentralityResult;
-import org.neo4j.gds.degree.DegreeCentralityStreamConfig;
-import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
-import org.neo4j.gds.harmonic.HarmonicResult;
-import org.neo4j.gds.pagerank.PageRankConfig;
-import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStreamConfig;
+import org.neo4j.gds.pagerank.PageRankConfig;
+import org.neo4j.gds.pagerank.PageRankResult;
 
 public class CentralityAlgorithmsStreamBusinessFacade {
 
@@ -38,31 +34,6 @@ public class CentralityAlgorithmsStreamBusinessFacade {
         this.centralityAlgorithmsFacade = centralityAlgorithmsFacade;
     }
 
-    public StreamComputationResult<DegreeCentralityResult> degreeCentrality(
-        String graphName,
-        DegreeCentralityStreamConfig config
-    ) {
-
-        var result = centralityAlgorithmsFacade.degreeCentrality(
-            graphName,
-            config
-        );
-
-        return createStreamComputationResult(result);
-    }
-
-    public StreamComputationResult<HarmonicResult> harmonicCentrality(
-        String graphName,
-        HarmonicCentralityStreamConfig config
-    ) {
-
-        var result = centralityAlgorithmsFacade.harmonicCentrality(
-            graphName,
-            config
-        );
-
-        return createStreamComputationResult(result);
-    }
     public StreamComputationResult<PageRankResult> pageRank(
         String graphName,
         PageRankConfig config

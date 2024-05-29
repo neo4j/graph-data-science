@@ -20,8 +20,8 @@
 package org.neo4j.gds.harmonic;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.algorithms.centrality.AlphaHarmonicStreamResult;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityStreamResult;
-import org.neo4j.gds.procedures.centrality.alphaharmonic.AlphaHarmonicStreamResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -45,7 +45,7 @@ public class HarmonicCentralityStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.centrality().harmonicCentralityStream(graphName, configuration);
+        return facade.algorithms().centrality().harmonicCentralityStream(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)
@@ -61,6 +61,6 @@ public class HarmonicCentralityStreamProc {
             .log()
             .warn("Procedure `gds.alpha.closeness.harmonic.stream` has been deprecated, please use `gds.closeness.harmonic.stream`.");
 
-        return facade.centrality().alphaHarmonicCentralityStream(graphName, configuration);
+        return facade.algorithms().centrality().alphaHarmonicCentralityStream(graphName, configuration);
     }
 }

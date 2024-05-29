@@ -20,38 +20,13 @@
 package org.neo4j.gds.procedures.centrality;
 
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
-import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.centrality.specificfields.AlphaHarmonicSpecificFields;
-import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.harmonic.DeprecatedTieredHarmonicCentralityWriteConfig;
-import org.neo4j.gds.harmonic.HarmonicResult;
-import org.neo4j.gds.procedures.centrality.alphaharmonic.AlphaHarmonicStreamResult;
 import org.neo4j.gds.procedures.centrality.alphaharmonic.AlphaHarmonicWriteResult;
-
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 final class AlphaHarmonicCentralityComputationalResultTransformer {
 
     private AlphaHarmonicCentralityComputationalResultTransformer() {}
-
-    static Stream<AlphaHarmonicStreamResult> toStreamResult(
-        StreamComputationResult<HarmonicResult> computationResult
-    ) {
-        return computationResult.result().map(result -> {
-            var nodePropertyValues = result.nodePropertyValues();
-            var graph = computationResult.graph();
-            return LongStream
-                .range(IdMap.START_NODE_ID, graph.nodeCount())
-                .filter(nodePropertyValues::hasValue)
-                .mapToObj(nodeId ->
-                    new AlphaHarmonicStreamResult(
-                        graph.toOriginalNodeId(nodeId),
-                        nodePropertyValues.doubleValue(nodeId)
-                    ));
-
-        }).orElseGet(Stream::empty);
-    }
 
     static AlphaHarmonicWriteResult toWriteResult(
         NodePropertyWriteResult<AlphaHarmonicSpecificFields> computationResult,

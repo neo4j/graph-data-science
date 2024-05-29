@@ -35,7 +35,6 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
 import org.neo4j.gds.harmonic.DeprecatedTieredHarmonicCentralityWriteConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
 import org.neo4j.gds.influenceMaximization.CELFNodeProperties;
@@ -60,29 +59,6 @@ public class CentralityAlgorithmsWriteBusinessFacade {
     ) {
         this.centralityAlgorithmsFacade = centralityAlgorithmsFacade;
         this.writeNodePropertyService = writeNodePropertyService;
-    }
-
-    public NodePropertyWriteResult<DefaultCentralitySpecificFields> degreeCentrality(
-        String graphName,
-        DegreeCentralityWriteConfig configuration,
-        boolean shouldComputeCentralityDistribution
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
-            () -> centralityAlgorithmsFacade.degreeCentrality(graphName, configuration)
-        );
-
-        return writeToDatabase(
-            intermediateResult.algorithmResult,
-            configuration,
-            shouldComputeCentralityDistribution,
-            intermediateResult.computeMilliseconds,
-            "DegreeCentralityWrite",
-            configuration.writeConcurrency(),
-            configuration.writeProperty(),
-            configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(intermediateResult.algorithmResult.resultStore())
-        );
     }
 
     public NodePropertyWriteResult<PageRankSpecificFields> pageRank(

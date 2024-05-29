@@ -20,24 +20,27 @@
 package org.neo4j.gds.procedures.algorithms.centrality;
 
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.degree.DegreeCentralityStreamConfig;
 
 import java.util.Optional;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class CentralityAlgorithmResultTransformer {
-    Stream<CentralityStreamResult> transform(IdMap graph, Optional<? extends CentralityAlgorithmResult> result) {
-        if (result.isEmpty()) return Stream.empty();
+class DegreeCentralityResultBuilderForStreamMode implements ResultBuilder<DegreeCentralityStreamConfig, CentralityAlgorithmResult, Stream<CentralityStreamResult>, Void> {
+    private final CentralityAlgorithmResultTransformer transformer = new CentralityAlgorithmResultTransformer();
 
-        var centralityAlgorithmResult = result.get();
-        var nodePropertyValues = centralityAlgorithmResult.nodePropertyValues();
-
-        return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
-            .filter(nodePropertyValues::hasValue)
-            .mapToObj(nodeId -> new CentralityStreamResult(
-                graph.toOriginalNodeId(nodeId),
-                nodePropertyValues.doubleValue(nodeId)
-            ));
+    @Override
+    public Stream<CentralityStreamResult> build(
+        Graph graph,
+        GraphStore graphStore,
+        DegreeCentralityStreamConfig configuration,
+        Optional<CentralityAlgorithmResult> result,
+        AlgorithmProcessingTimings timings,
+        Optional<Void> unused
+    ) {
+        return transformer.transform(graph, result);
     }
 }

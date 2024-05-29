@@ -25,11 +25,16 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTempla
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityStreamConfig;
+import org.neo4j.gds.degree.DegreeCentralityStreamConfig;
+import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
+import org.neo4j.gds.harmonic.HarmonicResult;
 
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BetweennessCentrality;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ClosenessCentrality;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.DegreeCentrality;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.HarmonicCentrality;
 
 public class CentralityAlgorithmsStreamModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
@@ -73,6 +78,38 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
             ClosenessCentrality,
             () -> estimationFacade.closenessCentrality(configuration),
             graph -> centralityAlgorithms.closenessCentrality(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT degreeCentrality(
+        GraphName graphName,
+        DegreeCentralityStreamConfig configuration,
+        ResultBuilder<DegreeCentralityStreamConfig, CentralityAlgorithmResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            DegreeCentrality,
+            () -> estimationFacade.degreeCentrality(configuration),
+            graph -> centralityAlgorithms.degreeCentrality(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT harmonicCentrality(
+        GraphName graphName,
+        HarmonicCentralityStreamConfig configuration,
+        ResultBuilder<HarmonicCentralityStreamConfig, HarmonicResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            HarmonicCentrality,
+            estimationFacade::harmonicCentrality,
+            graph -> centralityAlgorithms.harmonicCentrality(graph, configuration),
             Optional.empty(),
             resultBuilder
         );

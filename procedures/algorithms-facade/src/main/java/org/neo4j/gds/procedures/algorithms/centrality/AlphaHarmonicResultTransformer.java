@@ -19,23 +19,27 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.harmonic.HarmonicResult;
 
 import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class CentralityAlgorithmResultTransformer {
-    Stream<CentralityStreamResult> transform(IdMap graph, Optional<? extends CentralityAlgorithmResult> result) {
+/**
+ * This is a duplicate of {@link org.neo4j.gds.procedures.algorithms.centrality.CentralityAlgorithmResultTransformer},
+ * with slight modifications; leave it, it will wither and die one day
+ */
+class AlphaHarmonicResultTransformer {
+    Stream<AlphaHarmonicStreamResult> transform(IdMap graph, Optional<HarmonicResult> result) {
         if (result.isEmpty()) return Stream.empty();
 
-        var centralityAlgorithmResult = result.get();
-        var nodePropertyValues = centralityAlgorithmResult.nodePropertyValues();
+        var harmonicResult = result.get();
+        var nodePropertyValues = harmonicResult.nodePropertyValues();
 
         return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
             .filter(nodePropertyValues::hasValue)
-            .mapToObj(nodeId -> new CentralityStreamResult(
+            .mapToObj(nodeId -> new AlphaHarmonicStreamResult(
                 graph.toOriginalNodeId(nodeId),
                 nodePropertyValues.doubleValue(nodeId)
             ));

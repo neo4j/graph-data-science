@@ -33,7 +33,10 @@ import org.neo4j.gds.closeness.ClosenessCentralityStatsConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityStreamConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
 import org.neo4j.gds.degree.DegreeCentralityStatsConfig;
+import org.neo4j.gds.degree.DegreeCentralityStreamConfig;
+import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityStatsConfig;
+import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetaClosenessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetweennessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.ClosenessCentralityMutateStub;
@@ -137,6 +140,21 @@ public final class CentralityProcedureFacade {
             statsModeRunner,
             streamModeRunner,
             writeModeRunner
+        );
+    }
+
+    public Stream<AlphaHarmonicStreamResult> alphaHarmonicCentralityStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new AlphaHarmonicCentralityResultBuilderForStreamMode();
+
+        return streamModeRunner.runStreamModeAlgorithm(
+            graphName,
+            configuration,
+            HarmonicCentralityStreamConfig::of,
+            resultBuilder,
+            streamMode()::harmonicCentrality
         );
     }
 
@@ -337,6 +355,66 @@ public final class CentralityProcedureFacade {
         return Stream.of(result);
     }
 
+    public Stream<CentralityStreamResult> degreeCentralityStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new DegreeCentralityResultBuilderForStreamMode();
+
+        return streamModeRunner.runStreamModeAlgorithm(
+            graphName,
+            configuration,
+            DegreeCentralityStreamConfig::of,
+            resultBuilder,
+            streamMode()::degreeCentrality
+        );
+    }
+
+    public Stream<MemoryEstimateResult> degreeCentralityStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationModeRunner.runEstimation(
+            algorithmConfiguration,
+            DegreeCentralityStreamConfig::of,
+            configuration -> estimationMode().degreeCentrality(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<CentralityWriteResult> degreeCentralityWrite(String graphName, Map<String, Object> configuration) {
+        var shouldComputeCentralityDistribution = procedureReturnColumns.contains("centralityDistribution");
+        var resultBuilder = new DegreeCentralityResultBuilderForWriteMode(shouldComputeCentralityDistribution);
+
+        return writeModeRunner.runWriteModeAlgorithm(
+            graphName,
+            configuration,
+            DegreeCentralityWriteConfig::of,
+            writeMode()::degreeCentrality,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> degreeCentralityWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationModeRunner.runEstimation(
+            algorithmConfiguration,
+            DegreeCentralityWriteConfig::of,
+            configuration -> estimationMode().degreeCentrality(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
     public HarmonicCentralityMutateStub harmonicCentralityMutateStub() {
         return harmonicCentralityMutateStub;
     }
@@ -351,6 +429,21 @@ public final class CentralityProcedureFacade {
             HarmonicCentralityStatsConfig::of,
             resultBuilder,
             statsMode()::harmonicCentrality
+        );
+    }
+
+    public Stream<CentralityStreamResult> harmonicCentralityStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new HarmonicCentralityResultBuilderForStreamMode();
+
+        return streamModeRunner.runStreamModeAlgorithm(
+            graphName,
+            configuration,
+            HarmonicCentralityStreamConfig::of,
+            resultBuilder,
+            streamMode()::harmonicCentrality
         );
     }
 

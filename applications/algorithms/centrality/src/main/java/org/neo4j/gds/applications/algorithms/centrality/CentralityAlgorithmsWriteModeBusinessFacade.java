@@ -28,12 +28,14 @@ import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
+import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
 import org.neo4j.gds.logging.Log;
 
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BetweennessCentrality;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ClosenessCentrality;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.DegreeCentrality;
 
 public final class CentralityAlgorithmsWriteModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
@@ -102,6 +104,24 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             ClosenessCentrality,
             () -> estimationFacade.closenessCentrality(configuration),
             graph -> centralityAlgorithms.closenessCentrality(graph, configuration),
+            Optional.of(writeStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT degreeCentrality(
+        GraphName graphName,
+        DegreeCentralityWriteConfig configuration,
+        ResultBuilder<DegreeCentralityWriteConfig, CentralityAlgorithmResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var writeStep = new DegreeCentralityWriteStep(writeToDatabase, configuration);
+
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            DegreeCentrality,
+            () -> estimationFacade.degreeCentrality(configuration),
+            graph -> centralityAlgorithms.degreeCentrality(graph, configuration),
             Optional.of(writeStep),
             resultBuilder
         );
