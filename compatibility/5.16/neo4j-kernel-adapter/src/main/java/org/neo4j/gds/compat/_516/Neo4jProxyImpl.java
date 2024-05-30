@@ -20,32 +20,9 @@
 package org.neo4j.gds.compat._516;
 
 import org.neo4j.gds.compat.Neo4jProxyApi;
-import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.Read;
 
-import java.util.function.Function;
-
 public final class Neo4jProxyImpl implements Neo4jProxyApi {
-
-    @Override
-    public String neo4jArrowServerAddressHeader() {
-        // TODO: replace this with a dependency to neo4j once we moved the corresponding piece to a public module
-        return "ArrowPluginAddress";
-    }
-
-    @Override
-    public <T> T nodeLabelTokenSet(
-        NodeCursor nodeCursor,
-        Function<int[], T> intsConstructor,
-        Function<long[], T> longsConstructor
-    ) {
-        return intsConstructor.apply(nodeCursor.labels().all());
-    }
-
-    @Override
-    public String metricsManagerClass() {
-        return "com.neo4j.metrics.MetricsManager";
-    }
 
     @Override
     public long estimateNodeCount(Read read, int label) {
