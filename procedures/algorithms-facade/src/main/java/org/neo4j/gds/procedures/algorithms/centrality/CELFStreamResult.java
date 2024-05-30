@@ -17,13 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.centrality.celf;
+package org.neo4j.gds.procedures.algorithms.centrality;
 
 public class CELFStreamResult {
     public final long nodeId;
     public final double spread;
 
-    public CELFStreamResult(long nodeId, double spread) {
+    CELFStreamResult(long nodeId, double spread) {
         this.nodeId = nodeId;
         this.spread = spread;
     }

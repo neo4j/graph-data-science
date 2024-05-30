@@ -21,8 +21,6 @@ package org.neo4j.gds.algorithms.centrality;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
-import org.neo4j.gds.influenceMaximization.CELFResult;
-import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStreamConfig;
 import org.neo4j.gds.pagerank.PageRankConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 
@@ -40,19 +38,6 @@ public class CentralityAlgorithmsStreamBusinessFacade {
     ) {
 
         var result = this.centralityAlgorithmsFacade.pageRank(
-            graphName,
-            config
-        );
-
-        return createStreamComputationResult(result);
-    }
-
-    public StreamComputationResult<CELFResult> celf(
-        String graphName,
-        InfluenceMaximizationStreamConfig config
-    ) {
-
-        var result = centralityAlgorithmsFacade.celf(
             graphName,
             config
         );

@@ -40,6 +40,7 @@ import org.neo4j.gds.harmonic.HarmonicCentralityStatsConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
+import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStreamConfig;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetaClosenessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetweennessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.CelfMutateStub;
@@ -315,6 +316,37 @@ public final class CentralityProcedureFacade {
         var result = estimationModeRunner.runEstimation(
             algorithmConfiguration,
             InfluenceMaximizationStatsConfig::of,
+            configuration -> estimationMode().celf(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<CELFStreamResult> celfStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new CelfResultBuilderForStreamMode();
+
+        return streamModeRunner.runStreamModeAlgorithm(
+            graphName,
+            configuration,
+            InfluenceMaximizationStreamConfig::of,
+            resultBuilder,
+            streamMode()::celf
+        );
+    }
+
+    public Stream<MemoryEstimateResult> celfStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationModeRunner.runEstimation(
+            algorithmConfiguration,
+            InfluenceMaximizationStreamConfig::of,
             configuration -> estimationMode().celf(
                 configuration,
                 graphNameOrConfiguration

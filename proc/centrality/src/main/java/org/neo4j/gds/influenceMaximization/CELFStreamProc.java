@@ -20,7 +20,7 @@
 package org.neo4j.gds.influenceMaximization;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.centrality.celf.CELFStreamResult;
+import org.neo4j.gds.procedures.algorithms.centrality.CELFStreamResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -45,7 +45,7 @@ public class CELFStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.centrality().celfStream(graphName, configuration);
+        return facade.algorithms().centrality().celfStream(graphName, configuration);
     }
 
     @Procedure(name = "gds.influenceMaximization.celf.stream.estimate", mode = READ)
@@ -54,7 +54,7 @@ public class CELFStreamProc {
         @Name(value = "graphName") Object graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.centrality().celfStreamEstimate(graphName, configuration);
+        return facade.algorithms().centrality().celfStreamEstimate(graphName, configuration);
     }
 
     @Procedure(

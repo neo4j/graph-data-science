@@ -20,36 +20,12 @@
 package org.neo4j.gds.procedures.centrality;
 
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
-import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.centrality.specificfields.CELFSpecificFields;
-import org.neo4j.gds.influenceMaximization.CELFResult;
-import org.neo4j.gds.procedures.centrality.celf.CELFStreamResult;
 import org.neo4j.gds.procedures.centrality.celf.CELFWriteResult;
-
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 final class CELFComputationalResultTransformer {
 
     private CELFComputationalResultTransformer() {}
-
-
-    static  Stream<CELFStreamResult> toStreamResult(
-        StreamComputationResult<CELFResult> computationResult
-    ) {
-        return computationResult.result().map(result -> {
-
-            var graph = computationResult.graph();
-            var celfSeedSet = result.seedSetNodes();
-            long[] keySet = celfSeedSet.keys().toArray();
-            return LongStream.of(keySet)
-                .mapToObj(node -> new CELFStreamResult(
-                    graph.toOriginalNodeId(node),
-                    celfSeedSet.getOrDefault(node, 0)
-                ));
-
-        }).orElseGet(Stream::empty);
-    }
 
     static CELFWriteResult toWriteResult(
         NodePropertyWriteResult<CELFSpecificFields> mutateResult
