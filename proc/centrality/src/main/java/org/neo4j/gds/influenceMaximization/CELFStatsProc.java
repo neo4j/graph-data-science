@@ -20,7 +20,7 @@
 package org.neo4j.gds.influenceMaximization;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.centrality.celf.CELFStatsResult;
+import org.neo4j.gds.procedures.algorithms.centrality.CELFStatsResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -45,7 +45,7 @@ public class CELFStatsProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.centrality().celfStats(graphName, configuration);
+        return facade.algorithms().centrality().celfStats(graphName, configuration);
     }
 
     @Procedure(name = "gds.influenceMaximization.celf.stats.estimate", mode = READ)
@@ -54,7 +54,7 @@ public class CELFStatsProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.centrality().celfStatsEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().centrality().celfStatsEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Procedure(

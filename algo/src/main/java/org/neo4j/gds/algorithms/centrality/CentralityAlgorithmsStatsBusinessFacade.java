@@ -22,14 +22,12 @@ package org.neo4j.gds.algorithms.centrality;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StatsResult;
-import org.neo4j.gds.algorithms.centrality.specificfields.CELFSpecificFields;
 import org.neo4j.gds.algorithms.centrality.specificfields.CentralityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.centrality.specificfields.PageRankSpecificFields;
 import org.neo4j.gds.algorithms.runner.AlgorithmResultWithTiming;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankStatsConfig;
 import org.neo4j.gds.result.CentralityStatistics;
@@ -120,33 +118,6 @@ public class CentralityAlgorithmsStatsBusinessFacade {
                 .build();
         }).orElseGet(() -> StatsResult.empty(PageRankSpecificFields.EMPTY));
 
-    }
-
-    public StatsResult<CELFSpecificFields> celf(
-        String graphName,
-        InfluenceMaximizationStatsConfig configuration
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> centralityAlgorithmsFacade.celf(graphName, configuration)
-        );
-
-        var statsResultBuilder = StatsResult.<CELFSpecificFields>builder()
-            .computeMillis(intermediateResult.computeMilliseconds)
-            .postProcessingMillis(0);
-
-        var algorithmResult = intermediateResult.algorithmResult;
-        statsResultBuilder.algorithmSpecificFields(
-            algorithmResult.result().map(
-                    result -> new CELFSpecificFields(
-                        result.totalSpread(),
-                        intermediateResult.algorithmResult.graph().nodeCount()
-                    ))
-                .orElse(
-                    CELFSpecificFields.EMPTY
-                ));
-
-        return statsResultBuilder.build();
     }
 
     <RESULT, CONFIG extends AlgoBaseConfig, ASF extends CentralityStatisticsSpecificFields> StatsResult<ASF> statsResult(

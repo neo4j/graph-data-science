@@ -27,10 +27,13 @@ import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityStatsConfig;
 import org.neo4j.gds.degree.DegreeCentralityStatsConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityStatsConfig;
+import org.neo4j.gds.influenceMaximization.CELFResult;
+import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
 
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BetweennessCentrality;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.CELF;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ClosenessCentrality;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.DegreeCentrality;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.HarmonicCentrality;
@@ -109,6 +112,22 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
             HarmonicCentrality,
             estimationFacade::harmonicCentrality,
             graph -> centralityAlgorithms.harmonicCentrality(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT celf(
+        GraphName graphName,
+        InfluenceMaximizationStatsConfig configuration,
+        ResultBuilder<InfluenceMaximizationStatsConfig, CELFResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            CELF,
+            () -> estimationFacade.celf(configuration),
+            graph -> centralityAlgorithms.celf(graph, configuration),
             Optional.empty(),
             resultBuilder
         );

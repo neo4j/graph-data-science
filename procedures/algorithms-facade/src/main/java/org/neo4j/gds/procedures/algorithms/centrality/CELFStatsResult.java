@@ -17,14 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.centrality.celf;
+package org.neo4j.gds.procedures.algorithms.centrality;
 
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
 public final class CELFStatsResult {
-
     public final long computeMillis;
     public final double totalSpread;
     public final long nodeCount;
@@ -40,6 +40,10 @@ public final class CELFStatsResult {
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    static CELFStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+        return new CELFStatsResult(timings.computeMillis, 0, 0, configurationMap);
     }
 
     public static class Builder extends AbstractResultBuilder<CELFStatsResult> {

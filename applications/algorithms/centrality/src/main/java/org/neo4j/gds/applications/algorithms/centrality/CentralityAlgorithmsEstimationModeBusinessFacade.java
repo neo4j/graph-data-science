@@ -60,6 +60,16 @@ public class CentralityAlgorithmsEstimationModeBusinessFacade {
         return new CELFMemoryEstimateDefinition(configuration.toParameters()).memoryEstimation();
     }
 
+    public MemoryEstimateResult celf(InfluenceMaximizationBaseConfig configuration, Object graphNameOrConfiguration) {
+        var memoryEstimation = celf(configuration);
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
+        );
+    }
+
     public MemoryEstimation closenessCentrality(ClosenessCentralityBaseConfig ignored) {
         throw new MemoryEstimationNotImplementedException();
     }

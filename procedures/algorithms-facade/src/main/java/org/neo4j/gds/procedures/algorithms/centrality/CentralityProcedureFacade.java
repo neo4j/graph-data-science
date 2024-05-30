@@ -39,6 +39,7 @@ import org.neo4j.gds.harmonic.DeprecatedTieredHarmonicCentralityWriteConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityStatsConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
+import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetaClosenessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetweennessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.CelfMutateStub;
@@ -290,6 +291,37 @@ public final class CentralityProcedureFacade {
 
     public CelfMutateStub celfMutateStub() {
         return celfMutateStub;
+    }
+
+    public Stream<CELFStatsResult> celfStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new CelfResultBuilderForStatsMode();
+
+        return statsModeRunner.runStatsModeAlgorithm(
+            graphName,
+            configuration,
+            InfluenceMaximizationStatsConfig::of,
+            resultBuilder,
+            statsMode()::celf
+        );
+    }
+
+    public Stream<MemoryEstimateResult> celfStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationModeRunner.runEstimation(
+            algorithmConfiguration,
+            InfluenceMaximizationStatsConfig::of,
+            configuration -> estimationMode().celf(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
     }
 
     public ClosenessCentralityMutateStub closenessCentralityMutateStub() {

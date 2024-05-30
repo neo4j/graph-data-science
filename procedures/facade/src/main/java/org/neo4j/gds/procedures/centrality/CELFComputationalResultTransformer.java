@@ -20,12 +20,9 @@
 package org.neo4j.gds.procedures.centrality;
 
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
-import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.centrality.specificfields.CELFSpecificFields;
 import org.neo4j.gds.influenceMaximization.CELFResult;
-import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
-import org.neo4j.gds.procedures.centrality.celf.CELFStatsResult;
 import org.neo4j.gds.procedures.centrality.celf.CELFStreamResult;
 import org.neo4j.gds.procedures.centrality.celf.CELFWriteResult;
 
@@ -52,17 +49,6 @@ final class CELFComputationalResultTransformer {
                 ));
 
         }).orElseGet(Stream::empty);
-    }
-
-    static CELFStatsResult toStatsResult(
-        StatsResult<CELFSpecificFields> statsResult,
-        InfluenceMaximizationStatsConfig configuration
-    ) {
-        return new CELFStatsResult(statsResult.computeMillis(),
-            statsResult.algorithmSpecificFields().totalSpread(),
-            statsResult.algorithmSpecificFields().nodeCount(),
-            configuration.toMap()
-        );
     }
 
     static CELFWriteResult toWriteResult(
