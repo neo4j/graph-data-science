@@ -21,12 +21,8 @@ package org.neo4j.gds.algorithms.centrality;
 
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.influenceMaximization.CELFMemoryEstimateDefinition;
-import org.neo4j.gds.influenceMaximization.InfluenceMaximizationBaseConfig;
 import org.neo4j.gds.pagerank.PageRankConfig;
 import org.neo4j.gds.pagerank.PageRankMemoryEstimateDefinition;
-
-import java.util.Optional;
 
 public class CentralityAlgorithmsEstimateBusinessFacade {
 
@@ -36,19 +32,6 @@ public class CentralityAlgorithmsEstimateBusinessFacade {
         AlgorithmEstimator algorithmEstimator
     ) {
         this.algorithmEstimator = algorithmEstimator;
-    }
-
-    public <C extends InfluenceMaximizationBaseConfig> MemoryEstimateResult celf(
-        Object graphNameOrConfiguration,
-        C configuration
-    ) {
-
-        return algorithmEstimator.estimate(
-            graphNameOrConfiguration,
-            configuration,
-            Optional.empty(),
-            new CELFMemoryEstimateDefinition(configuration.toParameters())
-        );
     }
 
     public <C extends PageRankConfig> MemoryEstimateResult pageRank(

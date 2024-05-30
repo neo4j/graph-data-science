@@ -54,8 +54,8 @@ class DegreeCentralityWriteStep implements MutateOrWriteStep<CentralityAlgorithm
             configuration,
             configuration,
             DegreeCentrality,
-            result,
-            jobId
+            jobId,
+            result.nodePropertyValues()
         );
     }
 }

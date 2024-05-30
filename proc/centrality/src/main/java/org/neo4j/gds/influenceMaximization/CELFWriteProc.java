@@ -20,7 +20,7 @@
 package org.neo4j.gds.influenceMaximization;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.centrality.celf.CELFWriteResult;
+import org.neo4j.gds.procedures.algorithms.centrality.CELFWriteResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -46,7 +46,7 @@ public class CELFWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.centrality().celfWrite(graphName, configuration);
+        return facade.algorithms().centrality().celfWrite(graphName, configuration);
     }
 
     @Procedure(name = "gds.influenceMaximization.celf.write.estimate", mode = READ)
@@ -55,7 +55,7 @@ public class CELFWriteProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.centrality().celfWriteEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().centrality().celfWriteEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Procedure(

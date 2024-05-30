@@ -19,22 +19,23 @@
  */
 package org.neo4j.gds.applications.algorithms.centrality;
 
-import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
 import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.influenceMaximization.CELFNodeProperties;
+import org.neo4j.gds.influenceMaximization.CELFResult;
+import org.neo4j.gds.influenceMaximization.InfluenceMaximizationWriteConfig;
 
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BetweennessCentrality;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.CELF;
 
-class BetweennessCentralityWriteStep implements MutateOrWriteStep<CentralityAlgorithmResult, NodePropertiesWritten> {
+class CelfWriteStep implements MutateOrWriteStep<CELFResult, NodePropertiesWritten> {
     private final WriteToDatabase writeToDatabase;
-    private final BetweennessCentralityWriteConfig configuration;
+    private final InfluenceMaximizationWriteConfig configuration;
 
-    BetweennessCentralityWriteStep(WriteToDatabase writeToDatabase, BetweennessCentralityWriteConfig configuration) {
+    CelfWriteStep(WriteToDatabase writeToDatabase, InfluenceMaximizationWriteConfig configuration) {
         this.writeToDatabase = writeToDatabase;
         this.configuration = configuration;
     }
@@ -44,18 +45,20 @@ class BetweennessCentralityWriteStep implements MutateOrWriteStep<CentralityAlgo
         Graph graph,
         GraphStore graphStore,
         ResultStore resultStore,
-        CentralityAlgorithmResult result,
+        CELFResult result,
         JobId jobId
     ) {
+        var nodePropertyValues = new CELFNodeProperties(result.seedSetNodes(), graph.nodeCount());
+
         return writeToDatabase.perform(
             graph,
             graphStore,
             resultStore,
             configuration,
             configuration,
-            BetweennessCentrality,
+            CELF,
             jobId,
-            result.nodePropertyValues()
+            nodePropertyValues
         );
     }
 }

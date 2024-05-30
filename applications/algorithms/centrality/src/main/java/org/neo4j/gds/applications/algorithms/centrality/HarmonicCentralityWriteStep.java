@@ -54,8 +54,8 @@ class HarmonicCentralityWriteStep implements MutateOrWriteStep<HarmonicResult, N
             configuration,
             configuration,
             HarmonicCentrality,
-            result,
-            jobId
+            jobId,
+            result.nodePropertyValues()
         );
     }
 }

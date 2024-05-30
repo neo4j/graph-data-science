@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.applications.algorithms.centrality;
 
-import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.config.WriteConfig;
@@ -44,13 +44,13 @@ class WriteToDatabase {
         WriteConfig writeConfiguration,
         WritePropertyConfig writePropertyConfiguration,
         LabelForProgressTracking label,
-        CentralityAlgorithmResult result,
-        JobId jobId
+        JobId jobId,
+        NodePropertyValues nodePropertyValues
     ) {
         var writeNodePropertyResult = writeNodePropertyService.write(
             graph,
             graphStore,
-            result.nodePropertyValues(),
+            nodePropertyValues,
             writeConfiguration.writeConcurrency(),
             writePropertyConfiguration.writeProperty(),
             label.value,

@@ -31,11 +31,14 @@ import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
 import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
+import org.neo4j.gds.influenceMaximization.CELFResult;
+import org.neo4j.gds.influenceMaximization.InfluenceMaximizationWriteConfig;
 import org.neo4j.gds.logging.Log;
 
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BetweennessCentrality;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.CELF;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ClosenessCentrality;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.DegreeCentrality;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.HarmonicCentrality;
@@ -89,6 +92,24 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             BetweennessCentrality,
             () -> estimationFacade.betweennessCentrality(configuration),
             graph -> centralityAlgorithms.betweennessCentrality(graph, configuration),
+            Optional.of(writeStep),
+            resultBuilder
+        );
+    }
+
+    public <CONFIGURATION extends InfluenceMaximizationWriteConfig, RESULT> RESULT celf(
+        GraphName graphName,
+        CONFIGURATION configuration,
+        ResultBuilder<CONFIGURATION, CELFResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var writeStep = new CelfWriteStep(writeToDatabase, configuration);
+
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            CELF,
+            () -> estimationFacade.celf(configuration),
+            graph -> centralityAlgorithms.celf(graph, configuration),
             Optional.of(writeStep),
             resultBuilder
         );

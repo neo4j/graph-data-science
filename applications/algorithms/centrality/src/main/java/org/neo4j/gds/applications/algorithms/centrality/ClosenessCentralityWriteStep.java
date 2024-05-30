@@ -54,8 +54,8 @@ class ClosenessCentralityWriteStep implements MutateOrWriteStep<CentralityAlgori
             configuration,
             configuration,
             ClosenessCentrality,
-            result,
-            jobId
+            jobId,
+            result.nodePropertyValues()
         );
     }
 }

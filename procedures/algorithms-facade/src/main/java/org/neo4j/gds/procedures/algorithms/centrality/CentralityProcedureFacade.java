@@ -41,6 +41,7 @@ import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStreamConfig;
+import org.neo4j.gds.influenceMaximization.InfluenceMaximizationWriteConfig;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetaClosenessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetweennessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.CelfMutateStub;
@@ -168,6 +169,22 @@ public final class CentralityProcedureFacade {
             HarmonicCentralityStreamConfig::of,
             resultBuilder,
             streamMode()::harmonicCentrality
+        );
+    }
+
+    public Stream<AlphaHarmonicWriteResult> alphaHarmonicCentralityWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var shouldComputeCentralityDistribution = procedureReturnColumns.contains("centralityDistribution");
+        var resultBuilder = new AlphaHarmonicCentralityResultBuilderForWriteMode(shouldComputeCentralityDistribution);
+
+        return writeModeRunner.runWriteModeAlgorithm(
+            graphName,
+            configuration,
+            DeprecatedTieredHarmonicCentralityWriteConfig::of,
+            writeMode()::harmonicCentrality,
+            resultBuilder
         );
     }
 
@@ -356,6 +373,37 @@ public final class CentralityProcedureFacade {
         return Stream.of(result);
     }
 
+    public Stream<CELFWriteResult> celfWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new CelfResultBuilderForWriteMode();
+
+        return writeModeRunner.runWriteModeAlgorithm(
+            graphName,
+            configuration,
+            InfluenceMaximizationWriteConfig::of,
+            writeMode()::celf,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> celfWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationModeRunner.runEstimation(
+            algorithmConfiguration,
+            InfluenceMaximizationWriteConfig::of,
+            configuration -> estimationMode().celf(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
     public ClosenessCentralityMutateStub closenessCentralityMutateStub() {
         return closenessCentralityMutateStub;
     }
@@ -534,22 +582,6 @@ public final class CentralityProcedureFacade {
             graphName,
             configuration,
             HarmonicCentralityWriteConfig::of,
-            writeMode()::harmonicCentrality,
-            resultBuilder
-        );
-    }
-
-    public Stream<AlphaHarmonicWriteResult> alphaHarmonicCentralityWrite(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var shouldComputeCentralityDistribution = procedureReturnColumns.contains("centralityDistribution");
-        var resultBuilder = new AlphaHarmonicCentralityResultBuilderForWriteMode(shouldComputeCentralityDistribution);
-
-        return writeModeRunner.runWriteModeAlgorithm(
-            graphName,
-            configuration,
-            DeprecatedTieredHarmonicCentralityWriteConfig::of,
             writeMode()::harmonicCentrality,
             resultBuilder
         );
