@@ -1,6 +1,6 @@
 ext {
     gdsBaseVersion = '2.7.0-alpha04'
-    gdsAuraDSVersion = '67'
+    gdsAuraDSVersion = '68'
     // remove the -alphaXY suffix for AuraDS version
     gdsVersion = rootProject.hasProperty('aurads') ? gdsBaseVersion.split("-")[0] + "+${gdsAuraDSVersion}" : gdsBaseVersion
 }
