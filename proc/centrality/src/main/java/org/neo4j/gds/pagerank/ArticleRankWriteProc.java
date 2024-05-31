@@ -20,7 +20,7 @@
 package org.neo4j.gds.pagerank;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.centrality.pagerank.PageRankWriteResult;
+import org.neo4j.gds.procedures.algorithms.centrality.PageRankWriteResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -45,7 +45,7 @@ public class ArticleRankWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.centrality().articleRankWrite(graphName, configuration);
+        return facade.algorithms().centrality().articleRankWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.articleRank.write.estimate", mode = READ)
@@ -54,6 +54,6 @@ public class ArticleRankWriteProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.centrality().articleRankWriteEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().centrality().articleRankWriteEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

@@ -17,14 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.centrality.pagerank;
+package org.neo4j.gds.procedures.algorithms.centrality;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.procedures.algorithms.centrality.PageRankProcCompanion;
-import org.neo4j.gds.procedures.algorithms.centrality.PageRankStatsResult;
 
+import java.util.Collections;
 import java.util.Map;
 
 public final class PageRankWriteResult extends PageRankStatsResult {
@@ -32,10 +31,10 @@ public final class PageRankWriteResult extends PageRankStatsResult {
     public final long writeMillis;
     public final long nodePropertiesWritten;
 
-    PageRankWriteResult(
+    public PageRankWriteResult(
         long ranIterations,
         boolean didConverge,
-        @Nullable Map<String, Object> centralityDistribution,
+        Map<String, Object> centralityDistribution,
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
@@ -54,6 +53,20 @@ public final class PageRankWriteResult extends PageRankStatsResult {
         );
         this.writeMillis = writeMillis;
         this.nodePropertiesWritten = nodePropertiesWritten;
+    }
+
+    static PageRankWriteResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+        return new PageRankWriteResult(
+            0,
+            false,
+            Collections.emptyMap(),
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            0,
+            timings.mutateOrWriteMillis,
+            0,
+            configurationMap
+        );
     }
 
     public static class Builder extends PageRankProcCompanion.PageRankResultBuilder<PageRankWriteResult> {

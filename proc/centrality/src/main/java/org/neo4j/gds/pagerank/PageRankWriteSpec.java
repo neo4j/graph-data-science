@@ -25,7 +25,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
-import org.neo4j.gds.procedures.centrality.pagerank.PageRankWriteResult;
+import org.neo4j.gds.procedures.algorithms.centrality.PageRankWriteResult;
 
 import java.util.stream.Stream;
 

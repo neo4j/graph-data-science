@@ -34,9 +34,12 @@ import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationWriteConfig;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.pagerank.PageRankResult;
+import org.neo4j.gds.pagerank.PageRankWriteConfig;
 
 import java.util.Optional;
 
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ArticleRank;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BetweennessCentrality;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.CELF;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ClosenessCentrality;
@@ -76,6 +79,24 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             centralityAlgorithms,
             algorithmProcessingTemplate,
             writeToDatabase
+        );
+    }
+
+    public <RESULT> RESULT articleRank(
+        GraphName graphName,
+        PageRankWriteConfig configuration,
+        ResultBuilder<PageRankWriteConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var writeStep = new ArticleRankWriteStep(writeToDatabase, configuration);
+
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            ArticleRank,
+            estimationFacade::pageRank,
+            graph -> centralityAlgorithms.articleRank(graph, configuration),
+            Optional.of(writeStep),
+            resultBuilder
         );
     }
 

@@ -24,11 +24,6 @@ import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.pagerank.PageRankAlgorithmFactory;
 import org.neo4j.gds.pagerank.PageRankConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
-import org.neo4j.gds.influenceMaximization.CELFAlgorithmFactory;
-import org.neo4j.gds.influenceMaximization.CELFResult;
-import org.neo4j.gds.influenceMaximization.InfluenceMaximizationBaseConfig;
-
-import java.util.Optional;
 
 public class CentralityAlgorithmsFacade {
 
@@ -38,34 +33,12 @@ public class CentralityAlgorithmsFacade {
         this.algorithmRunner = algorithmRunner;
     }
 
-    AlgorithmComputationResult<CELFResult> celf(
-        String graphName,
-        InfluenceMaximizationBaseConfig config
-
-    ) {
-
-        return algorithmRunner.run(
-            graphName,
-            config,
-            Optional.empty(),
-            new CELFAlgorithmFactory<>()
-
-        );
-    }
-
 
     AlgorithmComputationResult<PageRankResult> pageRank(
         String graphName,
         PageRankConfig config
     ) {
         return pageRankVariant(graphName, config, PageRankAlgorithmFactory.Mode.PAGE_RANK);
-    }
-
-    AlgorithmComputationResult<PageRankResult> articleRank(
-        String graphName,
-        PageRankConfig config
-    ) {
-        return pageRankVariant(graphName, config, PageRankAlgorithmFactory.Mode.ARTICLE_RANK);
     }
 
     AlgorithmComputationResult<PageRankResult> eigenvector(

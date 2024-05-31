@@ -66,22 +66,6 @@ public class CentralityAlgorithmsWriteBusinessFacade {
         return pageRankVariant(intermediateResult, configuration, shouldComputeCentralityDistribution);
     }
 
-    public NodePropertyWriteResult<PageRankSpecificFields> articleRank(
-        String graphName,
-        PageRankWriteConfig configuration,
-        boolean shouldComputeCentralityDistribution
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
-            () -> centralityAlgorithmsFacade.articleRank(graphName, configuration)
-        );
-
-        return pageRankVariant(
-            intermediateResult, configuration,
-            shouldComputeCentralityDistribution
-        );
-    }
-
     public NodePropertyWriteResult<PageRankSpecificFields> eigenvector(
         String graphName,
         PageRankWriteConfig configuration,
