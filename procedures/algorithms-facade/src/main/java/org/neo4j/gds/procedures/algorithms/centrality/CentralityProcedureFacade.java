@@ -42,6 +42,7 @@ import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStreamConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationWriteConfig;
+import org.neo4j.gds.pagerank.PageRankStatsConfig;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.ArticleRankMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetaClosenessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetweennessCentralityMutateStub;
@@ -200,6 +201,32 @@ public final class CentralityProcedureFacade {
 
     public ArticleRankMutateStub articleRankMutateStub() {
         return articleRankMutateStub;
+    }
+
+    public Stream<PageRankStatsResult> articleRankStats(String graphName, Map<String, Object> configuration) {
+        var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("centralityDistribution");
+        var resultBuilder = new PageRankResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
+
+        return statsModeRunner.runStatsModeAlgorithm(
+            graphName,
+            configuration,
+            PageRankStatsConfig::of,
+            resultBuilder,
+            statsMode()::articleRank
+        );
+    }
+
+    public Stream<MemoryEstimateResult> articleRankStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationModeRunner.runEstimation(
+            algorithmConfiguration,
+            PageRankStatsConfig::of,
+            configuration -> estimationMode().pageRank(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
     }
 
     public BetaClosenessCentralityMutateStub betaClosenessCentralityMutateStub() {

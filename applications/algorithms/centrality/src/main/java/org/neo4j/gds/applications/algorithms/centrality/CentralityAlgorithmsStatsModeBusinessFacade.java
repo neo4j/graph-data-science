@@ -29,9 +29,12 @@ import org.neo4j.gds.degree.DegreeCentralityStatsConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityStatsConfig;
 import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
+import org.neo4j.gds.pagerank.PageRankResult;
+import org.neo4j.gds.pagerank.PageRankStatsConfig;
 
 import java.util.Optional;
 
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ArticleRank;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BetweennessCentrality;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.CELF;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ClosenessCentrality;
@@ -51,6 +54,22 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
         this.estimationFacade = estimationFacade;
         this.centralityAlgorithms = centralityAlgorithms;
         this.algorithmProcessingTemplate = algorithmProcessingTemplate;
+    }
+
+    public <RESULT> RESULT articleRank(
+        GraphName graphName,
+        PageRankStatsConfig configuration,
+        ResultBuilder<PageRankStatsConfig, PageRankResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            ArticleRank,
+            estimationFacade::pageRank,
+            graph -> centralityAlgorithms.articleRank(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
     }
 
     public <RESULT> RESULT betweennessCentrality(

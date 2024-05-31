@@ -55,22 +55,6 @@ public class CentralityAlgorithmsStatsBusinessFacade {
         return pageRankVariantStats(intermediateResult, configuration, shouldComputeCentralityDistribution);
     }
 
-    public StatsResult<PageRankSpecificFields> articleRank(
-        String graphName,
-        PageRankStatsConfig configuration,
-        boolean shouldComputeCentralityDistribution
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> centralityAlgorithmsFacade.articleRank(graphName, configuration)
-        );
-
-        return pageRankVariantStats(
-            intermediateResult, configuration,
-            shouldComputeCentralityDistribution
-        );
-    }
-
     public StatsResult<PageRankSpecificFields> eigenvector(
         String graphName,
         PageRankStatsConfig configuration,

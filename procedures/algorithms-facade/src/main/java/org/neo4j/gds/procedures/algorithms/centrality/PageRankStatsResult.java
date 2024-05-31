@@ -20,9 +20,11 @@
 package org.neo4j.gds.procedures.algorithms.centrality;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 
+import java.util.Collections;
 import java.util.Map;
 
 public class PageRankStatsResult extends StandardStatsResult {
@@ -43,6 +45,21 @@ public class PageRankStatsResult extends StandardStatsResult {
         this.ranIterations = ranIterations;
         this.didConverge = didConverge;
         this.centralityDistribution = centralityDistribution;
+    }
+
+    static PageRankStatsResult emptyFrom(
+        AlgorithmProcessingTimings timings,
+        Map<String, Object> configurationMap
+    ) {
+        return new PageRankStatsResult(
+            0,
+            false,
+            Collections.emptyMap(),
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            0,
+            configurationMap
+        );
     }
 
     public static class Builder extends PageRankProcCompanion.PageRankResultBuilder<PageRankStatsResult> {

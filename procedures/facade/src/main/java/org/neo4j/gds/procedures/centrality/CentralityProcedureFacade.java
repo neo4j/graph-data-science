@@ -164,27 +164,6 @@ public class CentralityProcedureFacade {
         return Stream.of(estimateBusinessFacade.pageRank(graphNameOrConfiguration, config));
     }
 
-    public Stream<PageRankStatsResult> articleRankStats(String graphName, Map<String, Object> configuration) {
-        var config = configurationCreator.createConfiguration(configuration, PageRankStatsConfig::of);
-
-        var computationResult = statsBusinessFacade.articleRank(
-            graphName,
-            config,
-            procedureReturnColumns.contains("centralityDistribution")
-        );
-
-        return Stream.of(PageRankComputationalResultTransformer.toStatsResult(computationResult, config));
-    }
-
-    public Stream<MemoryEstimateResult> articleRankStatsEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, PageRankStatsConfig::of);
-
-        return Stream.of(estimateBusinessFacade.articleRank(graphNameOrConfiguration, config));
-    }
-
     public Stream<CentralityStreamResult> articleRankStream(
         String graphName,
         Map<String, Object> configuration

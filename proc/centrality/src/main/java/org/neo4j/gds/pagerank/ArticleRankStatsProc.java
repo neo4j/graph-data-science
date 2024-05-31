@@ -44,7 +44,7 @@ public class ArticleRankStatsProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.centrality().articleRankStats(graphName, configuration);
+        return facade.algorithms().centrality().articleRankStats(graphName, configuration);
     }
 
     @Procedure(value = "gds.articleRank.stats.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class ArticleRankStatsProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.centrality().articleRankStatsEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().centrality().articleRankStatsEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

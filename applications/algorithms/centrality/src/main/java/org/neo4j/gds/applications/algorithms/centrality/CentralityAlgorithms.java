@@ -58,7 +58,6 @@ import org.neo4j.gds.pagerank.PageRankAlgorithm;
 import org.neo4j.gds.pagerank.PageRankAlgorithmFactory;
 import org.neo4j.gds.pagerank.PageRankComputation;
 import org.neo4j.gds.pagerank.PageRankConfig;
-import org.neo4j.gds.pagerank.PageRankMutateConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -79,7 +78,7 @@ public class CentralityAlgorithms {
         this.terminationFlag = terminationFlag;
     }
 
-    PageRankResult articleRank(Graph graph, PageRankMutateConfig configuration) {
+    PageRankResult articleRank(Graph graph, PageRankConfig configuration) {
         var task = Pregel.progressTask(graph, configuration, LabelForProgressTracking.ArticleRank.value);
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
@@ -232,7 +231,7 @@ public class CentralityAlgorithms {
     }
 
     private PregelComputation<PageRankConfig> pickComputation(
-        Graph graph, PageRankMutateConfig configuration,
+        Graph graph, PageRankConfig configuration,
         PageRankAlgorithmFactory.Mode mode
     ) {
         var degreeFunction = degreeFunction(
