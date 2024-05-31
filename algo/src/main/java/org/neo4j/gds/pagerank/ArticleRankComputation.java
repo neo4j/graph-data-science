@@ -45,7 +45,7 @@ public final class ArticleRankComputation implements PregelComputation<PageRankC
     private final double alpha;
     private final double averageDegree;
 
-    ArticleRankComputation(
+    public ArticleRankComputation(
         PageRankConfig config,
         LongSet sourceNodes,
         LongToDoubleFunction degreeFunction,

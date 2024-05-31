@@ -42,6 +42,7 @@ import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStreamConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationWriteConfig;
+import org.neo4j.gds.procedures.algorithms.centrality.stubs.ArticleRankMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetaClosenessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetweennessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.CelfMutateStub;
@@ -60,6 +61,7 @@ import java.util.stream.Stream;
 public final class CentralityProcedureFacade {
     private final ProcedureReturnColumns procedureReturnColumns;
 
+    private final ArticleRankMutateStub articleRankMutateStub;
     private final BetaClosenessCentralityMutateStub betaClosenessCentralityMutateStub;
     private final BetweennessCentralityMutateStub betweennessCentralityMutateStub;
     private final CelfMutateStub celfMutateStub;
@@ -76,6 +78,7 @@ public final class CentralityProcedureFacade {
 
     private CentralityProcedureFacade(
         ProcedureReturnColumns procedureReturnColumns,
+        ArticleRankMutateStub articleRankMutateStub,
         BetaClosenessCentralityMutateStub betaClosenessCentralityMutateStub,
         BetweennessCentralityMutateStub betweennessCentralityMutateStub,
         CelfMutateStub celfMutateStub,
@@ -89,6 +92,7 @@ public final class CentralityProcedureFacade {
         WriteModeAlgorithmRunner writeModeRunner
     ) {
         this.procedureReturnColumns = procedureReturnColumns;
+        this.articleRankMutateStub = articleRankMutateStub;
         this.betaClosenessCentralityMutateStub = betaClosenessCentralityMutateStub;
         this.betweennessCentralityMutateStub = betweennessCentralityMutateStub;
         this.celfMutateStub = celfMutateStub;
@@ -111,6 +115,11 @@ public final class CentralityProcedureFacade {
         StreamModeAlgorithmRunner streamModeRunner,
         WriteModeAlgorithmRunner writeModeRunner
     ) {
+        var articleRankMutateStub = new ArticleRankMutateStub(
+            genericStub,
+            applicationsFacade,
+            procedureReturnColumns
+        );
         var betaClosenessCentralityMutateStub = new BetaClosenessCentralityMutateStub(
             genericStub,
             applicationsFacade,
@@ -143,6 +152,7 @@ public final class CentralityProcedureFacade {
 
         return new CentralityProcedureFacade(
             procedureReturnColumns,
+            articleRankMutateStub,
             betaClosenessCentralityMutateStub,
             betweennessCentralityMutateStub,
             celfMutateStub,
@@ -186,6 +196,10 @@ public final class CentralityProcedureFacade {
             writeMode()::harmonicCentrality,
             resultBuilder
         );
+    }
+
+    public ArticleRankMutateStub articleRankMutateStub() {
+        return articleRankMutateStub;
     }
 
     public BetaClosenessCentralityMutateStub betaClosenessCentralityMutateStub() {

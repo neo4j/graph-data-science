@@ -22,6 +22,8 @@ package org.neo4j.gds.procedures.centrality.pagerank;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.procedures.algorithms.centrality.PageRankProcCompanion;
+import org.neo4j.gds.procedures.algorithms.centrality.PageRankStatsResult;
 
 import java.util.Map;
 

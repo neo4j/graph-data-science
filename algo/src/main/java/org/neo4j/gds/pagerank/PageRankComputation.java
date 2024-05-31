@@ -44,7 +44,7 @@ public final class PageRankComputation implements PregelComputation<PageRankConf
     private final double tolerance;
     private final double alpha;
 
-    PageRankComputation(
+    public PageRankComputation(
         PageRankConfig config,
         LongSet sourceNodes,
         LongToDoubleFunction degreeFunction

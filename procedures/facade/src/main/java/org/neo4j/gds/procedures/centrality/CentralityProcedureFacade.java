@@ -33,8 +33,8 @@ import org.neo4j.gds.pagerank.PageRankWriteConfig;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityStreamResult;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.centrality.pagerank.PageRankComputationalResultTransformer;
-import org.neo4j.gds.procedures.centrality.pagerank.PageRankMutateResult;
-import org.neo4j.gds.procedures.centrality.pagerank.PageRankStatsResult;
+import org.neo4j.gds.procedures.algorithms.centrality.PageRankMutateResult;
+import org.neo4j.gds.procedures.algorithms.centrality.PageRankStatsResult;
 import org.neo4j.gds.procedures.centrality.pagerank.PageRankWriteResult;
 
 import java.util.Map;
@@ -181,30 +181,6 @@ public class CentralityProcedureFacade {
         Map<String, Object> configuration
     ) {
         var config = configurationCreator.createConfiguration(configuration, PageRankStatsConfig::of);
-
-        return Stream.of(estimateBusinessFacade.articleRank(graphNameOrConfiguration, config));
-    }
-
-    public Stream<PageRankMutateResult> articleRankMutate(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, PageRankMutateConfig::of);
-
-        var computationResult = mutateBusinessFacade.articleRank(
-            graphName,
-            config,
-            procedureReturnColumns.contains("centralityDistribution")
-        );
-
-        return Stream.of(PageRankComputationalResultTransformer.toMutateResult(computationResult, config));
-    }
-
-    public Stream<MemoryEstimateResult> articleRankMutateEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, PageRankMutateConfig::of);
 
         return Stream.of(estimateBusinessFacade.articleRank(graphNameOrConfiguration, config));
     }

@@ -23,6 +23,7 @@ dependencies {
     implementation project(':memory-usage')
     implementation project(':neo4j-api')
     implementation project(':path-finding-algorithms')
+    implementation project(':pregel')
     implementation project(':progress-tracking')
     implementation project(':similarity-algorithms')
     implementation project(':string-formatting')

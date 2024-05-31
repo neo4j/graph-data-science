@@ -59,6 +59,7 @@ final class MutateModeAlgorithmLibrary {
     private static CanonicalProcedureName algorithmToName(Algorithm algorithm) {
         return switch (algorithm) {
             case AllShortestPaths -> null;
+            case ArticleRank -> CanonicalProcedureName.parse("gds.articleRank");
             case AStar -> CanonicalProcedureName.parse("gds.shortestpath.astar");
             case BellmanFord -> CanonicalProcedureName.parse("gds.bellmanford");
             case BetaClosenessCentrality -> CanonicalProcedureName.parse("gds.beta.closeness");
