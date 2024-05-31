@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.compat;
 
-import org.neo4j.graphdb.config.Configuration;
 import org.neo4j.graphdb.config.Setting;
 
 import java.lang.invoke.MethodHandles;
@@ -30,7 +29,21 @@ public final class SettingsUtil {
 
     private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
 
-    public static Optional<Setting<?>> tryFind(
+    public static <T, U> T tryConfigure(
+        T builder,
+        SetConfig<T, U> setConfig,
+        String className,
+        String settingName,
+        U settingValue
+    ) {
+        return tryFind(className, settingName).map(setting -> {
+            //noinspection unchecked
+            var typedSetting = (Setting<U>) setting;
+            return setConfig.set(builder, typedSetting, settingValue);
+        }).orElse(builder);
+    }
+
+    private static Optional<Setting<?>> tryFind(
         String className,
         String settingName
     ) {
@@ -51,41 +64,6 @@ public final class SettingsUtil {
                 e.getMessage()
             ), e);
         }
-    }
-
-    public static <T> Optional<T> tryGet(
-        Configuration config,
-        Class<T> settingType,
-        Setting<?> setting
-    ) {
-        var settingValue = config.get(setting);
-        if (settingValue == null) {
-            return Optional.empty();
-        }
-        return Optional.of(settingType.cast(settingValue));
-    }
-
-    public static <T> Optional<T> tryGet(
-        Configuration config,
-        Class<T> settingType,
-        String className,
-        String settingName
-    ) {
-        return tryFind(className, settingName).flatMap(setting -> tryGet(config, settingType, setting));
-    }
-
-    public static <T, U> T tryConfigure(
-        T builder,
-        SetConfig<T, U> setConfig,
-        String className,
-        String settingName,
-        U settingValue
-    ) {
-        return tryFind(className, settingName).map(setting -> {
-            //noinspection unchecked
-            var typedSetting = (Setting<U>) setting;
-            return setConfig.set(builder, typedSetting, settingValue);
-        }).orElse(builder);
     }
 
     public interface SetConfig<T, S> {
