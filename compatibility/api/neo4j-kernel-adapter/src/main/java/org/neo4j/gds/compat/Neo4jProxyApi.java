@@ -24,7 +24,6 @@ import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.input.Collector;
-import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
@@ -32,22 +31,7 @@ import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.scheduler.JobScheduler;
 
-import java.util.function.Function;
-
 public interface Neo4jProxyApi {
-
-    @CompatSince(Neo4jVersion.V_5_14)
-    String neo4jArrowServerAddressHeader();
-
-    @CompatSince(Neo4jVersion.V_5_14)
-    <T> T nodeLabelTokenSet(
-        NodeCursor nodeCursor,
-        Function<int[], T> intsConstructor,
-        Function<long[], T> longsConstructor
-    );
-
-    @CompatSince(Neo4jVersion.V_5_15)
-    String metricsManagerClass();
 
     @CompatSince(Neo4jVersion.V_5_17)
     long estimateNodeCount(Read read, int label);

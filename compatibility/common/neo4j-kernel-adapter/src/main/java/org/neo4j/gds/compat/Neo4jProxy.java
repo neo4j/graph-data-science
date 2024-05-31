@@ -107,7 +107,6 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
@@ -140,22 +139,6 @@ public final class Neo4jProxy {
                 return false;
             }
         };
-    }
-
-    public static String neo4jArrowServerAddressHeader() {
-        return IMPL.neo4jArrowServerAddressHeader();
-    }
-
-    public static <T> T nodeLabelTokenSet(
-        NodeCursor nodeCursor,
-        Function<int[], T> intsConstructor,
-        Function<long[], T> longsConstructor
-    ) {
-        return IMPL.nodeLabelTokenSet(nodeCursor, intsConstructor, longsConstructor);
-    }
-
-    public static String metricsManagerClass() {
-        return IMPL.metricsManagerClass();
     }
 
     public static CompatExecutionContext executionContext(KernelTransaction ktx) {

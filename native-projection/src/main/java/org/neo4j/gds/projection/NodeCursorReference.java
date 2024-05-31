@@ -39,7 +39,8 @@ public final class NodeCursorReference implements NodeReference {
 
     @Override
     public NodeLabelTokenSet labels() {
-        return Neo4jProxy.nodeLabelTokenSet(nodeCursor, NodeLabelTokenSet::from, NodeLabelTokenSet::from);
+        int[] tokens = nodeCursor.labels().all();
+        return NodeLabelTokenSet.from(tokens);
     }
 
     @Override
