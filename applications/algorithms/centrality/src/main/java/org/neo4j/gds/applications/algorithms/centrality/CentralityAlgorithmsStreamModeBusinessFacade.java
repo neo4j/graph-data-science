@@ -30,9 +30,12 @@ import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStreamConfig;
+import org.neo4j.gds.pagerank.PageRankResult;
+import org.neo4j.gds.pagerank.PageRankStreamConfig;
 
 import java.util.Optional;
 
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ArticleRank;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BetweennessCentrality;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.CELF;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ClosenessCentrality;
@@ -54,6 +57,22 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
         this.algorithmProcessingTemplate = algorithmProcessingTemplate;
     }
 
+    public <RESULT> RESULT articleRank(
+        GraphName graphName,
+        PageRankStreamConfig configuration,
+        ResultBuilder<PageRankStreamConfig, PageRankResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            ArticleRank,
+            estimationFacade::pageRank,
+            graph -> centralityAlgorithms.articleRank(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
+
     public <RESULT> RESULT betweennessCentrality(
         GraphName graphName,
         BetweennessCentralityStreamConfig configuration,
@@ -65,6 +84,22 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
             BetweennessCentrality,
             () -> estimationFacade.betweennessCentrality(configuration),
             graph -> centralityAlgorithms.betweennessCentrality(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT celf(
+        GraphName graphName,
+        InfluenceMaximizationStreamConfig configuration,
+        ResultBuilder<InfluenceMaximizationStreamConfig, CELFResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            CELF,
+            () -> estimationFacade.celf(configuration),
+            graph -> centralityAlgorithms.celf(graph, configuration),
             Optional.empty(),
             resultBuilder
         );
@@ -113,22 +148,6 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
             HarmonicCentrality,
             estimationFacade::harmonicCentrality,
             graph -> centralityAlgorithms.harmonicCentrality(graph, configuration),
-            Optional.empty(),
-            resultBuilder
-        );
-    }
-
-    public <RESULT> RESULT celf(
-        GraphName graphName,
-        InfluenceMaximizationStreamConfig configuration,
-        ResultBuilder<InfluenceMaximizationStreamConfig, CELFResult, RESULT, Void> resultBuilder
-    ) {
-        return algorithmProcessingTemplate.processAlgorithm(
-            graphName,
-            configuration,
-            CELF,
-            () -> estimationFacade.celf(configuration),
-            graph -> centralityAlgorithms.celf(graph, configuration),
             Optional.empty(),
             resultBuilder
         );

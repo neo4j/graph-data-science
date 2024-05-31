@@ -31,8 +31,8 @@ import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.influenceMaximization.CELFMemoryEstimateDefinition;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationBaseConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.pagerank.PageRankConfig;
 import org.neo4j.gds.pagerank.PageRankMemoryEstimateDefinition;
-import org.neo4j.gds.pagerank.PageRankStatsConfig;
 
 public class CentralityAlgorithmsEstimationModeBusinessFacade {
     private final AlgorithmEstimationTemplate algorithmEstimationTemplate;
@@ -101,7 +101,7 @@ public class CentralityAlgorithmsEstimationModeBusinessFacade {
         return new PageRankMemoryEstimateDefinition().memoryEstimation();
     }
 
-    public MemoryEstimateResult pageRank(PageRankStatsConfig configuration, Object graphNameOrConfiguration) {
+    public MemoryEstimateResult pageRank(PageRankConfig configuration, Object graphNameOrConfiguration) {
         var memoryEstimation = pageRank();
 
         return algorithmEstimationTemplate.estimate(

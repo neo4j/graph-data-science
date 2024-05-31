@@ -43,6 +43,7 @@ import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStreamConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationWriteConfig;
 import org.neo4j.gds.pagerank.PageRankStatsConfig;
+import org.neo4j.gds.pagerank.PageRankStreamConfig;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.ArticleRankMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetaClosenessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetweennessCentralityMutateStub;
@@ -223,6 +224,30 @@ public final class CentralityProcedureFacade {
         var result = estimationModeRunner.runEstimation(
             algorithmConfiguration,
             PageRankStatsConfig::of,
+            configuration -> estimationMode().pageRank(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<CentralityStreamResult> articleRankStream(String graphName, Map<String, Object> configuration) {
+        var resultBuilder = new PageRankResultBuilderForStreamMode();
+
+        return streamModeRunner.runStreamModeAlgorithm(
+            graphName,
+            configuration,
+            PageRankStreamConfig::of,
+            resultBuilder,
+            streamMode()::articleRank
+        );
+    }
+
+    public Stream<MemoryEstimateResult> articleRankStreamEstimate(
+        Object graphNameOrConfiguration, Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationModeRunner.runEstimation(
+            algorithmConfiguration,
+            PageRankStreamConfig::of,
             configuration -> estimationMode().pageRank(configuration, graphNameOrConfiguration)
         );
 

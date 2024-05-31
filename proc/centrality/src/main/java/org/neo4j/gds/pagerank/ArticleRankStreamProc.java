@@ -44,7 +44,7 @@ public class ArticleRankStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.centrality().articleRankStream(graphName, configuration);
+        return facade.algorithms().centrality().articleRankStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.articleRank.stream.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class ArticleRankStreamProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.centrality().articleRankStreamEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().centrality().articleRankStreamEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }
