@@ -22,11 +22,10 @@ package org.neo4j.gds.compat;
 import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 
-import java.util.Set;
 import java.util.stream.Stream;
 
 public interface GlobalProcedureRegistry {
-    Set<ProcedureSignature> getAllProcedures();
+    Stream<ProcedureSignature> getAllProcedures();
     Stream<UserFunctionSignature> getAllNonAggregatingFunctions();
     Stream<UserFunctionSignature> getAllAggregatingFunctions();
 }
