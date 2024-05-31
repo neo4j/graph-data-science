@@ -58,12 +58,27 @@ public final class Pregel<CONFIG extends PregelConfig> {
 
     private final ExecutorService executor;
 
+    /**
+     * @deprecated Use the variant that does proper injection of termination flag instead
+     */
+    @Deprecated
     public static <CONFIG extends PregelConfig> Pregel<CONFIG> create(
         Graph graph,
         CONFIG config,
         BasePregelComputation<CONFIG> computation,
         ExecutorService executor,
         ProgressTracker progressTracker
+    ) {
+        return create(graph, config, computation, executor, progressTracker, TerminationFlag.RUNNING_TRUE);
+    }
+
+    public static <CONFIG extends PregelConfig> Pregel<CONFIG> create(
+        Graph graph,
+        CONFIG config,
+        BasePregelComputation<CONFIG> computation,
+        ExecutorService executor,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         // This prevents users from disabling concurrency
         // validation in custom PregelConfig implementations.
@@ -86,7 +101,8 @@ public final class Pregel<CONFIG extends PregelConfig> {
             computation,
             NodeValue.of(computation.schema(config), graph.nodeCount(), config.concurrency()),
             executor,
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
     }
 
@@ -139,7 +155,8 @@ public final class Pregel<CONFIG extends PregelConfig> {
         final BasePregelComputation<CONFIG> computation,
         final NodeValue initialNodeValue,
         final ExecutorService executor,
-        final ProgressTracker progressTracker
+        final ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         this.graph = graph;
         this.config = config;
@@ -147,7 +164,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
         this.nodeValues = initialNodeValue;
         this.executor = executor;
         this.progressTracker = progressTracker;
-        this.terminationFlag = TerminationFlag.RUNNING_TRUE;
+        this.terminationFlag = terminationFlag;
 
         var reducer = computation.reducer();
 

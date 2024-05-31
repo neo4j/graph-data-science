@@ -44,6 +44,10 @@ public class PageRankAlgorithm extends Algorithm<PageRankResult> {
     private final PageRankConfig config;
     private final ExecutorService executorService;
 
+    /**
+     * @deprecated Use the variant  that does proper injection of termination flag instead
+     */
+    @Deprecated
     public PageRankAlgorithm(
         Graph graph,
         PageRankConfig config,
@@ -52,12 +56,33 @@ public class PageRankAlgorithm extends Algorithm<PageRankResult> {
         ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
+        this(
+            graph,
+            config,
+            pregelComputation,
+            mode,
+            executorService,
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
+        );
+    }
+
+    public PageRankAlgorithm(
+        Graph graph,
+        PageRankConfig config,
+        PregelComputation<PageRankConfig> pregelComputation,
+        PageRankAlgorithmFactory.Mode mode,
+        ExecutorService executorService,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
+    ) {
         super(progressTracker);
-        this.pregelJob = Pregel.create(graph, config, pregelComputation, executorService, progressTracker);
+        this.pregelJob = Pregel.create(graph, config, pregelComputation, executorService, progressTracker, terminationFlag);
         this.mode = mode;
         this.executorService = executorService;
         this.config = config;
         this.graph = graph;
+        this.terminationFlag = terminationFlag;
     }
 
     @Override
