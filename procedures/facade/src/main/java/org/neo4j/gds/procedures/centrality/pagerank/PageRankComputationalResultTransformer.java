@@ -26,6 +26,8 @@ import org.neo4j.gds.algorithms.centrality.specificfields.PageRankSpecificFields
 import org.neo4j.gds.pagerank.PageRankMutateConfig;
 import org.neo4j.gds.pagerank.PageRankStatsConfig;
 import org.neo4j.gds.pagerank.PageRankWriteConfig;
+import org.neo4j.gds.procedures.algorithms.centrality.PageRankMutateResult;
+import org.neo4j.gds.procedures.algorithms.centrality.PageRankStatsResult;
 
 public final class PageRankComputationalResultTransformer {
 

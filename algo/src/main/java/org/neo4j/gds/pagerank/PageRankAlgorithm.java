@@ -44,7 +44,7 @@ public class PageRankAlgorithm extends Algorithm<PageRankResult> {
     private final PageRankConfig config;
     private final ExecutorService executorService;
 
-    PageRankAlgorithm(
+    public PageRankAlgorithm(
         Graph graph,
         PageRankConfig config,
         PregelComputation<PageRankConfig> pregelComputation,

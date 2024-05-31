@@ -28,6 +28,7 @@ package org.neo4j.gds.applications.algorithms.metadata;
  */
 public enum Algorithm {
     AllShortestPaths,
+    ArticleRank,
     AStar,
     BellmanFord,
     BetaClosenessCentrality,

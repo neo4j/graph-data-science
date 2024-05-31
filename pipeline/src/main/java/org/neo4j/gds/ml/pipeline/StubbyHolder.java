@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.pipeline;
 
 import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
+import org.neo4j.gds.ml.pipeline.stubs.ArticleRankStub;
 import org.neo4j.gds.ml.pipeline.stubs.BellmanFordStub;
 import org.neo4j.gds.ml.pipeline.stubs.BetaClosenessCentralityStub;
 import org.neo4j.gds.ml.pipeline.stubs.BetweennessCentralityStub;
@@ -53,6 +54,7 @@ class StubbyHolder {
     Stub get(Algorithm algorithm) {
         return switch (algorithm) {
             case AllShortestPaths -> null;
+            case ArticleRank -> new ArticleRankStub();
             case AStar -> new SinglePairShortestPathAStarStub();
             case BellmanFord -> new BellmanFordStub();
             case BetaClosenessCentrality -> new BetaClosenessCentralityStub();

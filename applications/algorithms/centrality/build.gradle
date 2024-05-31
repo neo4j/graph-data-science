@@ -12,6 +12,7 @@ dependencies {
     implementation project(":core")
     implementation project(":logging")
     implementation project(":memory-usage")
+    implementation project(":pregel")
     implementation project(":progress-tracking")
     implementation project(":termination")
 }

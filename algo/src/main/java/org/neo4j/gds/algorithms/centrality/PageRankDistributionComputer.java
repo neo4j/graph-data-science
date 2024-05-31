@@ -30,12 +30,12 @@ import java.util.Map;
 
 import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
 
-final class PageRankDistributionComputer {
+public final class PageRankDistributionComputer {
     private static final String HISTOGRAM_ERROR_KEY = "Error";
 
     private PageRankDistributionComputer() {}
 
-    static PageRankDistribution computeDistribution(
+    public static PageRankDistribution computeDistribution(
         PageRankResult result,
         PageRankConfig configuration,
         boolean shouldComputeCentralityDistribution

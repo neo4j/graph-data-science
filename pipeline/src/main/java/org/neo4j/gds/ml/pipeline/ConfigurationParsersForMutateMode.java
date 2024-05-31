@@ -27,6 +27,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityMutateConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationMutateConfig;
+import org.neo4j.gds.pagerank.PageRankMutateConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordMutateConfig;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaMutateConfig;
@@ -54,6 +55,7 @@ public class ConfigurationParsersForMutateMode {
     public Function<CypherMapWrapper, AlgoBaseConfig> lookup(Algorithm algorithm) {
         return switch (algorithm) {
             case AllShortestPaths -> null;
+            case ArticleRank -> PageRankMutateConfig::of;
             case AStar -> ShortestPathAStarMutateConfig::of;
             case BellmanFord -> BellmanFordMutateConfig::of;
             case BetaClosenessCentrality -> ClosenessCentralityMutateConfig::of;

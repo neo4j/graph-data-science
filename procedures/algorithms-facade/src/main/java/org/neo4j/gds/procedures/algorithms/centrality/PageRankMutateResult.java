@@ -17,51 +17,73 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.centrality.pagerank;
+package org.neo4j.gds.procedures.algorithms.centrality;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 
+import java.util.Collections;
 import java.util.Map;
 
-public class PageRankStatsResult extends StandardStatsResult {
+public final class PageRankMutateResult extends PageRankStatsResult {
+    public final long mutateMillis;
+    public final long nodePropertiesWritten;
 
-    public final long ranIterations;
-    public final boolean didConverge;
-    public final Map<String, Object> centralityDistribution;
-
-    public PageRankStatsResult(
+    public PageRankMutateResult(
         long ranIterations,
         boolean didConverge,
-        @Nullable Map<String, Object> centralityDistribution,
+        Map<String, Object> centralityDistribution,
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
+        long mutateMillis,
+        long nodePropertiesWritten,
         Map<String, Object> configuration
     ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
-        this.ranIterations = ranIterations;
-        this.didConverge = didConverge;
-        this.centralityDistribution = centralityDistribution;
+        super(
+            ranIterations,
+            didConverge,
+            centralityDistribution,
+            preProcessingMillis,
+            computeMillis,
+            postProcessingMillis,
+            configuration
+        );
+        this.mutateMillis = mutateMillis;
+        this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    public static class Builder extends PageRankProcCompanion.PageRankResultBuilder<PageRankStatsResult> {
+    public static PageRankMutateResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+        return new PageRankMutateResult(
+            0,
+            false,
+            Collections.emptyMap(),
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            0,
+            timings.mutateOrWriteMillis,
+            0,
+            configurationMap
+        );
+    }
 
+    public static class Builder extends PageRankProcCompanion.PageRankResultBuilder<PageRankMutateResult> {
         public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
             super(returnColumns, concurrency);
         }
 
         @Override
-        public PageRankStatsResult buildResult() {
-            return new PageRankStatsResult(
+        public PageRankMutateResult buildResult() {
+            return new PageRankMutateResult(
                 ranIterations,
                 didConverge,
                 centralityHistogram,
                 preProcessingMillis,
                 computeMillis,
                 postProcessingMillis,
+                mutateMillis,
+                nodePropertiesWritten,
                 config.toMap()
             );
         }

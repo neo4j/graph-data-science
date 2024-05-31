@@ -19,10 +19,14 @@
  */
 package org.neo4j.gds.applications.algorithms.centrality;
 
+import com.carrotsearch.hppc.LongScatterSet;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
+import org.neo4j.gds.beta.pregel.Pregel;
+import org.neo4j.gds.beta.pregel.PregelComputation;
 import org.neo4j.gds.betweenness.BetweennessCentrality;
 import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
@@ -34,7 +38,10 @@ import org.neo4j.gds.closeness.ClosenessCentralityBaseConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.closeness.DefaultCentralityComputer;
 import org.neo4j.gds.closeness.WassermanFaustCentralityComputer;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.degree.DegreeCentrality;
 import org.neo4j.gds.degree.DegreeCentralityConfig;
@@ -45,7 +52,21 @@ import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.influenceMaximization.CELF;
 import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationBaseConfig;
+import org.neo4j.gds.pagerank.ArticleRankComputation;
+import org.neo4j.gds.pagerank.EigenvectorComputation;
+import org.neo4j.gds.pagerank.PageRankAlgorithm;
+import org.neo4j.gds.pagerank.PageRankAlgorithmFactory;
+import org.neo4j.gds.pagerank.PageRankComputation;
+import org.neo4j.gds.pagerank.PageRankConfig;
+import org.neo4j.gds.pagerank.PageRankMutateConfig;
+import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.termination.TerminationFlag;
+
+import java.util.concurrent.atomic.LongAdder;
+import java.util.function.LongToDoubleFunction;
+
+import static org.neo4j.gds.pagerank.PageRankAlgorithmFactory.Mode.ARTICLE_RANK;
+import static org.neo4j.gds.pagerank.PageRankAlgorithmFactory.Mode.EIGENVECTOR;
 
 public class CentralityAlgorithms {
     private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
@@ -56,6 +77,26 @@ public class CentralityAlgorithms {
     public CentralityAlgorithms(ProgressTrackerCreator progressTrackerCreator, TerminationFlag terminationFlag) {
         this.progressTrackerCreator = progressTrackerCreator;
         this.terminationFlag = terminationFlag;
+    }
+
+    PageRankResult articleRank(Graph graph, PageRankMutateConfig configuration) {
+        var task = Pregel.progressTask(graph, configuration, LabelForProgressTracking.ArticleRank.value);
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var mode = ARTICLE_RANK;
+
+        var computation = pickComputation(graph, configuration, mode);
+
+        var algorithm = new PageRankAlgorithm(
+            graph,
+            configuration,
+            computation,
+            mode,
+            DefaultPool.INSTANCE,
+            progressTracker
+        );
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
     BetwennessCentralityResult betweennessCentrality(Graph graph, BetweennessCentralityBaseConfig configuration) {
@@ -87,6 +128,19 @@ public class CentralityAlgorithms {
             progressTracker,
             terminationFlag
         );
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+    }
+
+    CELFResult celf(Graph graph, InfluenceMaximizationBaseConfig configuration) {
+        var task = Tasks.task(
+            LabelForProgressTracking.CELF.value,
+            Tasks.leaf("Greedy", graph.nodeCount()),
+            Tasks.leaf("LazyForwarding", configuration.seedSetSize() - 1)
+        );
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var algorithm = new CELF(graph, configuration.toParameters(), DefaultPool.INSTANCE, progressTracker);
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
@@ -148,16 +202,66 @@ public class CentralityAlgorithms {
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
-    CELFResult celf(Graph graph, InfluenceMaximizationBaseConfig configuration) {
-        var task = Tasks.task(
-            LabelForProgressTracking.CELF.value,
-            Tasks.leaf("Greedy", graph.nodeCount()),
-            Tasks.leaf("LazyForwarding", configuration.seedSetSize() - 1)
+    private double averageDegree(Graph graph, Concurrency concurrency) {
+        var degreeSum = new LongAdder();
+        ParallelUtil.parallelForEachNode(
+            graph.nodeCount(),
+            concurrency,
+            TerminationFlag.RUNNING_TRUE,
+            nodeId -> degreeSum.add(graph.degree(nodeId))
         );
-        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+        return (double) degreeSum.sum() / graph.nodeCount();
+    }
 
-        var algorithm = new CELF(graph, configuration.toParameters(), DefaultPool.INSTANCE, progressTracker);
+    private LongToDoubleFunction degreeFunction(
+        Graph graph,
+        PageRankConfig configuration
+    ) {
+        var degreeCentrality = new DegreeCentrality(
+            graph,
+            DefaultPool.INSTANCE,
+            configuration.concurrency(),
+            Orientation.NATURAL,
+            configuration.hasRelationshipWeightProperty(),
+            10_000,
+            ProgressTracker.NULL_TRACKER
+        );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        var degrees = degreeCentrality.compute().degreeFunction();
+        return degrees::get;
+    }
+
+    private PregelComputation<PageRankConfig> pickComputation(
+        Graph graph, PageRankMutateConfig configuration,
+        PageRankAlgorithmFactory.Mode mode
+    ) {
+        var degreeFunction = degreeFunction(
+            graph,
+            configuration
+        );
+
+        var mappedSourceNodes = new LongScatterSet(configuration.sourceNodes().size());
+
+        configuration.sourceNodes().stream()
+            .mapToLong(graph::toMappedNodeId)
+            .forEach(mappedSourceNodes::add);
+
+        if (mode == ARTICLE_RANK) {
+            double avgDegree = averageDegree(graph, configuration.concurrency());
+            return new ArticleRankComputation(configuration, mappedSourceNodes, degreeFunction, avgDegree);
+        } else if (mode == EIGENVECTOR) {
+            // Degrees are generally not respected in eigenvector centrality.
+            //
+            // However, relationship weights need to be normalized by the weighted degree.
+            // The score is divided by the weighted degree before being sent to the neighbors.
+            // For the unweighted case, we want a no-op and divide by 1.
+            degreeFunction = configuration.hasRelationshipWeightProperty()
+                ? degreeFunction
+                : (nodeId) -> 1;
+
+            return new EigenvectorComputation(graph.nodeCount(), configuration, mappedSourceNodes, degreeFunction);
+        } else {
+            return new PageRankComputation(configuration, mappedSourceNodes, degreeFunction);
+        }
     }
 }

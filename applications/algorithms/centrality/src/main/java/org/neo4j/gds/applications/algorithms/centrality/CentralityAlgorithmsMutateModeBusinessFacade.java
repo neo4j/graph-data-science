@@ -33,9 +33,12 @@ import org.neo4j.gds.harmonic.HarmonicCentralityMutateConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationMutateConfig;
+import org.neo4j.gds.pagerank.PageRankMutateConfig;
+import org.neo4j.gds.pagerank.PageRankResult;
 
 import java.util.Optional;
 
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ArticleRank;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BetweennessCentrality;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.CELF;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ClosenessCentrality;
@@ -60,15 +63,30 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         this.mutateNodeProperty = mutateNodeProperty;
     }
 
+    public <RESULT> RESULT articleRank(
+        GraphName graphName,
+        PageRankMutateConfig configuration,
+        ResultBuilder<PageRankMutateConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var mutateStep = new PageRankMutateStep(mutateNodeProperty, configuration);
+
+        return template.processAlgorithm(
+            graphName,
+            configuration,
+            ArticleRank,
+            estimation::pageRank,
+            graph -> algorithms.articleRank(graph, configuration),
+            Optional.of(mutateStep),
+            resultBuilder
+        );
+    }
+
     public <RESULT> RESULT betweennessCentrality(
         GraphName graphName,
         BetweennessCentralityMutateConfig configuration,
         ResultBuilder<BetweennessCentralityMutateConfig, BetwennessCentralityResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new BetweennessCentralityMutateStep(
-            mutateNodeProperty,
-            configuration
-        );
+        var mutateStep = new BetweennessCentralityMutateStep(mutateNodeProperty, configuration);
 
         return template.processAlgorithm(
             graphName,
@@ -76,69 +94,6 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
             BetweennessCentrality,
             () -> estimation.betweennessCentrality(configuration),
             graph -> algorithms.betweennessCentrality(graph, configuration),
-            Optional.of(mutateStep),
-            resultBuilder
-        );
-    }
-
-    public <RESULT> RESULT closenessCentrality(
-        GraphName graphName,
-        ClosenessCentralityMutateConfig configuration,
-        ResultBuilder<ClosenessCentralityMutateConfig, ClosenessCentralityResult, RESULT, NodePropertiesWritten> resultBuilder
-    ) {
-        var mutateStep = new ClosenessCentralityMutateStep(
-            mutateNodeProperty,
-            configuration
-        );
-
-        return template.processAlgorithm(
-            graphName,
-            configuration,
-            ClosenessCentrality,
-            () -> estimation.closenessCentrality(configuration),
-            graph -> algorithms.closenessCentrality(graph, configuration),
-            Optional.of(mutateStep),
-            resultBuilder
-        );
-    }
-
-    public <RESULT> RESULT degreeCentrality(
-        GraphName graphName,
-        DegreeCentralityMutateConfig configuration,
-        ResultBuilder<DegreeCentralityMutateConfig, DegreeCentralityResult, RESULT, NodePropertiesWritten> resultBuilder
-    ) {
-        var mutateStep = new DegreeCentralityMutateStep(
-            mutateNodeProperty,
-            configuration
-        );
-
-        return template.processAlgorithm(
-            graphName,
-            configuration,
-            DegreeCentrality,
-            () -> estimation.degreeCentrality(configuration),
-            graph -> algorithms.degreeCentrality(graph, configuration),
-            Optional.of(mutateStep),
-            resultBuilder
-        );
-    }
-
-    public <RESULT> RESULT harmonicCentrality(
-        GraphName graphName,
-        HarmonicCentralityMutateConfig configuration,
-        ResultBuilder<HarmonicCentralityMutateConfig, HarmonicResult, RESULT, NodePropertiesWritten> resultBuilder
-    ) {
-        var mutateStep = new HarmonicCentralityMutateStep(
-            mutateNodeProperty,
-            configuration
-        );
-
-        return template.processAlgorithm(
-            graphName,
-            configuration,
-            HarmonicCentrality,
-            estimation::harmonicCentrality,
-            graph -> algorithms.harmonicCentrality(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
         );
@@ -157,6 +112,60 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
             CELF,
             () -> estimation.celf(configuration),
             graph -> algorithms.celf(graph, configuration),
+            Optional.of(mutateStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT closenessCentrality(
+        GraphName graphName,
+        ClosenessCentralityMutateConfig configuration,
+        ResultBuilder<ClosenessCentralityMutateConfig, ClosenessCentralityResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var mutateStep = new ClosenessCentralityMutateStep(mutateNodeProperty, configuration);
+
+        return template.processAlgorithm(
+            graphName,
+            configuration,
+            ClosenessCentrality,
+            () -> estimation.closenessCentrality(configuration),
+            graph -> algorithms.closenessCentrality(graph, configuration),
+            Optional.of(mutateStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT degreeCentrality(
+        GraphName graphName,
+        DegreeCentralityMutateConfig configuration,
+        ResultBuilder<DegreeCentralityMutateConfig, DegreeCentralityResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var mutateStep = new DegreeCentralityMutateStep(mutateNodeProperty, configuration);
+
+        return template.processAlgorithm(
+            graphName,
+            configuration,
+            DegreeCentrality,
+            () -> estimation.degreeCentrality(configuration),
+            graph -> algorithms.degreeCentrality(graph, configuration),
+            Optional.of(mutateStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT harmonicCentrality(
+        GraphName graphName,
+        HarmonicCentralityMutateConfig configuration,
+        ResultBuilder<HarmonicCentralityMutateConfig, HarmonicResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var mutateStep = new HarmonicCentralityMutateStep(mutateNodeProperty, configuration);
+
+        return template.processAlgorithm(
+            graphName,
+            configuration,
+            HarmonicCentrality,
+            estimation::harmonicCentrality,
+            graph -> algorithms.harmonicCentrality(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
         );

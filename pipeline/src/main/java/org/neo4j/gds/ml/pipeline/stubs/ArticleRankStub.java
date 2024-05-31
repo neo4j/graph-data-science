@@ -17,17 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms.centrality;
+package org.neo4j.gds.ml.pipeline.stubs;
 
-import java.util.Collections;
-import java.util.Map;
+import org.neo4j.gds.pagerank.PageRankMutateConfig;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.centrality.PageRankMutateResult;
+import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
-public class PageRankDistribution {
-    public final Map<String, Object> centralitySummary;
-    public final long postProcessingMillis;
-
-    PageRankDistribution(Map<String, Object> centralitySummary, long postProcessingMillis) {
-        this.centralitySummary = Collections.unmodifiableMap(centralitySummary);
-        this.postProcessingMillis = postProcessingMillis;
+public class ArticleRankStub extends AbstractStub<PageRankMutateConfig, PageRankMutateResult> {
+    protected MutateStub<PageRankMutateConfig, PageRankMutateResult> stub(AlgorithmsProcedureFacade facade) {
+        return facade.centrality().articleRankMutateStub();
     }
 }

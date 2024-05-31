@@ -52,7 +52,7 @@ public final class EigenvectorComputation implements PregelComputation<PageRankC
     private final double tolerance;
     private final double initialValue;
 
-    EigenvectorComputation(
+    public EigenvectorComputation(
         long nodeCount,
         PageRankConfig config,
         LongSet sourceNodes,
