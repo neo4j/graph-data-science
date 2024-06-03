@@ -28,6 +28,7 @@ import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
+import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.scheduler.JobScheduler;
 
@@ -54,4 +55,6 @@ public interface Neo4jProxyApi {
     ) {
         throw new UnsupportedOperationException("GDS does not support block store format batch importer on this Neo4j version. Requires >= Neo4j 5.18.");
     }
+
+    GlobalProcedureRegistry globalProcedureRegistry(GlobalProcedures globalProcedures);
 }
