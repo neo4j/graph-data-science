@@ -50,7 +50,6 @@ public class ResultStoreRelationshipExporter implements RelationshipExporter {
 
     @Override
     public void write(String relationshipType) {
-        resultStore.addRelationship(relationshipType, graph, toOriginalId);
         resultStore.add(jobId, new ResultStoreEntry.RelationshipTopology(relationshipType, graph, toOriginalId));
     }
 
@@ -65,7 +64,6 @@ public class ResultStoreRelationshipExporter implements RelationshipExporter {
         String propertyKey,
         @Nullable RelationshipWithPropertyConsumer afterWriteConsumer
     ) {
-        resultStore.addRelationship(relationshipType, propertyKey, graph, toOriginalId);
         resultStore.add(jobId, new ResultStoreEntry.RelationshipsFromGraph(relationshipType, propertyKey, graph, toOriginalId));
     }
 }
