@@ -62,6 +62,11 @@ public class ResultStoreNodePropertyExporter implements NodePropertyExporter {
         var propertyKeys = new ArrayList<String>();
         var propertyValues = new ArrayList<NodePropertyValues>();
         nodeProperties.forEach(nodeProperty -> {
+            resultStore.addNodePropertyValues(
+                nodeLabels,
+                nodeProperty.propertyKey(),
+                nodeProperty.properties()
+            );
             propertyKeys.add(nodeProperty.propertyKey());
             propertyValues.add(nodeProperty.properties());
             writtenProperties += nodeProperty.properties().nodeCount();

@@ -40,6 +40,12 @@ class ResultStoreRelationshipExporterTest {
         var toOriginalId = mock(LongUnaryOperator.class);
         new ResultStoreRelationshipExporter(jobId, resultStore, graph, toOriginalId).write("REL");
 
+        var relationshipEntry = resultStore.getRelationship("REL");
+        assertThat(relationshipEntry.graph()).isEqualTo(graph);
+        assertThat(relationshipEntry.toOriginalId()).isEqualTo(toOriginalId);
+
+        assertThat(resultStore.getRelationship("REL", "foo")).isNull();
+
         var entry = resultStore.get(jobId);
         assertThat(entry).isInstanceOf(ResultStoreEntry.RelationshipTopology.class);
 
@@ -56,6 +62,12 @@ class ResultStoreRelationshipExporterTest {
         var graph = mock(Graph.class);
         var toOriginalId = mock(LongUnaryOperator.class);
         new ResultStoreRelationshipExporter(jobId, resultStore, graph, toOriginalId).write("REL", "prop");
+
+        var relationshipEntry = resultStore.getRelationship("REL", "prop");
+        assertThat(relationshipEntry.graph()).isEqualTo(graph);
+        assertThat(relationshipEntry.toOriginalId()).isEqualTo(toOriginalId);
+
+        assertThat(resultStore.getRelationship("REL")).isNull();
 
         var entry = resultStore.get(jobId);
         assertThat(entry).isInstanceOf(ResultStoreEntry.RelationshipsFromGraph.class);
