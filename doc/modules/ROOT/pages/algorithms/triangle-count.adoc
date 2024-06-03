@@ -272,11 +272,9 @@ CREATE
 ----
 
 With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
-We do this using a native projection targeting the `Person` nodes and the `KNOWS` relationships.
-For the relationships we must use the `UNDIRECTED` orientation.
-This is because the Triangle Count algorithm is defined only for undirected graphs.
+Note that the Triangle Count algorithm is defined only for undirected graphs.
 
-.The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
+.The following statement will project a graph using a Cypher projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-project-query]
 ----
 MATCH (source:Person)-[r:KNOWS]->(target:Person)
