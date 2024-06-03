@@ -709,6 +709,36 @@ public final class CentralityProcedureFacade {
         return Stream.of(result);
     }
 
+    public Stream<PageRankWriteResult> eigenvectorWrite(String graphName, Map<String, Object> configuration) {
+        validateKeyNotPresent(configuration, "dampingFactor");
+
+        var shouldComputeCentralityDistribution = procedureReturnColumns.contains("centralityDistribution");
+        var resultBuilder = new PageRankResultBuilderForWriteMode(shouldComputeCentralityDistribution);
+
+        return writeModeRunner.runWriteModeAlgorithm(
+            graphName,
+            configuration,
+            PageRankWriteConfig::of,
+            writeMode()::eigenvector,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> eigenvectorWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        validateKeyNotPresent(algorithmConfiguration, "dampingFactor");
+
+        var result = estimationModeRunner.runEstimation(
+            algorithmConfiguration,
+            PageRankWriteConfig::of,
+            configuration -> estimationMode().pageRank(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
     public HarmonicCentralityMutateStub harmonicCentralityMutateStub() {
         return harmonicCentralityMutateStub;
     }

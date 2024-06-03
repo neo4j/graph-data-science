@@ -41,13 +41,6 @@ public class CentralityAlgorithmsEstimateBusinessFacade {
         return pageRankVariant(graphNameOrConfiguration, configuration);
     }
 
-    public <C extends PageRankConfig> MemoryEstimateResult eigenvector(
-        Object graphNameOrConfiguration,
-        C configuration
-    ) {
-        return pageRankVariant(graphNameOrConfiguration, configuration);
-    }
-
     private <C extends PageRankConfig> MemoryEstimateResult pageRankVariant(
         Object graphNameOrConfiguration,
         C configuration

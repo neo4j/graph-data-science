@@ -29,13 +29,19 @@ import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankWriteConfig;
 
-class ArticleRankWriteStep implements MutateOrWriteStep<PageRankResult, NodePropertiesWritten> {
+class PageRankWriteStep implements MutateOrWriteStep<PageRankResult, NodePropertiesWritten> {
     private final WriteToDatabase writeToDatabase;
     private final PageRankWriteConfig configuration;
+    private final LabelForProgressTracking label;
 
-    ArticleRankWriteStep(WriteToDatabase writeToDatabase, PageRankWriteConfig configuration) {
+    PageRankWriteStep(
+        WriteToDatabase writeToDatabase,
+        PageRankWriteConfig configuration,
+        LabelForProgressTracking label
+    ) {
         this.writeToDatabase = writeToDatabase;
         this.configuration = configuration;
+        this.label = label;
     }
 
     @Override
@@ -52,7 +58,7 @@ class ArticleRankWriteStep implements MutateOrWriteStep<PageRankResult, NodeProp
             resultStore,
             configuration,
             configuration,
-            LabelForProgressTracking.ArticleRank,
+            label,
             jobId,
             result.nodePropertyValues()
         );

@@ -44,6 +44,7 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.CELF;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ClosenessCentrality;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.DegreeCentrality;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.EigenVector;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.HarmonicCentrality;
 
 public final class CentralityAlgorithmsWriteModeBusinessFacade {
@@ -87,7 +88,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         PageRankWriteConfig configuration,
         ResultBuilder<PageRankWriteConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new ArticleRankWriteStep(writeToDatabase, configuration);
+        var writeStep = new PageRankWriteStep(writeToDatabase, configuration, ArticleRank);
 
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
@@ -167,6 +168,24 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             DegreeCentrality,
             () -> estimationFacade.degreeCentrality(configuration),
             graph -> centralityAlgorithms.degreeCentrality(graph, configuration),
+            Optional.of(writeStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT eigenvector(
+        GraphName graphName,
+        PageRankWriteConfig configuration,
+        ResultBuilder<PageRankWriteConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var writeStep = new PageRankWriteStep(writeToDatabase, configuration, EigenVector);
+
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            EigenVector,
+            estimationFacade::pageRank,
+            graph -> centralityAlgorithms.eigenVector(graph, configuration),
             Optional.of(writeStep),
             resultBuilder
         );

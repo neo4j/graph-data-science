@@ -163,41 +163,4 @@ public class CentralityProcedureFacade {
 
         return Stream.of(estimateBusinessFacade.pageRank(graphNameOrConfiguration, config));
     }
-
-    public Stream<PageRankWriteResult> eigenvectorWrite(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        eigenvectorConfigurationPreconditions(configuration);
-
-        var config = configurationCreator.createConfiguration(configuration, PageRankWriteConfig::of);
-
-        var computationResult = writeBusinessFacade.eigenvector(
-            graphName,
-            config,
-            procedureReturnColumns.contains("centralityDistribution")
-        );
-
-        return Stream.of(PageRankComputationalResultTransformer.toWriteResult(computationResult, config));
-    }
-
-    public Stream<MemoryEstimateResult> eigenvectorWriteEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> configuration
-    ) {
-        eigenvectorConfigurationPreconditions(configuration);
-
-        var config = configurationCreator.createConfiguration(configuration, PageRankWriteConfig::of);
-
-        return Stream.of(estimateBusinessFacade.eigenvector(graphNameOrConfiguration, config));
-    }
-
-    // FIXME: this is abominable, we have to create separate configuration for Eigenvector that doesn't contain this key
-    private static void eigenvectorConfigurationPreconditions(Map<String, Object> configuration) {
-        if (configuration.containsKey("dampingFactor")) {
-            throw new IllegalArgumentException("Unexpected configuration key: dampingFactor");
-        }
-    }
-
-
 }
