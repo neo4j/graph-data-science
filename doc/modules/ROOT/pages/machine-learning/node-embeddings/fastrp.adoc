@@ -396,12 +396,12 @@ This graph represents seven people who know one another.
 A relationship property `weight` denotes the strength of the knowledge between two persons.
 
 With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
-We do this using a native projection targeting the `Person` nodes and the `KNOWS` relationships.
+We do this using a Cypher projection targeting the `Person` nodes and the `KNOWS` relationships.
 For the relationships we will use the `UNDIRECTED` orientation.
 This is because the FastRP algorithm has been measured to compute more predictive node embeddings in undirected graphs.
 We will also add the `weight` relationship property which we will make use of when running the weighted version of FastRP.
 
-.The following statement will project a graph using a native projection and store it in the graph catalog under the name 'persons'.
+.The following statement will project a graph using a Cypher projection and store it in the graph catalog under the name 'persons'.
 [source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
