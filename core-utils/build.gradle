@@ -5,16 +5,16 @@ description = 'Neo4j Graph Data Science :: Core utils'
 group = 'org.neo4j.gds'
 
 dependencies {
-    compileOnly         group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
-    compileOnly         group: 'org.immutables',           name: 'value-annotations',  version: ver.'immutables'
-    compileOnly         group: 'org.jetbrains',            name: 'annotations',        version: ver.'jetbrains-annotations'
+    compileOnly         openGds.immutables.builder
+    compileOnly         openGds.immutables.value.annotations
+    compileOnly         openGds.jetbrains.annotations
 
     compileOnly group: 'org.neo4j', name: 'neo4j-configuration',    version: ver.'neo4j'
     compileOnly group: 'org.neo4j', name: 'neo4j-logging',          version: ver.'neo4j'
 
     implementation project(':neo4j-settings')
 
-    implementation group: 'org.apache.commons', name: 'commons-text', version: ver.'commons-text'
+    implementation openGds.commons.text
 
     // TEST DEPENDENCIES
     testImplementation project(':test-utils')

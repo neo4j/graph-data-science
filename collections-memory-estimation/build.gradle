@@ -8,9 +8,9 @@ dependencies {
     implementation project(':memory-usage')
     implementation project(':collections')
 
-    testImplementation platform(dep.junit5bom)
-    testImplementation dep.junit5jupiter
-    testImplementation dep.junit5migration
-    testImplementation group: 'org.assertj', name: 'assertj-core', version: ver.'assertj'
-    testImplementation group: 'io.qala.datagen', name: 'qala-datagen-junit5', version: ver.'qala-datagen'
+    testImplementation platform(openGds.junit5bom)
+    testImplementation openGds.junit5.jupiter
+    testImplementation openGds.junit5.migration
+    testImplementation openGds.assertj.core
+    testImplementation openGds.qaladatagen
 }

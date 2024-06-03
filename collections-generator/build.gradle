@@ -6,16 +6,16 @@ group = 'org.neo4j.gds'
 
 dependencies {
     annotationProcessor project(':annotations')
-    annotationProcessor group: 'com.google.auto.service', name: 'auto-service', version: ver.'auto-service'
-    annotationProcessor group: 'org.immutables', name: 'builder', version: ver.'immutables'
-    annotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
+    annotationProcessor openGds.google.auto.service
+    annotationProcessor openGds.immutables.builder
+    annotationProcessor openGds.immutables.value
 
-    compileOnly group: 'com.google.auto.service', name: 'auto-service', version: ver.'auto-service'
+    compileOnly openGds.google.auto.service
 
     implementation project(':annotations')
     implementation project(':memory-usage')
-    implementation group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
-    implementation group: 'com.google.auto', name: 'auto-common', version: ver.'auto-common'
-    implementation group: 'com.squareup', name: 'javapoet', version: ver.'javapoet'
-    implementation group: 'org.apache.commons', name: 'commons-lang3', version: ver.'commons-lang3'
+    implementation openGds.immutables.value.annotations
+    implementation openGds.google.auto.common
+    implementation openGds.javapoet
+    implementation openGds.commons.lang3
 }

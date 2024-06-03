@@ -8,14 +8,14 @@ dependencies {
     annotationProcessor project(':annotations')
     annotationProcessor project(':config-generator')
 
-    annotationProcessor group: 'io.soabase.record-builder', name: 'record-builder-processor', version: ver.'record-builder'
-    annotationProcessor group: 'org.immutables', name: 'builder', version: ver.'immutables'
-    annotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
+    annotationProcessor openGds.recordBuilder
+    annotationProcessor openGds.immutables.builder
+    annotationProcessor openGds.immutables.value
 
-    compileOnly group: 'io.soabase.record-builder', name: 'record-builder-processor', version: ver.'record-builder'
-    compileOnly group: 'org.immutables', name: 'builder', version: ver.'immutables'
-    compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
-    compileOnly group: 'org.jetbrains', name: 'annotations', version: ver.'jetbrains-annotations'
+    compileOnly openGds.recordBuilder
+    compileOnly openGds.immutables.builder
+    compileOnly openGds.immutables.value.annotations
+    compileOnly openGds.jetbrains.annotations
 
     implementation project(':annotations')
     implementation project(':config-api')
@@ -30,10 +30,12 @@ dependencies {
     implementation project(':subgraph-filtering')
     implementation project(':transaction')
 
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: ver.'jackson'
-    implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: ver.'jackson'
-    implementation group: 'de.siegmar', name: 'fastcsv', version: ver.'fastcsv'
-    implementation group: 'org.opencypher', name: 'cypher-javacc-parser-9.0', version: ver.'opencypher-front-end', transitive: false
+    implementation openGds.jackson.databind
+    implementation openGds.jackson.dataformat.csv
+    implementation openGds.fastcsv
+    implementation(openGds.opencypher.ccparser) {
+        transitive = false
+    }
 
     neodeps().each {
         compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {

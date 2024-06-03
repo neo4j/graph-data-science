@@ -6,25 +6,25 @@ group = 'org.neo4j.gds'
 
 dependencies {
     annotationProcessor project(':annotations')
-    annotationProcessor group: 'com.google.auto.service', name: 'auto-service', version: ver.'auto-service'
-    annotationProcessor group: 'io.soabase.record-builder', name: 'record-builder-processor', version: ver.'record-builder'
-    annotationProcessor group: 'org.immutables', name: 'builder', version: ver.'immutables'
-    annotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
+    annotationProcessor openGds.google.auto.service
+    annotationProcessor openGds.recordBuilder
+    annotationProcessor openGds.immutables.builder
+    annotationProcessor openGds.immutables.value
 
-    compileOnly group: 'com.google.auto.service', name: 'auto-service', version: ver.'auto-service'
-    compileOnly group: 'io.soabase.record-builder', name: 'record-builder-processor', version: ver.'record-builder'
+    compileOnly openGds.google.auto.service
+    compileOnly openGds.recordBuilder
 
     implementation project(':annotations')
-    implementation group: 'com.google.auto', name: 'auto-common', version: ver.'auto-common'
-    implementation group: 'com.squareup', name: 'javapoet', version: ver.'javapoet'
-    implementation group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
-    implementation group: 'org.jetbrains', name: 'annotations', version: ver.'jetbrains-annotations'
+    implementation openGds.google.auto.common
+    implementation openGds.javapoet
+    implementation openGds.immutables.value.annotations
+    implementation openGds.jetbrains.annotations
 
-    testCompileOnly group: 'com.google.auto.service', name: 'auto-service', version: ver.'auto-service'
+    testCompileOnly openGds.google.auto.service
 
-    testImplementation platform(dep.junit5bom)
+    testImplementation platform(openGds.junit5bom)
     testImplementation project(':core-test-utils')
-    testImplementation dep.junit5jupiter
-    testImplementation dep.junit5migration
-    testImplementation group: 'com.google.testing.compile', name: 'compile-testing', version: ver.'compile-testing'
+    testImplementation openGds.junit5.jupiter
+    testImplementation openGds.junit5.migration
+    testImplementation openGds.google.testing.compile
 }

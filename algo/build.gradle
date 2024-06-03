@@ -7,15 +7,15 @@ group = 'org.neo4j.gds'
 dependencies {
     annotationProcessor project(':annotations')
     annotationProcessor project(':config-generator')
-    annotationProcessor group: 'org.immutables', name: 'builder', version: ver.'immutables'
-    annotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
+    annotationProcessor openGds.immutables.builder
+    annotationProcessor openGds.immutables.value
     annotationProcessor group: 'org.neo4j', name: 'annotations', version: ver.'neo4j'
 
-    compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
-    compileOnly group: 'org.immutables', name: 'builder', version: ver.'immutables'
-    compileOnly group: 'org.jetbrains', name: 'annotations', version: ver.'jetbrains-annotations'
+    compileOnly openGds.immutables.builder
+    compileOnly openGds.immutables.value.annotations
+    compileOnly openGds.jetbrains.annotations
 
-    implementation group: 'org.apache.commons', name: 'commons-math3', version: ver.'commons-math3'
+    implementation openGds.commons.math3
 
     neodeps().each {
         compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
@@ -58,8 +58,8 @@ dependencies {
     testImplementation project(':test-utils')
     testImplementation project(':ml-test-utils')
     testImplementation project(':ml-algo')
-    testImplementation group: 'net.jqwik', name: 'jqwik', version: ver.'jqwik'
-    testImplementation group: 'com.github.s1ck', name: 'gdl', version: ver.'gdl'
-    testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: ver.'mockito-junit-jupiter'
+    testImplementation openGds.jqwik
+    testImplementation openGds.gdl
+    testImplementation openGds.mockito.junit.jupiter
 
 }

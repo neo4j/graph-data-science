@@ -29,12 +29,15 @@ dependencies {
     implementation project(':string-formatting')
 
     // test infrastructure
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: ver.'junit5bom'
-    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: ver.'junit5bom'
-    testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: ver.'mockito-junit-jupiter'
-    testImplementation group: 'org.assertj', name: 'assertj-core', version: ver.'assertj'
+    testCompileOnly openGds.jetbrains.annotations
 
-    testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
+    testImplementation platform(openGds.junit5bom)
+    testImplementation openGds.junit5.jupiter.api
+    testImplementation openGds.mockito.junit.jupiter
+    testImplementation openGds.assertj.core
+
+    testRuntimeOnly openGds.junit5.jupiter.engine
+
 
     testAnnotationProcessor project(':config-generator')
 }

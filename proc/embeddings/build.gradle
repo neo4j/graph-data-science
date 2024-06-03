@@ -8,8 +8,8 @@ dependencies {
     annotationProcessor project(':annotations')
     annotationProcessor project(':procedure-collector')
 
-    annotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
-    annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
+    annotationProcessor openGds.immutables.builder
+    annotationProcessor openGds.immutables.value
 
     api project(':proc-common')
 
@@ -31,8 +31,8 @@ dependencies {
     implementation project(':transaction')
     implementation project(':ml-algo')
 
-    compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
-    compileOnly group: 'org.jetbrains', name: 'annotations', version: ver.'jetbrains-annotations'
+    compileOnly openGds.immutables.value.annotations
+    compileOnly openGds.jetbrains.annotations
     neodeps().each {
         compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
             transitive = false
@@ -41,7 +41,7 @@ dependencies {
 
     testAnnotationProcessor project(':annotations')
 
-    testCompileOnly group: 'org.immutables', name: 'builder', version: ver.'immutables'
+    testCompileOnly openGds.immutables.builder
 
     testImplementation project(':native-projection')
     testImplementation project(':open-model-catalog')
