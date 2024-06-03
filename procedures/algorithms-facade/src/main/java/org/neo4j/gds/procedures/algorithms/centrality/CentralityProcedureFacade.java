@@ -650,6 +650,36 @@ public final class CentralityProcedureFacade {
         return eigenVectorMutateStub;
     }
 
+    public Stream<PageRankStatsResult> eigenvectorStats(String graphName, Map<String, Object> configuration) {
+        validateKeyNotPresent(configuration, "dampingFactor");
+
+        var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("centralityDistribution");
+        var resultBuilder = new PageRankResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
+
+        return statsModeRunner.runStatsModeAlgorithm(
+            graphName,
+            configuration,
+            PageRankStatsConfig::of,
+            resultBuilder,
+            statsMode()::eigenVector
+        );
+    }
+
+    public Stream<MemoryEstimateResult> eigenvectorStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        validateKeyNotPresent(algorithmConfiguration, "dampingFactor");
+
+        var result = estimationModeRunner.runEstimation(
+            algorithmConfiguration,
+            PageRankStatsConfig::of,
+            configuration -> estimationMode().pageRank(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
     public HarmonicCentralityMutateStub harmonicCentralityMutateStub() {
         return harmonicCentralityMutateStub;
     }
@@ -709,5 +739,11 @@ public final class CentralityProcedureFacade {
 
     private CentralityAlgorithmsWriteModeBusinessFacade writeMode() {
         return applicationsFacade.centrality().write();
+    }
+
+    private void validateKeyNotPresent(Map<String, Object> configuration, String key) {
+        if (configuration.containsKey(key)) {
+            throw new IllegalArgumentException("Unexpected configuration key: " + key);
+        }
     }
 }

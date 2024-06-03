@@ -164,31 +164,6 @@ public class CentralityProcedureFacade {
         return Stream.of(estimateBusinessFacade.pageRank(graphNameOrConfiguration, config));
     }
 
-    public Stream<PageRankStatsResult> eigenvectorStats(String graphName, Map<String, Object> configuration) {
-        eigenvectorConfigurationPreconditions(configuration);
-
-        var config = configurationCreator.createConfiguration(configuration, PageRankStatsConfig::of);
-
-        var computationResult = statsBusinessFacade.eigenvector(
-            graphName,
-            config,
-            procedureReturnColumns.contains("centralityDistribution")
-        );
-
-        return Stream.of(PageRankComputationalResultTransformer.toStatsResult(computationResult, config));
-    }
-
-    public Stream<MemoryEstimateResult> eigenvectorStatsEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> configuration
-    ) {
-        eigenvectorConfigurationPreconditions(configuration);
-
-        var config = configurationCreator.createConfiguration(configuration, PageRankStatsConfig::of);
-
-        return Stream.of(estimateBusinessFacade.eigenvector(graphNameOrConfiguration, config));
-    }
-
     public Stream<CentralityStreamResult> eigenvectorStream(
         String graphName,
         Map<String, Object> configuration
