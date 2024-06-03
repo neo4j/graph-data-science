@@ -86,17 +86,18 @@ This graph builds a transportation network with roads between locations.
 Like in the real world, the roads in the graph have different lengths.
 These lengths are represented by the `cost` relationship property.
 
-.The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
+.The following statement will project a graph using a Cypher projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
-    'myGraph',
-    'Location',
-    'ROAD',
-    {
-        relationshipProperties: 'cost'
-    }
-)
+MATCH (source:Location)-[r:ROAD]->(target:Location)
+WITH gds.graph.project(
+  'myGraph',
+  source,
+  target,
+  { relationshipProperties: r { .cost } }
+) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
 
 In the following example we will demonstrate the use of the {algorithm} Shortest Path algorithm using this graph.

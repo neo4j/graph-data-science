@@ -2,5 +2,6 @@
 ====
 All the examples below should be run in an empty database.
 
-The examples use native projections as the norm, although xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[Cypher projections] can be used as well.
+The examples use xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[Cypher projections] as the norm.
+Native projections will be deprecated in a future release.
 ====

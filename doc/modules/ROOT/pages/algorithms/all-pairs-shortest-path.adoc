@@ -106,63 +106,7 @@ CREATE (a:Loc {name: 'A'}),
 
 ----
 
-=== Using native projection
-
-.The following will project and store a graph using native projection:
-[source, cypher, role=noplay graph-project-query, group=native]
-----
-CALL gds.graph.project(
-  'nativeGraph',
-  'Loc',
-  {
-    ROAD: {
-      properties: 'cost'
-    }
-  }
-)
-YIELD graphName
-----
-
-[role=query-example]
---
-.The following will run the algorithm and stream results:
-[source, cypher, role=noplay, group=native]
-----
-CALL gds.allShortestPaths.stream('nativeGraph', {
-  relationshipWeightProperty: 'cost'
-})
-YIELD sourceNodeId, targetNodeId, distance
-WITH sourceNodeId, targetNodeId, distance
-WHERE gds.util.isFinite(distance) = true
-WITH gds.util.asNode(sourceNodeId) AS source, gds.util.asNode(targetNodeId) AS target, distance WHERE source <> target
-RETURN source.name AS source, target.name AS target, distance
-ORDER BY distance DESC, source ASC, target ASC
-LIMIT 10
-----
-
-.Results
-[opts="header",cols="1,1,1"]
-|===
-| source | target | distance
-| "A"    | "F"    | 160.0
-| "A"    | "E"    | 120.0
-| "B"    | "F"    | 110.0
-| "C"    | "F"    | 110.0
-| "A"    | "D"    | 90.0
-| "B"    | "E"    | 70.0
-| "C"    | "E"    | 70.0
-| "D"    | "F"    | 70.0
-| "A"    | "B"    | 50.0
-| "A"    | "C"    | 50.0
-|===
---
-
-This query returned the top 10 pairs of nodes that are the furthest away from each other.
-F and E appear to be quite distant from the others.
-
-=== Using Cypher projection
-
-.The following will project and store an undirected graph using cypher projection:
+.The following will project and store an undirected graph using a Cypher projection:
 [source, cypher, role=noplay graph-project-query, group=cypher]
 ----
 MATCH (src:Loc)-[r:ROAD]->(trg:Loc)
@@ -170,9 +114,12 @@ RETURN gds.graph.project(
   'cypherGraph',
   src,
   trg,
-  {relationshipType: type(r), relationshipProperties: {cost: r.cost}},
-  {undirectedRelationshipTypes: ['ROAD']
-})
+  {
+    relationshipType: type(r),
+    relationshipProperties: r { .cost }
+  },
+  { undirectedRelationshipTypes: ['ROAD'] }
+)
 ----
 
 [role=query-example]

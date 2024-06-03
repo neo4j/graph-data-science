@@ -80,17 +80,18 @@ CREATE (a:Node {name: 'A'}),
 This graph builds an example network with relationships between nodes having both negative and positive weights.
 These weights are represented by the `cost` relationship property.
 
-.The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
+.The following statement will project a graph using a Cypher projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
-    'myGraph',
-    'Node',
-    'REL',
-    {
-        relationshipProperties: 'cost'
-    }
-)
+MATCH (source:Node)-[r:REL]->(target:Node)
+WITH gds.graph.project(
+  'myGraph',
+  source,
+  target,
+  { relationshipProperties: r { .cost } }
+) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
 
 In the following example we will demonstrate the use of the {algorithm} Shortest Path algorithm using this graph.

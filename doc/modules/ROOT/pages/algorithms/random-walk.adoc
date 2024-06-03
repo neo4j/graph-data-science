@@ -146,12 +146,16 @@ CREATE (home:Page {name: 'Home'}),
 
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
-    'myGraph',
-    '*',
-    { LINKS: { orientation: 'UNDIRECTED' } }
-);
-
+MATCH (source:Page)-[r:LINKS]->(target:Page)
+WITH gds.graph.project(
+  'myGraph',
+  source,
+  target,
+  { relationshipType: 'LINK' },
+  { undirectedRelationshipTypes: ['LINK'] }
+) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
 
 
