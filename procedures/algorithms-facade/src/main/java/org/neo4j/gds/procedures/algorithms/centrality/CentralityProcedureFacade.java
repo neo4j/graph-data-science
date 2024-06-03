@@ -680,6 +680,35 @@ public final class CentralityProcedureFacade {
         return Stream.of(result);
     }
 
+    public Stream<CentralityStreamResult> eigenvectorStream(String graphName, Map<String, Object> configuration) {
+        validateKeyNotPresent(configuration, "dampingFactor");
+
+        var resultBuilder = new PageRankResultBuilderForStreamMode();
+
+        return streamModeRunner.runStreamModeAlgorithm(
+            graphName,
+            configuration,
+            PageRankStreamConfig::of,
+            resultBuilder,
+            streamMode()::eigenvector
+        );
+    }
+
+    public Stream<MemoryEstimateResult> eigenvectorStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        validateKeyNotPresent(algorithmConfiguration, "dampingFactor");
+
+        var result = estimationModeRunner.runEstimation(
+            algorithmConfiguration,
+            PageRankStreamConfig::of,
+            configuration -> estimationMode().pageRank(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
     public HarmonicCentralityMutateStub harmonicCentralityMutateStub() {
         return harmonicCentralityMutateStub;
     }

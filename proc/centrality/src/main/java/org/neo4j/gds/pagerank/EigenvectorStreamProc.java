@@ -44,7 +44,7 @@ public class EigenvectorStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.centrality().eigenvectorStream(graphName, configuration);
+        return facade.algorithms().centrality().eigenvectorStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.eigenvector.stream.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class EigenvectorStreamProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.centrality().eigenvectorStreamEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().centrality().eigenvectorStreamEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

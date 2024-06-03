@@ -45,19 +45,6 @@ public class CentralityAlgorithmsStreamBusinessFacade {
         return createStreamComputationResult(result);
     }
 
-    public StreamComputationResult<PageRankResult> eigenvector(
-        String graphName,
-        PageRankConfig config
-    ) {
-
-        var result = this.centralityAlgorithmsFacade.eigenvector(
-            graphName,
-            config
-        );
-
-        return createStreamComputationResult(result);
-    }
-
     // ################################################################################################################
 
 
