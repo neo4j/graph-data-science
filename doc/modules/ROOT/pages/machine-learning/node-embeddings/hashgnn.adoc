@@ -395,33 +395,42 @@ CREATE
 This graph represents seven people who know one another.
 
 With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
-We do this using a native projection targeting the `Person` nodes and the `KNOWS` relationships.
+We do this using a Cypher projection targeting the `Person` nodes and the `KNOWS` relationships.
 For the relationships we will use the `UNDIRECTED` orientation.
 
-.The following statement will project a graph using a native projection and store it in the graph catalog under the name 'persons'.
+.The following statement will project a graph using a Cypher projection and store it in the graph catalog under the name 'persons'.
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
+MATCH (source:Person)-[r:LIKES|KNOWS]->(target:Fruit|Person)
+WITH gds.graph.project(
   'persons',
-  ['Person', 'Fruit'],
-  {
-    KNOWS: {
-      orientation: 'UNDIRECTED'
+  source,
+  target,
+  { 
+    sourceNodeLabels: labels(source),
+    targetNodeLabels: labels(target),
+    sourceNodeProperties: source {
+      age: coalesce(source.age, 0.0),
+      experience: coalesce(source.experience, 0.0),
+      hipster: coalesce(source.hipster, 0.0),
+      tropical: coalesce(source.tropical, 0.0),
+      sourness: coalesce(source.sourness, 0.0),
+      sweetness: coalesce(source.sweetness, 0.0)
     },
-    LIKES: {
-      orientation: 'UNDIRECTED'
-    }
+    targetNodeProperties: target {
+      age: coalesce(target.age, 0.0),
+      experience: coalesce(target.experience, 0.0),
+      hipster: coalesce(target.hipster, 0.0),
+      tropical: coalesce(target.tropical, 0.0),
+      sourness: coalesce(target.sourness, 0.0),
+      sweetness: coalesce(target.sweetness, 0.0)
+    },
+    relationshipType: type(r)
   },
-  { nodeProperties: {
-      age: {defaultValue: 0.0},
-      experience: {defaultValue: 0.0},
-      hipster: {defaultValue: 0.0},
-      tropical: {defaultValue: 0.0},
-      sourness: {defaultValue: 0.0},
-      sweetness: {defaultValue: 0.0}
-    }
-  }
-)
+  { undirectedRelationshipTypes: ['*'] }
+) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
 
 Since we will use binarization and the properties have different scales in some examples, we will create a scaled version of the `experience` property.

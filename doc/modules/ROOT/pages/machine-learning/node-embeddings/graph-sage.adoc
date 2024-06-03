@@ -396,18 +396,20 @@ CREATE
 
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
+MATCH (source:Person)-[r:KNOWS]->(target:Person)
+WITH gds.graph.project(
   'persons',
+  source,
+  target,
   {
-    Person: {
-      properties: ['age', 'heightAndWeight']
-    }
-  }, {
-    KNOWS: {
-      orientation: 'UNDIRECTED',
-      properties: ['relWeight']
-    }
-})
+    sourceNodeProperties: source { .age, .heightAndWeight },
+    targetNodeProperties: target { .age, .heightAndWeight },
+    relationshipProperties: r { .relWeight }
+  },
+  { undirectedRelationshipTypes: ['*'] }
+) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
 
 NOTE: The algorithm is defined for UNDIRECTED graphs.
@@ -520,23 +522,20 @@ CREATE
 
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
+MATCH (source:Person)-[r:LIKES]->(target:Instrument)
+WITH gds.graph.project(
   'persons_with_instruments',
+  source,
+  target,
   {
-    Person: {
-      properties: ['age', 'heightAndWeight']
-    },
-    Instrument: {
-      properties: ['cost']
-    }
-  }, {
-    KNOWS: {
-      orientation: 'UNDIRECTED'
-    },
-    LIKES: {
-      orientation: 'UNDIRECTED'
-    }
-})
+    sourceNodeProperties: source { .age, .heightAndWeight },
+    targetNodeProperties: target { .cost },
+    relationshipProperties: r { .relWeight }
+  },
+  { undirectedRelationshipTypes: ['*'] }
+) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
 
 We can now run GraphSAGE in multi-label mode on that graph by specifying the `projectedFeatureDimension` parameter.
@@ -594,13 +593,16 @@ For the purpose of this example we are going to use the `Persons` graph, but we 
 .Create a graph projection without any node properties
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
+MATCH (source:Person)-[r:KNOWS]->(target:Person)
+WITH gds.graph.project(
   'noPropertiesGraph',
-  'Person',
-  { KNOWS: {
-      orientation: 'UNDIRECTED'
-  }}
-)
+  source,
+  target,
+  {},
+  { undirectedRelationshipTypes: ['*'] }
+) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
 
 .Run DegreeCentrality mutate to create a new property for each node

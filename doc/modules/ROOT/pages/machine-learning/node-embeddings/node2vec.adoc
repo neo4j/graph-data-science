@@ -224,7 +224,14 @@ CREATE (dave)-[:LIKES]->(bongos);
 
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project('myGraph', ['Person', 'Instrument'], 'LIKES');
+MATCH (source:Person)-[r:LIKES]->(target:Instrument)
+WITH gds.graph.project(
+  'persons',
+  source,
+  target
+) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
 
 [role=query-example,no-result=true]

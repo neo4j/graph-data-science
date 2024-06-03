@@ -404,17 +404,20 @@ We will also add the `weight` relationship property which we will make use of wh
 .The following statement will project a graph using a Cypher projection and store it in the graph catalog under the name 'persons'.
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
+MATCH (source:Person)-[r:KNOWS]->(target:Person)
+WITH gds.graph.project(
   'persons',
-  'Person',
+  source,
+  target,
   {
-    KNOWS: {
-      orientation: 'UNDIRECTED',
-      properties: 'weight'
-    }
+    sourceNodeProperties: source { .age },
+    targetNodeProperties: target { .age },
+    relationshipProperties: r { .weight }
   },
-  { nodeProperties: ['age'] }
-)
+  { undirectedRelationshipTypes: ['*'] }
+) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
 
 
