@@ -245,21 +245,19 @@ CREATE
 ----
 
 With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
-We do this using a native projection targeting the `User` nodes and the `FOLLOWS` relationships.
 
 .The following statement will project a graph using a reverse projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
+MATCH (source:User)-[r:FOLLOWS]->(target:User)
+WITH gds.graph.project(
   'myGraph',
-  'User',
-  {
-    FOLLOWS: {
-      orientation: 'REVERSE',
-      properties: ['score']
-    }
-  }
-)
+  target,
+  source,
+  { relationshipProperties: r { .score } }
+) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
 
 The graph is projected in a `REVERSE` orientation in order to retrieve people with the most followers in the following examples.

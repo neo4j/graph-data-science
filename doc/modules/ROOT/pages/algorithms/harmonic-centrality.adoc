@@ -213,11 +213,16 @@ CREATE (a:User {name: "Alice"}),
 .The following will project and store a named graph:
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
+MATCH (source:User)-[r:LINK]->(target:User)
+WITH gds.graph.project(
   'graph',
-  'User',
-  { LINK: {orientation: 'UNDIRECTED'} }
-)
+  source,
+  target,
+  {},
+  { undirectedRelationshipTypes: ['*'] }
+) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
 
 [role=query-example]

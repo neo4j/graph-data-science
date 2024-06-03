@@ -246,11 +246,14 @@ CREATE
 .The following statement will project the graph and store it in the graph catalog.
 [source, cypher, role=graph-project-query no-play]
 ----
-CALL gds.graph.project(
+MATCH (source:Person)-[r:FRIEND_OF]->(target:Person)
+WITH gds.graph.project(
   'myGraph',
-  'Person',
-  'FRIEND_OF'
-);
+  source,
+  target
+) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
 
 In the following examples we will demonstrate using the CELF algorithm on this graph.

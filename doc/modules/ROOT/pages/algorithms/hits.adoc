@@ -252,11 +252,16 @@ In the example, we will use the HITS algorithm to calculate the authority and hu
 .The following statement will project the graph and store it in the graph catalog.
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
+MATCH (source:Website)-[r:LINK]->(target:Website)
+WITH gds.graph.project(
   'myGraph',
-  'Website',
-  {LINK: {indexInverse: true}}
-);
+  source,
+  target,
+  {},
+  { inverseIndexedRelationshipTypes: ['*'] }
+) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
 
 In the following examples we will demonstrate using the HITS algorithm on this graph.
