@@ -291,18 +291,22 @@ The `seed_label` property represents a value in the graph used to seed the node 
 For example, this can be a result from a previous run of the Label Propagation algorithm.
 In addition, each relationship has a weight property.
 
-.The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
+.The following statement will project a graph using a Cypher projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
-    'myGraph',
-    'User',
-    'FOLLOW',
-    {
-        nodeProperties: ['posts', 'seed_label'],
-        relationshipProperties: 'weight'
-    }
-)
+MATCH (source:User)-[r:FOLLOW]->(target:User)
+WITH gds.graph.project(
+  'myGraph',
+  source,
+  target,
+  {
+    sourceNodeProperties: source { .posts, .seed_label },
+    targetNodeProperties: target { .posts, .seed_label },
+    relationshipProperties: r { .weight }
+  }
+) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
 
 In the following examples we will demonstrate using the Label Propagation algorithm on this graph.

@@ -283,19 +283,20 @@ We load the `LINK` relationships with orientation set to `UNDIRECTED` as this wo
 .The following statement will project the graph and store it in the graph catalog.
 [source,cypher,role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
-    'myGraph',
-    'User',
-    {
-        LINK: {
-            orientation: 'UNDIRECTED'
-        }
-    },
-    {
-        nodeProperties: 'seed',
-        relationshipProperties: 'weight'
-    }
-)
+MATCH (source:User)-[r:LINK]->(target:User)
+WITH gds.graph.project(
+  'myGraph',
+  source,
+  target,
+  {
+    sourceNodeProperties: source { .seed },
+    targetNodeProperties: target { .seed },
+    relationshipProperties: r { .weight }
+  },
+  { undirectedRelationshipTypes: ['*'] }
+) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
 
 In the following examples we will demonstrate using the Leiden algorithm on this graph.
@@ -523,16 +524,16 @@ CREATE (m)-[:TYPE]->(n);
 .The following statement will project the graph and store it in the graph catalog.
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
-    'myGraph2',
-    'Node',
-    {
-        TYPE: {
-            orientation: 'undirected',
-            aggregation: 'NONE'
-        }
-    }
-)
+MATCH (source:Node)-[r:TYPE]->(target:Node)
+WITH gds.graph.project(
+  'myGraph2',
+  source,
+  target,
+  {},
+  { undirectedRelationshipTypes: ['*'] }
+) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
 
 

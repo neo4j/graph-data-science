@@ -260,15 +260,16 @@ Therefore the Modularity Optimization algorithm should detect two communities: "
 .The following statement will project the graph and store it in the graph catalog.
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
-    'myGraph',
-    'Person',
-    {
-        KNOWS: {
-            orientation: 'UNDIRECTED',
-            properties: ['weight']
-        }
-    })
+MATCH (source:Person)-[r:KNOWS]->(target:Person)
+WITH gds.graph.project(
+  'myGraph',
+  source,
+  target,
+  { relationshipProperties: r { .weight } },
+  { undirectedRelationshipTypes: ['*'] }
+) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
 [[algorithms-mo-mem-est]]
 === Memory estimation

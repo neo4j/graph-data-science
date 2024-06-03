@@ -220,15 +220,15 @@ We do this using a native projection targeting the `Person` nodes and the `TRANS
 .The following statement will project a graph store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
+MATCH (source:Person)-[r:TRANSACTION]->(target:Person)
+WITH gds.graph.project(
   'myGraph',
-  'Person',
-  {
-    TRANSACTION: {
-      properties: ['value']
-    }
-  }
-)
+  source,
+  target,
+  { relationshipProperties: r { .value } }
+) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
 
 

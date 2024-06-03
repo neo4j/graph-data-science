@@ -279,15 +279,16 @@ This is because the Triangle Count algorithm is defined only for undirected grap
 .The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
+MATCH (source:Person)-[r:KNOWS]->(target:Person)
+WITH gds.graph.project(
   'myGraph',
-  'Person',
-  {
-    KNOWS: {
-      orientation: 'UNDIRECTED'
-    }
-  }
-)
+  source,
+  target,
+  {},
+  { undirectedRelationshipTypes: ['*'] }
+) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
 
 include::partial$/algorithms/shared/undirected-req-note.adoc[]

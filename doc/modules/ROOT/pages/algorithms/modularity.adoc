@@ -150,19 +150,20 @@ We load the `LINK` relationships with orientation set to `UNDIRECTED`.
 .The following statement will project the graph and store it in the graph catalog.
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
-    'myGraph',
-    'User',
-    {
-        LINK: {
-            orientation: 'UNDIRECTED'
-        }
-    },
-    {
-        nodeProperties: 'community',
-        relationshipProperties: 'weight'
-    }
-)
+MATCH (source:User)-[r:LINK]->(target:User)
+WITH gds.graph.project(
+  'myGraph',
+  source,
+  target,
+  {
+    sourceNodeProperties: source { .community },
+    targetNodeProperties: target { .community },
+    relationshipProperties: r { .weight }
+  },
+  { undirectedRelationshipTypes: ['*'] }
+) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
 === Memory Estimation
 

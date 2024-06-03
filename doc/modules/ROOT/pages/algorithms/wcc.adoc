@@ -239,17 +239,18 @@ CREATE
 This graph has two connected components, each with three nodes.
 The relationships that connect the nodes in each component have a property `weight` which determines the strength of the relationship.
 
-.The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
+.The following statement will project a graph using a Cypher projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
+MATCH (source:User)-[r:LINK]->(target:User)
+WITH gds.graph.project(
   'myGraph',
-  'User',
-  'LINK',
-  {
-    relationshipProperties: 'weight'
-  }
-)
+  source,
+  target,
+  { relationshipProperties: r { .weight } }
+) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
 
 In the following examples we will demonstrate using the Weakly Connected Components algorithm on this graph.
@@ -506,15 +507,19 @@ We will therefore project a second graph that contains the previously computed c
 .The following will project a new graph containing the previously computed component id:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.project(
+MATCH (source:User)-[r:LINK]->(target:User)
+WITH gds.graph.project(
   'myGraph-seeded',
-  'User',
-  'LINK',
+  source,
+  target,
   {
-    nodeProperties: 'componentId',
-    relationshipProperties: 'weight'
+    sourceNodeProperties: source { .componentId },
+    targetNodeProperties: target { .componentId },
+    relationshipProperties: r { .weight }
   }
-)
+) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
 --
 
@@ -612,14 +617,19 @@ An inverse index allows the algorithm to traverse the relationships of a node ac
 If the graph is projected using a `NATURAL` orientation, the inverse index represents the `REVERSE` orientation and vice versa.
 
 
-.The following statement will project the above example graph using a native projection with inverse index  and store it in the graph catalog under the name `myIndexedGraph`.
+.The following statement will project the above example graph using a Cypher projection with inverse index  and store it in the graph catalog under the name `myIndexedGraph`.
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
+MATCH (source:User)-[r:LINK]->(target:User)
+WITH gds.graph.project(
   'myIndexedGraph',
-  'User',
-  {LINK: {orientation: 'NATURAL', indexInverse: true }}
-)
+  source,
+  target,
+  {},
+  { inverseIndexedRelationshipTypes: ['*'] }
+) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
 
 The following query is identical to the stream example in the xref:algorithms/wcc.adoc#algorithms-wcc-examples-seeding[previous section].

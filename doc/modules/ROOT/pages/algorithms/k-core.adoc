@@ -240,20 +240,20 @@ CREATE
 ----
 
 With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
-We do this using a native projection targeting the `User` nodes and the `FRIEND` relationships.
 
 .The following statement will project a graph using athe undirected projection and store it in the graph catalog under the name 'graph'.
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
+MATCH (source:User)-[r:FRIEND]->(target:User)
+WITH gds.graph.project(
   'graph',
-  'User',
-  {
-    FRIEND: {
-      orientation: 'UNDIRECTED'
-    }
-  }
-)
+  source,
+  target,
+  {},
+  { undirectedRelationshipTypes: ['*'] }
+) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 ----
 
 The graph is projected in the  `UNDIRECTED` orientation  as the friendship relationship is associative.
