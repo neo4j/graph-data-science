@@ -33,6 +33,7 @@ public enum LabelForProgressTracking {
     DeltaStepping("Delta Stepping"),
     DFS("DFS"),
     Dijkstra("Dijkstra"),
+    EigenVector("EigenVector"),
     FilteredKNN("Filtered K-Nearest Neighbours"),
     FilteredNodeSimilarity("Filtered Node Similarity"),
     HarmonicCentrality("HarmonicCentrality"),
@@ -66,6 +67,7 @@ public enum LabelForProgressTracking {
             case DeltaStepping -> DeltaStepping;
             case DFS -> DFS;
             case Dijkstra -> Dijkstra;
+            case EigenVector -> EigenVector;
             case FilteredKNN -> FilteredKNN;
             case FilteredNodeSimilarity -> FilteredNodeSimilarity;
             case HarmonicCentrality -> HarmonicCentrality;

@@ -42,6 +42,7 @@ import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStreamConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationWriteConfig;
+import org.neo4j.gds.pagerank.PageRankMutateConfig;
 import org.neo4j.gds.pagerank.PageRankStatsConfig;
 import org.neo4j.gds.pagerank.PageRankStreamConfig;
 import org.neo4j.gds.pagerank.PageRankWriteConfig;
@@ -51,12 +52,14 @@ import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetweennessCentralit
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.CelfMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.ClosenessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.DegreeCentralityMutateStub;
+import org.neo4j.gds.procedures.algorithms.centrality.stubs.EigenVectorMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.HarmonicCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
 import org.neo4j.gds.procedures.algorithms.runners.StatsModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.runners.WriteModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
+import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -70,8 +73,9 @@ public final class CentralityProcedureFacade {
     private final CelfMutateStub celfMutateStub;
     private final ClosenessCentralityMutateStub closenessCentralityMutateStub;
     private final DegreeCentralityMutateStub degreeCentralityMutateStub;
-
+    private final MutateStub<PageRankMutateConfig, PageRankMutateResult> eigenVectorMutateStub;
     private final HarmonicCentralityMutateStub harmonicCentralityMutateStub;
+
     private final ApplicationsFacade applicationsFacade;
 
     private final EstimationModeRunner estimationModeRunner;
@@ -87,6 +91,7 @@ public final class CentralityProcedureFacade {
         CelfMutateStub celfMutateStub,
         ClosenessCentralityMutateStub closenessCentralityMutateStub,
         DegreeCentralityMutateStub degreeCentralityMutateStub,
+        MutateStub<PageRankMutateConfig, PageRankMutateResult> eigenVectorMutateStub,
         HarmonicCentralityMutateStub harmonicCentralityMutateStub,
         ApplicationsFacade applicationsFacade,
         EstimationModeRunner estimationModeRunner,
@@ -101,6 +106,7 @@ public final class CentralityProcedureFacade {
         this.celfMutateStub = celfMutateStub;
         this.closenessCentralityMutateStub = closenessCentralityMutateStub;
         this.degreeCentralityMutateStub = degreeCentralityMutateStub;
+        this.eigenVectorMutateStub = eigenVectorMutateStub;
         this.harmonicCentralityMutateStub = harmonicCentralityMutateStub;
         this.applicationsFacade = applicationsFacade;
         this.estimationModeRunner = estimationModeRunner;
@@ -118,11 +124,7 @@ public final class CentralityProcedureFacade {
         StreamModeAlgorithmRunner streamModeRunner,
         WriteModeAlgorithmRunner writeModeRunner
     ) {
-        var articleRankMutateStub = new ArticleRankMutateStub(
-            genericStub,
-            applicationsFacade,
-            procedureReturnColumns
-        );
+        var articleRankMutateStub = new ArticleRankMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
         var betaClosenessCentralityMutateStub = new BetaClosenessCentralityMutateStub(
             genericStub,
             applicationsFacade,
@@ -133,10 +135,7 @@ public final class CentralityProcedureFacade {
             applicationsFacade,
             procedureReturnColumns
         );
-        var celfMutateStub = new CelfMutateStub(
-            genericStub,
-            applicationsFacade
-        );
+        var celfMutateStub = new CelfMutateStub(genericStub, applicationsFacade);
         var closenessCentralityMutateStub = new ClosenessCentralityMutateStub(
             genericStub,
             applicationsFacade,
@@ -146,6 +145,14 @@ public final class CentralityProcedureFacade {
             genericStub,
             applicationsFacade,
             procedureReturnColumns
+        );
+        var eigenVectorMutateStub = new MutateStubConfigurationValidationDecorator<>(
+            new EigenVectorMutateStub(
+                genericStub,
+                applicationsFacade,
+                procedureReturnColumns
+            ),
+            "dampingFactor"
         );
         var harmonicCentralityMutateStub = new HarmonicCentralityMutateStub(
             genericStub,
@@ -161,6 +168,7 @@ public final class CentralityProcedureFacade {
             celfMutateStub,
             closenessCentralityMutateStub,
             degreeCentralityMutateStub,
+            eigenVectorMutateStub,
             harmonicCentralityMutateStub,
             applicationsFacade,
             estimationModeRunner,
@@ -636,6 +644,10 @@ public final class CentralityProcedureFacade {
         );
 
         return Stream.of(result);
+    }
+
+    public MutateStub<PageRankMutateConfig, PageRankMutateResult> eigenVectorMutateStub() {
+        return eigenVectorMutateStub;
     }
 
     public HarmonicCentralityMutateStub harmonicCentralityMutateStub() {

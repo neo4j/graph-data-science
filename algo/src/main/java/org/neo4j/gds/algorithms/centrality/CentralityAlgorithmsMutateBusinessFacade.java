@@ -61,22 +61,6 @@ public class CentralityAlgorithmsMutateBusinessFacade {
         return pageRankVariant(intermediateResult, configuration, shouldComputeCentralityDistribution);
     }
 
-    public NodePropertyMutateResult<PageRankSpecificFields> eigenvector(
-        String graphName,
-        PageRankMutateConfig configuration,
-        boolean shouldComputeCentralityDistribution
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
-            () -> centralityAlgorithmsFacade.eigenvector(graphName, configuration)
-        );
-
-        return pageRankVariant(
-            intermediateResult, configuration,
-            shouldComputeCentralityDistribution
-        );
-    }
-
     @NotNull
     private NodePropertyMutateResult<PageRankSpecificFields> pageRankVariant(
         AlgorithmResultWithTiming<AlgorithmComputationResult<PageRankResult>> intermediateResult, PageRankMutateConfig configuration,

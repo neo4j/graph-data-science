@@ -67,6 +67,7 @@ public class ConfigurationParsersForMutateMode {
             case DeltaStepping -> AllShortestPathsDeltaMutateConfig::of;
             case DFS -> DfsMutateConfig::of;
             case Dijkstra -> ShortestPathDijkstraMutateConfig::of;
+            case EigenVector -> PageRankMutateConfig::of;
             case FilteredKNN -> FilteredKnnMutateConfig::of;
             case FilteredNodeSimilarity -> FilteredNodeSimilarityMutateConfig::of;
             case HarmonicCentrality -> HarmonicCentralityMutateConfig::of;

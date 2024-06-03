@@ -43,6 +43,7 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.CELF;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ClosenessCentrality;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.DegreeCentrality;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.EigenVector;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.HarmonicCentrality;
 
 public class CentralityAlgorithmsMutateModeBusinessFacade {
@@ -148,6 +149,24 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
             DegreeCentrality,
             () -> estimation.degreeCentrality(configuration),
             graph -> algorithms.degreeCentrality(graph, configuration),
+            Optional.of(mutateStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT eigenVector(
+        GraphName graphName,
+        PageRankMutateConfig configuration,
+        ResultBuilder<PageRankMutateConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var mutateStep = new PageRankMutateStep(mutateNodeProperty, configuration);
+
+        return template.processAlgorithm(
+            graphName,
+            configuration,
+            EigenVector,
+            estimation::pageRank,
+            graph -> algorithms.eigenVector(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
         );

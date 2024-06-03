@@ -71,6 +71,7 @@ final class MutateModeAlgorithmLibrary {
             case DeltaStepping -> CanonicalProcedureName.parse("gds.allshortestpaths.delta");
             case DFS -> CanonicalProcedureName.parse("gds.dfs");
             case Dijkstra -> CanonicalProcedureName.parse("gds.shortestpath.dijkstra");
+            case EigenVector -> CanonicalProcedureName.parse("gds.eigenvector");
             case FilteredKNN -> CanonicalProcedureName.parse("gds.knn.filtered");
             case FilteredNodeSimilarity -> CanonicalProcedureName.parse("gds.nodesimilarity.filtered");
             case HarmonicCentrality -> CanonicalProcedureName.parse("gds.closeness.harmonic");

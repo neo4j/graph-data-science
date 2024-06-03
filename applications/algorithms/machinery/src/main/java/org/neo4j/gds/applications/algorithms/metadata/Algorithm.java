@@ -40,6 +40,7 @@ public enum Algorithm {
     DeltaStepping,
     DFS,
     Dijkstra,
+    EigenVector,
     FilteredKNN,
     FilteredNodeSimilarity,
     HarmonicCentrality,
