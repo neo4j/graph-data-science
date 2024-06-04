@@ -73,8 +73,7 @@ public final class ApplicationsFacade {
         AlgorithmMetricsService algorithmMetricsService,
         ProjectionMetricsService projectionMetricsService,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
-        RequestScopedDependencies requestScopedDependencies,
-        WriteRelationshipService writeRelationshipService
+        RequestScopedDependencies requestScopedDependencies
     ) {
         var catalogBusinessFacade = createCatalogBusinessFacade(
             log,
@@ -109,6 +108,8 @@ public final class ApplicationsFacade {
             algorithmEstimationTemplate,
             progressTrackerCreator
         );
+
+        var writeRelationshipService = new WriteRelationshipService(log, requestScopedDependencies);
 
         var similarityApplications = SimilarityApplications.create(
             log,

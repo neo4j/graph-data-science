@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.procedures;
 
-import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.applications.ApplicationsFacade;
@@ -134,8 +133,6 @@ public class GraphDataScienceProcedures {
             algorithmEstimationTemplate
         );
 
-        var writeRelationshipService = new WriteRelationshipService(log, requestScopedDependencies);
-
         var applicationsFacade = ApplicationsFacade.create(
             log,
             algorithmProcessingTemplateDecorator,
@@ -145,8 +142,7 @@ public class GraphDataScienceProcedures {
             algorithmMetricsService,
             projectionMetricsService,
             algorithmEstimationTemplate,
-            requestScopedDependencies,
-            writeRelationshipService
+            requestScopedDependencies
         );
 
         var catalogProcedureFacade = catalogProcedureFacadeFactory.createCatalogProcedureFacade(
