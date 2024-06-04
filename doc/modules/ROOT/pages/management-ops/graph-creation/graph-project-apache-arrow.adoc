@@ -313,7 +313,7 @@ As with sending nodes and relationships, the overall throughput depends on the n
 Similar to the node import, the server expects the node records to adhere to a specific schema.
 Given an example node such as `({ yob: 1984, magic: 1.8, rank: 42 })`, it's record must be represented as follows:
 
-[[arrow-node-schema]]
+[[arrow-node-properties-schema]]
 [opts=header,cols="1,1,1,1"]
 |===
 | nodeId |  yob  | magic | rank
@@ -322,7 +322,7 @@ Given an example node such as `({ yob: 1984, magic: 1.8, rank: 42 })`, it's reco
 
 The following table describes the node columns with reserved names.
 
-[[arrow-node-columns]]
+[[arrow-node-properties-columns]]
 [opts=header,cols="1m,1,1,1,1"]
 |===
 | Name      | Type     | Optional | Nullable   | Description
