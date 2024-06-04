@@ -24,7 +24,6 @@ import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.input.Collector;
-import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
@@ -33,12 +32,6 @@ import org.neo4j.logging.internal.LogService;
 import org.neo4j.scheduler.JobScheduler;
 
 public interface Neo4jProxyApi {
-
-    @CompatSince(Neo4jVersion.V_5_17)
-    long estimateNodeCount(Read read, int label);
-
-    @CompatSince(Neo4jVersion.V_5_17)
-    long estimateRelationshipCount(Read read, int sourceLabel, int targetLabel, int type);
 
     @CompatSince(Neo4jVersion.V_5_18)
     default BatchImporter instantiateBlockBatchImporter(

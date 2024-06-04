@@ -118,11 +118,11 @@ public final class Neo4jProxy {
     );
 
     public static long estimateNodeCount(Read read, int label) {
-        return IMPL.estimateNodeCount(read, label);
+        return read.estimateCountsForNode(label);
     }
 
     public static long estimateRelationshipCount(Read read, int sourceLabel, int targetLabel, int type) {
-        return IMPL.estimateRelationshipCount(read, sourceLabel, targetLabel, type);
+        return read.estimateCountsForRelationships(sourceLabel, type, targetLabel);
     }
 
     public static DependencyResolver emptyDependencyResolver() {

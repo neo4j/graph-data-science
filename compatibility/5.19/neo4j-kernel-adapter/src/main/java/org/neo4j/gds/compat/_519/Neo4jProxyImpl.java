@@ -28,7 +28,6 @@ import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.Monitor;
 import org.neo4j.internal.batchimport.input.Collector;
-import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.io.fs.FileSystemAbstraction;
@@ -48,16 +47,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.stream.Stream;
 
 public final class Neo4jProxyImpl implements Neo4jProxyApi {
-
-    @Override
-    public long estimateNodeCount(Read read, int label) {
-        return read.estimateCountsForNode(label);
-    }
-
-    @Override
-    public long estimateRelationshipCount(Read read, int sourceLabel, int targetLabel, int type) {
-        return read.estimateCountsForRelationships(sourceLabel, type, targetLabel);
-    }
 
     @Override
     public BatchImporter instantiateBlockBatchImporter(
