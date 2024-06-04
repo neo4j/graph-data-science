@@ -41,6 +41,7 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.DegreeCentrality;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.EigenVector;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.HarmonicCentrality;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.PageRank;
 
 public class CentralityAlgorithmsStatsModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
@@ -84,6 +85,22 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
             BetweennessCentrality,
             () -> estimationFacade.betweennessCentrality(configuration),
             graph -> centralityAlgorithms.betweennessCentrality(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT celf(
+        GraphName graphName,
+        InfluenceMaximizationStatsConfig configuration,
+        ResultBuilder<InfluenceMaximizationStatsConfig, CELFResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            CELF,
+            () -> estimationFacade.celf(configuration),
+            graph -> centralityAlgorithms.celf(graph, configuration),
             Optional.empty(),
             resultBuilder
         );
@@ -153,17 +170,17 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
         );
     }
 
-    public <RESULT> RESULT celf(
+    public <RESULT> RESULT pageRank(
         GraphName graphName,
-        InfluenceMaximizationStatsConfig configuration,
-        ResultBuilder<InfluenceMaximizationStatsConfig, CELFResult, RESULT, Void> resultBuilder
+        PageRankStatsConfig configuration,
+        ResultBuilder<PageRankStatsConfig, PageRankResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
-            CELF,
-            () -> estimationFacade.celf(configuration),
-            graph -> centralityAlgorithms.celf(graph, configuration),
+            PageRank,
+            estimationFacade::pageRank,
+            graph -> centralityAlgorithms.pageRank(graph, configuration),
             Optional.empty(),
             resultBuilder
         );

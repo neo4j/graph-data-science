@@ -803,6 +803,32 @@ public final class CentralityProcedureFacade {
         return pageRankMutateStub;
     }
 
+    public Stream<PageRankStatsResult> pageRankStats(String graphName, Map<String, Object> configuration) {
+        var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("centralityDistribution");
+        var resultBuilder = new PageRankResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
+
+        return statsModeRunner.runStatsModeAlgorithm(
+            graphName,
+            configuration,
+            PageRankStatsConfig::of,
+            resultBuilder,
+            statsMode()::pageRank
+        );
+    }
+
+    public Stream<MemoryEstimateResult> pageRankStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationModeRunner.runEstimation(
+            algorithmConfiguration,
+            PageRankStatsConfig::of,
+            configuration -> estimationMode().pageRank(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
     private CentralityAlgorithmsEstimationModeBusinessFacade estimationMode() {
         return applicationsFacade.centrality().estimate();
     }

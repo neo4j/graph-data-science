@@ -41,13 +41,6 @@ public class CentralityAlgorithmsFacade {
         return pageRankVariant(graphName, config, PageRankAlgorithmFactory.Mode.PAGE_RANK);
     }
 
-    AlgorithmComputationResult<PageRankResult> eigenvector(
-        String graphName,
-        PageRankConfig config
-    ) {
-        return pageRankVariant(graphName, config, PageRankAlgorithmFactory.Mode.EIGENVECTOR);
-    }
-
     private AlgorithmComputationResult<PageRankResult> pageRankVariant(
         String graphName,
         PageRankConfig config,

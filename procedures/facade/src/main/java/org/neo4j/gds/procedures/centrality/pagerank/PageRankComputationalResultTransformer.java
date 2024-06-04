@@ -20,33 +20,13 @@
 package org.neo4j.gds.procedures.centrality.pagerank;
 
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
-import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.centrality.specificfields.PageRankSpecificFields;
-import org.neo4j.gds.pagerank.PageRankStatsConfig;
 import org.neo4j.gds.pagerank.PageRankWriteConfig;
-import org.neo4j.gds.procedures.algorithms.centrality.PageRankStatsResult;
 import org.neo4j.gds.procedures.algorithms.centrality.PageRankWriteResult;
 
 public final class PageRankComputationalResultTransformer {
 
     private PageRankComputationalResultTransformer() {}
-
-    public static PageRankStatsResult toStatsResult(
-        StatsResult<PageRankSpecificFields> computationResult,
-        @SuppressWarnings("TypeMayBeWeakened")
-        PageRankStatsConfig configuration
-    ) {
-        return new PageRankStatsResult(
-            computationResult.algorithmSpecificFields().ranIterations(),
-            computationResult.algorithmSpecificFields().didConverge(),
-            computationResult.algorithmSpecificFields().centralityDistribution(),
-            computationResult.preProcessingMillis(),
-            computationResult.computeMillis(),
-            computationResult.postProcessingMillis(),
-            configuration.toMap()
-        );
-    }
-
 
     public static PageRankWriteResult toWriteResult(
         NodePropertyWriteResult<PageRankSpecificFields> computationResult,

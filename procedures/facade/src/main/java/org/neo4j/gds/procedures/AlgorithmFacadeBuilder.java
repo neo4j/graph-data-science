@@ -21,7 +21,6 @@ package org.neo4j.gds.procedures;
 
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsFacade;
-import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsStatsBusinessFacade;
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsEstimateBusinessFacade;
@@ -131,7 +130,6 @@ class AlgorithmFacadeBuilder {
         var centralityAlgorithmsFacade = new CentralityAlgorithmsFacade(algorithmRunner);
 
         var estimateBusinessFacade = new CentralityAlgorithmsEstimateBusinessFacade(algorithmEstimator);
-        var statsBusinessFacade = new CentralityAlgorithmsStatsBusinessFacade(centralityAlgorithmsFacade);
         var streamBusinessFacade = new CentralityAlgorithmsStreamBusinessFacade(centralityAlgorithmsFacade);
         var writeBusinessFacade = new CentralityAlgorithmsWriteBusinessFacade(
             centralityAlgorithmsFacade,
@@ -143,7 +141,6 @@ class AlgorithmFacadeBuilder {
             configurationCreator,
             procedureReturnColumns,
             estimateBusinessFacade,
-            statsBusinessFacade,
             streamBusinessFacade,
             writeBusinessFacade
         );
