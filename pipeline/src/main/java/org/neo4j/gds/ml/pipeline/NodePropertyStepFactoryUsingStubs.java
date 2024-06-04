@@ -95,13 +95,20 @@ final class NodePropertyStepFactoryUsingStubs {
         List<String> contextNodeLabels,
         List<String> contextRelationshipTypes
     ) {
-        var canonicalProcedureName = CanonicalProcedureName.parse(procedureName);
-
-        var algorithm = mutateModeAlgorithmLibrary.lookup(canonicalProcedureName);
+        /*
+         * An explanation is in order here. User comes along with a string, and we need to match that to an algorithm.
+         * So we do normalising, and a lookup.
+         * The next thing we want to do is make things pretty, so we take the algorithm and look up its pretty name,
+         * its canonical name. That's handy for error messages and consistency.
+         */
+        var normalisedProcedureName = CanonicalProcedureName.parse(procedureName);
+        var algorithm = mutateModeAlgorithmLibrary.lookup(normalisedProcedureName);
 
         // The invariant is, you would have called "handles" above first, and you would have been turned away there
         if (algorithm == null) throw new IllegalStateException(
             "If you managed to get here, there was a programmer error somewhere");
+
+        var canonicalProcedureName = MutateModeAlgorithmLibrary.algorithmToName(algorithm);
 
         validationService.validate(algorithm, configuration);
 

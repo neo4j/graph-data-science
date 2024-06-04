@@ -56,35 +56,36 @@ final class MutateModeAlgorithmLibrary {
     /**
      * @return the canonical procedure name, or null if the algorithm does not have a mutate mode
      */
-    private static CanonicalProcedureName algorithmToName(Algorithm algorithm) {
+    static CanonicalProcedureName algorithmToName(Algorithm algorithm) {
         return switch (algorithm) {
             case AllShortestPaths -> null;
             case ArticleRank -> CanonicalProcedureName.parse("gds.articleRank");
-            case AStar -> CanonicalProcedureName.parse("gds.shortestpath.astar");
-            case BellmanFord -> CanonicalProcedureName.parse("gds.bellmanford");
+            case AStar -> CanonicalProcedureName.parse("gds.shortestPath.astar");
+            case BellmanFord -> CanonicalProcedureName.parse("gds.bellmanFord");
             case BetaClosenessCentrality -> CanonicalProcedureName.parse("gds.beta.closeness");
             case BetweennessCentrality -> CanonicalProcedureName.parse("gds.betweenness");
             case BFS -> CanonicalProcedureName.parse("gds.bfs");
             case CELF -> CanonicalProcedureName.parse("gds.influenceMaximization.celf");
             case ClosenessCentrality -> CanonicalProcedureName.parse("gds.closeness");
             case DegreeCentrality -> CanonicalProcedureName.parse("gds.degree");
-            case DeltaStepping -> CanonicalProcedureName.parse("gds.allshortestpaths.delta");
+            case DeltaStepping -> CanonicalProcedureName.parse("gds.allShortestPaths.delta");
             case DFS -> CanonicalProcedureName.parse("gds.dfs");
-            case Dijkstra -> CanonicalProcedureName.parse("gds.shortestpath.dijkstra");
+            case Dijkstra -> CanonicalProcedureName.parse("gds.shortestPath.dijkstra");
             case EigenVector -> CanonicalProcedureName.parse("gds.eigenvector");
             case FilteredKNN -> CanonicalProcedureName.parse("gds.knn.filtered");
-            case FilteredNodeSimilarity -> CanonicalProcedureName.parse("gds.nodesimilarity.filtered");
+            case FilteredNodeSimilarity -> CanonicalProcedureName.parse("gds.nodeSimilarity.filtered");
             case HarmonicCentrality -> CanonicalProcedureName.parse("gds.closeness.harmonic");
             case KNN -> CanonicalProcedureName.parse("gds.knn");
             case KSpanningTree -> null;
             case LongestPath -> null;
-            case NodeSimilarity -> CanonicalProcedureName.parse("gds.nodesimilarity");
+            case NodeSimilarity -> CanonicalProcedureName.parse("gds.nodeSimilarity");
+            case PageRank -> CanonicalProcedureName.parse("gds.pageRank");
             case RandomWalk -> null;
-            case SingleSourceDijkstra -> CanonicalProcedureName.parse("gds.allshortestpaths.dijkstra");
-            case SpanningTree -> CanonicalProcedureName.parse("gds.spanningtree");
-            case SteinerTree -> CanonicalProcedureName.parse("gds.steinertree");
+            case SingleSourceDijkstra -> CanonicalProcedureName.parse("gds.allShortestPaths.dijkstra");
+            case SpanningTree -> CanonicalProcedureName.parse("gds.spanningTree");
+            case SteinerTree -> CanonicalProcedureName.parse("gds.steinerTree");
             case TopologicalSort -> null;
-            case Yens -> CanonicalProcedureName.parse("gds.shortestpath.yens");
+            case Yens -> CanonicalProcedureName.parse("gds.shortestPath.yens");
         };
     }
 

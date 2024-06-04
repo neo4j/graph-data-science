@@ -75,6 +75,7 @@ public class ConfigurationParsersForMutateMode {
             case KSpanningTree -> null;
             case LongestPath -> null;
             case NodeSimilarity -> NodeSimilarityMutateConfig::of;
+            case PageRank -> PageRankMutateConfig::of;
             case RandomWalk -> null;
             case SingleSourceDijkstra -> AllShortestPathsDijkstraMutateConfig::of;
             case SpanningTree -> SpanningTreeMutateConfig::of;

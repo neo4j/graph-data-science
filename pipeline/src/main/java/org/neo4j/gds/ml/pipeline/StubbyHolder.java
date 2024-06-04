@@ -35,6 +35,7 @@ import org.neo4j.gds.ml.pipeline.stubs.FilteredNodeSimilarityStub;
 import org.neo4j.gds.ml.pipeline.stubs.HarmonicCentralityStub;
 import org.neo4j.gds.ml.pipeline.stubs.KnnStub;
 import org.neo4j.gds.ml.pipeline.stubs.NodeSimilarityStub;
+import org.neo4j.gds.ml.pipeline.stubs.PageRankStub;
 import org.neo4j.gds.ml.pipeline.stubs.SinglePairShortestPathAStarStub;
 import org.neo4j.gds.ml.pipeline.stubs.SinglePairShortestPathDijkstraStub;
 import org.neo4j.gds.ml.pipeline.stubs.SinglePairShortestPathYensStub;
@@ -75,6 +76,7 @@ class StubbyHolder {
             case KSpanningTree -> null;
             case LongestPath -> null;
             case NodeSimilarity -> new NodeSimilarityStub();
+            case PageRank -> new PageRankStub();
             case RandomWalk -> null;
             case SingleSourceDijkstra -> new SingleSourceShortestPathDijkstraStub();
             case SpanningTree -> new SpanningTreeStub();

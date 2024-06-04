@@ -48,6 +48,7 @@ public enum Algorithm {
     KSpanningTree,
     LongestPath,
     NodeSimilarity,
+    PageRank,
     RandomWalk,
     SingleSourceDijkstra,
     SpanningTree,

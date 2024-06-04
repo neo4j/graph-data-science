@@ -20,22 +20,19 @@
 package org.neo4j.gds.procedures.centrality;
 
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsEstimateBusinessFacade;
-import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsMutateBusinessFacade;
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsStatsBusinessFacade;
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.pagerank.PageRankMutateConfig;
 import org.neo4j.gds.pagerank.PageRankStatsConfig;
 import org.neo4j.gds.pagerank.PageRankStreamConfig;
 import org.neo4j.gds.pagerank.PageRankWriteConfig;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityStreamResult;
-import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.centrality.pagerank.PageRankComputationalResultTransformer;
-import org.neo4j.gds.procedures.algorithms.centrality.PageRankMutateResult;
 import org.neo4j.gds.procedures.algorithms.centrality.PageRankStatsResult;
 import org.neo4j.gds.procedures.algorithms.centrality.PageRankWriteResult;
+import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
+import org.neo4j.gds.procedures.centrality.pagerank.PageRankComputationalResultTransformer;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -44,7 +41,6 @@ public class CentralityProcedureFacade {
 
     private final ConfigurationCreator configurationCreator;
     private final ProcedureReturnColumns procedureReturnColumns;
-    private final CentralityAlgorithmsMutateBusinessFacade mutateBusinessFacade;
     private final CentralityAlgorithmsStatsBusinessFacade statsBusinessFacade;
     private final CentralityAlgorithmsStreamBusinessFacade streamBusinessFacade;
     private final CentralityAlgorithmsWriteBusinessFacade writeBusinessFacade;
@@ -55,14 +51,12 @@ public class CentralityProcedureFacade {
         ConfigurationCreator configurationCreator,
         ProcedureReturnColumns procedureReturnColumns,
         CentralityAlgorithmsEstimateBusinessFacade estimateBusinessFacade,
-        CentralityAlgorithmsMutateBusinessFacade mutateBusinessFacade,
         CentralityAlgorithmsStatsBusinessFacade statsBusinessFacade,
         CentralityAlgorithmsStreamBusinessFacade streamBusinessFacade,
         CentralityAlgorithmsWriteBusinessFacade writeBusinessFacade
     ) {
         this.configurationCreator = configurationCreator;
         this.procedureReturnColumns = procedureReturnColumns;
-        this.mutateBusinessFacade = mutateBusinessFacade;
         this.statsBusinessFacade = statsBusinessFacade;
         this.streamBusinessFacade = streamBusinessFacade;
         this.writeBusinessFacade = writeBusinessFacade;
@@ -112,30 +106,6 @@ public class CentralityProcedureFacade {
         Map<String, Object> configuration
     ) {
         var config = configurationCreator.createConfiguration(configuration, PageRankStatsConfig::of);
-
-        return Stream.of(estimateBusinessFacade.pageRank(graphNameOrConfiguration, config));
-    }
-
-    public Stream<PageRankMutateResult> pageRankMutate(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, PageRankMutateConfig::of);
-
-        var computationResult = mutateBusinessFacade.pageRank(
-            graphName,
-            config,
-            procedureReturnColumns.contains("centralityDistribution")
-        );
-
-        return Stream.of(PageRankComputationalResultTransformer.toMutateResult(computationResult, config));
-    }
-
-    public Stream<MemoryEstimateResult> pageRankMutateEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, PageRankMutateConfig::of);
 
         return Stream.of(estimateBusinessFacade.pageRank(graphNameOrConfiguration, config));
     }

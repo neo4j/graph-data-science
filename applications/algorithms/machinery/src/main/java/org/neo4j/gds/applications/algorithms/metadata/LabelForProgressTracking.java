@@ -41,6 +41,7 @@ public enum LabelForProgressTracking {
     KSpanningTree("K Spanning Tree"),
     LongestPath("LongestPath"),
     NodeSimilarity("Node Similarity"),
+    PageRank("PageRank"),
     RandomWalk("RandomWalk"),
     SingleSourceDijkstra("All Shortest Paths"),
     SpanningTree("SpanningTree"),
@@ -75,6 +76,7 @@ public enum LabelForProgressTracking {
             case KSpanningTree -> KSpanningTree;
             case LongestPath -> LongestPath;
             case NodeSimilarity -> NodeSimilarity;
+            case PageRank -> PageRank;
             case RandomWalk -> RandomWalk;
             case SingleSourceDijkstra -> SingleSourceDijkstra;
             case SpanningTree -> SpanningTree;

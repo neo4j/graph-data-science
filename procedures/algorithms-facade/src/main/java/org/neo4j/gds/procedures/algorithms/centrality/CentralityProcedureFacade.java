@@ -46,14 +46,13 @@ import org.neo4j.gds.pagerank.PageRankMutateConfig;
 import org.neo4j.gds.pagerank.PageRankStatsConfig;
 import org.neo4j.gds.pagerank.PageRankStreamConfig;
 import org.neo4j.gds.pagerank.PageRankWriteConfig;
-import org.neo4j.gds.procedures.algorithms.centrality.stubs.ArticleRankMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetaClosenessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetweennessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.CelfMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.ClosenessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.DegreeCentralityMutateStub;
-import org.neo4j.gds.procedures.algorithms.centrality.stubs.EigenVectorMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.HarmonicCentralityMutateStub;
+import org.neo4j.gds.procedures.algorithms.centrality.stubs.PageRankMutateStub;
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
 import org.neo4j.gds.procedures.algorithms.runners.StatsModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
@@ -67,7 +66,7 @@ import java.util.stream.Stream;
 public final class CentralityProcedureFacade {
     private final ProcedureReturnColumns procedureReturnColumns;
 
-    private final ArticleRankMutateStub articleRankMutateStub;
+    private final PageRankMutateStub articleRankMutateStub;
     private final BetaClosenessCentralityMutateStub betaClosenessCentralityMutateStub;
     private final BetweennessCentralityMutateStub betweennessCentralityMutateStub;
     private final CelfMutateStub celfMutateStub;
@@ -75,6 +74,7 @@ public final class CentralityProcedureFacade {
     private final DegreeCentralityMutateStub degreeCentralityMutateStub;
     private final MutateStub<PageRankMutateConfig, PageRankMutateResult> eigenVectorMutateStub;
     private final HarmonicCentralityMutateStub harmonicCentralityMutateStub;
+    private final PageRankMutateStub pageRankMutateStub;
 
     private final ApplicationsFacade applicationsFacade;
 
@@ -85,7 +85,7 @@ public final class CentralityProcedureFacade {
 
     private CentralityProcedureFacade(
         ProcedureReturnColumns procedureReturnColumns,
-        ArticleRankMutateStub articleRankMutateStub,
+        PageRankMutateStub articleRankMutateStub,
         BetaClosenessCentralityMutateStub betaClosenessCentralityMutateStub,
         BetweennessCentralityMutateStub betweennessCentralityMutateStub,
         CelfMutateStub celfMutateStub,
@@ -93,6 +93,7 @@ public final class CentralityProcedureFacade {
         DegreeCentralityMutateStub degreeCentralityMutateStub,
         MutateStub<PageRankMutateConfig, PageRankMutateResult> eigenVectorMutateStub,
         HarmonicCentralityMutateStub harmonicCentralityMutateStub,
+        PageRankMutateStub pageRankMutateStub,
         ApplicationsFacade applicationsFacade,
         EstimationModeRunner estimationModeRunner,
         StatsModeAlgorithmRunner statsModeRunner,
@@ -108,6 +109,7 @@ public final class CentralityProcedureFacade {
         this.degreeCentralityMutateStub = degreeCentralityMutateStub;
         this.eigenVectorMutateStub = eigenVectorMutateStub;
         this.harmonicCentralityMutateStub = harmonicCentralityMutateStub;
+        this.pageRankMutateStub = pageRankMutateStub;
         this.applicationsFacade = applicationsFacade;
         this.estimationModeRunner = estimationModeRunner;
         this.statsModeRunner = statsModeRunner;
@@ -124,7 +126,12 @@ public final class CentralityProcedureFacade {
         StreamModeAlgorithmRunner streamModeRunner,
         WriteModeAlgorithmRunner writeModeRunner
     ) {
-        var articleRankMutateStub = new ArticleRankMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
+        var articleRankMutateStub = new PageRankMutateStub(
+            genericStub,
+            applicationsFacade,
+            procedureReturnColumns,
+            applicationsFacade.centrality().mutate()::articleRank
+        );
         var betaClosenessCentralityMutateStub = new BetaClosenessCentralityMutateStub(
             genericStub,
             applicationsFacade,
@@ -147,10 +154,11 @@ public final class CentralityProcedureFacade {
             procedureReturnColumns
         );
         var eigenVectorMutateStub = new MutateStubConfigurationValidationDecorator<>(
-            new EigenVectorMutateStub(
+            new PageRankMutateStub(
                 genericStub,
                 applicationsFacade,
-                procedureReturnColumns
+                procedureReturnColumns,
+                applicationsFacade.centrality().mutate()::eigenVector
             ),
             "dampingFactor"
         );
@@ -158,6 +166,12 @@ public final class CentralityProcedureFacade {
             genericStub,
             applicationsFacade,
             procedureReturnColumns
+        );
+        var pageRankMutateStub = new PageRankMutateStub(
+            genericStub,
+            applicationsFacade,
+            procedureReturnColumns,
+            applicationsFacade.centrality().mutate()::pageRank
         );
 
         return new CentralityProcedureFacade(
@@ -170,6 +184,7 @@ public final class CentralityProcedureFacade {
             degreeCentralityMutateStub,
             eigenVectorMutateStub,
             harmonicCentralityMutateStub,
+            pageRankMutateStub,
             applicationsFacade,
             estimationModeRunner,
             statsModeRunner,
@@ -209,7 +224,7 @@ public final class CentralityProcedureFacade {
         );
     }
 
-    public ArticleRankMutateStub articleRankMutateStub() {
+    public PageRankMutateStub articleRankMutateStub() {
         return articleRankMutateStub;
     }
 
@@ -782,6 +797,10 @@ public final class CentralityProcedureFacade {
             writeMode()::harmonicCentrality,
             resultBuilder
         );
+    }
+
+    public PageRankMutateStub pageRankMutateStub() {
+        return pageRankMutateStub;
     }
 
     private CentralityAlgorithmsEstimationModeBusinessFacade estimationMode() {

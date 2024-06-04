@@ -19,14 +19,11 @@
  */
 package org.neo4j.gds.procedures.centrality.pagerank;
 
-import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.centrality.specificfields.PageRankSpecificFields;
-import org.neo4j.gds.pagerank.PageRankMutateConfig;
 import org.neo4j.gds.pagerank.PageRankStatsConfig;
 import org.neo4j.gds.pagerank.PageRankWriteConfig;
-import org.neo4j.gds.procedures.algorithms.centrality.PageRankMutateResult;
 import org.neo4j.gds.procedures.algorithms.centrality.PageRankStatsResult;
 import org.neo4j.gds.procedures.algorithms.centrality.PageRankWriteResult;
 
@@ -47,25 +44,6 @@ public final class PageRankComputationalResultTransformer {
             computationResult.computeMillis(),
             computationResult.postProcessingMillis(),
             configuration.toMap()
-        );
-    }
-
-    public static PageRankMutateResult toMutateResult(
-        NodePropertyMutateResult<PageRankSpecificFields> computationResult,
-        @SuppressWarnings("TypeMayBeWeakened")
-        PageRankMutateConfig config
-    ) {
-
-        return new PageRankMutateResult(
-            computationResult.algorithmSpecificFields().ranIterations(),
-            computationResult.algorithmSpecificFields().didConverge(),
-            computationResult.algorithmSpecificFields().centralityDistribution(),
-            computationResult.preProcessingMillis(),
-            computationResult.computeMillis(),
-            computationResult.postProcessingMillis(),
-            computationResult.mutateMillis(),
-            computationResult.nodePropertiesWritten(),
-            config.toMap()
         );
     }
 

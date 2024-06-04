@@ -66,6 +66,7 @@ import java.util.function.LongToDoubleFunction;
 
 import static org.neo4j.gds.pagerank.PageRankAlgorithmFactory.Mode.ARTICLE_RANK;
 import static org.neo4j.gds.pagerank.PageRankAlgorithmFactory.Mode.EIGENVECTOR;
+import static org.neo4j.gds.pagerank.PageRankAlgorithmFactory.Mode.PAGE_RANK;
 
 public class CentralityAlgorithms {
     private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
@@ -187,6 +188,10 @@ public class CentralityAlgorithms {
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+    }
+
+    PageRankResult pageRank(Graph graph, PageRankConfig configuration) {
+        return pagerank(graph, configuration, LabelForProgressTracking.PageRank, PAGE_RANK);
     }
 
     private double averageDegree(Graph graph, Concurrency concurrency) {

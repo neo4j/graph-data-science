@@ -19,18 +19,17 @@
  */
 package org.neo4j.gds.procedures.algorithms;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 import java.util.Locale;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class CanonicalProcedureName {
-    private final String value;
+    private final String normalised;
+    private final String raw;
 
-    private CanonicalProcedureName(String value) {
-        this.value = value;
+    private CanonicalProcedureName(String normalised, String raw) {
+        this.normalised = normalised;
+        this.raw = raw;
     }
 
     /**
@@ -43,29 +42,29 @@ public final class CanonicalProcedureName {
      *     <li>gds.shortestPath.dijkstra</li>
      * </ul>
      */
-    public static CanonicalProcedureName parse(String input) {
-        input = input.toLowerCase(Locale.ROOT);
-        input = !input.startsWith("gds.") ? formatWithLocale("gds.%s", input) : input;
-        input = !input.endsWith(".mutate") ? formatWithLocale("%s.mutate", input) : input;
+    public static CanonicalProcedureName parse(String rawInput) {
+        var normalisedInput = rawInput.toLowerCase(Locale.ROOT);
+        normalisedInput = !normalisedInput.startsWith("gds.") ? formatWithLocale("gds.%s", normalisedInput) : normalisedInput;
+        normalisedInput = !normalisedInput.endsWith(".mutate") ? formatWithLocale("%s.mutate", normalisedInput) : normalisedInput;
 
-        return new CanonicalProcedureName(input.substring(0, input.length() - ".mutate".length()));
+        return new CanonicalProcedureName(normalisedInput.substring(0, normalisedInput.length() - ".mutate".length()), rawInput);
     }
 
-    public String getValue() {
-        return value;
+    public String getNormalisedForm() {
+        return normalised;
+    }
+
+    public String getRawForm() {
+        return raw;
     }
 
     @Override
     public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
+        return normalised.hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
-    }
-
-    boolean matches(String identifier) {
-        return value.equals(identifier);
+        return normalised.equals(obj);
     }
 }
