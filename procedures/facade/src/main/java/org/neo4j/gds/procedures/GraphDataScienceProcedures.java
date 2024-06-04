@@ -25,6 +25,7 @@ import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
@@ -32,6 +33,7 @@ import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
+import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
@@ -92,11 +94,13 @@ public class GraphDataScienceProcedures {
         Log log,
         DefaultsConfiguration defaultsConfiguration,
         LimitsConfiguration limitsConfiguration,
+        Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
         Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> catalogBusinessFacadeDecorator,
         GraphStoreCatalogService graphStoreCatalogService,
+        MemoryGuard memoryGuard,
+        AlgorithmMetricsService algorithmMetricsService,
         ProjectionMetricsService projectionMetricsService,
         AlgorithmMetaDataSetter algorithmMetaDataSetter,
-        AlgorithmProcessingTemplate algorithmProcessingTemplate,
         KernelTransaction kernelTransaction,
         GraphLoaderContext graphLoaderContext,
         RequestScopedDependencies requestScopedDependencies,
@@ -134,11 +138,13 @@ public class GraphDataScienceProcedures {
 
         var applicationsFacade = ApplicationsFacade.create(
             log,
+            algorithmProcessingTemplateDecorator,
             catalogBusinessFacadeDecorator,
             graphStoreCatalogService,
+            memoryGuard,
+            algorithmMetricsService,
             projectionMetricsService,
             algorithmEstimationTemplate,
-            algorithmProcessingTemplate,
             requestScopedDependencies,
             writeRelationshipService
         );

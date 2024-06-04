@@ -21,8 +21,7 @@ package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
-import org.neo4j.gds.applications.algorithms.machinery.DefaultAlgorithmProcessingTemplate;
-import org.neo4j.gds.applications.algorithms.machinery.DefaultMemoryGuard;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
@@ -30,7 +29,6 @@ import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.mem.MemoryGauge;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
@@ -74,10 +72,9 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
     private final DeprecatedProceduresMetricService deprecatedProceduresMetricService;
     private final ExporterBuildersProviderService exporterBuildersProviderService;
     private final GraphStoreCatalogService graphStoreCatalogService;
-    private final MemoryGauge memoryGauge;
+    private final MemoryGuard memoryGuard;
     private final ProjectionMetricsService projectionMetricsService;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
-    private final boolean useMaxMemoryEstimation;
     private final UserLogServices userLogServices;
 
     GraphDataScienceProvider(
@@ -92,10 +89,9 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         DeprecatedProceduresMetricService deprecatedProceduresMetricService,
         ExporterBuildersProviderService exporterBuildersProviderService,
         GraphStoreCatalogService graphStoreCatalogService,
-        MemoryGauge memoryGauge,
+        MemoryGuard memoryGuard,
         ProjectionMetricsService projectionMetricsService,
         TaskRegistryFactoryService taskRegistryFactoryService,
-        boolean useMaxMemoryEstimation,
         UserLogServices userLogServices
     ) {
         this.log = log;
@@ -109,10 +105,9 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         this.deprecatedProceduresMetricService = deprecatedProceduresMetricService;
         this.exporterBuildersProviderService = exporterBuildersProviderService;
         this.graphStoreCatalogService = graphStoreCatalogService;
-        this.memoryGauge = memoryGauge;
+        this.memoryGuard = memoryGuard;
         this.projectionMetricsService = projectionMetricsService;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
-        this.useMaxMemoryEstimation = useMaxMemoryEstimation;
         this.userLogServices = userLogServices;
     }
 
@@ -155,7 +150,6 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             .with(userLogStore)
             .build();
 
-        var algorithmProcessingTemplate = buildAlgorithmProcessingTemplate(requestScopedDependencies);
         var graphLoaderContext = GraphLoaderContextProvider.buildGraphLoaderContext(
             context,
             databaseId,
@@ -169,11 +163,13 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             log,
             defaultsConfiguration,
             limitsConfiguration,
+            algorithmProcessingTemplateDecorator,
             catalogBusinessFacadeDecorator,
             graphStoreCatalogService,
+            memoryGuard,
+            algorithmMetricsService,
             projectionMetricsService,
             algorithmMetaDataSetter,
-            algorithmProcessingTemplate,
             kernelTransaction,
             graphLoaderContext,
             requestScopedDependencies,
@@ -183,21 +179,5 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             algorithmFacadeBuilderFactory,
             deprecatedProceduresMetricService
         );
-    }
-
-    private AlgorithmProcessingTemplate buildAlgorithmProcessingTemplate(RequestScopedDependencies requestScopedDependencies) {
-        var memoryGuard = new DefaultMemoryGuard(log, useMaxMemoryEstimation, memoryGauge);
-
-        var algorithmProcessingTemplate = new DefaultAlgorithmProcessingTemplate(
-            log,
-            algorithmMetricsService,
-            graphStoreCatalogService,
-            memoryGuard,
-            requestScopedDependencies
-        );
-
-        if (algorithmProcessingTemplateDecorator.isEmpty()) return algorithmProcessingTemplate;
-
-        return algorithmProcessingTemplateDecorator.get().apply(algorithmProcessingTemplate);
     }
 }

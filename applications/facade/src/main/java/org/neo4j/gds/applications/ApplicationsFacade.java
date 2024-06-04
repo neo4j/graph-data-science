@@ -22,12 +22,15 @@ package org.neo4j.gds.applications;
 import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.DefaultAlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.applications.graphstorecatalog.DefaultCatalogBusinessFacade;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 
 import java.util.Optional;
@@ -63,11 +66,13 @@ public final class ApplicationsFacade {
      */
     public static ApplicationsFacade create(
         Log log,
+        Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
         Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> catalogBusinessFacadeDecorator,
         GraphStoreCatalogService graphStoreCatalogService,
+        MemoryGuard memoryGuard,
+        AlgorithmMetricsService algorithmMetricsService,
         ProjectionMetricsService projectionMetricsService,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
-        AlgorithmProcessingTemplate algorithmProcessingTemplate,
         RequestScopedDependencies requestScopedDependencies,
         WriteRelationshipService writeRelationshipService
     ) {
@@ -76,6 +81,15 @@ public final class ApplicationsFacade {
             catalogBusinessFacadeDecorator,
             graphStoreCatalogService,
             projectionMetricsService
+        );
+
+        var algorithmProcessingTemplate = createAlgorithmProcessingTemplate(
+            log,
+            algorithmProcessingTemplateDecorator,
+            graphStoreCatalogService,
+            memoryGuard,
+            algorithmMetricsService,
+            requestScopedDependencies
         );
 
         var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
@@ -111,6 +125,27 @@ public final class ApplicationsFacade {
             .with(pathFindingApplications)
             .with(similarityApplications)
             .build();
+    }
+
+    private static AlgorithmProcessingTemplate createAlgorithmProcessingTemplate(
+        Log log,
+        Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
+        GraphStoreCatalogService graphStoreCatalogService,
+        MemoryGuard memoryGuard,
+        AlgorithmMetricsService algorithmMetricsService,
+        RequestScopedDependencies requestScopedDependencies
+    ) {
+        var algorithmProcessingTemplate = new DefaultAlgorithmProcessingTemplate(
+            log,
+            algorithmMetricsService,
+            graphStoreCatalogService,
+            memoryGuard,
+            requestScopedDependencies
+        );
+
+        if (algorithmProcessingTemplateDecorator.isEmpty()) return algorithmProcessingTemplate;
+
+        return algorithmProcessingTemplateDecorator.get().apply(algorithmProcessingTemplate);
     }
 
     private static CatalogBusinessFacade createCatalogBusinessFacade(
