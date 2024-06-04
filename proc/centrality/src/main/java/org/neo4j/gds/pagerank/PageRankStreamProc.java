@@ -44,7 +44,7 @@ public class PageRankStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.centrality().pageRankStream(graphName, configuration);
+        return facade.algorithms().centrality().pageRankStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.pageRank.stream.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class PageRankStreamProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.centrality().pageRankStreamEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().centrality().pageRankStreamEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

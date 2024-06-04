@@ -829,6 +829,31 @@ public final class CentralityProcedureFacade {
         return Stream.of(result);
     }
 
+    public Stream<CentralityStreamResult> pageRankStream(String graphName, Map<String, Object> configuration) {
+        var resultBuilder = new PageRankResultBuilderForStreamMode();
+
+        return streamModeRunner.runStreamModeAlgorithm(
+            graphName,
+            configuration,
+            PageRankStreamConfig::of,
+            resultBuilder,
+            streamMode()::pageRank
+        );
+    }
+
+    public Stream<MemoryEstimateResult> pageRankStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationModeRunner.runEstimation(
+            algorithmConfiguration,
+            PageRankStreamConfig::of,
+            configuration -> estimationMode().pageRank(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
     private CentralityAlgorithmsEstimationModeBusinessFacade estimationMode() {
         return applicationsFacade.centrality().estimate();
     }
