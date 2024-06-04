@@ -21,7 +21,6 @@ package org.neo4j.gds.compat._516;
 
 import org.neo4j.gds.compat.GlobalProcedureRegistry;
 import org.neo4j.gds.compat.Neo4jProxyApi;
-import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
@@ -29,16 +28,6 @@ import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import java.util.stream.Stream;
 
 public final class Neo4jProxyImpl implements Neo4jProxyApi {
-
-    @Override
-    public long estimateNodeCount(Read read, int label) {
-        return read.estimateCountsForNode(label);
-    }
-
-    @Override
-    public long estimateRelationshipCount(Read read, int sourceLabel, int targetLabel, int type) {
-        return read.estimateCountsForRelationships(sourceLabel, type, targetLabel);
-    }
 
     @Override
     public GlobalProcedureRegistry globalProcedureRegistry(GlobalProcedures globalProcedures) {
