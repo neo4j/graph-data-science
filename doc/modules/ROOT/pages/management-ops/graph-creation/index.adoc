@@ -52,7 +52,6 @@ The following table lists the supported property types, as well as their corresp
 | Double    | Float        | 64 bit signed | `Double.NaN`
 | List of Long | List of Integer | -   | `null`
 | List of Double | List of Float | -   | `null`
-| List of Float | -    | `null`
 |===
 
 
