@@ -100,4 +100,4 @@ shadowjar = { id = "com.github.johnrengelman.shadow", version = "8.1.0" }
 spawn = { id = "ch.kk7.spawn", version = "1.0.20180924200750" }
 nebula-dependencies = {id = "nebula.info-dependencies", version = "11.4.1"}
 google-protobuf = { id = "com.google.protobuf", version = "0.9.4" }
-mrjar = { id = "me.champeau.mrjar", version = "0.1.1" }
+champeau-mrjar = { id = "me.champeau.mrjar", version = "0.1.1" }

@@ -3,7 +3,7 @@ plugins {
 
     alias(openGds.plugins.forbiddenapis).apply(false)
     alias(openGds.plugins.google.protobuf).apply(false)
-    alias(openGds.plugins.mrjar).apply(false)
+    alias(openGds.plugins.champeau.mrjar).apply(false)
     alias(openGds.plugins.nebula.dependencies).apply(false)
     alias(openGds.plugins.shadowjar).apply(false)
     alias(openGds.plugins.spawn).apply(false)
