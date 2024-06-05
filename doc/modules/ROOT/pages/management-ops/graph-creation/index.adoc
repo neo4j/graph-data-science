@@ -45,7 +45,7 @@ Every supported type also defines a fallback value, which is used to indicate th
 The following table lists the supported property types, as well as their corresponding fallback values.
 
 .Types
-[opts="header",cols="1,1,1,1a"]
+[opts="header",cols="1,1,1,1"]
 |===
 | Java Type      | Cypher Type | Precision | Fallback value
 | Long      | Integer     | 64 bit signed | `Long.MIN_VALUE` footnote:min-value[Value of -2^63]
