@@ -43,7 +43,9 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.CELF;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ClosenessCentrality;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.DegreeCentrality;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.EigenVector;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.HarmonicCentrality;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.PageRank;
 
 public class CentralityAlgorithmsMutateModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimation;
@@ -153,6 +155,24 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         );
     }
 
+    public <RESULT> RESULT eigenVector(
+        GraphName graphName,
+        PageRankMutateConfig configuration,
+        ResultBuilder<PageRankMutateConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var mutateStep = new PageRankMutateStep(mutateNodeProperty, configuration);
+
+        return template.processAlgorithm(
+            graphName,
+            configuration,
+            EigenVector,
+            estimation::pageRank,
+            graph -> algorithms.eigenVector(graph, configuration),
+            Optional.of(mutateStep),
+            resultBuilder
+        );
+    }
+
     public <RESULT> RESULT harmonicCentrality(
         GraphName graphName,
         HarmonicCentralityMutateConfig configuration,
@@ -166,6 +186,24 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
             HarmonicCentrality,
             estimation::harmonicCentrality,
             graph -> algorithms.harmonicCentrality(graph, configuration),
+            Optional.of(mutateStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT pageRank(
+        GraphName graphName,
+        PageRankMutateConfig configuration,
+        ResultBuilder<PageRankMutateConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var mutateStep = new PageRankMutateStep(mutateNodeProperty, configuration);
+
+        return template.processAlgorithm(
+            graphName,
+            configuration,
+            PageRank,
+            estimation::pageRank,
+            graph -> algorithms.pageRank(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
         );

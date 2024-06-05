@@ -17,15 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat;
+package org.neo4j.gds.ml.pipeline.stubs;
 
-import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
-import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
+import org.neo4j.gds.pagerank.PageRankMutateConfig;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.centrality.PageRankMutateResult;
+import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
-import java.util.stream.Stream;
-
-public interface GlobalProcedureRegistry {
-    Stream<ProcedureSignature> getAllProcedures();
-    Stream<UserFunctionSignature> getAllNonAggregatingFunctions();
-    Stream<UserFunctionSignature> getAllAggregatingFunctions();
+public class PageRankStub extends AbstractStub<PageRankMutateConfig, PageRankMutateResult> {
+    protected MutateStub<PageRankMutateConfig, PageRankMutateResult> stub(AlgorithmsProcedureFacade facade) {
+        return facade.centrality().pageRankMutateStub();
+    }
 }

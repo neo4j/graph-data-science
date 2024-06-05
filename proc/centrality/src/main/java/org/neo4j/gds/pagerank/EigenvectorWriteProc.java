@@ -45,7 +45,7 @@ public class EigenvectorWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.centrality().eigenvectorWrite(graphName, configuration);
+        return facade.algorithms().centrality().eigenvectorWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.eigenvector.write.estimate", mode = READ)
@@ -54,6 +54,6 @@ public class EigenvectorWriteProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.centrality().eigenvectorWriteEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().centrality().eigenvectorWriteEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

@@ -94,7 +94,7 @@ class StubPoweredNodePropertyStep implements ExecutableNodePropertyStep {
      */
     @Override
     public String procName() {
-        return canonicalProcedureName.getValue() + ".mutate";
+        return canonicalProcedureName.getRawForm() + ".mutate";
     }
 
     @Override
@@ -115,7 +115,7 @@ class StubPoweredNodePropertyStep implements ExecutableNodePropertyStep {
             return stub.getMemoryEstimation(algorithmsProcedureFacade, username, configCopy);
         } catch (MemoryEstimationNotImplementedException exception) {
             // If a single node property step cannot be estimated, we ignore this step in the estimation
-            return MemoryEstimations.of(canonicalProcedureName.getValue() + ".mutate", MemoryRange.of(0));
+            return MemoryEstimations.of(canonicalProcedureName.getRawForm() + ".mutate", MemoryRange.of(0));
         }
     }
 

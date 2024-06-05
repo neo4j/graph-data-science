@@ -40,7 +40,7 @@ Please see the table below.
 |===
 | 1.x | 2.x
 | `gds.beta.pipeline.nodeClassification.configureParams`
-| | This procedure, which is no longer present, added logistic regression model candidates. Adding logistic regression candidates, can instead be done by calling `gds.beta.pipeline.nodeClassification.addLogisticRegression` one or multiple times.
+| This procedure, which is no longer present, added logistic regression model candidates. Adding logistic regression candidates, can instead be done by calling `gds.beta.pipeline.nodeClassification.addLogisticRegression` one or multiple times.
 |===
 
 

@@ -31,10 +31,10 @@ import org.neo4j.gds.procedures.algorithms.centrality.PageRankMutateResult;
 
 import java.util.Optional;
 
-class ArticleRankResultBuilderForMutateMode implements ResultBuilder<PageRankMutateConfig, PageRankResult, PageRankMutateResult, NodePropertiesWritten> {
+public class PageRankResultBuilderForMutateMode implements ResultBuilder<PageRankMutateConfig, PageRankResult, PageRankMutateResult, NodePropertiesWritten> {
     private final boolean shouldComputeCentralityDistribution;
 
-    ArticleRankResultBuilderForMutateMode(boolean shouldComputeCentralityDistribution) {
+    public PageRankResultBuilderForMutateMode(boolean shouldComputeCentralityDistribution) {
         this.shouldComputeCentralityDistribution = shouldComputeCentralityDistribution;
     }
 

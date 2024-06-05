@@ -21,17 +21,20 @@ package org.neo4j.gds.compat._519;
 
 import org.neo4j.configuration.Config;
 import org.neo4j.gds.compat.CompatMonitor;
+import org.neo4j.gds.compat.GlobalProcedureRegistry;
 import org.neo4j.gds.compat.Neo4jProxyApi;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.Monitor;
 import org.neo4j.internal.batchimport.input.Collector;
-import org.neo4j.internal.kernel.api.Read;
+import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
+import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.context.CursorContextFactory;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
+import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
 import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
 import org.neo4j.logging.internal.LogService;
@@ -41,18 +44,9 @@ import org.neo4j.storageengine.api.StorageEngineFactory;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.stream.Stream;
 
 public final class Neo4jProxyImpl implements Neo4jProxyApi {
-
-    @Override
-    public long estimateNodeCount(Read read, int label) {
-        return read.estimateCountsForNode(label);
-    }
-
-    @Override
-    public long estimateRelationshipCount(Read read, int sourceLabel, int targetLabel, int type) {
-        return read.estimateCountsForRelationships(sourceLabel, type, targetLabel);
-    }
 
     @Override
     public BatchImporter instantiateBlockBatchImporter(
@@ -106,6 +100,26 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             @Override
             public void completed(boolean success) {
                 compatMonitor.completed(success);
+            }
+        };
+    }
+
+    @Override
+    public GlobalProcedureRegistry globalProcedureRegistry(GlobalProcedures globalProcedures) {
+        return new GlobalProcedureRegistry() {
+            @Override
+            public Stream<ProcedureSignature> getAllProcedures() {
+                return globalProcedures.getCurrentView().getAllProcedures().stream();
+            }
+
+            @Override
+            public Stream<UserFunctionSignature> getAllNonAggregatingFunctions() {
+                return globalProcedures.getCurrentView().getAllNonAggregatingFunctions();
+            }
+
+            @Override
+            public Stream<UserFunctionSignature> getAllAggregatingFunctions() {
+                return globalProcedures.getCurrentView().getAllAggregatingFunctions();
             }
         };
     }

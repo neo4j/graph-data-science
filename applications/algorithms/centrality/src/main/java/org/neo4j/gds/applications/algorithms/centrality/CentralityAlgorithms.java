@@ -66,6 +66,7 @@ import java.util.function.LongToDoubleFunction;
 
 import static org.neo4j.gds.pagerank.PageRankAlgorithmFactory.Mode.ARTICLE_RANK;
 import static org.neo4j.gds.pagerank.PageRankAlgorithmFactory.Mode.EIGENVECTOR;
+import static org.neo4j.gds.pagerank.PageRankAlgorithmFactory.Mode.PAGE_RANK;
 
 public class CentralityAlgorithms {
     private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
@@ -79,24 +80,7 @@ public class CentralityAlgorithms {
     }
 
     PageRankResult articleRank(Graph graph, PageRankConfig configuration) {
-        var task = Pregel.progressTask(graph, configuration, LabelForProgressTracking.ArticleRank.value);
-        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
-
-        var mode = ARTICLE_RANK;
-
-        var computation = pickComputation(graph, configuration, mode);
-
-        var algorithm = new PageRankAlgorithm(
-            graph,
-            configuration,
-            computation,
-            mode,
-            DefaultPool.INSTANCE,
-            progressTracker,
-            terminationFlag
-        );
-
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return pagerank(graph, configuration, LabelForProgressTracking.ArticleRank, ARTICLE_RANK);
     }
 
     BetwennessCentralityResult betweennessCentrality(Graph graph, BetweennessCentralityBaseConfig configuration) {
@@ -188,6 +172,10 @@ public class CentralityAlgorithms {
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
+    PageRankResult eigenVector(Graph graph, PageRankConfig configuration) {
+        return pagerank(graph, configuration, LabelForProgressTracking.EigenVector, EIGENVECTOR);
+    }
+
     HarmonicResult harmonicCentrality(Graph graph, HarmonicCentralityBaseConfig configuration) {
         var task = Tasks.leaf(LabelForProgressTracking.HarmonicCentrality.value);
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
@@ -200,6 +188,10 @@ public class CentralityAlgorithms {
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+    }
+
+    PageRankResult pageRank(Graph graph, PageRankConfig configuration) {
+        return pagerank(graph, configuration, LabelForProgressTracking.PageRank, PAGE_RANK);
     }
 
     private double averageDegree(Graph graph, Concurrency concurrency) {
@@ -229,6 +221,30 @@ public class CentralityAlgorithms {
 
         var degrees = degreeCentrality.compute().degreeFunction();
         return degrees::get;
+    }
+
+    private PageRankResult pagerank(
+        Graph graph,
+        PageRankConfig configuration,
+        LabelForProgressTracking label,
+        PageRankAlgorithmFactory.Mode mode
+    ) {
+        var task = Pregel.progressTask(graph, configuration, label.value);
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var computation = pickComputation(graph, configuration, mode);
+
+        var algorithm = new PageRankAlgorithm(
+            graph,
+            configuration,
+            computation,
+            mode,
+            DefaultPool.INSTANCE,
+            progressTracker,
+            terminationFlag
+        );
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
     private PregelComputation<PageRankConfig> pickComputation(

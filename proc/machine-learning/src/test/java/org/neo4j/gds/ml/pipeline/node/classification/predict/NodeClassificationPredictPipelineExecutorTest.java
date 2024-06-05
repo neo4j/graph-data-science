@@ -428,13 +428,14 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
         var applicationsFacade = ApplicationsFacade.create(
             null,
             Optional.empty(),
+            Optional.empty(),
+            null,
             null,
             null,
             null,
             null,
             RequestScopedDependencies.builder().with(
-                TerminationFlag.RUNNING_TRUE).build(),
-            null
+                TerminationFlag.RUNNING_TRUE).build()
         );
         var configurationParser = new ConfigurationParser(null, null);
         var genericStub = new GenericStub(null, null, null, configurationParser, null, null);

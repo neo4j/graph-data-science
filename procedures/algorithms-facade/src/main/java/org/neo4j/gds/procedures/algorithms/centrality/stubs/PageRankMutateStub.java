@@ -23,8 +23,11 @@ import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.pagerank.PageRankMutateConfig;
+import org.neo4j.gds.pagerank.PageRankResult;
+import org.neo4j.gds.procedures.algorithms.AlgorithmHandle;
 import org.neo4j.gds.procedures.algorithms.centrality.PageRankMutateResult;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
@@ -32,19 +35,22 @@ import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class ArticleRankMutateStub implements MutateStub<PageRankMutateConfig, PageRankMutateResult> {
+public class PageRankMutateStub implements MutateStub<PageRankMutateConfig, PageRankMutateResult> {
     private final GenericStub genericStub;
     private final ApplicationsFacade applicationsFacade;
     private final ProcedureReturnColumns procedureReturnColumns;
+    private final AlgorithmHandle<PageRankMutateConfig, PageRankResult, PageRankMutateResult, NodePropertiesWritten> handle;
 
-    public ArticleRankMutateStub(
+    public PageRankMutateStub(
         GenericStub genericStub,
         ApplicationsFacade applicationsFacade,
-        ProcedureReturnColumns procedureReturnColumns
+        ProcedureReturnColumns procedureReturnColumns,
+        AlgorithmHandle<PageRankMutateConfig, PageRankResult, PageRankMutateResult, NodePropertiesWritten> handle
     ) {
         this.genericStub = genericStub;
         this.applicationsFacade = applicationsFacade;
         this.procedureReturnColumns = procedureReturnColumns;
+        this.handle = handle;
     }
 
     @Override
@@ -78,13 +84,13 @@ public class ArticleRankMutateStub implements MutateStub<PageRankMutateConfig, P
         Map<String, Object> rawConfiguration
     ) {
         var shouldComputeCentralityDistribution = procedureReturnColumns.contains("centralityDistribution");
-        var resultBuilder = new ArticleRankResultBuilderForMutateMode(shouldComputeCentralityDistribution);
+        var resultBuilder = new PageRankResultBuilderForMutateMode(shouldComputeCentralityDistribution);
 
         return genericStub.execute(
             graphNameAsString,
             rawConfiguration,
             PageRankMutateConfig::of,
-            applicationsFacade.centrality().mutate()::articleRank,
+            handle,
             resultBuilder
         );
     }

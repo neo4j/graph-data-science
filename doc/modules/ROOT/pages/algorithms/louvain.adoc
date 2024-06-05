@@ -390,7 +390,6 @@ YIELD communityCount, modularity, modularities
 |===
 | communityCount | modularity         | modularities
 | 2              | 0.3571428571428571 | [0.3571428571428571]
-|1 row
 |===
 --
 
@@ -418,7 +417,6 @@ YIELD communityCount, modularity, modularities
 |===
 | communityCount | modularity         | modularities
 | 2              | 0.3571428571428571 | [0.3571428571428571]
-|1 row
 |===
 --
 

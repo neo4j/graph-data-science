@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.DefaultMemoryGuard;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
@@ -87,16 +88,18 @@ final class GraphDataScienceProviderFactory {
     ) {
         var catalogProcedureFacadeFactory = new CatalogProcedureFacadeFactory(log);
 
-        var algorithmFacadeService = createAlgorithmService(
+        var algorithmFacadeBuilderFactory = createAlgorithmFacadeBuilderFactory(
             graphStoreCatalogService,
             useMaxMemoryEstimation
         );
+
+        var memoryGuard = new DefaultMemoryGuard(log, useMaxMemoryEstimation, memoryGauge);
 
         return new GraphDataScienceProvider(
             log,
             defaultsConfiguration,
             limitsConfiguration,
-            algorithmFacadeService,
+            algorithmFacadeBuilderFactory,
             metricsFacade.algorithmMetrics(),
             algorithmProcessingTemplateDecorator,
             catalogBusinessFacadeDecorator,
@@ -104,10 +107,9 @@ final class GraphDataScienceProviderFactory {
             metricsFacade.deprecatedProcedures(),
             exporterBuildersProviderService,
             graphStoreCatalogService,
-            memoryGauge,
+            memoryGuard,
             metricsFacade.projectionMetrics(),
             taskRegistryFactoryService,
-            useMaxMemoryEstimation,
             userLogServices
         );
     }
@@ -132,7 +134,7 @@ final class GraphDataScienceProviderFactory {
         );
     }
 
-    private AlgorithmFacadeBuilderFactory createAlgorithmService(
+    private AlgorithmFacadeBuilderFactory createAlgorithmFacadeBuilderFactory(
         GraphStoreCatalogService graphStoreCatalogService,
         boolean useMaxMemoryEstimation
     ) {

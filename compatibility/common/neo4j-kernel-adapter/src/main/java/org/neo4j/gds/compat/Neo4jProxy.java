@@ -106,8 +106,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static org.neo4j.gds.compat.InternalReadOps.countByIdGenerator;
@@ -120,11 +118,11 @@ public final class Neo4jProxy {
     );
 
     public static long estimateNodeCount(Read read, int label) {
-        return IMPL.estimateNodeCount(read, label);
+        return read.estimateCountsForNode(label);
     }
 
     public static long estimateRelationshipCount(Read read, int sourceLabel, int targetLabel, int type) {
-        return IMPL.estimateRelationshipCount(read, sourceLabel, targetLabel, type);
+        return read.estimateCountsForRelationships(sourceLabel, type, targetLabel);
     }
 
     public static DependencyResolver emptyDependencyResolver() {
@@ -226,22 +224,7 @@ public final class Neo4jProxy {
     }
 
     public static GlobalProcedureRegistry globalProcedureRegistry(GlobalProcedures globalProcedures) {
-        return new GlobalProcedureRegistry() {
-            @Override
-            public Set<ProcedureSignature> getAllProcedures() {
-                return globalProcedures.getCurrentView().getAllProcedures();
-            }
-
-            @Override
-            public Stream<UserFunctionSignature> getAllNonAggregatingFunctions() {
-                return globalProcedures.getCurrentView().getAllNonAggregatingFunctions();
-            }
-
-            @Override
-            public Stream<UserFunctionSignature> getAllAggregatingFunctions() {
-                return globalProcedures.getCurrentView().getAllAggregatingFunctions();
-            }
-        };
+        return IMPL.globalProcedureRegistry(globalProcedures);
     }
 
     public static String validateExternalDatabaseName(String databaseName) {

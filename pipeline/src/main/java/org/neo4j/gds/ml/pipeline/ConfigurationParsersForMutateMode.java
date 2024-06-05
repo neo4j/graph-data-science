@@ -67,6 +67,7 @@ public class ConfigurationParsersForMutateMode {
             case DeltaStepping -> AllShortestPathsDeltaMutateConfig::of;
             case DFS -> DfsMutateConfig::of;
             case Dijkstra -> ShortestPathDijkstraMutateConfig::of;
+            case EigenVector -> PageRankMutateConfig::of;
             case FilteredKNN -> FilteredKnnMutateConfig::of;
             case FilteredNodeSimilarity -> FilteredNodeSimilarityMutateConfig::of;
             case HarmonicCentrality -> HarmonicCentralityMutateConfig::of;
@@ -74,6 +75,7 @@ public class ConfigurationParsersForMutateMode {
             case KSpanningTree -> null;
             case LongestPath -> null;
             case NodeSimilarity -> NodeSimilarityMutateConfig::of;
+            case PageRank -> PageRankMutateConfig::of;
             case RandomWalk -> null;
             case SingleSourceDijkstra -> AllShortestPathsDijkstraMutateConfig::of;
             case SpanningTree -> SpanningTreeMutateConfig::of;

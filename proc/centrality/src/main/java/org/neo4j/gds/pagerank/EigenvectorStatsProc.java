@@ -44,7 +44,7 @@ public class EigenvectorStatsProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.centrality().eigenvectorStats(graphName, configuration);
+        return facade.algorithms().centrality().eigenvectorStats(graphName, configuration);
     }
 
     @Procedure(value = "gds.eigenvector.stats.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class EigenvectorStatsProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.centrality().eigenvectorStatsEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().centrality().eigenvectorStatsEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

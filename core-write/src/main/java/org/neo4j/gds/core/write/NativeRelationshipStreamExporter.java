@@ -42,6 +42,8 @@ import java.util.stream.Stream;
 
 public final class NativeRelationshipStreamExporter extends StatementApi implements RelationshipStreamExporter {
 
+    private static final int QUEUE_CAPACITY = 2;
+
     private final LongUnaryOperator toOriginalId;
     private final Stream<ExportedRelationship> relationships;
     private final int batchSize;

@@ -42,21 +42,23 @@ import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStreamConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationWriteConfig;
+import org.neo4j.gds.pagerank.PageRankMutateConfig;
 import org.neo4j.gds.pagerank.PageRankStatsConfig;
 import org.neo4j.gds.pagerank.PageRankStreamConfig;
 import org.neo4j.gds.pagerank.PageRankWriteConfig;
-import org.neo4j.gds.procedures.algorithms.centrality.stubs.ArticleRankMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetaClosenessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetweennessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.CelfMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.ClosenessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.DegreeCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.HarmonicCentralityMutateStub;
+import org.neo4j.gds.procedures.algorithms.centrality.stubs.PageRankMutateStub;
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
 import org.neo4j.gds.procedures.algorithms.runners.StatsModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.runners.WriteModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
+import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -64,14 +66,16 @@ import java.util.stream.Stream;
 public final class CentralityProcedureFacade {
     private final ProcedureReturnColumns procedureReturnColumns;
 
-    private final ArticleRankMutateStub articleRankMutateStub;
+    private final PageRankMutateStub articleRankMutateStub;
     private final BetaClosenessCentralityMutateStub betaClosenessCentralityMutateStub;
     private final BetweennessCentralityMutateStub betweennessCentralityMutateStub;
     private final CelfMutateStub celfMutateStub;
     private final ClosenessCentralityMutateStub closenessCentralityMutateStub;
     private final DegreeCentralityMutateStub degreeCentralityMutateStub;
-
+    private final MutateStub<PageRankMutateConfig, PageRankMutateResult> eigenVectorMutateStub;
     private final HarmonicCentralityMutateStub harmonicCentralityMutateStub;
+    private final PageRankMutateStub pageRankMutateStub;
+
     private final ApplicationsFacade applicationsFacade;
 
     private final EstimationModeRunner estimationModeRunner;
@@ -81,13 +85,15 @@ public final class CentralityProcedureFacade {
 
     private CentralityProcedureFacade(
         ProcedureReturnColumns procedureReturnColumns,
-        ArticleRankMutateStub articleRankMutateStub,
+        PageRankMutateStub articleRankMutateStub,
         BetaClosenessCentralityMutateStub betaClosenessCentralityMutateStub,
         BetweennessCentralityMutateStub betweennessCentralityMutateStub,
         CelfMutateStub celfMutateStub,
         ClosenessCentralityMutateStub closenessCentralityMutateStub,
         DegreeCentralityMutateStub degreeCentralityMutateStub,
+        MutateStub<PageRankMutateConfig, PageRankMutateResult> eigenVectorMutateStub,
         HarmonicCentralityMutateStub harmonicCentralityMutateStub,
+        PageRankMutateStub pageRankMutateStub,
         ApplicationsFacade applicationsFacade,
         EstimationModeRunner estimationModeRunner,
         StatsModeAlgorithmRunner statsModeRunner,
@@ -101,7 +107,9 @@ public final class CentralityProcedureFacade {
         this.celfMutateStub = celfMutateStub;
         this.closenessCentralityMutateStub = closenessCentralityMutateStub;
         this.degreeCentralityMutateStub = degreeCentralityMutateStub;
+        this.eigenVectorMutateStub = eigenVectorMutateStub;
         this.harmonicCentralityMutateStub = harmonicCentralityMutateStub;
+        this.pageRankMutateStub = pageRankMutateStub;
         this.applicationsFacade = applicationsFacade;
         this.estimationModeRunner = estimationModeRunner;
         this.statsModeRunner = statsModeRunner;
@@ -118,10 +126,11 @@ public final class CentralityProcedureFacade {
         StreamModeAlgorithmRunner streamModeRunner,
         WriteModeAlgorithmRunner writeModeRunner
     ) {
-        var articleRankMutateStub = new ArticleRankMutateStub(
+        var articleRankMutateStub = new PageRankMutateStub(
             genericStub,
             applicationsFacade,
-            procedureReturnColumns
+            procedureReturnColumns,
+            applicationsFacade.centrality().mutate()::articleRank
         );
         var betaClosenessCentralityMutateStub = new BetaClosenessCentralityMutateStub(
             genericStub,
@@ -133,10 +142,7 @@ public final class CentralityProcedureFacade {
             applicationsFacade,
             procedureReturnColumns
         );
-        var celfMutateStub = new CelfMutateStub(
-            genericStub,
-            applicationsFacade
-        );
+        var celfMutateStub = new CelfMutateStub(genericStub, applicationsFacade);
         var closenessCentralityMutateStub = new ClosenessCentralityMutateStub(
             genericStub,
             applicationsFacade,
@@ -147,10 +153,25 @@ public final class CentralityProcedureFacade {
             applicationsFacade,
             procedureReturnColumns
         );
+        var eigenVectorMutateStub = new MutateStubConfigurationValidationDecorator<>(
+            new PageRankMutateStub(
+                genericStub,
+                applicationsFacade,
+                procedureReturnColumns,
+                applicationsFacade.centrality().mutate()::eigenVector
+            ),
+            "dampingFactor"
+        );
         var harmonicCentralityMutateStub = new HarmonicCentralityMutateStub(
             genericStub,
             applicationsFacade,
             procedureReturnColumns
+        );
+        var pageRankMutateStub = new PageRankMutateStub(
+            genericStub,
+            applicationsFacade,
+            procedureReturnColumns,
+            applicationsFacade.centrality().mutate()::pageRank
         );
 
         return new CentralityProcedureFacade(
@@ -161,7 +182,9 @@ public final class CentralityProcedureFacade {
             celfMutateStub,
             closenessCentralityMutateStub,
             degreeCentralityMutateStub,
+            eigenVectorMutateStub,
             harmonicCentralityMutateStub,
+            pageRankMutateStub,
             applicationsFacade,
             estimationModeRunner,
             statsModeRunner,
@@ -201,7 +224,7 @@ public final class CentralityProcedureFacade {
         );
     }
 
-    public ArticleRankMutateStub articleRankMutateStub() {
+    public PageRankMutateStub articleRankMutateStub() {
         return articleRankMutateStub;
     }
 
@@ -638,6 +661,99 @@ public final class CentralityProcedureFacade {
         return Stream.of(result);
     }
 
+    public MutateStub<PageRankMutateConfig, PageRankMutateResult> eigenVectorMutateStub() {
+        return eigenVectorMutateStub;
+    }
+
+    public Stream<PageRankStatsResult> eigenvectorStats(String graphName, Map<String, Object> configuration) {
+        validateKeyNotPresent(configuration, "dampingFactor");
+
+        var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("centralityDistribution");
+        var resultBuilder = new PageRankResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
+
+        return statsModeRunner.runStatsModeAlgorithm(
+            graphName,
+            configuration,
+            PageRankStatsConfig::of,
+            resultBuilder,
+            statsMode()::eigenVector
+        );
+    }
+
+    public Stream<MemoryEstimateResult> eigenvectorStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        validateKeyNotPresent(algorithmConfiguration, "dampingFactor");
+
+        var result = estimationModeRunner.runEstimation(
+            algorithmConfiguration,
+            PageRankStatsConfig::of,
+            configuration -> estimationMode().pageRank(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<CentralityStreamResult> eigenvectorStream(String graphName, Map<String, Object> configuration) {
+        validateKeyNotPresent(configuration, "dampingFactor");
+
+        var resultBuilder = new PageRankResultBuilderForStreamMode();
+
+        return streamModeRunner.runStreamModeAlgorithm(
+            graphName,
+            configuration,
+            PageRankStreamConfig::of,
+            resultBuilder,
+            streamMode()::eigenvector
+        );
+    }
+
+    public Stream<MemoryEstimateResult> eigenvectorStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        validateKeyNotPresent(algorithmConfiguration, "dampingFactor");
+
+        var result = estimationModeRunner.runEstimation(
+            algorithmConfiguration,
+            PageRankStreamConfig::of,
+            configuration -> estimationMode().pageRank(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<PageRankWriteResult> eigenvectorWrite(String graphName, Map<String, Object> configuration) {
+        validateKeyNotPresent(configuration, "dampingFactor");
+
+        var shouldComputeCentralityDistribution = procedureReturnColumns.contains("centralityDistribution");
+        var resultBuilder = new PageRankResultBuilderForWriteMode(shouldComputeCentralityDistribution);
+
+        return writeModeRunner.runWriteModeAlgorithm(
+            graphName,
+            configuration,
+            PageRankWriteConfig::of,
+            writeMode()::eigenvector,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> eigenvectorWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        validateKeyNotPresent(algorithmConfiguration, "dampingFactor");
+
+        var result = estimationModeRunner.runEstimation(
+            algorithmConfiguration,
+            PageRankWriteConfig::of,
+            configuration -> estimationMode().pageRank(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
     public HarmonicCentralityMutateStub harmonicCentralityMutateStub() {
         return harmonicCentralityMutateStub;
     }
@@ -683,6 +799,10 @@ public final class CentralityProcedureFacade {
         );
     }
 
+    public PageRankMutateStub pageRankMutateStub() {
+        return pageRankMutateStub;
+    }
+
     private CentralityAlgorithmsEstimationModeBusinessFacade estimationMode() {
         return applicationsFacade.centrality().estimate();
     }
@@ -697,5 +817,11 @@ public final class CentralityProcedureFacade {
 
     private CentralityAlgorithmsWriteModeBusinessFacade writeMode() {
         return applicationsFacade.centrality().write();
+    }
+
+    private void validateKeyNotPresent(Map<String, Object> configuration, String key) {
+        if (configuration.containsKey(key)) {
+            throw new IllegalArgumentException("Unexpected configuration key: " + key);
+        }
     }
 }

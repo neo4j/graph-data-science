@@ -39,6 +39,7 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.CELF;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ClosenessCentrality;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.DegreeCentrality;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.EigenVector;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.HarmonicCentrality;
 
 public class CentralityAlgorithmsStatsModeBusinessFacade {
@@ -115,6 +116,22 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
             DegreeCentrality,
             () -> estimationFacade.degreeCentrality(configuration),
             graph -> centralityAlgorithms.degreeCentrality(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT eigenVector(
+        GraphName graphName,
+        PageRankStatsConfig configuration,
+        ResultBuilder<PageRankStatsConfig, PageRankResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            EigenVector,
+            estimationFacade::pageRank,
+            graph -> centralityAlgorithms.eigenVector(graph, configuration),
             Optional.empty(),
             resultBuilder
         );

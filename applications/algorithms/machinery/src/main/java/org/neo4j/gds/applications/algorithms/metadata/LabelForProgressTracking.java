@@ -33,6 +33,7 @@ public enum LabelForProgressTracking {
     DeltaStepping("Delta Stepping"),
     DFS("DFS"),
     Dijkstra("Dijkstra"),
+    EigenVector("EigenVector"),
     FilteredKNN("Filtered K-Nearest Neighbours"),
     FilteredNodeSimilarity("Filtered Node Similarity"),
     HarmonicCentrality("HarmonicCentrality"),
@@ -40,6 +41,7 @@ public enum LabelForProgressTracking {
     KSpanningTree("K Spanning Tree"),
     LongestPath("LongestPath"),
     NodeSimilarity("Node Similarity"),
+    PageRank("PageRank"),
     RandomWalk("RandomWalk"),
     SingleSourceDijkstra("All Shortest Paths"),
     SpanningTree("SpanningTree"),
@@ -66,6 +68,7 @@ public enum LabelForProgressTracking {
             case DeltaStepping -> DeltaStepping;
             case DFS -> DFS;
             case Dijkstra -> Dijkstra;
+            case EigenVector -> EigenVector;
             case FilteredKNN -> FilteredKNN;
             case FilteredNodeSimilarity -> FilteredNodeSimilarity;
             case HarmonicCentrality -> HarmonicCentrality;
@@ -73,6 +76,7 @@ public enum LabelForProgressTracking {
             case KSpanningTree -> KSpanningTree;
             case LongestPath -> LongestPath;
             case NodeSimilarity -> NodeSimilarity;
+            case PageRank -> PageRank;
             case RandomWalk -> RandomWalk;
             case SingleSourceDijkstra -> SingleSourceDijkstra;
             case SpanningTree -> SpanningTree;
