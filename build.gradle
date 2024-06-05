@@ -1,11 +1,12 @@
 plugins {
     id 'com.github.hierynomus.license'              version '0.16.2-37dde1f'        apply false
-    id 'com.github.johnrengelman.shadow'            version '8.1.0'                 apply false
-    id 'ch.kk7.spawn'                               version '1.0.20180924200750'    apply false
-    id 'de.thetaphi.forbiddenapis'                  version '3.7'                   apply false
-    id 'nebula.info-dependencies'                   version '11.4.1'                 apply false
-    id 'com.google.protobuf'                        version '0.9.4'                apply false
-    id 'me.champeau.mrjar'                          version "0.1.1"                 apply false
+
+    alias(openGds.plugins.forbiddenapis).apply(false)
+    alias(openGds.plugins.google.protobuf).apply(false)
+    alias(openGds.plugins.mrjar).apply(false)
+    alias(openGds.plugins.nebula.dependencies).apply(false)
+    alias(openGds.plugins.shadowjar).apply(false)
+    alias(openGds.plugins.spawn).apply(false)
 }
 
 description = 'Neo4j Graph Data Science :: OpenGDS'
