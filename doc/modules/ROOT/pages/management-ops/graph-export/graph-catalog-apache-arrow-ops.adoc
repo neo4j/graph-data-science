@@ -261,7 +261,7 @@ The specific configuration needs to include the following keys:
 The schema of the result records is identical to the corresponding procedure:
 
 .Results
-[opts="header",cols="1,1,1,1,1"]
+[opts="header",cols="1,1,1"]
 |===
 | sourceNodeId  | targetNodeId  | relationshipType
 | 0             | 1             | 0
