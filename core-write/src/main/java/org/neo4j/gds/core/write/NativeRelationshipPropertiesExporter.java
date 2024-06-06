@@ -23,6 +23,8 @@ package org.neo4j.gds.core.write;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.Write;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
@@ -33,7 +35,6 @@ import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.gds.utils.StatementApi;
-import org.neo4j.internal.kernel.api.Write;
 import org.neo4j.internal.kernel.api.exceptions.EntityNotFoundException;
 import org.neo4j.internal.kernel.api.exceptions.schema.ConstraintValidationException;
 
@@ -129,7 +130,7 @@ public class NativeRelationshipPropertiesExporter extends StatementApi implement
 
         return () -> acceptInTransaction(stmt -> {
             terminationFlag.assertRunning();
-            var ops = stmt.dataWrite();
+            var ops = Neo4jProxy.dataWrite(stmt);
 
             var writeConsumer = new WriteConsumer(toOriginalId, ops, propertyTranslator, relationshipToken, propertyTokens, progressTracker);
 
