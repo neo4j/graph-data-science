@@ -88,7 +88,7 @@ final class Neo4jVersionLookup {
         // TODO: remove this once we have a layer for that particular version, not "dev"
         var LATEST_SUPPORTED_MINOR_VERSION = MIN_SUPPORTED_MINOR_VERSION + NUM_SUPPORTED_MINOR_VERSIONS - 1; // -1 because the range is inclusive
         if (minorVersion > LATEST_SUPPORTED_MINOR_VERSION) {
-            return new Neo4jVersion.Unstable(minorVersion, majorVersion, fullVersion);
+            return new Neo4jVersion.Unstable(majorVersion, minorVersion, fullVersion);
         }
 
         return new Neo4jVersion.Known(majorVersion, minorVersion, fullVersion);
