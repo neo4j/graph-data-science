@@ -409,7 +409,7 @@ WITH gds.graph.project(
   { 
     sourceNodeLabels: labels(source),
     targetNodeLabels: labels(target),
-    sourceNodeProperties: source {
+    sourceNodeProperties: {
       age: coalesce(source.age, 0.0),
       experience: coalesce(source.experience, 0.0),
       hipster: coalesce(source.hipster, 0.0),
@@ -417,7 +417,7 @@ WITH gds.graph.project(
       sourness: coalesce(source.sourness, 0.0),
       sweetness: coalesce(source.sweetness, 0.0)
     },
-    targetNodeProperties: target {
+    targetNodeProperties: {
       age: coalesce(target.age, 0.0),
       experience: coalesce(target.experience, 0.0),
       hipster: coalesce(target.hipster, 0.0),
