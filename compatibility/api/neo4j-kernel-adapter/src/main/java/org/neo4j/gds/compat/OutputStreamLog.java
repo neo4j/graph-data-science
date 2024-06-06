@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.compat;
 
-import org.immutables.builder.Builder;
+import org.neo4j.gds.annotation.GenerateBuilder;
 import org.neo4j.logging.Level;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.log4j.Log4jLogProvider;
@@ -27,18 +27,17 @@ import org.neo4j.logging.log4j.Log4jLogProvider;
 import java.io.OutputStream;
 import java.util.Optional;
 
-final class LogBuilders {
-
-    @Builder.Factory
-    static Log outputStreamLog(
-        @Builder.Parameter OutputStream outputStream,
-        Optional<Level> level,
-        Optional<String> category
-    ) {
-        return new Log4jLogProvider(outputStream, level.orElse(Level.INFO)).getLog(category.orElse(""));
+@GenerateBuilder
+public record OutputStreamLog(
+    OutputStream outputStream,
+    Optional<Level> level,
+    Optional<String> category
+) {
+    public static OutputStreamLogBuilder builder(OutputStream outputStream) {
+        return OutputStreamLogBuilder.builder().outputStream(outputStream);
     }
 
-    private LogBuilders() {
-        throw new UnsupportedOperationException("No instances");
+    public Log log() {
+        return new Log4jLogProvider(outputStream, level.orElse(Level.INFO)).getLog(category.orElse(""));
     }
 }

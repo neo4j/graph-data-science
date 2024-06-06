@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.compat;
 
-import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.annotation.GenerateBuilder;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
@@ -29,18 +29,14 @@ public final class GdsVersionInfoProvider {
 
     private GdsVersionInfoProvider() {}
 
-    @ValueClass
-    public interface GdsVersionInfo {
-
-        String gdsVersion();
-
-        Optional<ProxyUtil.ErrorInfo> error();
+    @GenerateBuilder
+    public record GdsVersionInfo(String gdsVersion, Optional<ProxyUtil.ErrorInfo> error) {
     }
 
     public static final GdsVersionInfo GDS_VERSION_INFO = loadGdsVersion();
 
     private static GdsVersionInfo loadGdsVersion() {
-        var builder = ImmutableGdsVersionInfo.builder();
+        var builder = GdsVersionInfoBuilder.builder();
         try {
             // The class that we use to get the GDS version lives in proc-sysinfo, which is part of the released GDS jar,
             // but we don't want to depend on that here. One reason is that this class gets generated and re-generated
@@ -73,31 +69,25 @@ public final class GdsVersionInfoProvider {
                 .gdsVersion(String.valueOf(gdsVersion))
                 .build();
         } catch (ClassNotFoundException e) {
-            builder.error(ImmutableErrorInfo.builder()
-                .logLevel(ProxyUtil.LogLevel.DEBUG)
-                .message(
-                    "Could not determine GDS version, BuildInfoProperties is missing. " +
-                        "This is likely due to not running GDS as a plugin, " +
-                        "for example when running tests or using GDS as a Java module dependency."
-                )
-                .reason(e)
-                .build()
-            );
+            builder.error(new ProxyUtil.ErrorInfo(
+                "Could not determine GDS version, BuildInfoProperties is missing. " +
+                    "This is likely due to not running GDS as a plugin, " +
+                    "for example when running tests or using GDS as a Java module dependency.",
+                ProxyUtil.LogLevel.INFO,
+                e
+            ));
         } catch (NoSuchMethodException | IllegalAccessException e) {
-            builder.error(ImmutableErrorInfo.builder()
-                .logLevel(ProxyUtil.LogLevel.WARN)
-                .message(
-                    "Could not determine GDS version, the according methods on BuildInfoProperties could not be found.")
-                .reason(e)
-                .build()
-            );
+            builder.error(new ProxyUtil.ErrorInfo(
+                "Could not determine GDS version, the according methods on BuildInfoProperties could not be found.",
+                ProxyUtil.LogLevel.WARN,
+                e
+            ));
         } catch (Throwable e) {
-            builder.error(ImmutableErrorInfo.builder()
-                .logLevel(ProxyUtil.LogLevel.WARN)
-                .message("Could not determine GDS version, the according methods on BuildInfoProperties failed.")
-                .reason(e)
-                .build()
-            );
+            builder.error(new ProxyUtil.ErrorInfo(
+                "Could not determine GDS version, the according methods on BuildInfoProperties failed.",
+                ProxyUtil.LogLevel.WARN,
+                e
+            ));
         }
 
         return builder.gdsVersion("Unknown").build();
