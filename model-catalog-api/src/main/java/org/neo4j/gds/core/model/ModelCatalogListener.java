@@ -22,4 +22,8 @@ package org.neo4j.gds.core.model;
 public interface ModelCatalogListener {
 
     void onInsert(Model<?, ?, ?> model);
+
+    void onStore(Model<?, ?, ?> model);
+
+    void onLoad();
 }
