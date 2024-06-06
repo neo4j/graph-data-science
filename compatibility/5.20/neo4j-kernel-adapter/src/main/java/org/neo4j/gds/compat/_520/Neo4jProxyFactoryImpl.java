@@ -29,7 +29,7 @@ public final class Neo4jProxyFactoryImpl implements Neo4jProxyFactory {
 
     @Override
     public boolean canLoad(Neo4jVersion version) {
-        return version == Neo4jVersion.V_5_20;
+        return version.matches(5, 20);
     }
 
     @Override

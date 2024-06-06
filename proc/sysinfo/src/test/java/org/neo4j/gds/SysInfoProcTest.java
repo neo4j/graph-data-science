@@ -49,34 +49,15 @@ import static org.neo4j.gds.GdsEditionTestCondition.GDS_EDITION;
 class SysInfoProcTest extends BaseProcTest {
 
     private static final Collection<String> ALL_COMPATIBILITIES = List.of(
-        "Neo4j 5.x",
-        "Neo4j 5.x (placeholder)",
-        "Neo4j Settings 5.x",
-        "Neo4j Settings 5.x (placeholder)",
-
         "Neo4j 5.15",
-        "Neo4j 5.15 (placeholder)",
-
         "Neo4j 5.16",
-        "Neo4j 5.16 (placeholder)",
-
         "Neo4j 5.17",
-        "Neo4j 5.17 (placeholder)",
-
         "Neo4j 5.18",
-        "Neo4j 5.18 (placeholder)",
-
         "Neo4j 5.19",
-        "Neo4j 5.19 (placeholder)",
-
         "Neo4j 5.20",
-        "Neo4j 5.20 (placeholder)",
-
-        "Neo4j DEV",
-        "Neo4j DEV (placeholder)",
-
+        "Neo4j 5.21",
         "Neo4j RC",
-        "Neo4j RC (placeholder)"
+        "Neo4j DEV"
     );
 
     @BeforeEach
@@ -123,85 +104,18 @@ class SysInfoProcTest extends BaseProcTest {
 
         var neo4jVersion = GraphDatabaseApiProxy.neo4jVersion();
 
-        Set<String> expectedCompatibilities;
-        switch (neo4jVersion) {
-            case V_5_14:
-                expectedCompatibilities = Set.of(
-                    "Neo4j Settings 5.x (placeholder)",
-                    "Neo4j Settings 5.x",
-                    "Neo4j 5.14 (placeholder)",
-                    "Neo4j 5.14"
-                );
-                break;
-            case V_5_15:
-                expectedCompatibilities = Set.of(
-                    "Neo4j Settings 5.x (placeholder)",
-                    "Neo4j Settings 5.x",
-                    "Neo4j 5.15 (placeholder)",
-                    "Neo4j 5.15"
-                );
-                break;
-            case V_5_16:
-                expectedCompatibilities = Set.of(
-                    "Neo4j Settings 5.x (placeholder)",
-                    "Neo4j Settings 5.x",
-                    "Neo4j 5.16 (placeholder)",
-                    "Neo4j 5.16"
-                );
-                break;
-            case V_5_17:
-                expectedCompatibilities = Set.of(
-                    "Neo4j Settings 5.x (placeholder)",
-                    "Neo4j Settings 5.x",
-                    "Neo4j 5.17 (placeholder)",
-                    "Neo4j 5.17"
-                );
-                break;
-            case V_5_18:
-                expectedCompatibilities = Set.of(
-                    "Neo4j Settings 5.x (placeholder)",
-                    "Neo4j Settings 5.x",
-                    "Neo4j 5.18 (placeholder)",
-                    "Neo4j 5.18"
-                );
-                break;
-            case V_5_19:
-                expectedCompatibilities = Set.of(
-                    "Neo4j Settings 5.x (placeholder)",
-                    "Neo4j Settings 5.x",
-                    "Neo4j 5.19 (placeholder)",
-                    "Neo4j 5.19"
-                );
-                break;
-            case V_5_20:
-                expectedCompatibilities = Set.of(
-                    "Neo4j Settings 5.x (placeholder)",
-                    "Neo4j Settings 5.x",
-                    "Neo4j 5.20 (placeholder)",
-                    "Neo4j 5.20"
-                );
-                break;
-            case V_Dev:
-                expectedCompatibilities = Set.of(
-                    "Neo4j Settings 5.x",
-                    "Neo4j Settings 5.x (placeholder)",
-                    "Neo4j RC",
-                    "Neo4j DEV (placeholder)",
-                    "Neo4j DEV"
-                );
-                break;
-            default:
-                throw new IllegalStateException("Unexpected Neo4j version: " + neo4jVersion);
-        }
+        var expectedCompatibility = neo4jVersion.isUnstable()
+            ? Set.of("Neo4j %s".formatted(neo4jVersion), "Neo4j RC", "Neo4j DEV")
+            : Set.of("Neo4j %s".formatted(neo4jVersion));
 
         var allCompatibilities = new HashSet<>(ALL_COMPATIBILITIES);
-        allCompatibilities.removeAll(expectedCompatibilities);
+        allCompatibilities.removeAll(expectedCompatibility);
 
         Consumer<Object> availableCompat = (items) -> {
             var actualItems = (items instanceof String) ? List.of(items) : items;
             assertThat(actualItems)
                 .asInstanceOf(InstanceOfAssertFactories.list(String.class))
-                .isSubsetOf(expectedCompatibilities)
+                .isSubsetOf(expectedCompatibility)
                 .doesNotContainAnyElementsOf(allCompatibilities);
         };
 
@@ -210,7 +124,7 @@ class SysInfoProcTest extends BaseProcTest {
             assertThat(actualItems)
                 .asInstanceOf(InstanceOfAssertFactories.list(String.class))
                 .isSubsetOf(allCompatibilities)
-                .doesNotContainAnyElementsOf(expectedCompatibilities);
+                .doesNotContainAnyElementsOf(expectedCompatibility);
         };
 
         assertThat(result)
@@ -260,7 +174,10 @@ class SysInfoProcTest extends BaseProcTest {
             .containsEntry(Neo4jSettings.transactionStateAllocation().name(), "ON_HEAP")
             .containsEntry(Neo4jSettings.transactionStateMaxOffHeapMemory().name(), 1337L)
             .containsEntry("featureBitIdMap", GdsFeatureToggles.USE_BIT_ID_MAP.isEnabled())
-            .containsEntry("featureUncompressedAdjacencyList", GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled())
+            .containsEntry(
+                "featureUncompressedAdjacencyList",
+                GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled()
+            )
             .containsEntry("featurePackedAdjacencyList", GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST.isEnabled())
             .containsEntry("featureReorderedAdjacencyList", GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.isEnabled())
             .containsEntry("featureArrowDatabaseImport", GdsFeatureToggles.ENABLE_ARROW_DATABASE_IMPORT.isEnabled());

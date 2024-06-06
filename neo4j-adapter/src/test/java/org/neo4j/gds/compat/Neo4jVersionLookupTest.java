@@ -26,26 +26,41 @@ import org.neo4j.kernel.internal.CustomVersionSetting;
 import org.neo4j.kernel.internal.Version;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-class Neo4jVersionTest {
+class Neo4jVersionLookupTest {
     private static final String CUSTOM_VERSION_SETTING = CustomVersionSetting.getConfigKey();
 
     @ParameterizedTest
-    @CsvSource({
-        "5.14.0, V_5_14",
-        "5.15.0, V_5_15",
-        "5.16.0, V_5_16",
-        "5.17.0, V_5_17",
-        "5.18.1, V_5_18",
-        "5.19.0, V_5_19",
-        "5.20.0, V_5_20",
-        "5.21.0, V_Dev",
-    })
-    void testParse(String input, Neo4jVersion expected) {
-        assertEquals(expected.name(), Neo4jVersion.parse(input).name());
+    @CsvSource(
+        {
+            "5.15.0, 5, 15",
+            "5.16.0, 5, 16",
+            "5.17.0, 5, 17",
+            "5.18.1, 5, 18",
+            "5.19.0, 5, 19",
+            "5.20.0, 5, 20",
+        }
+    )
+    void testParse(String input, int major, int minor) {
+        assertThat(Neo4jVersionLookup.parse(input, input))
+            .returns(new Neo4jVersion.MajorMinor(major, minor), Neo4jVersion::semanticVersion)
+            .returns(true, Neo4jVersion::isSupported)
+            .returns(false, Neo4jVersion::isUnstable);
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        {
+            "5.21.0, 5, 21",
+            "5.21.0-SNAPSHOT, 5, 21",
+            "5.99.0-SNAPSHOT, 5, 99"
+        }
+    )
+    void testParseNext(String input, int major, int minor) {
+        assertThat(Neo4jVersionLookup.parse(input, input))
+            .returns(true, v -> v.matches(major, minor))
+            .returns(true, Neo4jVersion::isSupported)
+            .returns(true, Neo4jVersion::isUnstable);
     }
 
     @ParameterizedTest
@@ -59,28 +74,33 @@ class Neo4jVersionTest {
             "5.1.0",
             "5.2.0",
             "5.2.0",
-            "5.3.0",
-            "5.4.0",
+            "5.3.0", // ^
+            "5.4.0", // |
             "5.5.0", // 5.x versions no longer supported
-            "5.6.0",
-            "5.7.0",
+            "5.6.0", // |
+            "5.7.0", // v
             "5.8.0",
             "5.9.0",
             "5.10.0",
+            "5.11.0",
+            "5.12.0",
+            "5.13.0",
+            "5.14.0",
             "dev.5.dev.1",
             "5",
             "6.0.0",
-        })
+        }
+    )
     void testParseInvalid(String input) {
-        assertThatThrownBy(() -> Neo4jVersion.parse(input))
-            .isInstanceOf(UnsupportedOperationException.class)
-            .hasMessage("Cannot run on Neo4j Version " + input);
+        var version = Neo4jVersionLookup.parse(input, input);
+        assertThat(version).returns(false, Neo4jVersion::isSupported);
     }
 
     @Test
     void shouldNotRespectVersionOverride() {
-        System.setProperty(Neo4jVersionTest.CUSTOM_VERSION_SETTING, "foobidoobie");
-        assertNotEquals(Version.getNeo4jVersion(), Neo4jVersion.neo4jVersion());
+        System.setProperty(Neo4jVersionLookupTest.CUSTOM_VERSION_SETTING, "foobidoobie");
+        assertThat(Neo4jVersionLookup.findNeo4jVersion().toString())
+            .isNotEqualTo(Version.getNeo4jVersion());
     }
 
     @ParameterizedTest
@@ -92,11 +112,13 @@ class Neo4jVersionTest {
             "5.18.1, 5, 18",
             "5.19.0, 5, 19",
             "5.20.0, 5, 20",
+            "5.21.0, 5, 21",
+            "5.99.0, 5, 99",
         }
     )
     void semanticVersion(String input, int expectedMajor, int expectedMinor) {
-        Neo4jVersion version = Neo4jVersion.parse(input);
+        Neo4jVersion version = Neo4jVersionLookup.parse(input, input);
 
-        assertThat(version.semanticVersion()).isEqualTo(ImmutableMajorMinorVersion.of(expectedMajor, expectedMinor));
+        assertThat(version.semanticVersion()).isEqualTo(new Neo4jVersion.MajorMinor(expectedMajor, expectedMinor));
     }
 }
