@@ -35,7 +35,7 @@ import org.neo4j.scheduler.JobScheduler;
 
 public interface Neo4jProxyApi {
 
-    @CompatSince(Neo4jVersion.V_5_18)
+    @CompatSince(minor = 18)
     default BatchImporter instantiateBlockBatchImporter(
         DatabaseLayout directoryStructure,
         FileSystemAbstraction fileSystem,
@@ -51,7 +51,9 @@ public interface Neo4jProxyApi {
         throw new UnsupportedOperationException("GDS does not support block store format batch importer on this Neo4j version. Requires >= Neo4j 5.18.");
     }
 
+    @CompatSince(minor = 21)
     GlobalProcedureRegistry globalProcedureRegistry(GlobalProcedures globalProcedures);
 
+    @CompatSince(minor = 21)
     Write dataWrite(KernelTransaction kernelTransaction) throws InvalidTransactionTypeKernelException;
 }
