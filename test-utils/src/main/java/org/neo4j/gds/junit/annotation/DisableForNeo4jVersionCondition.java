@@ -66,13 +66,13 @@ public class DisableForNeo4jVersionCondition implements ExecutionCondition {
 
         for (var annotation : annotations) {
             var excludedNeo4jVersion = annotation.value();
-            if (currentNeo4jVersion == excludedNeo4jVersion) {
+            if (excludedNeo4jVersion.matches(currentNeo4jVersion)) {
                 var message = annotation.message();
                 if (message.isBlank()) {
                     message = formatWithLocale(
                         "%s should be disabled for Neo4j %s",
-                        element.toString(),
-                        excludedNeo4jVersion.toString()
+                        element,
+                        excludedNeo4jVersion
                     );
                 }
                 return disabled(message);

@@ -19,23 +19,26 @@
  */
 package org.neo4j.gds.junit.annotation;
 
-import org.junit.jupiter.api.extension.ExtendWith;
+@SuppressWarnings("all")
+public enum Neo4jVersion {
+    V_5_15(15),
+    V_5_16(16),
+    V_5_17(17),
+    V_5_18(18),
+    V_5_19(19),
+    V_5_20(20),
+    V_Dev(-2),
+    ;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+    private final int minor;
 
-import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+    Neo4jVersion(int minor) {
+        this.minor = minor;
+    }
 
-@Target({ METHOD, TYPE, ANNOTATION_TYPE })
-@Retention(RUNTIME)
-@ExtendWith(EnableForNeo4jVersionCondition.class)
-public @interface EnableForNeo4jVersion {
-
-    Neo4jVersion value();
-
-    String message() default "";
-
+    public boolean matches(org.neo4j.gds.compat.Neo4jVersion version) {
+        return (this == V_Dev)
+            ? version.isUnstable()
+            : version.major() == 5 && version.minor() == this.minor;
+    }
 }

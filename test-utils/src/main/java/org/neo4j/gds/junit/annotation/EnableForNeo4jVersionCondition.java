@@ -44,7 +44,7 @@ public class EnableForNeo4jVersionCondition implements ExecutionCondition {
         var runningNeo4jVersion = GraphDatabaseApiProxy.neo4jVersion();
 
         var single = findAnnotation(element, EnableForNeo4jVersion.class);
-        if (single != null && single.value() != runningNeo4jVersion) {
+        if (single != null && single.value().matches(runningNeo4jVersion)) {
             return disabled(formatWithLocale(
                 "Not enabled for %s, only for Neo4j version %s",
                 runningNeo4jVersion,
