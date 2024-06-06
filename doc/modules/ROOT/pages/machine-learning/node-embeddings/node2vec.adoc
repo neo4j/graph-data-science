@@ -226,7 +226,7 @@ CREATE (dave)-[:LIKES]->(bongos);
 ----
 MATCH (source:Person)-[r:LIKES]->(target:Instrument)
 WITH gds.graph.project(
-  'persons',
+  'myGraph',
   source,
   target
 ) AS g

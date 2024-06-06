@@ -295,6 +295,7 @@ WITH gds.graph.project(
   target,
   { 
     sourceNodeLabels: labels(source),
+    targetNodeLabels: labels(target),
     relationshipProperties: r { strength: coalesce(r.strength, 1.0) }
   }
 ) AS g
