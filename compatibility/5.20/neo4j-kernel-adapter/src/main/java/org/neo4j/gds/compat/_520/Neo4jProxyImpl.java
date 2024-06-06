@@ -20,14 +20,19 @@
 package org.neo4j.gds.compat._520;
 
 import org.neo4j.configuration.Config;
+import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.compat.CompatMonitor;
 import org.neo4j.gds.compat.GlobalProcedureRegistry;
 import org.neo4j.gds.compat.Neo4jProxyApi;
+import org.neo4j.gds.compat.Write;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.Monitor;
 import org.neo4j.internal.batchimport.input.Collector;
+import org.neo4j.internal.kernel.api.exceptions.EntityNotFoundException;
+import org.neo4j.internal.kernel.api.exceptions.InvalidTransactionTypeKernelException;
+import org.neo4j.internal.kernel.api.exceptions.schema.ConstraintValidationException;
 import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.io.fs.FileSystemAbstraction;
@@ -35,6 +40,7 @@ import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.context.CursorContextFactory;
 import org.neo4j.io.pagecache.context.FixedVersionContextSupplier;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
+import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
 import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
@@ -42,6 +48,7 @@ import org.neo4j.logging.internal.LogService;
 import org.neo4j.memory.EmptyMemoryTracker;
 import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.storageengine.api.StorageEngineFactory;
+import org.neo4j.values.storable.Value;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
@@ -129,6 +136,36 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             @Override
             public Stream<UserFunctionSignature> getAllAggregatingFunctions() {
                 return globalProcedures.getCurrentView().getAllAggregatingFunctions();
+            }
+        };
+    }
+
+    @Override
+    public Write dataWrite(KernelTransaction kernelTransaction) throws InvalidTransactionTypeKernelException {
+        var neoWrite = kernelTransaction.dataWrite();
+        return new Write() {
+
+            @Override
+            public void nodeAddLabel(long node, int nodeLabelToken) throws KernelException {
+                neoWrite.nodeAddLabel(node, nodeLabelToken);
+            }
+
+            @Override
+            public void nodeSetProperty(long node, int propertyKey, Value value) throws KernelException {
+                neoWrite.nodeSetProperty(node, propertyKey, value);
+            }
+
+            @Override
+            public long relationshipCreate(long source, int relationshipToken, long target) throws
+                EntityNotFoundException {
+                return neoWrite.relationshipCreate(source, relationshipToken, target);
+            }
+
+            @Override
+            public void relationshipSetProperty(long relationship, int propertyKey, Value value) throws
+                EntityNotFoundException,
+                ConstraintValidationException {
+                neoWrite.relationshipSetProperty(relationship, propertyKey, value);
             }
         };
     }

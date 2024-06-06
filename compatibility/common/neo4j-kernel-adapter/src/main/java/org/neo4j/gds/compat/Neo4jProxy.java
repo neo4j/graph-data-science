@@ -55,6 +55,7 @@ import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
 import org.neo4j.internal.kernel.api.connectioninfo.ClientConnectionInfo;
+import org.neo4j.internal.kernel.api.exceptions.InvalidTransactionTypeKernelException;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
 import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
@@ -267,6 +268,10 @@ public final class Neo4jProxy {
             ClientConnectionInfo.EMBEDDED_CONNECTION,
             databaseName
         );
+    }
+
+    public static Write dataWrite(KernelTransaction kernelTransaction) throws InvalidTransactionTypeKernelException {
+        return IMPL.dataWrite(kernelTransaction);
     }
 
     public static PropertyCursor allocatePropertyCursor(KernelTransaction kernelTransaction) {

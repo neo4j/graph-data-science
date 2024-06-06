@@ -24,9 +24,11 @@ import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.input.Collector;
+import org.neo4j.internal.kernel.api.exceptions.InvalidTransactionTypeKernelException;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
+import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.scheduler.JobScheduler;
@@ -50,4 +52,6 @@ public interface Neo4jProxyApi {
     }
 
     GlobalProcedureRegistry globalProcedureRegistry(GlobalProcedures globalProcedures);
+
+    Write dataWrite(KernelTransaction kernelTransaction) throws InvalidTransactionTypeKernelException;
 }

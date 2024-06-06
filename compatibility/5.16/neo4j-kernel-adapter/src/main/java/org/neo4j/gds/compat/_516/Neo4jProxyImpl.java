@@ -19,11 +19,18 @@
  */
 package org.neo4j.gds.compat._516;
 
+import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.compat.GlobalProcedureRegistry;
 import org.neo4j.gds.compat.Neo4jProxyApi;
+import org.neo4j.gds.compat.Write;
+import org.neo4j.internal.kernel.api.exceptions.EntityNotFoundException;
+import org.neo4j.internal.kernel.api.exceptions.InvalidTransactionTypeKernelException;
+import org.neo4j.internal.kernel.api.exceptions.schema.ConstraintValidationException;
 import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
+import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
+import org.neo4j.values.storable.Value;
 
 import java.util.stream.Stream;
 
@@ -45,6 +52,36 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             @Override
             public Stream<UserFunctionSignature> getAllAggregatingFunctions() {
                 return globalProcedures.getCurrentView().getAllAggregatingFunctions();
+            }
+        };
+    }
+
+    @Override
+    public Write dataWrite(KernelTransaction kernelTransaction) throws InvalidTransactionTypeKernelException {
+        org.neo4j.internal.kernel.api.Write neoWrite = kernelTransaction.dataWrite();
+        return new Write() {
+
+            @Override
+            public void nodeAddLabel(long node, int nodeLabelToken) throws KernelException {
+                neoWrite.nodeAddLabel(node, nodeLabelToken);
+            }
+
+            @Override
+            public long relationshipCreate(long source, int relationshipToken, long target) throws
+                EntityNotFoundException {
+                return neoWrite.relationshipCreate(source, relationshipToken, target);
+            }
+
+            @Override
+            public void nodeSetProperty(long node, int propertyKey, Value value) throws KernelException {
+                neoWrite.nodeSetProperty(node, propertyKey, value);
+            }
+
+            @Override
+            public void relationshipSetProperty(long relationship, int propertyKey, Value value) throws
+                EntityNotFoundException,
+                ConstraintValidationException {
+                neoWrite.relationshipSetProperty(relationship, propertyKey, value);
             }
         };
     }
