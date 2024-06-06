@@ -23,9 +23,7 @@ import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.compat.GlobalProcedureRegistry;
 import org.neo4j.gds.compat.Neo4jProxyApi;
 import org.neo4j.gds.compat.Write;
-import org.neo4j.internal.kernel.api.exceptions.EntityNotFoundException;
 import org.neo4j.internal.kernel.api.exceptions.InvalidTransactionTypeKernelException;
-import org.neo4j.internal.kernel.api.exceptions.schema.ConstraintValidationException;
 import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -67,8 +65,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             }
 
             @Override
-            public long relationshipCreate(long source, int relationshipToken, long target) throws
-                EntityNotFoundException {
+            public long relationshipCreate(long source, int relationshipToken, long target) throws KernelException {
                 return neoWrite.relationshipCreate(source, relationshipToken, target);
             }
 
@@ -79,8 +76,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
 
             @Override
             public void relationshipSetProperty(long relationship, int propertyKey, Value value) throws
-                EntityNotFoundException,
-                ConstraintValidationException {
+                KernelException {
                 neoWrite.relationshipSetProperty(relationship, propertyKey, value);
             }
         };

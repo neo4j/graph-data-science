@@ -21,6 +21,7 @@ package org.neo4j.gds.core.write;
 
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipIterator;
@@ -37,8 +38,6 @@ import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.gds.utils.StatementApi;
-import org.neo4j.internal.kernel.api.exceptions.EntityNotFoundException;
-import org.neo4j.internal.kernel.api.exceptions.schema.ConstraintValidationException;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.LongUnaryOperator;
@@ -190,7 +189,7 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
     private static class WriteConsumer implements RelationshipWithPropertyConsumer {
         @FunctionalInterface
         interface RelationshipWriteBehavior {
-            void apply(long sourceNodeId, long targetNodeId, double property) throws EntityNotFoundException, ConstraintValidationException;
+            void apply(long sourceNodeId, long targetNodeId, double property) throws KernelException;
         }
 
         private final LongUnaryOperator toOriginalId;
@@ -233,7 +232,8 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
             }
         }
 
-        private void writeWithoutProperty(long sourceNodeId, long targetNodeId, double property) throws EntityNotFoundException {
+        private void writeWithoutProperty(long sourceNodeId, long targetNodeId, double property) throws
+            KernelException {
             writeRelationship(sourceNodeId, targetNodeId);
             progressTracker.logProgress();
         }
@@ -242,13 +242,13 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
             long sourceNodeId,
             long targetNodeId,
             double property
-        ) throws EntityNotFoundException, ConstraintValidationException {
+        ) throws KernelException {
             long relId = writeRelationship(sourceNodeId, targetNodeId);
             exportProperty(property, relId);
             progressTracker.logProgress();
         }
 
-        private long writeRelationship(long sourceNodeId, long targetNodeId) throws EntityNotFoundException {
+        private long writeRelationship(long sourceNodeId, long targetNodeId) throws KernelException {
             return ops.relationshipCreate(
                 toOriginalId.applyAsLong(sourceNodeId),
                 relTypeToken,
@@ -256,7 +256,7 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
             );
         }
 
-        private void exportProperty(double property, long relId) throws EntityNotFoundException, ConstraintValidationException {
+        private void exportProperty(double property, long relId) throws KernelException {
             if (!Double.isNaN(property)) {
                 ops.relationshipSetProperty(
                     relId,

@@ -20,8 +20,6 @@
 package org.neo4j.gds.compat;
 
 import org.neo4j.exceptions.KernelException;
-import org.neo4j.internal.kernel.api.exceptions.EntityNotFoundException;
-import org.neo4j.internal.kernel.api.exceptions.schema.ConstraintValidationException;
 import org.neo4j.values.storable.Value;
 
 /**
@@ -31,10 +29,9 @@ public interface Write {
 
     void nodeSetProperty(long node, int propertyKey, Value value) throws KernelException;
 
-    void relationshipSetProperty(long relationship, int propertyKey, Value value) throws
-        EntityNotFoundException, ConstraintValidationException;
+    void relationshipSetProperty(long relationship, int propertyKey, Value value) throws KernelException;
 
     void nodeAddLabel(long node, int nodeLabelToken) throws KernelException;
 
-    long relationshipCreate(long source, int relationshipToken, long target) throws EntityNotFoundException;
+    long relationshipCreate(long source, int relationshipToken, long target) throws KernelException;
 }
