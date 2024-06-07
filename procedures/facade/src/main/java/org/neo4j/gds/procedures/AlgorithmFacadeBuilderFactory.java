@@ -24,6 +24,7 @@ import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
+import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -33,10 +34,9 @@ import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.modelcatalogservices.ModelCatalogServiceProvider;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
+import org.neo4j.gds.procedures.algorithms.runners.DefaultAlgorithmExecutionScaffolding;
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
-import org.neo4j.gds.procedures.algorithms.runners.StatsModeAlgorithmRunner;
-import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
-import org.neo4j.gds.procedures.algorithms.runners.WriteModeAlgorithmRunner;
+import org.neo4j.gds.procedures.algorithms.runners.MetadataSetter;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -75,6 +75,7 @@ public class AlgorithmFacadeBuilderFactory {
         KernelTransaction kernelTransaction,
         GraphDatabaseService graphDatabaseService,
         DatabaseGraphStoreEstimationService databaseGraphStoreEstimationService,
+        AlgorithmMetaDataSetter algorithmMetaDataSetter,
         ApplicationsFacade applicationsFacade,
         GenericStub genericStub
     ) {
@@ -107,15 +108,19 @@ public class AlgorithmFacadeBuilderFactory {
             requestScopedDependencies
         );
 
-        var estimationModeRunner = new EstimationModeRunner(configurationCreator);
         var closeableResourceRegistry = new TransactionCloseableResourceRegistry(kernelTransaction);
-        var streamModeAlgorithmRunner = new StreamModeAlgorithmRunner(closeableResourceRegistry, configurationCreator);
-        var statsModeAlgorithmRunner = new StatsModeAlgorithmRunner(configurationCreator);
-        var writeModeAlgorithmRunner = new WriteModeAlgorithmRunner(configurationCreator);
+
+        var estimationModeRunner = new EstimationModeRunner(configurationCreator);
+        var algorithmExecutionScaffolding = new DefaultAlgorithmExecutionScaffolding(configurationCreator);
+        var algorithmExecutionScaffoldingForStreamMode = new MetadataSetter(
+            algorithmMetaDataSetter,
+            algorithmExecutionScaffolding
+        );
 
         // procedure facade
         return new AlgorithmFacadeBuilder(
             configurationCreator,
+            closeableResourceRegistry,
             nodeLookup,
             procedureReturnColumns,
             mutateNodePropertyService,
@@ -126,9 +131,8 @@ public class AlgorithmFacadeBuilderFactory {
             applicationsFacade,
             genericStub,
             estimationModeRunner,
-            streamModeAlgorithmRunner,
-            statsModeAlgorithmRunner,
-            writeModeAlgorithmRunner
+            algorithmExecutionScaffolding,
+            algorithmExecutionScaffoldingForStreamMode
         );
     }
 }

@@ -19,33 +19,23 @@
  */
 package org.neo4j.gds.procedures.algorithms.runners;
 
-import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.procedures.algorithms.AlgorithmHandle;
-import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 
 import java.util.Map;
 import java.util.function.Function;
 
-public class WriteModeAlgorithmRunner {
-    private final ConfigurationCreator configurationCreator;
-
-    public WriteModeAlgorithmRunner(ConfigurationCreator configurationCreator) {
-        this.configurationCreator = configurationCreator;
-    }
-
-    public <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER runWriteModeAlgorithm(
+public interface AlgorithmExecutionScaffolding {
+    /**
+     * Just some scaffolding: parsing graph name, parsing configuration, then delegating
+     */
+    <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER runAlgorithm(
         String graphNameAsString,
         Map<String, Object> rawConfiguration,
         Function<CypherMapWrapper, CONFIGURATION> configurationSupplier,
         AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> algorithm,
         ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
-    ) {
-        var graphName = GraphName.parse(graphNameAsString);
-        var configuration = configurationCreator.createConfiguration(rawConfiguration, configurationSupplier);
-
-        return algorithm.compute(graphName, configuration, resultBuilder);
-    }
+    );
 }

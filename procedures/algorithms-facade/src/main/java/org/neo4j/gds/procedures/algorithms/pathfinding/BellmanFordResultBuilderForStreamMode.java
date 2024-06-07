@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
+import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
@@ -32,10 +33,16 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 class BellmanFordResultBuilderForStreamMode implements ResultBuilder<BellmanFordStreamConfig, BellmanFordResult, Stream<BellmanFordStreamResult>, Void> {
+    private final CloseableResourceRegistry closeableResourceRegistry;
     private final NodeLookup nodeLookup;
     private final boolean routeRequested;
 
-    BellmanFordResultBuilderForStreamMode(NodeLookup nodeLookup, boolean routeRequested) {
+    BellmanFordResultBuilderForStreamMode(
+        CloseableResourceRegistry closeableResourceRegistry,
+        NodeLookup nodeLookup,
+        boolean routeRequested
+    ) {
+        this.closeableResourceRegistry = closeableResourceRegistry;
         this.nodeLookup = nodeLookup;
         this.routeRequested = routeRequested;
     }
@@ -63,7 +70,14 @@ class BellmanFordResultBuilderForStreamMode implements ResultBuilder<BellmanFord
 
         var algorithmResult = getPathFindingResult(bellmanFordResult, containsNegativeCycle);
 
-        return algorithmResult.mapPaths(path -> resultBuilder.build(path, shouldCreateRoutes));
+        var resultStream = algorithmResult.mapPaths(path -> resultBuilder.build(
+            path,
+            shouldCreateRoutes
+        ));
+
+        closeableResourceRegistry.register(resultStream);
+
+        return resultStream;
     }
 
     private static PathFindingResult getPathFindingResult(

@@ -41,7 +41,6 @@ public class GraphDataScienceProceduresBuilder {
     private final Log log;
     private CentralityProcedureFacade centralityProcedureFacade;
     private CatalogProcedureFacade catalogProcedureFacade;
-    private org.neo4j.gds.procedures.centrality.CentralityProcedureFacade oldCentralityProcedureFacade;
     private CommunityProcedureFacade communityProcedureFacade;
     private MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade;
     private NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade;
@@ -61,11 +60,6 @@ public class GraphDataScienceProceduresBuilder {
 
     public GraphDataScienceProceduresBuilder with(CentralityProcedureFacade centralityProcedureFacade) {
         this.centralityProcedureFacade = centralityProcedureFacade;
-        return this;
-    }
-
-    public GraphDataScienceProceduresBuilder with(org.neo4j.gds.procedures.centrality.CentralityProcedureFacade oldCentralityProcedureFacade) {
-        this.oldCentralityProcedureFacade = oldCentralityProcedureFacade;
         return this;
     }
 
@@ -119,7 +113,6 @@ public class GraphDataScienceProceduresBuilder {
             log,
             algorithmsProcedureFacade,
             catalogProcedureFacade,
-            oldCentralityProcedureFacade,
             communityProcedureFacade,
             miscAlgorithmsProcedureFacade,
             nodeEmbeddingsProcedureFacade,

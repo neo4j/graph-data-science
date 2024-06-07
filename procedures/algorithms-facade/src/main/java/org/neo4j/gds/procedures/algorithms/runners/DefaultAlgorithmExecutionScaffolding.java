@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.procedures.algorithms.runners;
 
-import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -29,44 +28,24 @@ import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
-public class StreamModeAlgorithmRunner {
-    private final CloseableResourceRegistry closeableResourceRegistry;
+public class DefaultAlgorithmExecutionScaffolding implements AlgorithmExecutionScaffolding {
     private final ConfigurationCreator configurationCreator;
 
-    public StreamModeAlgorithmRunner(
-        CloseableResourceRegistry closeableResourceRegistry,
-        ConfigurationCreator configurationCreator
-    ) {
-        this.closeableResourceRegistry = closeableResourceRegistry;
+    public DefaultAlgorithmExecutionScaffolding(ConfigurationCreator configurationCreator) {
         this.configurationCreator = configurationCreator;
     }
 
-    /**
-     * Some reuse, all the stream algorithms use the same high level structure:
-     * <ol>
-     *     <li> configuration parsing
-     *     <li> parameter marshalling
-     *     <li> delegating to down stream layer to call the thing we are actually interested in
-     *     <li> handle resource closure
-     * </ol>
-     */
-    public <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> Stream<RESULT_TO_CALLER> runStreamModeAlgorithm(
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER runAlgorithm(
         String graphNameAsString,
         Map<String, Object> rawConfiguration,
         Function<CypherMapWrapper, CONFIGURATION> configurationSupplier,
-        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, Stream<RESULT_TO_CALLER>, Void> resultBuilder,
-        AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, Stream<RESULT_TO_CALLER>, Void> algorithm
+        AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> algorithm,
+        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
     ) {
         var graphName = GraphName.parse(graphNameAsString);
-        var configuration = configurationCreator.createConfigurationForStream(rawConfiguration, configurationSupplier);
+        var configuration = configurationCreator.createConfiguration(rawConfiguration, configurationSupplier);
 
-        var resultStream = algorithm.compute(graphName, configuration, resultBuilder);
-
-        // we need to do this for stream mode
-        closeableResourceRegistry.register(resultStream);
-
-        return resultStream;
+        return algorithm.compute(graphName, configuration, resultBuilder);
     }
 }

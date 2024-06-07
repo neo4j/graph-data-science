@@ -46,6 +46,7 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.DegreeCentrality;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.EigenVector;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.HarmonicCentrality;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.PageRank;
 
 public final class CentralityAlgorithmsWriteModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
@@ -204,6 +205,24 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             HarmonicCentrality,
             estimationFacade::harmonicCentrality,
             graph -> centralityAlgorithms.harmonicCentrality(graph, configuration),
+            Optional.of(writeStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT pageRank(
+        GraphName graphName,
+        PageRankWriteConfig configuration,
+        ResultBuilder<PageRankWriteConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var writeStep = new PageRankWriteStep(writeToDatabase, configuration, ArticleRank);
+
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            PageRank,
+            estimationFacade::pageRank,
+            graph -> centralityAlgorithms.pageRank(graph, configuration),
             Optional.of(writeStep),
             resultBuilder
         );

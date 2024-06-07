@@ -56,7 +56,6 @@ public class GraphDataScienceProcedures {
 
     private final AlgorithmsProcedureFacade algorithmsProcedureFacade;
     private final CatalogProcedureFacade catalogProcedureFacade;
-    private final org.neo4j.gds.procedures.centrality.CentralityProcedureFacade centralityProcedureFacade;
     private final CommunityProcedureFacade communityProcedureFacade;
     private final MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade;
     private final NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade;
@@ -71,7 +70,6 @@ public class GraphDataScienceProcedures {
         Log log,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
         CatalogProcedureFacade catalogProcedureFacade,
-        org.neo4j.gds.procedures.centrality.CentralityProcedureFacade centralityProcedureFacade,
         CommunityProcedureFacade communityProcedureFacade,
         MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade,
         NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade,
@@ -81,7 +79,6 @@ public class GraphDataScienceProcedures {
         this.log = log;
         this.algorithmsProcedureFacade = algorithmsProcedureFacade;
         this.catalogProcedureFacade = catalogProcedureFacade;
-        this.centralityProcedureFacade = centralityProcedureFacade;
         this.communityProcedureFacade = communityProcedureFacade;
         this.miscAlgorithmsProcedureFacade = miscAlgorithmsProcedureFacade;
         this.nodeEmbeddingsProcedureFacade = nodeEmbeddingsProcedureFacade;
@@ -159,12 +156,12 @@ public class GraphDataScienceProcedures {
             kernelTransaction,
             graphDatabaseService,
             databaseGraphStoreEstimationService,
+            algorithmMetaDataSetter,
             applicationsFacade,
             genericStub
         );
 
         var centralityProcedureFacade = algorithmFacadeBuilder.createCentralityProcedureFacade();
-        var oldCentralityProcedureFacade = algorithmFacadeBuilder.createOldCentralityProcedureFacade();
         var communityProcedureFacade = algorithmFacadeBuilder.createCommunityProcedureFacade();
         var miscAlgorithmsProcedureFacade = algorithmFacadeBuilder.createMiscellaneousProcedureFacade();
         var nodeEmbeddingsProcedureFacade = algorithmFacadeBuilder.createNodeEmbeddingsProcedureFacade();
@@ -176,7 +173,6 @@ public class GraphDataScienceProcedures {
         return new GraphDataScienceProceduresBuilder(log)
             .with(catalogProcedureFacade)
             .with(centralityProcedureFacade)
-            .with(oldCentralityProcedureFacade)
             .with(communityProcedureFacade)
             .with(miscAlgorithmsProcedureFacade)
             .with(nodeEmbeddingsProcedureFacade)
@@ -197,10 +193,6 @@ public class GraphDataScienceProcedures {
 
     public CatalogProcedureFacade catalog() {
         return catalogProcedureFacade;
-    }
-
-    public org.neo4j.gds.procedures.centrality.CentralityProcedureFacade centrality() {
-        return centralityProcedureFacade;
     }
 
     public CommunityProcedureFacade community() {

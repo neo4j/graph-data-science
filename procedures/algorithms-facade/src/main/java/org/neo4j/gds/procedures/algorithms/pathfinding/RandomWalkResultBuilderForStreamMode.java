@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
+import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
@@ -37,10 +38,16 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 class RandomWalkResultBuilderForStreamMode implements ResultBuilder<RandomWalkStreamConfig, Stream<long[]>, Stream<RandomWalkStreamResult>, Void> {
+    private final CloseableResourceRegistry closeableResourceRegistry;
     private final NodeLookup nodeLookup;
     private final boolean returnPath;
 
-    RandomWalkResultBuilderForStreamMode(NodeLookup nodeLookup, boolean returnPath) {
+    RandomWalkResultBuilderForStreamMode(
+        CloseableResourceRegistry closeableResourceRegistry,
+        NodeLookup nodeLookup,
+        boolean returnPath
+    ) {
+        this.closeableResourceRegistry = closeableResourceRegistry;
         this.nodeLookup = nodeLookup;
         this.returnPath = returnPath;
     }
@@ -60,12 +67,17 @@ class RandomWalkResultBuilderForStreamMode implements ResultBuilder<RandomWalkSt
             ? (List<Long> nodes) -> PathFactory.create(nodeLookup, nodes, RelationshipType.withName("NEXT"))
             : (List<Long> nodes) -> null;
 
-        return result.get()
-            .map(nodes -> {
-                var translatedNodes = translateInternalToNeoIds(nodes, graph);
-                var path = pathCreator.apply(translatedNodes);
-                return new RandomWalkStreamResult(translatedNodes, path);
-            });
+        var streamOfLongArrays = result.get();
+
+        var resultStream = streamOfLongArrays.map(nodes -> {
+            var translatedNodes = translateInternalToNeoIds(nodes, graph);
+            var path = pathCreator.apply(translatedNodes);
+            return new RandomWalkStreamResult(translatedNodes, path);
+        });
+
+        closeableResourceRegistry.register(resultStream);
+
+        return resultStream;
     }
 
     private List<Long> translateInternalToNeoIds(long[] nodes, IdMap idMap) {

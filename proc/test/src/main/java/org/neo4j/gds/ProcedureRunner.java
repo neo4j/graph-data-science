@@ -22,7 +22,6 @@ package org.neo4j.gds;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.applications.algorithms.machinery.DefaultAlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
@@ -165,14 +164,6 @@ public final class ProcedureRunner {
             .with(EmptyUserLogStore.INSTANCE)
             .build();
         var graphStoreCatalogService = new GraphStoreCatalogService();
-
-        var algorithmProcessingTemplate = new DefaultAlgorithmProcessingTemplate(
-            gdsLog,
-            MetricsFacade.PASSTHROUGH_METRICS_FACADE.algorithmMetrics(),
-            graphStoreCatalogService,
-            MemoryGuard.DISABLED,
-            requestScopedDependencies
-        );
 
         var catalogProcedureFacadeFactory = new CatalogProcedureFacadeFactory(gdsLog);
 

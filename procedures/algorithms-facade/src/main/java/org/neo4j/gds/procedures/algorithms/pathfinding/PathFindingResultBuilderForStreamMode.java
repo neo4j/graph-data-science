@@ -19,11 +19,13 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
+import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.paths.PathFactory;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.RelationshipType;
@@ -34,14 +36,19 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.paths.PathFactory.create;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class PathFindingResultBuilderForStreamMode<CONFIGURATION> implements ResultBuilder<CONFIGURATION, PathFindingResult, Stream<PathFindingStreamResult>, Void> {
+    private final CloseableResourceRegistry closeableResourceRegistry;
     private final NodeLookup nodeLookup;
     private final boolean pathRequested;
 
-    PathFindingResultBuilderForStreamMode(NodeLookup nodeLookup, boolean pathRequested) {
+    PathFindingResultBuilderForStreamMode(
+        CloseableResourceRegistry closeableResourceRegistry,
+        NodeLookup nodeLookup,
+        boolean pathRequested
+    ) {
+        this.closeableResourceRegistry = closeableResourceRegistry;
         this.nodeLookup = nodeLookup;
         this.pathRequested = pathRequested;
     }
@@ -60,7 +67,9 @@ public class PathFindingResultBuilderForStreamMode<CONFIGURATION> implements Res
         // this is us handling the case of generated graphs and such
         var createCypherPaths = pathRequested && graphStore.capabilities().canWriteToLocalDatabase();
 
-        return result.get().mapPaths(pathResult -> {
+        var pathFindingResult = result.get();
+
+        var resultStream = pathFindingResult.mapPaths(pathResult -> {
             var nodeIds = pathResult.nodeIds();
             var costs = pathResult.costs();
             var pathIndex = pathResult.index();
@@ -74,7 +83,7 @@ public class PathFindingResultBuilderForStreamMode<CONFIGURATION> implements Res
 
             Path path = null;
             if (createCypherPaths) {
-                path = create(
+                path = PathFactory.create(
                     nodeLookup,
                     nodeIds,
                     costs,
@@ -98,5 +107,9 @@ public class PathFindingResultBuilderForStreamMode<CONFIGURATION> implements Res
                 path
             );
         });
+
+        closeableResourceRegistry.register(resultStream);
+
+        return resultStream;
     }
 }

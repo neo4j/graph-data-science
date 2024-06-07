@@ -19,9 +19,6 @@
  */
 package org.neo4j.gds.procedures;
 
-import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsEstimateBusinessFacade;
-import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsFacade;
-import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacade;
@@ -45,6 +42,7 @@ import org.neo4j.gds.algorithms.misc.MiscAlgorithmsFacade;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
+import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
@@ -52,10 +50,8 @@ import org.neo4j.gds.modelcatalogservices.ModelCatalogService;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
-import org.neo4j.gds.procedures.algorithms.runners.StatsModeAlgorithmRunner;
-import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
-import org.neo4j.gds.procedures.algorithms.runners.WriteModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
@@ -65,6 +61,7 @@ import org.neo4j.gds.procedures.misc.MiscAlgorithmsProcedureFacade;
 class AlgorithmFacadeBuilder {
     // Request scoped parameters
     private final ConfigurationCreator configurationCreator;
+    private final CloseableResourceRegistry closeableResourceRegistry;
     private final NodeLookup nodeLookup;
     private final ProcedureReturnColumns procedureReturnColumns;
     private final MutateNodePropertyService mutateNodePropertyService;
@@ -75,12 +72,12 @@ class AlgorithmFacadeBuilder {
     private final ApplicationsFacade applicationsFacade;
     private final GenericStub genericStub;
     private final EstimationModeRunner estimationModeRunner;
-    private final StreamModeAlgorithmRunner streamModeAlgorithmRunner;
-    private final StatsModeAlgorithmRunner statsModeAlgorithmRunner;
-    private final WriteModeAlgorithmRunner writeModeAlgorithmRunner;
+    private final AlgorithmExecutionScaffolding algorithmExecutionScaffolding;
+    private final AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode;
 
     AlgorithmFacadeBuilder(
         ConfigurationCreator configurationCreator,
+        CloseableResourceRegistry closeableResourceRegistry,
         NodeLookup nodeLookup,
         ProcedureReturnColumns procedureReturnColumns,
         MutateNodePropertyService mutateNodePropertyService,
@@ -91,11 +88,11 @@ class AlgorithmFacadeBuilder {
         ApplicationsFacade applicationsFacade,
         GenericStub genericStub,
         EstimationModeRunner estimationModeRunner,
-        StreamModeAlgorithmRunner streamModeAlgorithmRunner,
-        StatsModeAlgorithmRunner statsModeAlgorithmRunner,
-        WriteModeAlgorithmRunner writeModeAlgorithmRunner
+        AlgorithmExecutionScaffolding algorithmExecutionScaffolding,
+        AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode
     ) {
         this.configurationCreator = configurationCreator;
+        this.closeableResourceRegistry = closeableResourceRegistry;
         this.nodeLookup = nodeLookup;
         this.procedureReturnColumns = procedureReturnColumns;
         this.mutateNodePropertyService = mutateNodePropertyService;
@@ -106,9 +103,8 @@ class AlgorithmFacadeBuilder {
         this.applicationsFacade = applicationsFacade;
         this.genericStub = genericStub;
         this.estimationModeRunner = estimationModeRunner;
-        this.streamModeAlgorithmRunner = streamModeAlgorithmRunner;
-        this.statsModeAlgorithmRunner = statsModeAlgorithmRunner;
-        this.writeModeAlgorithmRunner = writeModeAlgorithmRunner;
+        this.algorithmExecutionScaffolding = algorithmExecutionScaffolding;
+        this.algorithmExecutionScaffoldingForStreamMode = algorithmExecutionScaffoldingForStreamMode;
     }
 
     CentralityProcedureFacade createCentralityProcedureFacade() {
@@ -117,29 +113,8 @@ class AlgorithmFacadeBuilder {
             applicationsFacade,
             procedureReturnColumns,
             estimationModeRunner,
-            statsModeAlgorithmRunner,
-            streamModeAlgorithmRunner,
-            writeModeAlgorithmRunner
-        );
-    }
-
-    org.neo4j.gds.procedures.centrality.CentralityProcedureFacade createOldCentralityProcedureFacade() {
-
-        // algorithm facade
-        var centralityAlgorithmsFacade = new CentralityAlgorithmsFacade(algorithmRunner);
-
-        var estimateBusinessFacade = new CentralityAlgorithmsEstimateBusinessFacade(algorithmEstimator);
-        var writeBusinessFacade = new CentralityAlgorithmsWriteBusinessFacade(
-            centralityAlgorithmsFacade,
-            writeNodePropertyService
-        );
-
-        // procedure facade
-        return new org.neo4j.gds.procedures.centrality.CentralityProcedureFacade(
-            configurationCreator,
-            procedureReturnColumns,
-            estimateBusinessFacade,
-            writeBusinessFacade
+            algorithmExecutionScaffolding,
+            algorithmExecutionScaffoldingForStreamMode
         );
     }
 
@@ -178,9 +153,8 @@ class AlgorithmFacadeBuilder {
             genericStub,
             procedureReturnColumns,
             estimationModeRunner,
-            streamModeAlgorithmRunner,
-            statsModeAlgorithmRunner,
-            writeModeAlgorithmRunner
+            algorithmExecutionScaffolding,
+            algorithmExecutionScaffoldingForStreamMode
         );
     }
 
@@ -217,14 +191,14 @@ class AlgorithmFacadeBuilder {
 
     PathFindingProcedureFacade createPathFindingProcedureFacade() {
         return PathFindingProcedureFacade.create(
+            closeableResourceRegistry,
             nodeLookup,
             procedureReturnColumns,
             applicationsFacade,
             genericStub,
             estimationModeRunner,
-            streamModeAlgorithmRunner,
-            statsModeAlgorithmRunner,
-            writeModeAlgorithmRunner
+            algorithmExecutionScaffolding,
+            algorithmExecutionScaffoldingForStreamMode
         );
     }
 
