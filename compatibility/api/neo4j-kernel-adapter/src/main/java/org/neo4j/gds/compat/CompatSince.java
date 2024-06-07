@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
 
 /**
  * Marker interface to help with keeping the compat layer as small as necessary.
- *
+ * <p>
  * Annotating a method in `Neo4jProxyApi` with `@CompatSince(minor=42)` would mean that that method
  * needed to be added to the compat layer because of a change in Neo4j 5.42.
  * Consequently, when we drop support for a version such that the oldest supported Neo4j version is 5.42,
@@ -37,13 +37,13 @@ import java.lang.annotation.Target;
 public @interface CompatSince {
 
     /**
-     * The Neo4j major ersion that brought the change that required
+     * The Neo4j major version that brought the change that required
      * this compatibility method to exist.
      */
     int major() default 5;
 
     /**
-     * The Neo4j minor ersion that brought the change that required
+     * The Neo4j minor version that brought the change that required
      * this compatibility method to exist.
      */
     int minor();
