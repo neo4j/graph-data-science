@@ -20,7 +20,7 @@
 package org.neo4j.gds.algorithms.misc;
 
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
-import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.scaleproperties.ScalePropertiesMutateConfig;
 

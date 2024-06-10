@@ -17,6 +17,7 @@ dependencies {
     implementation project(':annotations')
     implementation project(':applications-facade')
     implementation project(':centrality-algorithms')
+    implementation project(':community-algorithms')
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':defaults-and-limits-configuration')

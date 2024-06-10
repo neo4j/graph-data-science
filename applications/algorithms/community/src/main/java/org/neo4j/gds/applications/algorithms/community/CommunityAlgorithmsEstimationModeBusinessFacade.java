@@ -17,26 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms.mutateservices;
+package org.neo4j.gds.applications.algorithms.community;
 
-public final class AddNodePropertyResult {
+import org.neo4j.gds.config.SeedConfig;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.wcc.WccMemoryEstimateDefinition;
 
-    private final long nodePropertiesAdded;
-    private final long mutateMilliseconds;
-
-    AddNodePropertyResult(
-        long nodePropertiesAdded,
-        long mutateMilliseconds
-    ) {
-        this.nodePropertiesAdded = nodePropertiesAdded;
-        this.mutateMilliseconds = mutateMilliseconds;
-    }
-
-    public long nodePropertiesAdded() {
-        return nodePropertiesAdded;
-    }
-
-    public long mutateMilliseconds() {
-        return mutateMilliseconds;
+public class CommunityAlgorithmsEstimationModeBusinessFacade {
+    public MemoryEstimation wcc(SeedConfig configuration) {
+        return new WccMemoryEstimateDefinition(configuration.isIncremental()).memoryEstimation();
     }
 }

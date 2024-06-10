@@ -39,22 +39,22 @@ import org.neo4j.gds.algorithms.misc.MiscAlgorithmStreamBusinessFacade;
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmWriteBusinessFacade;
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmsFacade;
-import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.modelcatalogservices.ModelCatalogService;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
-import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.embeddings.NodeEmbeddingsProcedureFacade;
 import org.neo4j.gds.procedures.misc.MiscAlgorithmsProcedureFacade;
 
@@ -119,6 +119,10 @@ class AlgorithmFacadeBuilder {
     }
 
     CommunityProcedureFacade createCommunityProcedureFacade() {
+        return CommunityProcedureFacade.create(genericStub, applicationsFacade, procedureReturnColumns);
+    }
+
+    org.neo4j.gds.procedures.community.CommunityProcedureFacade createOldCommunityProcedureFacade() {
 
         // algorithm facade
         var communityAlgorithmsFacade = new CommunityAlgorithmsFacade(algorithmRunner);
@@ -136,7 +140,7 @@ class AlgorithmFacadeBuilder {
         );
 
         // procedure facade
-        return new CommunityProcedureFacade(
+        return new org.neo4j.gds.procedures.community.CommunityProcedureFacade(
             configurationCreator,
             procedureReturnColumns,
             estimateBusinessFacade,

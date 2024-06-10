@@ -54,5 +54,6 @@ public enum Algorithm {
     SpanningTree,
     SteinerTree,
     TopologicalSort,
+    WCC,
     Yens;
 }

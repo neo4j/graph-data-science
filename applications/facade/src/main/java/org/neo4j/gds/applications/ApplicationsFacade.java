@@ -19,11 +19,13 @@
  */
 package org.neo4j.gds.applications;
 
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.DefaultAlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
@@ -46,17 +48,20 @@ import java.util.function.Function;
 public final class ApplicationsFacade {
     private final CatalogBusinessFacade catalogBusinessFacade;
     private final CentralityApplications centralityApplications;
+    private final CommunityApplications communityApplications;
     private final PathFindingApplications pathFindingApplications;
     private final SimilarityApplications similarityApplications;
 
     ApplicationsFacade(
         CatalogBusinessFacade catalogBusinessFacade,
         CentralityApplications centralityApplications,
+        CommunityApplications communityApplications,
         PathFindingApplications pathFindingApplications,
         SimilarityApplications similarityApplications
     ) {
         this.catalogBusinessFacade = catalogBusinessFacade;
         this.centralityApplications = centralityApplications;
+        this.communityApplications = communityApplications;
         this.pathFindingApplications = pathFindingApplications;
         this.similarityApplications = similarityApplications;
     }
@@ -93,12 +98,23 @@ public final class ApplicationsFacade {
 
         var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
 
+        var mutateNodePropertyService = new MutateNodePropertyService(log);
+        var mutateNodeProperty = new MutateNodeProperty(mutateNodePropertyService);
+
         var centralityApplications = CentralityApplications.create(
             log,
             requestScopedDependencies,
             algorithmEstimationTemplate,
             algorithmProcessingTemplate,
-            progressTrackerCreator
+            progressTrackerCreator,
+            mutateNodeProperty
+        );
+
+        var communityApplications = CommunityApplications.create(
+            requestScopedDependencies,
+            algorithmProcessingTemplate,
+            progressTrackerCreator,
+            mutateNodeProperty
         );
 
         var pathFindingApplications = PathFindingApplications.create(
@@ -123,6 +139,7 @@ public final class ApplicationsFacade {
         return new ApplicationsFacadeBuilder()
             .with(catalogBusinessFacade)
             .with(centralityApplications)
+            .with(communityApplications)
             .with(pathFindingApplications)
             .with(similarityApplications)
             .build();
@@ -172,6 +189,10 @@ public final class ApplicationsFacade {
 
     public CentralityApplications centrality() {
         return centralityApplications;
+    }
+
+    public CommunityApplications community() {
+        return communityApplications;
     }
 
     public PathFindingApplications pathFinding() {

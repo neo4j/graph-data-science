@@ -85,6 +85,7 @@ final class MutateModeAlgorithmLibrary {
             case SpanningTree -> CanonicalProcedureName.parse("gds.spanningTree");
             case SteinerTree -> CanonicalProcedureName.parse("gds.steinerTree");
             case TopologicalSort -> null;
+            case WCC -> CanonicalProcedureName.parse("gds.wcc");
             case Yens -> CanonicalProcedureName.parse("gds.shortestPath.yens");
         };
     }
