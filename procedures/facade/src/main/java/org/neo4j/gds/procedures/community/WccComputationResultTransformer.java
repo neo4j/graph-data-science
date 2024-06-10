@@ -20,46 +20,12 @@
 package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
-import org.neo4j.gds.algorithms.StreamComputationResult;
-import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.algorithms.community.specificfields.StandardCommunityStatisticsSpecificFields;
-import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.procedures.community.wcc.WccStreamResult;
 import org.neo4j.gds.procedures.community.wcc.WccWriteResult;
-import org.neo4j.gds.wcc.WccStreamConfig;
-
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 final class WccComputationResultTransformer {
 
     private WccComputationResultTransformer() {}
-
-    static Stream<WccStreamResult> toStreamResult(
-        StreamComputationResult<DisjointSetStruct> computationResult,
-        WccStreamConfig configuration
-    ) {
-        return computationResult.result().map(wccResult -> {
-            var graph = computationResult.graph();
-
-            var nodePropertyValues = CommunityCompanion.nodePropertyValues(
-                configuration.consecutiveIds(),
-                wccResult.asNodeProperties(),
-                configuration.minCommunitySize(),
-                configuration.concurrency()
-            );
-
-            return LongStream
-                .range(IdMap.START_NODE_ID, graph.nodeCount())
-                .filter(nodePropertyValues::hasValue)
-                .mapToObj(nodeId -> new WccStreamResult(
-                    graph.toOriginalNodeId(nodeId),
-                    nodePropertyValues.longValue(nodeId)
-                ));
-
-        }).orElseGet(Stream::empty);
-    }
 
     static WccWriteResult toWriteResult(NodePropertyWriteResult<StandardCommunityStatisticsSpecificFields> computationResult) {
         return new WccWriteResult(

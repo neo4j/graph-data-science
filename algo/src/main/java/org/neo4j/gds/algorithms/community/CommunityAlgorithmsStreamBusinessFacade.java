@@ -26,7 +26,6 @@ import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.conductance.ConductanceStreamConfig;
-import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.k1coloring.K1ColoringStreamConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
@@ -48,7 +47,6 @@ import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
-import org.neo4j.gds.wcc.WccBaseConfig;
 
 public class CommunityAlgorithmsStreamBusinessFacade {
     private final CommunityAlgorithmsFacade communityAlgorithmsFacade;
@@ -56,19 +54,6 @@ public class CommunityAlgorithmsStreamBusinessFacade {
     public CommunityAlgorithmsStreamBusinessFacade(CommunityAlgorithmsFacade communityAlgorithmsFacade) {
         this.communityAlgorithmsFacade = communityAlgorithmsFacade;
     }
-
-    public StreamComputationResult<DisjointSetStruct> wcc(
-        String graphName,
-        WccBaseConfig config
-    ) {
-        var result = this.communityAlgorithmsFacade.wcc(
-            graphName,
-            config
-        );
-
-        return createStreamComputationResult(result);
-    }
-
 
     public StreamComputationResult<KCoreDecompositionResult> kCore(
         String graphName,

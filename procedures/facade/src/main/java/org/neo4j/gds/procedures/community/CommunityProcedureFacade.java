@@ -107,7 +107,6 @@ import org.neo4j.gds.procedures.community.triangleCount.TriangleCountMutateResul
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStatsResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStreamResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountWriteResult;
-import org.neo4j.gds.procedures.community.wcc.WccStreamResult;
 import org.neo4j.gds.procedures.community.wcc.WccWriteResult;
 import org.neo4j.gds.scc.SccAlphaWriteConfig;
 import org.neo4j.gds.scc.SccMutateConfig;
@@ -122,7 +121,6 @@ import org.neo4j.gds.triangle.TriangleCountMutateConfig;
 import org.neo4j.gds.triangle.TriangleCountStatsConfig;
 import org.neo4j.gds.triangle.TriangleCountStreamConfig;
 import org.neo4j.gds.triangle.TriangleCountWriteConfig;
-import org.neo4j.gds.wcc.WccStreamConfig;
 import org.neo4j.gds.wcc.WccWriteConfig;
 
 import java.util.Map;
@@ -160,20 +158,6 @@ public class CommunityProcedureFacade {
 
     // WCC
 
-    public Stream<WccStreamResult> wccStream(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var streamConfig = configurationCreator.createConfigurationForStream(configuration, WccStreamConfig::of);
-
-        var computationResult = streamBusinessFacade.wcc(
-            graphName,
-            streamConfig
-        );
-
-        return WccComputationResultTransformer.toStreamResult(computationResult, streamConfig);
-    }
-
     public Stream<WccWriteResult> wccWrite(
         String graphName,
         Map<String, Object> configuration
@@ -194,14 +178,6 @@ public class CommunityProcedureFacade {
         Map<String, Object> algoConfiguration
     ) {
         var config = configurationCreator.createConfiguration(algoConfiguration, WccWriteConfig::of);
-        return Stream.of(estimateBusinessFacade.wcc(graphNameOrConfiguration, config));
-    }
-
-    public Stream<MemoryEstimateResult> wccEstimateStream(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, WccStreamConfig::of);
         return Stream.of(estimateBusinessFacade.wcc(graphNameOrConfiguration, config));
     }
 

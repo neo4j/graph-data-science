@@ -19,5 +19,44 @@
  */
 package org.neo4j.gds.applications.algorithms.community;
 
+import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.gds.wcc.WccStreamConfig;
+
+import java.util.Optional;
+
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
+
 public class CommunityAlgorithmsStreamModeBusinessFacade {
+    private final CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade;
+    private final CommunityAlgorithms algorithms;
+    private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
+
+    public CommunityAlgorithmsStreamModeBusinessFacade(
+        CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade,
+        CommunityAlgorithms algorithms,
+        AlgorithmProcessingTemplate algorithmProcessingTemplate
+    ) {
+        this.estimationFacade = estimationFacade;
+        this.algorithms = algorithms;
+        this.algorithmProcessingTemplate = algorithmProcessingTemplate;
+    }
+
+    public <RESULT> RESULT wcc(
+        GraphName graphName,
+        WccStreamConfig configuration,
+        ResultBuilder<WccStreamConfig, DisjointSetStruct, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            WCC,
+            () -> estimationFacade.wcc(configuration),
+            graph -> algorithms.wcc(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
 }

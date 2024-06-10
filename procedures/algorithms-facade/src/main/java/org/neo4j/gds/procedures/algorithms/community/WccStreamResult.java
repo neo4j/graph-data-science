@@ -17,10 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms;
+package org.neo4j.gds.procedures.algorithms.community;
 
-public final class AlgorithmProcedureConstants {
-    public static final String ESTIMATION_DESCRIPTION = "Returns an estimation of the memory consumption for that procedure.";
+public class WccStreamResult {
+    public final long nodeId;
+    public final long componentId;
 
-    private AlgorithmProcedureConstants() {}
+    public WccStreamResult(long nodeId, long componentId) {
+        this.nodeId = nodeId;
+        this.componentId = componentId;
+    }
 }

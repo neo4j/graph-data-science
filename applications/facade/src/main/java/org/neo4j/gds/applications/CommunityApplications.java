@@ -71,7 +71,11 @@ public final class CommunityApplications {
             mutateNodeProperty
         );
         var stats = new CommunityAlgorithmsStatsModeBusinessFacade(estimation, algorithms, algorithmProcessingTemplate);
-        var stream = new CommunityAlgorithmsStreamModeBusinessFacade();
+        var stream = new CommunityAlgorithmsStreamModeBusinessFacade(
+            estimation,
+            algorithms,
+            algorithmProcessingTemplate
+        );
         var write = new CommunityAlgorithmsWriteModeBusinessFacade();
 
         return new CommunityApplications(estimation, mutation, stats, stream, write);
