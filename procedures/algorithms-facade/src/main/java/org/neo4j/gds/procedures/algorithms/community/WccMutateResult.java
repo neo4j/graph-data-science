@@ -17,12 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.community.wcc;
+package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
+import java.util.Collections;
 import java.util.Map;
 
 public final class WccMutateResult extends WccStatsResult {
@@ -50,6 +52,19 @@ public final class WccMutateResult extends WccStatsResult {
         );
         this.mutateMillis = mutateMillis;
         this.nodePropertiesWritten = nodePropertiesWritten;
+    }
+
+    public static WccMutateResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+        return new WccMutateResult(
+            0,
+            Collections.emptyMap(),
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            0,
+            timings.mutateOrWriteMillis,
+            0,
+            configurationMap
+        );
     }
 
     public static class Builder extends AbstractCommunityResultBuilder<WccMutateResult> {

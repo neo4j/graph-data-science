@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.community;
+package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
@@ -26,21 +26,21 @@ public final class ProcedureStatisticsComputationInstructions implements Statist
     private final boolean computeCount;
     private final boolean computeDistribution;
 
-    static StatisticsComputationInstructions forComponents(ProcedureReturnColumns procedureReturnColumns) {
+    public static StatisticsComputationInstructions forComponents(ProcedureReturnColumns procedureReturnColumns) {
         return new ProcedureStatisticsComputationInstructions(
             procedureReturnColumns.contains("componentCount"),
             procedureReturnColumns.contains("componentDistribution")
         );
     }
 
-    static StatisticsComputationInstructions forCommunities(ProcedureReturnColumns procedureReturnColumns) {
+    public static StatisticsComputationInstructions forCommunities(ProcedureReturnColumns procedureReturnColumns) {
         return new ProcedureStatisticsComputationInstructions(
             procedureReturnColumns.contains("communityCount"),
             procedureReturnColumns.contains("communityDistribution")
         );
     }
 
-    ProcedureStatisticsComputationInstructions(
+    public ProcedureStatisticsComputationInstructions(
         boolean computeCount,
         boolean computeDistribution
     ) {

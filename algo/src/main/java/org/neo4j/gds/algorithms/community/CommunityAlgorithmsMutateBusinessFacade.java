@@ -33,7 +33,7 @@ import org.neo4j.gds.algorithms.community.specificfields.LouvainSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.ModularityOptimizationSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.StandardCommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.TriangleCountSpecificFields;
-import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
@@ -54,7 +54,6 @@ import org.neo4j.gds.scc.SccMutateConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.TriangleCountMutateConfig;
-import org.neo4j.gds.wcc.WccMutateConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,42 +74,6 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         this.mutateNodePropertyService = mutateNodePropertyService;
         this.communityAlgorithmsFacade = communityAlgorithmsFacade;
     }
-
-    public NodePropertyMutateResult<StandardCommunityStatisticsSpecificFields> wcc(
-        String graphName,
-        WccMutateConfig configuration,
-        StatisticsComputationInstructions statisticsComputationInstructions
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.wcc(graphName, configuration)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        return mutateNodeProperty(
-            algorithmResult,
-            configuration,
-            (result, config) -> CommunityCompanion.nodePropertyValues(
-                config.isIncremental(),
-                config.mutateProperty(),
-                config.seedProperty(),
-                config.consecutiveIds(),
-                result.asNodeProperties(),
-                () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
-            ),
-            (result -> result::setIdOf),
-            (result, componentCount, communitySummary) -> {
-                return new StandardCommunityStatisticsSpecificFields(
-                    componentCount,
-                    communitySummary
-                );
-            },
-            statisticsComputationInstructions,
-            intermediateResult.computeMilliseconds,
-            () -> StandardCommunityStatisticsSpecificFields.EMPTY
-        );
-    }
-
 
     public NodePropertyMutateResult<KCoreSpecificFields> kCore(
         String graphName,

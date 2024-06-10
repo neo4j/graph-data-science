@@ -17,16 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms.mutateservices;
+package org.neo4j.gds.applications.algorithms.machinery;
 
-import org.neo4j.gds.core.loading.SingleTypeRelationships;
+public final class AddRelationshipResult {
 
-/**
- * Extracting some common code so that it is reusable; eventually this can probably move to where it is used
- */
-public interface SingleTypeRelationshipsProducer {
+    private final long relationshipsAdded;
+    private final long mutateMilliseconds;
 
-    SingleTypeRelationships createRelationships(String mutateRelationshipType, String mutateProperty);
+    AddRelationshipResult(
+        long relationshipsAdded,
+        long mutateMilliseconds
+    ) {
+        this.relationshipsAdded = relationshipsAdded;
+        this.mutateMilliseconds = mutateMilliseconds;
+    }
 
-    long relationshipsCount();
+    public long relationshipsAdded() {
+        return relationshipsAdded;
+    }
+
+    public long mutateMilliseconds() {
+        return mutateMilliseconds;
+    }
 }

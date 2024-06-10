@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms;
 
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade;
 
@@ -29,21 +30,28 @@ import org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade;
  */
 public class AlgorithmsProcedureFacade {
     private final CentralityProcedureFacade centralityProcedureFacade;
+    private final CommunityProcedureFacade communityProcedureFacade;
     private final PathFindingProcedureFacade pathFindingProcedureFacade;
     private final SimilarityProcedureFacade similarityProcedureFacade;
 
     public AlgorithmsProcedureFacade(
         CentralityProcedureFacade centralityProcedureFacade,
+        CommunityProcedureFacade communityProcedureFacade,
         PathFindingProcedureFacade pathFindingProcedureFacade,
         SimilarityProcedureFacade similarityProcedureFacade
     ) {
         this.centralityProcedureFacade = centralityProcedureFacade;
+        this.communityProcedureFacade = communityProcedureFacade;
         this.pathFindingProcedureFacade = pathFindingProcedureFacade;
         this.similarityProcedureFacade = similarityProcedureFacade;
     }
 
     public CentralityProcedureFacade centrality() {
         return centralityProcedureFacade;
+    }
+
+    public CommunityProcedureFacade community() {
+        return communityProcedureFacade;
     }
 
     public PathFindingProcedureFacade pathFinding() {

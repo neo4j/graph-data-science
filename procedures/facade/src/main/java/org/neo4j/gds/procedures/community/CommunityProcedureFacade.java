@@ -58,6 +58,7 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
+import org.neo4j.gds.procedures.algorithms.community.ProcedureStatisticsComputationInstructions;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutMutateResult;
 import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutStreamResult;
@@ -105,8 +106,7 @@ import org.neo4j.gds.procedures.community.triangleCount.TriangleCountMutateResul
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStatsResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStreamResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountWriteResult;
-import org.neo4j.gds.procedures.community.wcc.WccMutateResult;
-import org.neo4j.gds.procedures.community.wcc.WccStatsResult;
+import org.neo4j.gds.procedures.algorithms.community.WccStatsResult;
 import org.neo4j.gds.procedures.community.wcc.WccStreamResult;
 import org.neo4j.gds.procedures.community.wcc.WccWriteResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
@@ -123,7 +123,6 @@ import org.neo4j.gds.triangle.TriangleCountMutateConfig;
 import org.neo4j.gds.triangle.TriangleCountStatsConfig;
 import org.neo4j.gds.triangle.TriangleCountStreamConfig;
 import org.neo4j.gds.triangle.TriangleCountWriteConfig;
-import org.neo4j.gds.wcc.WccMutateConfig;
 import org.neo4j.gds.wcc.WccStatsConfig;
 import org.neo4j.gds.wcc.WccStreamConfig;
 import org.neo4j.gds.wcc.WccWriteConfig;
@@ -177,21 +176,6 @@ public class CommunityProcedureFacade {
         return WccComputationResultTransformer.toStreamResult(computationResult, streamConfig);
     }
 
-    public Stream<WccMutateResult> wccMutate(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, WccMutateConfig::of);
-
-        var computationResult = mutateBusinessFacade.wcc(
-            graphName,
-            config,
-            ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns)
-        );
-
-        return Stream.of(WccComputationResultTransformer.toMutateResult(computationResult));
-    }
-
     public Stream<WccStatsResult> wccStats(
         String graphName,
         Map<String, Object> configuration
@@ -220,14 +204,6 @@ public class CommunityProcedureFacade {
         );
 
         return Stream.of(WccComputationResultTransformer.toWriteResult(computationResult));
-    }
-
-    public Stream<MemoryEstimateResult> wccEstimateMutate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, WccMutateConfig::of);
-        return Stream.of(estimateBusinessFacade.wcc(graphNameOrConfiguration, config));
     }
 
     public Stream<MemoryEstimateResult> wccEstimateStats(

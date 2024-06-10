@@ -17,23 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms.mutateservices;
+package org.neo4j.gds.applications.algorithms.machinery;
 
-public final class AddRelationshipResult {
+public final class AddNodePropertyResult {
 
-    private final long relationshipsAdded;
+    private final long nodePropertiesAdded;
     private final long mutateMilliseconds;
 
-    AddRelationshipResult(
-        long relationshipsAdded,
+    AddNodePropertyResult(
+        long nodePropertiesAdded,
         long mutateMilliseconds
     ) {
-        this.relationshipsAdded = relationshipsAdded;
+        this.nodePropertiesAdded = nodePropertiesAdded;
         this.mutateMilliseconds = mutateMilliseconds;
     }
 
-    public long relationshipsAdded() {
-        return relationshipsAdded;
+    public long nodePropertiesAdded() {
+        return nodePropertiesAdded;
     }
 
     public long mutateMilliseconds() {

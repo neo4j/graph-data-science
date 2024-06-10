@@ -17,40 +17,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms.mutateservices;
+package org.neo4j.gds.applications.algorithms.machinery;
 
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
+import org.neo4j.gds.config.MutateNodePropertyConfig;
 
-import java.util.Collection;
+public class MutateNodeProperty {
+    private final MutateNodePropertyService mutateNodePropertyService;
 
-public class MutateNodePropertyService {
-
-    private final Log log;
-
-    public MutateNodePropertyService(Log log) {
-        this.log = log;
+    public MutateNodeProperty(MutateNodePropertyService mutateNodePropertyService) {
+        this.mutateNodePropertyService = mutateNodePropertyService;
     }
 
-    public AddNodePropertyResult mutate(
-        String nodePropertyToMutate,
-        NodePropertyValues nodePropertyValues,
-        Collection<NodeLabel> nodeLabelsToUpdate,
+    public NodePropertiesWritten mutateNodeProperties(
         Graph graph,
-        GraphStore graphStore
+        GraphStore graphStore,
+        MutateNodePropertyConfig configuration,
+        NodePropertyValues nodePropertyValues
     ) {
-        return GraphStoreUpdater.addNodeProperty(
-            graph,
-            graphStore,
-            nodeLabelsToUpdate,
-            nodePropertyToMutate,
+        var addNodePropertyResult = mutateNodePropertyService.mutate(
+            configuration.mutateProperty(),
             nodePropertyValues,
-            this.log
+            configuration.nodeLabelIdentifiers(graphStore),
+            graph,
+            graphStore
         );
+
+        return new NodePropertiesWritten(addNodePropertyResult.nodePropertiesAdded());
     }
-
-
 }

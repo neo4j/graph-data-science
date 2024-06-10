@@ -27,6 +27,7 @@ import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 public class ApplicationsFacadeBuilder {
     private CatalogBusinessFacade catalogBusinessFacade;
     private CentralityApplications centralityApplications;
+    private CommunityApplications communityApplications;
     private PathFindingApplications pathFindingApplications;
     private SimilarityApplications similarityApplications;
 
@@ -37,6 +38,11 @@ public class ApplicationsFacadeBuilder {
 
     public ApplicationsFacadeBuilder with(CentralityApplications centralityApplications) {
         this.centralityApplications = centralityApplications;
+        return this;
+    }
+
+    public ApplicationsFacadeBuilder with(CommunityApplications communityApplications) {
+        this.communityApplications = communityApplications;
         return this;
     }
 
@@ -54,6 +60,7 @@ public class ApplicationsFacadeBuilder {
         return new ApplicationsFacade(
             catalogBusinessFacade,
             centralityApplications,
+            communityApplications,
             pathFindingApplications,
             similarityApplications
         );

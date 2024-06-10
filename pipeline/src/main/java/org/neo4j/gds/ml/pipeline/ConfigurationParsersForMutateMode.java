@@ -42,6 +42,7 @@ import org.neo4j.gds.similarity.knn.KnnMutateConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateConfig;
 import org.neo4j.gds.spanningtree.SpanningTreeMutateConfig;
 import org.neo4j.gds.steiner.SteinerTreeMutateConfig;
+import org.neo4j.gds.wcc.WccMutateConfig;
 
 import java.util.function.Function;
 
@@ -81,6 +82,7 @@ public class ConfigurationParsersForMutateMode {
             case SpanningTree -> SpanningTreeMutateConfig::of;
             case SteinerTree -> SteinerTreeMutateConfig::of;
             case TopologicalSort -> null;
+            case WCC -> WccMutateConfig::of;
             case Yens -> ShortestPathYensMutateConfig::of;
         };
     }

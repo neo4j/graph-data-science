@@ -26,6 +26,7 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -58,6 +59,10 @@ public class Wcc extends Algorithm<DisjointSetStruct> {
 
     private final Graph graph;
 
+    /**
+     * @deprecated Stop using this, use the variant that does direct injection of termination flag instead
+     */
+    @Deprecated
     public Wcc(
         Graph graph,
         ExecutorService executor,
@@ -65,7 +70,28 @@ public class Wcc extends Algorithm<DisjointSetStruct> {
         WccParameters parameters,
         ProgressTracker progressTracker
     ) {
+        this(
+            graph,
+            executor,
+            minBatchSize,
+            parameters,
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
+        );
+    }
+
+    public Wcc(
+        Graph graph,
+        ExecutorService executor,
+        int minBatchSize,
+        WccParameters parameters,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
+    ) {
         super(progressTracker);
+
+        this.terminationFlag = terminationFlag;
+
         this.graph = graph;
         this.parameters = parameters;
 
