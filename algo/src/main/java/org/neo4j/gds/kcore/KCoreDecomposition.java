@@ -22,16 +22,16 @@ package org.neo4j.gds.kcore;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.ha.HugeIntArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicIntArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.collections.ha.HugeIntArray;
-import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ParallelIntPageCreator;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -160,7 +160,7 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
         AtomicLong remainingNodes
     ) {
         List<KCoreDecompositionTask> tasks = new ArrayList<>();
-        var nodeProvider = new FullNodeProvider(graph.nodeCount());
+        var nodeProvider = NodeProvider.fullNodeProvider(graph.nodeCount());
         for (int taskId = 0; taskId < concurrency.value(); ++taskId) {
             tasks.add(new KCoreDecompositionTask(
                 graph.concurrentCopy(),
@@ -186,7 +186,7 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
             Optional.empty()
         );
         RunWithConcurrency.builder().tasks(rebuildTasks).concurrency(concurrency).run();
-        var newNodeProvider = new ReducedNodeProvider(nodeOrder, numberOfRemainingNodes);
+        var newNodeProvider = NodeProvider.reducedNodeProvider(numberOfRemainingNodes,nodeOrder);
         for (var task : tasks) {
             task.updateNodeProvider(newNodeProvider);
         }
