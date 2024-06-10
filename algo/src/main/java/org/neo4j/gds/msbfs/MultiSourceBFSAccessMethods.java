@@ -26,6 +26,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 
 import java.util.Arrays;
@@ -81,12 +82,15 @@ public final class MultiSourceBFSAccessMethods {
     private final int sourceNodeCount;
     private final long nodeOffset;
 
+    private final TerminationFlag terminationFlag;
+
 
     public static MultiSourceBFSAccessMethods aggregatedNeighborProcessing(
         long nodeCount,
         RelationshipIterator relationships,
         BfsConsumer perNodeAction,
-        Optional<long[]> sourceNodes
+        Optional<long[]> sourceNodes,
+        TerminationFlag terminationFlag
     ) {
 
         var builder =  new MultiSourceBFSInitializationSpecBuilder();
@@ -96,7 +100,8 @@ public final class MultiSourceBFSAccessMethods {
             nodeCount,
             relationships,
             new ANPStrategy(perNodeAction),
-            builder.build()
+            builder.build(),
+            terminationFlag
         );
     }
 
@@ -105,7 +110,8 @@ public final class MultiSourceBFSAccessMethods {
         Graph graph,
         BfsConsumer perNodeAction,
         BfsWithPredecessorConsumer perNeighborAction,
-        Optional<long[]> sourceNodes
+        Optional<long[]> sourceNodes,
+        TerminationFlag terminationFlag
     ) {
         MultiSourceBFSInitializationSpecBuilder builder = new MultiSourceBFSInitializationSpecBuilder()
             .seenNext(true);
@@ -116,7 +122,8 @@ public final class MultiSourceBFSAccessMethods {
             graph.nodeCount(),
             graph,
             new PredecessorStrategy(perNodeAction, perNeighborAction),
-            builder.build()
+            builder.build(),
+            terminationFlag
         );
     }
 
@@ -124,7 +131,8 @@ public final class MultiSourceBFSAccessMethods {
         long nodeCount,
         RelationshipIterator relationships,
         ExecutionStrategy strategy,
-        MultiSourceBFSInitializationSpec spec
+        MultiSourceBFSInitializationSpec spec,
+        TerminationFlag terminationFlag
     ) {
         var visits = new LocalHugeLongArray(nodeCount);
         var visitsNext = new LocalHugeLongArray(nodeCount);
@@ -150,7 +158,8 @@ public final class MultiSourceBFSAccessMethods {
             spec.allowStartNodeTraversal(),
             sourceNodes,
             0,
-            0
+            0,
+            terminationFlag
         );
 
     }
@@ -169,7 +178,8 @@ public final class MultiSourceBFSAccessMethods {
         boolean allowStartNodeTraversal,
         long @Nullable [] sourceNodes,
         int sourceNodeCount,
-        long nodeOffset
+        long nodeOffset,
+        TerminationFlag terminationFlag
     ) {
         this.visits = visits;
         this.visitsNext = visitsNext;
@@ -182,6 +192,7 @@ public final class MultiSourceBFSAccessMethods {
         this.sourceNodes = sourceNodes;
         this.sourceNodeCount = sourceNodeCount;
         this.nodeOffset = nodeOffset;
+        this.terminationFlag = terminationFlag;
     }
 
     /**
@@ -194,6 +205,7 @@ public final class MultiSourceBFSAccessMethods {
         RunWithConcurrency.builder()
             .concurrency(concurrency)
             .tasks(bfss)
+            .terminationFlag(terminationFlag)
             .maxWaitRetries((long) threads << 2)
             .waitTime(100L, TimeUnit.MICROSECONDS)
             .executor(executor)

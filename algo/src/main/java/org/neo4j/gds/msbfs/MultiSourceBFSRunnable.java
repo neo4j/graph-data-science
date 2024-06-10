@@ -114,6 +114,7 @@ public final class MultiSourceBFSRunnable implements Runnable {
         int sourceNodeCount,
         long nodeOffset
     ) {
+
         this.visits = visits;
         this.visitsNext = visitsNext;
         this.seens = seens;
