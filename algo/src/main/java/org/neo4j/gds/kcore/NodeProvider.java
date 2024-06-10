@@ -19,10 +19,37 @@
  */
 package org.neo4j.gds.kcore;
 
-public interface NodeProvider {
+import org.neo4j.gds.collections.ha.HugeLongArray;
 
-    long node(long indexId);
-    long size();
+import java.util.function.LongUnaryOperator;
+
+final class NodeProvider {
+
+    private  final LongUnaryOperator nodeOperator;
+    private final long size;
+
+    private NodeProvider(long size, LongUnaryOperator operator){
+            this.size  = size;
+            this.nodeOperator = operator;
+
+    }
+
+    long node(long indexId){
+        return nodeOperator.applyAsLong(indexId);
+    }
+
+    long size(){
+        return size;
+    }
+
+    static NodeProvider fullNodeProvider(long size){
+        return new NodeProvider(size, LongUnaryOperator.identity());
+    }
+
+    static NodeProvider reducedNodeProvider(long size, HugeLongArray nodeOrder){
+        return new NodeProvider(size, nodeOrder::get);
+    }
+
 }
 
 
