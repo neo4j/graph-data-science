@@ -110,7 +110,8 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
                         }
                         progressTracker.logProgress();
                     },
-                Optional.empty()
+                Optional.empty(),
+                terminationFlag
             ).run(concurrency, executorService);
 
             resultQueue.add(AllShortestPathsStreamResult.DONE);

@@ -69,7 +69,8 @@ public class HarmonicCentrality extends Algorithm<HarmonicResult> {
             graph.nodeCount(),
             graph,
             consumer,
-            Optional.empty()
+            Optional.empty(),
+            terminationFlag
         ).run(concurrency, executorService);
 
         var tasks = PartitionUtils.rangePartition(
