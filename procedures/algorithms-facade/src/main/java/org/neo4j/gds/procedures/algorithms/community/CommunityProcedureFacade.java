@@ -31,6 +31,7 @@ import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.wcc.WccStatsConfig;
+import org.neo4j.gds.wcc.WccStreamConfig;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -106,6 +107,31 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             WccStatsConfig::of,
+            configuration -> estimationMode().wcc(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<WccStreamResult> wccStream(String graphName, Map<String, Object> configuration) {
+        var resultBuilder = new WccResultBuilderForStreamMode();
+        
+        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+            graphName,
+            configuration,
+            WccStreamConfig::of,
+            streamMode()::wcc,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> wccStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            WccStreamConfig::of,
             configuration -> estimationMode().wcc(configuration, graphNameOrConfiguration)
         );
 

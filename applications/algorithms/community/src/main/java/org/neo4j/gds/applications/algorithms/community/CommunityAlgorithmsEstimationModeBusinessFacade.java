@@ -23,8 +23,8 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTempla
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.wcc.WccBaseConfig;
 import org.neo4j.gds.wcc.WccMemoryEstimateDefinition;
-import org.neo4j.gds.wcc.WccStatsConfig;
 
 public class CommunityAlgorithmsEstimationModeBusinessFacade {
     private final AlgorithmEstimationTemplate algorithmEstimationTemplate;
@@ -37,7 +37,7 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
         return new WccMemoryEstimateDefinition(configuration.isIncremental()).memoryEstimation();
     }
 
-    public MemoryEstimateResult wcc(WccStatsConfig configuration, Object graphNameOrConfiguration) {
+    public MemoryEstimateResult wcc(WccBaseConfig configuration, Object graphNameOrConfiguration) {
         var memoryEstimation = wcc(configuration);
 
         return algorithmEstimationTemplate.estimate(
