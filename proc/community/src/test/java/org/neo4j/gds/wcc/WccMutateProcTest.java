@@ -603,12 +603,15 @@ class WccMutateProcTest extends BaseProcTest {
         var communityProcedureFacade = CommunityProcedureFacade.create(
             genericStub,
             applicationsFacade,
-            ProcedureReturnColumns.EMPTY
+            ProcedureReturnColumns.EMPTY,
+            null,
+            null,
+            null
         );
-        var facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
+
+        return new GraphDataScienceProceduresBuilder(Log.noOpLog())
             .with(communityProcedureFacade)
             .with(DeprecatedProceduresMetricService.PASSTHROUGH)
             .build();
-        return facade;
     }
 }

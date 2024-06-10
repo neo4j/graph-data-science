@@ -21,27 +21,110 @@ package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
+import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsStatsModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsStreamModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsWriteModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.algorithms.community.stubs.WccMutateStub;
+import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
+import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
+import org.neo4j.gds.wcc.WccStatsConfig;
+
+import java.util.Map;
+import java.util.stream.Stream;
 
 public final class CommunityProcedureFacade {
+    private final ProcedureReturnColumns procedureReturnColumns;
     private final WccMutateStub wccMutateStub;
 
-    private CommunityProcedureFacade(WccMutateStub wccMutateStub) {
+    private final ApplicationsFacade applicationsFacade;
+
+    private final EstimationModeRunner estimationMode;
+    private final AlgorithmExecutionScaffolding algorithmExecutionScaffolding;
+    private final AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode;
+
+    private CommunityProcedureFacade(
+        ProcedureReturnColumns procedureReturnColumns,
+        WccMutateStub wccMutateStub,
+        ApplicationsFacade applicationsFacade,
+        EstimationModeRunner estimationMode,
+        AlgorithmExecutionScaffolding algorithmExecutionScaffolding,
+        AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode
+    ) {
+        this.procedureReturnColumns = procedureReturnColumns;
         this.wccMutateStub = wccMutateStub;
+        this.applicationsFacade = applicationsFacade;
+        this.estimationMode = estimationMode;
+        this.algorithmExecutionScaffolding = algorithmExecutionScaffolding;
+        this.algorithmExecutionScaffoldingForStreamMode = algorithmExecutionScaffoldingForStreamMode;
     }
 
     public static CommunityProcedureFacade create(
         GenericStub genericStub,
         ApplicationsFacade applicationsFacade,
-        ProcedureReturnColumns procedureReturnColumns
+        ProcedureReturnColumns procedureReturnColumns,
+        EstimationModeRunner estimationModeRunner,
+        AlgorithmExecutionScaffolding algorithmExecutionScaffolding,
+        AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode
     ) {
         var wccMutateStub = new WccMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
 
-        return new CommunityProcedureFacade(wccMutateStub);
+        return new CommunityProcedureFacade(
+            procedureReturnColumns,
+            wccMutateStub,
+            applicationsFacade,
+            estimationModeRunner,
+            algorithmExecutionScaffolding,
+            algorithmExecutionScaffoldingForStreamMode
+        );
     }
 
     public WccMutateStub wccMutateStub() {
         return wccMutateStub;
+    }
+
+    public Stream<WccStatsResult> wccStats(String graphName, Map<String, Object> configuration) {
+        var statisticsComputationInstructions = ProcedureStatisticsComputationInstructions.forComponents(
+            procedureReturnColumns);
+        var resultBuilder = new WccResultBuilderForStatsMode(statisticsComputationInstructions);
+
+        return algorithmExecutionScaffolding.runAlgorithm(
+            graphName,
+            configuration,
+            WccStatsConfig::of,
+            statsMode()::wcc,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> wccStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            WccStatsConfig::of,
+            configuration -> estimationMode().wcc(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
+    private CommunityAlgorithmsEstimationModeBusinessFacade estimationMode() {
+        return applicationsFacade.community().estimate();
+    }
+
+    private CommunityAlgorithmsStatsModeBusinessFacade statsMode() {
+        return applicationsFacade.community().stats();
+    }
+
+    private CommunityAlgorithmsStreamModeBusinessFacade streamMode() {
+        return applicationsFacade.community().stream();
+    }
+
+    private CommunityAlgorithmsWriteModeBusinessFacade writeMode() {
+        return applicationsFacade.community().write();
     }
 }

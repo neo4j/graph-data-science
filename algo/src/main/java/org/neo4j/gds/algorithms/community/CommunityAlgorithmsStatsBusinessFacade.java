@@ -20,6 +20,7 @@
 package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
+import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.community.specificfields.CommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.K1ColoringSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.KCoreSpecificFields;
@@ -31,7 +32,6 @@ import org.neo4j.gds.algorithms.community.specificfields.LouvainSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.ModularityOptimizationSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.ModularitySpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.StandardCommunityStatisticsSpecificFields;
-import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.community.specificfields.TriangleCountSpecificFields;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -49,7 +49,6 @@ import org.neo4j.gds.result.StatisticsComputationInstructions;
 import org.neo4j.gds.scc.SccStatsConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
 import org.neo4j.gds.triangle.TriangleCountStatsConfig;
-import org.neo4j.gds.wcc.WccStatsConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,33 +61,6 @@ public class CommunityAlgorithmsStatsBusinessFacade {
 
     public CommunityAlgorithmsStatsBusinessFacade(CommunityAlgorithmsFacade communityAlgorithmsFacade) {
         this.communityAlgorithmsFacade = communityAlgorithmsFacade;
-    }
-
-    public StatsResult<StandardCommunityStatisticsSpecificFields> wcc(
-        String graphName,
-        WccStatsConfig configuration,
-        StatisticsComputationInstructions statisticsComputationInstructions
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> communityAlgorithmsFacade.wcc(graphName, configuration)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        return statsResult(
-            algorithmResult,
-            configuration,
-            (result -> result::setIdOf),
-            (result, componentCount, communitySummary) -> {
-                return new StandardCommunityStatisticsSpecificFields(
-                    componentCount,
-                    communitySummary
-                );
-            },
-            statisticsComputationInstructions,
-            intermediateResult.computeMilliseconds,
-            () -> StandardCommunityStatisticsSpecificFields.EMPTY
-        );
     }
 
     public StatsResult<LabelPropagationSpecificFields> labelPropagation(

@@ -22,6 +22,10 @@ package org.neo4j.gds.applications;
 import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithms;
 import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsMutateModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsStatsModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsStreamModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsWriteModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
@@ -30,22 +34,32 @@ import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies
 public final class CommunityApplications {
     private final CommunityAlgorithmsEstimationModeBusinessFacade estimation;
     private final CommunityAlgorithmsMutateModeBusinessFacade mutation;
+    private final CommunityAlgorithmsStatsModeBusinessFacade stats;
+    private final CommunityAlgorithmsStreamModeBusinessFacade stream;
+    private final CommunityAlgorithmsWriteModeBusinessFacade write;
 
     private CommunityApplications(
         CommunityAlgorithmsEstimationModeBusinessFacade estimation,
-        CommunityAlgorithmsMutateModeBusinessFacade mutation
+        CommunityAlgorithmsMutateModeBusinessFacade mutation,
+        CommunityAlgorithmsStatsModeBusinessFacade stats,
+        CommunityAlgorithmsStreamModeBusinessFacade stream,
+        CommunityAlgorithmsWriteModeBusinessFacade write
     ) {
         this.estimation = estimation;
         this.mutation = mutation;
+        this.stats = stats;
+        this.stream = stream;
+        this.write = write;
     }
 
     static CommunityApplications create(
         RequestScopedDependencies requestScopedDependencies,
+        AlgorithmEstimationTemplate algorithmEstimationTemplate,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
         ProgressTrackerCreator progressTrackerCreator,
         MutateNodeProperty mutateNodeProperty
     ) {
-        var estimation = new CommunityAlgorithmsEstimationModeBusinessFacade();
+        var estimation = new CommunityAlgorithmsEstimationModeBusinessFacade(algorithmEstimationTemplate);
         var algorithms = new CommunityAlgorithms(
             progressTrackerCreator,
             requestScopedDependencies.getTerminationFlag()
@@ -56,8 +70,11 @@ public final class CommunityApplications {
             algorithmProcessingTemplate,
             mutateNodeProperty
         );
+        var stats = new CommunityAlgorithmsStatsModeBusinessFacade(estimation, algorithms, algorithmProcessingTemplate);
+        var stream = new CommunityAlgorithmsStreamModeBusinessFacade();
+        var write = new CommunityAlgorithmsWriteModeBusinessFacade();
 
-        return new CommunityApplications(estimation, mutation);
+        return new CommunityApplications(estimation, mutation, stats, stream, write);
     }
 
     public CommunityAlgorithmsEstimationModeBusinessFacade estimate() {
@@ -66,5 +83,17 @@ public final class CommunityApplications {
 
     public CommunityAlgorithmsMutateModeBusinessFacade mutate() {
         return mutation;
+    }
+
+    public CommunityAlgorithmsStatsModeBusinessFacade stats() {
+        return stats;
+    }
+
+    public CommunityAlgorithmsStreamModeBusinessFacade stream() {
+        return stream;
+    }
+
+    public CommunityAlgorithmsWriteModeBusinessFacade write() {
+        return write;
     }
 }

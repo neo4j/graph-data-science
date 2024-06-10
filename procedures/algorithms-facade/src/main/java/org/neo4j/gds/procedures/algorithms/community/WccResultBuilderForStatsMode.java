@@ -17,58 +17,54 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.community.stubs;
+package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
-import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.procedures.algorithms.community.CommunityStatisticsWithTimingComputer;
-import org.neo4j.gds.procedures.algorithms.community.WccMutateResult;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
-import org.neo4j.gds.wcc.WccMutateConfig;
+import org.neo4j.gds.wcc.WccStatsConfig;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
-public class WccResultBuilderForMutateMode implements ResultBuilder<WccMutateConfig, DisjointSetStruct, WccMutateResult, NodePropertiesWritten> {
-    private final CommunityStatisticsWithTimingComputer communityStatisticsWithTimingComputer = new CommunityStatisticsWithTimingComputer();
-
+class WccResultBuilderForStatsMode implements ResultBuilder<WccStatsConfig, DisjointSetStruct, Stream<WccStatsResult>, Void> {
     private final StatisticsComputationInstructions statisticsComputationInstructions;
 
-    public WccResultBuilderForMutateMode(StatisticsComputationInstructions statisticsComputationInstructions) {
+    WccResultBuilderForStatsMode(StatisticsComputationInstructions statisticsComputationInstructions) {
         this.statisticsComputationInstructions = statisticsComputationInstructions;
     }
 
     @Override
-    public WccMutateResult build(
+    public Stream<WccStatsResult> build(
         Graph graph,
         GraphStore graphStore,
-        WccMutateConfig configuration,
+        WccStatsConfig configuration,
         Optional<DisjointSetStruct> result,
         AlgorithmProcessingTimings timings,
-        Optional<NodePropertiesWritten> metadata
+        Optional<Void> unused
     ) {
-        if (result.isEmpty()) return WccMutateResult.emptyFrom(timings, configuration.toMap());
+        if (result.isEmpty()) return Stream.of(WccStatsResult.emptyFrom(timings, configuration.toMap()));
 
         var disjointSetStruct = result.get();
 
-        var communityStatisticsWithTiming = communityStatisticsWithTimingComputer.compute(
+        var communityStatisticsWithTiming = new CommunityStatisticsWithTimingComputer().compute(
             disjointSetStruct,
             configuration,
             statisticsComputationInstructions
         );
 
-        return new WccMutateResult(
+        var wccStatsResult = new WccStatsResult(
             communityStatisticsWithTiming.getLeft(),
             communityStatisticsWithTiming.getMiddle(),
             timings.preProcessingMillis,
             timings.computeMillis,
             communityStatisticsWithTiming.getRight(),
-            timings.mutateOrWriteMillis,
-            metadata.orElseThrow().value,
             configuration.toMap()
         );
+
+        return Stream.of(wccStatsResult);
     }
 }

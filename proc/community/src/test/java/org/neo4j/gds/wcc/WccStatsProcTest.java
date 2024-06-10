@@ -31,24 +31,22 @@ import org.neo4j.gds.ImmutableNodeProjections;
 import org.neo4j.gds.ImmutablePropertyMappings;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.ProcedureMethodHelper;
 import org.neo4j.gds.RelationshipProjections;
-import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
-import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
-import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStatsBusinessFacade;
-import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.configuration.DefaultsConfiguration;
+import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.Username;
@@ -59,30 +57,30 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
-import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.GraphDataScienceProceduresBuilder;
+import org.neo4j.gds.procedures.algorithms.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
-import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.runners.DefaultAlgorithmExecutionScaffolding;
+import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfigImpl;
+import org.neo4j.gds.termination.TerminationFlag;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+import static java.util.Collections.emptyMap;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.neo4j.gds.assertj.ConditionFactory.containsAllEntriesOf;
@@ -233,41 +231,32 @@ class WccStatsProcTest extends BaseProcTest {
 
     @Test
     void testRunOnEmptyGraph() {
-        applyOnProcedure((proc) -> {
-            proc.facade = createFacade();
-            var methods = ProcedureMethodHelper.statsMethods(proc).collect(Collectors.toList());
+        var wccStatsProc = new WccStatsProc();
+        wccStatsProc.facade = createFacade();
 
-            if (!methods.isEmpty()) {
-                // Create a dummy node with label "X" so that "X" is a valid label to put use for property mappings later
-                runQuery("CALL db.createLabel('X')");
-                runQuery("MATCH (n) DETACH DELETE n");
-                GraphStoreCatalog.removeAllLoadedGraphs();
+        // Create a dummy node with label "X" so that "X" is a valid label to put use for property mappings later
+        runQuery("CALL db.createLabel('X')");
+        runQuery("MATCH (n) DETACH DELETE n");
+        GraphStoreCatalog.removeAllLoadedGraphs();
 
-                var graphName = "graph";
-                var graphProjectConfig = GraphProjectFromStoreConfigImpl.builder()
-                    .username(TEST_USERNAME)
-                    .graphName(graphName)
-                    .nodeProjections(
-                        ImmutableNodeProjections.of(
-                            Map.of(NodeLabel.of("X"), ImmutableNodeProjection.of("X", ImmutablePropertyMappings.of()))
-                        )
-                    )
-                    .relationshipProjections(RelationshipProjections.ALL)
-                    .build();
-                var graphStore = graphLoader(graphProjectConfig).graphStore();
-                GraphStoreCatalog.set(graphProjectConfig, graphStore);
-                methods.forEach(method -> {
-                    try {
-                        Stream<?> result = (Stream<?>) method.invoke(proc, graphName, Map.of());
-                        assertEquals(1, result.count());
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        fail(e);
-                    }
-                });
-            }
-        });
+        var graphName = "graph";
+        var graphProjectConfig = GraphProjectFromStoreConfigImpl.builder()
+            .username(TEST_USERNAME)
+            .graphName(graphName)
+            .nodeProjections(
+                ImmutableNodeProjections.of(
+                    Map.of(NodeLabel.of("X"), ImmutableNodeProjection.of("X", ImmutablePropertyMappings.of()))
+                )
+            )
+            .relationshipProjections(RelationshipProjections.ALL)
+            .build();
+        var graphStore = graphLoader(graphProjectConfig).graphStore();
+        GraphStoreCatalog.set(graphProjectConfig, graphStore);
+
+        var result = wccStatsProc.stats(graphName, emptyMap());
+
+        assertThat(result).hasSize(1);
     }
-
 
     private GraphDataScienceProcedures createFacade() {
         var logMock = mock(org.neo4j.gds.logging.Log.class);
@@ -279,47 +268,39 @@ class WccStatsProcTest extends BaseProcTest {
             false
         );
 
-        var statsBusinessFacade = new CommunityAlgorithmsStatsBusinessFacade(
-            new CommunityAlgorithmsFacade(
-                new AlgorithmRunner(
-                    logMock,
-                    graphStoreCatalogService,
-                    new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
-                    memoryUsageValidator,
-                    RequestScopedDependencies.builder()
-                        .with(DatabaseId.of(db.databaseName()))
-                        .with(TaskRegistryFactory.empty())
-                        .with(new User(getUsername(), false))
-                        .with(EmptyUserLogRegistryFactory.INSTANCE)
-                        .build()
-                )
-            )
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .with(DatabaseId.of(db.databaseName()))
+            .with(TaskRegistryFactory.empty())
+            .with(new User(getUsername(), false))
+            .with(EmptyUserLogRegistryFactory.INSTANCE)
+            .with(TerminationFlag.RUNNING_TRUE)
+            .build();
+        var configurationParser = new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance);
+        var configurationCreator = new ConfigurationCreator(configurationParser, null, requestScopedDependencies.getUser());
+        var genericStub = new GenericStub(DefaultsConfiguration.Instance, LimitsConfiguration.Instance, configurationCreator, configurationParser, requestScopedDependencies.getUser(), null);
+        var applicationsFacade = ApplicationsFacade.create(
+            logMock,
+            Optional.empty(),
+            Optional.empty(),
+            graphStoreCatalogService,
+            null,
+            null,
+            null,
+            null,
+            requestScopedDependencies
         );
-
+        var communityProcedureFacade = CommunityProcedureFacade.create(
+            genericStub,
+            applicationsFacade,
+            ProcedureReturnColumns.EMPTY,
+            null,
+            new DefaultAlgorithmExecutionScaffolding(configurationCreator),
+            null
+        );
         return new GraphDataScienceProceduresBuilder(Log.noOpLog())
-            .with(new CommunityProcedureFacade(
-                new ConfigurationCreator(
-                    ConfigurationParser.EMPTY,
-                    null,
-                    new User(getUsername(), false)
-                ),
-                ProcedureReturnColumns.EMPTY,
-                null,
-                null,
-                statsBusinessFacade,
-                null,
-                null
-            ))
+            .with(communityProcedureFacade)
             .with(DeprecatedProceduresMetricService.PASSTHROUGH)
             .build();
-    }
-
-    private void applyOnProcedure(Consumer<WccStatsProc> func) {
-        TestProcedureRunner.applyOnProcedure(
-            db,
-            WccStatsProc.class,
-            func::accept
-        );
     }
 
     @NotNull

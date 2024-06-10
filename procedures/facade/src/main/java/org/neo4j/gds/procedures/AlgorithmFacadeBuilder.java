@@ -119,7 +119,14 @@ class AlgorithmFacadeBuilder {
     }
 
     CommunityProcedureFacade createCommunityProcedureFacade() {
-        return CommunityProcedureFacade.create(genericStub, applicationsFacade, procedureReturnColumns);
+        return CommunityProcedureFacade.create(
+            genericStub,
+            applicationsFacade,
+            procedureReturnColumns,
+            estimationModeRunner,
+            algorithmExecutionScaffolding,
+            algorithmExecutionScaffoldingForStreamMode
+        );
     }
 
     org.neo4j.gds.procedures.community.CommunityProcedureFacade createOldCommunityProcedureFacade() {

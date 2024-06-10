@@ -19,10 +19,9 @@
  */
 package org.neo4j.gds.wcc;
 
-import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.community.WccStatsResult;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -35,7 +34,7 @@ import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESC
 import static org.neo4j.gds.wcc.WccSpecification.WCC_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class WccStatsProc extends BaseProc {
+public class WccStatsProc {
 
     @Context
     public GraphDataScienceProcedures facade;
@@ -46,7 +45,7 @@ public class WccStatsProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().wccStats(graphName, configuration);
+        return facade.algorithms().community().wccStats(graphName, configuration);
     }
 
     @Procedure(value = "gds.wcc.stats.estimate", mode = READ)
@@ -55,6 +54,6 @@ public class WccStatsProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().wccEstimateStats(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().community().wccStatsEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.applications;
 
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.DefaultAlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
@@ -112,6 +112,7 @@ public final class ApplicationsFacade {
 
         var communityApplications = CommunityApplications.create(
             requestScopedDependencies,
+            algorithmEstimationTemplate,
             algorithmProcessingTemplate,
             progressTrackerCreator,
             mutateNodeProperty
