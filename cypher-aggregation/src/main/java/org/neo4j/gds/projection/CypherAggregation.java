@@ -26,7 +26,6 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
-import org.neo4j.internal.kernel.api.procs.FieldSignature;
 import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.procs.UserAggregationReducer;
@@ -38,10 +37,8 @@ import org.neo4j.procedure.Name;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.TextValue;
 
-import java.util.List;
-import java.util.Optional;
-
 import static org.neo4j.internal.kernel.api.procs.DefaultParameterValue.nullValue;
+import static org.neo4j.internal.kernel.api.procs.FieldSignature.inputField;
 
 public class CypherAggregation implements CallableUserAggregationFunction {
 
@@ -54,34 +51,18 @@ public class CypherAggregation implements CallableUserAggregationFunction {
     // NOTE: keep in sync with `procedureSyntax`
     @Override
     public UserFunctionSignature signature() {
-        return Neo4jProxy.userFunctionSignature(
-            FUNCTION_NAME,
-            // input signature:
-            List.of(
-                // @Name("graphName") TextValue graphName
-                FieldSignature.inputField("graphName", Neo4jTypes.NTString),
-                // @Name("sourceNode") AnyValue sourceNode
-                FieldSignature.inputField("sourceNode", Neo4jTypes.NTAny),
-                // @Name(value = "targetNode", defaultValue = "null") AnyValue targetNode
-                FieldSignature.inputField("targetNode", Neo4jTypes.NTAny, nullValue(Neo4jTypes.NTAny)),
-                // @Name(value = "dataConfig", defaultValue = "null") AnyValue dataConfig
-                FieldSignature.inputField("dataConfig", Neo4jTypes.NTAny, nullValue(Neo4jTypes.NTAny)),
-                // @Name(value = "configuration", defaultValue = "null") AnyValue config
-                FieldSignature.inputField("configuration", Neo4jTypes.NTAny, nullValue(Neo4jTypes.NTAny)),
-                // @Name(value = "alphaMigrationConfig", defaultValue = "null") AnyValue alphaMigrationConfig
-                FieldSignature.inputField("alphaMigrationConfig", Neo4jTypes.NTAny, nullValue(Neo4jTypes.NTAny))
-            ),
-            // output type: Map
-            Neo4jTypes.NTMap,
-            // function description
-            "Creates a named graph in the catalog for use by algorithms.",
-            // not internal
-            false,
-            // thread-safe, yes please
-            true,
-            // not deprecated
-            Optional.empty()
-        );
+        return Neo4jProxy.userFunctionSignature()
+            .name(FUNCTION_NAME)
+            .addInputField(inputField("graphName", Neo4jTypes.NTString))
+            .addInputField(inputField("sourceNode", Neo4jTypes.NTAny))
+            .addInputField(inputField("targetNode", Neo4jTypes.NTAny, nullValue(Neo4jTypes.NTAny)))
+            .addInputField(inputField("dataConfig", Neo4jTypes.NTAny, nullValue(Neo4jTypes.NTAny)))
+            .addInputField(inputField("configuration", Neo4jTypes.NTAny, nullValue(Neo4jTypes.NTAny)))
+            .addInputField(inputField("alphaMigrationConfig", Neo4jTypes.NTAny, nullValue(Neo4jTypes.NTAny)))
+            .returnType(Neo4jTypes.NTMap)
+            .description("Creates a named graph in the catalog for use by algorithms.")
+            .threadSafe(true) // yes, please
+            .build().toNeo();
     }
 
     // NOTE: keep in sync with `FUNCTION_NAME` and `signature`

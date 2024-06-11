@@ -57,11 +57,6 @@ import org.neo4j.internal.kernel.api.RelationshipScanCursor;
 import org.neo4j.internal.kernel.api.connectioninfo.ClientConnectionInfo;
 import org.neo4j.internal.kernel.api.exceptions.InvalidTransactionTypeKernelException;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
-import org.neo4j.internal.kernel.api.procs.FieldSignature;
-import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
-import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
-import org.neo4j.internal.kernel.api.procs.QualifiedName;
-import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.AuthenticationResult;
@@ -90,7 +85,6 @@ import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.memory.EmptyMemoryTracker;
-import org.neo4j.procedure.Mode;
 import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.ssl.config.SslPolicyLoader;
 import org.neo4j.storageengine.api.PropertySelection;
@@ -106,7 +100,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Optional;
 
 import static java.lang.String.format;
 import static org.neo4j.gds.compat.InternalReadOps.countByIdGenerator;
@@ -168,38 +161,12 @@ public final class Neo4jProxy {
         };
     }
 
-    public static ProcedureSignature procedureSignature(
-        QualifiedName name,
-        List<FieldSignature> inputSignature,
-        List<FieldSignature> outputSignature,
-        Mode mode,
-        boolean admin,
-        String deprecated,
-        String description,
-        String warning,
-        boolean eager,
-        boolean caseInsensitive,
-        boolean systemProcedure,
-        boolean internal,
-        boolean allowExpiredCredentials,
-        boolean threadSafe
-    ) {
-        return new ProcedureSignature(
-            name,
-            inputSignature,
-            outputSignature,
-            mode,
-            admin,
-            deprecated,
-            description,
-            warning,
-            eager,
-            caseInsensitive,
-            systemProcedure,
-            internal,
-            allowExpiredCredentials,
-            threadSafe
-        );
+    public static ProcedureSignatureBuilder procedureSignature() {
+        return ProcedureSignatureBuilder.builder().compat(IMPL);
+    }
+
+    public static UserFunctionSignatureBuilder userFunctionSignature() {
+        return UserFunctionSignatureBuilder.builder().compat(IMPL);
     }
 
     public static BoltTransactionRunner boltTransactionRunner() {
@@ -656,33 +623,6 @@ public final class Neo4jProxy {
         LogService logService
     ) {
         return SslPolicyLoader.create(fileSystem, config, logService.getInternalLogProvider());
-    }
-
-    public static UserFunctionSignature userFunctionSignature(
-        QualifiedName name,
-        List<FieldSignature> inputSignature,
-        Neo4jTypes.AnyType type,
-        String description,
-        boolean internal,
-        boolean threadSafe,
-        Optional<String> deprecatedBy
-    ) {
-        String category = null;      // No predefined categpry (like temporal or math)
-        var caseInsensitive = false; // case sensitive name match
-        var isBuiltIn = false;       // is built in; never true for GDS
-
-        return new UserFunctionSignature(
-            name,
-            inputSignature,
-            type,
-            deprecatedBy.orElse(null),
-            description,
-            category,
-            caseInsensitive,
-            isBuiltIn,
-            internal,
-            threadSafe
-        );
     }
 
     @SuppressForbidden(reason = "This is the compat API")
