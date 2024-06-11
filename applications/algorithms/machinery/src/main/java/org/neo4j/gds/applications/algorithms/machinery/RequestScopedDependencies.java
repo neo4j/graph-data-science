@@ -20,6 +20,7 @@
 package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -38,6 +39,7 @@ import org.neo4j.gds.termination.TerminationFlag;
  */
 public final class RequestScopedDependencies {
     private final DatabaseId databaseId;
+    private final GraphLoaderContext graphLoaderContext;
     private final NodeLabelExporterBuilder nodeLabelExporterBuilder;
     private final NodePropertyExporterBuilder nodePropertyExporterBuilder;
     private final ProcedureReturnColumns procedureReturnColumns;
@@ -56,7 +58,9 @@ public final class RequestScopedDependencies {
      * I just really like the <code>RequestScopedDependencies.builder().build()</code> form
      */
     private RequestScopedDependencies(
-        DatabaseId databaseId, NodeLabelExporterBuilder nodeLabelExporterBuilder,
+        DatabaseId databaseId,
+        GraphLoaderContext graphLoaderContext,
+        NodeLabelExporterBuilder nodeLabelExporterBuilder,
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
         ProcedureReturnColumns procedureReturnColumns,
         RelationshipExporterBuilder relationshipExporterBuilder,
@@ -69,6 +73,7 @@ public final class RequestScopedDependencies {
         UserLogStore userLogStore
     ) {
         this.databaseId = databaseId;
+        this.graphLoaderContext = graphLoaderContext;
         this.nodeLabelExporterBuilder = nodeLabelExporterBuilder;
         this.nodePropertyExporterBuilder = nodePropertyExporterBuilder;
         this.procedureReturnColumns = procedureReturnColumns;
@@ -88,6 +93,10 @@ public final class RequestScopedDependencies {
 
     public DatabaseId getDatabaseId() {
         return databaseId;
+    }
+
+    public GraphLoaderContext getGraphLoaderContext() {
+        return graphLoaderContext;
     }
 
     public NodeLabelExporterBuilder getNodeLabelExporterBuilder() {
@@ -141,6 +150,7 @@ public final class RequestScopedDependencies {
      */
     public static class RequestScopedDependenciesBuilder {
         private DatabaseId databaseId;
+        private GraphLoaderContext graphLoaderContext;
         private NodeLabelExporterBuilder nodeLabelExporterBuilder;
         private NodePropertyExporterBuilder nodePropertyExporterBuilder;
         private ProcedureReturnColumns procedureReturnColumns;
@@ -155,6 +165,11 @@ public final class RequestScopedDependencies {
 
         public RequestScopedDependenciesBuilder with(DatabaseId databaseId) {
             this.databaseId = databaseId;
+            return this;
+        }
+
+        public RequestScopedDependenciesBuilder with(GraphLoaderContext graphLoaderContext) {
+            this.graphLoaderContext = graphLoaderContext;
             return this;
         }
 
@@ -216,6 +231,7 @@ public final class RequestScopedDependencies {
         public RequestScopedDependencies build() {
             return new RequestScopedDependencies(
                 databaseId,
+                graphLoaderContext,
                 nodeLabelExporterBuilder,
                 nodePropertyExporterBuilder,
                 procedureReturnColumns,

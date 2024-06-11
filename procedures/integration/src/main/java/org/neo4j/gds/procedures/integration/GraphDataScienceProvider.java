@@ -135,8 +135,18 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
         var userLogStore = userLogServices.getUserLogStore(databaseId);
 
+        var graphLoaderContext = GraphLoaderContextProvider.buildGraphLoaderContext(
+            context,
+            databaseId,
+            taskRegistryFactory,
+            terminationFlag,
+            userLogRegistryFactory,
+            log
+        );
+
         var requestScopedDependencies = RequestScopedDependencies.builder()
             .with(databaseId)
+            .with(graphLoaderContext)
             .with(nodeLabelExporterBuilder)
             .with(nodePropertyExporterBuilder)
             .with(procedureReturnColumns)
@@ -150,15 +160,6 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             .with(userLogStore)
             .build();
 
-        var graphLoaderContext = GraphLoaderContextProvider.buildGraphLoaderContext(
-            context,
-            databaseId,
-            taskRegistryFactory,
-            terminationFlag,
-            userLogRegistryFactory,
-            log
-        );
-
         return GraphDataScienceProcedures.create(
             log,
             defaultsConfiguration,
@@ -171,7 +172,6 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             projectionMetricsService,
             algorithmMetaDataSetter,
             kernelTransaction,
-            graphLoaderContext,
             requestScopedDependencies,
             catalogProcedureFacadeFactory,
             graphDatabaseService,

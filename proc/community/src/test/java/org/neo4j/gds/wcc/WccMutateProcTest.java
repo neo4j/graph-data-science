@@ -582,6 +582,7 @@ class WccMutateProcTest extends BaseProcTest {
         var graphStoreCatalogService = new GraphStoreCatalogService();
         var requestScopedDependencies = RequestScopedDependencies.builder()
             .with(DatabaseId.of(db.databaseName()))
+            .with(GraphLoaderContext.NULL_CONTEXT)
             .with(TaskRegistryFactory.empty())
             .with(TerminationFlag.RUNNING_TRUE)
             .with(new User(getUsername(), false))
@@ -589,16 +590,16 @@ class WccMutateProcTest extends BaseProcTest {
             .build();
         var algorithmEstimationTemplate = new AlgorithmEstimationTemplate(graphStoreCatalogService, new DatabaseGraphStoreEstimationService(
             GraphLoaderContext.NULL_CONTEXT, requestScopedDependencies.getUser()), requestScopedDependencies);
-        var applicationsFacade = ApplicationsFacade.create(logMock, Optional.empty(), Optional.empty(), graphStoreCatalogService, MemoryGuard.DISABLED, new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()), new ProjectionMetricsService(new PassthroughExecutionMetricRegistrar()), algorithmEstimationTemplate, requestScopedDependencies);
+        var applicationsFacade = ApplicationsFacade.create(logMock, Optional.empty(), Optional.empty(), graphStoreCatalogService, MemoryGuard.DISABLED, new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()), new ProjectionMetricsService(new PassthroughExecutionMetricRegistrar()), requestScopedDependencies);
         var configurationParser = new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance);
         var configurationCreator = new ConfigurationCreator(configurationParser, null, requestScopedDependencies.getUser());
-        var genericStub = new GenericStub(
+        var genericStub = GenericStub.create(
             DefaultsConfiguration.Instance,
             LimitsConfiguration.Instance,
+            graphStoreCatalogService,
             configurationCreator,
             configurationParser,
-            requestScopedDependencies.getUser(),
-            algorithmEstimationTemplate
+            requestScopedDependencies
         );
         var communityProcedureFacade = CommunityProcedureFacade.create(
             genericStub,

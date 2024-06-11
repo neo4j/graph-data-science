@@ -32,6 +32,7 @@ import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.applications.graphstorecatalog.DefaultCatalogBusinessFacade;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 
@@ -77,7 +78,6 @@ public final class ApplicationsFacade {
         MemoryGuard memoryGuard,
         AlgorithmMetricsService algorithmMetricsService,
         ProjectionMetricsService projectionMetricsService,
-        AlgorithmEstimationTemplate algorithmEstimationTemplate,
         RequestScopedDependencies requestScopedDependencies
     ) {
         var catalogBusinessFacade = createCatalogBusinessFacade(
@@ -85,6 +85,16 @@ public final class ApplicationsFacade {
             catalogBusinessFacadeDecorator,
             graphStoreCatalogService,
             projectionMetricsService
+        );
+
+        var databaseGraphStoreEstimationService = new DatabaseGraphStoreEstimationService(
+            requestScopedDependencies.getGraphLoaderContext(),
+            requestScopedDependencies.getUser()
+        );
+        var algorithmEstimationTemplate = new AlgorithmEstimationTemplate(
+            graphStoreCatalogService,
+            databaseGraphStoreEstimationService,
+            requestScopedDependencies
         );
 
         var algorithmProcessingTemplate = createAlgorithmProcessingTemplate(

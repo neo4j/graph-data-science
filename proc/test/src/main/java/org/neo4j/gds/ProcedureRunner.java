@@ -157,6 +157,7 @@ public final class ProcedureRunner {
 
         var requestScopedDependencies = RequestScopedDependencies.builder()
             .with(new DatabaseIdAccessor().getDatabaseId(graphDatabaseService))
+            .with(GraphLoaderContext.NULL_CONTEXT)
             .with(new ProcedureCallContextReturnColumns(procedureCallContext))
             .with(taskRegistryFactory)
             .with(new User(username.username(), false))
@@ -171,6 +172,8 @@ public final class ProcedureRunner {
 
         var algorithmFacadeBuilderFactory = new AlgorithmFacadeBuilderFactory(
             gdsLog,
+            DefaultsConfiguration.Instance,
+            LimitsConfiguration.Instance,
             graphStoreCatalogService,
             false,
             new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
@@ -189,7 +192,6 @@ public final class ProcedureRunner {
             MetricsFacade.PASSTHROUGH_METRICS_FACADE.projectionMetrics(),
             AlgorithmMetaDataSetter.EMPTY,
             kernelTransaction,
-            GraphLoaderContext.NULL_CONTEXT,
             requestScopedDependencies,
             catalogProcedureFacadeFactory,
             graphDatabaseService,

@@ -425,6 +425,9 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
      * But let's be honest, there is enough work in front of us that such a fix is lower priority right now.
      */
     private static AlgorithmsProcedureFacade createAlgorithmsProcedureFacade() {
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .with(TerminationFlag.RUNNING_TRUE)
+            .build();
         var applicationsFacade = ApplicationsFacade.create(
             null,
             Optional.empty(),
@@ -433,12 +436,10 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             null,
             null,
             null,
-            null,
-            RequestScopedDependencies.builder().with(
-                TerminationFlag.RUNNING_TRUE).build()
+            requestScopedDependencies
         );
         var configurationParser = new ConfigurationParser(null, null);
-        var genericStub = new GenericStub(null, null, null, configurationParser, null, null);
+        var genericStub = GenericStub.create(null, null, null, null, configurationParser, requestScopedDependencies);
         var centralityProcedureFacade = CentralityProcedureFacade.create(
             genericStub,
             applicationsFacade,

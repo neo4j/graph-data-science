@@ -20,9 +20,7 @@
 package org.neo4j.gds.procedures;
 
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
-import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.applications.ApplicationsFacade;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -31,14 +29,12 @@ import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.catalog.CatalogProcedureFacade;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.embeddings.NodeEmbeddingsProcedureFacade;
@@ -98,7 +94,6 @@ public class GraphDataScienceProcedures {
         ProjectionMetricsService projectionMetricsService,
         AlgorithmMetaDataSetter algorithmMetaDataSetter,
         KernelTransaction kernelTransaction,
-        GraphLoaderContext graphLoaderContext,
         RequestScopedDependencies requestScopedDependencies,
         CatalogProcedureFacadeFactory catalogProcedureFacadeFactory,
         GraphDatabaseService graphDatabaseService,
@@ -112,23 +107,6 @@ public class GraphDataScienceProcedures {
             algorithmMetaDataSetter,
             requestScopedDependencies.getUser()
         );
-        var databaseGraphStoreEstimationService = new DatabaseGraphStoreEstimationService(
-            graphLoaderContext,
-            requestScopedDependencies.getUser()
-        );
-        var algorithmEstimationTemplate = new AlgorithmEstimationTemplate(
-            graphStoreCatalogService,
-            databaseGraphStoreEstimationService,
-            requestScopedDependencies
-        );
-        var genericStub = new GenericStub(
-            defaultsConfiguration,
-            limitsConfiguration,
-            configurationCreator,
-            configurationParser,
-            requestScopedDependencies.getUser(),
-            algorithmEstimationTemplate
-        );
 
         var applicationsFacade = ApplicationsFacade.create(
             log,
@@ -138,7 +116,6 @@ public class GraphDataScienceProcedures {
             memoryGuard,
             algorithmMetricsService,
             projectionMetricsService,
-            algorithmEstimationTemplate,
             requestScopedDependencies
         );
 
@@ -151,14 +128,13 @@ public class GraphDataScienceProcedures {
         );
 
         var algorithmFacadeBuilder = algorithmFacadeBuilderFactory.create(
+            configurationParser,
             configurationCreator,
             requestScopedDependencies,
             kernelTransaction,
             graphDatabaseService,
-            databaseGraphStoreEstimationService,
             algorithmMetaDataSetter,
-            applicationsFacade,
-            genericStub
+            applicationsFacade
         );
 
         var centralityProcedureFacade = algorithmFacadeBuilder.createCentralityProcedureFacade();

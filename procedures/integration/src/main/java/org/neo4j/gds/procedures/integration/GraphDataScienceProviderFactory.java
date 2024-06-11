@@ -138,11 +138,12 @@ final class GraphDataScienceProviderFactory {
         GraphStoreCatalogService graphStoreCatalogService,
         boolean useMaxMemoryEstimation
     ) {
-        // Defaults and limits is a big shared thing (or, will be)
         var modelCatalogServiceProvider = new ModelCatalogServiceProvider(modelCatalog);
 
         return new AlgorithmFacadeBuilderFactory(
             log,
+            defaultsConfiguration,
+            limitsConfiguration,
             graphStoreCatalogService,
             useMaxMemoryEstimation,
             metricsFacade.algorithmMetrics(),
