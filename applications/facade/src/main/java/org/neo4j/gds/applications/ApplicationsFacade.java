@@ -111,6 +111,7 @@ public final class ApplicationsFacade {
         );
 
         var communityApplications = CommunityApplications.create(
+            log,
             requestScopedDependencies,
             algorithmEstimationTemplate,
             algorithmProcessingTemplate,

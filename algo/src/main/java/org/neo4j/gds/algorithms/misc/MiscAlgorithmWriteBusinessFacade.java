@@ -21,7 +21,7 @@ package org.neo4j.gds.algorithms.misc;
 
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
-import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.scaleproperties.ScalePropertiesWriteConfig;
 
 public class MiscAlgorithmWriteBusinessFacade {

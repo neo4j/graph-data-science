@@ -19,10 +19,9 @@
  */
 package org.neo4j.gds.wcc;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.wcc.WccWriteResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.algorithms.community.WccWriteResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -36,7 +35,7 @@ import static org.neo4j.gds.wcc.WccSpecification.WCC_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class WccWriteProc extends BaseProc {
+public class WccWriteProc {
     @Context
     public GraphDataScienceProcedures facade;
 
@@ -46,7 +45,7 @@ public class WccWriteProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().wccWrite(graphName, configuration);
+        return facade.algorithms().community().wccWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.wcc.write.estimate", mode = READ)
@@ -55,6 +54,6 @@ public class WccWriteProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().wccEstimateWrite(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().community().wccWriteEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

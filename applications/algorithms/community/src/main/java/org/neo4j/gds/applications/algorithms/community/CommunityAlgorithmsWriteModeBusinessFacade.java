@@ -19,5 +19,74 @@
  */
 package org.neo4j.gds.applications.algorithms.community;
 
-public class CommunityAlgorithmsWriteModeBusinessFacade {
+import org.apache.commons.lang3.tuple.Pair;
+import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
+import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
+import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
+import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.wcc.WccWriteConfig;
+
+import java.util.Optional;
+
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
+
+public final class CommunityAlgorithmsWriteModeBusinessFacade {
+    private final CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade;
+    private final CommunityAlgorithms algorithms;
+    private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
+    private final WriteToDatabase writeToDatabase;
+
+    private CommunityAlgorithmsWriteModeBusinessFacade(
+        CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade,
+        CommunityAlgorithms algorithms,
+        AlgorithmProcessingTemplate algorithmProcessingTemplate,
+        WriteToDatabase writeToDatabase
+    ) {
+        this.estimationFacade = estimationFacade;
+        this.algorithms = algorithms;
+        this.algorithmProcessingTemplate = algorithmProcessingTemplate;
+        this.writeToDatabase = writeToDatabase;
+    }
+
+    public static CommunityAlgorithmsWriteModeBusinessFacade create(
+        Log log,
+        RequestScopedDependencies requestScopedDependencies,
+        CommunityAlgorithmsEstimationModeBusinessFacade estimation,
+        CommunityAlgorithms algorithms,
+        AlgorithmProcessingTemplate algorithmProcessingTemplate
+    ) {
+        var writeNodePropertyService = new WriteNodePropertyService(log, requestScopedDependencies);
+        var writeToDatabase = new WriteToDatabase(writeNodePropertyService);
+
+        return new CommunityAlgorithmsWriteModeBusinessFacade(
+            estimation,
+            algorithms,
+            algorithmProcessingTemplate,
+            writeToDatabase
+        );
+    }
+
+    public <RESULT> RESULT wcc(
+        GraphName graphName,
+        WccWriteConfig configuration,
+        ResultBuilder<WccWriteConfig, DisjointSetStruct, RESULT, Pair<NodePropertiesWritten, NodePropertyValues>> resultBuilder
+    ) {
+        var writeStep = new WccWriteStep(writeToDatabase, configuration);
+
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            WCC,
+            () -> estimationFacade.wcc(configuration),
+            graph -> algorithms.wcc(graph, configuration),
+            Optional.of(writeStep),
+            resultBuilder
+        );
+    }
 }

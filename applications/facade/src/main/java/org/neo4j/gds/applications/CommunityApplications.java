@@ -30,6 +30,7 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTempla
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.logging.Log;
 
 public final class CommunityApplications {
     private final CommunityAlgorithmsEstimationModeBusinessFacade estimation;
@@ -53,6 +54,7 @@ public final class CommunityApplications {
     }
 
     static CommunityApplications create(
+        Log log,
         RequestScopedDependencies requestScopedDependencies,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
@@ -76,7 +78,13 @@ public final class CommunityApplications {
             algorithms,
             algorithmProcessingTemplate
         );
-        var write = new CommunityAlgorithmsWriteModeBusinessFacade();
+        var write = CommunityAlgorithmsWriteModeBusinessFacade.create(
+            log,
+            requestScopedDependencies,
+            estimation,
+            algorithms,
+            algorithmProcessingTemplate
+        );
 
         return new CommunityApplications(estimation, mutation, stats, stream, write);
     }

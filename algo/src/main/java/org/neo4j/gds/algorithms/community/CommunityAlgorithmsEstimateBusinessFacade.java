@@ -45,8 +45,6 @@ import org.neo4j.gds.triangle.IntersectingTriangleCountMemoryEstimateDefinition;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientMemoryEstimateDefinition;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
-import org.neo4j.gds.wcc.WccBaseConfig;
-import org.neo4j.gds.wcc.WccMemoryEstimateDefinition;
 
 import java.util.Optional;
 
@@ -59,16 +57,6 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
     ) {
         this.algorithmEstimator = algorithmEstimator;
     }
-
-    public <C extends WccBaseConfig> MemoryEstimateResult wcc(Object graphNameOrConfiguration, C configuration) {
-        return algorithmEstimator.estimate(
-            graphNameOrConfiguration,
-            configuration,
-            configuration.relationshipWeightProperty(),
-            new WccMemoryEstimateDefinition(configuration.isIncremental())
-        );
-    }
-
 
     public <C extends ApproxMaxKCutBaseConfig> MemoryEstimateResult approxMaxKCut(Object graphNameOrConfiguration, C configuration) {
         return algorithmEstimator.estimate(

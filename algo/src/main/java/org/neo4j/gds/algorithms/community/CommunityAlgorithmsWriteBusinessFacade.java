@@ -34,7 +34,7 @@ import org.neo4j.gds.algorithms.community.specificfields.ModularityOptimizationS
 import org.neo4j.gds.algorithms.community.specificfields.StandardCommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.TriangleCountSpecificFields;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
-import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -57,7 +57,6 @@ import org.neo4j.gds.scc.SccAlphaWriteConfig;
 import org.neo4j.gds.scc.SccWriteConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientWriteConfig;
 import org.neo4j.gds.triangle.TriangleCountWriteConfig;
-import org.neo4j.gds.wcc.WccWriteConfig;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -79,47 +78,6 @@ public class CommunityAlgorithmsWriteBusinessFacade {
     ) {
         this.writeNodePropertyService = writeNodePropertyService;
         this.communityAlgorithmsFacade = communityAlgorithmsFacade;
-    }
-
-    public NodePropertyWriteResult<StandardCommunityStatisticsSpecificFields> wcc(
-        String graphName,
-        WccWriteConfig configuration,
-        StatisticsComputationInstructions statisticsComputationInstructions
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> communityAlgorithmsFacade.wcc(graphName, configuration)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        return writeToDatabase(
-            algorithmResult,
-            configuration,
-            (result, config) -> CommunityCompanion.nodePropertyValues(
-                config.isIncremental(),
-                config.seedProperty(),
-                config.writeProperty(),
-                config.consecutiveIds(),
-                result.asNodeProperties(),
-                config.minCommunitySize(),
-                config.concurrency(),
-                () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
-            ),
-            (result -> result::setIdOf),
-            (result, componentCount, communitySummary) -> new StandardCommunityStatisticsSpecificFields(
-                componentCount,
-                communitySummary
-            ),
-            statisticsComputationInstructions,
-            intermediateResult.computeMilliseconds,
-            () -> StandardCommunityStatisticsSpecificFields.EMPTY,
-            "WccWrite",
-            configuration.writeConcurrency(),
-            configuration.writeProperty(),
-            configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(algorithmResult.resultStore())
-        );
-
     }
 
     public NodePropertyWriteResult<KCoreSpecificFields> kcore(

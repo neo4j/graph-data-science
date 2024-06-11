@@ -107,7 +107,6 @@ import org.neo4j.gds.procedures.community.triangleCount.TriangleCountMutateResul
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStatsResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStreamResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountWriteResult;
-import org.neo4j.gds.procedures.community.wcc.WccWriteResult;
 import org.neo4j.gds.scc.SccAlphaWriteConfig;
 import org.neo4j.gds.scc.SccMutateConfig;
 import org.neo4j.gds.scc.SccStatsConfig;
@@ -121,7 +120,6 @@ import org.neo4j.gds.triangle.TriangleCountMutateConfig;
 import org.neo4j.gds.triangle.TriangleCountStatsConfig;
 import org.neo4j.gds.triangle.TriangleCountStreamConfig;
 import org.neo4j.gds.triangle.TriangleCountWriteConfig;
-import org.neo4j.gds.wcc.WccWriteConfig;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -155,33 +153,6 @@ public class CommunityProcedureFacade {
         this.streamBusinessFacade = streamBusinessFacade;
         this.writeBusinessFacade = writeBusinessFacade;
     }
-
-    // WCC
-
-    public Stream<WccWriteResult> wccWrite(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var writeConfig = configurationCreator.createConfiguration(configuration, WccWriteConfig::of);
-
-        var computationResult = writeBusinessFacade.wcc(
-            graphName,
-            writeConfig,
-            ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns)
-        );
-
-        return Stream.of(WccComputationResultTransformer.toWriteResult(computationResult));
-    }
-
-    public Stream<MemoryEstimateResult> wccEstimateWrite(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, WccWriteConfig::of);
-        return Stream.of(estimateBusinessFacade.wcc(graphNameOrConfiguration, config));
-    }
-
-    // WCC end
 
     // K-Core Decomposition
     public Stream<KCoreDecompositionStreamResult> kCoreStream(

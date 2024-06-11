@@ -17,51 +17,62 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.centrality;
+package org.neo4j.gds.applications.algorithms.community;
 
+import org.apache.commons.lang3.tuple.Pair;
+import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
 import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
-import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
+import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.pagerank.PageRankResult;
-import org.neo4j.gds.pagerank.PageRankWriteConfig;
+import org.neo4j.gds.wcc.WccWriteConfig;
 
-class PageRankWriteStep implements MutateOrWriteStep<PageRankResult, NodePropertiesWritten> {
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
+
+class WccWriteStep implements MutateOrWriteStep<DisjointSetStruct, Pair<NodePropertiesWritten, NodePropertyValues>> {
     private final WriteToDatabase writeToDatabase;
-    private final PageRankWriteConfig configuration;
-    private final LabelForProgressTracking label;
+    private final WccWriteConfig configuration;
 
-    PageRankWriteStep(
-        WriteToDatabase writeToDatabase,
-        PageRankWriteConfig configuration,
-        LabelForProgressTracking label
-    ) {
+    WccWriteStep(WriteToDatabase writeToDatabase, WccWriteConfig configuration) {
         this.writeToDatabase = writeToDatabase;
         this.configuration = configuration;
-        this.label = label;
     }
 
     @Override
-    public NodePropertiesWritten execute(
+    public Pair<NodePropertiesWritten, NodePropertyValues> execute(
         Graph graph,
         GraphStore graphStore,
         ResultStore resultStore,
-        PageRankResult result,
+        DisjointSetStruct disjointSetStruct,
         JobId jobId
     ) {
-        return writeToDatabase.perform(
+        var nodePropertyValues = CommunityCompanion.nodePropertyValues(
+            configuration.isIncremental(),
+            configuration.seedProperty(),
+            configuration.writeProperty(),
+            configuration.consecutiveIds(),
+            disjointSetStruct.asNodeProperties(),
+            configuration.minCommunitySize(),
+            configuration.concurrency(),
+            () -> graphStore.nodeProperty(configuration.seedProperty())
+        );
+
+        var nodePropertiesWritten = writeToDatabase.perform(
             graph,
             graphStore,
             resultStore,
             configuration,
             configuration,
-            label,
+            WCC,
             jobId,
-            result.nodePropertyValues()
+            nodePropertyValues
         );
+
+        return Pair.of(nodePropertiesWritten, nodePropertyValues);
     }
 }

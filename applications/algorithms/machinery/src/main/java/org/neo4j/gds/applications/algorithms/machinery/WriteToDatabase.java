@@ -17,9 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.centrality;
+package org.neo4j.gds.applications.algorithms.machinery;
 
-import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
@@ -30,14 +29,14 @@ import org.neo4j.gds.config.WriteConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.utils.progress.JobId;
 
-class WriteToDatabase {
+public class WriteToDatabase {
     private final WriteNodePropertyService writeNodePropertyService;
 
-    WriteToDatabase(WriteNodePropertyService writeNodePropertyService) {
+    public WriteToDatabase(WriteNodePropertyService writeNodePropertyService) {
         this.writeNodePropertyService = writeNodePropertyService;
     }
 
-    NodePropertiesWritten perform(
+    public NodePropertiesWritten perform(
         Graph graph,
         GraphStore graphStore,
         ResultStore resultStore,
