@@ -987,6 +987,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
 
         var samplingMetric = projectionMetricsService.createRandomWakSampling(samplerType.name());
         try (samplingMetric) {
+            samplingMetric.start();
             return graphSamplingApplication.sample(
                 user,
                 taskRegistryFactory,
