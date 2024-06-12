@@ -26,6 +26,9 @@ import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCut;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
+import org.neo4j.gds.conductance.Conductance;
+import org.neo4j.gds.conductance.ConductanceResult;
+import org.neo4j.gds.conductance.ConductanceStreamConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
@@ -48,27 +51,6 @@ public class CommunityAlgorithms {
         this.terminationFlag = terminationFlag;
     }
 
-    DisjointSetStruct wcc(Graph graph, WccBaseConfig configuration) {
-        var task = Tasks.leaf(LabelForProgressTracking.WCC.value, graph.relationshipCount());
-        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
-
-        if (configuration.hasRelationshipWeightProperty() && configuration.threshold() == 0) {
-            progressTracker.logWarning(
-                "Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set.");
-        }
-
-        var algorithm = new Wcc(
-            graph,
-            DefaultPool.INSTANCE,
-            ParallelUtil.DEFAULT_BATCH_SIZE,
-            configuration.toParameters(),
-            progressTracker,
-            terminationFlag
-        );
-
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
-    }
-
     ApproxMaxKCutResult approximateMaximumKCut(Graph graph, ApproxMaxKCutBaseConfig configuration) {
         var task = Tasks.iterativeFixed(
             LabelForProgressTracking.ApproximateMaximumKCut.value,
@@ -84,6 +66,51 @@ public class CommunityAlgorithms {
             graph,
             configuration.toParameters(),
             DefaultPool.INSTANCE,
+            progressTracker,
+            terminationFlag
+        );
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+    }
+
+    ConductanceResult conductance(Graph graph, ConductanceStreamConfig configuration) {
+        var task = Tasks.task(
+            LabelForProgressTracking.Conductance.value,
+            Tasks.leaf("count relationships", graph.nodeCount()),
+            Tasks.leaf("accumulate counts"),
+            Tasks.leaf("perform conductance computations")
+        );
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var parameters = configuration.toParameters();
+
+        var algorithm = new Conductance(
+            graph,
+            parameters.concurrency(),
+            parameters.minBatchSize(),
+            parameters.hasRelationshipWeightProperty(),
+            parameters.communityProperty(),
+            DefaultPool.INSTANCE,
+            progressTracker
+        );
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+    }
+
+    DisjointSetStruct wcc(Graph graph, WccBaseConfig configuration) {
+        var task = Tasks.leaf(LabelForProgressTracking.WCC.value, graph.relationshipCount());
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        if (configuration.hasRelationshipWeightProperty() && configuration.threshold() == 0) {
+            progressTracker.logWarning(
+                "Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set.");
+        }
+
+        var algorithm = new Wcc(
+            graph,
+            DefaultPool.INSTANCE,
+            ParallelUtil.DEFAULT_BATCH_SIZE,
+            configuration.toParameters(),
             progressTracker,
             terminationFlag
         );

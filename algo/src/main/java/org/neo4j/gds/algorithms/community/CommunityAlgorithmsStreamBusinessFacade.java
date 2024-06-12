@@ -184,6 +184,7 @@ public class CommunityAlgorithmsStreamBusinessFacade {
         return createStreamComputationResult(result);
     }
 
+    // kill
     public StreamComputationResult<ConductanceResult> conductance(
         String graphName,
         ConductanceStreamConfig config

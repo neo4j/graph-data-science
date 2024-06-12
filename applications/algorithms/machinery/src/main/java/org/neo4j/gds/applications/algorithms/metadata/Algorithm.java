@@ -37,6 +37,7 @@ public enum Algorithm {
     BFS,
     CELF,
     ClosenessCentrality,
+    Conductance,
     DegreeCentrality,
     DeltaStepping,
     DFS,

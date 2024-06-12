@@ -67,6 +67,7 @@ class StubbyHolder {
             case BFS -> new BreadthFirstSearchStub();
             case CELF -> new CelfStub();
             case ClosenessCentrality -> new ClosenessCentralityStub();
+            case Conductance -> null;
             case DegreeCentrality -> new DegreeCentralityStub();
             case DeltaStepping -> new SingleSourceShortestPathDeltaStub();
             case DFS -> new DepthFirstSearchStub();

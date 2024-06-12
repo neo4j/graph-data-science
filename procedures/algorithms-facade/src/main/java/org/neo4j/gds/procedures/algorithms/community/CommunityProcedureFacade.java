@@ -27,6 +27,7 @@ import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsStream
 import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsWriteModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
+import org.neo4j.gds.conductance.ConductanceStreamConfig;
 import org.neo4j.gds.procedures.algorithms.community.stubs.ApproximateMaximumKCutMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.WccMutateStub;
 import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
@@ -120,6 +121,21 @@ public final class CommunityProcedureFacade {
         );
 
         return Stream.of(result);
+    }
+
+    public Stream<ConductanceStreamResult> conductanceStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new ConductanceResultBuilderForStreamMode();
+
+        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+            graphName,
+            configuration,
+            ConductanceStreamConfig::of,
+            streamMode()::conductance,
+            resultBuilder
+        );
     }
 
     public WccMutateStub wccMutateStub() {

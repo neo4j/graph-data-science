@@ -30,6 +30,7 @@ public enum LabelForProgressTracking {
     BFS("BFS"),
     CELF("CELF"),
     ClosenessCentrality("Closeness Centrality"),
+    Conductance("Conductance"),
     DegreeCentrality("DegreeCentrality"),
     DeltaStepping("Delta Stepping"),
     DFS("DFS"),
@@ -67,6 +68,7 @@ public enum LabelForProgressTracking {
             case BFS -> BFS;
             case CELF -> CELF;
             case ClosenessCentrality -> ClosenessCentrality;
+            case Conductance -> Conductance;
             case DegreeCentrality -> DegreeCentrality;
             case DeltaStepping -> DeltaStepping;
             case DFS -> DFS;

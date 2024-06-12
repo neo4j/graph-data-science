@@ -66,6 +66,7 @@ public class ConfigurationParsersForMutateMode {
             case BFS -> BfsMutateConfig::of;
             case CELF -> InfluenceMaximizationMutateConfig::of;
             case ClosenessCentrality -> ClosenessCentralityMutateConfig::of;
+            case Conductance -> null;
             case DegreeCentrality -> DegreeCentralityMutateConfig::of;
             case DeltaStepping -> AllShortestPathsDeltaMutateConfig::of;
             case DFS -> DfsMutateConfig::of;

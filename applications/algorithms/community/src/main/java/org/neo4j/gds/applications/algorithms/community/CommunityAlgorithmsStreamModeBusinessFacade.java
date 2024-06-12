@@ -24,12 +24,15 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTempla
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
+import org.neo4j.gds.conductance.ConductanceResult;
+import org.neo4j.gds.conductance.ConductanceStreamConfig;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.wcc.WccStreamConfig;
 
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ApproximateMaximumKCut;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Conductance;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
 
 public class CommunityAlgorithmsStreamModeBusinessFacade {
@@ -58,6 +61,22 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
             ApproximateMaximumKCut,
             () -> estimationFacade.approximateMaximumKCut(configuration),
             graph -> algorithms.approximateMaximumKCut(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT conductance(
+        GraphName graphName,
+        ConductanceStreamConfig configuration,
+        ResultBuilder<ConductanceStreamConfig, ConductanceResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            Conductance,
+            estimationFacade::conductance,
+            graph -> algorithms.conductance(graph, configuration),
             Optional.empty(),
             resultBuilder
         );

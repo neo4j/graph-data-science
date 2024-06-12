@@ -68,6 +68,7 @@ final class MutateModeAlgorithmLibrary {
             case BFS -> CanonicalProcedureName.parse("gds.bfs");
             case CELF -> CanonicalProcedureName.parse("gds.influenceMaximization.celf");
             case ClosenessCentrality -> CanonicalProcedureName.parse("gds.closeness");
+            case Conductance -> null;
             case DegreeCentrality -> CanonicalProcedureName.parse("gds.degree");
             case DeltaStepping -> CanonicalProcedureName.parse("gds.allShortestPaths.delta");
             case DFS -> CanonicalProcedureName.parse("gds.dfs");
