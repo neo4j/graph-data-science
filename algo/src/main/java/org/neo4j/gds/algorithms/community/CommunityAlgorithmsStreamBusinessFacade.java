@@ -21,8 +21,6 @@ package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
-import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
-import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.conductance.ConductanceStreamConfig;
@@ -192,20 +190,6 @@ public class CommunityAlgorithmsStreamBusinessFacade {
     ) {
 
         var result = this.communityAlgorithmsFacade.conductance(
-            graphName,
-            config
-        );
-
-        return createStreamComputationResult(result);
-    }
-
-
-    public StreamComputationResult<ApproxMaxKCutResult> approxMaxKCut(
-        String graphName,
-        ApproxMaxKCutBaseConfig config
-    ) {
-
-        var result = this.communityAlgorithmsFacade.approxMaxKCut(
             graphName,
             config
         );

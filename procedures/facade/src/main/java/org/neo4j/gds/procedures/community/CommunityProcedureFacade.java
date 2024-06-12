@@ -26,7 +26,6 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacad
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
 import org.neo4j.gds.conductance.ConductanceStreamConfig;
 import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
 import org.neo4j.gds.k1coloring.K1ColoringStatsConfig;
@@ -60,7 +59,6 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
 import org.neo4j.gds.procedures.algorithms.community.ProcedureStatisticsComputationInstructions;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutStreamResult;
 import org.neo4j.gds.procedures.community.conductance.ConductanceStreamResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringMutateResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringStatsResult;
@@ -1135,28 +1133,6 @@ public class CommunityProcedureFacade {
         );
 
         return ConductanceComputationResultTransformer.toStreamResult(computationResult);
-    }
-
-    public Stream<ApproxMaxKCutStreamResult> approxMaxKCutStream(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var streamConfig = configurationCreator.createConfigurationForStream(configuration, ApproxMaxKCutStreamConfig::of);
-
-        var computationResult = streamBusinessFacade.approxMaxKCut(
-            graphName,
-            streamConfig
-        );
-
-        return ApproxMaxKCutComputationResultTransformer.toStreamResult(computationResult, streamConfig);
-    }
-
-    public Stream<MemoryEstimateResult> approxMaxKCutEstimateStream(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, ApproxMaxKCutStreamConfig::of);
-        return Stream.of(estimateBusinessFacade.approxMaxKCut(graphNameOrConfiguration, config));
     }
 
     public Stream<AlphaSccWriteResult> alphaSccWrite(

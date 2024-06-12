@@ -22,11 +22,14 @@ package org.neo4j.gds.applications.algorithms.community;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
+import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.wcc.WccStreamConfig;
 
 import java.util.Optional;
 
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ApproximateMaximumKCut;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
 
 public class CommunityAlgorithmsStreamModeBusinessFacade {
@@ -42,6 +45,22 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         this.estimationFacade = estimationFacade;
         this.algorithms = algorithms;
         this.algorithmProcessingTemplate = algorithmProcessingTemplate;
+    }
+
+    public <RESULT> RESULT approximateMaximumKCut(
+        GraphName graphName,
+        ApproxMaxKCutStreamConfig configuration,
+        ResultBuilder<ApproxMaxKCutStreamConfig, ApproxMaxKCutResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            ApproximateMaximumKCut,
+            () -> estimationFacade.approximateMaximumKCut(configuration),
+            graph -> algorithms.approximateMaximumKCut(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
     }
 
     public <RESULT> RESULT wcc(

@@ -20,8 +20,7 @@
 package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
-import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutMemoryEstimateDefinition;
-import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
 import org.neo4j.gds.k1coloring.K1ColoringMemoryEstimateDefinition;
 import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
@@ -38,7 +37,6 @@ import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityCalculatorMemoryEstimateDefinition;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationBaseConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationMemoryEstimateDefinition;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.scc.SccBaseConfig;
 import org.neo4j.gds.scc.SccMemoryEstimateDefinition;
 import org.neo4j.gds.triangle.IntersectingTriangleCountMemoryEstimateDefinition;
@@ -56,15 +54,6 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
         AlgorithmEstimator algorithmEstimator
     ) {
         this.algorithmEstimator = algorithmEstimator;
-    }
-
-    public <C extends ApproxMaxKCutBaseConfig> MemoryEstimateResult approxMaxKCut(Object graphNameOrConfiguration, C configuration) {
-        return algorithmEstimator.estimate(
-            graphNameOrConfiguration,
-            configuration,
-            configuration.relationshipWeightProperty(),
-            new ApproxMaxKCutMemoryEstimateDefinition(configuration.toMemoryEstimationParameters())
-        );
     }
 
     public <C extends K1ColoringBaseConfig> MemoryEstimateResult k1Coloring(

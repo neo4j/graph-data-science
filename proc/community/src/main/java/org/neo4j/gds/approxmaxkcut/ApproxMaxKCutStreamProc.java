@@ -20,7 +20,7 @@
 package org.neo4j.gds.approxmaxkcut;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutStreamResult;
+import org.neo4j.gds.procedures.algorithms.community.ApproxMaxKCutStreamResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -45,7 +45,7 @@ public class ApproxMaxKCutStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().approxMaxKCutStream(graphName, configuration);
+        return facade.algorithms().community().approxMaxKCutStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.maxkcut.stream.estimate", mode = READ)
@@ -54,7 +54,7 @@ public class ApproxMaxKCutStreamProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().approxMaxKCutEstimateStream(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().community().approxMaxKCutStreamEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Deprecated
@@ -66,11 +66,9 @@ public class ApproxMaxKCutStreamProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         facade.deprecatedProcedures().called("gds.alpha.maxkcut.stream");
-
         facade
             .log()
             .warn("Procedure `gds.alpha.maxkcut.stream` has been deprecated, please use `gds.maxkcut.stream`.");
-
         return stream(graphName, configuration);
     }
 

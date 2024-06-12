@@ -35,6 +35,23 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
         this.algorithmEstimationTemplate = algorithmEstimationTemplate;
     }
 
+    public MemoryEstimation approximateMaximumKCut(ApproxMaxKCutBaseConfig configuration) {
+        return new ApproxMaxKCutMemoryEstimateDefinition(configuration.toMemoryEstimationParameters()).memoryEstimation();
+    }
+
+    public MemoryEstimateResult approximateMaximumKCut(
+        ApproxMaxKCutBaseConfig configuration,
+        Object graphNameOrConfiguration
+    ) {
+        var memoryEstimation = approximateMaximumKCut(configuration);
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
+        );
+    }
+
     public MemoryEstimation wcc(SeedConfig configuration) {
         return new WccMemoryEstimateDefinition(configuration.isIncremental()).memoryEstimation();
     }
@@ -47,9 +64,5 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
             graphNameOrConfiguration,
             memoryEstimation
         );
-    }
-
-    public MemoryEstimation approximateMaximumKCut(ApproxMaxKCutBaseConfig configuration) {
-        return new ApproxMaxKCutMemoryEstimateDefinition(configuration.toMemoryEstimationParameters()).memoryEstimation();
     }
 }

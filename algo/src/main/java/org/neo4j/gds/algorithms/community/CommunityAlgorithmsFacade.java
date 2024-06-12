@@ -21,14 +21,10 @@ package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
-import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutAlgorithmFactory;
-import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
-import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.conductance.ConductanceAlgorithmFactory;
 import org.neo4j.gds.conductance.ConductanceBaseConfig;
 import org.neo4j.gds.conductance.ConductanceResult;
-import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.k1coloring.K1ColoringAlgorithmFactory;
 import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
@@ -61,8 +57,6 @@ import org.neo4j.gds.triangle.LocalClusteringCoefficientFactory;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
-import org.neo4j.gds.wcc.WccAlgorithmFactory;
-import org.neo4j.gds.wcc.WccBaseConfig;
 
 import java.util.Optional;
 
@@ -74,18 +68,6 @@ public class CommunityAlgorithmsFacade {
         AlgorithmRunner algorithmRunner
     ) {
         this.algorithmRunner = algorithmRunner;
-    }
-
-    AlgorithmComputationResult<DisjointSetStruct> wcc(
-        String graphName,
-        WccBaseConfig config
-    ) {
-        return algorithmRunner.run(
-            graphName,
-            config,
-            config.relationshipWeightProperty(),
-            new WccAlgorithmFactory<>()
-        );
     }
 
     AlgorithmComputationResult<TriangleCountResult> triangleCount(
@@ -219,19 +201,6 @@ public class CommunityAlgorithmsFacade {
             new ConductanceAlgorithmFactory<>()
         );
     }
-
-    AlgorithmComputationResult<ApproxMaxKCutResult> approxMaxKCut(
-        String graphName,
-        ApproxMaxKCutBaseConfig config
-    ) {
-        return algorithmRunner.run(
-            graphName,
-            config,
-            config.relationshipWeightProperty(),
-            new ApproxMaxKCutAlgorithmFactory<>()
-        );
-    }
-
 
     public AlgorithmComputationResult<ModularityOptimizationResult> modularityOptimization(
         String graphName,

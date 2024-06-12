@@ -26,6 +26,7 @@ import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsStatsM
 import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsWriteModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
 import org.neo4j.gds.procedures.algorithms.community.stubs.ApproximateMaximumKCutMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.WccMutateStub;
 import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
@@ -91,6 +92,34 @@ public final class CommunityProcedureFacade {
 
     public ApproximateMaximumKCutMutateStub approximateMaximumKCutMutateStub() {
         return approximateMaximumKCutMutateStub;
+    }
+
+    public Stream<ApproxMaxKCutStreamResult> approxMaxKCutStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new ApproxMaxKCutResultBuilderForStreamMode();
+
+        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+            graphName,
+            configuration,
+            ApproxMaxKCutStreamConfig::of,
+            streamMode()::approximateMaximumKCut,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> approxMaxKCutStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            ApproxMaxKCutStreamConfig::of,
+            configuration -> estimationMode().approximateMaximumKCut(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
     }
 
     public WccMutateStub wccMutateStub() {
