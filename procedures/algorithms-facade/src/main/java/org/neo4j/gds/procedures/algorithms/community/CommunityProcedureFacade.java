@@ -26,6 +26,7 @@ import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsStatsM
 import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsWriteModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.algorithms.community.stubs.ApproximateMaximumKCutMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.WccMutateStub;
 import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
@@ -39,6 +40,7 @@ import java.util.stream.Stream;
 
 public final class CommunityProcedureFacade {
     private final ProcedureReturnColumns procedureReturnColumns;
+    private final ApproximateMaximumKCutMutateStub approximateMaximumKCutMutateStub;
     private final WccMutateStub wccMutateStub;
 
     private final ApplicationsFacade applicationsFacade;
@@ -49,6 +51,7 @@ public final class CommunityProcedureFacade {
 
     private CommunityProcedureFacade(
         ProcedureReturnColumns procedureReturnColumns,
+        ApproximateMaximumKCutMutateStub approximateMaximumKCutMutateStub,
         WccMutateStub wccMutateStub,
         ApplicationsFacade applicationsFacade,
         EstimationModeRunner estimationMode,
@@ -56,6 +59,7 @@ public final class CommunityProcedureFacade {
         AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode
     ) {
         this.procedureReturnColumns = procedureReturnColumns;
+        this.approximateMaximumKCutMutateStub = approximateMaximumKCutMutateStub;
         this.wccMutateStub = wccMutateStub;
         this.applicationsFacade = applicationsFacade;
         this.estimationMode = estimationMode;
@@ -71,16 +75,22 @@ public final class CommunityProcedureFacade {
         AlgorithmExecutionScaffolding algorithmExecutionScaffolding,
         AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode
     ) {
+        var approximateMaximumKCutMutateStub = new ApproximateMaximumKCutMutateStub(genericStub, applicationsFacade);
         var wccMutateStub = new WccMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
 
         return new CommunityProcedureFacade(
             procedureReturnColumns,
+            approximateMaximumKCutMutateStub,
             wccMutateStub,
             applicationsFacade,
             estimationModeRunner,
             algorithmExecutionScaffolding,
             algorithmExecutionScaffoldingForStreamMode
         );
+    }
+
+    public ApproximateMaximumKCutMutateStub approximateMaximumKCutMutateStub() {
+        return approximateMaximumKCutMutateStub;
     }
 
     public WccMutateStub wccMutateStub() {

@@ -26,7 +26,6 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacad
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
 import org.neo4j.gds.conductance.ConductanceStreamConfig;
 import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
@@ -61,7 +60,6 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
 import org.neo4j.gds.procedures.algorithms.community.ProcedureStatisticsComputationInstructions;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutMutateResult;
 import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutStreamResult;
 import org.neo4j.gds.procedures.community.conductance.ConductanceStreamResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringMutateResult;
@@ -1153,33 +1151,11 @@ public class CommunityProcedureFacade {
         return ApproxMaxKCutComputationResultTransformer.toStreamResult(computationResult, streamConfig);
     }
 
-    public Stream<ApproxMaxKCutMutateResult> approxMaxKCutMutate(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var streamConfig = configurationCreator.createConfiguration(configuration, ApproxMaxKCutMutateConfig::of);
-
-        var computationResult = mutateBusinessFacade.approxMaxKCut(
-            graphName,
-            streamConfig
-        );
-
-        return Stream.of(ApproxMaxKCutComputationResultTransformer.toMutateResult(computationResult));
-    }
-
     public Stream<MemoryEstimateResult> approxMaxKCutEstimateStream(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
         var config = configurationCreator.createConfiguration(algoConfiguration, ApproxMaxKCutStreamConfig::of);
-        return Stream.of(estimateBusinessFacade.approxMaxKCut(graphNameOrConfiguration, config));
-    }
-
-    public Stream<MemoryEstimateResult> approxMaxKCutEstimateMutate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, ApproxMaxKCutMutateConfig::of);
         return Stream.of(estimateBusinessFacade.approxMaxKCut(graphNameOrConfiguration, config));
     }
 

@@ -21,7 +21,6 @@ package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
-import org.neo4j.gds.algorithms.community.specificfields.ApproxMaxKCutSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.CommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.K1ColoringSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.KCoreSpecificFields;
@@ -33,9 +32,8 @@ import org.neo4j.gds.algorithms.community.specificfields.LouvainSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.ModularityOptimizationSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.StandardCommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.TriangleCountSpecificFields;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
@@ -431,35 +429,6 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             () -> LocalClusteringCoefficientSpecificFields.EMPTY
         );
     }
-
-    public NodePropertyMutateResult<ApproxMaxKCutSpecificFields> approxMaxKCut(
-        String graphName,
-        ApproxMaxKCutMutateConfig configuration
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.approxMaxKCut(graphName, configuration)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-
-        return mutateNodeProperty(
-            algorithmResult,
-            configuration,
-            ((result, configuration1) -> {
-                return CommunityCompanion.nodePropertyValues(
-                    false,
-                    NodePropertyValuesAdapter.adapt(result.candidateSolution())
-                );
-            }),
-            (result) -> new ApproxMaxKCutSpecificFields(
-                result.cutCost()
-            ),
-            intermediateResult.computeMilliseconds,
-            () -> ApproxMaxKCutSpecificFields.EMPTY
-        );
-    }
-
 
     public NodePropertyMutateResult<ModularityOptimizationSpecificFields> modularityOptimization(
         String graphName,

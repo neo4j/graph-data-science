@@ -19,15 +19,12 @@
  */
 package org.neo4j.gds.procedures.community;
 
-import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.community.CommunityCompanion;
-import org.neo4j.gds.algorithms.community.specificfields.ApproxMaxKCutSpecificFields;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
-import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutMutateResult;
 import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutStreamResult;
 
 import java.util.stream.LongStream;
@@ -59,17 +56,5 @@ final class ApproxMaxKCutComputationResultTransformer {
 
 
         }).orElseGet(Stream::empty);
-    }
-
-    static ApproxMaxKCutMutateResult toMutateResult(NodePropertyMutateResult<ApproxMaxKCutSpecificFields> computationResult) {
-        return new ApproxMaxKCutMutateResult(
-            computationResult.nodePropertiesWritten(),
-            computationResult.algorithmSpecificFields().cutCost(),
-            computationResult.preProcessingMillis(),
-            computationResult.computeMillis(),
-            computationResult.postProcessingMillis(),
-            computationResult.mutateMillis(),
-            computationResult.configuration().toMap()
-        );
     }
 }

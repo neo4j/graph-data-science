@@ -23,13 +23,19 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
+import org.neo4j.gds.approxmaxkcut.ApproxMaxKCut;
+import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
+import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.wcc.Wcc;
 import org.neo4j.gds.wcc.WccBaseConfig;
+
+import java.util.List;
 
 public class CommunityAlgorithms {
     private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
@@ -61,5 +67,52 @@ public class CommunityAlgorithms {
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+    }
+
+    ApproxMaxKCutResult approximateMaximumKCut(Graph graph, ApproxMaxKCutBaseConfig configuration) {
+        var task = Tasks.iterativeFixed(
+            LabelForProgressTracking.ApproximateMaximumKCut.value,
+            () -> List.of(
+                Tasks.leaf("place nodes randomly", graph.nodeCount()),
+                searchTask(graph.nodeCount(), configuration.vnsMaxNeighborhoodOrder())
+            ),
+            configuration.iterations()
+        );
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var algorithm = ApproxMaxKCut.create(
+            graph,
+            configuration.toParameters(),
+            DefaultPool.INSTANCE,
+            progressTracker,
+            terminationFlag
+        );
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+    }
+
+    private static Task searchTask(long nodeCount, int vnsMaxNeighborhoodOrder) {
+        if (vnsMaxNeighborhoodOrder > 0) {
+            return Tasks.iterativeOpen(
+                "variable neighborhood search",
+                () -> List.of(localSearchTask(nodeCount))
+            );
+        }
+
+        return localSearchTask(nodeCount);
+    }
+
+    private static Task localSearchTask(long nodeCount) {
+        return Tasks.task(
+            "local search",
+            Tasks.iterativeOpen(
+                "improvement loop",
+                () -> List.of(
+                    Tasks.leaf("compute node to community weights", nodeCount),
+                    Tasks.leaf("swap for local improvements", nodeCount)
+                )
+            ),
+            Tasks.leaf("compute current solution cost", nodeCount)
+        );
     }
 }

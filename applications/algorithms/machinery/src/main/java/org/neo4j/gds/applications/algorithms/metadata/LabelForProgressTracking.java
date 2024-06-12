@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.algorithms.metadata;
 
 public enum LabelForProgressTracking {
     AllShortestPaths("All Shortest Paths"),
+    ApproximateMaximumKCut("ApproxMaxKCut"),
     ArticleRank("ArticleRank"),
     AStar("AStar"),
     BellmanFord("Bellman-Ford"),
@@ -57,6 +58,7 @@ public enum LabelForProgressTracking {
     public static LabelForProgressTracking from(Algorithm algorithm) {
         return switch (algorithm) {
             case AllShortestPaths -> AllShortestPaths;
+            case ApproximateMaximumKCut -> ApproximateMaximumKCut;
             case ArticleRank -> ArticleRank;
             case AStar -> AStar;
             case BellmanFord -> BellmanFord;

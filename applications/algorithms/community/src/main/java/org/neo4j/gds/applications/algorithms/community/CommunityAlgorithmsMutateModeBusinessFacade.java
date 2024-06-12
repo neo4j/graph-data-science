@@ -24,11 +24,14 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTempla
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
+import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
+import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.wcc.WccMutateConfig;
 
 import java.util.Optional;
 
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ApproximateMaximumKCut;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
 
 public class CommunityAlgorithmsMutateModeBusinessFacade {
@@ -67,4 +70,21 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         );
     }
 
+    public <RESULT> RESULT approximateMaximumKCut(
+        GraphName graphName,
+        ApproxMaxKCutMutateConfig configuration,
+        ResultBuilder<ApproxMaxKCutMutateConfig, ApproxMaxKCutResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var mutateStep = new ApproxMaxKCutMutateStep(mutateNodeProperty, configuration);
+
+        return template.processAlgorithm(
+            graphName,
+            configuration,
+            ApproximateMaximumKCut,
+            () -> estimation.approximateMaximumKCut(configuration),
+            graph -> algorithms.approximateMaximumKCut(graph, configuration),
+            Optional.of(mutateStep),
+            resultBuilder
+        );
+    }
 }

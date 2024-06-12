@@ -17,15 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.community.approxmaxkcut;
+package org.neo4j.gds.procedures.algorithms.community;
 
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
+import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
 public final class ApproxMaxKCutMutateResult extends StandardMutateResult {
-
     public final long nodePropertiesWritten;
     public final double cutCost;
 
@@ -49,8 +49,22 @@ public final class ApproxMaxKCutMutateResult extends StandardMutateResult {
         this.cutCost = cutCost;
     }
 
-    public static final class Builder extends AbstractResultBuilder<ApproxMaxKCutMutateResult> {
+    public static ApproxMaxKCutMutateResult emptyFrom(
+        AlgorithmProcessingTimings timings,
+        Map<String, Object> configurationMap
+    ) {
+        return new ApproxMaxKCutMutateResult(
+            0,
+            0,
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            0,
+            timings.mutateOrWriteMillis,
+            configurationMap
+        );
+    }
 
+    public static final class Builder extends AbstractResultBuilder<ApproxMaxKCutMutateResult> {
         private final double cutCost;
 
         public Builder(double cutCost) {

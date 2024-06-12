@@ -21,6 +21,8 @@ package org.neo4j.gds.applications.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutMemoryEstimateDefinition;
+import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.wcc.WccBaseConfig;
@@ -45,5 +47,9 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
             graphNameOrConfiguration,
             memoryEstimation
         );
+    }
+
+    public MemoryEstimation approximateMaximumKCut(ApproxMaxKCutBaseConfig configuration) {
+        return new ApproxMaxKCutMemoryEstimateDefinition(configuration.toMemoryEstimationParameters()).memoryEstimation();
     }
 }

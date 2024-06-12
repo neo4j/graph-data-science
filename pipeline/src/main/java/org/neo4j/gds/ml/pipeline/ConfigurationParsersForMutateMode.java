@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.pipeline;
 
 import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
+import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -56,6 +57,7 @@ public class ConfigurationParsersForMutateMode {
     public Function<CypherMapWrapper, AlgoBaseConfig> lookup(Algorithm algorithm) {
         return switch (algorithm) {
             case AllShortestPaths -> null;
+            case ApproximateMaximumKCut -> ApproxMaxKCutMutateConfig::of;
             case ArticleRank -> PageRankMutateConfig::of;
             case AStar -> ShortestPathAStarMutateConfig::of;
             case BellmanFord -> BellmanFordMutateConfig::of;

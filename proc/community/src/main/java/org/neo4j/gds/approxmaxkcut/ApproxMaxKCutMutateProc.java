@@ -21,7 +21,7 @@ package org.neo4j.gds.approxmaxkcut;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutMutateResult;
+import org.neo4j.gds.procedures.algorithms.community.ApproxMaxKCutMutateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -45,7 +45,7 @@ public class ApproxMaxKCutMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().approxMaxKCutMutate(graphName, configuration);
+        return facade.algorithms().community().approximateMaximumKCutMutateStub().execute(graphName, configuration);
     }
 
     @Procedure(value = "gds.maxkcut.mutate.estimate", mode = READ)
@@ -54,7 +54,7 @@ public class ApproxMaxKCutMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().approxMaxKCutEstimateMutate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().community().approximateMaximumKCutMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Deprecated
@@ -88,5 +88,4 @@ public class ApproxMaxKCutMutateProc {
 
         return estimate(graphNameOrConfiguration, algoConfiguration);
     }
-
 }
