@@ -30,9 +30,9 @@ import org.neo4j.gds.procedures.community.modularity.ModularityStreamResult;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.modularity.ModularityStreamProc.DESCRIPTION;
+import static org.neo4j.gds.modularity.Constants.MODULARITY_DESCRIPTION;
 
-@GdsCallable(name = "gds.modularity.stream", aliases = {"gds.alpha.modularity.stream"}, description = DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.modularity.stream", aliases = {"gds.alpha.modularity.stream"}, description = MODULARITY_DESCRIPTION, executionMode = STREAM)
 public class ModularityStreamSpec implements AlgorithmSpec<ModularityCalculator, ModularityResult, ModularityStreamConfig, Stream<ModularityStreamResult>, ModularityCalculatorFactory<ModularityStreamConfig>> {
     @Override
     public String name() {

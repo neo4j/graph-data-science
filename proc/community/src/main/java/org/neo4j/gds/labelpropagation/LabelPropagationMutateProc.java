@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.labelpropagation;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationMutateResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
@@ -35,8 +34,7 @@ import static org.neo4j.gds.labelpropagation.LabelPropagation.LABEL_PROPAGATION_
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class LabelPropagationMutateProc extends BaseProc {
-
+public class LabelPropagationMutateProc {
     @Context
     public GraphDataScienceProcedures facade;
 

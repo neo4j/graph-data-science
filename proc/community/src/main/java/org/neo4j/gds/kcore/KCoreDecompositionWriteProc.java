@@ -33,11 +33,11 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.kcore.KCoreDecomposition.KCORE_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class KCoreDecompositionWriteProc extends BaseProc {
-
     @Context
     public GraphDataScienceProcedures facade;
 
@@ -51,7 +51,7 @@ public class KCoreDecompositionWriteProc extends BaseProc {
     }
 
     @Procedure(value = "gds.kcore.write.estimate", mode = READ)
-    @Description(KCORE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
@@ -62,5 +62,4 @@ public class KCoreDecompositionWriteProc extends BaseProc {
             transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
-
 }

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.modularity;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.community.modularity.ModularityStatsResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
@@ -32,16 +31,16 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.modularity.ModularityStreamProc.DESCRIPTION;
+import static org.neo4j.gds.modularity.Constants.MODULARITY_DESCRIPTION;
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class ModularityStatsProc extends BaseProc {
-
+public class ModularityStatsProc {
     @Context
     public GraphDataScienceProcedures facade;
+
     @Procedure(value = "gds.modularity.stats", mode = READ)
-    @Description(DESCRIPTION)
+    @Description(MODULARITY_DESCRIPTION)
     public Stream<ModularityStatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -61,19 +60,16 @@ public class ModularityStatsProc extends BaseProc {
     @Deprecated(forRemoval = true)
     @Internal
     @Procedure(value = "gds.alpha.modularity.stats", mode = READ, deprecatedBy = "gds.modularity.stats")
-    @Description(DESCRIPTION)
+    @Description(MODULARITY_DESCRIPTION)
     public Stream<ModularityStatsResult> statsAlpha(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.alpha.modularity.stats");
-        executionContext()
+        facade.deprecatedProcedures().called("gds.alpha.modularity.stats");
+        facade
             .log()
             .warn("Procedure `gds.alpha.modularity.stats` has been deprecated, please use `gds.modularity.stats`.");
 
         return stats(graphName, configuration);
     }
-
 }

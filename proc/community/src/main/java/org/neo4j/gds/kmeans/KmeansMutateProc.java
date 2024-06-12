@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.kmeans;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.community.kmeans.KmeansMutateResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
@@ -36,8 +35,7 @@ import static org.neo4j.gds.kmeans.Kmeans.KMEANS_DESCRIPTION;
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class KmeansMutateProc extends BaseProc {
-
+public class KmeansMutateProc {
     @Context
     public GraphDataScienceProcedures facade;
 
@@ -58,11 +56,10 @@ public class KmeansMutateProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.beta.kmeans.mutate");
+        facade.deprecatedProcedures().called("gds.beta.kmeans.mutate");
 
-        executionContext().log()
+        facade
+            .log()
             .warn("Procedure `gds.beta.kmeans.mutate` has been deprecated, please use `gds.kmeans.mutate`.");
         return mutate(graphName, configuration);
     }
@@ -74,7 +71,6 @@ public class KmeansMutateProc extends BaseProc {
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
         return facade.community().kmeansEstimateMutate(graphName, configuration);
-
     }
 
     @Deprecated(forRemoval = true)
@@ -85,10 +81,9 @@ public class KmeansMutateProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.beta.kmeans.mutate.estimate");
-        executionContext().log()
+        facade.deprecatedProcedures().called("gds.beta.kmeans.mutate.estimate");
+        facade
+            .log()
             .warn("Procedure `gds.beta.kmeans.mutate.estimate` has been deprecated, please use `gds.kmeans.mutate.estimate`.");
         return estimate(graphName, configuration);
     }

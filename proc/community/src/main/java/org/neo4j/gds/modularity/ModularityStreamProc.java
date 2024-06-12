@@ -31,17 +31,16 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.modularity.Constants.MODULARITY_DESCRIPTION;
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class ModularityStreamProc {
-    static final String DESCRIPTION = "The Modularity procedure computes the modularity scores for a given set of communities/";
-
     @Context
     public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.modularity.stream", mode = READ)
-    @Description(DESCRIPTION)
+    @Description(MODULARITY_DESCRIPTION)
     public Stream<ModularityStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -61,7 +60,7 @@ public class ModularityStreamProc {
     @Deprecated(forRemoval = true)
     @Internal
     @Procedure(value = "gds.alpha.modularity.stream", mode = READ, deprecatedBy = "gds.modularity.stream")
-    @Description(DESCRIPTION)
+    @Description(MODULARITY_DESCRIPTION)
     public Stream<ModularityStreamResult> streamAlpha(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.k1coloring;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringWriteResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
@@ -37,8 +36,7 @@ import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESC
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class K1ColoringWriteProc extends BaseProc {
-
+public class K1ColoringWriteProc {
     @Context
     public GraphDataScienceProcedures facade;
 
@@ -68,10 +66,8 @@ public class K1ColoringWriteProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.beta.k1coloring.write");
-        executionContext()
+        facade.deprecatedProcedures().called("gds.beta.k1coloring.write");
+        facade
             .log()
             .warn(
                 "Procedure `gds.beta.k1coloring.write` has been deprecated, please use `gds.k1coloring.write`.");
@@ -79,21 +75,18 @@ public class K1ColoringWriteProc extends BaseProc {
     }
 
     @Procedure(value = "gds.beta.k1coloring.write.estimate", mode = READ, deprecatedBy = "gds.k1coloring.write.estimate")
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     @Internal
     @Deprecated(forRemoval = true)
     public Stream<MemoryEstimateResult> betaEstimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.beta.k1coloring.write.estimate");
-        executionContext()
+        facade.deprecatedProcedures().called("gds.beta.k1coloring.write.estimate");
+        facade
             .log()
             .warn(
                 "Procedure `gds.beta.k1coloring.write.estimate` has been deprecated, please use `gds.k1coloring.write.estimate`.");
         return estimate(graphNameOrConfiguration,algoConfiguration);
     }
-
 }
