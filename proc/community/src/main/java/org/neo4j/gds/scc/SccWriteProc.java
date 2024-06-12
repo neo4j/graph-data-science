@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.scc;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.community.scc.AlphaSccWriteResult;
 import org.neo4j.gds.procedures.community.scc.SccWriteResult;
@@ -38,8 +37,7 @@ import static org.neo4j.gds.scc.Scc.SCC_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class SccWriteProc extends BaseProc {
-
+public class SccWriteProc {
     @Context
     public GraphDataScienceProcedures facade;
 
@@ -69,10 +67,8 @@ public class SccWriteProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.alpha.scc.write");
-        executionContext()
+        facade.deprecatedProcedures().called("gds.alpha.scc.write");
+        facade
             .log()
             .warn(
                 "Procedure `gds.alpha.scc.write` has been deprecated, please use `gds.scc.write`.");

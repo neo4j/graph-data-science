@@ -29,23 +29,19 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.ImmutableNodeProjection;
-import org.neo4j.gds.ImmutableNodeProjections;
 import org.neo4j.gds.ImmutablePropertyMappings;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.ProcedureMethodHelper;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.QueryRunner;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.TestNativeGraphLoader;
-import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacade;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
@@ -55,12 +51,12 @@ import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
@@ -71,7 +67,6 @@ import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
@@ -85,26 +80,19 @@ import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfigImpl;
 import org.neo4j.gds.termination.TerminationFlag;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
@@ -341,37 +329,30 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
             new MutateNodePropertyService(logMock)
         );
 
-        TestProcedureRunner.applyOnProcedure(db, LabelPropagationMutateProc.class, procedure -> {
-            procedure.facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
-                .with(new CommunityProcedureFacade(
-                    new ConfigurationCreator(
-                        ConfigurationParser.EMPTY,
-                        null,
-                        new User(getUsername(), false)
-                    ),
-                    ProcedureReturnColumns.EMPTY,
+        var procedure = new LabelPropagationMutateProc();
+        procedure.facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
+            .with(new CommunityProcedureFacade(
+                new ConfigurationCreator(
+                    ConfigurationParser.EMPTY,
                     null,
-                    algorithmsMutateBusinessFacade,
-                    null,
-                    null,
-                    null
-                ))
-                .with(DeprecatedProceduresMetricService.PASSTHROUGH)
-                .build();
+                    new User(getUsername(), false)
+                ),
+                ProcedureReturnColumns.EMPTY,
+                null,
+                algorithmsMutateBusinessFacade,
+                null,
+                null,
+                null
+            ))
+            .with(DeprecatedProceduresMetricService.PASSTHROUGH)
+            .build();
 
-            ProcedureMethodHelper.mutateMethods(procedure)
-                .forEach(mutateMethod -> {
-                    Map<String, Object> config = Map.of(
-                        "nodeLabels", Collections.singletonList("B"),
-                        "mutateProperty", MUTATE_PROPERTY
-                    );
-                    try {
-                        mutateMethod.invoke(procedure, TEST_GRAPH_NAME, config);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        fail(e);
-                    }
-                });
-        });
+
+        Map<String, Object> config = Map.of(
+            "nodeLabels", Collections.singletonList("B"),
+            "mutateProperty", MUTATE_PROPERTY
+        );
+        procedure.mutate(TEST_GRAPH_NAME, config);
 
         String graphWriteQuery =
             "CALL gds.graph.nodeProperties.write(" +
@@ -470,139 +451,37 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
             new MutateNodePropertyService(logMock)
         );
 
-        TestProcedureRunner.applyOnProcedure(db, LabelPropagationMutateProc.class, procedure -> {
-            procedure.facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
-                .with(                new CommunityProcedureFacade(
-                    new ConfigurationCreator(
-                        ConfigurationParser.EMPTY,
-                        null,
-                        new User(getUsername(), false)
-                    ),
-                    ProcedureReturnColumns.EMPTY,
+        var procedure = new LabelPropagationMutateProc();
+        procedure.facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
+            .with(new CommunityProcedureFacade(
+                new ConfigurationCreator(
+                    ConfigurationParser.EMPTY,
                     null,
-                    algorithmsMutateBusinessFacade,
-                    null,
-                    null,
-                    null
-                ))
-                .with(DeprecatedProceduresMetricService.PASSTHROUGH)
-                .build();
+                    new User(getUsername(), false)
+                ),
+                ProcedureReturnColumns.EMPTY,
+                null,
+                algorithmsMutateBusinessFacade,
+                null,
+                null,
+                null
+            ))
+            .with(DeprecatedProceduresMetricService.PASSTHROUGH)
+            .build();
 
-            ProcedureMethodHelper.mutateMethods(procedure)
-                .forEach(mutateMethod -> {
-                    Map<String, Object> config = Map.of("mutateProperty", MUTATE_PROPERTY);
-                    try {
-                        // mutate first time
-                        mutateMethod.invoke(procedure, graphName, config);
-                        // mutate second time using same `mutateProperty`
-                        assertThatThrownBy(() -> mutateMethod.invoke(procedure, graphName, config))
-                            .hasRootCauseInstanceOf(IllegalArgumentException.class)
-                            .hasRootCauseMessage(formatWithLocale(
-                                "Node property `%s` already exists in the in-memory graph.",
-                                MUTATE_PROPERTY
-                            ));
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        fail(e);
-                    }
-                });
-        });
+        Map<String, Object> config = Map.of("mutateProperty", MUTATE_PROPERTY);
+        procedure.mutate(graphName, config);
+
+        try {
+            procedure.mutate(graphName, config);
+
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e).hasMessage(formatWithLocale("Node property `%s` already exists in the in-memory graph.", MUTATE_PROPERTY));
+        }
+
         Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), graphName).graphStore().getUnion();
         assertGraphEquals(fromGdl(expectedMutatedGraph()), mutatedGraph);
-    }
-
-    @Test
-    void testExceptionLogging() {
-        List<TestLog> log = new ArrayList<>(1);
-        assertThrows(
-            NullPointerException.class,
-            () -> TestProcedureRunner.applyOnProcedure(db, LabelPropagationMutateProc.class, procedure -> {
-                var computationResult = mock(ComputationResult.class);
-                log.add(0, ((TestLog) procedure.log));
-                new LabelPropagationMutateSpecification().computationResultConsumer().consume(computationResult, procedure.executionContext());
-            })
-        );
-
-        assertTrue(log.get(0).containsMessage(TestLog.WARN, "Graph mutation failed"));
-    }
-
-    @Test
-    void testRunOnEmptyGraph() {
-        var logMock = mock(org.neo4j.gds.logging.Log.class);
-        when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
-
-        final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
-        final AlgorithmMemoryValidationService memoryUsageValidator = new AlgorithmMemoryValidationService(
-            logMock,
-            false
-        );
-        var algorithmsMutateBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
-            new CommunityAlgorithmsFacade(
-                new AlgorithmRunner(
-                    logMock,
-                    graphStoreCatalogService,
-                    new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
-                    memoryUsageValidator,
-                    RequestScopedDependencies.builder()
-                        .with(DatabaseId.of(db.databaseName()))
-                        .with(TaskRegistryFactory.empty())
-                        .with(new User(getUsername(), false))
-                        .with(EmptyUserLogRegistryFactory.INSTANCE)
-                        .build()
-                )
-            ),
-            new MutateNodePropertyService(logMock)
-        );
-
-        TestProcedureRunner.applyOnProcedure(db, LabelPropagationMutateProc.class, (procedure) -> {
-            procedure.facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
-                .with(new CommunityProcedureFacade(
-                    new ConfigurationCreator(
-                        ConfigurationParser.EMPTY,
-                        null,
-                        new User(getUsername(), false)
-                    ),
-                    ProcedureReturnColumns.EMPTY,
-                    null,
-                    algorithmsMutateBusinessFacade,
-                    null,
-                    null,
-                    null
-                ))
-                .with(DeprecatedProceduresMetricService.PASSTHROUGH)
-                .build();
-
-            var methods = ProcedureMethodHelper.mutateMethods(procedure).collect(Collectors.toList());
-
-            if (!methods.isEmpty()) {
-                // Create a dummy node with label "X" so that "X" is a valid label to put use for property mappings later
-                runQuery("CALL db.createLabel('X')");
-                runQuery("MATCH (n) DETACH DELETE n");
-                GraphStoreCatalog.removeAllLoadedGraphs();
-
-                var graphName = "graph";
-                var graphProjectConfig = GraphProjectFromStoreConfigImpl.builder()
-                    .username(TEST_USERNAME)
-                    .graphName(graphName)
-                    .nodeProjections(
-                        ImmutableNodeProjections.of(
-                            Map.of(NodeLabel.of("X"), ImmutableNodeProjection.of("X", ImmutablePropertyMappings.of()))
-                        )
-                    )
-                    .relationshipProjections(RelationshipProjections.ALL)
-                    .build();
-                var graphStore = graphLoader(graphProjectConfig).graphStore();
-                GraphStoreCatalog.set(graphProjectConfig, graphStore);
-                methods.forEach(method -> {
-                    Map<String, Object> config = Map.of("mutateProperty", MUTATE_PROPERTY);
-                    try {
-                        Stream<?> result = (Stream<?>) method.invoke(procedure, graphName, config);
-                        assertEquals(1, result.count());
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        fail(e);
-                    }
-                });
-            }
-        });
     }
 
     @NotNull
@@ -642,8 +521,8 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
             new MutateNodePropertyService(logMock)
         );
 
-        TestProcedureRunner.applyOnProcedure(db, LabelPropagationMutateProc.class, procedure -> {
-            procedure.facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
+        var procedure = new LabelPropagationMutateProc();
+        procedure.facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
                 .with(new CommunityProcedureFacade(
                     new ConfigurationCreator(
                         ConfigurationParser.EMPTY,
@@ -659,15 +538,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                 ))
                 .with(DeprecatedProceduresMetricService.PASSTHROUGH)
                 .build();
-            ProcedureMethodHelper.mutateMethods(procedure)
-                .forEach(mutateMethod -> {
-                    try {
-                        mutateMethod.invoke(procedure, graphName, config);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        fail(e);
-                    }
-                });
-        });
+        procedure.mutate(graphName, config);
 
         return GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), graphName).graphStore();
     }

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.k1coloring;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringStreamResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
@@ -36,8 +35,7 @@ import static org.neo4j.gds.k1coloring.K1ColoringSpecificationHelper.K1_COLORING
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class K1ColoringStreamProc extends BaseProc {
-
+public class K1ColoringStreamProc {
     @Context
     public GraphDataScienceProcedures facade;
 

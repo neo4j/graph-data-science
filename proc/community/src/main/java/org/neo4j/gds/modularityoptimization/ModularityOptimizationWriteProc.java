@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.modularityoptimization;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationWriteResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
@@ -37,8 +36,7 @@ import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESC
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class ModularityOptimizationWriteProc extends BaseProc {
-
+public class ModularityOptimizationWriteProc {
     @Context
     public GraphDataScienceProcedures facade;
 
@@ -68,10 +66,8 @@ public class ModularityOptimizationWriteProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.beta.modularityOptimization.write");
-        executionContext()
+        facade.deprecatedProcedures().called("gds.beta.modularityOptimization.write");
+        facade
             .log()
             .warn("Procedure `gds.beta.modularityOptimization.write` has been deprecated, please use `gds.modularityOptimization.write`.");
 
@@ -86,10 +82,8 @@ public class ModularityOptimizationWriteProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.beta.modularityOptimization.write.estimate");
-        executionContext()
+        facade.deprecatedProcedures().called("gds.beta.modularityOptimization.write.estimate");
+        facade
             .log()
             .warn("Procedure `gds.beta.modularityOptimization.write.estimate` has been deprecated, please use `gds.modularityOptimization.write.estimate`.");
 

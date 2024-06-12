@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.kcore.KCoreDecomposition.KCORE_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class KCoreDecompositionStatsProc {
@@ -47,7 +48,7 @@ public class KCoreDecompositionStatsProc {
     }
 
     @Procedure(value = "gds.kcore.stats.estimate", mode = READ)
-    @Description(KCORE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration

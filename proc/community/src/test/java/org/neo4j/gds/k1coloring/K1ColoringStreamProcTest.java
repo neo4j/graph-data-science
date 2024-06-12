@@ -31,7 +31,6 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.InvocationCountingTaskStore;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacade;
@@ -59,8 +58,8 @@ import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.GraphDataScienceProceduresBuilder;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
+import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.HashMap;
@@ -196,50 +195,46 @@ class K1ColoringStreamProcTest extends BaseProcTest {
             false
         );
 
+        TaskRegistryFactory taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
 
-        TestProcedureRunner.applyOnProcedure(db, K1ColoringStreamProc.class, proc -> {
+        var algorithmsStreamBusinessFacade = new CommunityAlgorithmsStreamBusinessFacade(
+            new CommunityAlgorithmsFacade(
+                new AlgorithmRunner(
+                    logMock,
+                    graphStoreCatalogService,
+                    new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
+                    memoryUsageValidator,
+                    RequestScopedDependencies.builder()
+                        .with(DatabaseId.of(db.databaseName()))
+                        .with(taskRegistryFactory)
+                        .with(TerminationFlag.RUNNING_TRUE)
+                        .with(new User(getUsername(), false))
+                        .with(EmptyUserLogRegistryFactory.INSTANCE)
+                        .build()
+                )
+            ));
+        var proc = new K1ColoringStreamProc();
+        proc.facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
+            .with(new CommunityProcedureFacade(
+                new ConfigurationCreator(
+                    ConfigurationParser.EMPTY,
+                    mock(AlgorithmMetaDataSetter.class),
+                    new User(getUsername(), false)
+                ),
+                ProcedureReturnColumns.EMPTY,
+                null,
+                null,
+                null,
+                algorithmsStreamBusinessFacade,
+                null
+            ))
+            .with(DeprecatedProceduresMetricService.PASSTHROUGH)
+            .build();
+        var someJobId = new JobId();
+        Map<String, Object> configMap = Map.of("jobId", someJobId);
+        proc.stream(K1COLORING_GRAPH, configMap);
 
-            TaskRegistryFactory taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
-            proc.taskRegistryFactory = taskRegistryFactory;
-
-            var algorithmsStreamBusinessFacade = new CommunityAlgorithmsStreamBusinessFacade(
-                new CommunityAlgorithmsFacade(
-                    new AlgorithmRunner(
-                        logMock,
-                        graphStoreCatalogService,
-                        new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
-                        memoryUsageValidator,
-                        RequestScopedDependencies.builder()
-                            .with(DatabaseId.of(db.databaseName()))
-                            .with(taskRegistryFactory)
-                            .with(TerminationFlag.RUNNING_TRUE)
-                            .with(new User(getUsername(), false))
-                            .with(EmptyUserLogRegistryFactory.INSTANCE)
-                            .build()
-                    )
-                ));
-            proc.facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
-                .with(new CommunityProcedureFacade(
-                    new ConfigurationCreator(
-                        ConfigurationParser.EMPTY,
-                        mock(AlgorithmMetaDataSetter.class),
-                        new User(getUsername(), false)
-                    ),
-                    ProcedureReturnColumns.EMPTY,
-                    null,
-                    null,
-                    null,
-                    algorithmsStreamBusinessFacade,
-                    null
-                ))
-                .with(DeprecatedProceduresMetricService.PASSTHROUGH)
-                .build();
-            var someJobId = new JobId();
-            Map<String, Object> configMap = Map.of("jobId", someJobId);
-            proc.stream(K1COLORING_GRAPH, configMap);
-
-            assertThat(taskStore.seenJobIds).containsExactly(someJobId);
-        });
+        assertThat(taskStore.seenJobIds).containsExactly(someJobId);
     }
 
     @Test
