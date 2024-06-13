@@ -23,7 +23,6 @@ import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.community.specificfields.AlphaSccSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.CommunityStatisticsSpecificFields;
-import org.neo4j.gds.algorithms.community.specificfields.K1ColoringSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.KCoreSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.KmeansSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LabelPropagationSpecificFields;
@@ -34,14 +33,13 @@ import org.neo4j.gds.algorithms.community.specificfields.ModularityOptimizationS
 import org.neo4j.gds.algorithms.community.specificfields.StandardCommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.TriangleCountSpecificFields;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
-import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.k1coloring.K1ColoringWriteConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionWriteConfig;
 import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.kmeans.KmeansWriteConfig;
@@ -356,47 +354,6 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
             configuration.resolveResultStore(algorithmResult.resultStore())
-        );
-    }
-
-    public NodePropertyWriteResult<K1ColoringSpecificFields> k1coloring(
-        String graphName,
-        K1ColoringWriteConfig config,
-        boolean computeUsedColors
-    ) {
-
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.k1Coloring(graphName, config)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        return writeToDatabase(
-            algorithmResult,
-            config,
-            (result, configuration) -> CommunityCompanion.nodePropertyValues(
-                false,
-                NodePropertyValuesAdapter.adapt(result.colors()),
-                configuration.minCommunitySize(),
-                configuration.concurrency()
-            ),
-            (result) -> {
-                long usedColors = (computeUsedColors) ? result.usedColors().cardinality() : 0;
-
-                return new K1ColoringSpecificFields(
-                    result.colors().size(),
-                    usedColors,
-                    result.ranIterations(),
-                    result.didConverge()
-                );
-            },
-            intermediateResult.computeMilliseconds,
-            () -> K1ColoringSpecificFields.EMPTY,
-            "K1ColoringWrite",
-            config.writeConcurrency(),
-            config.writeProperty(),
-            config.arrowConnectionInfo(),
-            config.resolveResultStore(algorithmResult.resultStore())
         );
     }
 

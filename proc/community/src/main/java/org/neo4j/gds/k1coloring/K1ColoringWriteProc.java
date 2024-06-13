@@ -20,7 +20,7 @@
 package org.neo4j.gds.k1coloring;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.k1coloring.K1ColoringWriteResult;
+import org.neo4j.gds.procedures.algorithms.community.K1ColoringWriteResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -46,7 +46,7 @@ public class K1ColoringWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().k1ColoringWrite(graphName, configuration);
+        return facade.algorithms().community().k1ColoringWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.k1coloring.write.estimate", mode = READ)
@@ -55,7 +55,7 @@ public class K1ColoringWriteProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().k1ColoringEstimateWrite(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().community().k1ColoringWriteEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Procedure(name = "gds.beta.k1coloring.write", mode = WRITE, deprecatedBy ="gds.k1coloring.write" )

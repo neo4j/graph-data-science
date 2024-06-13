@@ -29,11 +29,14 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.gds.k1coloring.K1ColoringResult;
+import org.neo4j.gds.k1coloring.K1ColoringWriteConfig;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.wcc.WccWriteConfig;
 
 import java.util.Optional;
 
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.K1Coloring;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
 
 public final class CommunityAlgorithmsWriteModeBusinessFacade {
@@ -69,6 +72,24 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
             algorithms,
             algorithmProcessingTemplate,
             writeToDatabase
+        );
+    }
+
+    public <RESULT> RESULT k1Coloring(
+        GraphName graphName,
+        K1ColoringWriteConfig configuration,
+        ResultBuilder<K1ColoringWriteConfig, K1ColoringResult, RESULT, Void> resultBuilder
+    ) {
+        var writeStep = new K1ColoringWriteStep(writeToDatabase, configuration);
+
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            K1Coloring,
+            estimationFacade::k1Coloring,
+            graph -> algorithms.k1Coloring(graph, configuration),
+            Optional.of(writeStep),
+            resultBuilder
         );
     }
 

@@ -19,60 +19,54 @@
  */
 package org.neo4j.gds.applications.algorithms.community;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
 import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
-import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.wcc.WccWriteConfig;
+import org.neo4j.gds.k1coloring.K1ColoringResult;
+import org.neo4j.gds.k1coloring.K1ColoringWriteConfig;
 
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.K1Coloring;
 
-class WccWriteStep implements MutateOrWriteStep<DisjointSetStruct, Pair<NodePropertiesWritten, NodePropertyValues>> {
+class K1ColoringWriteStep implements MutateOrWriteStep<K1ColoringResult, Void> {
     private final WriteToDatabase writeToDatabase;
-    private final WccWriteConfig configuration;
+    private final K1ColoringWriteConfig configuration;
 
-    WccWriteStep(WriteToDatabase writeToDatabase, WccWriteConfig configuration) {
+    K1ColoringWriteStep(WriteToDatabase writeToDatabase, K1ColoringWriteConfig configuration) {
         this.writeToDatabase = writeToDatabase;
         this.configuration = configuration;
     }
 
     @Override
-    public Pair<NodePropertiesWritten, NodePropertyValues> execute(
+    public Void execute(
         Graph graph,
         GraphStore graphStore,
         ResultStore resultStore,
-        DisjointSetStruct result,
+        K1ColoringResult result,
         JobId jobId
     ) {
         var nodePropertyValues = CommunityCompanion.nodePropertyValues(
-            configuration.isIncremental(),
-            configuration.seedProperty(),
-            configuration.writeProperty(),
-            configuration.consecutiveIds(),
-            result.asNodeProperties(),
+            false,
+            NodePropertyValuesAdapter.adapt(result.colors()),
             configuration.minCommunitySize(),
-            configuration.concurrency(),
-            () -> graphStore.nodeProperty(configuration.seedProperty())
+            configuration.concurrency()
         );
 
-        var nodePropertiesWritten = writeToDatabase.perform(
+        writeToDatabase.perform(
             graph,
             graphStore,
             resultStore,
             configuration,
             configuration,
-            WCC,
+            K1Coloring,
             jobId,
             nodePropertyValues
         );
 
-        return Pair.of(nodePropertiesWritten, nodePropertyValues);
+        return null;
     }
 }

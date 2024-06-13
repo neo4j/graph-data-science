@@ -26,7 +26,6 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacad
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.k1coloring.K1ColoringWriteConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStreamConfig;
@@ -55,7 +54,6 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
 import org.neo4j.gds.procedures.algorithms.community.ProcedureStatisticsComputationInstructions;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.community.k1coloring.K1ColoringWriteResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionMutateResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionStatsResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionStreamResult;
@@ -914,21 +912,6 @@ public class CommunityProcedureFacade {
         return Stream.of(estimateBusinessFacade.localClusteringCoefficient(graphNameOrConfiguration, config));
     }
 
-    public Stream<K1ColoringWriteResult> k1ColoringWrite(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var writeConfig = configurationCreator.createConfiguration(configuration, K1ColoringWriteConfig::of);
-
-        var computationResult = writeBusinessFacade.k1coloring(
-            graphName,
-            writeConfig,
-            procedureReturnColumns.contains("colorCount")
-        );
-
-        return Stream.of(K1ColoringComputationResultTransformer.toWriteResult(computationResult));
-    }
-
     public Stream<ModularityOptimizationStreamResult> modularityOptimizationStream(
         String graphName,
         Map<String, Object> configuration
@@ -1027,14 +1010,6 @@ public class CommunityProcedureFacade {
     ) {
         var config = configurationCreator.createConfiguration(algoConfiguration, ModularityOptimizationWriteConfig::of);
         return Stream.of(estimateBusinessFacade.modularityOptimization(graphNameOrConfiguration, config));
-    }
-
-    public Stream<MemoryEstimateResult> k1ColoringEstimateWrite(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, K1ColoringWriteConfig::of);
-        return Stream.of(estimateBusinessFacade.k1Coloring(graphNameOrConfiguration, config));
     }
 
     public Stream<AlphaSccWriteResult> alphaSccWrite(

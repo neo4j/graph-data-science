@@ -17,13 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.community.k1coloring;
+package org.neo4j.gds.procedures.algorithms.community;
+
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 
 import java.util.Map;
 
-@SuppressWarnings("unused")
 public class K1ColoringWriteResult {
-    
     public final long preProcessingMillis;
     public final long computeMillis;
     public final long writeMillis;
@@ -55,5 +55,16 @@ public class K1ColoringWriteResult {
         this.configuration = configuration;
     }
 
-
+    static K1ColoringWriteResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+        return new K1ColoringWriteResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            0,
+            timings.mutateOrWriteMillis,
+            0,
+            0,
+            false,
+            configurationMap
+        );
+    }
 }

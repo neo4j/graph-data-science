@@ -21,8 +21,6 @@ package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
-import org.neo4j.gds.k1coloring.K1ColoringMemoryEstimateDefinition;
 import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionMemoryEstimateDefinition;
 import org.neo4j.gds.kmeans.KmeansBaseConfig;
@@ -54,18 +52,6 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
         AlgorithmEstimator algorithmEstimator
     ) {
         this.algorithmEstimator = algorithmEstimator;
-    }
-
-    public <C extends K1ColoringBaseConfig> MemoryEstimateResult k1Coloring(
-        Object graphNameOrConfiguration,
-        C configuration
-    ) {
-        return algorithmEstimator.estimate(
-            graphNameOrConfiguration,
-            configuration,
-            Optional.empty(),
-            new K1ColoringMemoryEstimateDefinition()
-        );
     }
 
     public <C extends KCoreDecompositionBaseConfig> MemoryEstimateResult kcore(
