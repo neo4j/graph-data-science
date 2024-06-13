@@ -34,6 +34,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -67,7 +68,8 @@ class K1ColoringTest {
             DEFAULT_BATCH_SIZE,
             new Concurrency(1),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var result = k1Coloring.compute();
@@ -113,7 +115,8 @@ class K1ColoringTest {
             DEFAULT_BATCH_SIZE,
             new Concurrency(8),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var result = k1Coloring.compute();
@@ -155,7 +158,8 @@ class K1ColoringTest {
             DEFAULT_BATCH_SIZE,
             new Concurrency(8),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
       var result =  k1Coloring.compute();
@@ -192,7 +196,8 @@ class K1ColoringTest {
             DEFAULT_BATCH_SIZE,
             concurrency,
             DefaultPool.INSTANCE,
-            progressTracker
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var result = k1Coloring.compute();

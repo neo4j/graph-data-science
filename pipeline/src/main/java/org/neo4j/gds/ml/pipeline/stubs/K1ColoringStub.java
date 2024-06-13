@@ -17,29 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms.centrality.specificfields;
+package org.neo4j.gds.ml.pipeline.stubs;
 
-import java.util.Map;
+import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.community.K1ColoringMutateResult;
+import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
-
-public class DefaultCentralitySpecificFields implements CentralityStatisticsSpecificFields {
-
-    public static final DefaultCentralitySpecificFields EMPTY = new DefaultCentralitySpecificFields(
-        Map.of()
-    );
-
-    private final Map<String, Object> centralityDistribution;
-
-    public DefaultCentralitySpecificFields(
-        Map<String, Object> centralityDistribution
-    ) {
-        this.centralityDistribution = centralityDistribution;
+public class K1ColoringStub extends AbstractStub<K1ColoringMutateConfig, K1ColoringMutateResult> {
+    protected MutateStub<K1ColoringMutateConfig, K1ColoringMutateResult> stub(AlgorithmsProcedureFacade facade) {
+        return facade.community().k1ColoringMutateStub();
     }
-
-
-    @Override
-    public Map<String, Object> centralityDistribution(){
-        return  centralityDistribution;
-    }
-
 }

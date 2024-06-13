@@ -46,6 +46,7 @@ public enum Algorithm {
     FilteredKNN,
     FilteredNodeSimilarity,
     HarmonicCentrality,
+    K1Coloring,
     KNN,
     KSpanningTree,
     LongestPath,

@@ -268,7 +268,7 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
 
         var rowCount=runQueryWithRowConsumer(query, row -> {
             AssertionsForClassTypes.assertThat(row.getNumber("preProcessingMillis").longValue()).isNotEqualTo(-1);
-            AssertionsForClassTypes.assertThat(row.getNumber("computeMillis").longValue()).isEqualTo(0);
+            AssertionsForClassTypes.assertThat(row.getNumber("computeMillis").longValue()).isEqualTo(-1);
             AssertionsForClassTypes.assertThat(row.getNumber("nodeCount").longValue()).isEqualTo(0);
             AssertionsForClassTypes.assertThat(row.getNumber("colorCount").longValue()).isEqualTo(0);
             AssertionsForClassTypes.assertThat(row.getNumber("ranIterations").longValue()).isEqualTo(0);

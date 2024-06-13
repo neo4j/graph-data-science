@@ -29,6 +29,7 @@ import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -84,7 +85,8 @@ public class K1Coloring extends Algorithm<K1ColoringResult> {
         int minBatchSize,
         Concurrency concurrency,
         ExecutorService executor,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -101,6 +103,8 @@ public class K1Coloring extends Algorithm<K1ColoringResult> {
         if (maxIterations <= 0L) {
             throw new IllegalArgumentException("Must iterate at least 1 time");
         }
+
+        this.terminationFlag = terminationFlag;
     }
 
     private BitSet currentNodesToColor() {
