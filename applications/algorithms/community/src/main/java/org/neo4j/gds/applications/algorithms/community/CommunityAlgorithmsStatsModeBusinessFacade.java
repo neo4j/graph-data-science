@@ -23,10 +23,13 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.gds.k1coloring.K1ColoringResult;
+import org.neo4j.gds.k1coloring.K1ColoringStatsConfig;
 import org.neo4j.gds.wcc.WccStatsConfig;
 
 import java.util.Optional;
 
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.K1Coloring;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
 
 public class CommunityAlgorithmsStatsModeBusinessFacade {
@@ -42,6 +45,22 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
         this.estimationFacade = estimationFacade;
         this.communityAlgorithms = communityAlgorithms;
         this.algorithmProcessingTemplate = algorithmProcessingTemplate;
+    }
+
+    public <RESULT> RESULT k1Coloring(
+        GraphName graphName,
+        K1ColoringStatsConfig configuration,
+        ResultBuilder<K1ColoringStatsConfig, K1ColoringResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            K1Coloring,
+            estimationFacade::k1Coloring,
+            graph -> communityAlgorithms.k1Coloring(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
     }
 
     public <RESULT> RESULT wcc(

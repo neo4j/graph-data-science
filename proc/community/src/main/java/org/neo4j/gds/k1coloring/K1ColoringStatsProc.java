@@ -20,7 +20,7 @@
 package org.neo4j.gds.k1coloring;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.k1coloring.K1ColoringStatsResult;
+import org.neo4j.gds.procedures.algorithms.community.K1ColoringStatsResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -45,7 +45,7 @@ public class K1ColoringStatsProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().k1ColoringStats(graphName, configuration);
+        return facade.algorithms().community().k1ColoringStats(graphName, configuration);
     }
 
     @Procedure(value = "gds.k1coloring.stats.estimate", mode = READ)
@@ -54,7 +54,7 @@ public class K1ColoringStatsProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().k1ColoringEstimateStats(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().community().k1ColoringStatsEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Procedure(name = "gds.beta.k1coloring.stats", mode = READ, deprecatedBy = "gds.k1coloring.stats")

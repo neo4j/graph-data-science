@@ -28,6 +28,7 @@ import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsWriteM
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
 import org.neo4j.gds.conductance.ConductanceStreamConfig;
+import org.neo4j.gds.k1coloring.K1ColoringStatsConfig;
 import org.neo4j.gds.procedures.algorithms.community.stubs.ApproximateMaximumKCutMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.K1ColoringMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.WccMutateStub;
@@ -146,6 +147,34 @@ public final class CommunityProcedureFacade {
 
     public K1ColoringMutateStub k1ColoringMutateStub() {
         return k1ColoringMutateStub;
+    }
+
+    public Stream<K1ColoringStatsResult> k1ColoringStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new K1ColoringResultBuilderForStatsMode(procedureReturnColumns.contains("colorCount"));
+
+        return algorithmExecutionScaffolding.runAlgorithm(
+            graphName,
+            configuration,
+            K1ColoringStatsConfig::of,
+            statsMode()::k1Coloring,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> k1ColoringStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            K1ColoringStatsConfig::of,
+            configuration -> estimationMode().k1Coloring(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
     }
 
     public WccMutateStub wccMutateStub() {

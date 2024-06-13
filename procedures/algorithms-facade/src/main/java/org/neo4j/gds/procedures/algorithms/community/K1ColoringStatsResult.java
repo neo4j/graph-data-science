@@ -17,13 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.community.k1coloring;
+package org.neo4j.gds.procedures.algorithms.community;
+
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 
 import java.util.Map;
+import java.util.stream.Stream;
 
-@SuppressWarnings("unused")
 public class K1ColoringStatsResult {
-
     public final long preProcessingMillis;
     public final long computeMillis;
 
@@ -52,5 +53,20 @@ public class K1ColoringStatsResult {
         this.configuration = configuration;
     }
 
-
+    static Stream<K1ColoringStatsResult> emptyFrom(
+        AlgorithmProcessingTimings timings,
+        Map<String, Object> configurationMap
+    ) {
+        return Stream.of(
+            new K1ColoringStatsResult(
+                timings.preProcessingMillis,
+                timings.computeMillis,
+                0,
+                0,
+                0,
+                false,
+                configurationMap
+            )
+        );
+    }
 }
