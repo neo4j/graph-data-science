@@ -25,8 +25,8 @@ import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutMemoryEstimateDefinition;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
+import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
 import org.neo4j.gds.k1coloring.K1ColoringMemoryEstimateDefinition;
-import org.neo4j.gds.k1coloring.K1ColoringStatsConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.wcc.WccBaseConfig;
 import org.neo4j.gds.wcc.WccMemoryEstimateDefinition;
@@ -63,7 +63,7 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
         return new K1ColoringMemoryEstimateDefinition().memoryEstimation();
     }
 
-    public MemoryEstimateResult k1Coloring(K1ColoringStatsConfig configuration, Object graphNameOrConfiguration) {
+    public MemoryEstimateResult k1Coloring(K1ColoringBaseConfig configuration, Object graphNameOrConfiguration) {
         var memoryEstimation = k1Coloring();
 
         return algorithmEstimationTemplate.estimate(

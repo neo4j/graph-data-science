@@ -27,12 +27,15 @@ import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
 import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.conductance.ConductanceStreamConfig;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.gds.k1coloring.K1ColoringResult;
+import org.neo4j.gds.k1coloring.K1ColoringStreamConfig;
 import org.neo4j.gds.wcc.WccStreamConfig;
 
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ApproximateMaximumKCut;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Conductance;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.K1Coloring;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
 
 public class CommunityAlgorithmsStreamModeBusinessFacade {
@@ -77,6 +80,22 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
             Conductance,
             estimationFacade::conductance,
             graph -> algorithms.conductance(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT k1Coloring(
+        GraphName graphName,
+        K1ColoringStreamConfig configuration,
+        ResultBuilder<K1ColoringStreamConfig, K1ColoringResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            K1Coloring,
+            estimationFacade::k1Coloring,
+            graph -> algorithms.k1Coloring(graph, configuration),
             Optional.empty(),
             resultBuilder
         );

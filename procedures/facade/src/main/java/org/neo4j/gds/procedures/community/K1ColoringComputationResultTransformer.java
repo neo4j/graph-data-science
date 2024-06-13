@@ -20,45 +20,12 @@
 package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
-import org.neo4j.gds.algorithms.StreamComputationResult;
-import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.algorithms.community.specificfields.K1ColoringSpecificFields;
-import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.k1coloring.K1ColoringResult;
-import org.neo4j.gds.k1coloring.K1ColoringStreamConfig;
-import org.neo4j.gds.procedures.community.k1coloring.K1ColoringStreamResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringWriteResult;
-
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 final class K1ColoringComputationResultTransformer {
 
     private K1ColoringComputationResultTransformer() {}
-
-    static Stream<K1ColoringStreamResult> toStreamResult(
-        StreamComputationResult<K1ColoringResult> computationResult,
-        K1ColoringStreamConfig configuration
-    ) {
-        return computationResult.result().map(k1ColoringResult -> {
-            var graph = computationResult.graph();
-            var nodePropertyValues = CommunityCompanion.nodePropertyValues(
-                false,
-                NodePropertyValuesAdapter.adapt(k1ColoringResult.colors()),
-                configuration.minCommunitySize(),
-                configuration.concurrency()
-            );
-            return LongStream
-                .range(IdMap.START_NODE_ID, graph.nodeCount())
-                .filter(nodePropertyValues::hasValue)
-                .mapToObj(nodeId -> new K1ColoringStreamResult(
-                    graph.toOriginalNodeId(nodeId),
-                    nodePropertyValues.longValue(nodeId)
-                ));
-
-        }).orElseGet(Stream::empty);
-    }
 
     static K1ColoringWriteResult toWriteResult(
         NodePropertyWriteResult<K1ColoringSpecificFields> computationResult
