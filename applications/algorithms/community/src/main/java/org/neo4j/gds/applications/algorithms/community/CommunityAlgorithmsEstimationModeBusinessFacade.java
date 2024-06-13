@@ -25,6 +25,7 @@ import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutMemoryEstimateDefinition;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
+import org.neo4j.gds.k1coloring.K1ColoringMemoryEstimateDefinition;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.wcc.WccBaseConfig;
 import org.neo4j.gds.wcc.WccMemoryEstimateDefinition;
@@ -55,6 +56,10 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
 
     MemoryEstimation conductance() {
         throw new MemoryEstimationNotImplementedException();
+    }
+
+    public MemoryEstimation k1Coloring() {
+        return new K1ColoringMemoryEstimateDefinition().memoryEstimation();
     }
 
     public MemoryEstimation wcc(SeedConfig configuration) {

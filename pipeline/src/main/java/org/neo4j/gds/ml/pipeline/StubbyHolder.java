@@ -34,6 +34,7 @@ import org.neo4j.gds.ml.pipeline.stubs.EigenVectorStub;
 import org.neo4j.gds.ml.pipeline.stubs.FilteredKnnStub;
 import org.neo4j.gds.ml.pipeline.stubs.FilteredNodeSimilarityStub;
 import org.neo4j.gds.ml.pipeline.stubs.HarmonicCentralityStub;
+import org.neo4j.gds.ml.pipeline.stubs.K1ColoringStub;
 import org.neo4j.gds.ml.pipeline.stubs.KnnStub;
 import org.neo4j.gds.ml.pipeline.stubs.NodeSimilarityStub;
 import org.neo4j.gds.ml.pipeline.stubs.PageRankStub;
@@ -76,6 +77,7 @@ class StubbyHolder {
             case FilteredKNN -> new FilteredKnnStub();
             case FilteredNodeSimilarity -> new FilteredNodeSimilarityStub();
             case HarmonicCentrality -> new HarmonicCentralityStub();
+            case K1Coloring -> new K1ColoringStub();
             case KNN -> new KnnStub();
             case KSpanningTree -> null;
             case LongestPath -> null;

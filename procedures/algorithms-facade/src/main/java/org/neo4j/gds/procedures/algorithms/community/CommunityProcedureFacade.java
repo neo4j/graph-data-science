@@ -29,6 +29,7 @@ import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
 import org.neo4j.gds.conductance.ConductanceStreamConfig;
 import org.neo4j.gds.procedures.algorithms.community.stubs.ApproximateMaximumKCutMutateStub;
+import org.neo4j.gds.procedures.algorithms.community.stubs.K1ColoringMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.WccMutateStub;
 import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
@@ -43,6 +44,7 @@ import java.util.stream.Stream;
 public final class CommunityProcedureFacade {
     private final ProcedureReturnColumns procedureReturnColumns;
     private final ApproximateMaximumKCutMutateStub approximateMaximumKCutMutateStub;
+    private final K1ColoringMutateStub k1ColoringMutateStub;
     private final WccMutateStub wccMutateStub;
 
     private final ApplicationsFacade applicationsFacade;
@@ -54,6 +56,7 @@ public final class CommunityProcedureFacade {
     private CommunityProcedureFacade(
         ProcedureReturnColumns procedureReturnColumns,
         ApproximateMaximumKCutMutateStub approximateMaximumKCutMutateStub,
+        K1ColoringMutateStub k1ColoringMutateStub,
         WccMutateStub wccMutateStub,
         ApplicationsFacade applicationsFacade,
         EstimationModeRunner estimationMode,
@@ -62,6 +65,7 @@ public final class CommunityProcedureFacade {
     ) {
         this.procedureReturnColumns = procedureReturnColumns;
         this.approximateMaximumKCutMutateStub = approximateMaximumKCutMutateStub;
+        this.k1ColoringMutateStub = k1ColoringMutateStub;
         this.wccMutateStub = wccMutateStub;
         this.applicationsFacade = applicationsFacade;
         this.estimationMode = estimationMode;
@@ -78,11 +82,13 @@ public final class CommunityProcedureFacade {
         AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode
     ) {
         var approximateMaximumKCutMutateStub = new ApproximateMaximumKCutMutateStub(genericStub, applicationsFacade);
+        var k1ColoringMutateStub = new K1ColoringMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
         var wccMutateStub = new WccMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
 
         return new CommunityProcedureFacade(
             procedureReturnColumns,
             approximateMaximumKCutMutateStub,
+            k1ColoringMutateStub,
             wccMutateStub,
             applicationsFacade,
             estimationModeRunner,
@@ -136,6 +142,10 @@ public final class CommunityProcedureFacade {
             streamMode()::conductance,
             resultBuilder
         );
+    }
+
+    public K1ColoringMutateStub k1ColoringMutateStub() {
+        return k1ColoringMutateStub;
     }
 
     public WccMutateStub wccMutateStub() {

@@ -27,13 +27,16 @@ import org.neo4j.gds.approxmaxkcut.ApproxMaxKCut;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.conductance.Conductance;
+import org.neo4j.gds.conductance.ConductanceBaseConfig;
 import org.neo4j.gds.conductance.ConductanceResult;
-import org.neo4j.gds.conductance.ConductanceStreamConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.k1coloring.K1Coloring;
+import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
+import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.wcc.Wcc;
 import org.neo4j.gds.wcc.WccBaseConfig;
@@ -73,7 +76,7 @@ public class CommunityAlgorithms {
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
-    ConductanceResult conductance(Graph graph, ConductanceStreamConfig configuration) {
+    ConductanceResult conductance(Graph graph, ConductanceBaseConfig configuration) {
         var task = Tasks.task(
             LabelForProgressTracking.Conductance.value,
             Tasks.leaf("count relationships", graph.nodeCount()),
@@ -92,6 +95,32 @@ public class CommunityAlgorithms {
             parameters.communityProperty(),
             DefaultPool.INSTANCE,
             progressTracker
+        );
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+    }
+
+    K1ColoringResult k1Coloring(Graph graph, K1ColoringBaseConfig configuration) {
+        var task = Tasks.iterativeDynamic(
+            LabelForProgressTracking.K1Coloring.value,
+            () -> List.of(
+                Tasks.leaf("color nodes", graph.nodeCount()),
+                Tasks.leaf("validate nodes", graph.nodeCount())
+            ),
+            configuration.maxIterations()
+        );
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var parameters = configuration.toParameters();
+
+        var algorithm = new K1Coloring(
+            graph,
+            parameters.maxIterations(),
+            parameters.batchSize(),
+            parameters.concurrency(),
+            DefaultPool.INSTANCE,
+            progressTracker,
+            terminationFlag
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);

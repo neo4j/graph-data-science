@@ -27,11 +27,14 @@ import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
+import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.wcc.WccMutateConfig;
 
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ApproximateMaximumKCut;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.K1Coloring;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
 
 public class CommunityAlgorithmsMutateModeBusinessFacade {
@@ -52,24 +55,6 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         this.mutateNodeProperty = mutateNodeProperty;
     }
 
-    public <RESULT> RESULT wcc(
-        GraphName graphName,
-        WccMutateConfig configuration,
-        ResultBuilder<WccMutateConfig, DisjointSetStruct, RESULT, NodePropertiesWritten> resultBuilder
-    ) {
-        var mutateStep = new WccMutateStep(mutateNodeProperty, configuration);
-
-        return template.processAlgorithm(
-            graphName,
-            configuration,
-            WCC,
-            () -> estimation.wcc(configuration),
-            graph -> algorithms.wcc(graph, configuration),
-            Optional.of(mutateStep),
-            resultBuilder
-        );
-    }
-
     public <RESULT> RESULT approximateMaximumKCut(
         GraphName graphName,
         ApproxMaxKCutMutateConfig configuration,
@@ -83,6 +68,42 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
             ApproximateMaximumKCut,
             () -> estimation.approximateMaximumKCut(configuration),
             graph -> algorithms.approximateMaximumKCut(graph, configuration),
+            Optional.of(mutateStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT k1Coloring(
+        GraphName graphName,
+        K1ColoringMutateConfig configuration,
+        ResultBuilder<K1ColoringMutateConfig, K1ColoringResult, RESULT, Void> resultBuilder
+    ) {
+        var mutateStep = new K1ColoringMutateStep(mutateNodeProperty, configuration);
+
+        return template.processAlgorithm(
+            graphName,
+            configuration,
+            K1Coloring,
+            estimation::k1Coloring,
+            graph -> algorithms.k1Coloring(graph, configuration),
+            Optional.of(mutateStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT wcc(
+        GraphName graphName,
+        WccMutateConfig configuration,
+        ResultBuilder<WccMutateConfig, DisjointSetStruct, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var mutateStep = new WccMutateStep(mutateNodeProperty, configuration);
+
+        return template.processAlgorithm(
+            graphName,
+            configuration,
+            WCC,
+            () -> estimation.wcc(configuration),
+            graph -> algorithms.wcc(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
         );

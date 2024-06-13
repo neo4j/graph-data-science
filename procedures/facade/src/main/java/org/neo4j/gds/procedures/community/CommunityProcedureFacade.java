@@ -26,7 +26,6 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacad
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
 import org.neo4j.gds.k1coloring.K1ColoringStatsConfig;
 import org.neo4j.gds.k1coloring.K1ColoringStreamConfig;
 import org.neo4j.gds.k1coloring.K1ColoringWriteConfig;
@@ -58,7 +57,6 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
 import org.neo4j.gds.procedures.algorithms.community.ProcedureStatisticsComputationInstructions;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.community.k1coloring.K1ColoringMutateResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringStatsResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringStreamResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringWriteResult;
@@ -938,21 +936,6 @@ public class CommunityProcedureFacade {
         return K1ColoringComputationResultTransformer.toStreamResult(computationResult, streamConfig);
     }
 
-    public Stream<K1ColoringMutateResult> k1ColoringMutate(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var mutateConfig = configurationCreator.createConfiguration(configuration, K1ColoringMutateConfig::of);
-
-        var computationResult = mutateBusinessFacade.k1coloring(
-            graphName,
-            mutateConfig,
-            procedureReturnColumns.contains("colorCount")
-        );
-
-        return Stream.of(K1ColoringComputationResultTransformer.toMutateResult(computationResult));
-    }
-
     public Stream<K1ColoringWriteResult> k1ColoringWrite(
         String graphName,
         Map<String, Object> configuration
@@ -1082,14 +1065,6 @@ public class CommunityProcedureFacade {
         );
 
         return Stream.of(K1ColoringComputationResultTransformer.toStatsResult(computationResult, statsConfig));
-    }
-
-    public Stream<MemoryEstimateResult> k1ColoringEstimateMutate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, K1ColoringMutateConfig::of);
-        return Stream.of(estimateBusinessFacade.k1Coloring(graphNameOrConfiguration, config));
     }
 
     public Stream<MemoryEstimateResult> k1ColoringEstimateStats(

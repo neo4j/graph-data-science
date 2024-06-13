@@ -21,7 +21,7 @@ package org.neo4j.gds.k1coloring;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.procedures.community.k1coloring.K1ColoringMutateResult;
+import org.neo4j.gds.procedures.algorithms.community.K1ColoringMutateResult;
 
 class K1ColoringMutateResultBuilder extends K1ColoringResultBuilder<K1ColoringMutateResult> {
     K1ColoringMutateResultBuilder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
