@@ -39,18 +39,23 @@ shadowJar {
 
     relocate('com.', 'org.neo4j.gds.shaded.com.') {
         exclude 'com/neo4j/**'
+        exclude 'com/codahale/**'
     }
     relocate('org.', 'org.neo4j.gds.shaded.org.') {
         exclude 'org/neo4j/**'
     }
-    relocate('de.siegmar.', 'org.neo4j.gds.shaded.de.siegmar.')
-    relocate('io.jsonwebtoken.', 'org.neo4j.gds.shaded.io.jsonwebtoken.')
-    relocate('pabeles', 'org.neo4j.gds.shaded.pabeles')
 
-    relocate('javassist', 'org.neo4j.gds.shaded.javassist')
-
+    relocate('android.annotation.', 'com.neo4j.gds.shaded.android.annotation.')
+    relocate('de.siegmar.', 'com.neo4j.gds.shaded.de.siegmar.')
+    relocate('io.grpc.', 'com.neo4j.gds.shaded.io.grpc.')
+    relocate('io.jsonwebtoken.', 'com.neo4j.gds.shaded.io.jsonwebtoken.')
+    relocate('io.netty.', 'com.neo4j.gds.shaded.io.netty.')
+    relocate('io.perfmark.', 'com.neo4j.gds.shaded.io.perfmark.')
+    relocate('javassist', 'com.neo4j.gds.shaded.javassist')
     relocate('javax.annotation.', 'com.neo4j.gds.shaded.javax.annotation.')
+    relocate('pabeles', 'com.neo4j.gds.shaded.pabeles')
     relocate('stormpot', 'com.neo4j.gds.shaded.stormpot')
+
 
     mergeServiceFiles()
     archiveBaseName.set("open-gds")
