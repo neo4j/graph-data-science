@@ -22,7 +22,6 @@ package org.neo4j.gds.algorithms.community;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.community.specificfields.CommunityStatisticsSpecificFields;
-import org.neo4j.gds.algorithms.community.specificfields.KCoreSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.KmeansSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LabelPropagationSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LeidenSpecificFields;
@@ -35,7 +34,6 @@ import org.neo4j.gds.algorithms.community.specificfields.TriangleCountSpecificFi
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
 import org.neo4j.gds.kmeans.KmeansStatsConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
 import org.neo4j.gds.leiden.LeidenStatsConfig;
@@ -135,24 +133,6 @@ public class CommunityAlgorithmsStatsBusinessFacade {
             statisticsComputationInstructions,
             intermediateResult.computeMilliseconds,
             () -> StandardCommunityStatisticsSpecificFields.EMPTY
-        );
-    }
-
-    public StatsResult<KCoreSpecificFields> kCore(
-        String graphName,
-        KCoreDecompositionStatsConfig configuration
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> communityAlgorithmsFacade.kCore(graphName, configuration)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        return statsResult(
-            algorithmResult,
-            (result) -> new KCoreSpecificFields(result.degeneracy()),
-            intermediateResult.computeMilliseconds,
-            () -> KCoreSpecificFields.EMPTY
         );
     }
 

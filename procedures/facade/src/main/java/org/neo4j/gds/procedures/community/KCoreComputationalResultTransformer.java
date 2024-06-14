@@ -20,13 +20,10 @@
 package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
-import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.community.specificfields.KCoreSpecificFields;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
-import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
-import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionStatsResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionStreamResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionWriteResult;
 
@@ -62,19 +59,4 @@ final class KCoreComputationalResultTransformer {
             computationResult.configuration().toMap()
         );
     }
-
-
-    static KCoreDecompositionStatsResult toStatsResult(
-        StatsResult<KCoreSpecificFields> computationResult,
-        KCoreDecompositionStatsConfig config
-    ) {
-        return new KCoreDecompositionStatsResult(
-            computationResult.algorithmSpecificFields().degeneracy(),
-            computationResult.preProcessingMillis(),
-            computationResult.computeMillis(),
-            computationResult.postProcessingMillis(),
-            config.toMap()
-        );
-    }
-
 }

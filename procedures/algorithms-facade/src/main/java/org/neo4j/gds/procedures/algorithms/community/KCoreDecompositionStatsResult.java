@@ -17,15 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.community.kcore;
+package org.neo4j.gds.procedures.algorithms.community;
 
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 
 import java.util.Map;
+import java.util.stream.Stream;
 
 public class KCoreDecompositionStatsResult extends StandardStatsResult {
-
     public final long degeneracy;
 
     public KCoreDecompositionStatsResult(
@@ -39,8 +40,22 @@ public class KCoreDecompositionStatsResult extends StandardStatsResult {
         this.degeneracy = degeneracy;
     }
 
-    public static final class Builder extends AbstractResultBuilder<KCoreDecompositionStatsResult> {
+    static Stream<KCoreDecompositionStatsResult> emptyFrom(
+        AlgorithmProcessingTimings timings,
+        Map<String, Object> configurationMap
+    ) {
+        return Stream.of(
+            new KCoreDecompositionStatsResult(
+                0,
+                timings.preProcessingMillis,
+                timings.computeMillis,
+                0,
+                configurationMap
+            )
+        );
+    }
 
+    public static final class Builder extends AbstractResultBuilder<KCoreDecompositionStatsResult> {
         private long degeneracy;
 
         public Builder withDegeneracy(long degeneracy) {
@@ -58,5 +73,4 @@ public class KCoreDecompositionStatsResult extends StandardStatsResult {
             );
         }
     }
-
 }

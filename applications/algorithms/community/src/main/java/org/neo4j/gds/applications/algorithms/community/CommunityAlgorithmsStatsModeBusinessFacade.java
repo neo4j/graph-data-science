@@ -25,11 +25,14 @@ import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.k1coloring.K1ColoringStatsConfig;
+import org.neo4j.gds.kcore.KCoreDecompositionResult;
+import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
 import org.neo4j.gds.wcc.WccStatsConfig;
 
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.K1Coloring;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KCore;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
 
 public class CommunityAlgorithmsStatsModeBusinessFacade {
@@ -58,6 +61,22 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
             K1Coloring,
             estimationFacade::k1Coloring,
             graph -> communityAlgorithms.k1Coloring(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT kCore(
+        GraphName graphName,
+        KCoreDecompositionStatsConfig configuration,
+        ResultBuilder<KCoreDecompositionStatsConfig, KCoreDecompositionResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            KCore,
+            estimationFacade::kCore,
+            graph -> communityAlgorithms.kCore(graph, configuration),
             Optional.empty(),
             resultBuilder
         );
