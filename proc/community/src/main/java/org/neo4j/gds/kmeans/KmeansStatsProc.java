@@ -20,7 +20,7 @@
 package org.neo4j.gds.kmeans;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.kmeans.KmeansStatsResult;
+import org.neo4j.gds.procedures.algorithms.community.KmeansStatsResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;

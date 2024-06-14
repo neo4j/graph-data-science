@@ -26,6 +26,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -58,7 +59,7 @@ class KmeansRestartsTest {
             .build();
         var kmeansContext = ImmutableKmeansContext.builder().build();
 
-        var kmeans = Kmeans.createKmeans(graph, kmeansConfig.toParameters(), kmeansContext);
+        var kmeans = Kmeans.createKmeans(graph, kmeansConfig.toParameters(), kmeansContext, TerminationFlag.RUNNING_TRUE);
         var result = kmeans.compute();
         var communities = result.communities();
         var distances = result.distanceFromCenter();
@@ -92,7 +93,7 @@ class KmeansRestartsTest {
 
         var kmeansContext = ImmutableKmeansContext.builder().build();
 
-        var kmeans = Kmeans.createKmeans(graph, kmeansConfig.toParameters(), kmeansContext);
+        var kmeans = Kmeans.createKmeans(graph, kmeansConfig.toParameters(), kmeansContext, TerminationFlag.RUNNING_TRUE);
         var result = kmeans.compute();
         var communities = result.communities();
         var distances = result.distanceFromCenter();
@@ -128,7 +129,7 @@ class KmeansRestartsTest {
             .k(2)
             .build();
         var kmeansContext = ImmutableKmeansContext.builder().build();
-        var kmeans = Kmeans.createKmeans(graph, kmeansConfig.toParameters(), kmeansContext);
+        var kmeans = Kmeans.createKmeans(graph, kmeansConfig.toParameters(), kmeansContext, TerminationFlag.RUNNING_TRUE);
         var centers = kmeans.compute().centers();
         assertThat(centers[1]).isEqualTo(new double[]{100.0});
         assertThat(centers[0][0]).isCloseTo(1.05, Offset.offset(1e-4));

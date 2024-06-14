@@ -17,55 +17,83 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.community.kmeans;
+package org.neo4j.gds.procedures.algorithms.community;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
-import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class KmeansStatsResult extends StandardStatsResult {
+public class KmeansMutateResult extends KmeansStatsResult {
+    public final long mutateMillis;
+    public final long nodePropertiesWritten;
 
-    public final Map<String, Object> communityDistribution;
-    public final List<List<Double>> centroids;
-    public final double averageDistanceToCentroid;
-    public final double averageSilhouette;
-
-    public KmeansStatsResult(
+    public KmeansMutateResult(
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
-        @Nullable Map<String, Object> communityDistribution,
-        @Nullable List<List<Double>> centroids,
-        @Nullable double averageDistanceToCentroid,
-        @Nullable double averageSilhouette,
+        long mutateMillis,
+        long nodePropertiesWritten,
+        Map<String, Object> communityDistribution,
+        List<List<Double>> centroids,
+        double averageDistanceToCentroid,
+        double averageSilhouette,
         Map<String, Object> configuration
     ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
-        this.communityDistribution = communityDistribution;
-        this.centroids = centroids;
-        this.averageDistanceToCentroid = averageDistanceToCentroid;
-        this.averageSilhouette = averageSilhouette;
+        super(
+            preProcessingMillis,
+            computeMillis,
+            postProcessingMillis,
+            communityDistribution,
+            centroids,
+            averageDistanceToCentroid,
+            averageSilhouette,
+            configuration
+        );
+        this.mutateMillis = mutateMillis;
+        this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    public static final class Builder extends AbstractCommunityResultBuilder<KmeansStatsResult> {
+    public static KmeansMutateResult emptyFrom(
+        AlgorithmProcessingTimings timings,
+        Map<String, Object> configurationMap
+    ) {
+        return new KmeansMutateResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            0,
+            timings.mutateOrWriteMillis,
+            0,
+            Collections.emptyMap(),
+            Collections.emptyList(),
+            0,
+            0,
+            configurationMap
+        );
+    }
+
+    public static class Builder extends AbstractCommunityResultBuilder<KmeansMutateResult> {
+        private List<List<Double>> centroids;
+        private double averageDistanceToCentroid;
+
+        private double averageSilhouette;
+
         public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
             super(returnColumns, concurrency);
         }
 
-        private List<List<Double>> centroids;
-        private double averageDistanceToCentroid;
-        private double averageSilhouette;
         @Override
-        public KmeansStatsResult buildResult() {
-            return new KmeansStatsResult(
+        protected KmeansMutateResult buildResult() {
+            return new KmeansMutateResult(
                 preProcessingMillis,
                 computeMillis,
                 postProcessingDuration,
+                mutateMillis,
+                nodePropertiesWritten,
                 communityHistogramOrNull(),
                 centroids,
                 averageDistanceToCentroid,

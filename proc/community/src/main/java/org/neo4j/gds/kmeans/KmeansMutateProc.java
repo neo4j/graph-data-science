@@ -20,7 +20,7 @@
 package org.neo4j.gds.kmeans;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.kmeans.KmeansMutateResult;
+import org.neo4j.gds.procedures.algorithms.community.KmeansMutateResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -45,7 +45,7 @@ public class KmeansMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().kmeansMutate(graphName, configuration);
+        return facade.algorithms().community().kMeansMutateStub().execute(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)
@@ -57,7 +57,6 @@ public class KmeansMutateProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         facade.deprecatedProcedures().called("gds.beta.kmeans.mutate");
-
         facade
             .log()
             .warn("Procedure `gds.beta.kmeans.mutate` has been deprecated, please use `gds.kmeans.mutate`.");
@@ -70,7 +69,7 @@ public class KmeansMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        return facade.community().kmeansEstimateMutate(graphName, configuration);
+        return facade.algorithms().community().kMeansMutateStub().estimate(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)

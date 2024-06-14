@@ -22,7 +22,6 @@ package org.neo4j.gds.algorithms.community;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.community.specificfields.CommunityStatisticsSpecificFields;
-import org.neo4j.gds.algorithms.community.specificfields.KmeansSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LabelPropagationSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LeidenSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LocalClusteringCoefficientSpecificFields;
@@ -34,8 +33,6 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.kmeans.KmeansMutateConfig;
-import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.labelpropagation.LabelPropagationMutateConfig;
 import org.neo4j.gds.leiden.LeidenMutateConfig;
 import org.neo4j.gds.leiden.LeidenResult;
@@ -49,8 +46,6 @@ import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.TriangleCountMutateConfig;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Supplier;
 
 import static org.neo4j.gds.algorithms.community.CommunityCompanion.createIntermediateCommunitiesNodePropertyValues;
@@ -312,40 +307,6 @@ public class CommunityAlgorithmsMutateBusinessFacade {
 
     }
 
-    public NodePropertyMutateResult<KmeansSpecificFields> kmeans(
-        String graphName,
-        KmeansMutateConfig configuration,
-        StatisticsComputationInstructions statisticsComputationInstructions,
-        boolean computeListOfCentroids
-        ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.kmeans(graphName, configuration)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        NodePropertyValuesMapper<KmeansResult, KmeansMutateConfig> mapper = ((result, config) ->
-            NodePropertyValuesAdapter.adapt(result.communities()));
-
-        return mutateNodeProperty(
-            algorithmResult,
-            configuration,
-            mapper,
-            (result -> result.communities()::get),
-            (result, componentCount, communitySummary) -> {
-                return new KmeansSpecificFields(
-                    communitySummary,
-                    arrayMatrixToListMatrix(computeListOfCentroids, result.centers()),
-                    result.averageDistanceToCentroid(),
-                    result.averageSilhouette()
-                );
-            },
-            statisticsComputationInstructions,
-            intermediateResult.computeMilliseconds,
-            () -> KmeansSpecificFields.EMPTY
-        );
-    }
-
     public NodePropertyMutateResult<LocalClusteringCoefficientSpecificFields> localClusteringCoefficient(
         String graphName,
         LocalClusteringCoefficientMutateConfig configuration
@@ -452,20 +413,4 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         }).orElseGet(() -> NodePropertyMutateResult.empty(emptyASFSupplier.get(), configuration));
 
     }
-
-    private List<List<Double>> arrayMatrixToListMatrix(boolean shouldCompute, double[][] matrix) {
-        if (shouldCompute) {
-            var result = new ArrayList<List<Double>>();
-
-            for (double[] row : matrix) {
-                List<Double> rowList = new ArrayList<>();
-                result.add(rowList);
-                for (double column : row)
-                    rowList.add(column);
-            }
-            return result;
-        }
-        return null;
-    }
-
 }

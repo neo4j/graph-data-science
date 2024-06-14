@@ -26,7 +26,6 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacad
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.kmeans.KmeansMutateConfig;
 import org.neo4j.gds.kmeans.KmeansStatsConfig;
 import org.neo4j.gds.kmeans.KmeansStreamConfig;
 import org.neo4j.gds.kmeans.KmeansWriteConfig;
@@ -48,10 +47,9 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
+import org.neo4j.gds.procedures.algorithms.community.KmeansStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.ProcedureStatisticsComputationInstructions;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.community.kmeans.KmeansMutateResult;
-import org.neo4j.gds.procedures.community.kmeans.KmeansStatsResult;
 import org.neo4j.gds.procedures.community.kmeans.KmeansStreamResult;
 import org.neo4j.gds.procedures.community.kmeans.KmeansWriteResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationMutateResult;
@@ -645,22 +643,6 @@ public class CommunityProcedureFacade {
         return KmeansComputationResultTransformer.toStreamResult(computationResult);
     }
 
-    public Stream<KmeansMutateResult> kmeansMutate(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var mutateConfig = configurationCreator.createConfiguration(configuration, KmeansMutateConfig::of);
-
-        var computationResult = mutateBusinessFacade.kmeans(
-            graphName,
-            mutateConfig,
-            ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns),
-            procedureReturnColumns.contains("centroids")
-        );
-
-        return Stream.of(KmeansComputationResultTransformer.toMutateResult(computationResult));
-    }
-
     public Stream<KmeansWriteResult> kmeansWrite(
         String graphName,
         Map<String, Object> configuration
@@ -691,14 +673,6 @@ public class CommunityProcedureFacade {
         );
 
         return Stream.of(KmeansComputationResultTransformer.toStatsResult(computationResult, statsConfig));
-    }
-
-    public Stream<MemoryEstimateResult> kmeansEstimateMutate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, KmeansMutateConfig::of);
-        return Stream.of(estimateBusinessFacade.kmeans(graphNameOrConfiguration, config));
     }
 
     public Stream<MemoryEstimateResult> kmeansEstimateStats(

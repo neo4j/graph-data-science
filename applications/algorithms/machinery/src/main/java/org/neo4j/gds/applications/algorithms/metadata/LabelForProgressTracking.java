@@ -41,6 +41,7 @@ public enum LabelForProgressTracking {
     HarmonicCentrality("HarmonicCentrality"),
     K1Coloring("K1Coloring"),
     KCore("KCoreDecomposition"),
+    KMeans("K-Means"),
     KNN("K-Nearest Neighbours"),
     KSpanningTree("K Spanning Tree"),
     LongestPath("LongestPath"),
@@ -81,6 +82,7 @@ public enum LabelForProgressTracking {
             case HarmonicCentrality -> HarmonicCentrality;
             case K1Coloring -> K1Coloring;
             case KCore -> KCore;
+            case KMeans -> KMeans;
             case KNN -> KNN;
             case KSpanningTree -> KSpanningTree;
             case LongestPath -> LongestPath;

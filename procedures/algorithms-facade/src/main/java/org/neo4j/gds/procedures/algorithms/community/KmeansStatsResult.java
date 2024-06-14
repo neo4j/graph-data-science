@@ -17,65 +17,53 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.community.kmeans;
+package org.neo4j.gds.procedures.algorithms.community;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
+import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 
 import java.util.List;
 import java.util.Map;
 
-public class KmeansMutateResult extends KmeansStatsResult {
+public class KmeansStatsResult extends StandardStatsResult {
+    public final Map<String, Object> communityDistribution;
+    public final List<List<Double>> centroids;
+    public final double averageDistanceToCentroid;
+    public final double averageSilhouette;
 
-    public final long mutateMillis;
-    public final long nodePropertiesWritten;
-
-    public KmeansMutateResult(
+    public KmeansStatsResult(
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
-        long mutateMillis,
-        long nodePropertiesWritten,
-        @Nullable Map<String, Object> communityDistribution,
-        @Nullable List<List<Double>> centroids,
-        @Nullable double averageDistanceToCentroid,
-        @Nullable double averageSilhouette,
+        Map<String, Object> communityDistribution,
+        List<List<Double>> centroids,
+        double averageDistanceToCentroid,
+        double averageSilhouette,
         Map<String, Object> configuration
     ) {
-        super(
-            preProcessingMillis,
-            computeMillis,
-            postProcessingMillis,
-            communityDistribution,
-            centroids,
-            averageDistanceToCentroid,
-            averageSilhouette,
-            configuration
-        );
-        this.mutateMillis = mutateMillis;
-        this.nodePropertiesWritten = nodePropertiesWritten;
+        super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
+        this.communityDistribution = communityDistribution;
+        this.centroids = centroids;
+        this.averageDistanceToCentroid = averageDistanceToCentroid;
+        this.averageSilhouette = averageSilhouette;
     }
 
-    public static class Builder extends AbstractCommunityResultBuilder<KmeansMutateResult> {
-        private List<List<Double>> centroids;
-        private double averageDistanceToCentroid;
-
-        private double averageSilhouette;
-
+    public static final class Builder extends AbstractCommunityResultBuilder<KmeansStatsResult> {
         public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
             super(returnColumns, concurrency);
         }
 
+        private List<List<Double>> centroids;
+        private double averageDistanceToCentroid;
+        private double averageSilhouette;
         @Override
-        protected KmeansMutateResult buildResult() {
-            return new KmeansMutateResult(
+        public KmeansStatsResult buildResult() {
+            return new KmeansStatsResult(
                 preProcessingMillis,
                 computeMillis,
                 postProcessingDuration,
-                mutateMillis,
-                nodePropertiesWritten,
                 communityHistogramOrNull(),
                 centroids,
                 averageDistanceToCentroid,
@@ -99,5 +87,4 @@ public class KmeansMutateResult extends KmeansStatsResult {
             return this;
         }
     }
-
 }

@@ -48,6 +48,7 @@ public enum Algorithm {
     HarmonicCentrality,
     K1Coloring,
     KCore,
+    KMeans,
     KNN,
     KSpanningTree,
     LongestPath,

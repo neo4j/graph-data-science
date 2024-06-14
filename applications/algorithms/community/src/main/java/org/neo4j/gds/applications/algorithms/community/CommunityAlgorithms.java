@@ -40,6 +40,10 @@ import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.kcore.KCoreDecomposition;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
+import org.neo4j.gds.kmeans.ImmutableKmeansContext;
+import org.neo4j.gds.kmeans.Kmeans;
+import org.neo4j.gds.kmeans.KmeansBaseConfig;
+import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.wcc.Wcc;
 import org.neo4j.gds.wcc.WccBaseConfig;
@@ -138,6 +142,27 @@ public class CommunityAlgorithms {
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
+    KmeansResult kMeans(Graph graph, KmeansBaseConfig configuration) {
+        var seedCentroids = (List) configuration.seedCentroids();
+        if (configuration.numberOfRestarts() > 1 && seedCentroids.size() > 0) {
+            throw new IllegalArgumentException("K-Means cannot be run multiple time when seeded");
+        }
+        if (seedCentroids.size() > 0 && seedCentroids.size() != configuration.k()) {
+            throw new IllegalArgumentException("Incorrect number of seeded centroids given for running K-Means");
+        }
+
+        var task = constructKMeansProgressTask(graph, configuration);
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var kmeansContext = ImmutableKmeansContext.builder()
+            .executor(DefaultPool.INSTANCE)
+            .progressTracker(progressTracker)
+            .build();
+        var algorithm = Kmeans.createKmeans(graph, configuration.toParameters(), kmeansContext, terminationFlag);
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+    }
+
     DisjointSetStruct wcc(Graph graph, WccBaseConfig configuration) {
         var task = Tasks.leaf(LabelForProgressTracking.WCC.value, graph.relationshipCount());
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
@@ -157,6 +182,37 @@ public class CommunityAlgorithms {
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+    }
+
+    private Task constructKMeansProgressTask(Graph graph, KmeansBaseConfig configuration) {
+        var label = LabelForProgressTracking.KMeans;
+
+        var iterations = configuration.numberOfRestarts();
+        if (iterations == 1) {
+            return kMeansTask(graph, label.value, configuration);
+        }
+
+        return Tasks.iterativeFixed(
+            label.value,
+            () -> List.of(kMeansTask(graph, "KMeans Iteration", configuration)),
+            iterations
+        );
+    }
+
+    private Task kMeansTask(Graph graph, String description, KmeansBaseConfig configuration) {
+        if (configuration.computeSilhouette()) {
+            return Tasks.task(description, List.of(
+                Tasks.leaf("Initialization", configuration.k()),
+                Tasks.iterativeDynamic("Main", () -> List.of(Tasks.leaf("Iteration")), configuration.maxIterations()),
+                Tasks.leaf("Silhouette", graph.nodeCount())
+
+            ));
+        } else {
+            return Tasks.task(description, List.of(
+                Tasks.leaf("Initialization", configuration.k()),
+                Tasks.iterativeDynamic("Main", () -> List.of(Tasks.leaf("Iteration")), configuration.maxIterations())
+            ));
+        }
     }
 
     private static Task searchTask(long nodeCount, int vnsMaxNeighborhoodOrder) {

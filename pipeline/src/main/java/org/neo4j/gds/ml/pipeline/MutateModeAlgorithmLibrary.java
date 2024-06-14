@@ -79,6 +79,7 @@ final class MutateModeAlgorithmLibrary {
             case HarmonicCentrality -> CanonicalProcedureName.parse("gds.closeness.harmonic");
             case K1Coloring -> CanonicalProcedureName.parse("gds.k1coloring");
             case KCore -> CanonicalProcedureName.parse("gds.kcore");
+            case KMeans -> CanonicalProcedureName.parse("gds.kmeans");
             case KNN -> CanonicalProcedureName.parse("gds.knn");
             case KSpanningTree -> null;
             case LongestPath -> null;
