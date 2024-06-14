@@ -95,6 +95,16 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
         return new KmeansMemoryEstimateDefinition(configuration.toParameters()).memoryEstimation();
     }
 
+    public MemoryEstimateResult kMeans(KmeansBaseConfig configuration, Object graphNameOrConfiguration) {
+        var memoryEstimation = kMeans(configuration);
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
+        );
+    }
+
     public MemoryEstimation wcc(SeedConfig configuration) {
         return new WccMemoryEstimateDefinition(configuration.isIncremental()).memoryEstimation();
     }

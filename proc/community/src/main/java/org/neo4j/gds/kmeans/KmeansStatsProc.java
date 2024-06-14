@@ -45,7 +45,7 @@ public class KmeansStatsProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().kmeansStats(graphName, configuration);
+        return facade.algorithms().community().kmeansStats(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)
@@ -69,7 +69,7 @@ public class KmeansStatsProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        return facade.community().kmeansEstimateStats(graphName, configuration);
+        return facade.algorithms().community().kmeansStatsEstimate(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)

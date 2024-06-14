@@ -27,12 +27,15 @@ import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.k1coloring.K1ColoringStatsConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
+import org.neo4j.gds.kmeans.KmeansResult;
+import org.neo4j.gds.kmeans.KmeansStatsConfig;
 import org.neo4j.gds.wcc.WccStatsConfig;
 
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.K1Coloring;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KCore;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KMeans;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
 
 public class CommunityAlgorithmsStatsModeBusinessFacade {
@@ -77,6 +80,22 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
             KCore,
             estimationFacade::kCore,
             graph -> communityAlgorithms.kCore(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT kMeans(
+        GraphName graphName,
+        KmeansStatsConfig configuration,
+        ResultBuilder<KmeansStatsConfig, KmeansResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            KMeans,
+            () -> estimationFacade.kMeans(configuration),
+            graph -> communityAlgorithms.kMeans(graph, configuration),
             Optional.empty(),
             resultBuilder
         );
