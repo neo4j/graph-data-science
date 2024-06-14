@@ -17,29 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.community.stubs;
+package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
-import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.kmeans.KmeansMutateConfig;
 import org.neo4j.gds.kmeans.KmeansResult;
-import org.neo4j.gds.procedures.algorithms.community.CentroidsComputer;
-import org.neo4j.gds.procedures.algorithms.community.KmeansMutateResult;
+import org.neo4j.gds.kmeans.KmeansStatsConfig;
 import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
-public class KMeansResultBuilderForMutateMode implements ResultBuilder<KmeansMutateConfig, KmeansResult, KmeansMutateResult, NodePropertiesWritten> {
+class KMeansResultBuilderForStatsMode implements ResultBuilder<KmeansStatsConfig, KmeansResult, Stream<KmeansStatsResult>, Void> {
     private final StatisticsComputationInstructions statisticsComputationInstructions;
     private final boolean shouldComputeListOfCentroids;
 
-    KMeansResultBuilderForMutateMode(
+    KMeansResultBuilderForStatsMode(
         StatisticsComputationInstructions statisticsComputationInstructions,
         boolean shouldComputeListOfCentroids
     ) {
@@ -48,15 +46,15 @@ public class KMeansResultBuilderForMutateMode implements ResultBuilder<KmeansMut
     }
 
     @Override
-    public KmeansMutateResult build(
+    public Stream<KmeansStatsResult> build(
         Graph graph,
         GraphStore graphStore,
-        KmeansMutateConfig configuration,
+        KmeansStatsConfig configuration,
         Optional<KmeansResult> result,
         AlgorithmProcessingTimings timings,
-        Optional<NodePropertiesWritten> metadata
+        Optional<Void> unused
     ) {
-        if (result.isEmpty()) return KmeansMutateResult.emptyFrom(timings, configuration.toMap());
+        if (result.isEmpty()) return Stream.of(KmeansStatsResult.emptyFrom(timings, configuration.toMap()));
 
         var kmeansResult = result.get();
 
@@ -74,17 +72,17 @@ public class KMeansResultBuilderForMutateMode implements ResultBuilder<KmeansMut
 
         var centroids = new CentroidsComputer().compute(shouldComputeListOfCentroids, kmeansResult.centers());
 
-        return new KmeansMutateResult(
+        var kmeansStatsResult = new KmeansStatsResult(
             timings.preProcessingMillis,
             timings.computeMillis,
             communityStatistics.computeMilliseconds(),
-            timings.mutateOrWriteMillis,
-            metadata.orElseThrow().value,
             communitySummary,
             centroids,
             kmeansResult.averageDistanceToCentroid(),
             kmeansResult.averageSilhouette(),
             configuration.toMap()
         );
+
+        return Stream.of(kmeansStatsResult);
     }
 }

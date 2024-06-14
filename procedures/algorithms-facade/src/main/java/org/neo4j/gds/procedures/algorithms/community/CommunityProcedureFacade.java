@@ -34,6 +34,7 @@ import org.neo4j.gds.k1coloring.K1ColoringWriteConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStreamConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionWriteConfig;
+import org.neo4j.gds.kmeans.KmeansStatsConfig;
 import org.neo4j.gds.procedures.algorithms.community.stubs.ApproximateMaximumKCutMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.K1ColoringMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.KCoreMutateStub;
@@ -340,6 +341,37 @@ public final class CommunityProcedureFacade {
 
     public KMeansMutateStub kMeansMutateStub() {
         return kMeansMutateStub;
+    }
+
+    public Stream<KmeansStatsResult> kmeansStats(String graphName, Map<String, Object> configuration) {
+        var statisticsComputationInstructions = ProcedureStatisticsComputationInstructions.forCommunities(
+            procedureReturnColumns);
+        var shouldComputeListOfCentroids = procedureReturnColumns.contains("centroids");
+        var resultBuilder = new KMeansResultBuilderForStatsMode(
+            statisticsComputationInstructions,
+            shouldComputeListOfCentroids
+        );
+
+        return algorithmExecutionScaffolding.runAlgorithm(
+            graphName,
+            configuration,
+            KmeansStatsConfig::of,
+            statsMode()::kMeans,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> kmeansStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            KmeansStatsConfig::of,
+            configuration -> estimationMode().kMeans(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
     }
 
     public WccMutateStub wccMutateStub() {

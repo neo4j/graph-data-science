@@ -22,7 +22,6 @@ package org.neo4j.gds.algorithms.community;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.community.specificfields.CommunityStatisticsSpecificFields;
-import org.neo4j.gds.algorithms.community.specificfields.KmeansSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LabelPropagationSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LeidenSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LocalClusteringCoefficientSpecificFields;
@@ -34,7 +33,6 @@ import org.neo4j.gds.algorithms.community.specificfields.TriangleCountSpecificFi
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.kmeans.KmeansStatsConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
 import org.neo4j.gds.leiden.LeidenStatsConfig;
 import org.neo4j.gds.louvain.LouvainStatsConfig;
@@ -46,8 +44,6 @@ import org.neo4j.gds.scc.SccStatsConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
 import org.neo4j.gds.triangle.TriangleCountStatsConfig;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Supplier;
 
 import static org.neo4j.gds.algorithms.runner.AlgorithmRunner.runWithTiming;
@@ -133,36 +129,6 @@ public class CommunityAlgorithmsStatsBusinessFacade {
             statisticsComputationInstructions,
             intermediateResult.computeMilliseconds,
             () -> StandardCommunityStatisticsSpecificFields.EMPTY
-        );
-    }
-
-    public StatsResult<KmeansSpecificFields> kmeans(
-        String graphName,
-        KmeansStatsConfig configuration,
-        StatisticsComputationInstructions statisticsComputationInstructions,
-        boolean computeListOfCentroids
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> communityAlgorithmsFacade.kmeans(graphName, configuration)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        return statsResult(
-            algorithmResult,
-            configuration,
-            (result -> result.communities()::get),
-            (result, componentCount, communitySummary) -> {
-                return new KmeansSpecificFields(
-                    communitySummary,
-                    arrayMatrixToListMatrix(computeListOfCentroids, result.centers()),
-                    result.averageDistanceToCentroid(),
-                    result.averageSilhouette()
-                );
-            },
-            statisticsComputationInstructions,
-            intermediateResult.computeMilliseconds,
-            () -> KmeansSpecificFields.EMPTY
         );
     }
 
@@ -363,21 +329,4 @@ public class CommunityAlgorithmsStatsBusinessFacade {
         }).orElseGet(() -> StatsResult.empty(emptyASFSupplier.get()));
 
     }
-
-    private List<List<Double>> arrayMatrixToListMatrix(boolean shouldCompute, double[][] matrix) {
-        if (shouldCompute) {
-            var result = new ArrayList<List<Double>>();
-
-            for (double[] row : matrix) {
-                List<Double> rowList = new ArrayList<>();
-                result.add(rowList);
-                for (double column : row)
-                    rowList.add(column);
-            }
-            return result;
-        }
-        return null;
-    }
-
-
 }

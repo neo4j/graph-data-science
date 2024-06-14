@@ -20,10 +20,12 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -48,6 +50,19 @@ public class KmeansStatsResult extends StandardStatsResult {
         this.centroids = centroids;
         this.averageDistanceToCentroid = averageDistanceToCentroid;
         this.averageSilhouette = averageSilhouette;
+    }
+
+    static KmeansStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+        return new KmeansStatsResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            0,
+            Collections.emptyMap(),
+            Collections.emptyList(),
+            0,
+            0,
+            configurationMap
+        );
     }
 
     public static final class Builder extends AbstractCommunityResultBuilder<KmeansStatsResult> {
