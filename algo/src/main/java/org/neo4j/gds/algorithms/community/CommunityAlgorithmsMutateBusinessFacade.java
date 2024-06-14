@@ -22,7 +22,6 @@ package org.neo4j.gds.algorithms.community;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.community.specificfields.CommunityStatisticsSpecificFields;
-import org.neo4j.gds.algorithms.community.specificfields.KCoreSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.KmeansSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LabelPropagationSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LeidenSpecificFields;
@@ -35,7 +34,6 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.kmeans.KmeansMutateConfig;
 import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.labelpropagation.LabelPropagationMutateConfig;
@@ -69,27 +67,6 @@ public class CommunityAlgorithmsMutateBusinessFacade {
     ) {
         this.mutateNodePropertyService = mutateNodePropertyService;
         this.communityAlgorithmsFacade = communityAlgorithmsFacade;
-    }
-
-    public NodePropertyMutateResult<KCoreSpecificFields> kCore(
-        String graphName,
-        KCoreDecompositionMutateConfig config
-    ) {
-
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.kCore(graphName, config)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        return mutateNodeProperty(
-            algorithmResult,
-            config,
-            (result, configuration) -> NodePropertyValuesAdapter.adapt(result.coreValues()),
-            (result) -> new KCoreSpecificFields(result.degeneracy()),
-            intermediateResult.computeMilliseconds,
-            () -> KCoreSpecificFields.EMPTY
-        );
     }
 
     public NodePropertyMutateResult<LouvainSpecificFields> louvain(

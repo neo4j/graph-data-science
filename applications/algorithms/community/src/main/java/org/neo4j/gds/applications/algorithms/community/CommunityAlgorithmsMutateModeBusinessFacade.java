@@ -29,12 +29,15 @@ import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
+import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
+import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import org.neo4j.gds.wcc.WccMutateConfig;
 
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ApproximateMaximumKCut;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.K1Coloring;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KCore;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
 
 public class CommunityAlgorithmsMutateModeBusinessFacade {
@@ -86,6 +89,24 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
             K1Coloring,
             estimation::k1Coloring,
             graph -> algorithms.k1Coloring(graph, configuration),
+            Optional.of(mutateStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT kCore(
+        GraphName graphName,
+        KCoreDecompositionMutateConfig configuration,
+        ResultBuilder<KCoreDecompositionMutateConfig, KCoreDecompositionResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var mutateStep = new KCoreMutateStep(mutateNodeProperty, configuration);
+
+        return template.processAlgorithm(
+            graphName,
+            configuration,
+            KCore,
+            estimation::kCore,
+            graph -> algorithms.kCore(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
         );

@@ -29,6 +29,7 @@ import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityMutateConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationMutateConfig;
 import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
+import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.pagerank.PageRankMutateConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordMutateConfig;
@@ -77,6 +78,7 @@ public class ConfigurationParsersForMutateMode {
             case FilteredNodeSimilarity -> FilteredNodeSimilarityMutateConfig::of;
             case HarmonicCentrality -> HarmonicCentralityMutateConfig::of;
             case K1Coloring -> K1ColoringMutateConfig::of;
+            case KCore -> KCoreDecompositionMutateConfig::of;
             case KNN -> KnnMutateConfig::of;
             case KSpanningTree -> null;
             case LongestPath -> null;

@@ -27,6 +27,7 @@ import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
 import org.neo4j.gds.k1coloring.K1ColoringMemoryEstimateDefinition;
+import org.neo4j.gds.kcore.KCoreDecompositionMemoryEstimateDefinition;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.wcc.WccBaseConfig;
 import org.neo4j.gds.wcc.WccMemoryEstimateDefinition;
@@ -71,6 +72,10 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
             graphNameOrConfiguration,
             memoryEstimation
         );
+    }
+
+    public MemoryEstimation kCore() {
+        return new KCoreDecompositionMemoryEstimateDefinition().memoryEstimation();
     }
 
     public MemoryEstimation wcc(SeedConfig configuration) {

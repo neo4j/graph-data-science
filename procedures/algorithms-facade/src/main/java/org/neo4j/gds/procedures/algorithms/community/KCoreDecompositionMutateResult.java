@@ -17,15 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.community.kcore;
+package org.neo4j.gds.procedures.algorithms.community;
 
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
+import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
 public class KCoreDecompositionMutateResult extends StandardMutateResult {
-
     public final long nodePropertiesWritten;
     public final long degeneracy;
 
@@ -43,8 +43,22 @@ public class KCoreDecompositionMutateResult extends StandardMutateResult {
         this.degeneracy = degeneracy;
     }
 
-    public static final class Builder extends AbstractResultBuilder<KCoreDecompositionMutateResult> {
+    public static KCoreDecompositionMutateResult emptyFrom(
+        AlgorithmProcessingTimings timings,
+        Map<String, Object> configurationMap
+    ) {
+        return new KCoreDecompositionMutateResult(
+            0,
+            0,
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            0,
+            timings.mutateOrWriteMillis,
+            configurationMap
+        );
+    }
 
+    public static final class Builder extends AbstractResultBuilder<KCoreDecompositionMutateResult> {
         private long degeneracy;
 
         public Builder withDegeneracy(long degeneracy) {
@@ -64,5 +78,4 @@ public class KCoreDecompositionMutateResult extends StandardMutateResult {
             );
         }
     }
-
 }

@@ -40,6 +40,7 @@ public enum LabelForProgressTracking {
     FilteredNodeSimilarity("Filtered Node Similarity"),
     HarmonicCentrality("HarmonicCentrality"),
     K1Coloring("K1Coloring"),
+    KCore("KCoreDecomposition"),
     KNN("K-Nearest Neighbours"),
     KSpanningTree("K Spanning Tree"),
     LongestPath("LongestPath"),
@@ -79,6 +80,7 @@ public enum LabelForProgressTracking {
             case FilteredNodeSimilarity -> FilteredNodeSimilarity;
             case HarmonicCentrality -> HarmonicCentrality;
             case K1Coloring -> K1Coloring;
+            case KCore -> KCore;
             case KNN -> KNN;
             case KSpanningTree -> KSpanningTree;
             case LongestPath -> LongestPath;

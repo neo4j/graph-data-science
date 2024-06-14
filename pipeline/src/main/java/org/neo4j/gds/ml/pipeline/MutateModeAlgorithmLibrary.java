@@ -78,6 +78,7 @@ final class MutateModeAlgorithmLibrary {
             case FilteredNodeSimilarity -> CanonicalProcedureName.parse("gds.nodeSimilarity.filtered");
             case HarmonicCentrality -> CanonicalProcedureName.parse("gds.closeness.harmonic");
             case K1Coloring -> CanonicalProcedureName.parse("gds.k1coloring");
+            case KCore -> CanonicalProcedureName.parse("gds.kcore");
             case KNN -> CanonicalProcedureName.parse("gds.knn");
             case KSpanningTree -> null;
             case LongestPath -> null;

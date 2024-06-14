@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.kcore;
 
-import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionMutateResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.algorithms.community.KCoreDecompositionMutateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -44,7 +44,7 @@ public class KCoreDecompositionMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().kCoreMutate(graphName, configuration);
+        return facade.algorithms().community().kCoreMutateStub().execute(graphName, configuration);
     }
 
     @Procedure(value = "gds.kcore.mutate.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class KCoreDecompositionMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().kCoreEstimateMutate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().community().kCoreMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

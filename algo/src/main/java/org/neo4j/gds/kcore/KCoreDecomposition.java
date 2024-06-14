@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.kcore;
 
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeIntArray;
@@ -50,19 +49,16 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
     //When only 2% nodes remain in the graph, we can create a smaller array to loop over these ones only
     static double REBUILD_CONSTANT = 0.02;
 
-    public KCoreDecomposition(Graph graph, Concurrency concurrency, ProgressTracker progressTracker) {
-        super(progressTracker);
-        this.graph = graph;
-        this.concurrency = concurrency;
-        this.chunkSize = CHUNK_SIZE;
+    public KCoreDecomposition(Graph graph, Concurrency concurrency, ProgressTracker progressTracker, TerminationFlag terminationFlag) {
+        this(graph, concurrency, progressTracker, CHUNK_SIZE, terminationFlag);
     }
 
-    @TestOnly
-    KCoreDecomposition(Graph graph, Concurrency concurrency, ProgressTracker progressTracker, int chunkSize) {
+    KCoreDecomposition(Graph graph, Concurrency concurrency, ProgressTracker progressTracker, int chunkSize, TerminationFlag terminationFlag) {
         super(progressTracker);
         this.graph = graph;
         this.concurrency = concurrency;
         this.chunkSize = chunkSize;
+        this.terminationFlag = terminationFlag;
     }
 
     @Override

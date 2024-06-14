@@ -26,7 +26,6 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacad
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStreamConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionWriteConfig;
@@ -54,7 +53,6 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
 import org.neo4j.gds.procedures.algorithms.community.ProcedureStatisticsComputationInstructions;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionMutateResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionStatsResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionStreamResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionWriteResult;
@@ -158,20 +156,6 @@ public class CommunityProcedureFacade {
         return KCoreComputationalResultTransformer.toStreamResult(computationResult);
     }
 
-    public Stream<KCoreDecompositionMutateResult> kCoreMutate(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, KCoreDecompositionMutateConfig::of);
-
-        var computationResult = mutateBusinessFacade.kCore(
-            graphName,
-            config
-        );
-
-        return Stream.of(KCoreComputationalResultTransformer.toMutateResult(computationResult));
-    }
-
     public Stream<KCoreDecompositionStatsResult> kCoreStats(
         String graphName,
         Map<String, Object> configuration
@@ -205,14 +189,6 @@ public class CommunityProcedureFacade {
         Map<String, Object> algoConfiguration
     ) {
         var config = configurationCreator.createConfiguration(algoConfiguration, KCoreDecompositionStreamConfig::of);
-        return Stream.of(estimateBusinessFacade.kcore(graphNameOrConfiguration, config));
-    }
-
-    public Stream<MemoryEstimateResult> kCoreEstimateMutate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, KCoreDecompositionMutateConfig::of);
         return Stream.of(estimateBusinessFacade.kcore(graphNameOrConfiguration, config));
     }
 
