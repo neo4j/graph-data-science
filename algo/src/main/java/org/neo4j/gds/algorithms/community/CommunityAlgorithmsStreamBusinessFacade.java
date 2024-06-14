@@ -22,8 +22,6 @@ package org.neo4j.gds.algorithms.community;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
-import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import org.neo4j.gds.kmeans.KmeansBaseConfig;
 import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
@@ -47,20 +45,6 @@ public class CommunityAlgorithmsStreamBusinessFacade {
 
     public CommunityAlgorithmsStreamBusinessFacade(CommunityAlgorithmsFacade communityAlgorithmsFacade) {
         this.communityAlgorithmsFacade = communityAlgorithmsFacade;
-    }
-
-    public StreamComputationResult<KCoreDecompositionResult> kCore(
-        String graphName,
-        KCoreDecompositionBaseConfig config
-    ) {
-
-        var result = this.communityAlgorithmsFacade.kCore(
-            graphName,
-            config
-        );
-        
-        return createStreamComputationResult(result);
-
     }
 
     public StreamComputationResult<LouvainResult> louvain(

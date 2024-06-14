@@ -20,33 +20,12 @@
 package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
-import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.community.specificfields.KCoreSpecificFields;
-import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.kcore.KCoreDecompositionResult;
-import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionStreamResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionWriteResult;
-
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 final class KCoreComputationalResultTransformer {
 
     private KCoreComputationalResultTransformer() {}
-
-    static Stream<KCoreDecompositionStreamResult> toStreamResult(StreamComputationResult<KCoreDecompositionResult> computationResult) {
-        return computationResult.result().map(kCoreResult -> {
-            var coreValues = kCoreResult.coreValues();
-            var graph = computationResult.graph();
-            return LongStream
-                .range(IdMap.START_NODE_ID, graph.nodeCount())
-                .mapToObj(nodeId ->
-                    new KCoreDecompositionStreamResult(
-                        graph.toOriginalNodeId(nodeId),
-                        coreValues.get(nodeId)
-                    ));
-        }).orElseGet(Stream::empty);
-    }
 
     static KCoreDecompositionWriteResult toWriteResult(NodePropertyWriteResult<KCoreSpecificFields> computationResult) {
         return new KCoreDecompositionWriteResult(

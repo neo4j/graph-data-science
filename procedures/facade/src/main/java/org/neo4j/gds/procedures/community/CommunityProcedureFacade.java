@@ -26,7 +26,6 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacad
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.kcore.KCoreDecompositionStreamConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionWriteConfig;
 import org.neo4j.gds.kmeans.KmeansMutateConfig;
 import org.neo4j.gds.kmeans.KmeansStatsConfig;
@@ -52,7 +51,6 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
 import org.neo4j.gds.procedures.algorithms.community.ProcedureStatisticsComputationInstructions;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionStreamResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionWriteResult;
 import org.neo4j.gds.procedures.community.kmeans.KmeansMutateResult;
 import org.neo4j.gds.procedures.community.kmeans.KmeansStatsResult;
@@ -136,24 +134,6 @@ public class CommunityProcedureFacade {
         this.writeBusinessFacade = writeBusinessFacade;
     }
 
-    // K-Core Decomposition
-    public Stream<KCoreDecompositionStreamResult> kCoreStream(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var streamConfig = configurationCreator.createConfigurationForStream(
-            configuration,
-            KCoreDecompositionStreamConfig::of
-        );
-
-        var computationResult = streamBusinessFacade.kCore(
-            graphName,
-            streamConfig
-        );
-
-        return KCoreComputationalResultTransformer.toStreamResult(computationResult);
-    }
-
     public Stream<KCoreDecompositionWriteResult> kCoreWrite(
         String graphName,
         Map<String, Object> configuration
@@ -167,16 +147,6 @@ public class CommunityProcedureFacade {
 
         return Stream.of(KCoreComputationalResultTransformer.toWriteResult(computationResult));
     }
-
-    public Stream<MemoryEstimateResult> kCoreEstimateStream(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, KCoreDecompositionStreamConfig::of);
-        return Stream.of(estimateBusinessFacade.kcore(graphNameOrConfiguration, config));
-    }
-
-    // K-Core Decomposition end
 
     public Stream<LouvainStatsResult> louvainStats(
         String graphName,

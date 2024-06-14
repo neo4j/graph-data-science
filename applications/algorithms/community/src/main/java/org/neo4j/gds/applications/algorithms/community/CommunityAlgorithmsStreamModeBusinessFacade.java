@@ -29,6 +29,8 @@ import org.neo4j.gds.conductance.ConductanceStreamConfig;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.k1coloring.K1ColoringStreamConfig;
+import org.neo4j.gds.kcore.KCoreDecompositionResult;
+import org.neo4j.gds.kcore.KCoreDecompositionStreamConfig;
 import org.neo4j.gds.wcc.WccStreamConfig;
 
 import java.util.Optional;
@@ -36,6 +38,7 @@ import java.util.Optional;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ApproximateMaximumKCut;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Conductance;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.K1Coloring;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KCore;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
 
 public class CommunityAlgorithmsStreamModeBusinessFacade {
@@ -96,6 +99,22 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
             K1Coloring,
             estimationFacade::k1Coloring,
             graph -> algorithms.k1Coloring(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT kCore(
+        GraphName graphName,
+        KCoreDecompositionStreamConfig configuration,
+        ResultBuilder<KCoreDecompositionStreamConfig, KCoreDecompositionResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            KCore,
+            estimationFacade::kCore,
+            graph -> algorithms.kCore(graph, configuration),
             Optional.empty(),
             resultBuilder
         );

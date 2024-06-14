@@ -32,6 +32,7 @@ import org.neo4j.gds.k1coloring.K1ColoringStatsConfig;
 import org.neo4j.gds.k1coloring.K1ColoringStreamConfig;
 import org.neo4j.gds.k1coloring.K1ColoringWriteConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
+import org.neo4j.gds.kcore.KCoreDecompositionStreamConfig;
 import org.neo4j.gds.procedures.algorithms.community.stubs.ApproximateMaximumKCutMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.K1ColoringMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.KCoreMutateStub;
@@ -268,6 +269,34 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             KCoreDecompositionStatsConfig::of,
+            configuration -> estimationMode().kCore(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<KCoreDecompositionStreamResult> kCoreStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new KCoreResultBuilderForStreamMode();
+
+        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+            graphName,
+            configuration,
+            KCoreDecompositionStreamConfig::of,
+            streamMode()::kCore,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> kCoreStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            KCoreDecompositionStreamConfig::of,
             configuration -> estimationMode().kCore(configuration, graphNameOrConfiguration)
         );
 

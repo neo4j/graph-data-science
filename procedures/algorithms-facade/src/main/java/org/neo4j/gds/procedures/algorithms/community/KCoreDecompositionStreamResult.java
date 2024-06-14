@@ -17,14 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.community.kcore;
+package org.neo4j.gds.procedures.algorithms.community;
 
 public class KCoreDecompositionStreamResult {
     public final long nodeId;
     @SuppressWarnings("WeakerAccess")
     public final long coreValue;
 
-    public KCoreDecompositionStreamResult(long nodeId, int coreValue) {
+    KCoreDecompositionStreamResult(long nodeId, int coreValue) {
         this.nodeId = nodeId;
         this.coreValue = coreValue;
     }
