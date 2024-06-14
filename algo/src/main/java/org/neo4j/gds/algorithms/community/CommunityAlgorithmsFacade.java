@@ -22,15 +22,6 @@ package org.neo4j.gds.algorithms.community;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.conductance.ConductanceAlgorithmFactory;
-import org.neo4j.gds.conductance.ConductanceBaseConfig;
-import org.neo4j.gds.conductance.ConductanceResult;
-import org.neo4j.gds.k1coloring.K1ColoringAlgorithmFactory;
-import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
-import org.neo4j.gds.k1coloring.K1ColoringResult;
-import org.neo4j.gds.kcore.KCoreDecompositionAlgorithmFactory;
-import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
-import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import org.neo4j.gds.kmeans.KmeansAlgorithmFactory;
 import org.neo4j.gds.kmeans.KmeansBaseConfig;
 import org.neo4j.gds.kmeans.KmeansResult;
@@ -79,18 +70,6 @@ public class CommunityAlgorithmsFacade {
             config,
             Optional.empty(),
             new IntersectingTriangleCountFactory<>()
-        );
-    }
-
-    AlgorithmComputationResult<KCoreDecompositionResult> kCore(
-        String graphName,
-        KCoreDecompositionBaseConfig config
-    ) {
-        return algorithmRunner.run(
-            graphName,
-            config,
-            Optional.empty(),
-            new KCoreDecompositionAlgorithmFactory<>()
         );
     }
 
@@ -175,31 +154,6 @@ public class CommunityAlgorithmsFacade {
             config,
             Optional.empty(),
             new LocalClusteringCoefficientFactory<>()
-        );
-    }
-
-    AlgorithmComputationResult<K1ColoringResult> k1Coloring(
-        String graphName,
-        K1ColoringBaseConfig config
-    ) {
-        return algorithmRunner.run(
-            graphName,
-            config,
-            Optional.empty(),
-            new K1ColoringAlgorithmFactory<>()
-        );
-    }
-
-    // kill
-    AlgorithmComputationResult<ConductanceResult> conductance(
-        String graphName,
-        ConductanceBaseConfig config
-    ) {
-        return algorithmRunner.run(
-            graphName,
-            config,
-            config.relationshipWeightProperty(),
-            new ConductanceAlgorithmFactory<>()
         );
     }
 
