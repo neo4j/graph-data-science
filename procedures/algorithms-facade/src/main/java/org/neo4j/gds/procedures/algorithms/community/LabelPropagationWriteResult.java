@@ -17,17 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.community.labelpropagation;
+package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.procedures.algorithms.community.LabelPropagationResultBuilder;
-import org.neo4j.gds.procedures.algorithms.community.LabelPropagationStatsResult;
 
+import java.util.Collections;
 import java.util.Map;
 
 public class LabelPropagationWriteResult extends LabelPropagationStatsResult {
-
     public final long writeMillis;
     public final long nodePropertiesWritten;
 
@@ -61,9 +60,25 @@ public class LabelPropagationWriteResult extends LabelPropagationStatsResult {
         return new Builder(returnColumns, concurrency);
     }
 
+    static LabelPropagationWriteResult emptyFrom(
+        AlgorithmProcessingTimings timings,
+        Map<String, Object> configurationMap
+    ) {
+        return new LabelPropagationWriteResult(
+            0,
+            false,
+            0,
+            Collections.emptyMap(),
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            0,
+            timings.mutateOrWriteMillis,
+            0,
+            configurationMap
+        );
+    }
 
     public static class Builder extends LabelPropagationResultBuilder<LabelPropagationWriteResult> {
-
         Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
             super(returnColumns, concurrency);
         }

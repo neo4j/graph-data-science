@@ -35,6 +35,8 @@ import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import org.neo4j.gds.kcore.KCoreDecompositionWriteConfig;
 import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.kmeans.KmeansWriteConfig;
+import org.neo4j.gds.labelpropagation.LabelPropagationResult;
+import org.neo4j.gds.labelpropagation.LabelPropagationWriteConfig;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.wcc.WccWriteConfig;
 
@@ -43,6 +45,7 @@ import java.util.Optional;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.K1Coloring;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KCore;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KMeans;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.LabelPropagation;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
 
 public final class CommunityAlgorithmsWriteModeBusinessFacade {
@@ -130,6 +133,24 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
             KMeans,
             () -> estimationFacade.kMeans(configuration),
             graph -> algorithms.kMeans(graph, configuration),
+            Optional.of(writeStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT labelPropagation(
+        GraphName graphName,
+        LabelPropagationWriteConfig configuration,
+        ResultBuilder<LabelPropagationWriteConfig, LabelPropagationResult, RESULT, Pair<NodePropertiesWritten, NodePropertyValues>> resultBuilder
+    ) {
+        var writeStep = new LabelPropagationWriteStep(writeToDatabase, configuration);
+
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            LabelPropagation,
+            estimationFacade::labelPropagation,
+            graph -> algorithms.labelPropagation(graph, configuration),
             Optional.of(writeStep),
             resultBuilder
         );

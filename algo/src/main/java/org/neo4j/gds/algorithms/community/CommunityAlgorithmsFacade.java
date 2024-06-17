@@ -22,9 +22,6 @@ package org.neo4j.gds.algorithms.community;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
-import org.neo4j.gds.labelpropagation.LabelPropagationFactory;
-import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.leiden.LeidenAlgorithmFactory;
 import org.neo4j.gds.leiden.LeidenBaseConfig;
 import org.neo4j.gds.leiden.LeidenResult;
@@ -91,18 +88,6 @@ public class CommunityAlgorithmsFacade {
             config,
             config.relationshipWeightProperty(),
             new LeidenAlgorithmFactory<>()
-        );
-    }
-
-    AlgorithmComputationResult<LabelPropagationResult> labelPropagation(
-        String graphName,
-        LabelPropagationBaseConfig configuration
-    ) {
-        return algorithmRunner.run(
-            graphName,
-            configuration,
-            configuration.relationshipWeightProperty(),
-            new LabelPropagationFactory<>()
         );
     }
 

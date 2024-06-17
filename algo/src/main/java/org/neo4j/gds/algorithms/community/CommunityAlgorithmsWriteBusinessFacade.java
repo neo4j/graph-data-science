@@ -23,7 +23,6 @@ import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.community.specificfields.AlphaSccSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.CommunityStatisticsSpecificFields;
-import org.neo4j.gds.algorithms.community.specificfields.LabelPropagationSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LeidenSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LocalClusteringCoefficientSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LouvainSpecificFields;
@@ -38,7 +37,6 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.labelpropagation.LabelPropagationWriteConfig;
 import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.leiden.LeidenWriteConfig;
 import org.neo4j.gds.louvain.LouvainResult;
@@ -185,48 +183,6 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             intermediateResult.computeMilliseconds,
             () -> LouvainSpecificFields.EMPTY,
             "LouvainWrite",
-            configuration.writeConcurrency(),
-            configuration.writeProperty(),
-            configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(algorithmResult.resultStore())
-        );
-    }
-
-    public NodePropertyWriteResult<LabelPropagationSpecificFields>  labelPropagation(
-        String graphName,
-        LabelPropagationWriteConfig configuration,
-        StatisticsComputationInstructions statisticsComputationInstructions
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.labelPropagation(graphName, configuration)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        return writeToDatabase(
-            algorithmResult,
-            configuration,
-            ((result, config) -> CommunityCompanion.nodePropertyValues(
-                config.isIncremental(),
-                config.writeProperty(),
-                config.seedProperty(),
-                config.consecutiveIds(),
-                NodePropertyValuesAdapter.adapt(result.labels()),
-                config.minCommunitySize(),
-                config.concurrency(),
-                () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
-            )),
-            (result -> result.labels()::get),
-            (result, componentCount, communitySummary) -> LabelPropagationSpecificFields.from(
-                result.ranIterations(),
-                result.didConverge(),
-                componentCount,
-                communitySummary
-            ),
-            statisticsComputationInstructions,
-            intermediateResult.computeMilliseconds,
-            () -> LabelPropagationSpecificFields.EMPTY,
-            "LabelPropagationWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),

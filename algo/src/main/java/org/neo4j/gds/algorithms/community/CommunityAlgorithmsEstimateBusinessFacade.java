@@ -21,12 +21,6 @@ package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
-import org.neo4j.gds.kcore.KCoreDecompositionMemoryEstimateDefinition;
-import org.neo4j.gds.kmeans.KmeansBaseConfig;
-import org.neo4j.gds.kmeans.KmeansMemoryEstimateDefinition;
-import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
-import org.neo4j.gds.labelpropagation.LabelPropagationMemoryEstimateDefinition;
 import org.neo4j.gds.leiden.LeidenBaseConfig;
 import org.neo4j.gds.leiden.LeidenMemoryEstimateDefinition;
 import org.neo4j.gds.louvain.LouvainBaseConfig;
@@ -54,41 +48,6 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
         this.algorithmEstimator = algorithmEstimator;
     }
 
-    public <C extends KCoreDecompositionBaseConfig> MemoryEstimateResult kcore(
-        Object graphNameOrConfiguration,
-        C configuration
-    ) {
-        return algorithmEstimator.estimate(
-            graphNameOrConfiguration,
-            configuration,
-            Optional.empty(),
-            new KCoreDecompositionMemoryEstimateDefinition()
-        );
-    }
-
-    public <C extends KmeansBaseConfig> MemoryEstimateResult kmeans(
-        Object graphNameOrConfiguration,
-        C configuration
-    ) {
-        return algorithmEstimator.estimate(
-            graphNameOrConfiguration,
-            configuration,
-            Optional.empty(),
-            new KmeansMemoryEstimateDefinition(configuration.toParameters())
-        );
-    }
-
-    public <C extends LabelPropagationBaseConfig> MemoryEstimateResult labelPropagation(
-        Object graphNameOrConfiguration,
-        C configuration
-    ) {
-        return algorithmEstimator.estimate(
-            graphNameOrConfiguration,
-            configuration,
-            configuration.relationshipWeightProperty(),
-            new LabelPropagationMemoryEstimateDefinition()
-        );
-    }
     public <C extends TriangleCountBaseConfig> MemoryEstimateResult triangleCount(
         Object graphNameOrConfiguration,
         C configuration
