@@ -39,6 +39,7 @@ qala-datagen = "2.5.1"
 record-builder = "41"
 reflections = "0.10.2"
 sb-contrib = "7.6.3"
+stormpot = "3.1"
 
 [libraries]
 agrona = { module = "org.agrona:agrona", version.ref = "agrona" }
@@ -95,6 +96,7 @@ protoc = { module = "com.google.protobuf:protoc", version.ref = "protobuf" }
 qaladatagen = { module = "io.qala.datagen:qala-datagen-junit5", version.ref = "qala-datagen" }
 recordBuilder = { module = "io.soabase.record-builder:record-builder-processor", version.ref = "record-builder" }
 reflections = { module = "org.reflections:reflections", version.ref = "reflections" }
+stormpot = { module = "com.github.chrisvest:stormpot", version.ref = "stormpot" }
 
 [plugins]
 champeau-mrjar = "me.champeau.mrjar:0.1.1"
