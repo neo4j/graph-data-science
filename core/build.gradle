@@ -52,6 +52,10 @@ dependencies {
             [group: 'com.github.chrisvest',    name: 'stormpot',                 version: "3.1"],
     )
 
+    implementation (
+            openGds.caffeine,
+    )
+
     // TEST DEPENDENCIES
 
     testCompileOnly openGds.immutables.builder

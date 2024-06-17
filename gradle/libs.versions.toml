@@ -3,6 +3,7 @@ agrona = "1.21.2"
 asciidoctorj = "2.5.13"
 assertj = "3.26.0"
 bouncycastle-prov = "1.78.1"
+caffeine = "3.1.8"
 checkStyle = "10.12.1"
 commons-io = "2.16.1"
 commons-lang3 = "3.14.0"
@@ -44,6 +45,7 @@ agrona = { module = "org.agrona:agrona", version.ref = "agrona" }
 asciidoctorj = { module = "org.asciidoctor:asciidoctorj", version.ref = "asciidoctorj" }
 assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 bouncycastle-prov = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle-prov" }
+caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
 commons-io = { module = "commons-io:commons-io", version.ref = "commons-io" }
 commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "commons-lang3" }
 commons-math3 = { module = "org.apache.commons:commons-math3", version.ref = "commons-math3" }
