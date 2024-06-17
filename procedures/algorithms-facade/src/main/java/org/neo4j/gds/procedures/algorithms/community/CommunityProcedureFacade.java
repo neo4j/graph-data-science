@@ -38,6 +38,7 @@ import org.neo4j.gds.kmeans.KmeansStatsConfig;
 import org.neo4j.gds.kmeans.KmeansStreamConfig;
 import org.neo4j.gds.kmeans.KmeansWriteConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
+import org.neo4j.gds.labelpropagation.LabelPropagationStreamConfig;
 import org.neo4j.gds.procedures.algorithms.community.stubs.ApproximateMaximumKCutMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.K1ColoringMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.KCoreMutateStub;
@@ -474,6 +475,33 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             LabelPropagationStatsConfig::of,
+            configuration -> estimationMode().labelPropagation(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<LabelPropagationStreamResult> labelPropagationStream(
+        String graphName, Map<String, Object> configuration
+    ) {
+        var resultBuilder = new LabelPropagationResultBuilderForStreamMode();
+
+        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+            graphName,
+            configuration,
+            LabelPropagationStreamConfig::of,
+            streamMode()::labelPropagation,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> labelPropagationStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            LabelPropagationStreamConfig::of,
             configuration -> estimationMode().labelPropagation(configuration, graphNameOrConfiguration)
         );
 

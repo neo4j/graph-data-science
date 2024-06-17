@@ -22,8 +22,6 @@ package org.neo4j.gds.algorithms.community;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
-import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.leiden.LeidenBaseConfig;
 import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.louvain.LouvainBaseConfig;
@@ -105,20 +103,6 @@ public class CommunityAlgorithmsStreamBusinessFacade {
         var result = this.communityAlgorithmsFacade.modularity(
             graphName,
             config
-        );
-
-        return createStreamComputationResult(result);
-    }
-
-
-    public StreamComputationResult<LabelPropagationResult> labelPropagation(
-        String graphName,
-        LabelPropagationBaseConfig configuration
-    ) {
-
-        var result = this.communityAlgorithmsFacade.labelPropagation(
-            graphName,
-            configuration
         );
 
         return createStreamComputationResult(result);

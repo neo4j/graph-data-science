@@ -33,6 +33,8 @@ import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import org.neo4j.gds.kcore.KCoreDecompositionStreamConfig;
 import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.kmeans.KmeansStreamConfig;
+import org.neo4j.gds.labelpropagation.LabelPropagationResult;
+import org.neo4j.gds.labelpropagation.LabelPropagationStreamConfig;
 import org.neo4j.gds.wcc.WccStreamConfig;
 
 import java.util.Optional;
@@ -42,6 +44,7 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.K1Coloring;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KCore;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KMeans;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.LabelPropagation;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
 
 public class CommunityAlgorithmsStreamModeBusinessFacade {
@@ -134,6 +137,22 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
             KMeans,
             () -> estimationFacade.kMeans(configuration),
             graph -> algorithms.kMeans(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT labelPropagation(
+        GraphName graphName,
+        LabelPropagationStreamConfig configuration,
+        ResultBuilder<LabelPropagationStreamConfig, LabelPropagationResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            LabelPropagation,
+            estimationFacade::labelPropagation,
+            graph -> algorithms.labelPropagation(graph, configuration),
             Optional.empty(),
             resultBuilder
         );

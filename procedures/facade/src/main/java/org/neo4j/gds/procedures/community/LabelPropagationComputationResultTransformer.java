@@ -20,48 +20,12 @@
 package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
-import org.neo4j.gds.algorithms.StreamComputationResult;
-import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.algorithms.community.specificfields.LabelPropagationSpecificFields;
-import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.labelpropagation.LabelPropagationResult;
-import org.neo4j.gds.labelpropagation.LabelPropagationStreamConfig;
-import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationStreamResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationWriteResult;
-
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 final class LabelPropagationComputationResultTransformer {
 
     private LabelPropagationComputationResultTransformer() {}
-
-    static Stream<LabelPropagationStreamResult> toStreamResult(
-        StreamComputationResult<LabelPropagationResult> computationResult,
-        LabelPropagationStreamConfig configuration
-    ) {
-        return computationResult.result().map(result -> {
-            var graph = computationResult.graph();
-
-
-            var nodePropertyValues = CommunityCompanion.nodePropertyValues(
-                configuration.consecutiveIds(),
-                NodePropertyValuesAdapter.adapt(result.labels()),
-                configuration.minCommunitySize(),
-                configuration.concurrency()
-            );
-
-
-            return LongStream
-                .range(IdMap.START_NODE_ID, graph.nodeCount())
-                .filter(nodePropertyValues::hasValue)
-                .mapToObj(nodeId -> new LabelPropagationStreamResult(
-                    graph.toOriginalNodeId(nodeId),
-                    nodePropertyValues.longValue(nodeId)
-                ));
-        }).orElseGet(Stream::empty);
-    }
 
     static LabelPropagationWriteResult toWriteResult(NodePropertyWriteResult<LabelPropagationSpecificFields> computationResult) {
         return new LabelPropagationWriteResult(
