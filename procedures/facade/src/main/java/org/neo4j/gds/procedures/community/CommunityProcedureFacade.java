@@ -26,7 +26,6 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacad
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStreamConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationWriteConfig;
 import org.neo4j.gds.leiden.LeidenMutateConfig;
@@ -43,7 +42,6 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
-import org.neo4j.gds.procedures.algorithms.community.LabelPropagationStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.ProcedureStatisticsComputationInstructions;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationStreamResult;
@@ -499,21 +497,6 @@ public class CommunityProcedureFacade {
         return LabelPropagationComputationResultTransformer.toStreamResult(computationResult, streamConfig);
     }
 
-    public Stream<LabelPropagationStatsResult> labelPropagationStats(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, LabelPropagationStatsConfig::of);
-
-        var computationResult = statsBusinessFacade.labelPropagation(
-            graphName,
-            config,
-            ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
-        );
-
-        return Stream.of(LabelPropagationComputationResultTransformer.toStatsResult(computationResult, config));
-    }
-
     public Stream<LabelPropagationWriteResult> labelPropagationWrite(
         String graphName,
         Map<String, Object> configuration
@@ -534,14 +517,6 @@ public class CommunityProcedureFacade {
         Map<String, Object> algoConfiguration
     ) {
         var config = configurationCreator.createConfiguration(algoConfiguration, LabelPropagationStreamConfig::of);
-        return Stream.of(estimateBusinessFacade.labelPropagation(graphNameOrConfiguration, config));
-    }
-
-    public Stream<MemoryEstimateResult> labelPropagationEstimateStats(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, LabelPropagationStatsConfig::of);
         return Stream.of(estimateBusinessFacade.labelPropagation(graphNameOrConfiguration, config));
     }
 

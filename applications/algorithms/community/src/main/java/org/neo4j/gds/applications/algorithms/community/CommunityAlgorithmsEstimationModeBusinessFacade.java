@@ -31,6 +31,7 @@ import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionMemoryEstimateDefinition;
 import org.neo4j.gds.kmeans.KmeansBaseConfig;
 import org.neo4j.gds.kmeans.KmeansMemoryEstimateDefinition;
+import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationMemoryEstimateDefinition;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.wcc.WccBaseConfig;
@@ -108,6 +109,19 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
 
     public MemoryEstimation labelPropagation() {
         return new LabelPropagationMemoryEstimateDefinition().memoryEstimation();
+    }
+
+    public MemoryEstimateResult labelPropagation(
+        LabelPropagationBaseConfig configuration,
+        Object graphNameOrConfiguration
+    ) {
+        var memoryEstimation = labelPropagation();
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
+        );
     }
 
     public MemoryEstimation wcc(SeedConfig configuration) {

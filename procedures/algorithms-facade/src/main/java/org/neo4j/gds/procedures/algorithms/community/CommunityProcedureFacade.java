@@ -37,6 +37,7 @@ import org.neo4j.gds.kcore.KCoreDecompositionWriteConfig;
 import org.neo4j.gds.kmeans.KmeansStatsConfig;
 import org.neo4j.gds.kmeans.KmeansStreamConfig;
 import org.neo4j.gds.kmeans.KmeansWriteConfig;
+import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
 import org.neo4j.gds.procedures.algorithms.community.stubs.ApproximateMaximumKCutMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.K1ColoringMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.KCoreMutateStub;
@@ -447,6 +448,36 @@ public final class CommunityProcedureFacade {
 
     public LabelPropagationMutateStub labelPropagationMutateStub() {
         return labelPropagationMutateStub;
+    }
+
+    public Stream<LabelPropagationStatsResult> labelPropagationStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var statisticsComputationInstructions = ProcedureStatisticsComputationInstructions.forCommunities(
+            procedureReturnColumns);
+        var resultBuilder = new LabelPropagationResultBuilderForStatsMode(statisticsComputationInstructions);
+
+        return algorithmExecutionScaffolding.runAlgorithm(
+            graphName,
+            configuration,
+            LabelPropagationStatsConfig::of,
+            statsMode()::labelPropagation,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> labelPropagationStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            LabelPropagationStatsConfig::of,
+            configuration -> estimationMode().labelPropagation(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
     }
 
     public WccMutateStub wccMutateStub() {

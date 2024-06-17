@@ -44,7 +44,7 @@ public class LabelPropagationStatsProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().labelPropagationStats(graphName, configuration);
+        return facade.algorithms().community().labelPropagationStats(graphName, configuration);
     }
 
     @Procedure(value = "gds.labelPropagation.stats.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class LabelPropagationStatsProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().labelPropagationEstimateStats(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().community().labelPropagationStatsEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

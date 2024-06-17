@@ -22,7 +22,6 @@ package org.neo4j.gds.algorithms.community;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.community.specificfields.CommunityStatisticsSpecificFields;
-import org.neo4j.gds.algorithms.community.specificfields.LabelPropagationSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LeidenSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LocalClusteringCoefficientSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LouvainSpecificFields;
@@ -33,7 +32,6 @@ import org.neo4j.gds.algorithms.community.specificfields.TriangleCountSpecificFi
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
 import org.neo4j.gds.leiden.LeidenStatsConfig;
 import org.neo4j.gds.louvain.LouvainStatsConfig;
 import org.neo4j.gds.modularity.ModularityStatsConfig;
@@ -53,35 +51,6 @@ public class CommunityAlgorithmsStatsBusinessFacade {
 
     public CommunityAlgorithmsStatsBusinessFacade(CommunityAlgorithmsFacade communityAlgorithmsFacade) {
         this.communityAlgorithmsFacade = communityAlgorithmsFacade;
-    }
-
-    public StatsResult<LabelPropagationSpecificFields> labelPropagation(
-        String graphName,
-        LabelPropagationStatsConfig configuration,
-        StatisticsComputationInstructions statisticsComputationInstructions
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> communityAlgorithmsFacade.labelPropagation(graphName, configuration)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        return statsResult(
-            algorithmResult,
-            configuration,
-            (result -> result.labels()::get),
-            (result, componentCount, communitySummary) -> {
-                return LabelPropagationSpecificFields.from(
-                    result.ranIterations(),
-                    result.didConverge(),
-                    componentCount,
-                    communitySummary
-                );
-            },
-            statisticsComputationInstructions,
-            intermediateResult.computeMilliseconds,
-            () -> LabelPropagationSpecificFields.EMPTY
-        );
     }
 
     public StatsResult<LocalClusteringCoefficientSpecificFields> localClusteringCoefficient(

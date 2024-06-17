@@ -20,9 +20,11 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 
+import java.util.Collections;
 import java.util.Map;
 
 public class LabelPropagationStatsResult extends StandardStatsResult {
@@ -46,6 +48,22 @@ public class LabelPropagationStatsResult extends StandardStatsResult {
         this.didConverge = didConverge;
         this.communityCount = communityCount;
         this.communityDistribution = communityDistribution;
+    }
+
+    static LabelPropagationStatsResult emptyFrom(
+        AlgorithmProcessingTimings timings,
+        Map<String, Object> configurationMap
+    ) {
+        return new LabelPropagationStatsResult(
+            0,
+            false,
+            0,
+            Collections.emptyMap(),
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            0,
+            configurationMap
+        );
     }
 
     public static class Builder extends LabelPropagationResultBuilder<LabelPropagationStatsResult> {
