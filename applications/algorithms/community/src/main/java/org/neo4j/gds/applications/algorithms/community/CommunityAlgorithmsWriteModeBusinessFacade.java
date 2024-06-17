@@ -33,6 +33,8 @@ import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.k1coloring.K1ColoringWriteConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import org.neo4j.gds.kcore.KCoreDecompositionWriteConfig;
+import org.neo4j.gds.kmeans.KmeansResult;
+import org.neo4j.gds.kmeans.KmeansWriteConfig;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.wcc.WccWriteConfig;
 
@@ -40,6 +42,7 @@ import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.K1Coloring;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KCore;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KMeans;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
 
 public final class CommunityAlgorithmsWriteModeBusinessFacade {
@@ -109,6 +112,24 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
             KCore,
             estimationFacade::kCore,
             graph -> algorithms.kCore(graph, configuration),
+            Optional.of(writeStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT kMeans(
+        GraphName graphName,
+        KmeansWriteConfig configuration,
+        ResultBuilder<KmeansWriteConfig, KmeansResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var writeStep = new KMeansWriteStep(writeToDatabase, configuration);
+
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            KMeans,
+            () -> estimationFacade.kMeans(configuration),
+            graph -> algorithms.kMeans(graph, configuration),
             Optional.of(writeStep),
             resultBuilder
         );

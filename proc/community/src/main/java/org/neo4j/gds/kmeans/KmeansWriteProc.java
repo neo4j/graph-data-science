@@ -20,7 +20,7 @@
 package org.neo4j.gds.kmeans;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.kmeans.KmeansWriteResult;
+import org.neo4j.gds.procedures.algorithms.community.KmeansWriteResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -46,7 +46,7 @@ public class KmeansWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().kmeansWrite(graphName, configuration);
+        return facade.algorithms().community().kmeansWrite(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)
@@ -70,7 +70,7 @@ public class KmeansWriteProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        return facade.community().kmeansEstimateWrite(graphName, configuration);
+        return facade.algorithms().community().kmeansWriteEstimate(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)
@@ -87,6 +87,4 @@ public class KmeansWriteProc {
             .warn("Procedure `gds.beta.kmeans.write.estimate` has been deprecated, please use `gds.kmeans.write.estimate`.");
         return estimate(graphName, configuration);
     }
-
-
 }

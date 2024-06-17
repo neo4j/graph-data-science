@@ -22,9 +22,6 @@ package org.neo4j.gds.algorithms.community;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.kmeans.KmeansAlgorithmFactory;
-import org.neo4j.gds.kmeans.KmeansBaseConfig;
-import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationFactory;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
@@ -130,18 +127,6 @@ public class CommunityAlgorithmsFacade {
             config,
             config.relationshipWeightProperty(),
             new ModularityCalculatorFactory<>()
-        );
-    }
-
-    AlgorithmComputationResult<KmeansResult> kmeans(
-        String graphName,
-        KmeansBaseConfig config
-    ) {
-        return algorithmRunner.run(
-            graphName,
-            config,
-            Optional.empty(),
-            new KmeansAlgorithmFactory<>()
         );
     }
 

@@ -26,7 +26,6 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacad
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.kmeans.KmeansWriteConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationMutateConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStreamConfig;
@@ -47,7 +46,6 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
 import org.neo4j.gds.procedures.algorithms.community.ProcedureStatisticsComputationInstructions;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.community.kmeans.KmeansWriteResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationMutateResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationStatsResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationStreamResult;
@@ -623,30 +621,6 @@ public class CommunityProcedureFacade {
     ) {
         var config = configurationCreator.createConfiguration(algoConfiguration, ModularityStatsConfig::of);
         return Stream.of(estimateBusinessFacade.modularity(graphNameOrConfiguration, config));
-    }
-
-    public Stream<KmeansWriteResult> kmeansWrite(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var writeConfig = configurationCreator.createConfiguration(configuration, KmeansWriteConfig::of);
-
-        var computationResult = writeBusinessFacade.kmeans(
-            graphName,
-            writeConfig,
-            ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns),
-            procedureReturnColumns.contains("centroids")
-        );
-
-        return Stream.of(KmeansComputationResultTransformer.toWriteResult(computationResult));
-    }
-
-    public Stream<MemoryEstimateResult> kmeansEstimateWrite(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, KmeansWriteConfig::of);
-        return Stream.of(estimateBusinessFacade.kmeans(graphNameOrConfiguration, config));
     }
 
     public Stream<LocalClusteringCoefficientStreamResult> localClusteringCoefficientStream(

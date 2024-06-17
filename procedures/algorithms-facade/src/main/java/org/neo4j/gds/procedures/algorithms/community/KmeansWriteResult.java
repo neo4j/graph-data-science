@@ -17,19 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.community.kmeans;
+package org.neo4j.gds.procedures.algorithms.community;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.procedures.algorithms.community.KmeansStatsResult;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 public class KmeansWriteResult extends KmeansStatsResult {
-
     public final long writeMillis;
     public final long nodePropertiesWritten;
 
@@ -39,10 +38,10 @@ public class KmeansWriteResult extends KmeansStatsResult {
         long postProcessingMillis,
         long writeMillis,
         long nodePropertiesWritten,
-        @Nullable Map<String, Object> communityDistribution,
-        @Nullable List<List<Double>> centroids,
-        @Nullable double averageDistanceToCentroid,
-        @Nullable double averageSilhouette,
+        Map<String, Object> communityDistribution,
+        List<List<Double>> centroids,
+        double averageDistanceToCentroid,
+        double averageSilhouette,
         Map<String, Object> configuration
     ) {
         super(
@@ -57,6 +56,21 @@ public class KmeansWriteResult extends KmeansStatsResult {
         );
         this.writeMillis = writeMillis;
         this.nodePropertiesWritten = nodePropertiesWritten;
+    }
+
+    static KmeansWriteResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+        return new KmeansWriteResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            0,
+            timings.mutateOrWriteMillis,
+            0,
+            Collections.emptyMap(),
+            Collections.emptyList(),
+            0,
+            0,
+            configurationMap
+        );
     }
 
     public static class Builder extends AbstractCommunityResultBuilder<KmeansWriteResult> {
@@ -101,5 +115,4 @@ public class KmeansWriteResult extends KmeansStatsResult {
             return this;
         }
     }
-
 }

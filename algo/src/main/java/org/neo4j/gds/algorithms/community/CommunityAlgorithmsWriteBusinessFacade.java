@@ -23,7 +23,6 @@ import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.community.specificfields.AlphaSccSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.CommunityStatisticsSpecificFields;
-import org.neo4j.gds.algorithms.community.specificfields.KmeansSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LabelPropagationSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LeidenSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LocalClusteringCoefficientSpecificFields;
@@ -39,8 +38,6 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.kmeans.KmeansResult;
-import org.neo4j.gds.kmeans.KmeansWriteConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationWriteConfig;
 import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.leiden.LeidenWriteConfig;
@@ -59,7 +56,6 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.algorithms.community.CommunityCompanion.arrayMatrixToListMatrix;
 import static org.neo4j.gds.algorithms.community.CommunityCompanion.createIntermediateCommunitiesNodePropertyValues;
 import static org.neo4j.gds.algorithms.runner.AlgorithmRunner.runWithTiming;
 
@@ -283,44 +279,6 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             intermediateResult.computeMilliseconds,
             () -> LeidenSpecificFields.EMPTY,
             "LeidenWrite",
-            configuration.writeConcurrency(),
-            configuration.writeProperty(),
-            configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(algorithmResult.resultStore())
-        );
-    }
-
-
-    public NodePropertyWriteResult<KmeansSpecificFields> kmeans(
-        String graphName,
-        KmeansWriteConfig configuration,
-        StatisticsComputationInstructions statisticsComputationInstructions,
-        boolean computeListOfCentroids
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.kmeans(graphName, configuration)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        NodePropertyValuesMapper<KmeansResult, KmeansWriteConfig> mapper = ((result, config) ->
-            NodePropertyValuesAdapter.adapt(result.communities()));
-
-        return writeToDatabase(
-            algorithmResult,
-            configuration,
-            mapper,
-            (result -> result.communities()::get),
-            (result, componentCount, communitySummary) -> new KmeansSpecificFields(
-                communitySummary,
-                arrayMatrixToListMatrix(computeListOfCentroids, result.centers()),
-                result.averageDistanceToCentroid(),
-                result.averageSilhouette()
-            ),
-            statisticsComputationInstructions,
-            intermediateResult.computeMilliseconds,
-            () -> KmeansSpecificFields.EMPTY,
-            "KmeansWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
