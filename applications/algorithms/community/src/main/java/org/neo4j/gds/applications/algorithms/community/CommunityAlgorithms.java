@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.community;
 
+import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
@@ -47,11 +48,15 @@ import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.labelpropagation.LabelPropagation;
 import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
+import org.neo4j.gds.leiden.Leiden;
+import org.neo4j.gds.leiden.LeidenMutateConfig;
+import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.wcc.Wcc;
 import org.neo4j.gds.wcc.WccBaseConfig;
 
 import java.util.List;
+import java.util.Optional;
 
 public class CommunityAlgorithms {
     private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
@@ -184,6 +189,49 @@ public class CommunityAlgorithms {
             DefaultPool.INSTANCE,
             progressTracker,
             terminationFlag
+        );
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+    }
+
+    LeidenResult leiden(Graph graph, LeidenMutateConfig configuration) {
+        if (!graph.schema().isUndirected()) {
+            throw new IllegalArgumentException(
+                "The Leiden algorithm works only with undirected graphs. Please orient the edges properly");
+        }
+
+        var iterations = configuration.maxLevels();
+        var iterativeTasks = Tasks.iterativeDynamic(
+            "Iteration",
+            () ->
+                List.of(
+                    Tasks.leaf("Local Move", 1),
+                    Tasks.leaf("Modularity Computation", graph.nodeCount()),
+                    Tasks.leaf("Refinement", graph.nodeCount()),
+                    Tasks.leaf("Aggregation", graph.nodeCount())
+                ),
+            iterations
+        );
+        var initializationTask = Tasks.leaf("Initialization", graph.nodeCount());
+        var task = Tasks.task(LabelForProgressTracking.Leiden.value, initializationTask, iterativeTasks);
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var parameters = configuration.toParameters();
+        var seedValues = Optional.ofNullable(parameters.seedProperty())
+            .map(seedParameter -> CommunityCompanion.extractSeedingNodePropertyValues(graph, seedParameter))
+            .orElse(null);
+
+        var algorithm = new Leiden(
+            graph,
+            parameters.maxLevels(),
+            parameters.gamma(),
+            parameters.theta(),
+            parameters.includeIntermediateCommunities(),
+            parameters.randomSeed().orElse(0L),
+            seedValues,
+            parameters.tolerance(),
+            parameters.concurrency(),
+            progressTracker
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);

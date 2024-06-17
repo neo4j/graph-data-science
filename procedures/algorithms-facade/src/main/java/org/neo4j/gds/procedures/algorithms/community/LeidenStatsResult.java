@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.community.leiden;
+package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -60,7 +60,6 @@ public class LeidenStatsResult extends StandardStatsResult {
     }
 
     public static class StatsBuilder extends AbstractCommunityResultBuilder<LeidenStatsResult> {
-
         long levels = -1;
         boolean didConverge = false;
         double modularity;
@@ -107,5 +106,4 @@ public class LeidenStatsResult extends StandardStatsResult {
             );
         }
     }
-
 }

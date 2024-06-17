@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.applications.algorithms.community;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
@@ -35,6 +37,8 @@ import org.neo4j.gds.kmeans.KmeansMutateConfig;
 import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.labelpropagation.LabelPropagationMutateConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
+import org.neo4j.gds.leiden.LeidenMutateConfig;
+import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.wcc.WccMutateConfig;
 
 import java.util.Optional;
@@ -44,6 +48,7 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KCore;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KMeans;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.LabelPropagation;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Leiden;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
 
 public class CommunityAlgorithmsMutateModeBusinessFacade {
@@ -149,6 +154,24 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
             LabelPropagation,
             estimation::labelPropagation,
             graph -> algorithms.labelPropagation(graph, configuration),
+            Optional.of(mutateStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT leiden(
+        GraphName graphName,
+        LeidenMutateConfig configuration,
+        ResultBuilder<LeidenMutateConfig, LeidenResult, RESULT, Pair<NodePropertiesWritten, NodePropertyValues>> resultBuilder
+    ) {
+        var mutateStep = new LeidenMutateStep(mutateNodeProperty, configuration);
+
+        return template.processAlgorithm(
+            graphName,
+            configuration,
+            Leiden,
+            () -> estimation.leiden(configuration),
+            graph -> algorithms.leiden(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
         );

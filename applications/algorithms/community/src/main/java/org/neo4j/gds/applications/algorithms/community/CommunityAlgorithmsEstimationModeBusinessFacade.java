@@ -33,6 +33,8 @@ import org.neo4j.gds.kmeans.KmeansBaseConfig;
 import org.neo4j.gds.kmeans.KmeansMemoryEstimateDefinition;
 import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationMemoryEstimateDefinition;
+import org.neo4j.gds.leiden.LeidenBaseConfig;
+import org.neo4j.gds.leiden.LeidenMemoryEstimateDefinition;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.wcc.WccBaseConfig;
 import org.neo4j.gds.wcc.WccMemoryEstimateDefinition;
@@ -122,6 +124,10 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
             graphNameOrConfiguration,
             memoryEstimation
         );
+    }
+
+    public MemoryEstimation leiden(LeidenBaseConfig configuration) {
+        return new LeidenMemoryEstimateDefinition(configuration.toMemoryEstimationParameters()).memoryEstimation();
     }
 
     public MemoryEstimation wcc(SeedConfig configuration) {

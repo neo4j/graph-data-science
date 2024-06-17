@@ -22,7 +22,6 @@ package org.neo4j.gds.algorithms.community;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.community.specificfields.CommunityStatisticsSpecificFields;
-import org.neo4j.gds.algorithms.community.specificfields.LeidenSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LocalClusteringCoefficientSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LouvainSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.ModularityOptimizationSpecificFields;
@@ -32,8 +31,6 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.leiden.LeidenMutateConfig;
-import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
@@ -103,55 +100,6 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             statisticsComputationInstructions,
             intermediateResult.computeMilliseconds,
             () -> LouvainSpecificFields.EMPTY
-        );
-    }
-
-    public NodePropertyMutateResult<LeidenSpecificFields> leiden(
-        String graphName,
-        LeidenMutateConfig configuration,
-        StatisticsComputationInstructions statisticsComputationInstructions
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.leiden(graphName, configuration)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        NodePropertyValuesMapper<LeidenResult, LeidenMutateConfig> mapper = ((result, config) -> {
-            return config.includeIntermediateCommunities()
-                ? createIntermediateCommunitiesNodePropertyValues(
-                result::getIntermediateCommunities,
-                result.communities().size()
-            )
-                : CommunityCompanion.nodePropertyValues(
-                    config.isIncremental(),
-                    config.mutateProperty(),
-                    config.seedProperty(),
-                    config.consecutiveIds(),
-                    NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent()),
-                    () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
-                );
-        });
-
-        return mutateNodeProperty(
-            algorithmResult,
-            configuration,
-            mapper,
-            (result -> result.communities()::get),
-            (result, componentCount, communitySummary) -> {
-                return LeidenSpecificFields.from(
-                    result.communities().size(),
-                    result.modularity(),
-                    result.modularities(),
-                    componentCount,
-                    result.ranLevels(),
-                    result.didConverge(),
-                    communitySummary
-                );
-            },
-            statisticsComputationInstructions,
-            intermediateResult.computeMilliseconds,
-            () -> LeidenSpecificFields.EMPTY
         );
     }
 

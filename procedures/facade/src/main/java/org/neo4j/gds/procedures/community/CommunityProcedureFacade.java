@@ -26,7 +26,6 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacad
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.leiden.LeidenMutateConfig;
 import org.neo4j.gds.leiden.LeidenStatsConfig;
 import org.neo4j.gds.leiden.LeidenStreamConfig;
 import org.neo4j.gds.leiden.LeidenWriteConfig;
@@ -40,10 +39,9 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
+import org.neo4j.gds.procedures.algorithms.community.LeidenStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.ProcedureStatisticsComputationInstructions;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.community.leiden.LeidenMutateResult;
-import org.neo4j.gds.procedures.community.leiden.LeidenStatsResult;
 import org.neo4j.gds.procedures.community.leiden.LeidenStreamResult;
 import org.neo4j.gds.procedures.community.leiden.LeidenWriteResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
@@ -223,21 +221,6 @@ public class CommunityProcedureFacade {
         return LeidenComputationResultTransformer.toStreamResult(computationResult, streamConfig);
     }
 
-    public Stream<LeidenMutateResult> leidenMutate(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, LeidenMutateConfig::of);
-
-        var computationResult = mutateBusinessFacade.leiden(
-            graphName,
-            config,
-            ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
-        );
-
-        return Stream.of(LeidenComputationResultTransformer.toMutateResult(computationResult));
-    }
-
     public Stream<LeidenStatsResult> leidenStats(
         String graphName,
         Map<String, Object> configuration
@@ -270,14 +253,6 @@ public class CommunityProcedureFacade {
         Map<String, Object> algoConfiguration
     ) {
         var config = configurationCreator.createConfiguration(algoConfiguration, LeidenStreamConfig::of);
-        return Stream.of(estimateBusinessFacade.leiden(graphNameOrConfiguration, config));
-    }
-
-    public Stream<MemoryEstimateResult> leidenEstimateMutate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, LeidenMutateConfig::of);
         return Stream.of(estimateBusinessFacade.leiden(graphNameOrConfiguration, config));
     }
 

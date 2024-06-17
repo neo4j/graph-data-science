@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.procedures.community;
 
-import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
@@ -29,8 +28,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.leiden.LeidenStatsConfig;
 import org.neo4j.gds.leiden.LeidenStreamConfig;
-import org.neo4j.gds.procedures.community.leiden.LeidenMutateResult;
-import org.neo4j.gds.procedures.community.leiden.LeidenStatsResult;
+import org.neo4j.gds.procedures.algorithms.community.LeidenStatsResult;
 import org.neo4j.gds.procedures.community.leiden.LeidenStreamResult;
 import org.neo4j.gds.procedures.community.leiden.LeidenWriteResult;
 
@@ -66,24 +64,6 @@ final class LeidenComputationResultTransformer {
                     return new LeidenStreamResult(graph.toOriginalNodeId(nodeId), communities, communityId);
                 });
         }).orElseGet(Stream::empty);
-    }
-
-    static LeidenMutateResult toMutateResult(NodePropertyMutateResult<LeidenSpecificFields> computationResult) {
-        return new LeidenMutateResult(
-            computationResult.algorithmSpecificFields().ranLevels(),
-            computationResult.algorithmSpecificFields().didConverge(),
-            computationResult.algorithmSpecificFields().nodeCount(),
-            computationResult.algorithmSpecificFields().communityCount(),
-            computationResult.preProcessingMillis(),
-            computationResult.computeMillis(),
-            computationResult.postProcessingMillis(),
-            computationResult.mutateMillis(),
-            computationResult.nodePropertiesWritten(),
-            computationResult.algorithmSpecificFields().communityDistribution(),
-            computationResult.algorithmSpecificFields().modularities(),
-            computationResult.algorithmSpecificFields().modularity(),
-            computationResult.configuration().toMap()
-        );
     }
 
     static LeidenStatsResult toStatsResult(

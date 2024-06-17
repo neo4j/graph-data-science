@@ -22,6 +22,7 @@ package org.neo4j.gds.procedures.community.leiden;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.procedures.algorithms.community.LeidenStatsResult;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
 import java.util.List;

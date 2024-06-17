@@ -10,6 +10,7 @@ dependencies {
     implementation project(":algorithms-machinery")
     implementation project(":config-api")
     implementation project(":core")
+    implementation project(":graph-schema-api")
     implementation project(":logging")
     implementation project(":memory-usage")
     implementation project(":progress-tracking")

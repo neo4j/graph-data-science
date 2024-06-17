@@ -52,6 +52,7 @@ public enum Algorithm {
     KNN,
     KSpanningTree,
     LabelPropagation,
+    Leiden,
     LongestPath,
     NodeSimilarity,
     PageRank,

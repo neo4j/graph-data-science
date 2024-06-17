@@ -113,7 +113,7 @@ public final class CommunityCompanion {
         return nodePropertyValues(consecutiveIds, resultAfterMinFilter);
     }
 
-    static LongArrayNodePropertyValues createIntermediateCommunitiesNodePropertyValues(
+    public static LongArrayNodePropertyValues createIntermediateCommunitiesNodePropertyValues(
         LongToObjectFunction<long[]> intermediateCommunitiesProvider,
         long size
     ) {
