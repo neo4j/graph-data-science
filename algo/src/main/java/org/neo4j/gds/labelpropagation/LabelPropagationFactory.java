@@ -26,6 +26,7 @@ import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 
@@ -45,7 +46,8 @@ public class LabelPropagationFactory<CONFIG extends LabelPropagationBaseConfig> 
             graph,
             parameters,
             DefaultPool.INSTANCE,
-            progressTracker
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         );
     }
 

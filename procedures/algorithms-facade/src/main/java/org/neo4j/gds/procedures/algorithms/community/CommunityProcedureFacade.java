@@ -41,6 +41,7 @@ import org.neo4j.gds.procedures.algorithms.community.stubs.ApproximateMaximumKCu
 import org.neo4j.gds.procedures.algorithms.community.stubs.K1ColoringMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.KCoreMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.KMeansMutateStub;
+import org.neo4j.gds.procedures.algorithms.community.stubs.LabelPropagationMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.WccMutateStub;
 import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
@@ -58,6 +59,7 @@ public final class CommunityProcedureFacade {
     private final K1ColoringMutateStub k1ColoringMutateStub;
     private final KCoreMutateStub kCoreMutateStub;
     private final KMeansMutateStub kMeansMutateStub;
+    private final LabelPropagationMutateStub labelPropagationMutateStub;
     private final WccMutateStub wccMutateStub;
 
     private final ApplicationsFacade applicationsFacade;
@@ -72,6 +74,7 @@ public final class CommunityProcedureFacade {
         K1ColoringMutateStub k1ColoringMutateStub,
         KCoreMutateStub kCoreMutateStub,
         KMeansMutateStub kMeansMutateStub,
+        LabelPropagationMutateStub labelPropagationMutateStub,
         WccMutateStub wccMutateStub,
         ApplicationsFacade applicationsFacade,
         EstimationModeRunner estimationMode,
@@ -83,6 +86,7 @@ public final class CommunityProcedureFacade {
         this.k1ColoringMutateStub = k1ColoringMutateStub;
         this.kCoreMutateStub = kCoreMutateStub;
         this.kMeansMutateStub = kMeansMutateStub;
+        this.labelPropagationMutateStub = labelPropagationMutateStub;
         this.wccMutateStub = wccMutateStub;
         this.applicationsFacade = applicationsFacade;
         this.estimationMode = estimationMode;
@@ -102,6 +106,11 @@ public final class CommunityProcedureFacade {
         var k1ColoringMutateStub = new K1ColoringMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
         var kCoreMutateStub = new KCoreMutateStub(genericStub, applicationsFacade);
         var kMeansMutateStub = new KMeansMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
+        var labelPropagationMutateStub = new LabelPropagationMutateStub(
+            genericStub,
+            applicationsFacade,
+            procedureReturnColumns
+        );
         var wccMutateStub = new WccMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
 
         return new CommunityProcedureFacade(
@@ -110,6 +119,7 @@ public final class CommunityProcedureFacade {
             k1ColoringMutateStub,
             kCoreMutateStub,
             kMeansMutateStub,
+            labelPropagationMutateStub,
             wccMutateStub,
             applicationsFacade,
             estimationModeRunner,
@@ -433,6 +443,10 @@ public final class CommunityProcedureFacade {
         );
 
         return Stream.of(result);
+    }
+
+    public LabelPropagationMutateStub labelPropagationMutateStub() {
+        return labelPropagationMutateStub;
     }
 
     public WccMutateStub wccMutateStub() {

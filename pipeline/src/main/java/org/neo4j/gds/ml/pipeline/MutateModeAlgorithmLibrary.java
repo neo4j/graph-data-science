@@ -82,6 +82,7 @@ final class MutateModeAlgorithmLibrary {
             case KMeans -> CanonicalProcedureName.parse("gds.kmeans");
             case KNN -> CanonicalProcedureName.parse("gds.knn");
             case KSpanningTree -> null;
+            case LabelPropagation -> CanonicalProcedureName.parse("gds.labelPropagation");
             case LongestPath -> null;
             case NodeSimilarity -> CanonicalProcedureName.parse("gds.nodeSimilarity");
             case PageRank -> CanonicalProcedureName.parse("gds.pageRank");

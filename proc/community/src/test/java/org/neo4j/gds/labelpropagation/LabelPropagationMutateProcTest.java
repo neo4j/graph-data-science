@@ -39,10 +39,6 @@ import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.TestNativeGraphLoader;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
-import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
-import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacade;
-import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
@@ -51,13 +47,16 @@ import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
+import org.neo4j.gds.applications.ApplicationsFacade;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.configuration.DefaultsConfiguration;
+import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphLoader;
@@ -72,10 +71,12 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.GraphDataScienceProceduresBuilder;
+import org.neo4j.gds.procedures.algorithms.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
-import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfigImpl;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -85,6 +86,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -302,51 +304,9 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
             storeLoaderBuilder.putRelationshipProjectionsWithIdentifier(relationshipType.name(), projection));
         GraphLoader loader = storeLoaderBuilder.build();
         GraphStoreCatalog.set(loader.projectConfig(), loader.graphStore());
-        var logMock = mock(org.neo4j.gds.logging.Log.class);
-        when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
-
-        final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
-        final AlgorithmMemoryValidationService memoryUsageValidator = new AlgorithmMemoryValidationService(
-            logMock,
-            false
-        );
-        var algorithmsMutateBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
-            new CommunityAlgorithmsFacade(
-                new AlgorithmRunner(
-                    logMock,
-                    graphStoreCatalogService,
-                    new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
-                    memoryUsageValidator,
-                    RequestScopedDependencies.builder()
-                        .with(DatabaseId.of(db.databaseName()))
-                        .with(TaskRegistryFactory.empty())
-                        .with(TerminationFlag.RUNNING_TRUE)
-                        .with(new User(getUsername(), false))
-                        .with(EmptyUserLogRegistryFactory.INSTANCE)
-                        .build()
-                )
-            ),
-            new MutateNodePropertyService(logMock)
-        );
 
         var procedure = new LabelPropagationMutateProc();
-        procedure.facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
-            .with(new CommunityProcedureFacade(
-                new ConfigurationCreator(
-                    ConfigurationParser.EMPTY,
-                    null,
-                    new User(getUsername(), false)
-                ),
-                ProcedureReturnColumns.EMPTY,
-                null,
-                algorithmsMutateBusinessFacade,
-                null,
-                null,
-                null
-            ))
-            .with(DeprecatedProceduresMetricService.PASSTHROUGH)
-            .build();
-
+        procedure.facade = constructFacade();
 
         Map<String, Object> config = Map.of(
             "nodeLabels", Collections.singletonList("B"),
@@ -424,50 +384,9 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
     @Test
     void testMutateFailsOnExistingToken() {
         String graphName = ensureGraphExists();
-        var logMock = mock(org.neo4j.gds.logging.Log.class);
-        when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
-
-        final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
-        final AlgorithmMemoryValidationService memoryUsageValidator = new AlgorithmMemoryValidationService(
-            logMock,
-            false
-        );
-        var algorithmsMutateBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
-            new CommunityAlgorithmsFacade(
-                new AlgorithmRunner(
-                    logMock,
-                    graphStoreCatalogService,
-                    new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
-                    memoryUsageValidator,
-                    RequestScopedDependencies.builder()
-                        .with(DatabaseId.of(db.databaseName()))
-                        .with(TaskRegistryFactory.empty())
-                        .with(TerminationFlag.RUNNING_TRUE)
-                        .with(new User(getUsername(), false))
-                        .with(EmptyUserLogRegistryFactory.INSTANCE)
-                        .build()
-                )
-            ),
-            new MutateNodePropertyService(logMock)
-        );
 
         var procedure = new LabelPropagationMutateProc();
-        procedure.facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
-            .with(new CommunityProcedureFacade(
-                new ConfigurationCreator(
-                    ConfigurationParser.EMPTY,
-                    null,
-                    new User(getUsername(), false)
-                ),
-                ProcedureReturnColumns.EMPTY,
-                null,
-                algorithmsMutateBusinessFacade,
-                null,
-                null,
-                null
-            ))
-            .with(DeprecatedProceduresMetricService.PASSTHROUGH)
-            .build();
+        procedure.facade = constructFacade();
 
         Map<String, Object> config = Map.of("mutateProperty", MUTATE_PROPERTY);
         procedure.mutate(graphName, config);
@@ -494,50 +413,9 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
 
     @NotNull
     private GraphStore runMutation(String graphName, Map<String, Object> config) {
-        var logMock = mock(org.neo4j.gds.logging.Log.class);
-        when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
-
-        final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
-        final AlgorithmMemoryValidationService memoryUsageValidator = new AlgorithmMemoryValidationService(
-            logMock,
-            false
-        );
-        var algorithmsMutateBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
-            new CommunityAlgorithmsFacade(
-                new AlgorithmRunner(
-                    logMock,
-                    graphStoreCatalogService,
-                    new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
-                    memoryUsageValidator,
-                    RequestScopedDependencies.builder()
-                        .with(DatabaseId.of(db.databaseName()))
-                        .with(TaskRegistryFactory.empty())
-                        .with(TerminationFlag.RUNNING_TRUE)
-                        .with(new User(getUsername(), false))
-                        .with(EmptyUserLogRegistryFactory.INSTANCE)
-                        .build()
-                )
-            ),
-            new MutateNodePropertyService(logMock)
-        );
-
         var procedure = new LabelPropagationMutateProc();
-        procedure.facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
-                .with(new CommunityProcedureFacade(
-                    new ConfigurationCreator(
-                        ConfigurationParser.EMPTY,
-                        null,
-                        new User(getUsername(), false)
-                    ),
-                    ProcedureReturnColumns.EMPTY,
-                    null,
-                    algorithmsMutateBusinessFacade,
-                    null,
-                    null,
-                    null
-                ))
-                .with(DeprecatedProceduresMetricService.PASSTHROUGH)
-                .build();
+        procedure.facade = constructFacade();
+
         procedure.mutate(graphName, config);
 
         return GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), graphName).graphStore();
@@ -581,7 +459,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
 
         @Test
         void testGraphMutationFiltered() {
-            
+
             String query = GdsCypher
                 .call(TEST_GRAPH_NAME)
                 .algo("labelPropagation")
@@ -607,5 +485,60 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                 }
             );
         }
+    }
+
+    private GraphDataScienceProcedures constructFacade() {
+        var logMock = mock(org.neo4j.gds.logging.Log.class);
+        when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
+
+        final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
+
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .with(DatabaseId.of(db.databaseName()))
+            .with(TaskRegistryFactory.empty())
+            .with(TerminationFlag.RUNNING_TRUE)
+            .with(new User(getUsername(), false))
+            .with(EmptyUserLogRegistryFactory.INSTANCE)
+            .build();
+
+
+        var configurationParser = new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance);
+        var configurationCreator = new ConfigurationCreator(
+            configurationParser,
+            null,
+            requestScopedDependencies.getUser()
+        );
+
+        var genericStub = GenericStub.create(
+            DefaultsConfiguration.Instance,
+            LimitsConfiguration.Instance,
+            graphStoreCatalogService,
+            configurationCreator,
+            configurationParser,
+            requestScopedDependencies
+        );
+        var applicationsFacade = ApplicationsFacade.create(
+            logMock,
+            Optional.empty(),
+            Optional.empty(),
+            graphStoreCatalogService,
+            MemoryGuard.DISABLED,
+            new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
+            null,
+            requestScopedDependencies
+        );
+        var communityProcedureFacade = CommunityProcedureFacade.create(
+            genericStub,
+            applicationsFacade,
+            ProcedureReturnColumns.EMPTY,
+            null,
+            null,
+            null
+        );
+
+        return new GraphDataScienceProceduresBuilder(Log.noOpLog())
+            .with(communityProcedureFacade)
+            .with(DeprecatedProceduresMetricService.PASSTHROUGH)
+            .build();
     }
 }

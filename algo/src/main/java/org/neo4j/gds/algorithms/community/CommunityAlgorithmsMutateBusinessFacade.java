@@ -22,7 +22,6 @@ package org.neo4j.gds.algorithms.community;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.community.specificfields.CommunityStatisticsSpecificFields;
-import org.neo4j.gds.algorithms.community.specificfields.LabelPropagationSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LeidenSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LocalClusteringCoefficientSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LouvainSpecificFields;
@@ -33,7 +32,6 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.labelpropagation.LabelPropagationMutateConfig;
 import org.neo4j.gds.leiden.LeidenMutateConfig;
 import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
@@ -187,45 +185,6 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             () -> StandardCommunityStatisticsSpecificFields.EMPTY
         );
 
-    }
-
-    public NodePropertyMutateResult<LabelPropagationSpecificFields> labelPropagation(
-        String graphName,
-        LabelPropagationMutateConfig configuration,
-        StatisticsComputationInstructions statisticsComputationInstructions
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.labelPropagation(graphName, configuration)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        return mutateNodeProperty(
-            algorithmResult,
-            configuration,
-            ((result1, config) -> {
-                return CommunityCompanion.nodePropertyValues(
-                    config.isIncremental(),
-                    config.mutateProperty(),
-                    config.seedProperty(),
-                    config.consecutiveIds(),
-                    NodePropertyValuesAdapter.adapt(result1.labels()),
-                    () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
-                );
-            }),
-            (result -> result.labels()::get),
-            (result, componentCount, communitySummary) -> {
-                return LabelPropagationSpecificFields.from(
-                    result.ranIterations(),
-                    result.didConverge(),
-                    componentCount,
-                    communitySummary
-                );
-            },
-            statisticsComputationInstructions,
-            intermediateResult.computeMilliseconds,
-            () -> LabelPropagationSpecificFields.EMPTY
-        );
     }
 
     public NodePropertyMutateResult<TriangleCountSpecificFields> triangleCount(

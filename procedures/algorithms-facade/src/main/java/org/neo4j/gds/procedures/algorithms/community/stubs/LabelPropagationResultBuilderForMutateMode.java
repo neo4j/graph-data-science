@@ -17,57 +17,72 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.community;
+package org.neo4j.gds.procedures.algorithms.community.stubs;
 
+import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
-import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
+import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
+import org.neo4j.gds.labelpropagation.LabelPropagationMutateConfig;
+import org.neo4j.gds.labelpropagation.LabelPropagationResult;
+import org.neo4j.gds.procedures.algorithms.community.CommunityStatisticsWithTimingComputer;
+import org.neo4j.gds.procedures.algorithms.community.LabelPropagationMutateResult;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
-import org.neo4j.gds.wcc.WccStatsConfig;
 
 import java.util.Optional;
-import java.util.stream.Stream;
 
-class WccResultBuilderForStatsMode implements ResultBuilder<WccStatsConfig, DisjointSetStruct, Stream<WccStatsResult>, Void> {
+class LabelPropagationResultBuilderForMutateMode implements ResultBuilder<LabelPropagationMutateConfig, LabelPropagationResult, LabelPropagationMutateResult, NodePropertiesWritten> {
     private final CommunityStatisticsWithTimingComputer communityStatisticsWithTimingComputer = new CommunityStatisticsWithTimingComputer();
 
     private final StatisticsComputationInstructions statisticsComputationInstructions;
 
-    WccResultBuilderForStatsMode(StatisticsComputationInstructions statisticsComputationInstructions) {
+    LabelPropagationResultBuilderForMutateMode(StatisticsComputationInstructions statisticsComputationInstructions) {
         this.statisticsComputationInstructions = statisticsComputationInstructions;
     }
 
     @Override
-    public Stream<WccStatsResult> build(
+    public LabelPropagationMutateResult build(
         Graph graph,
         GraphStore graphStore,
-        WccStatsConfig configuration,
-        Optional<DisjointSetStruct> result,
+        LabelPropagationMutateConfig configuration,
+        Optional<LabelPropagationResult> result,
         AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        Optional<NodePropertiesWritten> metadata
     ) {
-        if (result.isEmpty()) return Stream.of(WccStatsResult.emptyFrom(timings, configuration.toMap()));
+        if (result.isEmpty()) return LabelPropagationMutateResult.emptyFrom(timings, configuration.toMap());
 
-        var disjointSetStruct = result.get();
+        var labelPropagationResult = result.get();
+
+        var nodePropertyValues = CommunityCompanion.nodePropertyValues(
+            configuration.isIncremental(),
+            configuration.mutateProperty(),
+            configuration.seedProperty(),
+            configuration.consecutiveIds(),
+            NodePropertyValuesAdapter.adapt(labelPropagationResult.labels()),
+            () -> graphStore.nodeProperty(configuration.seedProperty())
+        );
 
         var communityStatisticsWithTiming = communityStatisticsWithTimingComputer.compute(
             configuration,
             statisticsComputationInstructions,
-            disjointSetStruct.size(),
-            disjointSetStruct::setIdOf
+            nodePropertyValues.nodeCount(),
+            labelPropagationResult.labels()::get
         );
 
-        var wccStatsResult = new WccStatsResult(
+        return new LabelPropagationMutateResult(
+            labelPropagationResult.ranIterations(),
+            labelPropagationResult.didConverge(),
             communityStatisticsWithTiming.getLeft(),
             communityStatisticsWithTiming.getMiddle(),
             timings.preProcessingMillis,
             timings.computeMillis,
             communityStatisticsWithTiming.getRight(),
+            timings.mutateOrWriteMillis,
+            metadata.orElseThrow().value,
             configuration.toMap()
         );
-
-        return Stream.of(wccStatsResult);
     }
 }

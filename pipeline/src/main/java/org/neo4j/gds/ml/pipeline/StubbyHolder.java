@@ -38,6 +38,7 @@ import org.neo4j.gds.ml.pipeline.stubs.K1ColoringStub;
 import org.neo4j.gds.ml.pipeline.stubs.KCoreStub;
 import org.neo4j.gds.ml.pipeline.stubs.KMeansStub;
 import org.neo4j.gds.ml.pipeline.stubs.KnnStub;
+import org.neo4j.gds.ml.pipeline.stubs.LabelPropagationStub;
 import org.neo4j.gds.ml.pipeline.stubs.NodeSimilarityStub;
 import org.neo4j.gds.ml.pipeline.stubs.PageRankStub;
 import org.neo4j.gds.ml.pipeline.stubs.SinglePairShortestPathAStarStub;
@@ -84,6 +85,7 @@ class StubbyHolder {
             case KMeans -> new KMeansStub();
             case KNN -> new KnnStub();
             case KSpanningTree -> null;
+            case LabelPropagation -> new LabelPropagationStub();
             case LongestPath -> null;
             case NodeSimilarity -> new NodeSimilarityStub();
             case PageRank -> new PageRankStub();

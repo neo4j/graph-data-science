@@ -44,6 +44,7 @@ public enum LabelForProgressTracking {
     KMeans("K-Means"),
     KNN("K-Nearest Neighbours"),
     KSpanningTree("K Spanning Tree"),
+    LabelPropagation("Label Propagation"),
     LongestPath("LongestPath"),
     NodeSimilarity("Node Similarity"),
     PageRank("PageRank"),
@@ -85,6 +86,7 @@ public enum LabelForProgressTracking {
             case KMeans -> KMeans;
             case KNN -> KNN;
             case KSpanningTree -> KSpanningTree;
+            case LabelPropagation -> LabelPropagation;
             case LongestPath -> LongestPath;
             case NodeSimilarity -> NodeSimilarity;
             case PageRank -> PageRank;

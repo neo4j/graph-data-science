@@ -55,9 +55,10 @@ public class WccResultBuilderForMutateMode implements ResultBuilder<WccMutateCon
         var disjointSetStruct = result.get();
 
         var communityStatisticsWithTiming = communityStatisticsWithTimingComputer.compute(
-            disjointSetStruct,
             configuration,
-            statisticsComputationInstructions
+            statisticsComputationInstructions,
+            disjointSetStruct.size(),
+            disjointSetStruct::setIdOf
         );
 
         return new WccMutateResult(

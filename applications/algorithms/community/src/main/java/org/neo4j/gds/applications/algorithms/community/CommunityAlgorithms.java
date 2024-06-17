@@ -44,6 +44,9 @@ import org.neo4j.gds.kmeans.ImmutableKmeansContext;
 import org.neo4j.gds.kmeans.Kmeans;
 import org.neo4j.gds.kmeans.KmeansBaseConfig;
 import org.neo4j.gds.kmeans.KmeansResult;
+import org.neo4j.gds.labelpropagation.LabelPropagation;
+import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
+import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.wcc.Wcc;
 import org.neo4j.gds.wcc.WccBaseConfig;
@@ -159,6 +162,29 @@ public class CommunityAlgorithms {
             .progressTracker(progressTracker)
             .build();
         var algorithm = Kmeans.createKmeans(graph, configuration.toParameters(), kmeansContext, terminationFlag);
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+    }
+
+    LabelPropagationResult labelPropagation(Graph graph, LabelPropagationBaseConfig configuration) {
+        var task = Tasks.task(
+            LabelForProgressTracking.LabelPropagation.value,
+            Tasks.leaf("Initialization", graph.relationshipCount()),
+            Tasks.iterativeDynamic(
+                "Assign labels",
+                () -> List.of(Tasks.leaf("Iteration", graph.relationshipCount())),
+                configuration.maxIterations()
+            )
+        );
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var algorithm = new LabelPropagation(
+            graph,
+            configuration.toParameters(),
+            DefaultPool.INSTANCE,
+            progressTracker,
+            terminationFlag
+        );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }

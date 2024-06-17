@@ -20,7 +20,7 @@
 package org.neo4j.gds.labelpropagation;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationStatsResult;
+import org.neo4j.gds.procedures.algorithms.community.LabelPropagationStatsResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;

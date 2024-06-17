@@ -21,6 +21,8 @@ package org.neo4j.gds.procedures.community.labelpropagation;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.procedures.algorithms.community.LabelPropagationResultBuilder;
+import org.neo4j.gds.procedures.algorithms.community.LabelPropagationStatsResult;
 
 import java.util.Map;
 

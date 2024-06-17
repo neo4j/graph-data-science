@@ -22,21 +22,22 @@ package org.neo4j.gds.procedures.algorithms.community;
 import org.apache.commons.lang3.tuple.Triple;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
 
 import java.util.Map;
+import java.util.function.LongUnaryOperator;
 
 public class CommunityStatisticsWithTimingComputer {
     public Triple<Long, Map<String, Object>, Long> compute(
-        DisjointSetStruct disjointSetStruct,
         ConcurrencyConfig configuration,
-        StatisticsComputationInstructions statisticsComputationInstructions
+        StatisticsComputationInstructions statisticsComputationInstructions,
+        long nodeCount,
+        LongUnaryOperator communityFunction
     ) {
         var communityStatistics = CommunityStatistics.communityStats(
-            disjointSetStruct.size(),
-            disjointSetStruct::setIdOf,
+            nodeCount,
+            communityFunction,
             DefaultPool.INSTANCE,
             configuration.concurrency(),
             statisticsComputationInstructions

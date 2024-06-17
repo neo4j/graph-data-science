@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.community.labelpropagation;
+package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -26,7 +26,6 @@ import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 import java.util.Map;
 
 public class LabelPropagationStatsResult extends StandardStatsResult {
-
     public final long ranIterations;
     public final boolean didConverge;
     public final long communityCount;
@@ -50,7 +49,6 @@ public class LabelPropagationStatsResult extends StandardStatsResult {
     }
 
     public static class Builder extends LabelPropagationResultBuilder<LabelPropagationStatsResult> {
-
         public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
             super(returnColumns, concurrency);
         }
