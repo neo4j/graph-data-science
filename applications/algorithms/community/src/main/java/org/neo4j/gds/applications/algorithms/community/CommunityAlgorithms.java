@@ -49,7 +49,7 @@ import org.neo4j.gds.labelpropagation.LabelPropagation;
 import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.leiden.Leiden;
-import org.neo4j.gds.leiden.LeidenMutateConfig;
+import org.neo4j.gds.leiden.LeidenBaseConfig;
 import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.wcc.Wcc;
@@ -194,7 +194,7 @@ public class CommunityAlgorithms {
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
-    LeidenResult leiden(Graph graph, LeidenMutateConfig configuration) {
+    LeidenResult leiden(Graph graph, LeidenBaseConfig configuration) {
         if (!graph.schema().isUndirected()) {
             throw new IllegalArgumentException(
                 "The Leiden algorithm works only with undirected graphs. Please orient the edges properly");

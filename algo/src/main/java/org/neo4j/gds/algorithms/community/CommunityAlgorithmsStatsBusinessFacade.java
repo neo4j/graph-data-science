@@ -22,7 +22,6 @@ package org.neo4j.gds.algorithms.community;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.community.specificfields.CommunityStatisticsSpecificFields;
-import org.neo4j.gds.algorithms.community.specificfields.LeidenSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LocalClusteringCoefficientSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LouvainSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.ModularityOptimizationSpecificFields;
@@ -32,7 +31,6 @@ import org.neo4j.gds.algorithms.community.specificfields.TriangleCountSpecificFi
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.leiden.LeidenStatsConfig;
 import org.neo4j.gds.louvain.LouvainStatsConfig;
 import org.neo4j.gds.modularity.ModularityStatsConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
@@ -99,39 +97,6 @@ public class CommunityAlgorithmsStatsBusinessFacade {
             intermediateResult.computeMilliseconds,
             () -> StandardCommunityStatisticsSpecificFields.EMPTY
         );
-    }
-
-    public StatsResult<LeidenSpecificFields> leiden(
-        String graphName,
-        LeidenStatsConfig configuration,
-        StatisticsComputationInstructions statisticsComputationInstructions
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> communityAlgorithmsFacade.leiden(graphName, configuration)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        return statsResult(
-            algorithmResult,
-            configuration,
-            (result -> result.communities()::get),
-            (result, componentCount, communitySummary) -> {
-                return LeidenSpecificFields.from(
-                    result.communities().size(),
-                    result.modularity(),
-                    result.modularities(),
-                    componentCount,
-                    result.ranLevels(),
-                    result.didConverge(),
-                    communitySummary
-                );
-            },
-            statisticsComputationInstructions,
-            intermediateResult.computeMilliseconds,
-            () -> LeidenSpecificFields.EMPTY
-        );
-
     }
 
     public StatsResult<LouvainSpecificFields> louvain(

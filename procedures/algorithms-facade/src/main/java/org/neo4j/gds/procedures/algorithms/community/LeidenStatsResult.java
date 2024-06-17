@@ -20,10 +20,12 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -57,6 +59,22 @@ public class LeidenStatsResult extends StandardStatsResult {
         this.communityDistribution = communityDistribution;
         this.modularities = modularities;
         this.modularity = modularity;
+    }
+
+    static LeidenStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+        return new LeidenStatsResult(
+            0,
+            false,
+            0,
+            0,
+            Collections.emptyMap(),
+            0,
+            Collections.emptyList(),
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            0,
+            configurationMap
+        );
     }
 
     public static class StatsBuilder extends AbstractCommunityResultBuilder<LeidenStatsResult> {

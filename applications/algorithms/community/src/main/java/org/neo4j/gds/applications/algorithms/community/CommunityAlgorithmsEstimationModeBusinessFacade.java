@@ -130,6 +130,16 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
         return new LeidenMemoryEstimateDefinition(configuration.toMemoryEstimationParameters()).memoryEstimation();
     }
 
+    public MemoryEstimateResult leiden(LeidenBaseConfig configuration, Object graphNameOrConfiguration) {
+        var memoryEstimation = leiden(configuration);
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
+        );
+    }
+
     public MemoryEstimation wcc(SeedConfig configuration) {
         return new WccMemoryEstimateDefinition(configuration.isIncremental()).memoryEstimation();
     }

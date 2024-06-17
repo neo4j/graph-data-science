@@ -31,6 +31,8 @@ import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.kmeans.KmeansStatsConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
+import org.neo4j.gds.leiden.LeidenResult;
+import org.neo4j.gds.leiden.LeidenStatsConfig;
 import org.neo4j.gds.wcc.WccStatsConfig;
 
 import java.util.Optional;
@@ -39,6 +41,7 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KCore;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KMeans;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.LabelPropagation;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Leiden;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
 
 public class CommunityAlgorithmsStatsModeBusinessFacade {
@@ -115,6 +118,22 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
             LabelPropagation,
             estimationFacade::labelPropagation,
             graph -> communityAlgorithms.labelPropagation(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT leiden(
+        GraphName graphName,
+        LeidenStatsConfig configuration,
+        ResultBuilder<LeidenStatsConfig, LeidenResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            Leiden,
+            () -> estimationFacade.leiden(configuration),
+            graph -> communityAlgorithms.leiden(graph, configuration),
             Optional.empty(),
             resultBuilder
         );
