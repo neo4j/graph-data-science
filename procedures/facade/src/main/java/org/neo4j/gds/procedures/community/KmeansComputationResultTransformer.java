@@ -20,37 +20,12 @@
 package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
-import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.community.specificfields.KmeansSpecificFields;
-import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.kmeans.KmeansResult;
-import org.neo4j.gds.procedures.community.kmeans.KmeansStreamResult;
 import org.neo4j.gds.procedures.community.kmeans.KmeansWriteResult;
-
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 final class KmeansComputationResultTransformer {
 
     private KmeansComputationResultTransformer() {}
-
-    static Stream<KmeansStreamResult> toStreamResult(StreamComputationResult<KmeansResult> computationResult) {
-        return computationResult.result().map(kmeansResult -> {
-            var communities = kmeansResult.communities();
-            var distances = kmeansResult.distanceFromCenter();
-            var silhuette = kmeansResult.silhouette();
-            var graph = computationResult.graph();
-            return LongStream
-                .range(IdMap.START_NODE_ID, graph.nodeCount())
-                .mapToObj(nodeId -> new KmeansStreamResult(
-                    graph.toOriginalNodeId(nodeId),
-                    communities.get(nodeId),
-                    distances.get(nodeId),
-                    silhuette == null ? -1 : silhuette.get(nodeId)
-                ));
-
-        }).orElseGet(Stream::empty);
-    }
 
     static KmeansWriteResult toWriteResult(NodePropertyWriteResult<KmeansSpecificFields> computationResult) {
         return new KmeansWriteResult(

@@ -22,8 +22,6 @@ package org.neo4j.gds.algorithms.community;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.kmeans.KmeansBaseConfig;
-import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.leiden.LeidenBaseConfig;
@@ -121,19 +119,6 @@ public class CommunityAlgorithmsStreamBusinessFacade {
         var result = this.communityAlgorithmsFacade.labelPropagation(
             graphName,
             configuration
-        );
-
-        return createStreamComputationResult(result);
-    }
-
-    public StreamComputationResult<KmeansResult> kmeans(
-        String graphName,
-        KmeansBaseConfig config
-    ) {
-
-        var result = this.communityAlgorithmsFacade.kmeans(
-            graphName,
-            config
         );
 
         return createStreamComputationResult(result);

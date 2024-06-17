@@ -20,7 +20,7 @@
 package org.neo4j.gds.kmeans;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.kmeans.KmeansStreamResult;
+import org.neo4j.gds.procedures.algorithms.community.KmeansStreamResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -45,7 +45,7 @@ public class KmeansStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().kmeansStream(graphName, configuration);
+        return facade.algorithms().community().kmeansStream(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)
@@ -68,7 +68,7 @@ public class KmeansStreamProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        return facade.community().kmeansEstimateStream(graphName, configuration);
+        return facade.algorithms().community().kmeansStreamEstimate(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)
