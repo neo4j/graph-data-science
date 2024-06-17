@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.procedures.integration;
 
+import org.neo4j.configuration.Config;
 import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
@@ -76,6 +77,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
     private final ProjectionMetricsService projectionMetricsService;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
     private final UserLogServices userLogServices;
+    private final Config config;
 
     GraphDataScienceProvider(
         Log log,
@@ -92,7 +94,8 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         MemoryGuard memoryGuard,
         ProjectionMetricsService projectionMetricsService,
         TaskRegistryFactoryService taskRegistryFactoryService,
-        UserLogServices userLogServices
+        UserLogServices userLogServices,
+        Config config
     ) {
         this.log = log;
         this.defaultsConfiguration = defaultsConfiguration;
@@ -109,6 +112,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         this.projectionMetricsService = projectionMetricsService;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.userLogServices = userLogServices;
+        this.config = config;
     }
 
     @Override
@@ -120,7 +124,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         var graphDatabaseService = context.graphDatabaseAPI();
         var databaseId = databaseIdAccessor.getDatabaseId(graphDatabaseService);
 
-        var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(graphDatabaseService);
+        var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(graphDatabaseService, config);
         var exporterContext = new ExporterContext.ProcedureContextWrapper(context);
         var nodeLabelExporterBuilder = exportBuildersProvider.nodeLabelExporterBuilder(exporterContext);
         var nodePropertyExporterBuilder = exportBuildersProvider.nodePropertyExporterBuilder(exporterContext);

@@ -52,7 +52,7 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
         var log = new LogAccessor().getLog(dependencies.logService(), getClass());
 
         // OpenGDS edition customisations go here
-        ExporterBuildersProviderService exporterBuildersProviderService = __ -> new NativeExportBuildersProvider(); // we always just offer native writes in OpenGDS
+        ExporterBuildersProviderService exporterBuildersProviderService = (__, ___) -> new NativeExportBuildersProvider(); // we always just offer native writes in OpenGDS
         var metricsFacade = MetricsFacade.PASSTHROUGH_METRICS_FACADE; // no metrics in OpenGDS
         var modelCatalog = new OpenModelCatalogProvider().get(null);
 
@@ -64,7 +64,8 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
             Optional.empty(), // no extra checks in OpenGDS
             exporterBuildersProviderService,
             metricsFacade,
-            modelCatalog
+            modelCatalog,
+            dependencies.config()
         ).build();
     }
 

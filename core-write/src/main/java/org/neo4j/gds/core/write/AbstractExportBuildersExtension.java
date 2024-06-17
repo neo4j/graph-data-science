@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.write;
 
+import org.neo4j.configuration.Config;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.extension.ExtensionFactory;
@@ -37,7 +38,8 @@ public abstract class AbstractExportBuildersExtension extends
     @Override
     public Lifecycle newInstance(ExtensionContext context, Dependencies dependencies) {
         var exportBuildersProviderSelector = exportBuildersProviderSelector(
-            dependencies.graphDatabaseService()
+            dependencies.graphDatabaseService(),
+            dependencies.config()
         );
         return new GlobalProceduresExporterComponentProvider(
             dependencies.globalProcedures(),
@@ -46,7 +48,8 @@ public abstract class AbstractExportBuildersExtension extends
     }
 
     protected abstract ExportBuildersProviderSelector exportBuildersProviderSelector(
-        GraphDatabaseService graphDatabaseService
+        GraphDatabaseService graphDatabaseService,
+        Config config
     );
 
     static class GlobalProceduresExporterComponentProvider extends LifecycleAdapter {
@@ -111,5 +114,7 @@ public abstract class AbstractExportBuildersExtension extends
         GlobalProcedures globalProcedures();
 
         GraphDatabaseService graphDatabaseService();
+
+        Config config();
     }
 }

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.procedures.integration;
 
+import org.neo4j.configuration.Config;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -105,7 +106,8 @@ public final class GraphDataScienceExtensionBuilder {
         Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> catalogFacadeDecorator,
         ExporterBuildersProviderService exporterBuildersProviderService,
         MetricsFacade metricsFacade,
-        ModelCatalog modelCatalog
+        ModelCatalog modelCatalog,
+        Config config
     ) {
         // Read some configuration used to select behaviour
         var progressTrackingEnabled = neo4jConfiguration.get(ProgressFeatureSettings.progress_tracking_enabled);
@@ -147,7 +149,8 @@ public final class GraphDataScienceExtensionBuilder {
             exporterBuildersProviderService,
             memoryGauge,
             metricsFacade,
-            modelCatalog
+            modelCatalog,
+            config
         );
 
         return new GraphDataScienceExtensionBuilder(
