@@ -49,7 +49,11 @@ dependencies {
             openGds.eclipse.collections,
             openGds.hppc,
             openGds.hdrhistogram,
-            [group: 'com.github.chrisvest',    name: 'stormpot',                 version: "3.1"],
+    )
+
+    implementation (
+            openGds.caffeine,
+            openGds.stormpot,
     )
 
     // TEST DEPENDENCIES
