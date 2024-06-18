@@ -33,6 +33,8 @@ import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
 import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.leiden.LeidenStatsConfig;
+import org.neo4j.gds.louvain.LouvainResult;
+import org.neo4j.gds.louvain.LouvainStatsConfig;
 import org.neo4j.gds.wcc.WccStatsConfig;
 
 import java.util.Optional;
@@ -42,6 +44,7 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KMeans;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.LabelPropagation;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Leiden;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Louvain;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
 
 public class CommunityAlgorithmsStatsModeBusinessFacade {
@@ -134,6 +137,22 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
             Leiden,
             () -> estimationFacade.leiden(configuration),
             graph -> communityAlgorithms.leiden(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT louvain(
+        GraphName graphName,
+        LouvainStatsConfig configuration,
+        ResultBuilder<LouvainStatsConfig, LouvainResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            Louvain,
+            () -> estimationFacade.louvain(configuration),
+            graph -> communityAlgorithms.louvain(graph, configuration),
             Optional.empty(),
             resultBuilder
         );

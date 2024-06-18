@@ -20,16 +20,13 @@
 package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
-import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.algorithms.community.specificfields.LouvainSpecificFields;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.louvain.LouvainResult;
-import org.neo4j.gds.louvain.LouvainStatsConfig;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
 import org.neo4j.gds.louvain.LouvainWriteConfig;
-import org.neo4j.gds.procedures.algorithms.community.LouvainStatsResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainWriteResult;
 
@@ -66,23 +63,6 @@ final class LouvainComputationResultTransformer {
                     return LouvainStreamResult.create(graph.toOriginalNodeId(nodeId), communities, communityId);
                 });
         }).orElseGet(Stream::empty);
-    }
-
-    static LouvainStatsResult toStatsResult(
-        StatsResult<LouvainSpecificFields> computationResult,
-        LouvainStatsConfig config
-    ) {
-        return new LouvainStatsResult(
-            computationResult.algorithmSpecificFields().modularity(),
-            computationResult.algorithmSpecificFields().modularities(),
-            computationResult.algorithmSpecificFields().ranLevels(),
-            computationResult.algorithmSpecificFields().communityCount(),
-            computationResult.algorithmSpecificFields().communityDistribution(),
-            computationResult.preProcessingMillis(),
-            computationResult.computeMillis(),
-            computationResult.postProcessingMillis(),
-            config.toMap()
-        );
     }
 
     static LouvainWriteResult toWriteResult(NodePropertyWriteResult<LouvainSpecificFields> computationResult, LouvainWriteConfig config) {

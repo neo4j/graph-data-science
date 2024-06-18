@@ -26,7 +26,6 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacad
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.louvain.LouvainStatsConfig;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
 import org.neo4j.gds.louvain.LouvainWriteConfig;
 import org.neo4j.gds.modularity.ModularityStatsConfig;
@@ -35,7 +34,6 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
-import org.neo4j.gds.procedures.algorithms.community.LouvainStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.ProcedureStatisticsComputationInstructions;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
@@ -104,29 +102,6 @@ public class CommunityProcedureFacade {
         this.statsBusinessFacade = statsBusinessFacade;
         this.streamBusinessFacade = streamBusinessFacade;
         this.writeBusinessFacade = writeBusinessFacade;
-    }
-
-    public Stream<LouvainStatsResult> louvainStats(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, LouvainStatsConfig::of);
-
-        var computationResult = statsBusinessFacade.louvain(
-            graphName,
-            config,
-            ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
-        );
-
-        return Stream.of(LouvainComputationResultTransformer.toStatsResult(computationResult, config));
-    }
-
-    public Stream<MemoryEstimateResult> louvainEstimateStats(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, LouvainStatsConfig::of);
-        return Stream.of(estimateBusinessFacade.louvain(graphNameOrConfiguration, config));
     }
 
     public Stream<LouvainStreamResult> louvainStream(

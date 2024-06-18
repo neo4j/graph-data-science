@@ -23,7 +23,6 @@ import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.community.specificfields.CommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LocalClusteringCoefficientSpecificFields;
-import org.neo4j.gds.algorithms.community.specificfields.LouvainSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.ModularityOptimizationSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.ModularitySpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.StandardCommunityStatisticsSpecificFields;
@@ -31,7 +30,6 @@ import org.neo4j.gds.algorithms.community.specificfields.TriangleCountSpecificFi
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.louvain.LouvainStatsConfig;
 import org.neo4j.gds.modularity.ModularityStatsConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
 import org.neo4j.gds.result.CommunityStatistics;
@@ -96,36 +94,6 @@ public class CommunityAlgorithmsStatsBusinessFacade {
             statisticsComputationInstructions,
             intermediateResult.computeMilliseconds,
             () -> StandardCommunityStatisticsSpecificFields.EMPTY
-        );
-    }
-
-    public StatsResult<LouvainSpecificFields> louvain(
-        String graphName,
-        LouvainStatsConfig configuration,
-        StatisticsComputationInstructions statisticsComputationInstructions
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> communityAlgorithmsFacade.louvain(graphName, configuration)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        return statsResult(
-            algorithmResult,
-            configuration,
-            (result -> result.communities()::get),
-            (result, componentCount, communitySummary) -> {
-                return LouvainSpecificFields.from(
-                    result.modularity(),
-                    result.modularities(),
-                    componentCount,
-                    result.ranLevels(),
-                    communitySummary
-                );
-            },
-            statisticsComputationInstructions,
-            intermediateResult.computeMilliseconds,
-            () -> LouvainSpecificFields.EMPTY
         );
     }
 
