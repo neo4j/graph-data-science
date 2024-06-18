@@ -46,6 +46,7 @@ public enum LabelForProgressTracking {
     KSpanningTree("K Spanning Tree"),
     LabelPropagation("Label Propagation"),
     Leiden("Leiden"),
+    Louvain("Louvain"),
     LongestPath("LongestPath"),
     NodeSimilarity("Node Similarity"),
     PageRank("PageRank"),
@@ -89,6 +90,7 @@ public enum LabelForProgressTracking {
             case KSpanningTree -> KSpanningTree;
             case LabelPropagation -> LabelPropagation;
             case Leiden -> Leiden;
+            case Louvain -> Louvain;
             case LongestPath -> LongestPath;
             case NodeSimilarity -> NodeSimilarity;
             case PageRank -> PageRank;

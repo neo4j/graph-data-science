@@ -51,6 +51,10 @@ import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.leiden.Leiden;
 import org.neo4j.gds.leiden.LeidenBaseConfig;
 import org.neo4j.gds.leiden.LeidenResult;
+import org.neo4j.gds.louvain.Louvain;
+import org.neo4j.gds.louvain.LouvainBaseConfig;
+import org.neo4j.gds.louvain.LouvainResult;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationFactory;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.wcc.Wcc;
 import org.neo4j.gds.wcc.WccBaseConfig;
@@ -232,6 +236,31 @@ public class CommunityAlgorithms {
             parameters.tolerance(),
             parameters.concurrency(),
             progressTracker
+        );
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+    }
+
+    LouvainResult louvain(Graph graph, LouvainBaseConfig configuration) {
+        var task = Tasks.iterativeDynamic(
+            LabelForProgressTracking.Louvain.value,
+            () -> List.of(ModularityOptimizationFactory.progressTask(graph, configuration.maxIterations())),
+            configuration.maxLevels()
+        );
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var parameters = configuration.toParameters();
+
+        var algorithm = new Louvain(
+            graph,
+            parameters.concurrency(),
+            parameters.maxIterations(),
+            parameters.tolerance(),
+            parameters.maxLevels(),
+            parameters.includeIntermediateCommunities(),
+            parameters.seedProperty(),
+            progressTracker,
+            DefaultPool.INSTANCE
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);

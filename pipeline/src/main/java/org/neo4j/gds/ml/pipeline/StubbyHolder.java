@@ -40,6 +40,7 @@ import org.neo4j.gds.ml.pipeline.stubs.KMeansStub;
 import org.neo4j.gds.ml.pipeline.stubs.KnnStub;
 import org.neo4j.gds.ml.pipeline.stubs.LabelPropagationStub;
 import org.neo4j.gds.ml.pipeline.stubs.LeidenStub;
+import org.neo4j.gds.ml.pipeline.stubs.LouvainStub;
 import org.neo4j.gds.ml.pipeline.stubs.NodeSimilarityStub;
 import org.neo4j.gds.ml.pipeline.stubs.PageRankStub;
 import org.neo4j.gds.ml.pipeline.stubs.SinglePairShortestPathAStarStub;
@@ -88,6 +89,7 @@ class StubbyHolder {
             case KSpanningTree -> null;
             case LabelPropagation -> new LabelPropagationStub();
             case Leiden -> new LeidenStub();
+            case Louvain -> new LouvainStub();
             case LongestPath -> null;
             case NodeSimilarity -> new NodeSimilarityStub();
             case PageRank -> new PageRankStub();

@@ -23,7 +23,6 @@ import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.community.specificfields.CommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LocalClusteringCoefficientSpecificFields;
-import org.neo4j.gds.algorithms.community.specificfields.LouvainSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.ModularityOptimizationSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.StandardCommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.TriangleCountSpecificFields;
@@ -31,8 +30,6 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.louvain.LouvainMutateConfig;
-import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
 import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
@@ -43,7 +40,6 @@ import org.neo4j.gds.triangle.TriangleCountMutateConfig;
 
 import java.util.function.Supplier;
 
-import static org.neo4j.gds.algorithms.community.CommunityCompanion.createIntermediateCommunitiesNodePropertyValues;
 import static org.neo4j.gds.algorithms.runner.AlgorithmRunner.runWithTiming;
 
 public class CommunityAlgorithmsMutateBusinessFacade {
@@ -57,50 +53,6 @@ public class CommunityAlgorithmsMutateBusinessFacade {
     ) {
         this.mutateNodePropertyService = mutateNodePropertyService;
         this.communityAlgorithmsFacade = communityAlgorithmsFacade;
-    }
-
-    public NodePropertyMutateResult<LouvainSpecificFields> louvain(
-        String graphName,
-        LouvainMutateConfig configuration,
-        StatisticsComputationInstructions statisticsComputationInstructions
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.louvain(graphName, configuration)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        NodePropertyValuesMapper<LouvainResult, LouvainMutateConfig> mapper = ((result, config) -> {
-            return config.includeIntermediateCommunities()
-                ? createIntermediateCommunitiesNodePropertyValues(result::getIntermediateCommunities, result.size())
-                : CommunityCompanion.nodePropertyValues(
-                    config.isIncremental(),
-                    config.mutateProperty(),
-                    config.seedProperty(),
-                    config.consecutiveIds(),
-                    NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent()),
-                    () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
-                );
-        });
-
-        return mutateNodeProperty(
-            algorithmResult,
-            configuration,
-            mapper,
-            (result -> result::getCommunity),
-            (result, componentCount, communitySummary) -> {
-                return LouvainSpecificFields.from(
-                    result.modularity(),
-                    result.modularities(),
-                    componentCount,
-                    result.ranLevels(),
-                    communitySummary
-                );
-            },
-            statisticsComputationInstructions,
-            intermediateResult.computeMilliseconds,
-            () -> LouvainSpecificFields.EMPTY
-        );
     }
 
     public NodePropertyMutateResult<StandardCommunityStatisticsSpecificFields> scc(

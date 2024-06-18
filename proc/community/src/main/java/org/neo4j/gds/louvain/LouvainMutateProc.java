@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.louvain;
 
-import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.algorithms.community.LouvainMutateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -44,7 +44,7 @@ public class LouvainMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().louvainMutate(graphName, configuration);
+        return facade.algorithms().community().louvainMutateStub().execute(graphName, configuration);
     }
 
     @Procedure(value = "gds.louvain.mutate.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class LouvainMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        return facade.community().louvainEstimateMutate(graphName, configuration);
+        return facade.algorithms().community().louvainMutateStub().estimate(graphName, configuration);
     }
 }

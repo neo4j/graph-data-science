@@ -26,7 +26,6 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacad
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.louvain.LouvainStatsConfig;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
 import org.neo4j.gds.louvain.LouvainWriteConfig;
@@ -36,10 +35,9 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
+import org.neo4j.gds.procedures.algorithms.community.LouvainStatsResult;
 import org.neo4j.gds.procedures.algorithms.community.ProcedureStatisticsComputationInstructions;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
-import org.neo4j.gds.procedures.community.louvain.LouvainStatsResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainWriteResult;
 import org.neo4j.gds.procedures.community.modularity.ModularityStatsResult;
@@ -151,29 +149,6 @@ public class CommunityProcedureFacade {
         Map<String, Object> algoConfiguration
     ) {
         var config = configurationCreator.createConfiguration(algoConfiguration, LouvainStreamConfig::of);
-        return Stream.of(estimateBusinessFacade.louvain(graphNameOrConfiguration, config));
-    }
-
-    public Stream<LouvainMutateResult> louvainMutate(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, LouvainMutateConfig::of);
-
-        var computationResult = mutateBusinessFacade.louvain(
-            graphName,
-            config,
-            ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
-        );
-
-        return Stream.of(LouvainComputationResultTransformer.toMutateResult(computationResult));
-    }
-
-    public Stream<MemoryEstimateResult> louvainEstimateMutate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, LouvainMutateConfig::of);
         return Stream.of(estimateBusinessFacade.louvain(graphNameOrConfiguration, config));
     }
 

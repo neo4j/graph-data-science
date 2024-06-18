@@ -17,16 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.community.louvain;
+package org.neo4j.gds.procedures.algorithms.community;
+
+import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 
 import java.util.List;
 import java.util.Map;
 
-public final class LouvainMutateResult extends LouvainStatsResult {
-    public final long mutateMillis;
-    public final long nodePropertiesWritten;
+public class LouvainStatsResult extends StandardStatsResult {
+    public final double modularity;
+    public final List<Double> modularities;
+    public final long ranLevels;
+    public final long communityCount;
+    public final Map<String, Object> communityDistribution;
 
-    public LouvainMutateResult(
+    public LouvainStatsResult(
         double modularity,
         List<Double> modularities,
         long ranLevels,
@@ -35,22 +40,13 @@ public final class LouvainMutateResult extends LouvainStatsResult {
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
-        long mutateMillis,
-        long nodePropertiesWritten,
         Map<String, Object> configuration
     ) {
-        super(
-            modularity,
-            modularities,
-            ranLevels,
-            communityCount,
-            communityDistribution,
-            preProcessingMillis,
-            computeMillis,
-            postProcessingMillis,
-            configuration
-        );
-        this.mutateMillis = mutateMillis;
-        this.nodePropertiesWritten = nodePropertiesWritten;
+        super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
+        this.modularity = modularity;
+        this.modularities = modularities;
+        this.ranLevels = ranLevels;
+        this.communityCount = communityCount;
+        this.communityDistribution = communityDistribution;
     }
 }

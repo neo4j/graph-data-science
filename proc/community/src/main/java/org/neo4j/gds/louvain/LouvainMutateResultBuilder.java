@@ -21,7 +21,7 @@ package org.neo4j.gds.louvain;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
+import org.neo4j.gds.procedures.algorithms.community.LouvainMutateResult;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
