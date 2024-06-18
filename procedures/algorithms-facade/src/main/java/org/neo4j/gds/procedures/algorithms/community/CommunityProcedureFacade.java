@@ -45,6 +45,7 @@ import org.neo4j.gds.leiden.LeidenStreamConfig;
 import org.neo4j.gds.leiden.LeidenWriteConfig;
 import org.neo4j.gds.louvain.LouvainStatsConfig;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
+import org.neo4j.gds.louvain.LouvainWriteConfig;
 import org.neo4j.gds.procedures.algorithms.community.stubs.ApproximateMaximumKCutMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.K1ColoringMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.KCoreMutateStub;
@@ -698,6 +699,36 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             LouvainStreamConfig::of,
+            configuration -> estimationMode().louvain(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<LouvainWriteResult> louvainWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var statisticsComputationInstructions = ProcedureStatisticsComputationInstructions.forCommunities(
+            procedureReturnColumns);
+        var resultBuilder = new LouvainResultBuilderForWriteMode(statisticsComputationInstructions);
+
+        return algorithmExecutionScaffolding.runAlgorithm(
+            graphName,
+            configuration,
+            LouvainWriteConfig::of,
+            writeMode()::louvain,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> louvainWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            LouvainWriteConfig::of,
             configuration -> estimationMode().louvain(configuration, graphNameOrConfiguration)
         );
 

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.community.stubs;
+package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -26,38 +26,41 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTiming
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.louvain.LouvainResult;
-import org.neo4j.gds.procedures.algorithms.community.LouvainMutateResult;
+import org.neo4j.gds.louvain.LouvainWriteConfig;
 import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
 
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public class LouvainResultBuilderForMutateMode implements ResultBuilder<LouvainMutateConfig, LouvainResult, LouvainMutateResult, NodePropertiesWritten> {
+class LouvainResultBuilderForWriteMode implements ResultBuilder<LouvainWriteConfig, LouvainResult, Stream<LouvainWriteResult>, NodePropertiesWritten> {
     private final StatisticsComputationInstructions statisticsComputationInstructions;
+    private final LouvainNodePropertyValuesComputer louvainNodePropertyValuesComputer = new LouvainNodePropertyValuesComputer();
 
-    LouvainResultBuilderForMutateMode(StatisticsComputationInstructions statisticsComputationInstructions) {
+    LouvainResultBuilderForWriteMode(StatisticsComputationInstructions statisticsComputationInstructions) {
         this.statisticsComputationInstructions = statisticsComputationInstructions;
     }
 
     @Override
-    public LouvainMutateResult build(
+    public Stream<LouvainWriteResult> build(
         Graph graph,
         GraphStore graphStore,
-        LouvainMutateConfig configuration,
+        LouvainWriteConfig configuration,
         Optional<LouvainResult> result,
         AlgorithmProcessingTimings timings,
         Optional<NodePropertiesWritten> metadata
     ) {
-        if (result.isEmpty()) return LouvainMutateResult.emptyFrom(timings, configuration.toMap());
+        if (result.isEmpty()) return Stream.of(LouvainWriteResult.emptyFrom(timings, configuration.toMap()));
 
         var louvainResult = result.get();
 
-        var nodePropertyValues = new LouvainNodePropertyValuesComputer().compute(
+        var nodePropertyValues = louvainNodePropertyValuesComputer.compute(
             graphStore,
             configuration,
-            configuration.mutateProperty(),
+            configuration.writeProperty(),
             louvainResult
         );
 
@@ -71,9 +74,9 @@ public class LouvainResultBuilderForMutateMode implements ResultBuilder<LouvainM
         var componentCount = communityStatistics.componentCount();
         var communitySummary = CommunityStatistics.communitySummary(communityStatistics.histogram());
 
-        return LouvainMutateResult.create(
+        var leidenWriteResult = new LouvainWriteResult(
             louvainResult.modularity(),
-            louvainResult.modularities(),
+            Arrays.stream(louvainResult.modularities()).boxed().collect(Collectors.toList()),
             louvainResult.ranLevels(),
             componentCount,
             communitySummary,
@@ -84,5 +87,7 @@ public class LouvainResultBuilderForMutateMode implements ResultBuilder<LouvainM
             metadata.orElseThrow().value,
             configuration.toMap()
         );
+
+        return Stream.of(leidenWriteResult);
     }
 }

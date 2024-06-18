@@ -48,7 +48,12 @@ class LouvainMutateStep implements MutateOrWriteStep<LouvainResult, NodeProperti
         LouvainResult result,
         JobId jobId
     ) {
-        var nodePropertyValues = louvainNodePropertyValuesComputer.compute(graphStore, configuration, result);
+        var nodePropertyValues = louvainNodePropertyValuesComputer.compute(
+            graphStore,
+            configuration,
+            configuration.mutateProperty(),
+            result
+        );
 
         return mutateNodeProperty.mutateNodeProperties(
             graph,

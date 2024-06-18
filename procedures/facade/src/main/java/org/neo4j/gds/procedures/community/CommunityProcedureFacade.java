@@ -26,7 +26,6 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacad
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.louvain.LouvainWriteConfig;
 import org.neo4j.gds.modularity.ModularityStatsConfig;
 import org.neo4j.gds.modularity.ModularityStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
@@ -35,7 +34,6 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
 import org.neo4j.gds.procedures.algorithms.community.ProcedureStatisticsComputationInstructions;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.community.louvain.LouvainWriteResult;
 import org.neo4j.gds.procedures.community.modularity.ModularityStatsResult;
 import org.neo4j.gds.procedures.community.modularity.ModularityStreamResult;
 import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationMutateResult;
@@ -100,29 +98,6 @@ public class CommunityProcedureFacade {
         this.statsBusinessFacade = statsBusinessFacade;
         this.streamBusinessFacade = streamBusinessFacade;
         this.writeBusinessFacade = writeBusinessFacade;
-    }
-
-    public Stream<LouvainWriteResult> louvainWrite(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, LouvainWriteConfig::of);
-
-        var computationResult = writeBusinessFacade.louvain(
-            graphName,
-            config,
-            ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
-        );
-
-        return Stream.of(LouvainComputationResultTransformer.toWriteResult(computationResult, config));
-    }
-
-    public Stream<MemoryEstimateResult> louvainEstimateWrite(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, LouvainWriteConfig::of);
-        return Stream.of(estimateBusinessFacade.louvain(graphNameOrConfiguration, config));
     }
 
     public Stream<SccStreamResult> sccStream(

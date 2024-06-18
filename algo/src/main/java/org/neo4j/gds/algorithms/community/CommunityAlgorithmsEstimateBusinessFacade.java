@@ -21,8 +21,6 @@ package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.louvain.LouvainBaseConfig;
-import org.neo4j.gds.louvain.LouvainMemoryEstimateDefinition;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityCalculatorMemoryEstimateDefinition;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationBaseConfig;
@@ -55,18 +53,6 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             configuration,
             Optional.empty(),
             new IntersectingTriangleCountMemoryEstimateDefinition()
-        );
-    }
-
-    public <C extends LouvainBaseConfig> MemoryEstimateResult louvain(
-        Object graphNameOrConfiguration,
-        C configuration
-    ) {
-        return algorithmEstimator.estimate(
-            graphNameOrConfiguration,
-            configuration,
-            configuration.relationshipWeightProperty(),
-            new LouvainMemoryEstimateDefinition(configuration.toMemoryEstimationParameters())
         );
     }
 

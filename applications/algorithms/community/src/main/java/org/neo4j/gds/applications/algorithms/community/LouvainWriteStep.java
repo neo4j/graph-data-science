@@ -20,19 +20,54 @@
 package org.neo4j.gds.applications.algorithms.community;
 
 import org.neo4j.gds.algorithms.community.CommunityCompanion;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.louvain.LouvainBaseConfig;
+import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
+import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.louvain.LouvainResult;
+import org.neo4j.gds.louvain.LouvainWriteConfig;
 
-public class LouvainNodePropertyValuesComputer {
-    public NodePropertyValues compute(
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Louvain;
+
+class LouvainWriteStep implements MutateOrWriteStep<LouvainResult, NodePropertiesWritten> {
+    private final WriteToDatabase writeToDatabase;
+    private final LouvainWriteConfig configuration;
+
+    LouvainWriteStep(WriteToDatabase writeToDatabase, LouvainWriteConfig configuration) {
+        this.writeToDatabase = writeToDatabase;
+        this.configuration = configuration;
+    }
+
+    @Override
+    public NodePropertiesWritten execute(
+        Graph graph,
         GraphStore graphStore,
-        LouvainBaseConfig configuration,
-        String resultProperty,
-        LouvainResult result
+        ResultStore resultStore,
+        LouvainResult result,
+        JobId jobId
     ) {
+        var nodePropertyValues = constructNodePropertyValues(graphStore, result);
+
+        var nodePropertiesWritten = writeToDatabase.perform(
+            graph,
+            graphStore,
+            resultStore,
+            configuration,
+            configuration,
+            Louvain,
+            jobId,
+            nodePropertyValues
+        );
+
+        return nodePropertiesWritten;
+    }
+
+    private NodePropertyValues constructNodePropertyValues(GraphStore graphStore, LouvainResult result) {
         if (configuration.includeIntermediateCommunities())
             return CommunityCompanion.createIntermediateCommunitiesNodePropertyValues(
                 result::getIntermediateCommunities,
@@ -41,10 +76,12 @@ public class LouvainNodePropertyValuesComputer {
 
         return CommunityCompanion.nodePropertyValues(
             configuration.isIncremental(),
-            resultProperty,
+            configuration.writeProperty(),
             configuration.seedProperty(),
             configuration.consecutiveIds(),
             NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent()),
+            configuration.minCommunitySize(),
+            configuration.concurrency(),
             () -> graphStore.nodeProperty(configuration.seedProperty())
         );
     }

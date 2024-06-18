@@ -22,9 +22,6 @@ package org.neo4j.gds.algorithms.community;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.louvain.LouvainAlgorithmFactory;
-import org.neo4j.gds.louvain.LouvainBaseConfig;
-import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityCalculatorFactory;
 import org.neo4j.gds.modularity.ModularityResult;
@@ -61,18 +58,6 @@ public class CommunityAlgorithmsFacade {
             config,
             Optional.empty(),
             new IntersectingTriangleCountFactory<>()
-        );
-    }
-
-    AlgorithmComputationResult<LouvainResult> louvain(
-        String graphName,
-        LouvainBaseConfig config
-    ) {
-        return algorithmRunner.run(
-            graphName,
-            config,
-            config.relationshipWeightProperty(),
-            new LouvainAlgorithmFactory<>()
         );
     }
 

@@ -40,6 +40,8 @@ import org.neo4j.gds.labelpropagation.LabelPropagationWriteConfig;
 import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.leiden.LeidenWriteConfig;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.louvain.LouvainResult;
+import org.neo4j.gds.louvain.LouvainWriteConfig;
 import org.neo4j.gds.wcc.WccWriteConfig;
 
 import java.util.Optional;
@@ -49,6 +51,7 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KMeans;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.LabelPropagation;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Leiden;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Louvain;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
 
 public final class CommunityAlgorithmsWriteModeBusinessFacade {
@@ -172,6 +175,24 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
             Leiden,
             () -> estimationFacade.leiden(configuration),
             graph -> algorithms.leiden(graph, configuration),
+            Optional.of(writeStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT louvain(
+        GraphName graphName,
+        LouvainWriteConfig configuration,
+        ResultBuilder<LouvainWriteConfig, LouvainResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var writeStep = new LouvainWriteStep(writeToDatabase, configuration);
+
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            Louvain,
+            () -> estimationFacade.louvain(configuration),
+            graph -> algorithms.louvain(graph, configuration),
             Optional.of(writeStep),
             resultBuilder
         );

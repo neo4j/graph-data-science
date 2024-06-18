@@ -17,10 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.community.louvain;
+package org.neo4j.gds.procedures.algorithms.community;
 
-import org.neo4j.gds.procedures.algorithms.community.LouvainStatsResult;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -54,5 +55,21 @@ public final class LouvainWriteResult extends LouvainStatsResult {
         );
         this.writeMillis = writeMillis;
         this.nodePropertiesWritten = nodePropertiesWritten;
+    }
+
+    static LouvainWriteResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+        return new LouvainWriteResult(
+            0,
+            Collections.emptyList(),
+            0,
+            0,
+            Collections.emptyMap(),
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            0,
+            timings.mutateOrWriteMillis,
+            0,
+            configurationMap
+        );
     }
 }

@@ -25,7 +25,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.procedures.algorithms.community.LouvainMutateResult;
-import org.neo4j.gds.procedures.community.louvain.LouvainWriteResult;
+import org.neo4j.gds.procedures.algorithms.community.LouvainWriteResult;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
 abstract class LouvainResultBuilder<PROC_RESULT> extends AbstractCommunityResultBuilder<PROC_RESULT> {

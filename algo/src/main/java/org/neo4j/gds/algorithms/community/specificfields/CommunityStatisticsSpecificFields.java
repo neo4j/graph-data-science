@@ -24,7 +24,6 @@ import java.util.Map;
 /**
  * Defines the structure of algorithm community statistics.
  * The implementations may add more methods specific for the particular algorithm.
- * @see LouvainSpecificFields
  */
 public interface CommunityStatisticsSpecificFields {
     long communityCount();

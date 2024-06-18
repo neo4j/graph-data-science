@@ -24,7 +24,6 @@ import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.community.specificfields.AlphaSccSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.CommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LocalClusteringCoefficientSpecificFields;
-import org.neo4j.gds.algorithms.community.specificfields.LouvainSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.ModularityOptimizationSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.StandardCommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.TriangleCountSpecificFields;
@@ -36,8 +35,6 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.louvain.LouvainResult;
-import org.neo4j.gds.louvain.LouvainWriteConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
 import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
@@ -46,12 +43,9 @@ import org.neo4j.gds.scc.SccWriteConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientWriteConfig;
 import org.neo4j.gds.triangle.TriangleCountWriteConfig;
 
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
-import static org.neo4j.gds.algorithms.community.CommunityCompanion.createIntermediateCommunitiesNodePropertyValues;
 import static org.neo4j.gds.algorithms.runner.AlgorithmRunner.runWithTiming;
 
 public class CommunityAlgorithmsWriteBusinessFacade {
@@ -137,54 +131,6 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             configuration.resolveResultStore(algorithmResult.resultStore())
         );
 
-    }
-
-    public NodePropertyWriteResult<LouvainSpecificFields> louvain(
-        String graphName,
-        LouvainWriteConfig configuration,
-        StatisticsComputationInstructions statisticsComputationInstructions
-    ) {
-
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> communityAlgorithmsFacade.louvain(graphName, configuration)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        NodePropertyValuesMapper<LouvainResult, LouvainWriteConfig> mapper = ((result, config) -> config.includeIntermediateCommunities()
-            ? createIntermediateCommunitiesNodePropertyValues(result::getIntermediateCommunities, result.size())
-            : CommunityCompanion.nodePropertyValues(
-                config.isIncremental(),
-                config.writeProperty(),
-                config.seedProperty(),
-                config.consecutiveIds(),
-                NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent()),
-                config.minCommunitySize(),
-                config.concurrency(),
-                () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
-            ));
-
-        return writeToDatabase(
-            algorithmResult,
-            configuration,
-            mapper,
-            (result -> result::getCommunity),
-            (result, componentCount, communitySummary) -> new LouvainSpecificFields(
-                result.modularity(),
-                Arrays.stream(result.modularities()).boxed().collect(Collectors.toList()),
-                result.ranLevels(),
-                componentCount,
-                communitySummary
-            ),
-            statisticsComputationInstructions,
-            intermediateResult.computeMilliseconds,
-            () -> LouvainSpecificFields.EMPTY,
-            "LouvainWrite",
-            configuration.writeConcurrency(),
-            configuration.writeProperty(),
-            configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(algorithmResult.resultStore())
-        );
     }
 
     public NodePropertyWriteResult<ModularityOptimizationSpecificFields> modularityOptimization(
