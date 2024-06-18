@@ -1127,6 +1127,35 @@ class CypherAggregationTest extends BaseProcTest {
             .doesNotThrowAnyException();
     }
 
+    @Test
+    void shouldFailOnEmptyGraphName() {
+        var query =
+            """
+                UNWIND [
+                  [0, 1, 'a', {}, 'rel', {}],\s
+                  [2, 3, 'b', {x:1}, 'rel2', {weight: 0.1}],
+                  [5, 6, 'c', {y:1}, 'rel3', {hq: 0.1}]
+                ] AS data
+                 RETURN gds.graph.project(
+                    '',
+                    data[0],
+                    data[1],
+                    {
+                        sourceNodeLabels: data[2],
+                        targetNodeLabels: null,
+                        sourceNodeProperties: data[3],
+                        targetNodeProperties: null,
+                        relationshipType: data[4],
+                        relationshipProperties: data[5]
+                    }
+                )
+                """;
+
+        assertThatException()
+            .isThrownBy(() -> runQuery(query))
+            .withMessageContaining("`graphName` can not be null or blank");
+    }
+
     @Nested
     class LargerGraphTest extends RandomGraphTestCase {
 
@@ -1207,34 +1236,5 @@ class CypherAggregationTest extends BaseProcTest {
             assertThat(graph.nodeCount()).isEqualTo(nodeCount);
             assertThat(graph.relationshipCount()).isEqualTo(relCount);
         }
-    }
-
-    @Test
-    void shouldFailOnEmptyGraphName() {
-        var query =
-            """
-                UNWIND [
-                  [0, 1, 'a', {}, 'rel', {}],\s
-                  [2, 3, 'b', {x:1}, 'rel2', {weight: 0.1}],
-                  [5, 6, 'c', {y:1}, 'rel3', {hq: 0.1}]
-                ] AS data
-                 RETURN gds.graph.project(
-                    '',
-                    data[0],
-                    data[1],
-                    {
-                        sourceNodeLabels: data[2],
-                        targetNodeLabels: null,
-                        sourceNodeProperties: data[3],
-                        targetNodeProperties: null,
-                        relationshipType: data[4],
-                        relationshipProperties: data[5]
-                    }
-                )
-                """;
-
-        assertThatException()
-            .isThrownBy(() -> runQuery(query))
-            .withMessageContaining("Graph name cannot be blank");
     }
 }

@@ -28,6 +28,7 @@ import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
 import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.core.ConfigKeyValidation;
+import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -208,9 +209,7 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
     }
 
     private static void validateGraphName(String graphName, String username, DatabaseId databaseId) {
-        if (graphName.isBlank()) {
-            throw new IllegalArgumentException("Graph name cannot be blank");
-        }
+        CypherMapAccess.failOnBlank("graphName", graphName);
         if (GraphStoreCatalog.exists(username, databaseId, graphName)) {
             throw new IllegalArgumentException("Graph " + graphName + " already exists");
         }

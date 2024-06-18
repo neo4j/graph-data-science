@@ -96,7 +96,7 @@ class ProductGraphAggregatorTest {
                 MapValue.EMPTY,
                 MapValue.EMPTY,
                 NoValue.NO_VALUE
-            )).withMessage("Graph name cannot be blank");
+            )).withMessageContaining("`graphName` can not be null or blank");
     }
 
     private static Stream<Arguments> emptyGraphNames() {
