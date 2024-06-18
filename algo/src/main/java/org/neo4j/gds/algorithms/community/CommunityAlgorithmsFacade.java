@@ -22,9 +22,6 @@ package org.neo4j.gds.algorithms.community;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.leiden.LeidenAlgorithmFactory;
-import org.neo4j.gds.leiden.LeidenBaseConfig;
-import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.louvain.LouvainAlgorithmFactory;
 import org.neo4j.gds.louvain.LouvainBaseConfig;
 import org.neo4j.gds.louvain.LouvainResult;
@@ -76,18 +73,6 @@ public class CommunityAlgorithmsFacade {
             config,
             config.relationshipWeightProperty(),
             new LouvainAlgorithmFactory<>()
-        );
-    }
-
-    AlgorithmComputationResult<LeidenResult> leiden(
-        String graphName,
-        LeidenBaseConfig config
-    ) {
-        return algorithmRunner.run(
-            graphName,
-            config,
-            config.relationshipWeightProperty(),
-            new LeidenAlgorithmFactory<>()
         );
     }
 

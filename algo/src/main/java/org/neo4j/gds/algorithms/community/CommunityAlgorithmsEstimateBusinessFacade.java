@@ -21,8 +21,6 @@ package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.leiden.LeidenBaseConfig;
-import org.neo4j.gds.leiden.LeidenMemoryEstimateDefinition;
 import org.neo4j.gds.louvain.LouvainBaseConfig;
 import org.neo4j.gds.louvain.LouvainMemoryEstimateDefinition;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
@@ -57,19 +55,6 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             configuration,
             Optional.empty(),
             new IntersectingTriangleCountMemoryEstimateDefinition()
-        );
-    }
-
-
-    public <C extends LeidenBaseConfig> MemoryEstimateResult leiden(
-        Object graphNameOrConfiguration,
-        C configuration
-    ) {
-        return algorithmEstimator.estimate(
-            graphNameOrConfiguration,
-            configuration,
-            configuration.relationshipWeightProperty(),
-            new LeidenMemoryEstimateDefinition(configuration.toMemoryEstimationParameters())
         );
     }
 

@@ -21,7 +21,7 @@ package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.leiden.LeidenWriteResult;
+import org.neo4j.gds.procedures.algorithms.community.LeidenWriteResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -46,7 +46,7 @@ public class LeidenWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().leidenWrite(graphName, configuration);
+        return facade.algorithms().community().leidenWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.leiden.write.estimate", mode = READ)
@@ -55,7 +55,7 @@ public class LeidenWriteProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        return facade.community().leidenEstimateWrite(graphName, configuration);
+        return facade.algorithms().community().leidenWriteEstimate(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)

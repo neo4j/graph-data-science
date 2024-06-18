@@ -17,19 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.community.leiden;
+package org.neo4j.gds.procedures.algorithms.community;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.procedures.algorithms.community.LeidenStatsResult;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 public final class LeidenWriteResult extends LeidenStatsResult {
-
     public final long writeMillis;
     public final long nodePropertiesWritten;
 
@@ -43,7 +42,7 @@ public final class LeidenWriteResult extends LeidenStatsResult {
         long postProcessingMillis,
         long writeMillis,
         long nodePropertiesWritten,
-        @Nullable Map<String, Object> communityDistribution,
+        Map<String, Object> communityDistribution,
         List<Double> modularities,
         double modularity,
         Map<String, Object> configuration
@@ -65,8 +64,25 @@ public final class LeidenWriteResult extends LeidenStatsResult {
         this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    public static class Builder extends AbstractCommunityResultBuilder<LeidenWriteResult> {
+    static LeidenWriteResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+        return new LeidenWriteResult(
+            0,
+            false,
+            0,
+            0,
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            0,
+            timings.mutateOrWriteMillis,
+            0,
+            Collections.emptyMap(),
+            Collections.emptyList(),
+            0,
+            configurationMap
+        );
+    }
 
+    public static class Builder extends AbstractCommunityResultBuilder<LeidenWriteResult> {
         long levels = -1;
         boolean didConverge = false;
 
@@ -116,5 +132,4 @@ public final class LeidenWriteResult extends LeidenStatsResult {
             );
         }
     }
-
 }

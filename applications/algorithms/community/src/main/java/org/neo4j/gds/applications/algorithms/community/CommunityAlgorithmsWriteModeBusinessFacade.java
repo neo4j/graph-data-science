@@ -37,6 +37,8 @@ import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.kmeans.KmeansWriteConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.labelpropagation.LabelPropagationWriteConfig;
+import org.neo4j.gds.leiden.LeidenResult;
+import org.neo4j.gds.leiden.LeidenWriteConfig;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.wcc.WccWriteConfig;
 
@@ -46,6 +48,7 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KCore;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KMeans;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.LabelPropagation;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Leiden;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
 
 public final class CommunityAlgorithmsWriteModeBusinessFacade {
@@ -151,6 +154,24 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
             LabelPropagation,
             estimationFacade::labelPropagation,
             graph -> algorithms.labelPropagation(graph, configuration),
+            Optional.of(writeStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT leiden(
+        GraphName graphName,
+        LeidenWriteConfig configuration,
+        ResultBuilder<LeidenWriteConfig, LeidenResult, RESULT, Pair<NodePropertiesWritten, NodePropertyValues>> resultBuilder
+    ) {
+        var writeStep = new LeidenWriteStep(writeToDatabase, configuration);
+
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            Leiden,
+            () -> estimationFacade.leiden(configuration),
+            graph -> algorithms.leiden(graph, configuration),
             Optional.of(writeStep),
             resultBuilder
         );

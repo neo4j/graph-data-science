@@ -26,7 +26,6 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacad
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.leiden.LeidenWriteConfig;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.louvain.LouvainStatsConfig;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
@@ -39,7 +38,6 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
 import org.neo4j.gds.procedures.algorithms.community.ProcedureStatisticsComputationInstructions;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.community.leiden.LeidenWriteResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainStatsResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
@@ -200,26 +198,6 @@ public class CommunityProcedureFacade {
     ) {
         var config = configurationCreator.createConfiguration(algoConfiguration, LouvainWriteConfig::of);
         return Stream.of(estimateBusinessFacade.louvain(graphNameOrConfiguration, config));
-    }
-
-    public Stream<LeidenWriteResult> leidenWrite(String graphName, Map<String, Object> configuration) {
-        var config = configurationCreator.createConfiguration(configuration, LeidenWriteConfig::of);
-
-        var computationResult = writeBusinessFacade.leiden(
-            graphName,
-            config,
-            ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
-        );
-
-        return Stream.of(LeidenComputationResultTransformer.toWriteResult(computationResult));
-    }
-
-    public Stream<MemoryEstimateResult> leidenEstimateWrite(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, LeidenWriteConfig::of);
-        return Stream.of(estimateBusinessFacade.leiden(graphNameOrConfiguration, config));
     }
 
     public Stream<SccStreamResult> sccStream(
