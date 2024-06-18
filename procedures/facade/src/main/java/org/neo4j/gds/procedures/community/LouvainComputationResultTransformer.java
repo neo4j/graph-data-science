@@ -20,50 +20,12 @@
 package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
-import org.neo4j.gds.algorithms.StreamComputationResult;
-import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.algorithms.community.specificfields.LouvainSpecificFields;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.louvain.LouvainResult;
-import org.neo4j.gds.louvain.LouvainStreamConfig;
 import org.neo4j.gds.louvain.LouvainWriteConfig;
-import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainWriteResult;
-
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 final class LouvainComputationResultTransformer {
     private LouvainComputationResultTransformer() {}
-
-    static Stream<LouvainStreamResult> toStreamResult(
-        StreamComputationResult<LouvainResult> computationResult,
-        LouvainStreamConfig configuration
-    ) {
-        return computationResult.result().map(louvainResult -> {
-            var graph = computationResult.graph();
-
-            var nodePropertyValues = CommunityCompanion.nodePropertyValues(
-                configuration.consecutiveIds(),
-                NodePropertyValuesAdapter.adapt(louvainResult.dendrogramManager().getCurrent()),
-                configuration.minCommunitySize(),
-                configuration.concurrency()
-            );
-
-            var includeIntermediateCommunities = configuration.includeIntermediateCommunities();
-
-            return LongStream.range(0, graph.nodeCount())
-                .boxed().
-                filter(nodePropertyValues::hasValue)
-                .map(nodeId -> {
-                    var communities = includeIntermediateCommunities
-                        ? louvainResult.getIntermediateCommunities(nodeId)
-                        : null;
-                    var communityId = nodePropertyValues.longValue(nodeId);
-                    return LouvainStreamResult.create(graph.toOriginalNodeId(nodeId), communities, communityId);
-                });
-        }).orElseGet(Stream::empty);
-    }
 
     static LouvainWriteResult toWriteResult(NodePropertyWriteResult<LouvainSpecificFields> computationResult, LouvainWriteConfig config) {
         return new LouvainWriteResult(

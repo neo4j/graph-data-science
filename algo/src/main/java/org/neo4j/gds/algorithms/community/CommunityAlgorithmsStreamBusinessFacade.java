@@ -22,8 +22,6 @@ package org.neo4j.gds.algorithms.community;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.louvain.LouvainBaseConfig;
-import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
@@ -39,19 +37,6 @@ public class CommunityAlgorithmsStreamBusinessFacade {
 
     public CommunityAlgorithmsStreamBusinessFacade(CommunityAlgorithmsFacade communityAlgorithmsFacade) {
         this.communityAlgorithmsFacade = communityAlgorithmsFacade;
-    }
-
-    public StreamComputationResult<LouvainResult> louvain(
-        String graphName,
-        LouvainBaseConfig config
-    ) {
-
-        var result = this.communityAlgorithmsFacade.louvain(
-            graphName,
-            config
-        );
-
-        return createStreamComputationResult(result);
     }
 
     public StreamComputationResult<HugeLongArray> scc(
