@@ -42,6 +42,7 @@ import org.neo4j.gds.labelpropagation.LabelPropagationStreamConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationWriteConfig;
 import org.neo4j.gds.leiden.LeidenStatsConfig;
 import org.neo4j.gds.leiden.LeidenStreamConfig;
+import org.neo4j.gds.leiden.LeidenWriteConfig;
 import org.neo4j.gds.procedures.algorithms.community.stubs.ApproximateMaximumKCutMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.K1ColoringMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.KCoreMutateStub;
@@ -600,6 +601,36 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             LeidenStreamConfig::of,
+            configuration -> estimationMode().leiden(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<LeidenWriteResult> leidenWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var statisticsComputationInstructions = ProcedureStatisticsComputationInstructions.forCommunities(
+            procedureReturnColumns);
+        var resultBuilder = new LeidenResultBuilderForWriteMode(statisticsComputationInstructions);
+
+        return algorithmExecutionScaffolding.runAlgorithm(
+            graphName,
+            configuration,
+            LeidenWriteConfig::of,
+            writeMode()::leiden,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> leidenWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            LeidenWriteConfig::of,
             configuration -> estimationMode().leiden(configuration, graphNameOrConfiguration)
         );
 

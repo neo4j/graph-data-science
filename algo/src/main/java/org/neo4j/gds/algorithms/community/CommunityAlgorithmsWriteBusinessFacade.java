@@ -23,7 +23,6 @@ import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.community.specificfields.AlphaSccSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.CommunityStatisticsSpecificFields;
-import org.neo4j.gds.algorithms.community.specificfields.LeidenSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LocalClusteringCoefficientSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LouvainSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.ModularityOptimizationSpecificFields;
@@ -37,8 +36,6 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.leiden.LeidenResult;
-import org.neo4j.gds.leiden.LeidenWriteConfig;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.louvain.LouvainWriteConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
@@ -183,58 +180,6 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             intermediateResult.computeMilliseconds,
             () -> LouvainSpecificFields.EMPTY,
             "LouvainWrite",
-            configuration.writeConcurrency(),
-            configuration.writeProperty(),
-            configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(algorithmResult.resultStore())
-        );
-    }
-
-    public NodePropertyWriteResult<LeidenSpecificFields> leiden(
-        String graphName,
-        LeidenWriteConfig configuration,
-        StatisticsComputationInstructions statisticsComputationInstructions
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> communityAlgorithmsFacade.leiden(graphName, configuration)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        NodePropertyValuesMapper<LeidenResult, LeidenWriteConfig> mapper = ((result, config) -> config.includeIntermediateCommunities()
-            ? createIntermediateCommunitiesNodePropertyValues(
-            result::getIntermediateCommunities,
-            result.communities().size()
-        )
-            : CommunityCompanion.nodePropertyValues(
-                config.isIncremental(),
-                config.writeProperty(),
-                config.seedProperty(),
-                config.consecutiveIds(),
-                NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent()),
-                config.minCommunitySize(),
-                config.concurrency(),
-                () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
-            ));
-
-        return writeToDatabase(
-            algorithmResult,
-            configuration,
-            mapper,
-            (result -> result.communities()::get),
-            (result, componentCount, communitySummary) -> LeidenSpecificFields.from(
-                result.communities().size(),
-                result.modularity(),
-                result.modularities(),
-                componentCount,
-                result.ranLevels(),
-                result.didConverge(),
-                communitySummary
-            ),
-            statisticsComputationInstructions,
-            intermediateResult.computeMilliseconds,
-            () -> LeidenSpecificFields.EMPTY,
-            "LeidenWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
