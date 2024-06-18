@@ -20,48 +20,11 @@
 package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
-import org.neo4j.gds.algorithms.StreamComputationResult;
-import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.algorithms.community.specificfields.LeidenSpecificFields;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.leiden.LeidenResult;
-import org.neo4j.gds.leiden.LeidenStreamConfig;
-import org.neo4j.gds.procedures.community.leiden.LeidenStreamResult;
 import org.neo4j.gds.procedures.community.leiden.LeidenWriteResult;
-
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 final class LeidenComputationResultTransformer {
     private LeidenComputationResultTransformer() {}
-
-    static Stream<LeidenStreamResult> toStreamResult(
-        StreamComputationResult<LeidenResult> computationResult,
-        LeidenStreamConfig configuration
-    ) {
-        return computationResult.result().map(leidenResult -> {
-            var graph = computationResult.graph();
-
-            var nodePropertyValues = CommunityCompanion.nodePropertyValues(
-                configuration.consecutiveIds(),
-                NodePropertyValuesAdapter.adapt(leidenResult.dendrogramManager().getCurrent()),
-                configuration.minCommunitySize(),
-                configuration.concurrency()
-            );
-            var includeIntermediateCommunities = configuration.includeIntermediateCommunities();
-
-            return LongStream.range(0, graph.nodeCount())
-                .boxed().
-                filter(nodePropertyValues::hasValue)
-                .map(nodeId -> {
-                    var communities = includeIntermediateCommunities
-                        ? leidenResult.getIntermediateCommunities(nodeId)
-                        : null;
-                    var communityId = nodePropertyValues.longValue(nodeId);
-                    return new LeidenStreamResult(graph.toOriginalNodeId(nodeId), communities, communityId);
-                });
-        }).orElseGet(Stream::empty);
-    }
 
     static LeidenWriteResult toWriteResult(NodePropertyWriteResult<LeidenSpecificFields> computationResult) {
         return new LeidenWriteResult(

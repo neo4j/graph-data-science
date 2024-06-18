@@ -17,26 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.community.leiden;
-
-import org.jetbrains.annotations.Nullable;
+package org.neo4j.gds.procedures.algorithms.community;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public final class LeidenStreamResult {
-
     public final long nodeId;
     public final long communityId;
     public final List<Long> intermediateCommunityIds;
 
-    public LeidenStreamResult(long nodeId, @Nullable long[] intermediateCommunityIds, long communityId) {
+    private LeidenStreamResult(long nodeId, List<Long> intermediateCommunityIds, long communityId) {
         this.nodeId = nodeId;
-        this.intermediateCommunityIds = intermediateCommunityIds == null ? null : Arrays
-            .stream(intermediateCommunityIds)
-            .boxed()
-            .collect(Collectors.toList());
+        this.intermediateCommunityIds = intermediateCommunityIds;
         this.communityId = communityId;
+    }
+
+    static LeidenStreamResult create(long nodeId, long[] intermediateCommunityIdsArray, long communityId) {
+        List<Long> intermediateCommunityIdsList = intermediateCommunityIdsArray == null
+            ? null
+            : Arrays.stream(intermediateCommunityIdsArray).boxed().collect(Collectors.toList());
+        return new LeidenStreamResult(nodeId, intermediateCommunityIdsList, communityId);
     }
 }

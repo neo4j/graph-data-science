@@ -26,7 +26,6 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacad
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.leiden.LeidenStreamConfig;
 import org.neo4j.gds.leiden.LeidenWriteConfig;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.louvain.LouvainStatsConfig;
@@ -40,7 +39,6 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
 import org.neo4j.gds.procedures.algorithms.community.ProcedureStatisticsComputationInstructions;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.community.leiden.LeidenStreamResult;
 import org.neo4j.gds.procedures.community.leiden.LeidenWriteResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainStatsResult;
@@ -204,21 +202,6 @@ public class CommunityProcedureFacade {
         return Stream.of(estimateBusinessFacade.louvain(graphNameOrConfiguration, config));
     }
 
-    public Stream<LeidenStreamResult> leidenStream(
-        String graphName,
-        Map<String, Object> configuration
-
-    ) {
-        var streamConfig = configurationCreator.createConfigurationForStream(configuration, LeidenStreamConfig::of);
-
-        var computationResult = streamBusinessFacade.leiden(
-            graphName,
-            streamConfig
-        );
-
-        return LeidenComputationResultTransformer.toStreamResult(computationResult, streamConfig);
-    }
-
     public Stream<LeidenWriteResult> leidenWrite(String graphName, Map<String, Object> configuration) {
         var config = configurationCreator.createConfiguration(configuration, LeidenWriteConfig::of);
 
@@ -229,14 +212,6 @@ public class CommunityProcedureFacade {
         );
 
         return Stream.of(LeidenComputationResultTransformer.toWriteResult(computationResult));
-    }
-
-    public Stream<MemoryEstimateResult> leidenEstimateStream(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, LeidenStreamConfig::of);
-        return Stream.of(estimateBusinessFacade.leiden(graphNameOrConfiguration, config));
     }
 
     public Stream<MemoryEstimateResult> leidenEstimateWrite(
