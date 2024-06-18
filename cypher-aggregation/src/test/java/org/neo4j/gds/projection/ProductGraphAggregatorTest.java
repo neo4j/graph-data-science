@@ -20,6 +20,9 @@
 package org.neo4j.gds.projection;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -28,7 +31,10 @@ import org.neo4j.values.storable.NoValue;
 import org.neo4j.values.storable.Values;
 import org.neo4j.values.virtual.MapValue;
 
+import java.util.stream.Stream;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 class ProductGraphAggregatorTest {
 
@@ -68,5 +74,37 @@ class ProductGraphAggregatorTest {
 
         assertThat(graphStore.nodes().toOriginalNodeId(0)).isEqualTo(source);
         assertThat(graphStore.nodes().toOriginalNodeId(1)).isEqualTo(target);
+    }
+
+    @ParameterizedTest(name = "graphName=`{1}`")
+    @MethodSource("emptyGraphNames")
+    void shouldFailOnEmptyGraphName(String emptyGraphName, String description) {
+
+        var aggregator = new ProductGraphAggregator(
+            DatabaseId.random(),
+            "neo4j",
+            WriteMode.LOCAL,
+            ExecutingQueryProvider.empty(),
+            MetricsFacade.PASSTHROUGH_METRICS_FACADE.projectionMetrics()
+        );
+
+        assertThatIllegalArgumentException().isThrownBy(() ->
+            aggregator.projectNextRelationship(
+                Values.stringValue(emptyGraphName),
+                Values.longValue(1L),
+                Values.longValue(2L),
+                MapValue.EMPTY,
+                MapValue.EMPTY,
+                NoValue.NO_VALUE
+            )).withMessage("Graph name cannot be blank");
+    }
+
+    private static Stream<Arguments> emptyGraphNames() {
+        return Stream.of(
+            Arguments.of("", "empty"),
+            Arguments.of("\t", "tab"),
+            Arguments.of("\n", "new line"),
+            Arguments.of("   ", "spaces")
+        );
     }
 }

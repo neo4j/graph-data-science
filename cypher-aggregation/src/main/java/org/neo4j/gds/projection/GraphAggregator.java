@@ -208,6 +208,9 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
     }
 
     private static void validateGraphName(String graphName, String username, DatabaseId databaseId) {
+        if (graphName.isBlank()) {
+            throw new IllegalArgumentException("Graph name cannot be blank");
+        }
         if (GraphStoreCatalog.exists(username, databaseId, graphName)) {
             throw new IllegalArgumentException("Graph " + graphName + " already exists");
         }
