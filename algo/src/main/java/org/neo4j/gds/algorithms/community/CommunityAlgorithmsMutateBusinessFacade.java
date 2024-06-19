@@ -23,14 +23,12 @@ import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.community.specificfields.CommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LocalClusteringCoefficientSpecificFields;
-import org.neo4j.gds.algorithms.community.specificfields.ModularityOptimizationSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.StandardCommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.TriangleCountSpecificFields;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
 import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
 import org.neo4j.gds.scc.SccMutateConfig;
@@ -190,47 +188,6 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             ),
             intermediateResult.computeMilliseconds,
             () -> LocalClusteringCoefficientSpecificFields.EMPTY
-        );
-    }
-
-    public NodePropertyMutateResult<ModularityOptimizationSpecificFields> modularityOptimization(
-        String graphName,
-        ModularityOptimizationMutateConfig configuration,
-        StatisticsComputationInstructions statisticsComputationInstructions
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.modularityOptimization(graphName, configuration)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        return mutateNodeProperty(
-            algorithmResult,
-            configuration,
-            ((modularityOptimizationResult, config) -> {
-                return CommunityCompanion.nodePropertyValues(
-                    config.isIncremental(),
-                    config.mutateProperty(),
-                    config.seedProperty(),
-                    config.consecutiveIds(),
-                    modularityOptimizationResult.asNodeProperties(),
-                    () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
-                );
-            }),
-            (result -> result::communityId),
-            (result, componentCount, communitySummary) -> {
-                return new ModularityOptimizationSpecificFields(
-                    result.modularity(),
-                    result.ranIterations(),
-                    result.didConverge(),
-                    result.asNodeProperties().nodeCount(),
-                    componentCount,
-                    communitySummary
-                );
-            },
-            statisticsComputationInstructions,
-            intermediateResult.computeMilliseconds,
-            () -> ModularityOptimizationSpecificFields.EMPTY
         );
     }
 

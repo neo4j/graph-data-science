@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.community.modularityoptimization;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.procedures.algorithms.community.ModularityOptimizationResultBuilder;
 
 import java.util.Map;
 

@@ -20,7 +20,7 @@
 package org.neo4j.gds.modularityoptimization;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationMutateResult;
+import org.neo4j.gds.procedures.algorithms.community.ModularityOptimizationMutateResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -45,7 +45,7 @@ public class ModularityOptimizationMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().modularityOptimizationMutate(graphName, configuration);
+        return facade.algorithms().community().modularityOptimizationMutateStub().execute(graphName, configuration);
     }
 
     @Procedure(value = "gds.modularityOptimization.mutate.estimate", mode = READ)
@@ -54,7 +54,7 @@ public class ModularityOptimizationMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().modularityOptimizationEstimateMutate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().community().modularityOptimizationMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Deprecated(forRemoval = true)

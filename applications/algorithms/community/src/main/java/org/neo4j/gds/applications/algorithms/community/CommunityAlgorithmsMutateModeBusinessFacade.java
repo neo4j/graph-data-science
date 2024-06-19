@@ -41,6 +41,8 @@ import org.neo4j.gds.leiden.LeidenMutateConfig;
 import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.louvain.LouvainResult;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.wcc.WccMutateConfig;
 
 import java.util.Optional;
@@ -52,6 +54,7 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.LabelPropagation;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Leiden;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Louvain;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ModularityOptimization;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
 
 public class CommunityAlgorithmsMutateModeBusinessFacade {
@@ -193,6 +196,24 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
             Louvain,
             () -> estimation.louvain(configuration),
             graph -> algorithms.louvain(graph, configuration),
+            Optional.of(mutateStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT modularityOptimization(
+        GraphName graphName,
+        ModularityOptimizationMutateConfig configuration,
+        ResultBuilder<ModularityOptimizationMutateConfig, ModularityOptimizationResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var mutateStep = new ModularityOptimizationMutateStep(mutateNodeProperty, configuration);
+
+        return template.processAlgorithm(
+            graphName,
+            configuration,
+            ModularityOptimization,
+            estimation::modularityOptimization,
+            graph -> algorithms.modularityOptimization(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
         );

@@ -34,6 +34,7 @@ import org.neo4j.gds.kmeans.KmeansMutateConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationMutateConfig;
 import org.neo4j.gds.leiden.LeidenMutateConfig;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
 import org.neo4j.gds.pagerank.PageRankMutateConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordMutateConfig;
@@ -91,6 +92,7 @@ public class ConfigurationParsersForMutateMode {
             case Louvain -> LouvainMutateConfig::of;
             case LongestPath -> null;
             case Modularity -> null;
+            case ModularityOptimization -> ModularityOptimizationMutateConfig::of;
             case NodeSimilarity -> NodeSimilarityMutateConfig::of;
             case PageRank -> PageRankMutateConfig::of;
             case RandomWalk -> null;

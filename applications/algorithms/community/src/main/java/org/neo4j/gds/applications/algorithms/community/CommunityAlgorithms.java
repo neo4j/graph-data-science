@@ -37,8 +37,10 @@ import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.k1coloring.K1Coloring;
+import org.neo4j.gds.k1coloring.K1ColoringAlgorithmFactory;
 import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
+import org.neo4j.gds.k1coloring.K1ColoringStreamConfigImpl;
 import org.neo4j.gds.kcore.KCoreDecomposition;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import org.neo4j.gds.kmeans.ImmutableKmeansContext;
@@ -57,13 +59,18 @@ import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityCalculator;
 import org.neo4j.gds.modularity.ModularityResult;
+import org.neo4j.gds.modularityoptimization.ModularityOptimization;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationFactory;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.wcc.Wcc;
 import org.neo4j.gds.wcc.WccBaseConfig;
 
 import java.util.List;
 import java.util.Optional;
+
+import static org.neo4j.gds.modularityoptimization.ModularityOptimization.K1COLORING_MAX_ITERATIONS;
 
 public class CommunityAlgorithms {
     private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
@@ -279,6 +286,43 @@ public class CommunityAlgorithms {
         return algorithm.compute();
     }
 
+    ModularityOptimizationResult modularityOptimization(Graph graph, ModularityOptimizationMutateConfig configuration) {
+        var task = Tasks.task(
+            LabelForProgressTracking.ModularityOptimization.value,
+            Tasks.task(
+                "initialization",
+                K1ColoringAlgorithmFactory.k1ColoringProgressTask(graph, createModularityConfig())
+            ),
+            Tasks.iterativeDynamic(
+                "compute modularity",
+                () -> List.of(Tasks.leaf("optimizeForColor", graph.relationshipCount())),
+                configuration.maxIterations()
+            )
+        );
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var seedPropertyValues = configuration.seedProperty() != null ?
+            CommunityCompanion.extractSeedingNodePropertyValues(
+                graph,
+                configuration.seedProperty()
+            ) : null;
+
+        var parameters = configuration.toParameters();
+
+        var algorithm = new ModularityOptimization(
+            graph,
+            parameters.maxIterations(),
+            parameters.tolerance(),
+            seedPropertyValues,
+            parameters.concurrency(),
+            parameters.batchSize(),
+            DefaultPool.INSTANCE,
+            progressTracker
+        );
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+    }
+
     DisjointSetStruct wcc(Graph graph, WccBaseConfig configuration) {
         var task = Tasks.leaf(LabelForProgressTracking.WCC.value, graph.relationshipCount());
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
@@ -354,5 +398,13 @@ public class CommunityAlgorithms {
             ),
             Tasks.leaf("compute current solution cost", nodeCount)
         );
+    }
+
+    private K1ColoringBaseConfig createModularityConfig() {
+        return K1ColoringStreamConfigImpl
+            .builder()
+            .maxIterations(K1COLORING_MAX_ITERATIONS)
+            .build();
+
     }
 }

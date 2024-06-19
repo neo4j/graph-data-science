@@ -19,18 +19,15 @@
  */
 package org.neo4j.gds.procedures.community;
 
-import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.algorithms.community.specificfields.ModularityOptimizationSpecificFields;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
-import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationMutateResult;
 import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationStatsResult;
 import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationStreamResult;
 import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationWriteResult;
@@ -63,25 +60,6 @@ final class ModularityOptimisationComputationResultTransformer {
                         nodePropertyValues.longValue(nodeId)
                     ));
             }).orElseGet(Stream::empty);
-    }
-
-    static ModularityOptimizationMutateResult toMutateResult(
-        NodePropertyMutateResult<ModularityOptimizationSpecificFields> computationResult,
-        ModularityOptimizationMutateConfig mutateConfig
-    ) {
-        return new ModularityOptimizationMutateResult(
-            computationResult.preProcessingMillis(),
-            computationResult.computeMillis(),
-            computationResult.postProcessingMillis(),
-            computationResult.mutateMillis(),
-            computationResult.algorithmSpecificFields().nodes(),
-            computationResult.algorithmSpecificFields().didConverge(),
-            computationResult.algorithmSpecificFields().ranIterations(),
-            computationResult.algorithmSpecificFields().modularity(),
-            computationResult.algorithmSpecificFields().communityCount(),
-            computationResult.algorithmSpecificFields().communityDistribution(),
-            mutateConfig.toMap()
-        );
     }
 
     static ModularityOptimizationStatsResult toStatsResult(

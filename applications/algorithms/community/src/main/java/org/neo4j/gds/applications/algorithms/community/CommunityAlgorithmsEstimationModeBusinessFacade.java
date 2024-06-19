@@ -40,6 +40,7 @@ import org.neo4j.gds.louvain.LouvainMemoryEstimateDefinition;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityCalculatorMemoryEstimateDefinition;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationMemoryEstimateDefinition;
 import org.neo4j.gds.wcc.WccBaseConfig;
 import org.neo4j.gds.wcc.WccMemoryEstimateDefinition;
 
@@ -160,6 +161,10 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
 
     public MemoryEstimation modularity() {
         return new ModularityCalculatorMemoryEstimateDefinition().memoryEstimation();
+    }
+
+    public MemoryEstimation modularityOptimization() {
+        return new ModularityOptimizationMemoryEstimateDefinition().memoryEstimation();
     }
 
     public MemoryEstimateResult modularity(ModularityBaseConfig configuration, Object graphNameOrConfiguration) {

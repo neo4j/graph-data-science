@@ -20,7 +20,7 @@
 package org.neo4j.gds.modularityoptimization;
 
 import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationResultBuilder;
+import org.neo4j.gds.procedures.algorithms.community.ModularityOptimizationResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 final class ModularityOptimizationSpecificationHelper {
