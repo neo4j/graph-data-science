@@ -26,10 +26,8 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacad
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
 import org.neo4j.gds.procedures.algorithms.community.ProcedureStatisticsComputationInstructions;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationWriteResult;
 import org.neo4j.gds.procedures.community.scc.AlphaSccWriteResult;
 import org.neo4j.gds.procedures.community.scc.SccMutateResult;
 import org.neo4j.gds.procedures.community.scc.SccStatsResult;
@@ -362,29 +360,6 @@ public class CommunityProcedureFacade {
     ) {
         var config = configurationCreator.createConfiguration(algoConfiguration, LocalClusteringCoefficientStreamConfig::of);
         return Stream.of(estimateBusinessFacade.localClusteringCoefficient(graphNameOrConfiguration, config));
-    }
-
-    public Stream<ModularityOptimizationWriteResult> modularityOptimizationWrite(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var writeConfig = configurationCreator.createConfiguration(configuration, ModularityOptimizationWriteConfig::of);
-
-        var computationResult = writeBusinessFacade.modularityOptimization(
-            graphName,
-            writeConfig,
-            ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
-        );
-
-        return Stream.of(ModularityOptimisationComputationResultTransformer.toWriteResult(computationResult));
-    }
-
-    public Stream<MemoryEstimateResult> modularityOptimizationEstimateWrite(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, ModularityOptimizationWriteConfig::of);
-        return Stream.of(estimateBusinessFacade.modularityOptimization(graphNameOrConfiguration, config));
     }
 
     public Stream<AlphaSccWriteResult> alphaSccWrite(

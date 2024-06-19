@@ -22,9 +22,6 @@ package org.neo4j.gds.algorithms.community;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationBaseConfig;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationFactory;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.scc.SccAlgorithmFactory;
 import org.neo4j.gds.scc.SccCommonBaseConfig;
 import org.neo4j.gds.triangle.IntersectingTriangleCountFactory;
@@ -79,18 +76,6 @@ public class CommunityAlgorithmsFacade {
             config,
             Optional.empty(),
             new LocalClusteringCoefficientFactory<>()
-        );
-    }
-
-    public AlgorithmComputationResult<ModularityOptimizationResult> modularityOptimization(
-        String graphName,
-        ModularityOptimizationBaseConfig config
-    ) {
-        return algorithmRunner.run(
-            graphName,
-            config,
-            config.relationshipWeightProperty(),
-            new ModularityOptimizationFactory<>()
         );
     }
 }

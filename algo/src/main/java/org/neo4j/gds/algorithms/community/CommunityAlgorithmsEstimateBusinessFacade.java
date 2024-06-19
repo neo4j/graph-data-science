@@ -21,8 +21,6 @@ package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationBaseConfig;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationMemoryEstimateDefinition;
 import org.neo4j.gds.scc.SccBaseConfig;
 import org.neo4j.gds.scc.SccMemoryEstimateDefinition;
 import org.neo4j.gds.triangle.IntersectingTriangleCountMemoryEstimateDefinition;
@@ -75,18 +73,6 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             configuration,
             Optional.empty(),
             new LocalClusteringCoefficientMemoryEstimateDefinition(configuration.seedProperty())
-        );
-    }
-
-    public <C extends ModularityOptimizationBaseConfig> MemoryEstimateResult modularityOptimization(
-        Object graphNameOrConfiguration,
-        C configuration
-    ) {
-        return algorithmEstimator.estimate(
-            graphNameOrConfiguration,
-            configuration,
-            configuration.relationshipWeightProperty(),
-            new ModularityOptimizationMemoryEstimateDefinition()
         );
     }
 }

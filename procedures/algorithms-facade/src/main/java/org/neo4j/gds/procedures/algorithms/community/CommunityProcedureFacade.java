@@ -50,6 +50,7 @@ import org.neo4j.gds.modularity.ModularityStatsConfig;
 import org.neo4j.gds.modularity.ModularityStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
 import org.neo4j.gds.procedures.algorithms.community.stubs.ApproximateMaximumKCutMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.K1ColoringMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.KCoreMutateStub;
@@ -862,6 +863,35 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             ModularityOptimizationStreamConfig::of,
+            configuration -> estimationMode().modularityOptimization(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<ModularityOptimizationWriteResult> modularityOptimizationWrite(
+        String graphName, Map<String, Object> configuration
+    ) {
+        var statisticsComputationInstructions = ProcedureStatisticsComputationInstructions.forCommunities(
+            procedureReturnColumns);
+        var resultBuilder = new ModularityOptimizationResultBuilderForWriteMode(statisticsComputationInstructions);
+
+        return algorithmExecutionScaffolding.runAlgorithm(
+            graphName,
+            configuration,
+            ModularityOptimizationWriteConfig::of,
+            writeMode()::modularityOptimization,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> modularityOptimizationWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            ModularityOptimizationWriteConfig::of,
             configuration -> estimationMode().modularityOptimization(configuration, graphNameOrConfiguration)
         );
 

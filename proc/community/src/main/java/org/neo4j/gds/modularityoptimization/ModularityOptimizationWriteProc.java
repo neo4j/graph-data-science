@@ -20,7 +20,7 @@
 package org.neo4j.gds.modularityoptimization;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationWriteResult;
+import org.neo4j.gds.procedures.algorithms.community.ModularityOptimizationWriteResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -46,7 +46,7 @@ public class ModularityOptimizationWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().modularityOptimizationWrite(graphName, configuration);
+        return facade.algorithms().community().modularityOptimizationWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.modularityOptimization.write.estimate", mode = READ)
@@ -55,7 +55,7 @@ public class ModularityOptimizationWriteProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().modularityOptimizationEstimateWrite(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().community().modularityOptimizationWriteEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Deprecated(forRemoval = true)

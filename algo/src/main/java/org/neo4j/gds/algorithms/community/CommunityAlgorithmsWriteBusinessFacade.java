@@ -24,7 +24,6 @@ import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.community.specificfields.AlphaSccSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.CommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LocalClusteringCoefficientSpecificFields;
-import org.neo4j.gds.algorithms.community.specificfields.ModularityOptimizationSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.StandardCommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.TriangleCountSpecificFields;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
@@ -35,7 +34,6 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
 import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
 import org.neo4j.gds.scc.SccAlphaWriteConfig;
@@ -131,52 +129,6 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             configuration.resolveResultStore(algorithmResult.resultStore())
         );
 
-    }
-
-    public NodePropertyWriteResult<ModularityOptimizationSpecificFields> modularityOptimization(
-        String graphName,
-        ModularityOptimizationWriteConfig configuration,
-        StatisticsComputationInstructions statisticsComputationInstructions
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.modularityOptimization(graphName, configuration)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        Supplier<ModularityOptimizationSpecificFields> emptySupplier = () -> ModularityOptimizationSpecificFields.EMPTY;
-
-        return writeToDatabase(
-            algorithmResult,
-            configuration,
-            (result, config) -> CommunityCompanion.nodePropertyValues(
-                config.isIncremental(),
-                config.writeProperty(),
-                config.seedProperty(),
-                config.consecutiveIds(),
-                result.asNodeProperties(),
-                config.minCommunitySize(),
-                config.concurrency(),
-                () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
-            ),
-            result -> result::communityId,
-            (result, componentCount, communitySummary) -> new ModularityOptimizationSpecificFields(
-                result.modularity(),
-                result.ranIterations(),
-                result.didConverge(),
-                result.asNodeProperties().nodeCount(),
-                componentCount,
-                communitySummary
-            ),
-            statisticsComputationInstructions,
-            intermediateResult.computeMilliseconds,
-            emptySupplier,
-            "ModularityOptimizationWrite",
-            configuration.writeConcurrency(),
-            configuration.writeProperty(),
-            configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(algorithmResult.resultStore())
-        );
     }
 
     public NodePropertyWriteResult<TriangleCountSpecificFields> triangleCount(

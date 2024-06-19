@@ -38,6 +38,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.modularity.TestGraphs;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.logging.Log;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -123,7 +124,8 @@ class FootballTest {
             concurrency,
             minBatchSize,
             DefaultPool.INSTANCE,
-            progressTracker
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
     }
 

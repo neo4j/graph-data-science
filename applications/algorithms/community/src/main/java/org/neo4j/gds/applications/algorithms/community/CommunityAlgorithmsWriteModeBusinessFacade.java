@@ -42,6 +42,8 @@ import org.neo4j.gds.leiden.LeidenWriteConfig;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.louvain.LouvainWriteConfig;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
 import org.neo4j.gds.wcc.WccWriteConfig;
 
 import java.util.Optional;
@@ -52,6 +54,7 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.LabelPropagation;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Leiden;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Louvain;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ModularityOptimization;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
 
 public final class CommunityAlgorithmsWriteModeBusinessFacade {
@@ -193,6 +196,24 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
             Louvain,
             () -> estimationFacade.louvain(configuration),
             graph -> algorithms.louvain(graph, configuration),
+            Optional.of(writeStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT modularityOptimization(
+        GraphName graphName,
+        ModularityOptimizationWriteConfig configuration,
+        ResultBuilder<ModularityOptimizationWriteConfig, ModularityOptimizationResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var writeStep = new ModularityOptimizationWriteStep(writeToDatabase, configuration);
+
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            ModularityOptimization,
+            estimationFacade::modularityOptimization,
+            graph -> algorithms.modularityOptimization(graph, configuration),
             Optional.of(writeStep),
             resultBuilder
         );
