@@ -8,6 +8,14 @@ pluginManagement {
     }
 }
 
+dependencyResolutionManagement {
+    versionCatalogs {
+        openGds {
+            from(files("gradle/libs.versions.toml"))
+        }
+    }
+}
+
 rootProject.name = 'open-gds'
 
 include('algo')

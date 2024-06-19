@@ -17,12 +17,12 @@ if (ver.'neo4j'.startsWith('5.')) {
 
     dependencies {
         annotationProcessor project(':annotations')
-        annotationProcessor group: 'org.immutables', name: 'value',              version: ver.'immutables'
+        annotationProcessor openGds.immutables.value
         annotationProcessor group: 'org.neo4j',      name: 'annotations',        version: neos.'5.19'
 
         compileOnly project(':annotations')
         compileOnly project(':progress-tracking')
-        compileOnly group: 'org.immutables', name: 'value-annotations',           version: ver.'immutables'
+        compileOnly openGds.immutables.value.annotations
         compileOnly group: 'org.neo4j',      name: 'neo4j',                       version: neos.'5.19'
         compileOnly group: 'org.neo4j',      name: 'neo4j-record-storage-engine', version: neos.'5.19'
 
@@ -50,12 +50,12 @@ if (ver.'neo4j'.startsWith('5.')) {
         implementation project(':storage-engine-adapter-api')
 
         java17AnnotationProcessor project(':annotations')
-        java17AnnotationProcessor group: 'org.immutables', name: 'value',              version: ver.'immutables'
+        java17AnnotationProcessor openGds.immutables.value
         java17AnnotationProcessor group: 'org.neo4j',      name: 'annotations',        version: neos.'5.19'
 
         java17CompileOnly project(':annotations')
         java17CompileOnly project(':progress-tracking')
-        java17CompileOnly group: 'org.immutables', name: 'value-annotations',           version: ver.'immutables'
+        java17CompileOnly openGds.immutables.value.annotations
         java17CompileOnly group: 'org.neo4j',      name: 'neo4j',                       version: neos.'5.19'
         java17CompileOnly group: 'org.neo4j',      name: 'neo4j-record-storage-engine', version: neos.'5.19'
 

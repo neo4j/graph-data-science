@@ -7,8 +7,8 @@ group = 'org.neo4j.gds'
 dependencies {
     annotationProcessor project(':annotations')
 
-    annotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
-    annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
+    annotationProcessor openGds.immutables.builder
+    annotationProcessor openGds.immutables.value
 
     api(project(':algo'))
     api project(':metrics-api')
@@ -35,11 +35,11 @@ dependencies {
     implementation project(':termination')
     implementation project(':transaction')
 
-    implementation group: 'org.reflections',  name: 'reflections',  version: ver.doc.'reflections'
-    implementation group: 'org.hdrhistogram', name: 'HdrHistogram', version: ver.'HdrHistogram'
+    implementation openGds.reflections
+    implementation openGds.hdrhistogram
 
-    compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
-    compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
+    compileOnly openGds.immutables.value.annotations
+    compileOnly openGds.jetbrains.annotations
 
     neodeps().each {
         compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
@@ -51,14 +51,14 @@ dependencies {
 
     testAnnotationProcessor project(':annotations')
     testAnnotationProcessor project(':config-generator')
-    testAnnotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
+    testAnnotationProcessor openGds.immutables.value
 
     testImplementation project(':algo-test')
     testImplementation project(':proc-test')
     testImplementation project(':graph-schema-api')
-    testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
-    testCompileOnly group: 'org.immutables', name: 'builder',           version: ver.'immutables'
-    testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
+    testCompileOnly openGds.immutables.value.annotations
+    testCompileOnly openGds.immutables.builder
+    testCompileOnly openGds.jetbrains.annotations
 
     testImplementation project(':opengds-extension')
 }

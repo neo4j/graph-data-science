@@ -7,13 +7,13 @@ group = 'org.neo4j.gds'
 dependencies {
     annotationProcessor project(':config-generator')
     annotationProcessor project(':procedure-collector')
-    annotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
+    annotationProcessor openGds.immutables.value
     compileOnly project(':annotations')
-    compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
-    compileOnly group: 'org.immutables', name: 'builder', version: ver.'immutables'
-    compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
+    compileOnly openGds.immutables.value.annotations
+    compileOnly openGds.immutables.builder
+    compileOnly openGds.jetbrains.annotations
 
-    implementation group: 'org.reflections', name: 'reflections',  version: ver.doc.'reflections'
+    implementation openGds.reflections
 
     implementation project(':algo-common')
     implementation project(':algo-test')
@@ -35,7 +35,7 @@ dependencies {
     api project(':test-utils')
 
     testCompileOnly project(':annotations')
-    testCompileOnly group: 'org.jetbrains', name: 'annotations', version: ver.'jetbrains-annotations'
+    testCompileOnly openGds.jetbrains.annotations
 
 }
 

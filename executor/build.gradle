@@ -7,8 +7,8 @@ group = 'org.neo4j.gds'
 dependencies {
     annotationProcessor project(':annotations')
 
-    annotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
-    annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
+    annotationProcessor openGds.immutables.builder
+    annotationProcessor openGds.immutables.value
 
     implementation project(':annotations')
     implementation project(':algo')
@@ -31,10 +31,10 @@ dependencies {
     implementation project(':licensing')
     implementation project(':termination')
 
-    implementation group: 'org.reflections',  name: 'reflections',  version: ver.doc.'reflections'
+    implementation openGds.reflections
 
-    compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
-    compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
+    compileOnly openGds.immutables.value.annotations
+    compileOnly openGds.jetbrains.annotations
 
     neodeps().each {
         compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
@@ -42,7 +42,7 @@ dependencies {
         }
     }
 
-    testCompileOnly group: 'org.immutables', name: 'builder', version: ver.'immutables'
+    testCompileOnly openGds.immutables.builder
 
     testImplementation project(':algo-test')
     testImplementation project(':test-utils')
@@ -50,7 +50,7 @@ dependencies {
 
     testAnnotationProcessor project(':annotations')
     testAnnotationProcessor project(':config-generator')
-    testAnnotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
+    testAnnotationProcessor openGds.immutables.value
 
     testImplementation project(':opengds-extension')
 }

@@ -8,8 +8,8 @@ dependencies {
     annotationProcessor project(':annotations')
     annotationProcessor project(':config-generator')
 
-    annotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
-    annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
+    annotationProcessor openGds.immutables.builder
+    annotationProcessor openGds.immutables.value
 
     api project(':proc-common')
 
@@ -40,12 +40,14 @@ dependencies {
     implementation project(':termination')
     implementation project(':transaction')
 
-    implementation group: 'org.openjdk.jol', name: 'jol-core', version: ver.'jol'
-    implementation group: 'org.opencypher', name: 'cypher-javacc-parser-9.0', version: ver.'opencypher-front-end', transitive: false
-    implementation group: 'org.hdrhistogram', name: 'HdrHistogram', version: ver.'HdrHistogram'
+    implementation openGds.jol.core
+    implementation(openGds.opencypher.ccparser) {
+        transitive = false
+    }
+    implementation openGds.hdrhistogram
 
-    compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
-    compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
+    compileOnly openGds.immutables.value.annotations
+    compileOnly openGds.jetbrains.annotations
     neodeps().each {
         compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
             transitive = false
@@ -58,10 +60,10 @@ dependencies {
     testImplementation project(':proc-test')
     testImplementation project(':proc-common')
     testImplementation project(':proc')
-    testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
-    testCompileOnly group: 'org.immutables', name: 'builder',           version: ver.'immutables'
-    testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
-    testImplementation group: 'org.mockito', name:'mockito-junit-jupiter', version: ver.'mockito-junit-jupiter'
+    testCompileOnly openGds.immutables.value.annotations
+    testCompileOnly openGds.immutables.builder
+    testCompileOnly openGds.jetbrains.annotations
+    testImplementation openGds.mockito.junit.jupiter
 
     testImplementation project(':opengds-extension')
 }

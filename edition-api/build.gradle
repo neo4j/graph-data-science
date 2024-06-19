@@ -7,7 +7,7 @@ group = 'org.neo4j.gds'
 dependencies {
     annotationProcessor group: 'org.neo4j', name: 'annotations', version: ver.'neo4j'
 
-    compileOnly group: 'org.jetbrains', name: 'annotations', version: ver.'jetbrains-annotations'
+    compileOnly openGds.jetbrains.annotations
     compileOnly project(':annotations')
 
     neodeps().each {
@@ -28,8 +28,8 @@ dependencies {
     testImplementation project(':open-model-catalog')
     testImplementation project(':open-licensing')
 
-    testImplementation platform(dep.junit5bom)
-    testImplementation dep.junit5jupiter
-    testImplementation group: 'org.assertj', name: 'assertj-core', version: ver.'assertj'
+    testImplementation platform(openGds.junit5bom)
+    testImplementation openGds.junit5.jupiter
+    testImplementation openGds.assertj.core
     testImplementation group: 'org.neo4j.community', name: 'it-test-support', version: ver.'neo4j'
 }

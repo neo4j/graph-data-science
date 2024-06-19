@@ -6,28 +6,28 @@ group = 'org.neo4j.gds'
 
 dependencies {
     annotationProcessor project(':annotations')
-    annotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
-    annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
+    annotationProcessor openGds.immutables.builder
+    annotationProcessor openGds.immutables.value
 
-    compileOnly         group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
-    compileOnly         group: 'org.immutables',           name: 'value-annotations',  version: ver.'immutables'
-    compileOnly         group: 'org.jetbrains',            name: 'annotations',        version: ver.'jetbrains-annotations'
+    compileOnly         openGds.immutables.builder
+    compileOnly         openGds.immutables.value.annotations
+    compileOnly         openGds.jetbrains.annotations
 
     implementation(
-            project(':annotations'),
-            project(':string-formatting'),
-            [group: 'org.eclipse.collections', name: 'eclipse-collections-api',  version: ver.'eclipse-collections'],
-            [group: 'org.eclipse.collections', name: 'eclipse-collections',      version: ver.'eclipse-collections'],
+        project(':annotations'),
+        project(':string-formatting'),
+        openGds.eclipse.collections.api,
+        openGds.eclipse.collections,
     )
 
-    api group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: ver.'jackson'
-    api group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: ver.'jackson'
+    api openGds.jackson.databind
+    api openGds.jackson.dataformat.csv
 
-    testCompileOnly         group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
-    testCompileOnly         group: 'org.immutables',           name: 'value-annotations',  version: ver.'immutables'
+    testCompileOnly         openGds.immutables.builder
+    testCompileOnly         openGds.immutables.value.annotations
 
-    testImplementation platform(dep.junit5bom)
-    testImplementation dep.junit5jupiter
-    testImplementation group: 'org.assertj',             name: 'assertj-core',            version: ver.'assertj'
-    testImplementation group: 'org.hamcrest',            name: 'hamcrest-library',        version: ver.'hamcrest'
+    testImplementation platform(openGds.junit5bom)
+    testImplementation openGds.junit5.jupiter
+    testImplementation openGds.assertj.core
+    testImplementation openGds.hamcrest
 }

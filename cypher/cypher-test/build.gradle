@@ -6,13 +6,13 @@ group = 'org.neo4j.gds'
 
 dependencies {
     testAnnotationProcessor project(':annotations')
-    testAnnotationProcessor group: 'org.immutables', name: 'builder',            version: ver.'immutables'
-    testAnnotationProcessor group: 'org.immutables', name: 'value',              version: ver.'immutables'
+    testAnnotationProcessor openGds.immutables.builder
+    testAnnotationProcessor openGds.immutables.value
 
     testCompileOnly project(':annotations')
-    testCompileOnly         group: 'org.immutables', name: 'builder',            version: ver.'immutables'
-    testCompileOnly         group: 'org.immutables', name: 'value-annotations',  version: ver.'immutables'
-    testCompileOnly         group: 'org.jetbrains',  name: 'annotations',        version: ver.'jetbrains-annotations'
+    testCompileOnly openGds.immutables.builder
+    testCompileOnly openGds.immutables.value.annotations
+    testCompileOnly openGds.jetbrains.annotations
 
     neodeps().each {
         testCompileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {

@@ -26,23 +26,23 @@ group = 'org.neo4j.gds'
 
 dependencies {
     annotationProcessor project(':annotations')
-    annotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
+    annotationProcessor openGds.immutables.value
 
-    compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
-    compileOnly group: 'org.jetbrains', name: 'annotations', version: ver.'jetbrains-annotations'
+    compileOnly openGds.immutables.value.annotations
+    compileOnly openGds.jetbrains.annotations
 
     api project(':graph-dimensions')
 
     implementation(
         project(':annotations'),
-        [group: 'com.carrotsearch', name: 'hppc', version: ver.'hppc'],
-        [group: 'org.openjdk.jol', name: 'jol-core', version: ver.'jol'],
+        openGds.hppc,
+        openGds.jol.core,
     )
 
-    testCompileOnly    group: 'org.immutables', name: 'value-annotations',  version: ver.'immutables'
+    testCompileOnly    openGds.immutables.value.annotations
 
-    testImplementation platform(dep.junit5bom)
-    testImplementation dep.junit5jupiter
-    testImplementation dep.junit5migration
-    testImplementation group: 'org.assertj', name: 'assertj-core', version: ver.'assertj'
+    testImplementation platform(openGds.junit5bom)
+    testImplementation openGds.junit5.jupiter
+    testImplementation openGds.junit5.migration
+    testImplementation openGds.assertj.core
 }
