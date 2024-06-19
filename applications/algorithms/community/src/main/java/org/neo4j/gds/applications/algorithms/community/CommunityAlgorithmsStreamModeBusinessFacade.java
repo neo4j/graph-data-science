@@ -41,6 +41,8 @@ import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
 import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.modularity.ModularityStreamConfig;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.wcc.WccStreamConfig;
 
 import java.util.Optional;
@@ -54,6 +56,7 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Leiden;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Louvain;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Modularity;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ModularityOptimization;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
 
 public class CommunityAlgorithmsStreamModeBusinessFacade {
@@ -210,6 +213,22 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
             Modularity,
             estimationFacade::modularity,
             graph -> algorithms.modularity(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT modularityOptimization(
+        GraphName graphName,
+        ModularityOptimizationStreamConfig configuration,
+        ResultBuilder<ModularityOptimizationStreamConfig, ModularityOptimizationResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            ModularityOptimization,
+            estimationFacade::modularityOptimization,
+            graph -> algorithms.modularityOptimization(graph, configuration),
             Optional.empty(),
             resultBuilder
         );

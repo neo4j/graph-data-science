@@ -26,11 +26,9 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacad
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
 import org.neo4j.gds.procedures.algorithms.community.ProcedureStatisticsComputationInstructions;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationStreamResult;
 import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationWriteResult;
 import org.neo4j.gds.procedures.community.scc.AlphaSccWriteResult;
 import org.neo4j.gds.procedures.community.scc.SccMutateResult;
@@ -366,23 +364,6 @@ public class CommunityProcedureFacade {
         return Stream.of(estimateBusinessFacade.localClusteringCoefficient(graphNameOrConfiguration, config));
     }
 
-    public Stream<ModularityOptimizationStreamResult> modularityOptimizationStream(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var streamConfig = configurationCreator.createConfigurationForStream(
-            configuration,
-            ModularityOptimizationStreamConfig::of
-        );
-
-        var computationResult = streamBusinessFacade.modularityOptimization(
-            graphName,
-            streamConfig
-        );
-
-        return ModularityOptimisationComputationResultTransformer.toStreamResult(computationResult, streamConfig);
-    }
-
     public Stream<ModularityOptimizationWriteResult> modularityOptimizationWrite(
         String graphName,
         Map<String, Object> configuration
@@ -396,14 +377,6 @@ public class CommunityProcedureFacade {
         );
 
         return Stream.of(ModularityOptimisationComputationResultTransformer.toWriteResult(computationResult));
-    }
-
-    public Stream<MemoryEstimateResult> modularityOptimizationEstimateStream(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, ModularityOptimizationStreamConfig::of);
-        return Stream.of(estimateBusinessFacade.modularityOptimization(graphNameOrConfiguration, config));
     }
 
     public Stream<MemoryEstimateResult> modularityOptimizationEstimateWrite(

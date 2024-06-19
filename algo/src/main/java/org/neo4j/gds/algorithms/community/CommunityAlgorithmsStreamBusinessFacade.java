@@ -22,8 +22,6 @@ package org.neo4j.gds.algorithms.community;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.scc.SccBaseConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
@@ -68,18 +66,6 @@ public class CommunityAlgorithmsStreamBusinessFacade {
         LocalClusteringCoefficientStreamConfig config
     ) {
         var result = this.communityAlgorithmsFacade.localClusteringCoefficient(
-            graphName,
-            config
-        );
-
-        return createStreamComputationResult(result);
-    }
-
-    public StreamComputationResult<ModularityOptimizationResult> modularityOptimization(
-        String graphName,
-        ModularityOptimizationStreamConfig config
-    ) {
-        var result = this.communityAlgorithmsFacade.modularityOptimization(
             graphName,
             config
         );
