@@ -39,7 +39,7 @@ qala-datagen = "2.5.1"
 record-builder = "41"
 reflections = "0.10.2"
 sb-contrib = "7.6.3"
-stormpot = "3.1"
+stormpot = "3.2"
 
 [libraries]
 agrona = { module = "org.agrona:agrona", version.ref = "agrona" }
