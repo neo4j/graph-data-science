@@ -60,8 +60,8 @@ import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityCalculator;
 import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimization;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationBaseConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationFactory;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.wcc.Wcc;
@@ -286,7 +286,7 @@ public class CommunityAlgorithms {
         return algorithm.compute();
     }
 
-    ModularityOptimizationResult modularityOptimization(Graph graph, ModularityOptimizationMutateConfig configuration) {
+    ModularityOptimizationResult modularityOptimization(Graph graph, ModularityOptimizationBaseConfig configuration) {
         var task = Tasks.task(
             LabelForProgressTracking.ModularityOptimization.value,
             Tasks.task(

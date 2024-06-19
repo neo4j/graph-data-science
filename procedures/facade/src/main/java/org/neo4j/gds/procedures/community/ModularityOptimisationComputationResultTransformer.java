@@ -20,15 +20,12 @@
 package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
-import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.algorithms.community.specificfields.ModularityOptimizationSpecificFields;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
-import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationStatsResult;
 import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationStreamResult;
 import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationWriteResult;
 
@@ -60,24 +57,6 @@ final class ModularityOptimisationComputationResultTransformer {
                         nodePropertyValues.longValue(nodeId)
                     ));
             }).orElseGet(Stream::empty);
-    }
-
-    static ModularityOptimizationStatsResult toStatsResult(
-        StatsResult<ModularityOptimizationSpecificFields> computationResult,
-        ModularityOptimizationStatsConfig configuration
-    ) {
-        return new ModularityOptimizationStatsResult(
-            computationResult.preProcessingMillis(),
-            computationResult.computeMillis(),
-            computationResult.postProcessingMillis(),
-            computationResult.algorithmSpecificFields().nodes(),
-            computationResult.algorithmSpecificFields().didConverge(),
-            computationResult.algorithmSpecificFields().ranIterations(),
-            computationResult.algorithmSpecificFields().modularity(),
-            computationResult.algorithmSpecificFields().communityCount(),
-            computationResult.algorithmSpecificFields().communityDistribution(),
-            configuration.toMap()
-        );
     }
 
     static ModularityOptimizationWriteResult toWriteResult(NodePropertyWriteResult<ModularityOptimizationSpecificFields> computationResult) {

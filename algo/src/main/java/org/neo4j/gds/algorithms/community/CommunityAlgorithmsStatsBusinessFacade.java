@@ -23,13 +23,11 @@ import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.community.specificfields.CommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LocalClusteringCoefficientSpecificFields;
-import org.neo4j.gds.algorithms.community.specificfields.ModularityOptimizationSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.StandardCommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.TriangleCountSpecificFields;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
 import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
 import org.neo4j.gds.scc.SccStatsConfig;
@@ -37,8 +35,6 @@ import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
 import org.neo4j.gds.triangle.TriangleCountStatsConfig;
 
 import java.util.function.Supplier;
-
-import static org.neo4j.gds.algorithms.runner.AlgorithmRunner.runWithTiming;
 
 public class CommunityAlgorithmsStatsBusinessFacade {
     private final CommunityAlgorithmsFacade communityAlgorithmsFacade;
@@ -113,38 +109,6 @@ public class CommunityAlgorithmsStatsBusinessFacade {
             () -> TriangleCountSpecificFields.EMPTY
         );
     }
-
-    public StatsResult<ModularityOptimizationSpecificFields> modularityOptimization(
-        String graphName,
-        ModularityOptimizationStatsConfig configuration,
-        StatisticsComputationInstructions statisticsComputationInstructions
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.modularityOptimization(graphName, configuration)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        return statsResult(
-            algorithmResult,
-            configuration,
-            (result -> result::communityId),
-            (result, componentCount, communitySummary) -> {
-                return new ModularityOptimizationSpecificFields(
-                    result.modularity(),
-                    result.ranIterations(),
-                    result.didConverge(),
-                    result.asNodeProperties().nodeCount(),
-                    componentCount,
-                    communitySummary
-                );
-            },
-            statisticsComputationInstructions,
-            intermediateResult.computeMilliseconds,
-            () -> ModularityOptimizationSpecificFields.EMPTY
-        );
-    }
-
 
     /*
     By using `ASF extends CommunityStatisticsSpecificFields` we enforce the algorithm specific fields

@@ -48,6 +48,7 @@ import org.neo4j.gds.louvain.LouvainStreamConfig;
 import org.neo4j.gds.louvain.LouvainWriteConfig;
 import org.neo4j.gds.modularity.ModularityStatsConfig;
 import org.neo4j.gds.modularity.ModularityStreamConfig;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
 import org.neo4j.gds.procedures.algorithms.community.stubs.ApproximateMaximumKCutMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.K1ColoringMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.KCoreMutateStub;
@@ -60,6 +61,7 @@ import org.neo4j.gds.procedures.algorithms.community.stubs.WccMutateStub;
 import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
+import org.neo4j.gds.result.StatisticsComputationInstructions;
 import org.neo4j.gds.wcc.WccStatsConfig;
 import org.neo4j.gds.wcc.WccStreamConfig;
 import org.neo4j.gds.wcc.WccWriteConfig;
@@ -805,6 +807,36 @@ public final class CommunityProcedureFacade {
 
     public ModularityOptimizationMutateStub modularityOptimizationMutateStub() {
         return modularityOptimizationMutateStub;
+    }
+
+    public Stream<ModularityOptimizationStatsResult> modularityOptimizationStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        StatisticsComputationInstructions statisticsComputationInstructions = ProcedureStatisticsComputationInstructions.forCommunities(
+            procedureReturnColumns);
+        var resultBuilder = new ModularityOptimizationResultBuilderForStatsMode(statisticsComputationInstructions);
+
+        return algorithmExecutionScaffolding.runAlgorithm(
+            graphName,
+            configuration,
+            ModularityOptimizationStatsConfig::of,
+            statsMode()::modularityOptimization,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> modularityOptimizationStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            ModularityOptimizationStatsConfig::of,
+            configuration -> estimationMode().modularityOptimization(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
     }
 
     public WccMutateStub wccMutateStub() {

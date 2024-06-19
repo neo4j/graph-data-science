@@ -40,14 +40,6 @@ import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.TestNativeGraphLoader;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
-import org.neo4j.gds.algorithms.community.CommunityAlgorithmsEstimateBusinessFacade;
-import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
-import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacade;
-import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStatsBusinessFacade;
-import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacade;
-import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
-import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -55,13 +47,16 @@ import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
+import org.neo4j.gds.applications.ApplicationsFacade;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.configuration.DefaultsConfiguration;
+import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.Username;
@@ -71,15 +66,16 @@ import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
+import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.GraphDataScienceProceduresBuilder;
+import org.neo4j.gds.procedures.algorithms.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
-import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfigImpl;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -88,6 +84,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -503,44 +500,48 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
         when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
 
         final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
-        final AlgorithmMemoryValidationService memoryUsageValidator = new AlgorithmMemoryValidationService(
+        var configurationParser = new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance);
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .with(DatabaseId.of(db.databaseName()))
+            .with(TaskRegistryFactory.empty())
+            .with(TerminationFlag.RUNNING_TRUE)
+            .with(new User(getUsername(), false))
+            .with(EmptyUserLogRegistryFactory.INSTANCE)
+            .build();
+        var configurationCreator = new ConfigurationCreator(
+            configurationParser,
+            null,
+            requestScopedDependencies.getUser()
+        );
+        var genericStub = GenericStub.create(
+            DefaultsConfiguration.Instance,
+            LimitsConfiguration.Instance,
+            graphStoreCatalogService,
+            configurationCreator,
+            configurationParser,
+            requestScopedDependencies
+        );
+        var applicationsFacade = ApplicationsFacade.create(
             logMock,
-            false
+            Optional.empty(),
+            Optional.empty(),
+            graphStoreCatalogService,
+            MemoryGuard.DISABLED,
+            new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
+            new ProjectionMetricsService(new PassthroughExecutionMetricRegistrar()),
+            requestScopedDependencies
+        );
+        var communityProcedureFacade = CommunityProcedureFacade.create(
+            genericStub,
+            applicationsFacade,
+            ProcedureReturnColumns.EMPTY,
+            null,
+            null,
+            null
         );
 
-        var algorithmsMutateBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
-            new CommunityAlgorithmsFacade(
-                new AlgorithmRunner(
-                    logMock,
-                    graphStoreCatalogService,
-                    new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
-                    memoryUsageValidator,
-                    RequestScopedDependencies.builder()
-                        .with(DatabaseId.of(db.databaseName()))
-                        .with(TaskRegistryFactory.empty())
-                        .with(TerminationFlag.RUNNING_TRUE)
-                        .with(new User(getUsername(), false))
-                        .with(EmptyUserLogRegistryFactory.INSTANCE)
-                        .build()
-                )
-            ),
-            new MutateNodePropertyService(logMock)
-        );
-
-        return new GraphDataScienceProceduresBuilder(Log.noOpLog())
-            .with(new CommunityProcedureFacade(
-                new ConfigurationCreator(
-                    ConfigurationParser.EMPTY,
-                    null,
-                    new User(getUsername(), false)
-                ),
-                ProcedureReturnColumns.EMPTY,
-                mock(CommunityAlgorithmsEstimateBusinessFacade.class),
-                algorithmsMutateBusinessFacade,
-                mock(CommunityAlgorithmsStatsBusinessFacade.class),
-                mock(CommunityAlgorithmsStreamBusinessFacade.class),
-                mock(CommunityAlgorithmsWriteBusinessFacade.class)
-            ))
+        return new GraphDataScienceProceduresBuilder(logMock)
+            .with(communityProcedureFacade)
             .with(DeprecatedProceduresMetricService.PASSTHROUGH)
             .build();
     }

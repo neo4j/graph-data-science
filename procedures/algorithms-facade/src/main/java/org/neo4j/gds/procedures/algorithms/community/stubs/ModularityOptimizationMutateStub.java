@@ -59,7 +59,7 @@ public class ModularityOptimizationMutateStub implements MutateStub<ModularityOp
             username,
             configuration,
             ModularityOptimizationMutateConfig::of,
-            estimationMode()::wcc
+            __ -> estimationMode().modularityOptimization()
         );
     }
 
@@ -69,7 +69,7 @@ public class ModularityOptimizationMutateStub implements MutateStub<ModularityOp
             graphName,
             configuration,
             ModularityOptimizationMutateConfig::of,
-            estimationMode()::wcc
+            __ -> estimationMode().modularityOptimization()
         );
     }
 
