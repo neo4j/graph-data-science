@@ -54,9 +54,9 @@ import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.louvain.Louvain;
 import org.neo4j.gds.louvain.LouvainBaseConfig;
 import org.neo4j.gds.louvain.LouvainResult;
+import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityCalculator;
 import org.neo4j.gds.modularity.ModularityResult;
-import org.neo4j.gds.modularity.ModularityStatsConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationFactory;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.wcc.Wcc;
@@ -269,7 +269,7 @@ public class CommunityAlgorithms {
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
-    ModularityResult modularity(Graph graph, ModularityStatsConfig configuration) {
+    ModularityResult modularity(Graph graph, ModularityBaseConfig configuration) {
         var algorithm = ModularityCalculator.create(
             graph,
             graph.nodeProperties(configuration.communityProperty())::longValue,

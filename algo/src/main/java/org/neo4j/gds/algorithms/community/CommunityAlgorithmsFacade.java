@@ -22,9 +22,6 @@ package org.neo4j.gds.algorithms.community;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.modularity.ModularityBaseConfig;
-import org.neo4j.gds.modularity.ModularityCalculatorFactory;
-import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationBaseConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationFactory;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
@@ -70,18 +67,6 @@ public class CommunityAlgorithmsFacade {
             config,
             Optional.empty(),
             new SccAlgorithmFactory<>()
-        );
-    }
-
-    AlgorithmComputationResult<ModularityResult> modularity(
-        String graphName,
-        ModularityBaseConfig config
-    ) {
-        return algorithmRunner.run(
-            graphName,
-            config,
-            config.relationshipWeightProperty(),
-            new ModularityCalculatorFactory<>()
         );
     }
 

@@ -22,8 +22,6 @@ package org.neo4j.gds.algorithms.community;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.modularity.ModularityBaseConfig;
-import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.scc.SccBaseConfig;
@@ -58,19 +56,6 @@ public class CommunityAlgorithmsStreamBusinessFacade {
     ) {
 
         var result = this.communityAlgorithmsFacade.triangleCount(
-            graphName,
-            config
-        );
-
-        return createStreamComputationResult(result);
-    }
-
-    public StreamComputationResult<ModularityResult> modularity(
-        String graphName,
-        ModularityBaseConfig config
-    ) {
-
-        var result = this.communityAlgorithmsFacade.modularity(
             graphName,
             config
         );

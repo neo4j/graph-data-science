@@ -26,14 +26,12 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacad
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.modularity.ModularityStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
 import org.neo4j.gds.procedures.algorithms.community.ProcedureStatisticsComputationInstructions;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.community.modularity.ModularityStreamResult;
 import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationMutateResult;
 import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationStatsResult;
 import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationStreamResult;
@@ -278,29 +276,6 @@ public class CommunityProcedureFacade {
     ) {
         var config = configurationCreator.createConfiguration(algoConfiguration, TriangleCountWriteConfig::of);
         return Stream.of(estimateBusinessFacade.triangleCount(graphNameOrConfiguration, config));
-    }
-
-    public Stream<ModularityStreamResult> modularityStream(
-        String graphName,
-        Map<String, Object> configuration
-
-    ) {
-        var streamConfig = configurationCreator.createConfigurationForStream(configuration, ModularityStreamConfig::of);
-
-        var computationResult = streamBusinessFacade.modularity(
-            graphName,
-            streamConfig
-        );
-
-        return ModularityComputationResultTransformer.toStreamResult(computationResult);
-    }
-
-    public Stream<MemoryEstimateResult> modularityEstimateStream(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, ModularityStreamConfig::of);
-        return Stream.of(estimateBusinessFacade.modularity(graphNameOrConfiguration, config));
     }
 
     public Stream<LocalClusteringCoefficientStreamResult> localClusteringCoefficientStream(

@@ -39,6 +39,8 @@ import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.leiden.LeidenStreamConfig;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
+import org.neo4j.gds.modularity.ModularityResult;
+import org.neo4j.gds.modularity.ModularityStreamConfig;
 import org.neo4j.gds.wcc.WccStreamConfig;
 
 import java.util.Optional;
@@ -51,6 +53,7 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.LabelPropagation;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Leiden;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Louvain;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Modularity;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
 
 public class CommunityAlgorithmsStreamModeBusinessFacade {
@@ -191,6 +194,22 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
             Louvain,
             () -> estimationFacade.louvain(configuration),
             graph -> algorithms.louvain(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT modularity(
+        GraphName graphName,
+        ModularityStreamConfig configuration,
+        ResultBuilder<ModularityStreamConfig, ModularityResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            Modularity,
+            estimationFacade::modularity,
+            graph -> algorithms.modularity(graph, configuration),
             Optional.empty(),
             resultBuilder
         );

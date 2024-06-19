@@ -21,8 +21,6 @@ package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.modularity.ModularityBaseConfig;
-import org.neo4j.gds.modularity.ModularityCalculatorMemoryEstimateDefinition;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationBaseConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationMemoryEstimateDefinition;
 import org.neo4j.gds.scc.SccBaseConfig;
@@ -77,18 +75,6 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             configuration,
             Optional.empty(),
             new LocalClusteringCoefficientMemoryEstimateDefinition(configuration.seedProperty())
-        );
-    }
-
-    public <C extends ModularityBaseConfig> MemoryEstimateResult modularity(
-        Object graphNameOrConfiguration,
-        C configuration
-    ) {
-        return algorithmEstimator.estimate(
-            graphNameOrConfiguration,
-            configuration,
-            configuration.relationshipWeightProperty(),
-            new ModularityCalculatorMemoryEstimateDefinition()
         );
     }
 
