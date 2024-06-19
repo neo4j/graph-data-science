@@ -19,12 +19,8 @@
  */
 package org.neo4j.gds.procedures.community;
 
-import org.neo4j.gds.algorithms.community.specificfields.ModularitySpecificFields;
-import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.modularity.ModularityResult;
-import org.neo4j.gds.modularity.ModularityStatsConfig;
-import org.neo4j.gds.procedures.community.modularity.ModularityStatsResult;
 import org.neo4j.gds.procedures.community.modularity.ModularityStreamResult;
 
 import java.util.stream.LongStream;
@@ -44,21 +40,4 @@ final class ModularityComputationResultTransformer {
 
         }).orElseGet(Stream::empty);
     }
-
-    static ModularityStatsResult toStatsResult(
-        StatsResult<ModularitySpecificFields> computationResult,
-        ModularityStatsConfig config
-    ) {
-        return new ModularityStatsResult(
-            computationResult.algorithmSpecificFields().nodeCount(),
-            computationResult.algorithmSpecificFields().relationshipCount(),
-            computationResult.algorithmSpecificFields().communityCount(),
-            computationResult.algorithmSpecificFields().modularity(),
-            computationResult.preProcessingMillis(),
-            computationResult.computeMillis(),
-            computationResult.postProcessingMillis(),
-            config.toMap()
-        );
-    }
-
 }

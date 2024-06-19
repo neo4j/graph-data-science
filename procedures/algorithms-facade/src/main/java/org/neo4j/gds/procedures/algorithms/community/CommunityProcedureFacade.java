@@ -46,6 +46,7 @@ import org.neo4j.gds.leiden.LeidenWriteConfig;
 import org.neo4j.gds.louvain.LouvainStatsConfig;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
 import org.neo4j.gds.louvain.LouvainWriteConfig;
+import org.neo4j.gds.modularity.ModularityStatsConfig;
 import org.neo4j.gds.procedures.algorithms.community.stubs.ApproximateMaximumKCutMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.K1ColoringMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.KCoreMutateStub;
@@ -730,6 +731,34 @@ public final class CommunityProcedureFacade {
             algorithmConfiguration,
             LouvainWriteConfig::of,
             configuration -> estimationMode().louvain(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<ModularityStatsResult> modularityStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new ModularityResultBuilderForStatsMode();
+
+        return algorithmExecutionScaffolding.runAlgorithm(
+            graphName,
+            configuration,
+            ModularityStatsConfig::of,
+            statsMode()::modularity,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> modularityStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            ModularityStatsConfig::of,
+            configuration -> estimationMode().modularity(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);

@@ -24,13 +24,11 @@ import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.community.specificfields.CommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LocalClusteringCoefficientSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.ModularityOptimizationSpecificFields;
-import org.neo4j.gds.algorithms.community.specificfields.ModularitySpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.StandardCommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.TriangleCountSpecificFields;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.modularity.ModularityStatsConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
 import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
@@ -113,30 +111,6 @@ public class CommunityAlgorithmsStatsBusinessFacade {
             (result) -> new TriangleCountSpecificFields(result.globalTriangles(), algorithmResult.graph().nodeCount()),
             intermediateResult.computeMilliseconds,
             () -> TriangleCountSpecificFields.EMPTY
-        );
-    }
-
-    public StatsResult<ModularitySpecificFields> modularity(
-        String graphName,
-        ModularityStatsConfig config
-    ) {
-
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> communityAlgorithmsFacade.modularity(graphName, config)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        return statsResult(
-            algorithmResult,
-            (result) -> new ModularitySpecificFields(
-                result.nodeCount(),
-                result.relationshipCount(),
-                result.communityCount(),
-                result.totalModularity()
-            ),
-            intermediateResult.computeMilliseconds,
-            () -> ModularitySpecificFields.EMPTY
         );
     }
 

@@ -48,6 +48,7 @@ public enum LabelForProgressTracking {
     Leiden("Leiden"),
     Louvain("Louvain"),
     LongestPath("LongestPath"),
+    Modularity("Modularity"),
     NodeSimilarity("Node Similarity"),
     PageRank("PageRank"),
     RandomWalk("RandomWalk"),
@@ -92,6 +93,7 @@ public enum LabelForProgressTracking {
             case Leiden -> Leiden;
             case Louvain -> Louvain;
             case LongestPath -> LongestPath;
+            case Modularity -> Modularity;
             case NodeSimilarity -> NodeSimilarity;
             case PageRank -> PageRank;
             case RandomWalk -> RandomWalk;

@@ -55,6 +55,7 @@ public enum Algorithm {
     Leiden,
     Louvain,
     LongestPath,
+    Modularity,
     NodeSimilarity,
     PageRank,
     RandomWalk,

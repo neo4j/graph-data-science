@@ -91,6 +91,7 @@ class StubbyHolder {
             case Leiden -> new LeidenStub();
             case Louvain -> new LouvainStub();
             case LongestPath -> null;
+            case Modularity -> null;
             case NodeSimilarity -> new NodeSimilarityStub();
             case PageRank -> new PageRankStub();
             case RandomWalk -> null;

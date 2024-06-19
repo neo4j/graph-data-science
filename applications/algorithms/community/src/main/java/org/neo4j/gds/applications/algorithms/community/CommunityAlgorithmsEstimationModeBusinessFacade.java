@@ -38,6 +38,8 @@ import org.neo4j.gds.leiden.LeidenMemoryEstimateDefinition;
 import org.neo4j.gds.louvain.LouvainBaseConfig;
 import org.neo4j.gds.louvain.LouvainMemoryEstimateDefinition;
 import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.modularity.ModularityCalculatorMemoryEstimateDefinition;
+import org.neo4j.gds.modularity.ModularityStatsConfig;
 import org.neo4j.gds.wcc.WccBaseConfig;
 import org.neo4j.gds.wcc.WccMemoryEstimateDefinition;
 
@@ -148,6 +150,20 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
 
     public MemoryEstimateResult louvain(LouvainBaseConfig configuration, Object graphNameOrConfiguration) {
         var memoryEstimation = louvain(configuration);
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
+        );
+    }
+
+    public MemoryEstimation modularity() {
+        return new ModularityCalculatorMemoryEstimateDefinition().memoryEstimation();
+    }
+
+    public MemoryEstimateResult modularity(ModularityStatsConfig configuration, Object graphNameOrConfiguration) {
+        var memoryEstimation = modularity();
 
         return algorithmEstimationTemplate.estimate(
             configuration,

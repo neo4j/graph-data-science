@@ -17,11 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.community.modularity;
+package org.neo4j.gds.procedures.algorithms.community;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.result.AbstractCommunityResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 
 import java.util.Map;
@@ -49,44 +47,16 @@ public class ModularityStatsResult extends StandardStatsResult {
         this.modularity = modularity;
     }
 
-    public static class StatsBuilder extends AbstractCommunityResultBuilder<ModularityStatsResult> {
-
-        double modularity;
-        private long relationshipCount;
-        private long communityCount;
-
-        public StatsBuilder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
-            super(returnColumns, concurrency);
-        }
-
-        public StatsBuilder withModularity(double modularity) {
-            this.modularity = modularity;
-            return this;
-        }
-
-        public StatsBuilder withRelationshipCount(long relationshipCount) {
-            this.relationshipCount = relationshipCount;
-            return this;
-        }
-
-        public StatsBuilder withCommunityCount(long communityCount) {
-            this.communityCount = communityCount;
-            return this;
-        }
-
-        @Override
-        protected ModularityStatsResult buildResult() {
-            return new ModularityStatsResult(
-                nodeCount,
-                relationshipCount,
-                communityCount,
-                modularity,
-                preProcessingMillis,
-                computeMillis,
-                postProcessingDuration,
-                config.toMap()
-            );
-        }
+    static ModularityStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+        return new ModularityStatsResult(
+            0,
+            0,
+            0,
+            0,
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            0,
+            configurationMap
+        );
     }
-
 }

@@ -86,6 +86,7 @@ final class MutateModeAlgorithmLibrary {
             case Leiden -> CanonicalProcedureName.parse("gds.leiden");
             case Louvain -> CanonicalProcedureName.parse("gds.louvain");
             case LongestPath -> null;
+            case Modularity -> null;
             case NodeSimilarity -> CanonicalProcedureName.parse("gds.nodeSimilarity");
             case PageRank -> CanonicalProcedureName.parse("gds.pageRank");
             case RandomWalk -> null;

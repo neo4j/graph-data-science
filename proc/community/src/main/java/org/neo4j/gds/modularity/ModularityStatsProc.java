@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.modularity;
 
-import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.modularity.ModularityStatsResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.algorithms.community.ModularityStatsResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -45,7 +45,7 @@ public class ModularityStatsProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().modularityStats(graphName, configuration);
+        return facade.algorithms().community().modularityStats(graphName, configuration);
     }
 
     @Procedure(value = "gds.modularity.stats.estimate", mode = READ)
@@ -54,7 +54,7 @@ public class ModularityStatsProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().modularityEstimateStats(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().community().modularityStatsEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Deprecated(forRemoval = true)

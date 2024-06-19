@@ -90,6 +90,7 @@ public class ConfigurationParsersForMutateMode {
             case Leiden -> LeidenMutateConfig::of;
             case Louvain -> LouvainMutateConfig::of;
             case LongestPath -> null;
+            case Modularity -> null;
             case NodeSimilarity -> NodeSimilarityMutateConfig::of;
             case PageRank -> PageRankMutateConfig::of;
             case RandomWalk -> null;
