@@ -21,12 +21,9 @@ package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
-import org.neo4j.gds.algorithms.community.specificfields.AlphaSccSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.CommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LocalClusteringCoefficientSpecificFields;
-import org.neo4j.gds.algorithms.community.specificfields.StandardCommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.TriangleCountSpecificFields;
-import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
@@ -36,8 +33,6 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
-import org.neo4j.gds.scc.SccAlphaWriteConfig;
-import org.neo4j.gds.scc.SccWriteConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientWriteConfig;
 import org.neo4j.gds.triangle.TriangleCountWriteConfig;
 
@@ -57,78 +52,6 @@ public class CommunityAlgorithmsWriteBusinessFacade {
     ) {
         this.writeNodePropertyService = writeNodePropertyService;
         this.communityAlgorithmsFacade = communityAlgorithmsFacade;
-    }
-
-    public NodePropertyWriteResult<StandardCommunityStatisticsSpecificFields> scc(
-        String graphName,
-        SccWriteConfig configuration,
-        StatisticsComputationInstructions statisticsComputationInstructions
-    ) {
-
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> communityAlgorithmsFacade.scc(graphName, configuration)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        return writeToDatabase(
-            algorithmResult,
-            configuration,
-            (result, config) -> CommunityCompanion.nodePropertyValues(
-                config.consecutiveIds(),
-                NodePropertyValuesAdapter.adapt(result),
-                Optional.empty(),
-                config.concurrency()
-            ),
-            (result -> result::get),
-            (result, componentCount, communitySummary) -> new StandardCommunityStatisticsSpecificFields(
-                componentCount,
-                communitySummary
-            ),
-            statisticsComputationInstructions,
-            intermediateResult.computeMilliseconds,
-            () -> StandardCommunityStatisticsSpecificFields.EMPTY,
-            "SccWrite",
-            configuration.writeConcurrency(),
-            configuration.writeProperty(),
-            configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(algorithmResult.resultStore())
-        );
-
-    }
-
-    public NodePropertyWriteResult<AlphaSccSpecificFields> alphaScc(
-        String graphName,
-        SccAlphaWriteConfig configuration,
-        StatisticsComputationInstructions statisticsComputationInstructions
-    ) {
-
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> communityAlgorithmsFacade.scc(graphName, configuration)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        return writeToDatabase(
-            algorithmResult,
-            configuration,
-            (result, config) -> NodePropertyValuesAdapter.adapt(result),
-            (result -> result::get),
-            (result, componentCount, communitySummary) -> new AlphaSccSpecificFields(
-                result.size(),
-                componentCount,
-                communitySummary
-            ),
-            statisticsComputationInstructions,
-            intermediateResult.computeMilliseconds,
-            () -> AlphaSccSpecificFields.EMPTY,
-            "SccWrite",
-            configuration.writeConcurrency(),
-            configuration.writeProperty(),
-            configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(algorithmResult.resultStore())
-        );
-
     }
 
     public NodePropertyWriteResult<TriangleCountSpecificFields> triangleCount(

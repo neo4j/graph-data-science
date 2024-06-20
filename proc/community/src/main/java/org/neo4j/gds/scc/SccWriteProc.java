@@ -20,8 +20,8 @@
 package org.neo4j.gds.scc;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.scc.AlphaSccWriteResult;
-import org.neo4j.gds.procedures.community.scc.SccWriteResult;
+import org.neo4j.gds.procedures.algorithms.community.AlphaSccWriteResult;
+import org.neo4j.gds.procedures.algorithms.community.SccWriteResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -47,7 +47,7 @@ public class SccWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().sccWrite(graphName, configuration);
+        return facade.algorithms().community().sccWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.scc.write.estimate", mode = READ)
@@ -56,7 +56,7 @@ public class SccWriteProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().sccEstimateWrite(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().community().sccWriteEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Procedure(value = "gds.alpha.scc.write", mode = WRITE, deprecatedBy = "gds.scc.write")
@@ -70,10 +70,7 @@ public class SccWriteProc {
         facade.deprecatedProcedures().called("gds.alpha.scc.write");
         facade
             .log()
-            .warn(
-                "Procedure `gds.alpha.scc.write` has been deprecated, please use `gds.scc.write`.");
-        return facade.community().alphaSccWrite(graphName, configuration);
+            .warn("Procedure `gds.alpha.scc.write` has been deprecated, please use `gds.scc.write`.");
+        return facade.algorithms().community().sccWriteAlpha(graphName, configuration);
     }
-
-
 }

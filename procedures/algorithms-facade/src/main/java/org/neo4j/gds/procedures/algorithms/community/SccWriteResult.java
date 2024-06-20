@@ -17,22 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.community.scc;
+package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.procedures.algorithms.results.StandardWriteResult;
 
+import java.util.Collections;
 import java.util.Map;
 
 public class SccWriteResult extends StandardWriteResult {
-
     public final long componentCount;
     public final Map<String, Object> componentDistribution;
     public final long nodePropertiesWritten;
 
-    public SccWriteResult(
+    SccWriteResult(
         long componentCount,
         Map<String, Object> componentDistribution,
         long preProcessingMillis,
@@ -49,8 +50,20 @@ public class SccWriteResult extends StandardWriteResult {
         this.componentDistribution = componentDistribution;
     }
 
-    public static class Builder extends AbstractCommunityResultBuilder<SccWriteResult> {
+    static SccWriteResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+        return new SccWriteResult(
+            0,
+            Collections.emptyMap(),
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            0,
+            timings.mutateOrWriteMillis,
+            0,
+            configurationMap
+        );
+    }
 
+    public static class Builder extends AbstractCommunityResultBuilder<SccWriteResult> {
         public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
             super(returnColumns, concurrency);
         }
@@ -77,6 +90,5 @@ public class SccWriteResult extends StandardWriteResult {
             this.buildCommunityCount = buildCommunityCount;
             return this;
         }
-
     }
 }

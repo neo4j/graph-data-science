@@ -17,15 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.community.scc;
+package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
 public class AlphaSccWriteResult {
-
     public final long preProcessingMillis;
     public final long computeMillis;
     public final long writeMillis;
@@ -89,8 +89,31 @@ public class AlphaSccWriteResult {
         this.writeProperty = writeProperty;
     }
 
-    public static class Builder extends AbstractCommunityResultBuilder<AlphaSccWriteResult> {
+    static AlphaSccWriteResult emptyFrom(AlgorithmProcessingTimings timings, String writeProperty) {
+        return new AlphaSccWriteResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            0,
+            timings.mutateOrWriteMillis,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            writeProperty
+        );
+    }
 
+    public static class Builder extends AbstractCommunityResultBuilder<AlphaSccWriteResult> {
         public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
             super(returnColumns, concurrency);
         }

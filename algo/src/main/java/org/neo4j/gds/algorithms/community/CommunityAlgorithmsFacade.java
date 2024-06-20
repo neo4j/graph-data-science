@@ -21,9 +21,6 @@ package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
-import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.scc.SccAlgorithmFactory;
-import org.neo4j.gds.scc.SccCommonBaseConfig;
 import org.neo4j.gds.triangle.IntersectingTriangleCountFactory;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientFactory;
@@ -52,18 +49,6 @@ public class CommunityAlgorithmsFacade {
             config,
             Optional.empty(),
             new IntersectingTriangleCountFactory<>()
-        );
-    }
-
-    AlgorithmComputationResult<HugeLongArray> scc(
-        String graphName,
-        SccCommonBaseConfig config
-    ) {
-        return algorithmRunner.run(
-            graphName,
-            config,
-            Optional.empty(),
-            new SccAlgorithmFactory<>()
         );
     }
 

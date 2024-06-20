@@ -65,8 +65,10 @@ import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
+import org.neo4j.gds.scc.SccAlphaWriteConfig;
 import org.neo4j.gds.scc.SccStatsConfig;
 import org.neo4j.gds.scc.SccStreamConfig;
+import org.neo4j.gds.scc.SccWriteConfig;
 import org.neo4j.gds.wcc.WccStatsConfig;
 import org.neo4j.gds.wcc.WccStreamConfig;
 import org.neo4j.gds.wcc.WccWriteConfig;
@@ -962,6 +964,52 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             SccStreamConfig::of,
+            configuration -> estimationMode().scc(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<SccWriteResult> sccWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var statisticsComputationInstructions = ProcedureStatisticsComputationInstructions.forComponents(
+            procedureReturnColumns);
+        var resultBuilder = new SccResultBuilderForWriteMode(statisticsComputationInstructions);
+
+        return algorithmExecutionScaffolding.runAlgorithm(
+            graphName,
+            configuration,
+            SccWriteConfig::of,
+            writeMode()::scc,
+            resultBuilder
+        );
+    }
+
+    public Stream<AlphaSccWriteResult> sccWriteAlpha(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var statisticsComputationInstructions = new ProcedureStatisticsComputationInstructions(true, true);
+        var resultBuilder = new SccAlphaResultBuilderForWriteMode(statisticsComputationInstructions);
+
+        return algorithmExecutionScaffolding.runAlgorithm(
+            graphName,
+            configuration,
+            SccAlphaWriteConfig::of,
+            writeMode()::sccAlpha,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> sccWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            SccWriteConfig::of,
             configuration -> estimationMode().scc(configuration, graphNameOrConfiguration)
         );
 

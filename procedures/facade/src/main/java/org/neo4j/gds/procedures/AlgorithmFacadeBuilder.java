@@ -149,7 +149,6 @@ class AlgorithmFacadeBuilder {
         // procedure facade
         return new org.neo4j.gds.procedures.community.CommunityProcedureFacade(
             configurationCreator,
-            procedureReturnColumns,
             estimateBusinessFacade,
             mutateBusinessFacade,
             statsBusinessFacade,
