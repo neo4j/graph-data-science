@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.procedures.integration;
 
+import org.neo4j.configuration.Config;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.DefaultMemoryGuard;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
@@ -62,6 +63,7 @@ final class GraphDataScienceProviderFactory {
     private final MemoryGauge memoryGauge;
     private final MetricsFacade metricsFacade;
     private final ModelCatalog modelCatalog;
+    private final Config config;
 
     private GraphDataScienceProviderFactory(
         Log log,
@@ -70,7 +72,8 @@ final class GraphDataScienceProviderFactory {
         ExporterBuildersProviderService exporterBuildersProviderService,
         MemoryGauge memoryGauge,
         MetricsFacade metricsFacade,
-        ModelCatalog modelCatalog
+        ModelCatalog modelCatalog,
+        Config config
     ) {
         this.log = log;
         this.algorithmProcessingTemplateDecorator = algorithmProcessingTemplateDecorator;
@@ -79,6 +82,7 @@ final class GraphDataScienceProviderFactory {
         this.memoryGauge = memoryGauge;
         this.metricsFacade = metricsFacade;
         this.modelCatalog = modelCatalog;
+        this.config = config;
     }
 
     GraphDataScienceProvider createGraphDataScienceProvider(
@@ -110,7 +114,8 @@ final class GraphDataScienceProviderFactory {
             memoryGuard,
             metricsFacade.projectionMetrics(),
             taskRegistryFactoryService,
-            userLogServices
+            userLogServices,
+            this.config
         );
     }
 
@@ -121,7 +126,8 @@ final class GraphDataScienceProviderFactory {
         ExporterBuildersProviderService exporterBuildersProviderService,
         MemoryGauge memoryGauge,
         MetricsFacade metricsFacade,
-        ModelCatalog modelCatalog
+        ModelCatalog modelCatalog,
+        Config config
     ) {
         return new GraphDataScienceProviderFactory(
             log,
@@ -130,7 +136,8 @@ final class GraphDataScienceProviderFactory {
             exporterBuildersProviderService,
             memoryGauge,
             metricsFacade,
-            modelCatalog
+            modelCatalog,
+            config
         );
     }
 
