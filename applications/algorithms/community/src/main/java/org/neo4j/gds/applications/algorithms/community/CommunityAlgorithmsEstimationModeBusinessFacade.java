@@ -140,6 +140,19 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
         return new LocalClusteringCoefficientMemoryEstimateDefinition(configuration.seedProperty()).memoryEstimation();
     }
 
+    public MemoryEstimateResult lcc(
+        LocalClusteringCoefficientBaseConfig configuration,
+        Object graphNameOrConfiguration
+    ) {
+        var memoryEstimation = lcc(configuration);
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
+        );
+    }
+
     public MemoryEstimation leiden(LeidenBaseConfig configuration) {
         return new LeidenMemoryEstimateDefinition(configuration.toMemoryEstimationParameters()).memoryEstimation();
     }

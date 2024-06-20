@@ -44,7 +44,7 @@ public class LocalClusteringCoefficientStatsProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().localClusteringCoefficientStats(graphName, configuration);
+        return facade.algorithms().community().localClusteringCoefficientStats(graphName, configuration);
     }
 
     @Procedure(value = "gds.localClusteringCoefficient.stats.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class LocalClusteringCoefficientStatsProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().localClusteringCoefficientEstimateStats(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().community().localClusteringCoefficientStatsEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

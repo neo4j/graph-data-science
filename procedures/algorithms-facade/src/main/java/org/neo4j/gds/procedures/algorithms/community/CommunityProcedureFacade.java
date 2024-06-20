@@ -70,6 +70,7 @@ import org.neo4j.gds.scc.SccAlphaWriteConfig;
 import org.neo4j.gds.scc.SccStatsConfig;
 import org.neo4j.gds.scc.SccStreamConfig;
 import org.neo4j.gds.scc.SccWriteConfig;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
 import org.neo4j.gds.wcc.WccStatsConfig;
 import org.neo4j.gds.wcc.WccStreamConfig;
 import org.neo4j.gds.wcc.WccWriteConfig;
@@ -591,6 +592,34 @@ public final class CommunityProcedureFacade {
 
     public LccMutateStub lccMutateStub() {
         return lccMutateStub;
+    }
+
+    public Stream<LocalClusteringCoefficientStatsResult> localClusteringCoefficientStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new LccResultBuilderForStatsMode();
+
+        return algorithmExecutionScaffolding.runAlgorithm(
+            graphName,
+            configuration,
+            LocalClusteringCoefficientStatsConfig::of,
+            statsMode()::lcc,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> localClusteringCoefficientStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            LocalClusteringCoefficientStatsConfig::of,
+            configuration -> estimationMode().lcc(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
     }
 
     public LeidenMutateStub leidenMutateStub() {

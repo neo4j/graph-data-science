@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 
@@ -43,6 +44,19 @@ public class LocalClusteringCoefficientStatsResult extends StandardStatsResult {
 
     public static Builder statsBuilder() {
         return new Builder();
+    }
+
+    static LocalClusteringCoefficientStatsResult emptyFrom(
+        AlgorithmProcessingTimings timings,
+        Map<String, Object> configurationMap
+    ) {
+        return new LocalClusteringCoefficientStatsResult(
+            0,
+            0,
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            configurationMap
+        );
     }
 
     public static class Builder extends AbstractResultBuilder<LocalClusteringCoefficientStatsResult> {

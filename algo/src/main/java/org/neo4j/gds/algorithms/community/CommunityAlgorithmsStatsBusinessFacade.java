@@ -21,11 +21,9 @@ package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StatsResult;
-import org.neo4j.gds.algorithms.community.specificfields.LocalClusteringCoefficientSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.TriangleCountSpecificFields;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
 import org.neo4j.gds.triangle.TriangleCountStatsConfig;
 
 import java.util.function.Supplier;
@@ -35,27 +33,6 @@ public class CommunityAlgorithmsStatsBusinessFacade {
 
     public CommunityAlgorithmsStatsBusinessFacade(CommunityAlgorithmsFacade communityAlgorithmsFacade) {
         this.communityAlgorithmsFacade = communityAlgorithmsFacade;
-    }
-
-    public StatsResult<LocalClusteringCoefficientSpecificFields> localClusteringCoefficient(
-        String graphName,
-        LocalClusteringCoefficientStatsConfig configuration
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> communityAlgorithmsFacade.localClusteringCoefficient(graphName, configuration)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        return statsResult(
-            algorithmResult,
-            (result) -> new LocalClusteringCoefficientSpecificFields(
-                result.localClusteringCoefficients().size(),
-                result.averageClusteringCoefficient()
-            ),
-            intermediateResult.computeMilliseconds,
-            () -> LocalClusteringCoefficientSpecificFields.EMPTY
-        );
     }
 
     public StatsResult<TriangleCountSpecificFields> triangleCount(

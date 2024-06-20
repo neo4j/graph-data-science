@@ -41,6 +41,8 @@ import org.neo4j.gds.modularity.ModularityStatsConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
 import org.neo4j.gds.scc.SccStatsConfig;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
 import org.neo4j.gds.wcc.WccStatsConfig;
 
 import java.util.Optional;
@@ -48,6 +50,7 @@ import java.util.Optional;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.K1Coloring;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KCore;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KMeans;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.LCC;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.LabelPropagation;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Leiden;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Louvain;
@@ -130,6 +133,22 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
             LabelPropagation,
             estimationFacade::labelPropagation,
             graph -> communityAlgorithms.labelPropagation(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT lcc(
+        GraphName graphName,
+        LocalClusteringCoefficientStatsConfig configuration,
+        ResultBuilder<LocalClusteringCoefficientStatsConfig, LocalClusteringCoefficientResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            LCC,
+            () -> estimationFacade.lcc(configuration),
+            graph -> communityAlgorithms.lcc(graph, configuration),
             Optional.empty(),
             resultBuilder
         );

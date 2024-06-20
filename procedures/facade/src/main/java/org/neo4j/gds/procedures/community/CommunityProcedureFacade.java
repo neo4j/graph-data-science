@@ -26,14 +26,12 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacad
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.algorithms.community.LocalClusteringCoefficientStatsResult;
 import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientStreamResult;
 import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientWriteResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountMutateResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStatsResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStreamResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountWriteResult;
-import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientWriteConfig;
 import org.neo4j.gds.triangle.TriangleCountMutateConfig;
@@ -177,20 +175,6 @@ public class CommunityProcedureFacade {
         return LCCComputationResultTransformer.toStreamResult(computationResult);
     }
 
-    public Stream<LocalClusteringCoefficientStatsResult> localClusteringCoefficientStats(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var statsConfig = configurationCreator.createConfiguration(configuration, LocalClusteringCoefficientStatsConfig::of);
-
-        var computationResult = statsBusinessFacade.localClusteringCoefficient(
-            graphName,
-            statsConfig
-        );
-
-        return Stream.of(LCCComputationResultTransformer.toStatsResult(computationResult, statsConfig));
-    }
-
     public Stream<LocalClusteringCoefficientWriteResult> localClusteringCoefficientWrite(
         String graphName,
         Map<String, Object> configuration
@@ -210,14 +194,6 @@ public class CommunityProcedureFacade {
         Map<String, Object> algoConfiguration
     ) {
         var config = configurationCreator.createConfiguration(algoConfiguration, LocalClusteringCoefficientWriteConfig::of);
-        return Stream.of(estimateBusinessFacade.localClusteringCoefficient(graphNameOrConfiguration, config));
-    }
-
-    public Stream<MemoryEstimateResult> localClusteringCoefficientEstimateStats(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, LocalClusteringCoefficientStatsConfig::of);
         return Stream.of(estimateBusinessFacade.localClusteringCoefficient(graphNameOrConfiguration, config));
     }
 
