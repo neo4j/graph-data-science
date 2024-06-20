@@ -26,12 +26,10 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacad
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientWriteResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountMutateResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStatsResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStreamResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountWriteResult;
-import org.neo4j.gds.triangle.LocalClusteringCoefficientWriteConfig;
 import org.neo4j.gds.triangle.TriangleCountMutateConfig;
 import org.neo4j.gds.triangle.TriangleCountStatsConfig;
 import org.neo4j.gds.triangle.TriangleCountStreamConfig;
@@ -154,27 +152,5 @@ public class CommunityProcedureFacade {
     ) {
         var config = configurationCreator.createConfiguration(algoConfiguration, TriangleCountWriteConfig::of);
         return Stream.of(estimateBusinessFacade.triangleCount(graphNameOrConfiguration, config));
-    }
-
-    public Stream<LocalClusteringCoefficientWriteResult> localClusteringCoefficientWrite(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var writeConfig = configurationCreator.createConfiguration(configuration, LocalClusteringCoefficientWriteConfig::of);
-
-        var computationResult = writeBusinessFacade.localClusteringCoefficient(
-            graphName,
-            writeConfig
-        );
-
-        return Stream.of(LCCComputationResultTransformer.toWriteResult(computationResult));
-    }
-
-    public Stream<MemoryEstimateResult> localClusteringCoefficientEstimateWrite(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, LocalClusteringCoefficientWriteConfig::of);
-        return Stream.of(estimateBusinessFacade.localClusteringCoefficient(graphNameOrConfiguration, config));
     }
 }

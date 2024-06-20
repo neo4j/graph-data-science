@@ -22,9 +22,6 @@ package org.neo4j.gds.algorithms.community;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.triangle.IntersectingTriangleCountFactory;
-import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
-import org.neo4j.gds.triangle.LocalClusteringCoefficientFactory;
-import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
 
@@ -49,18 +46,6 @@ public class CommunityAlgorithmsFacade {
             config,
             Optional.empty(),
             new IntersectingTriangleCountFactory<>()
-        );
-    }
-
-    public AlgorithmComputationResult<LocalClusteringCoefficientResult> localClusteringCoefficient(
-        String graphName,
-        LocalClusteringCoefficientBaseConfig config
-    ) {
-        return algorithmRunner.run(
-            graphName,
-            config,
-            Optional.empty(),
-            new LocalClusteringCoefficientFactory<>()
         );
     }
 }

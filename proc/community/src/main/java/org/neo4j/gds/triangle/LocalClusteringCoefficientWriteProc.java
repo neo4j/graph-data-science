@@ -20,7 +20,7 @@
 package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientWriteResult;
+import org.neo4j.gds.procedures.algorithms.community.LocalClusteringCoefficientWriteResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -45,7 +45,7 @@ public class LocalClusteringCoefficientWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().localClusteringCoefficientWrite(graphName, configuration);
+        return facade.algorithms().community().localClusteringCoefficientWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.localClusteringCoefficient.write.estimate", mode = READ)
@@ -54,6 +54,6 @@ public class LocalClusteringCoefficientWriteProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().localClusteringCoefficientEstimateWrite(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().community().localClusteringCoefficientWriteEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

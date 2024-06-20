@@ -47,6 +47,8 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
 import org.neo4j.gds.scc.SccAlphaWriteConfig;
 import org.neo4j.gds.scc.SccWriteConfig;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientWriteConfig;
 import org.neo4j.gds.wcc.WccWriteConfig;
 
 import java.util.Optional;
@@ -54,6 +56,7 @@ import java.util.Optional;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.K1Coloring;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KCore;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KMeans;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.LCC;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.LabelPropagation;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Leiden;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Louvain;
@@ -164,6 +167,24 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
             LabelPropagation,
             estimationFacade::labelPropagation,
             graph -> algorithms.labelPropagation(graph, configuration),
+            Optional.of(writeStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT lcc(
+        GraphName graphName,
+        LocalClusteringCoefficientWriteConfig configuration,
+        ResultBuilder<LocalClusteringCoefficientWriteConfig, LocalClusteringCoefficientResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var writeStep = new LccWriteStep(writeToDatabase, configuration);
+
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            LCC,
+            () -> estimationFacade.lcc(configuration),
+            graph -> algorithms.lcc(graph, configuration),
             Optional.of(writeStep),
             resultBuilder
         );

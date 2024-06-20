@@ -22,7 +22,6 @@ package org.neo4j.gds.algorithms.community;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.community.specificfields.CommunityStatisticsSpecificFields;
-import org.neo4j.gds.algorithms.community.specificfields.LocalClusteringCoefficientSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.TriangleCountSpecificFields;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
@@ -33,7 +32,6 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
-import org.neo4j.gds.triangle.LocalClusteringCoefficientWriteConfig;
 import org.neo4j.gds.triangle.TriangleCountWriteConfig;
 
 import java.util.Optional;
@@ -79,36 +77,6 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             config.resolveResultStore(algorithmResult.resultStore())
         );
     }
-
-    public NodePropertyWriteResult<LocalClusteringCoefficientSpecificFields> localClusteringCoefficient(
-        String graphName,
-        LocalClusteringCoefficientWriteConfig config
-    ) {
-
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.localClusteringCoefficient(graphName, config)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        return writeToDatabase(
-            algorithmResult,
-            config,
-            (result, configuration) -> NodePropertyValuesAdapter.adapt(result.localClusteringCoefficients()),
-            (result) -> new LocalClusteringCoefficientSpecificFields(
-                result.localClusteringCoefficients().size(),
-                result.averageClusteringCoefficient()
-            ),
-            intermediateResult.computeMilliseconds,
-            () -> LocalClusteringCoefficientSpecificFields.EMPTY,
-            "LocalClusteringCoefficientWrite",
-            config.writeConcurrency(),
-            config.writeProperty(),
-            config.arrowConnectionInfo(),
-            config.resolveResultStore(algorithmResult.resultStore())
-        );
-    }
-
 
     <RESULT, CONFIG extends AlgoBaseConfig, ASF extends CommunityStatisticsSpecificFields> NodePropertyWriteResult<ASF> writeToDatabase(
         AlgorithmComputationResult<RESULT> algorithmResult,

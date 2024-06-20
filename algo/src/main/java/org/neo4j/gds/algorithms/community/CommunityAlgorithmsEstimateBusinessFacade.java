@@ -22,8 +22,6 @@ package org.neo4j.gds.algorithms.community;
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.triangle.IntersectingTriangleCountMemoryEstimateDefinition;
-import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
-import org.neo4j.gds.triangle.LocalClusteringCoefficientMemoryEstimateDefinition;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 
 import java.util.Optional;
@@ -47,18 +45,6 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             configuration,
             Optional.empty(),
             new IntersectingTriangleCountMemoryEstimateDefinition()
-        );
-    }
-
-    public <C extends LocalClusteringCoefficientBaseConfig> MemoryEstimateResult localClusteringCoefficient(
-        Object graphNameOrConfiguration,
-        C configuration
-    ) {
-        return algorithmEstimator.estimate(
-            graphNameOrConfiguration,
-            configuration,
-            Optional.empty(),
-            new LocalClusteringCoefficientMemoryEstimateDefinition(configuration.seedProperty())
         );
     }
 }
