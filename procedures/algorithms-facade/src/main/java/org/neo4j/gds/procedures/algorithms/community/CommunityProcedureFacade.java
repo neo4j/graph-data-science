@@ -66,6 +66,7 @@ import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
 import org.neo4j.gds.scc.SccStatsConfig;
+import org.neo4j.gds.scc.SccStreamConfig;
 import org.neo4j.gds.wcc.WccStatsConfig;
 import org.neo4j.gds.wcc.WccStreamConfig;
 import org.neo4j.gds.wcc.WccWriteConfig;
@@ -933,6 +934,34 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             SccStatsConfig::of,
+            configuration -> estimationMode().scc(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<SccStreamResult> sccStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new SccResultBuilderForStreamMode();
+
+        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+            graphName,
+            configuration,
+            SccStreamConfig::of,
+            streamMode()::scc,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> sccStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            SccStreamConfig::of,
             configuration -> estimationMode().scc(configuration, graphNameOrConfiguration)
         );
 

@@ -24,6 +24,7 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTempla
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.conductance.ConductanceStreamConfig;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
@@ -43,6 +44,7 @@ import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.modularity.ModularityStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
+import org.neo4j.gds.scc.SccStreamConfig;
 import org.neo4j.gds.wcc.WccStreamConfig;
 
 import java.util.Optional;
@@ -57,6 +59,7 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Louvain;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Modularity;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ModularityOptimization;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.SCC;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
 
 public class CommunityAlgorithmsStreamModeBusinessFacade {
@@ -229,6 +232,22 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
             ModularityOptimization,
             estimationFacade::modularityOptimization,
             graph -> algorithms.modularityOptimization(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT scc(
+        GraphName graphName,
+        SccStreamConfig configuration,
+        ResultBuilder<SccStreamConfig, HugeLongArray, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            SCC,
+            estimationFacade::scc,
+            graph -> algorithms.scc(graph, configuration),
             Optional.empty(),
             resultBuilder
         );

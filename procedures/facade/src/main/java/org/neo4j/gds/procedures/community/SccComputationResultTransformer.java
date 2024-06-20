@@ -20,48 +20,15 @@
 package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
-import org.neo4j.gds.algorithms.StreamComputationResult;
-import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.algorithms.community.specificfields.AlphaSccSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.StandardCommunityStatisticsSpecificFields;
-import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.procedures.community.scc.AlphaSccWriteResult;
-import org.neo4j.gds.procedures.community.scc.SccStreamResult;
 import org.neo4j.gds.procedures.community.scc.SccWriteResult;
 import org.neo4j.gds.scc.SccAlphaWriteConfig;
-import org.neo4j.gds.scc.SccStreamConfig;
-
-import java.util.Optional;
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 final class SccComputationResultTransformer {
 
     private SccComputationResultTransformer() {}
-
-    static Stream<SccStreamResult> toStreamResult(
-        StreamComputationResult<HugeLongArray> computationResult,
-        SccStreamConfig configuration
-    ) {
-        return computationResult.result().map(sccResult -> {
-            var graph = computationResult.graph();
-            var nodePropertyValues = CommunityCompanion.nodePropertyValues(
-                configuration.consecutiveIds(),
-                NodePropertyValuesAdapter.adapt(sccResult),
-                Optional.empty(),
-                configuration.concurrency()
-            );
-            return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
-                .filter(nodePropertyValues::hasValue)
-                .mapToObj(i -> new SccStreamResult(
-                    graph.toOriginalNodeId(i),
-                    nodePropertyValues.longValue(i)
-                ));
-
-        }).orElseGet(Stream::empty);
-    }
 
     static SccWriteResult toWriteResult(NodePropertyWriteResult<StandardCommunityStatisticsSpecificFields> computationResult) {
         return new SccWriteResult(

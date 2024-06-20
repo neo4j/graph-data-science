@@ -42,8 +42,8 @@ import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityCalculatorMemoryEstimateDefinition;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationBaseConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationMemoryEstimateDefinition;
+import org.neo4j.gds.scc.SccBaseConfig;
 import org.neo4j.gds.scc.SccMemoryEstimateDefinition;
-import org.neo4j.gds.scc.SccStatsConfig;
 import org.neo4j.gds.wcc.WccBaseConfig;
 import org.neo4j.gds.wcc.WccMemoryEstimateDefinition;
 
@@ -197,7 +197,7 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
         return new SccMemoryEstimateDefinition().memoryEstimation();
     }
 
-    public MemoryEstimateResult scc(SccStatsConfig configuration, Object graphNameOrConfiguration) {
+    public MemoryEstimateResult scc(SccBaseConfig configuration, Object graphNameOrConfiguration) {
         var memoryEstimation = scc();
 
         return algorithmEstimationTemplate.estimate(

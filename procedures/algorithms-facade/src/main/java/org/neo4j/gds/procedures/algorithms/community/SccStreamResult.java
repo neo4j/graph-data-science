@@ -17,16 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.community.scc;
+package org.neo4j.gds.procedures.algorithms.community;
 
 public class SccStreamResult {
-
-        public final long nodeId;
-        public final long componentId;
+    public final long nodeId;
+    public final long componentId;
 
     public SccStreamResult(long nodeId, long componentId) {
-            this.nodeId = nodeId;
-            this.componentId = componentId;
-        }
+        this.nodeId = nodeId;
+        this.componentId = componentId;
     }
-
+}
