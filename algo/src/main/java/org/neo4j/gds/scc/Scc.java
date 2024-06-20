@@ -26,6 +26,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.paged.PagedLongStack;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 /**
  * huge iterative (non recursive) sequential strongly connected components algorithm.
@@ -46,7 +47,8 @@ public class Scc extends Algorithm<HugeLongArray> {
 
     public Scc(
         Graph graph,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
 
@@ -59,6 +61,8 @@ public class Scc extends Algorithm<HugeLongArray> {
         this.stack = HugeLongArrayStack.newStack(nodeCount);
         this.todo = new PagedLongStack(nodeCount); //can be as high as `graph.relationshipsCount()` if we are unlucky...
         this.visited = new BitSet(nodeCount);
+
+        this.terminationFlag = terminationFlag;
     }
 
     /**

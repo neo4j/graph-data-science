@@ -59,6 +59,7 @@ import org.neo4j.gds.procedures.algorithms.community.stubs.LabelPropagationMutat
 import org.neo4j.gds.procedures.algorithms.community.stubs.LeidenMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.LouvainMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.ModularityOptimizationMutateStub;
+import org.neo4j.gds.procedures.algorithms.community.stubs.SccMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.WccMutateStub;
 import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
@@ -81,6 +82,7 @@ public final class CommunityProcedureFacade {
     private final LeidenMutateStub leidenMutateStub;
     private final LouvainMutateStub louvainMutateStub;
     private final ModularityOptimizationMutateStub modularityOptimizationMutateStub;
+    private final SccMutateStub sccMutateStub;
     private final WccMutateStub wccMutateStub;
 
     private final ApplicationsFacade applicationsFacade;
@@ -99,6 +101,7 @@ public final class CommunityProcedureFacade {
         LeidenMutateStub leidenMutateStub,
         LouvainMutateStub louvainMutateStub,
         ModularityOptimizationMutateStub modularityOptimizationMutateStub,
+        SccMutateStub sccMutateStub,
         WccMutateStub wccMutateStub,
         ApplicationsFacade applicationsFacade,
         EstimationModeRunner estimationMode,
@@ -114,6 +117,7 @@ public final class CommunityProcedureFacade {
         this.leidenMutateStub = leidenMutateStub;
         this.louvainMutateStub = louvainMutateStub;
         this.modularityOptimizationMutateStub = modularityOptimizationMutateStub;
+        this.sccMutateStub = sccMutateStub;
         this.wccMutateStub = wccMutateStub;
         this.applicationsFacade = applicationsFacade;
         this.estimationMode = estimationMode;
@@ -145,6 +149,7 @@ public final class CommunityProcedureFacade {
             applicationsFacade,
             procedureReturnColumns
         );
+        var sccMutateStub = new SccMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
         var wccMutateStub = new WccMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
 
         return new CommunityProcedureFacade(
@@ -157,6 +162,7 @@ public final class CommunityProcedureFacade {
             leidenMutateStub,
             louvainMutateStub,
             modularityOptimizationMutateStub,
+            sccMutateStub,
             wccMutateStub,
             applicationsFacade,
             estimationModeRunner,
@@ -896,6 +902,10 @@ public final class CommunityProcedureFacade {
         );
 
         return Stream.of(result);
+    }
+
+    public SccMutateStub sccMutateStub() {
+        return sccMutateStub;
     }
 
     public WccMutateStub wccMutateStub() {

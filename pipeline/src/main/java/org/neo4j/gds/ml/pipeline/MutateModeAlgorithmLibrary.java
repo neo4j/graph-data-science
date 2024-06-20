@@ -91,6 +91,7 @@ final class MutateModeAlgorithmLibrary {
             case NodeSimilarity -> CanonicalProcedureName.parse("gds.nodeSimilarity");
             case PageRank -> CanonicalProcedureName.parse("gds.pageRank");
             case RandomWalk -> null;
+            case SCC -> CanonicalProcedureName.parse("gds.scc");
             case SingleSourceDijkstra -> CanonicalProcedureName.parse("gds.allShortestPaths.dijkstra");
             case SpanningTree -> CanonicalProcedureName.parse("gds.spanningTree");
             case SteinerTree -> CanonicalProcedureName.parse("gds.steinerTree");

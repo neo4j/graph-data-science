@@ -19,60 +19,56 @@
  */
 package org.neo4j.gds.procedures.algorithms.community.stubs;
 
+import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.algorithms.community.LouvainNodePropertyValuesComputer;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.louvain.LouvainMutateConfig;
-import org.neo4j.gds.louvain.LouvainResult;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.procedures.algorithms.community.CommunityStatisticsWithTimingComputer;
-import org.neo4j.gds.procedures.algorithms.community.LouvainMutateResult;
+import org.neo4j.gds.procedures.algorithms.community.SccMutateResult;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
+import org.neo4j.gds.scc.SccMutateConfig;
 
 import java.util.Optional;
 
-public class LouvainResultBuilderForMutateMode implements ResultBuilder<LouvainMutateConfig, LouvainResult, LouvainMutateResult, NodePropertiesWritten> {
+public class SccResultBuilderForMutateMode implements ResultBuilder<SccMutateConfig, HugeLongArray, SccMutateResult, NodePropertiesWritten> {
     private final CommunityStatisticsWithTimingComputer communityStatisticsWithTimingComputer = new CommunityStatisticsWithTimingComputer();
 
     private final StatisticsComputationInstructions statisticsComputationInstructions;
 
-    LouvainResultBuilderForMutateMode(StatisticsComputationInstructions statisticsComputationInstructions) {
+    SccResultBuilderForMutateMode(StatisticsComputationInstructions statisticsComputationInstructions) {
         this.statisticsComputationInstructions = statisticsComputationInstructions;
     }
 
     @Override
-    public LouvainMutateResult build(
+    public SccMutateResult build(
         Graph graph,
         GraphStore graphStore,
-        LouvainMutateConfig configuration,
-        Optional<LouvainResult> result,
+        SccMutateConfig configuration,
+        Optional<HugeLongArray> result,
         AlgorithmProcessingTimings timings,
         Optional<NodePropertiesWritten> metadata
     ) {
-        if (result.isEmpty()) return LouvainMutateResult.emptyFrom(timings, configuration.toMap());
+        if (result.isEmpty()) return SccMutateResult.emptyFrom(timings, configuration.toMap());
 
-        var louvainResult = result.get();
+        var hugeLongArray = result.get();
 
-        var nodePropertyValues = new LouvainNodePropertyValuesComputer().compute(
-            graphStore,
-            configuration,
-            configuration.mutateProperty(),
-            louvainResult
+        var nodePropertyValues = CommunityCompanion.nodePropertyValues(
+            configuration.consecutiveIds(),
+            NodePropertyValuesAdapter.adapt(hugeLongArray)
         );
 
         var communityStatisticsWithTiming = communityStatisticsWithTimingComputer.compute(
             configuration,
             statisticsComputationInstructions,
             nodePropertyValues.nodeCount(),
-            louvainResult::getCommunity
+            hugeLongArray::get
         );
 
-        return LouvainMutateResult.create(
-            louvainResult.modularity(),
-            louvainResult.modularities(),
-            louvainResult.ranLevels(),
+        return new SccMutateResult(
             communityStatisticsWithTiming.getLeft(),
             communityStatisticsWithTiming.getMiddle(),
             timings.preProcessingMillis,

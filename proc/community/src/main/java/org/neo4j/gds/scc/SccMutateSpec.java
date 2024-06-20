@@ -31,7 +31,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
-import org.neo4j.gds.procedures.community.scc.SccMutateResult;
+import org.neo4j.gds.procedures.algorithms.community.SccMutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;

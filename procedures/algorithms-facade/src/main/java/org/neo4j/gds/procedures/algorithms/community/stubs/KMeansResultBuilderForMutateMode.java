@@ -25,17 +25,18 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.kmeans.KmeansMutateConfig;
 import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.procedures.algorithms.community.CentroidsComputer;
+import org.neo4j.gds.procedures.algorithms.community.CommunityStatisticsWithTimingComputer;
 import org.neo4j.gds.procedures.algorithms.community.KmeansMutateResult;
-import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
 
 import java.util.Optional;
 
 public class KMeansResultBuilderForMutateMode implements ResultBuilder<KmeansMutateConfig, KmeansResult, KmeansMutateResult, NodePropertiesWritten> {
+    private final CommunityStatisticsWithTimingComputer communityStatisticsWithTimingComputer = new CommunityStatisticsWithTimingComputer();
+
     private final StatisticsComputationInstructions statisticsComputationInstructions;
     private final boolean shouldComputeListOfCentroids;
 
@@ -62,25 +63,22 @@ public class KMeansResultBuilderForMutateMode implements ResultBuilder<KmeansMut
 
         var nodePropertyValues = NodePropertyValuesAdapter.adapt(kmeansResult.communities());
 
-        var communityStatistics = CommunityStatistics.communityStats(
+        var communityStatisticsWithTiming = communityStatisticsWithTimingComputer.compute(
+            configuration,
+            statisticsComputationInstructions,
             nodePropertyValues.nodeCount(),
-            nodeId -> kmeansResult.communities().get(nodeId),
-            DefaultPool.INSTANCE,
-            configuration.concurrency(),
-            statisticsComputationInstructions
+            nodeId -> kmeansResult.communities().get(nodeId)
         );
-
-        var communitySummary = CommunityStatistics.communitySummary(communityStatistics.histogram());
 
         var centroids = new CentroidsComputer().compute(shouldComputeListOfCentroids, kmeansResult.centers());
 
         return new KmeansMutateResult(
             timings.preProcessingMillis,
             timings.computeMillis,
-            communityStatistics.computeMilliseconds(),
+            communityStatisticsWithTiming.getRight(),
             timings.mutateOrWriteMillis,
             metadata.orElseThrow().value,
-            communitySummary,
+            communityStatisticsWithTiming.getMiddle(),
             centroids,
             kmeansResult.averageDistanceToCentroid(),
             kmeansResult.averageSilhouette(),

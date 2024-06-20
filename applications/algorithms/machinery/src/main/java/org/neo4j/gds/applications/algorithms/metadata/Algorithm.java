@@ -60,6 +60,7 @@ public enum Algorithm {
     NodeSimilarity,
     PageRank,
     RandomWalk,
+    SCC,
     SingleSourceDijkstra,
     SpanningTree,
     SteinerTree,

@@ -53,6 +53,7 @@ public enum LabelForProgressTracking {
     NodeSimilarity("Node Similarity"),
     PageRank("PageRank"),
     RandomWalk("RandomWalk"),
+    SCC("SCC"),
     SingleSourceDijkstra("All Shortest Paths"),
     SpanningTree("SpanningTree"),
     SteinerTree("SteinerTree"),
@@ -99,6 +100,7 @@ public enum LabelForProgressTracking {
             case NodeSimilarity -> NodeSimilarity;
             case PageRank -> PageRank;
             case RandomWalk -> RandomWalk;
+            case SCC -> SCC;
             case SingleSourceDijkstra -> SingleSourceDijkstra;
             case SpanningTree -> SpanningTree;
             case SteinerTree -> SteinerTree;

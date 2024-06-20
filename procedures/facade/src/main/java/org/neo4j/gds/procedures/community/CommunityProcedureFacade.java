@@ -29,7 +29,6 @@ import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.algorithms.community.ProcedureStatisticsComputationInstructions;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.community.scc.AlphaSccWriteResult;
-import org.neo4j.gds.procedures.community.scc.SccMutateResult;
 import org.neo4j.gds.procedures.community.scc.SccStatsResult;
 import org.neo4j.gds.procedures.community.scc.SccStreamResult;
 import org.neo4j.gds.procedures.community.scc.SccWriteResult;
@@ -42,7 +41,6 @@ import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStatsResult
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStreamResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountWriteResult;
 import org.neo4j.gds.scc.SccAlphaWriteConfig;
-import org.neo4j.gds.scc.SccMutateConfig;
 import org.neo4j.gds.scc.SccStatsConfig;
 import org.neo4j.gds.scc.SccStreamConfig;
 import org.neo4j.gds.scc.SccWriteConfig;
@@ -103,21 +101,6 @@ public class CommunityProcedureFacade {
         return SccComputationResultTransformer.toStreamResult(computationResult, streamConfig);
     }
 
-    public Stream<SccMutateResult> sccMutate(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, SccMutateConfig::of);
-
-        var computationResult = mutateBusinessFacade.scc(
-            graphName,
-            config,
-            ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns)
-        );
-
-        return Stream.of(SccComputationResultTransformer.toMutateResult(computationResult));
-    }
-
     public Stream<SccWriteResult> sccWrite(
         String graphName,
         Map<String, Object> configuration
@@ -153,14 +136,6 @@ public class CommunityProcedureFacade {
         Map<String, Object> algoConfiguration
     ) {
         var config = configurationCreator.createConfiguration(algoConfiguration, SccWriteConfig::of);
-        return Stream.of(estimateBusinessFacade.estimateScc(graphNameOrConfiguration, config));
-    }
-
-    public Stream<MemoryEstimateResult> sccEstimateMutate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, SccMutateConfig::of);
         return Stream.of(estimateBusinessFacade.estimateScc(graphNameOrConfiguration, config));
     }
 
