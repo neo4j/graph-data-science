@@ -19,16 +19,13 @@
  */
 package org.neo4j.gds.procedures.community;
 
-import org.neo4j.gds.algorithms.community.specificfields.LocalClusteringCoefficientSpecificFields;
-import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
-import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientMutateResult;
-import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientStatsResult;
+import org.neo4j.gds.algorithms.community.specificfields.LocalClusteringCoefficientSpecificFields;
+import org.neo4j.gds.procedures.algorithms.community.LocalClusteringCoefficientStatsResult;
 import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientStreamResult;
 import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientWriteResult;
-import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
 
@@ -49,21 +46,6 @@ final class LCCComputationResultTransformer {
                     localClusteringCoefficients.get(i)
                 ));
         }).orElseGet(Stream::empty);
-    }
-
-    static LocalClusteringCoefficientMutateResult toMutateResult(
-        NodePropertyMutateResult<LocalClusteringCoefficientSpecificFields> computationResult,
-        LocalClusteringCoefficientMutateConfig configuration
-    ) {
-        return new LocalClusteringCoefficientMutateResult(
-            computationResult.algorithmSpecificFields().averageClusteringCoefficient(),
-            computationResult.algorithmSpecificFields().nodeCount(),
-            computationResult.preProcessingMillis(),
-            computationResult.computeMillis(),
-            computationResult.mutateMillis(),
-            computationResult.nodePropertiesWritten(),
-            configuration.toMap()
-        );
     }
 
     static LocalClusteringCoefficientStatsResult toStatsResult(

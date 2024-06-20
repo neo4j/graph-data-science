@@ -17,16 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.community.triangle;
+package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 
 import java.util.Map;
 
-@SuppressWarnings("unused")
 public class LocalClusteringCoefficientStatsResult extends StandardStatsResult {
-
     public final double averageClusteringCoefficient;
     public final long nodeCount;
 

@@ -21,20 +21,17 @@ package org.neo4j.gds.algorithms.community;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
-import org.neo4j.gds.algorithms.community.specificfields.StandardCommunityStatisticsSpecificFields;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.result.StatisticsComputationInstructions;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -87,65 +84,6 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
         assertThat(mutateResult.algorithmSpecificFields())
             .as("Incorrect additional algorithm field value")
             .isEqualTo(19L);
-    }
-
-    @Test
-    void mutateWithCommunityStatistics() {
-
-        var nodePropertyService = new MutateNodePropertyService(mock(Log.class));
-
-        var businessFacade = new CommunityAlgorithmsMutateBusinessFacade(null, nodePropertyService);
-
-        var configMock = mock(MutateNodePropertyConfig.class);
-        when(configMock.mutateProperty()).thenReturn("bugger-off");
-        when(configMock.concurrency()).thenReturn(new Concurrency(4));
-
-        var result = HugeLongArray.newArray(graph.nodeCount());
-        result.setAll(graph::toOriginalNodeId);
-        var algorithmResultMock = AlgorithmComputationResult.of(
-            result,
-            graph,
-            graphStore,
-            ResultStore.EMPTY
-        );
-
-        var statisticsComputationInstructionsMock = mock(StatisticsComputationInstructions.class);
-        when(statisticsComputationInstructionsMock.computeCountOnly()).thenReturn(true);
-
-        NodePropertyValuesMapper<HugeLongArray, MutateNodePropertyConfig> nodePropertyValuesMapper =
-            (r, c) -> NodePropertyValuesAdapter.adapt(r);
-
-        var mutateResult = businessFacade.mutateNodeProperty(
-            algorithmResultMock,
-            configMock,
-            nodePropertyValuesMapper,
-            ((r) -> r::get),
-            (r, cc, cs) -> new StandardCommunityStatisticsSpecificFields(
-                cc,
-                cs
-            ),
-            statisticsComputationInstructionsMock,
-            50L,
-            () -> StandardCommunityStatisticsSpecificFields.EMPTY
-        );
-
-
-        assertThat(mutateResult.algorithmSpecificFields().communityCount()).isEqualTo(4);
-        assertThat(mutateResult.computeMillis()).isEqualTo(50);
-        assertThat(mutateResult.mutateMillis()).isGreaterThanOrEqualTo(0L);
-        assertThat(mutateResult.postProcessingMillis()).isGreaterThanOrEqualTo(0L);
-
-        var nodeProperty = graphStore.nodeProperty("bugger-off");
-        assertThat(nodeProperty).isNotNull();
-        var buggerOffValues = nodeProperty.values();
-        assertThat(buggerOffValues.nodeCount()).isEqualTo(4);
-        graph.forEachNode(nodeId -> {
-            assertThat(buggerOffValues.longValue(nodeId))
-                .as("Mutated node property (nodeId=%s) doesn't have the expected value...", nodeId)
-                .isEqualTo(graph.toOriginalNodeId(nodeId));
-            return true;
-        });
-
     }
 
     @Test

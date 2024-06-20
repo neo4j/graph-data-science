@@ -56,6 +56,7 @@ import org.neo4j.gds.procedures.algorithms.community.stubs.K1ColoringMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.KCoreMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.KMeansMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.LabelPropagationMutateStub;
+import org.neo4j.gds.procedures.algorithms.community.stubs.LccMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.LeidenMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.LouvainMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.ModularityOptimizationMutateStub;
@@ -83,6 +84,7 @@ public final class CommunityProcedureFacade {
     private final KCoreMutateStub kCoreMutateStub;
     private final KMeansMutateStub kMeansMutateStub;
     private final LabelPropagationMutateStub labelPropagationMutateStub;
+    private final LccMutateStub lccMutateStub;
     private final LeidenMutateStub leidenMutateStub;
     private final LouvainMutateStub louvainMutateStub;
     private final ModularityOptimizationMutateStub modularityOptimizationMutateStub;
@@ -102,6 +104,7 @@ public final class CommunityProcedureFacade {
         KCoreMutateStub kCoreMutateStub,
         KMeansMutateStub kMeansMutateStub,
         LabelPropagationMutateStub labelPropagationMutateStub,
+        LccMutateStub lccMutateStub,
         LeidenMutateStub leidenMutateStub,
         LouvainMutateStub louvainMutateStub,
         ModularityOptimizationMutateStub modularityOptimizationMutateStub,
@@ -122,6 +125,7 @@ public final class CommunityProcedureFacade {
         this.louvainMutateStub = louvainMutateStub;
         this.modularityOptimizationMutateStub = modularityOptimizationMutateStub;
         this.sccMutateStub = sccMutateStub;
+        this.lccMutateStub = lccMutateStub;
         this.wccMutateStub = wccMutateStub;
         this.applicationsFacade = applicationsFacade;
         this.estimationMode = estimationMode;
@@ -146,6 +150,7 @@ public final class CommunityProcedureFacade {
             applicationsFacade,
             procedureReturnColumns
         );
+        var lccMutateStub = new LccMutateStub(genericStub, applicationsFacade);
         var leidenMutateStub = new LeidenMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
         var louvainMutateStub = new LouvainMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
         var modularityOptimizationMutateStub = new ModularityOptimizationMutateStub(
@@ -163,6 +168,7 @@ public final class CommunityProcedureFacade {
             kCoreMutateStub,
             kMeansMutateStub,
             labelPropagationMutateStub,
+            lccMutateStub,
             leidenMutateStub,
             louvainMutateStub,
             modularityOptimizationMutateStub,
@@ -581,6 +587,10 @@ public final class CommunityProcedureFacade {
         );
 
         return Stream.of(result);
+    }
+
+    public LccMutateStub lccMutateStub() {
+        return lccMutateStub;
     }
 
     public LeidenMutateStub leidenMutateStub() {

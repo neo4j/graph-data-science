@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.procedures.community.triangle;
 
+import org.neo4j.gds.procedures.algorithms.community.LocalClusteringCoefficientStatsResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;

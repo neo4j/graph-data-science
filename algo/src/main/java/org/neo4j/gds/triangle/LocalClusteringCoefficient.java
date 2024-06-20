@@ -29,6 +29,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 
 import java.util.Optional;
@@ -47,12 +48,13 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
     private HugeDoubleArray localClusteringCoefficients;
     private double averageClusteringCoefficient;
 
-    LocalClusteringCoefficient(
+    public LocalClusteringCoefficient(
         Graph graph,
         Concurrency concurrency,
         long maxDegree,
         @Nullable String seedProperty,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -63,6 +65,8 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
             Optional.ofNullable(seedProperty)
                 .map(graph::nodeProperties)
                 .orElse(null);
+
+        this.terminationFlag = terminationFlag;
     }
 
     @Override

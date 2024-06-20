@@ -51,6 +51,7 @@ import org.neo4j.gds.similarity.knn.KnnMutateConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateConfig;
 import org.neo4j.gds.spanningtree.SpanningTreeMutateConfig;
 import org.neo4j.gds.steiner.SteinerTreeMutateConfig;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateConfig;
 import org.neo4j.gds.wcc.WccMutateConfig;
 
 import java.util.function.Function;
@@ -89,6 +90,7 @@ public class ConfigurationParsersForMutateMode {
             case KNN -> KnnMutateConfig::of;
             case KSpanningTree -> null;
             case LabelPropagation -> LabelPropagationMutateConfig::of;
+            case LCC -> LocalClusteringCoefficientMutateConfig::of;
             case Leiden -> LeidenMutateConfig::of;
             case Louvain -> LouvainMutateConfig::of;
             case LongestPath -> null;

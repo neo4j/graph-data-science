@@ -17,15 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.community.triangle;
+package org.neo4j.gds.procedures.algorithms.community;
 
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
-@SuppressWarnings("unused")
 public final class LocalClusteringCoefficientMutateResult extends LocalClusteringCoefficientStatsResult {
-
     public long mutateMillis;
     public long nodePropertiesWritten;
 
@@ -51,6 +50,21 @@ public final class LocalClusteringCoefficientMutateResult extends LocalClusterin
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    public static LocalClusteringCoefficientMutateResult emptyFrom(
+        AlgorithmProcessingTimings timings,
+        Map<String, Object> configurationMap
+    ) {
+        return new LocalClusteringCoefficientMutateResult(
+            0,
+            0,
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.mutateOrWriteMillis,
+            0,
+            configurationMap
+        );
     }
 
     public static class Builder extends AbstractResultBuilder<LocalClusteringCoefficientMutateResult> {

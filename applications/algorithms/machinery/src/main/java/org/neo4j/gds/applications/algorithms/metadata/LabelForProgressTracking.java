@@ -45,6 +45,7 @@ public enum LabelForProgressTracking {
     KNN("K-Nearest Neighbours"),
     KSpanningTree("K Spanning Tree"),
     LabelPropagation("Label Propagation"),
+    LCC("LocalClusteringCoefficient"),
     Leiden("Leiden"),
     Louvain("Louvain"),
     LongestPath("LongestPath"),
@@ -92,6 +93,7 @@ public enum LabelForProgressTracking {
             case KNN -> KNN;
             case KSpanningTree -> KSpanningTree;
             case LabelPropagation -> LabelPropagation;
+            case LCC -> LCC;
             case Leiden -> Leiden;
             case Louvain -> Louvain;
             case LongestPath -> LongestPath;

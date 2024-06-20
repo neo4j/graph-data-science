@@ -67,9 +67,14 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.scc.Scc;
 import org.neo4j.gds.scc.SccCommonBaseConfig;
 import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.triangle.IntersectingTriangleCountFactory;
+import org.neo4j.gds.triangle.LocalClusteringCoefficient;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.wcc.Wcc;
 import org.neo4j.gds.wcc.WccBaseConfig;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -204,6 +209,29 @@ public class CommunityAlgorithms {
             graph,
             configuration.toParameters(),
             DefaultPool.INSTANCE,
+            progressTracker,
+            terminationFlag
+        );
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+    }
+
+    LocalClusteringCoefficientResult lcc(Graph graph, LocalClusteringCoefficientBaseConfig configuration) {
+        var tasks = new ArrayList<Task>();
+        if (configuration.seedProperty() == null) {
+            tasks.add(IntersectingTriangleCountFactory.triangleCountProgressTask(graph));
+        }
+        tasks.add(Tasks.leaf("Calculate Local Clustering Coefficient", graph.nodeCount()));
+        var task = Tasks.task(LabelForProgressTracking.LCC.value, tasks);
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var parameters = configuration.toParameters();
+
+        var algorithm = new LocalClusteringCoefficient(
+            graph,
+            parameters.concurrency(),
+            parameters.maxDegree(),
+            parameters.seedProperty(),
             progressTracker,
             terminationFlag
         );
