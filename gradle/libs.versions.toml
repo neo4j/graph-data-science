@@ -1,10 +1,7 @@
 [versions]
-asciidoctorj = "2.5.12"
-reflections = "0.10.2"
-agrona = "1.21.1"
-assertj = "3.25.3"
-google-auto-common = "1.2.2"
-google-auto-service = "1.1.1"
+agrona = "1.21.2"
+asciidoctorj = "2.5.13"
+assertj = "3.26.0"
 bouncycastle-prov = "1.78.1"
 checkStyle = "10.12.1"
 commons-io = "2.16.1"
@@ -17,27 +14,30 @@ eclipse-collections = "11.1.0"
 ejml = "0.43.1"
 fastcsv = "2.2.2"
 gdl = "0.3.9"
+google-auto-common = "1.2.2"
+google-auto-service = "1.1.1"
 hamcrest = "2.2"
 hdrhistogram = "2.1.12"
-immutables = "2.10.1"
 hppc = "0.7.3"
+immutables = "2.10.1"
 ipaddress = "5.3.3"
 jackson = "2.17.1"
 javapoet = "1.13.0"
 jetbrains-annotations = "24.1.0"
 jjwt = "0.12.5"
 jol = "0.17"
-jqwik = "1.8.4"
+jqwik = "1.8.5"
 junit-pioneer = "2.2.0"
 junit5bom = "5.10.2"
 memoryfilesystem = "2.8.0"
-mockito-junit-jupiter = "5.11.0"
+mockito-junit-jupiter = "5.12.0"
 opencypher-front-end = "9.0.20210312"
 picocli = "4.7.6"
+protobuf = "3.25.3"
 qala-datagen = "2.5.1"
 record-builder = "41"
+reflections = "0.10.2"
 sb-contrib = "7.6.3"
-protobuf = "3.25.3"
 
 [libraries]
 agrona = { module = "org.agrona:agrona", version.ref = "agrona" }
@@ -48,56 +48,56 @@ commons-io = { module = "commons-io:commons-io", version.ref = "commons-io" }
 commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "commons-lang3" }
 commons-math3 = { module = "org.apache.commons:commons-math3", version.ref = "commons-math3" }
 commons-text = { module = "org.apache.commons:commons-text", version.ref = "commons-text" }
-eclipse-collections = { group = "org.eclipse.collections", name = "eclipse-collections", version.ref = "eclipse-collections" }
-eclipse-collections-api = { group = "org.eclipse.collections", name = "eclipse-collections-api", version.ref = "eclipse-collections" }
-ejml-core = { group = "org.ejml", name = "ejml-core", version.ref = "ejml" }
-ejml-ddense = { group = "org.ejml", name = "ejml-ddense", version.ref = "ejml" }
-fastcsv = { group = "de.siegmar", name = "fastcsv", version.ref = "fastcsv" }
-gdl = { group = "com.github.s1ck", name = "gdl", version.ref = "gdl" }
+eclipse-collections = { module = "org.eclipse.collections:eclipse-collections", version.ref = "eclipse-collections" }
+eclipse-collections-api = { module = "org.eclipse.collections:eclipse-collections-api", version.ref = "eclipse-collections" }
+ejml-core = { module = "org.ejml:ejml-core", version.ref = "ejml" }
+ejml-ddense = { module = "org.ejml:ejml-ddense", version.ref = "ejml" }
+fastcsv = { module = "de.siegmar:fastcsv", version.ref = "fastcsv" }
+gdl = { module = "com.github.s1ck:gdl", version.ref = "gdl" }
 google-auto-common = { module = "com.google.auto:auto-common", version.ref = "google-auto-common" }
 google-auto-service = { module = "com.google.auto.service:auto-service", version.ref = "google-auto-service" }
 google-testing-compile = { module = "com.google.testing.compile:compile-testing", version.ref = "compile-testing" }
-hamcrest = { group = "org.hamcrest", name = "hamcrest-library", version.ref = "hamcrest" }
-hdrhistogram = { group = "org.hdrhistogram", name = "HdrHistogram", version.ref = "hdrhistogram" }
+hamcrest = { module = "org.hamcrest:hamcrest-library", version.ref = "hamcrest" }
+hdrhistogram = { module = "org.hdrhistogram:HdrHistogram", version.ref = "hdrhistogram" }
 hppc = { module = "com.carrotsearch:hppc", version.ref = "hppc" }
-immutables-builder = { group = "org.immutables", name = "builder", version.ref = "immutables" }
-immutables-value-annotations = { group = "org.immutables", name = "value-annotations", version.ref = "immutables" }
-immutables-value = { group = "org.immutables", name = "value", version.ref = "immutables" }
-ipaddress = { group = "com.github.seancfoley", name = "ipaddress", version.ref = "ipaddress" }
-jackson-annotations = { group = "com.fasterxml.jackson.core", name = "jackson-annotations", version.ref = "jackson" }
-jackson-core = { group = "com.fasterxml.jackson.core", name = "jackson-core", version.ref = "jackson" }
-jackson-databind = { group = "com.fasterxml.jackson.core", name = "jackson-databind", version.ref = "jackson" }
-jackson-dataformat-csv = { group = "com.fasterxml.jackson.dataformat", name = "jackson-dataformat-csv", version.ref = "jackson" }
+immutables-builder = { module = "org.immutables:builder", version.ref = "immutables" }
+immutables-value = { module = "org.immutables:value", version.ref = "immutables" }
+immutables-value-annotations = { module = "org.immutables:value-annotations", version.ref = "immutables" }
+ipaddress = { module = "com.github.seancfoley:ipaddress", version.ref = "ipaddress" }
+jackson-annotations = { module = "com.fasterxml.jackson.core:jackson-annotations", version.ref = "jackson" }
+jackson-core = { module = "com.fasterxml.jackson.core:jackson-core", version.ref = "jackson" }
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+jackson-dataformat-csv = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-csv", version.ref = "jackson" }
 javapoet = { module = "com.squareup:javapoet", version.ref = "javapoet" }
-jetbrains-annotations = { group = "org.jetbrains", name = "annotations", version.ref = "jetbrains-annotations" }
-jjwt-impl = { group = "io.jsonwebtoken", name = "jjwt-impl", version.ref = "jjwt" }
-jjwt-jackson = { group = "io.jsonwebtoken", name = "jjwt-jackson", version.ref = "jjwt" }
-jol-core = { group = "org.openjdk.jol", name = "jol-core", version.ref = "jol" }
+jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains-annotations" }
+jjwt-impl = { module = "io.jsonwebtoken:jjwt-impl", version.ref = "jjwt" }
+jjwt-jackson = { module = "io.jsonwebtoken:jjwt-jackson", version.ref = "jjwt" }
+jol-core = { module = "org.openjdk.jol:jol-core", version.ref = "jol" }
 jqwik = { module = "net.jqwik:jqwik", version.ref = "jqwik" }
-junit5bom = { module = "org.junit:junit-bom", version.ref = "junit5bom" }
-junit5-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter" }
-junit5-jupiter-api = { group = "org.junit.jupiter", name = "junit-jupiter-api" }
-junit5-jupiter-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine" }
-junit5-jupiter-params = { group = "org.junit.jupiter", name = "junit-jupiter-params" }
+junit-pioneer = { module = "org.junit-pioneer:junit-pioneer", version.ref = "junit-pioneer" }
+junit5-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit5-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api" }
+junit5-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine" }
+junit5-jupiter-params = { module = "org.junit.jupiter:junit-jupiter-params" }
 junit5-migration = { module = "org.junit.jupiter:junit-jupiter-migrationsupport" }
 junit5-platform = { module = "org.junit.platform:junit-platform-launcher" }
-junit-pioneer = { group = "org.junit-pioneer", name = "junit-pioneer", version.ref = "junit-pioneer" }
-memoryfilesystem = { module = 'com.github.marschall:memoryfilesystem', version.ref = "memoryfilesystem" }
-mockito-junit-jupiter = { module = 'org.mockito:mockito-junit-jupiter', version.ref = "mockito-junit-jupiter" }
+junit5bom = { module = "org.junit:junit-bom", version.ref = "junit5bom" }
+memoryfilesystem = { module = "com.github.marschall:memoryfilesystem", version.ref = "memoryfilesystem" }
+mockito-junit-jupiter = { module = "org.mockito:mockito-junit-jupiter", version.ref = "mockito-junit-jupiter" }
 neo4j-cypher-dsl = { module = "org.neo4j:neo4j-cypher-dsl", version.ref = "cypher-dsl" }
-picocli = { module = "info.picocli:picocli", version.ref = 'picocli' }
+opencypher-astfactory = { module = "org.opencypher:cypher-ast-factory-9.0", version.ref = "opencypher-front-end" }
+opencypher-ccparser = { module = "org.opencypher:cypher-javacc-parser-9.0", version.ref = "opencypher-front-end" }
+picocli = { module = "info.picocli:picocli", version.ref = "picocli" }
+protobuf-java = { module = "com.google.protobuf:protobuf-java", version.ref = "protobuf" }
 protoc = { module = "com.google.protobuf:protoc", version.ref = "protobuf" }
-protobuf-java = { group = "com.google.protobuf", name = "protobuf-java", version.ref = "protobuf" }
 qaladatagen = { module = "io.qala.datagen:qala-datagen-junit5", version.ref = "qala-datagen" }
 recordBuilder = { module = "io.soabase.record-builder:record-builder-processor", version.ref = "record-builder" }
 reflections = { module = "org.reflections:reflections", version.ref = "reflections" }
-opencypher-ccparser = { module = "org.opencypher:cypher-javacc-parser-9.0", version.ref = "opencypher-front-end" }
-opencypher-astfactory = { module = "org.opencypher:cypher-ast-factory-9.0", version.ref = "opencypher-front-end" }
 
 [plugins]
-forbiddenapis = { id = "de.thetaphi.forbiddenapis", version = "3.7" }
-shadowjar = { id = "com.github.johnrengelman.shadow", version = "8.1.0" }
-spawn = { id = "ch.kk7.spawn", version = "1.0.20180924200750" }
-nebula-dependencies = {id = "nebula.info-dependencies", version = "11.4.1"}
-google-protobuf = { id = "com.google.protobuf", version = "0.9.4" }
-champeau-mrjar = { id = "me.champeau.mrjar", version = "0.1.1" }
+champeau-mrjar = "me.champeau.mrjar:0.1.1"
+forbiddenapis = "de.thetaphi.forbiddenapis:3.7"
+google-protobuf = "com.google.protobuf:0.9.4"
+nebula-dependencies = "nebula.info-dependencies:11.4.1"
+shadowjar = "com.github.johnrengelman.shadow:8.1.1"
+spawn = "ch.kk7.spawn:1.0.20180924200750"
