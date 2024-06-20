@@ -29,7 +29,6 @@ import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.algorithms.community.ProcedureStatisticsComputationInstructions;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.community.scc.AlphaSccWriteResult;
-import org.neo4j.gds.procedures.community.scc.SccStatsResult;
 import org.neo4j.gds.procedures.community.scc.SccStreamResult;
 import org.neo4j.gds.procedures.community.scc.SccWriteResult;
 import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientMutateResult;
@@ -41,7 +40,6 @@ import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStatsResult
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStreamResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountWriteResult;
 import org.neo4j.gds.scc.SccAlphaWriteConfig;
-import org.neo4j.gds.scc.SccStatsConfig;
 import org.neo4j.gds.scc.SccStreamConfig;
 import org.neo4j.gds.scc.SccWriteConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateConfig;
@@ -116,34 +114,11 @@ public class CommunityProcedureFacade {
         return Stream.of(SccComputationResultTransformer.toWriteResult(computationResult));
     }
 
-    public Stream<SccStatsResult> sccStats(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, SccStatsConfig::of);
-
-        var computationResult = statsBusinessFacade.scc(
-            graphName,
-            config,
-            ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns)
-        );
-
-        return Stream.of(SccComputationResultTransformer.toStatsResult(computationResult, config));
-    }
-
     public Stream<MemoryEstimateResult> sccEstimateWrite(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
         var config = configurationCreator.createConfiguration(algoConfiguration, SccWriteConfig::of);
-        return Stream.of(estimateBusinessFacade.estimateScc(graphNameOrConfiguration, config));
-    }
-
-    public Stream<MemoryEstimateResult> sccEstimateStats(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, SccStatsConfig::of);
         return Stream.of(estimateBusinessFacade.estimateScc(graphNameOrConfiguration, config));
     }
 

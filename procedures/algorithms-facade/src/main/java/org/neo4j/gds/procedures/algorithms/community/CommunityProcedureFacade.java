@@ -65,6 +65,7 @@ import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
+import org.neo4j.gds.scc.SccStatsConfig;
 import org.neo4j.gds.wcc.WccStatsConfig;
 import org.neo4j.gds.wcc.WccStreamConfig;
 import org.neo4j.gds.wcc.WccWriteConfig;
@@ -906,6 +907,36 @@ public final class CommunityProcedureFacade {
 
     public SccMutateStub sccMutateStub() {
         return sccMutateStub;
+    }
+
+    public Stream<SccStatsResult> sccStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var statisticsComputationInstructions = ProcedureStatisticsComputationInstructions.forComponents(
+            procedureReturnColumns);
+        var resultBuilder = new SccResultBuilderForStatsMode(statisticsComputationInstructions);
+
+        return algorithmExecutionScaffolding.runAlgorithm(
+            graphName,
+            configuration,
+            SccStatsConfig::of,
+            statsMode()::scc,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> sccStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            SccStatsConfig::of,
+            configuration -> estimationMode().scc(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
     }
 
     public WccMutateStub wccMutateStub() {

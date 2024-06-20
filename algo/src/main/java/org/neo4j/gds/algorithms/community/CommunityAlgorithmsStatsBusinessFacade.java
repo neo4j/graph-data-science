@@ -21,16 +21,10 @@ package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StatsResult;
-import org.neo4j.gds.algorithms.community.specificfields.CommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LocalClusteringCoefficientSpecificFields;
-import org.neo4j.gds.algorithms.community.specificfields.StandardCommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.TriangleCountSpecificFields;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.result.CommunityStatistics;
-import org.neo4j.gds.result.StatisticsComputationInstructions;
-import org.neo4j.gds.scc.SccStatsConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
 import org.neo4j.gds.triangle.TriangleCountStatsConfig;
 
@@ -64,33 +58,6 @@ public class CommunityAlgorithmsStatsBusinessFacade {
         );
     }
 
-    public StatsResult<StandardCommunityStatisticsSpecificFields> scc(
-        String graphName,
-        SccStatsConfig configuration,
-        StatisticsComputationInstructions statisticsComputationInstructions
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> communityAlgorithmsFacade.scc(graphName, configuration)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        return statsResult(
-            algorithmResult,
-            configuration,
-            (result -> result::get),
-            (result, componentCount, communitySummary) -> {
-                return new StandardCommunityStatisticsSpecificFields(
-                    componentCount,
-                    communitySummary
-                );
-            },
-            statisticsComputationInstructions,
-            intermediateResult.computeMilliseconds,
-            () -> StandardCommunityStatisticsSpecificFields.EMPTY
-        );
-    }
-
     public StatsResult<TriangleCountSpecificFields> triangleCount(
         String graphName,
         TriangleCountStatsConfig config
@@ -108,45 +75,6 @@ public class CommunityAlgorithmsStatsBusinessFacade {
             intermediateResult.computeMilliseconds,
             () -> TriangleCountSpecificFields.EMPTY
         );
-    }
-
-    /*
-    By using `ASF extends CommunityStatisticsSpecificFields` we enforce the algorithm specific fields
-    to contain the statistics information.
-    */
-    <RESULT, CONFIG extends AlgoBaseConfig, ASF extends CommunityStatisticsSpecificFields> StatsResult<ASF> statsResult(
-        AlgorithmComputationResult<RESULT> algorithmResult,
-        CONFIG configuration,
-        CommunityFunctionSupplier<RESULT> communityFunctionSupplier,
-        SpecificFieldsWithCommunityStatisticsSupplier<RESULT, ASF> specificFieldsSupplier,
-        StatisticsComputationInstructions statisticsComputationInstructions,
-        long computeMilliseconds,
-        Supplier<ASF> emptyASFSupplier
-    ) {
-
-        return algorithmResult.result().map(result -> {
-
-            // 2. Compute result statistics
-            var communityStatistics = CommunityStatistics.communityStats(
-                algorithmResult.graph().nodeCount(),
-                communityFunctionSupplier.communityFunction(result),
-                DefaultPool.INSTANCE,
-                configuration.concurrency(),
-                statisticsComputationInstructions
-            );
-
-            var componentCount = communityStatistics.componentCount();
-            var communitySummary = CommunityStatistics.communitySummary(communityStatistics.histogram());
-
-            var specificFields = specificFieldsSupplier.specificFields(result, componentCount, communitySummary);
-
-            return StatsResult.<ASF>builder()
-                .computeMillis(computeMilliseconds)
-                .postProcessingMillis(communityStatistics.computeMilliseconds())
-                .algorithmSpecificFields(specificFields)
-                .build();
-        }).orElseGet(() -> StatsResult.empty(emptyASFSupplier.get()));
-
     }
 
     <RESULT, CONFIG extends AlgoBaseConfig, ASF> StatsResult<ASF> statsResult(

@@ -22,6 +22,7 @@ package org.neo4j.gds.applications.algorithms.community;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.k1coloring.K1ColoringStatsConfig;
@@ -39,6 +40,7 @@ import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.modularity.ModularityStatsConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
+import org.neo4j.gds.scc.SccStatsConfig;
 import org.neo4j.gds.wcc.WccStatsConfig;
 
 import java.util.Optional;
@@ -51,6 +53,7 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Louvain;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Modularity;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ModularityOptimization;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.SCC;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
 
 public class CommunityAlgorithmsStatsModeBusinessFacade {
@@ -191,6 +194,22 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
             ModularityOptimization,
             estimationFacade::modularityOptimization,
             graph -> communityAlgorithms.modularityOptimization(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT scc(
+        GraphName graphName,
+        SccStatsConfig configuration,
+        ResultBuilder<SccStatsConfig, HugeLongArray, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            SCC,
+            estimationFacade::scc,
+            graph -> communityAlgorithms.scc(graph, configuration),
             Optional.empty(),
             resultBuilder
         );

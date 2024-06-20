@@ -20,7 +20,6 @@
 package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
-import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.algorithms.community.specificfields.AlphaSccSpecificFields;
@@ -29,11 +28,9 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.procedures.community.scc.AlphaSccWriteResult;
-import org.neo4j.gds.procedures.community.scc.SccStatsResult;
 import org.neo4j.gds.procedures.community.scc.SccStreamResult;
 import org.neo4j.gds.procedures.community.scc.SccWriteResult;
 import org.neo4j.gds.scc.SccAlphaWriteConfig;
-import org.neo4j.gds.scc.SccStatsConfig;
 import org.neo4j.gds.scc.SccStreamConfig;
 
 import java.util.Optional;
@@ -64,20 +61,6 @@ final class SccComputationResultTransformer {
                 ));
 
         }).orElseGet(Stream::empty);
-    }
-
-    static SccStatsResult toStatsResult(
-        StatsResult<StandardCommunityStatisticsSpecificFields> computationResult,
-        SccStatsConfig config
-    ) {
-        return new SccStatsResult(
-            computationResult.algorithmSpecificFields().communityCount(),
-            computationResult.algorithmSpecificFields().communityDistribution(),
-            computationResult.preProcessingMillis(),
-            computationResult.computeMillis(),
-            computationResult.postProcessingMillis(),
-            config.toMap()
-        );
     }
 
     static SccWriteResult toWriteResult(NodePropertyWriteResult<StandardCommunityStatisticsSpecificFields> computationResult) {

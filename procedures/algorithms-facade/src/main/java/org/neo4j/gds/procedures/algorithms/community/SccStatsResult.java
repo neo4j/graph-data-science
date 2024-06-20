@@ -17,17 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.community.scc;
+package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 
+import java.util.Collections;
 import java.util.Map;
 
 public class SccStatsResult extends StandardStatsResult {
-
     public final long componentCount;
     public final Map<String, Object> componentDistribution;
 
@@ -45,8 +46,18 @@ public class SccStatsResult extends StandardStatsResult {
         this.componentDistribution = componentDistribution;
     }
 
-    public static class Builder extends AbstractCommunityResultBuilder<SccStatsResult> {
+    static SccStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+        return new SccStatsResult(
+            0,
+            Collections.emptyMap(),
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            0,
+            configurationMap
+        );
+    }
 
+    public static class Builder extends AbstractCommunityResultBuilder<SccStatsResult> {
         public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
             super(returnColumns, concurrency);
         }
@@ -72,6 +83,5 @@ public class SccStatsResult extends StandardStatsResult {
             this.buildCommunityCount = buildCommunityCount;
             return this;
         }
-
     }
 }
