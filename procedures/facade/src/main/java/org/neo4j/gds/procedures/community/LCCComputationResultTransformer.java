@@ -20,30 +20,12 @@
 package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
-import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.community.specificfields.LocalClusteringCoefficientSpecificFields;
-import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientStreamResult;
 import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientWriteResult;
-import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
-
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 final class LCCComputationResultTransformer {
 
     private LCCComputationResultTransformer() {}
-
-    static Stream<LocalClusteringCoefficientStreamResult> toStreamResult(StreamComputationResult<LocalClusteringCoefficientResult> computationResult) {
-        return computationResult.result().map(result -> {
-            var graph = computationResult.graph();
-            var localClusteringCoefficients = result.localClusteringCoefficients();
-            return LongStream.range(0, graph.nodeCount())
-                .mapToObj(i -> new LocalClusteringCoefficientStreamResult(
-                    graph.toOriginalNodeId(i),
-                    localClusteringCoefficients.get(i)
-                ));
-        }).orElseGet(Stream::empty);
-    }
 
     static LocalClusteringCoefficientWriteResult toWriteResult(
         NodePropertyWriteResult<LocalClusteringCoefficientSpecificFields> computationResult

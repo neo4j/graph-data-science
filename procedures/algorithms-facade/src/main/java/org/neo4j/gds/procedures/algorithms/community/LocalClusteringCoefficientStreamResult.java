@@ -17,9 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.community.triangle;
+package org.neo4j.gds.procedures.algorithms.community;
 
-@SuppressWarnings("unused")
 public class LocalClusteringCoefficientStreamResult {
     public final long nodeId;
     public final double localClusteringCoefficient;

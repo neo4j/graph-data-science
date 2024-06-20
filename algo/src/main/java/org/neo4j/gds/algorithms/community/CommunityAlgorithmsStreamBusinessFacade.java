@@ -21,8 +21,6 @@ package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
-import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
-import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
 
@@ -39,18 +37,6 @@ public class CommunityAlgorithmsStreamBusinessFacade {
     ) {
 
         var result = this.communityAlgorithmsFacade.triangleCount(
-            graphName,
-            config
-        );
-
-        return createStreamComputationResult(result);
-    }
-
-    public StreamComputationResult<LocalClusteringCoefficientResult> localClusteringCoefficient(
-        String graphName,
-        LocalClusteringCoefficientStreamConfig config
-    ) {
-        var result = this.communityAlgorithmsFacade.localClusteringCoefficient(
             graphName,
             config
         );

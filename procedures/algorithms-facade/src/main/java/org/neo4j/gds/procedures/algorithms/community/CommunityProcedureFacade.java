@@ -71,6 +71,7 @@ import org.neo4j.gds.scc.SccStatsConfig;
 import org.neo4j.gds.scc.SccStreamConfig;
 import org.neo4j.gds.scc.SccWriteConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
 import org.neo4j.gds.wcc.WccStatsConfig;
 import org.neo4j.gds.wcc.WccStreamConfig;
 import org.neo4j.gds.wcc.WccWriteConfig;
@@ -616,6 +617,33 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             LocalClusteringCoefficientStatsConfig::of,
+            configuration -> estimationMode().lcc(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<LocalClusteringCoefficientStreamResult> localClusteringCoefficientStream(
+        String graphName, Map<String, Object> configuration
+    ) {
+        var resultBuilder = new LccResultBuilderForStreamMode();
+
+        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+            graphName,
+            configuration,
+            LocalClusteringCoefficientStreamConfig::of,
+            streamMode()::lcc,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> localClusteringCoefficientStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            LocalClusteringCoefficientStreamConfig::of,
             configuration -> estimationMode().lcc(configuration, graphNameOrConfiguration)
         );
 
