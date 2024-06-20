@@ -6,6 +6,7 @@ ext {
         '5.18': properties.getOrDefault('neo4jVersion518', '5.18.1'),
         '5.19': properties.getOrDefault('neo4jVersion519', '5.19.0'),
         '5.20': properties.getOrDefault('neo4jVersion520', '5.20.0'),
+        '5.21': properties.getOrDefault('neo4jVersion521', '5.21.0-SNAPSHOT'),
     ]
 
     neo4jDefault = neos.'5.20'
