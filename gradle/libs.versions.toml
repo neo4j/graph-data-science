@@ -93,3 +93,11 @@ recordBuilder = { module = "io.soabase.record-builder:record-builder-processor",
 reflections = { module = "org.reflections:reflections", version.ref = "reflections" }
 opencypher-ccparser = { module = "org.opencypher:cypher-javacc-parser-9.0", version.ref = "opencypher-front-end" }
 opencypher-astfactory = { module = "org.opencypher:cypher-ast-factory-9.0", version.ref = "opencypher-front-end" }
+
+[plugins]
+forbiddenapis = { id = "de.thetaphi.forbiddenapis", version = "3.7" }
+shadowjar = { id = "com.github.johnrengelman.shadow", version = "8.1.0" }
+spawn = { id = "ch.kk7.spawn", version = "1.0.20180924200750" }
+nebula-dependencies = {id = "nebula.info-dependencies", version = "11.4.1"}
+google-protobuf = { id = "com.google.protobuf", version = "0.9.4" }
+champeau-mrjar = { id = "me.champeau.mrjar", version = "0.1.1" }
