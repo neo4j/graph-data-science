@@ -493,7 +493,7 @@ public class CatalogProcedureFacade {
 
     public Stream<TopologyResult> streamRelationships(
         String graphName,
-        List<String> relationshipTypes,
+        Object relationshipTypes,
         Map<String, Object> configuration
     ) {
         return catalog().streamRelationships(

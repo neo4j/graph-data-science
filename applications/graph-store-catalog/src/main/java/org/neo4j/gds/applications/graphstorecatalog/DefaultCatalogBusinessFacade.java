@@ -707,7 +707,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         User user,
         DatabaseId databaseId,
         String graphNameAsString,
-        List<String> relationshipTypes,
+        Object relationshipTypes,
         Map<String, Object> rawConfiguration
     ) {
         var graphName = graphNameValidationService.validate(graphNameAsString);

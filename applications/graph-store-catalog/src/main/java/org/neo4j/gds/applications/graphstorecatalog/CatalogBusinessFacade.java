@@ -199,7 +199,7 @@ public interface CatalogBusinessFacade {
         User user,
         DatabaseId databaseId,
         String graphName,
-        List<String> relationshipTypes,
+        Object relationshipTypes,
         Map<String, Object> configuration
     );
 

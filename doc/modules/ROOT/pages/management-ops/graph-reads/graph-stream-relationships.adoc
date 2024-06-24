@@ -17,7 +17,7 @@ This is useful if we ran multiple algorithms in `mutate` mode and want to retrie
 ----
 CALL gds.graph.relationships.stream(
     graphName: String,
-    relationshipTypes: List of Strings,
+    relationshipTypes: String or List of Strings,
     configuration: Map
 )
 YIELD
@@ -31,7 +31,7 @@ YIELD
 |===
 | Name                   | Type                       | Optional | Description
 | graphName              | String                     | no       | The name under which the graph is stored in the catalog.
-| relationshipTypes      | List of Strings            | yes      | The relationship types to stream the relationship properties for graph.
+| relationshipTypes      | String or List of Strings  | yes      | The relationship types to stream the relationship properties for graph.
 | configuration          | Map                        | yes      | Additional parameters to configure streamNodeProperties.
 |===
 

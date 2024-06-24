@@ -78,7 +78,7 @@ public interface GraphStreamRelationshipsConfig extends BaseConfig, ConcurrencyC
 
     static GraphStreamRelationshipsConfig of(
         String graphName,
-        List<String> relationshipTypes,
+        Object relationshipTypes,
         CypherMapWrapper config
     ) {
         return new GraphStreamRelationshipsConfigImpl(

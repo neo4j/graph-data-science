@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.api.DatabaseId;
@@ -40,6 +41,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class GraphStreamRelationshipsProcTest extends BaseProcTest {
     @SuppressWarnings("unused")
@@ -85,6 +87,27 @@ class GraphStreamRelationshipsProcTest extends BaseProcTest {
                 relationship(idFunction.of("b"), idFunction.of("c"), "REL1"),
                 relationship(idFunction.of("c"), idFunction.of("b"), "REL2"),
                 relationship(idFunction.of("b"), idFunction.of("a"), "REL2")
+            )
+        );
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"'REL1'", "['REL1']"})
+    void streamRelationshipsForTypesAsStringOrList(String relationshipTypes) {
+        var actualRelationships = new ArrayList<TopologyResult>();
+
+        runQueryWithRowConsumer(formatWithLocale("CALL gds.graph.relationships.stream('graph', %s)", relationshipTypes), row -> actualRelationships.add(
+            relationship(
+                row.getNumber("sourceNodeId").longValue(),
+                row.getNumber("targetNodeId").longValue(),
+                row.getString("relationshipType")
+            )
+        ));
+
+        assertThat(actualRelationships).containsExactlyInAnyOrderElementsOf(
+            List.of(
+                relationship(idFunction.of("a"), idFunction.of("b"), "REL1"),
+                relationship(idFunction.of("b"), idFunction.of("c"), "REL1")
             )
         );
     }
