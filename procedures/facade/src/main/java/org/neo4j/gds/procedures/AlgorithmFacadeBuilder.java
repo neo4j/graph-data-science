@@ -116,6 +116,7 @@ class AlgorithmFacadeBuilder {
         return CommunityProcedureFacade.create(
             genericStub,
             applicationsFacade,
+            closeableResourceRegistry,
             procedureReturnColumns,
             estimationModeRunner,
             algorithmExecutionScaffolding,

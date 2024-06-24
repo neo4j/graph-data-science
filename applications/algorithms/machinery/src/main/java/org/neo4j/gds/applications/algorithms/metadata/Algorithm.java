@@ -67,6 +67,7 @@ public enum Algorithm {
     SteinerTree,
     TopologicalSort,
     TriangleCount,
+    Triangles,
     WCC,
     Yens;
 }

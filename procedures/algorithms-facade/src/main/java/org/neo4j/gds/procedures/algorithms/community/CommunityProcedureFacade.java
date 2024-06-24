@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
+import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsEstimationModeBusinessFacade;
@@ -74,9 +75,11 @@ import org.neo4j.gds.scc.SccWriteConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientWriteConfig;
+import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountStatsConfig;
 import org.neo4j.gds.triangle.TriangleCountStreamConfig;
 import org.neo4j.gds.triangle.TriangleCountWriteConfig;
+import org.neo4j.gds.triangle.TriangleStreamResult;
 import org.neo4j.gds.wcc.WccStatsConfig;
 import org.neo4j.gds.wcc.WccStreamConfig;
 import org.neo4j.gds.wcc.WccWriteConfig;
@@ -85,7 +88,9 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public final class CommunityProcedureFacade {
+    private final CloseableResourceRegistry closeableResourceRegistry;
     private final ProcedureReturnColumns procedureReturnColumns;
+
     private final ApproximateMaximumKCutMutateStub approximateMaximumKCutMutateStub;
     private final K1ColoringMutateStub k1ColoringMutateStub;
     private final KCoreMutateStub kCoreMutateStub;
@@ -106,6 +111,7 @@ public final class CommunityProcedureFacade {
     private final AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode;
 
     private CommunityProcedureFacade(
+        CloseableResourceRegistry closeableResourceRegistry,
         ProcedureReturnColumns procedureReturnColumns,
         ApproximateMaximumKCutMutateStub approximateMaximumKCutMutateStub,
         K1ColoringMutateStub k1ColoringMutateStub,
@@ -124,6 +130,7 @@ public final class CommunityProcedureFacade {
         AlgorithmExecutionScaffolding algorithmExecutionScaffolding,
         AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode
     ) {
+        this.closeableResourceRegistry = closeableResourceRegistry;
         this.procedureReturnColumns = procedureReturnColumns;
         this.approximateMaximumKCutMutateStub = approximateMaximumKCutMutateStub;
         this.k1ColoringMutateStub = k1ColoringMutateStub;
@@ -146,6 +153,7 @@ public final class CommunityProcedureFacade {
     public static CommunityProcedureFacade create(
         GenericStub genericStub,
         ApplicationsFacade applicationsFacade,
+        CloseableResourceRegistry closeableResourceRegistry,
         ProcedureReturnColumns procedureReturnColumns,
         EstimationModeRunner estimationModeRunner,
         AlgorithmExecutionScaffolding algorithmExecutionScaffolding,
@@ -176,6 +184,7 @@ public final class CommunityProcedureFacade {
         var wccMutateStub = new WccMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
 
         return new CommunityProcedureFacade(
+            closeableResourceRegistry,
             procedureReturnColumns,
             approximateMaximumKCutMutateStub,
             k1ColoringMutateStub,
@@ -1206,6 +1215,18 @@ public final class CommunityProcedureFacade {
         );
 
         return Stream.of(result);
+    }
+
+    public Stream<TriangleStreamResult> trianglesStream(String graphName, Map<String, Object> configuration) {
+        var resultBuilder = new TrianglesResultBuilderForStreamMode(closeableResourceRegistry);
+
+        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+            graphName,
+            configuration,
+            TriangleCountBaseConfig::of,
+            streamMode()::triangles,
+            resultBuilder
+        );
     }
 
     public WccMutateStub wccMutateStub() {

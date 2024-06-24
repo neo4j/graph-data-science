@@ -107,6 +107,7 @@ class StubbyHolder {
             case SteinerTree -> new SteinerTreeStub();
             case TopologicalSort -> null;
             case TriangleCount -> new TriangleCountStub();
+            case Triangles -> null;
             case WCC -> new WccStub();
             case Yens -> new SinglePairShortestPathYensStub();
         };

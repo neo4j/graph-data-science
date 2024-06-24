@@ -530,6 +530,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
         var communityProcedureFacade = CommunityProcedureFacade.create(
             genericStub,
             applicationsFacade,
+            null,
             ProcedureReturnColumns.EMPTY,
             null,
             null,

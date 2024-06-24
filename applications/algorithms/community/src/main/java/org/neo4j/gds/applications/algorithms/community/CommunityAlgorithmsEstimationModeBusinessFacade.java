@@ -242,6 +242,10 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
         );
     }
 
+    MemoryEstimation triangles() {
+        throw new MemoryEstimationNotImplementedException();
+    }
+
     public MemoryEstimation wcc(SeedConfig configuration) {
         return new WccMemoryEstimateDefinition(configuration.isIncremental()).memoryEstimation();
     }

@@ -106,6 +106,7 @@ public class ConfigurationParsersForMutateMode {
             case SteinerTree -> SteinerTreeMutateConfig::of;
             case TopologicalSort -> null;
             case TriangleCount -> TriangleCountMutateConfig::of;
+            case Triangles -> null;
             case WCC -> WccMutateConfig::of;
             case Yens -> ShortestPathYensMutateConfig::of;
         };

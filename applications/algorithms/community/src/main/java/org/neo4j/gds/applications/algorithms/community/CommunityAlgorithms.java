@@ -32,6 +32,7 @@ import org.neo4j.gds.conductance.Conductance;
 import org.neo4j.gds.conductance.ConductanceBaseConfig;
 import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
@@ -74,12 +75,15 @@ import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
+import org.neo4j.gds.triangle.TriangleStream;
+import org.neo4j.gds.triangle.TriangleStreamResult;
 import org.neo4j.gds.wcc.Wcc;
 import org.neo4j.gds.wcc.WccBaseConfig;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.modularityoptimization.ModularityOptimization.K1COLORING_MAX_ITERATIONS;
 
@@ -385,6 +389,17 @@ public class CommunityAlgorithms {
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+    }
+
+    Stream<TriangleStreamResult> triangles(Graph graph, ConcurrencyConfig configuration) {
+        var algorithm = TriangleStream.create(
+            graph,
+            DefaultPool.INSTANCE,
+            configuration.concurrency(),
+            terminationFlag
+        );
+
+        return algorithm.compute();
     }
 
     DisjointSetStruct wcc(Graph graph, WccBaseConfig configuration) {
