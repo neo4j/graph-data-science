@@ -17,20 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.community.triangleCount;
+package org.neo4j.gds.procedures.algorithms.community;
 
-import org.neo4j.gds.procedures.algorithms.community.TriangleCountStatsResult;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
-@SuppressWarnings("unused")
 public class TriangleCountWriteResult extends TriangleCountStatsResult {
-
     public long writeMillis;
     public long nodePropertiesWritten;
 
-    public TriangleCountWriteResult(
+    TriangleCountWriteResult(
         long globalTriangleCount,
         long nodeCount,
         long preProcessingMillis,
@@ -50,8 +48,22 @@ public class TriangleCountWriteResult extends TriangleCountStatsResult {
         this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    public static class Builder extends AbstractResultBuilder<TriangleCountWriteResult> {
+    static TriangleCountWriteResult emptyFrom(
+        AlgorithmProcessingTimings timings,
+        Map<String, Object> configurationMap
+    ) {
+        return new TriangleCountWriteResult(
+            0,
+            0,
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.mutateOrWriteMillis,
+            0,
+            configurationMap
+        );
+    }
 
+    public static class Builder extends AbstractResultBuilder<TriangleCountWriteResult> {
         long globalTriangleCount = 0;
 
         public Builder withGlobalTriangleCount(long globalTriangleCount) {

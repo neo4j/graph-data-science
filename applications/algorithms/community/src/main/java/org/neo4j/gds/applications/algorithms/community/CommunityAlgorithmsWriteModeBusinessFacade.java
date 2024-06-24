@@ -49,6 +49,8 @@ import org.neo4j.gds.scc.SccAlphaWriteConfig;
 import org.neo4j.gds.scc.SccWriteConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientWriteConfig;
+import org.neo4j.gds.triangle.TriangleCountResult;
+import org.neo4j.gds.triangle.TriangleCountWriteConfig;
 import org.neo4j.gds.wcc.WccWriteConfig;
 
 import java.util.Optional;
@@ -62,6 +64,7 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Louvain;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ModularityOptimization;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.SCC;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.TriangleCount;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
 
 public final class CommunityAlgorithmsWriteModeBusinessFacade {
@@ -275,6 +278,24 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
             SCC,
             estimationFacade::scc,
             graph -> algorithms.scc(graph, configuration),
+            Optional.of(writeStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT triangleCount(
+        GraphName graphName,
+        TriangleCountWriteConfig configuration,
+        ResultBuilder<TriangleCountWriteConfig, TriangleCountResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var writeStep = new TriangleCountWriteStep(writeToDatabase, configuration);
+
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            TriangleCount,
+            estimationFacade::triangleCount,
+            graph -> algorithms.triangleCount(graph, configuration),
             Optional.of(writeStep),
             resultBuilder
         );

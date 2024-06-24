@@ -42,7 +42,6 @@ public class GraphDataScienceProceduresBuilder {
     private CentralityProcedureFacade centralityProcedureFacade;
     private CatalogProcedureFacade catalogProcedureFacade;
     private CommunityProcedureFacade communityProcedureFacade;
-    private org.neo4j.gds.procedures.community.CommunityProcedureFacade oldCommunityProcedureFacade;
     private MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade;
     private NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade;
     private PathFindingProcedureFacade pathFindingProcedureFacade;
@@ -69,11 +68,6 @@ public class GraphDataScienceProceduresBuilder {
         return this;
     }
 
-    public GraphDataScienceProceduresBuilder with(org.neo4j.gds.procedures.community.CommunityProcedureFacade oldCommunityProcedureFacade) {
-        this.oldCommunityProcedureFacade = oldCommunityProcedureFacade;
-        return this;
-    }
-
     public GraphDataScienceProceduresBuilder with(MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade) {
         this.miscAlgorithmsProcedureFacade = miscAlgorithmsProcedureFacade;
         return this;
@@ -89,10 +83,6 @@ public class GraphDataScienceProceduresBuilder {
         return this;
     }
 
-    /**
-     * @deprecated this stops working the moment I need pipelines to use algorithms. At that point: opinionated builder
-     */
-    @Deprecated
     public GraphDataScienceProceduresBuilder with(PipelinesProcedureFacade pipelinesProcedureFacade) {
         this.pipelinesProcedureFacade = pipelinesProcedureFacade;
         return this;
@@ -120,7 +110,6 @@ public class GraphDataScienceProceduresBuilder {
             log,
             algorithmsProcedureFacade,
             catalogProcedureFacade,
-            oldCommunityProcedureFacade,
             miscAlgorithmsProcedureFacade,
             nodeEmbeddingsProcedureFacade,
             pipelinesProcedureFacade,

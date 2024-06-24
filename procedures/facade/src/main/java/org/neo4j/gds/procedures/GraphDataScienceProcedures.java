@@ -36,7 +36,6 @@ import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 import org.neo4j.gds.procedures.catalog.CatalogProcedureFacade;
-import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.embeddings.NodeEmbeddingsProcedureFacade;
 import org.neo4j.gds.procedures.misc.MiscAlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.pipelines.PipelinesProcedureFacade;
@@ -52,7 +51,6 @@ public class GraphDataScienceProcedures {
 
     private final AlgorithmsProcedureFacade algorithmsProcedureFacade;
     private final CatalogProcedureFacade catalogProcedureFacade;
-    private final CommunityProcedureFacade communityProcedureFacade;
     private final MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade;
     private final NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade;
     private final PipelinesProcedureFacade pipelinesProcedureFacade;
@@ -66,7 +64,6 @@ public class GraphDataScienceProcedures {
         Log log,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
         CatalogProcedureFacade catalogProcedureFacade,
-        CommunityProcedureFacade communityProcedureFacade,
         MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade,
         NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade,
         PipelinesProcedureFacade pipelinesProcedureFacade,
@@ -75,7 +72,6 @@ public class GraphDataScienceProcedures {
         this.log = log;
         this.algorithmsProcedureFacade = algorithmsProcedureFacade;
         this.catalogProcedureFacade = catalogProcedureFacade;
-        this.communityProcedureFacade = communityProcedureFacade;
         this.miscAlgorithmsProcedureFacade = miscAlgorithmsProcedureFacade;
         this.nodeEmbeddingsProcedureFacade = nodeEmbeddingsProcedureFacade;
         this.pipelinesProcedureFacade = pipelinesProcedureFacade;
@@ -139,7 +135,6 @@ public class GraphDataScienceProcedures {
 
         var centralityProcedureFacade = algorithmFacadeBuilder.createCentralityProcedureFacade();
         var communityProcedureFacade = algorithmFacadeBuilder.createCommunityProcedureFacade();
-        var oldCommunityProcedureFacade = algorithmFacadeBuilder.createOldCommunityProcedureFacade();
         var miscAlgorithmsProcedureFacade = algorithmFacadeBuilder.createMiscellaneousProcedureFacade();
         var nodeEmbeddingsProcedureFacade = algorithmFacadeBuilder.createNodeEmbeddingsProcedureFacade();
         var pathFindingProcedureFacade = algorithmFacadeBuilder.createPathFindingProcedureFacade();
@@ -151,7 +146,6 @@ public class GraphDataScienceProcedures {
             .with(catalogProcedureFacade)
             .with(centralityProcedureFacade)
             .with(communityProcedureFacade)
-            .with(oldCommunityProcedureFacade)
             .with(miscAlgorithmsProcedureFacade)
             .with(nodeEmbeddingsProcedureFacade)
             .with(pathFindingProcedureFacade)
@@ -171,10 +165,6 @@ public class GraphDataScienceProcedures {
 
     public CatalogProcedureFacade catalog() {
         return catalogProcedureFacade;
-    }
-
-    public CommunityProcedureFacade community() {
-        return communityProcedureFacade;
     }
 
     public MiscAlgorithmsProcedureFacade miscellaneousAlgorithms() {
