@@ -59,7 +59,7 @@ YIELD
 CALL gds.graph.relationshipProperty.stream(
     graphName: String,
     relationshipProperty: String,
-    relationshipTypes: List of Strings,
+    relationshipTypes: String or List of Strings,
     configuration: Map
 )
 YIELD
@@ -75,7 +75,7 @@ YIELD
 | Name                   | Type                       | Optional | Description
 | graphName              | String                     | no       | The name under which the graph is stored in the catalog.
 | relationshipProperty   | String                     | no       | The relationship property in the graph to stream.
-| relationshipTypes      | List of Strings            | yes      | The relationship types to stream the relationship properties for graph.
+| relationshipTypes      | String or List of Strings  | yes      | The relationship types to stream the relationship properties for graph.
 | configuration          | Map                        | yes      | Additional parameters to configure streamNodeProperties.
 |===
 
