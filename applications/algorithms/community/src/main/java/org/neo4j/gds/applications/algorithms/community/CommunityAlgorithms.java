@@ -67,10 +67,13 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.scc.Scc;
 import org.neo4j.gds.scc.SccCommonBaseConfig;
 import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.triangle.IntersectingTriangleCount;
 import org.neo4j.gds.triangle.IntersectingTriangleCountFactory;
 import org.neo4j.gds.triangle.LocalClusteringCoefficient;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
+import org.neo4j.gds.triangle.TriangleCountMutateConfig;
+import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.wcc.Wcc;
 import org.neo4j.gds.wcc.WccBaseConfig;
 
@@ -362,6 +365,24 @@ public class CommunityAlgorithms {
         );
 
         var algorithm = new Scc(graph, progressTracker, terminationFlag);
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+    }
+
+    TriangleCountResult triangleCount(Graph graph, TriangleCountMutateConfig configuration) {
+        var task = Tasks.leaf(LabelForProgressTracking.TriangleCount.value, graph.nodeCount());
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var parameters = configuration.toParameters();
+
+        var algorithm = IntersectingTriangleCount.create(
+            graph,
+            parameters.concurrency(),
+            parameters.maxDegree(),
+            DefaultPool.INSTANCE,
+            progressTracker,
+            terminationFlag
+        );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }

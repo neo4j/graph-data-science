@@ -21,7 +21,6 @@ package org.neo4j.gds.procedures;
 
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
-import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStatsBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
@@ -40,12 +39,12 @@ import org.neo4j.gds.algorithms.misc.MiscAlgorithmWriteBusinessFacade;
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmsFacade;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
-import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.modelcatalogservices.ModelCatalogService;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.community.CommunityProcedureFacade;
@@ -135,11 +134,6 @@ class AlgorithmFacadeBuilder {
         var communityAlgorithmsFacade = new CommunityAlgorithmsFacade(algorithmRunner);
 
         var estimateBusinessFacade = new CommunityAlgorithmsEstimateBusinessFacade(algorithmEstimator);
-        var mutateBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
-            communityAlgorithmsFacade,
-            mutateNodePropertyService
-
-        );
         var statsBusinessFacade = new CommunityAlgorithmsStatsBusinessFacade(communityAlgorithmsFacade);
         var streamBusinessFacade = new CommunityAlgorithmsStreamBusinessFacade(communityAlgorithmsFacade);
         var writeBusinessFacade = new CommunityAlgorithmsWriteBusinessFacade(
@@ -150,7 +144,6 @@ class AlgorithmFacadeBuilder {
         return new org.neo4j.gds.procedures.community.CommunityProcedureFacade(
             configurationCreator,
             estimateBusinessFacade,
-            mutateBusinessFacade,
             statsBusinessFacade,
             streamBusinessFacade,
             writeBusinessFacade

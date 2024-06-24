@@ -47,6 +47,8 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.scc.SccMutateConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
+import org.neo4j.gds.triangle.TriangleCountMutateConfig;
+import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.wcc.WccMutateConfig;
 
 import java.util.Optional;
@@ -61,6 +63,7 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Louvain;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ModularityOptimization;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.SCC;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.TriangleCount;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
 
 public class CommunityAlgorithmsMutateModeBusinessFacade {
@@ -256,6 +259,24 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
             SCC,
             estimation::scc,
             graph -> algorithms.scc(graph, configuration),
+            Optional.of(mutateStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT triangleCount(
+        GraphName graphName,
+        TriangleCountMutateConfig configuration,
+        ResultBuilder<TriangleCountMutateConfig, TriangleCountResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var mutateStep = new TriangleCountMutateStep(mutateNodeProperty, configuration);
+
+        return template.processAlgorithm(
+            graphName,
+            configuration,
+            TriangleCount,
+            estimation::triangleCount,
+            graph -> algorithms.triangleCount(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
         );

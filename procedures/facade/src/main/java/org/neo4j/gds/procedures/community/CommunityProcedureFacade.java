@@ -20,17 +20,14 @@
 package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsEstimateBusinessFacade;
-import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStatsBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.algorithms.community.TriangleCountStatsResult;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.community.triangleCount.TriangleCountMutateResult;
-import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStatsResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStreamResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountWriteResult;
-import org.neo4j.gds.triangle.TriangleCountMutateConfig;
 import org.neo4j.gds.triangle.TriangleCountStatsConfig;
 import org.neo4j.gds.triangle.TriangleCountStreamConfig;
 import org.neo4j.gds.triangle.TriangleCountWriteConfig;
@@ -44,7 +41,6 @@ public class CommunityProcedureFacade {
 
     // business logic
     private final CommunityAlgorithmsEstimateBusinessFacade estimateBusinessFacade;
-    private final CommunityAlgorithmsMutateBusinessFacade mutateBusinessFacade;
     private final CommunityAlgorithmsStatsBusinessFacade statsBusinessFacade;
     private final CommunityAlgorithmsStreamBusinessFacade streamBusinessFacade;
     private final CommunityAlgorithmsWriteBusinessFacade writeBusinessFacade;
@@ -52,14 +48,12 @@ public class CommunityProcedureFacade {
     public CommunityProcedureFacade(
         ConfigurationCreator configurationCreator,
         CommunityAlgorithmsEstimateBusinessFacade estimateBusinessFacade,
-        CommunityAlgorithmsMutateBusinessFacade mutateBusinessFacade,
         CommunityAlgorithmsStatsBusinessFacade statsBusinessFacade,
         CommunityAlgorithmsStreamBusinessFacade streamBusinessFacade,
         CommunityAlgorithmsWriteBusinessFacade writeBusinessFacade
     ) {
         this.configurationCreator = configurationCreator;
         this.estimateBusinessFacade = estimateBusinessFacade;
-        this.mutateBusinessFacade = mutateBusinessFacade;
         this.statsBusinessFacade = statsBusinessFacade;
         this.streamBusinessFacade = streamBusinessFacade;
         this.writeBusinessFacade = writeBusinessFacade;
@@ -78,20 +72,6 @@ public class CommunityProcedureFacade {
         );
 
         return TriangleCountComputationResultTransformer.toStreamResult(computationResult);
-    }
-
-    public Stream<TriangleCountMutateResult> triangleCountMutate(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, TriangleCountMutateConfig::of);
-
-        var computationResult = mutateBusinessFacade.triangleCount(
-            graphName,
-            config
-        );
-
-        return Stream.of(TriangleCountComputationResultTransformer.toMutateResult(computationResult));
     }
 
     public Stream<TriangleCountStatsResult> triangleCountStats(
@@ -127,14 +107,6 @@ public class CommunityProcedureFacade {
         Map<String, Object> algoConfiguration
     ) {
         var config = configurationCreator.createConfiguration(algoConfiguration, TriangleCountStreamConfig::of);
-        return Stream.of(estimateBusinessFacade.triangleCount(graphNameOrConfiguration, config));
-    }
-
-    public Stream<MemoryEstimateResult> triangleCountEstimateMutate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, TriangleCountMutateConfig::of);
         return Stream.of(estimateBusinessFacade.triangleCount(graphNameOrConfiguration, config));
     }
 

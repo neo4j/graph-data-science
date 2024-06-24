@@ -27,6 +27,7 @@ import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.termination.TerminationFlag;
 
 public class IntersectingTriangleCountFactory<CONFIG extends TriangleCountBaseConfig> extends GraphAlgorithmFactory<IntersectingTriangleCount, CONFIG> {
 
@@ -43,7 +44,8 @@ public class IntersectingTriangleCountFactory<CONFIG extends TriangleCountBaseCo
             parameters.concurrency(),
             parameters.maxDegree(),
             DefaultPool.INSTANCE,
-            progressTracker
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         );
     }
 

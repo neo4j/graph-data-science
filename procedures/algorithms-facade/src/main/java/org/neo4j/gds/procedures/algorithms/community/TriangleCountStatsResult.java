@@ -17,16 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.community.triangleCount;
+package org.neo4j.gds.procedures.algorithms.community;
 
-import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
+import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
-@SuppressWarnings("unused")
 public class TriangleCountStatsResult extends StandardStatsResult {
-
     public final long globalTriangleCount;
     public final long nodeCount;
 
@@ -44,7 +42,6 @@ public class TriangleCountStatsResult extends StandardStatsResult {
     }
 
     public static class Builder extends AbstractResultBuilder<TriangleCountStatsResult> {
-
         long globalTriangleCount = 0;
 
         public Builder withGlobalTriangleCount(long globalTriangleCount) {

@@ -59,6 +59,7 @@ public enum LabelForProgressTracking {
     SpanningTree("SpanningTree"),
     SteinerTree("SteinerTree"),
     TopologicalSort("TopologicalSort"),
+    TriangleCount("TriangleCount"),
     WCC("WCC"),
     Yens("Yens");
 
@@ -107,6 +108,7 @@ public enum LabelForProgressTracking {
             case SpanningTree -> SpanningTree;
             case SteinerTree -> SteinerTree;
             case TopologicalSort -> TopologicalSort;
+            case TriangleCount -> TriangleCount;
             case WCC -> WCC;
             case Yens -> Yens;
         };

@@ -61,6 +61,7 @@ import org.neo4j.gds.procedures.algorithms.community.stubs.LeidenMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.LouvainMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.ModularityOptimizationMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.SccMutateStub;
+import org.neo4j.gds.procedures.algorithms.community.stubs.TriangleCountMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.WccMutateStub;
 import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
@@ -92,6 +93,7 @@ public final class CommunityProcedureFacade {
     private final LouvainMutateStub louvainMutateStub;
     private final ModularityOptimizationMutateStub modularityOptimizationMutateStub;
     private final SccMutateStub sccMutateStub;
+    private final TriangleCountMutateStub triangleCountMutateStub;
     private final WccMutateStub wccMutateStub;
 
     private final ApplicationsFacade applicationsFacade;
@@ -112,6 +114,7 @@ public final class CommunityProcedureFacade {
         LouvainMutateStub louvainMutateStub,
         ModularityOptimizationMutateStub modularityOptimizationMutateStub,
         SccMutateStub sccMutateStub,
+        TriangleCountMutateStub triangleCountMutateStub,
         WccMutateStub wccMutateStub,
         ApplicationsFacade applicationsFacade,
         EstimationModeRunner estimationMode,
@@ -129,6 +132,7 @@ public final class CommunityProcedureFacade {
         this.modularityOptimizationMutateStub = modularityOptimizationMutateStub;
         this.sccMutateStub = sccMutateStub;
         this.lccMutateStub = lccMutateStub;
+        this.triangleCountMutateStub = triangleCountMutateStub;
         this.wccMutateStub = wccMutateStub;
         this.applicationsFacade = applicationsFacade;
         this.estimationMode = estimationMode;
@@ -162,6 +166,10 @@ public final class CommunityProcedureFacade {
             procedureReturnColumns
         );
         var sccMutateStub = new SccMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
+        var triangleCountMutateStub = new TriangleCountMutateStub(
+            genericStub,
+            applicationsFacade
+        );
         var wccMutateStub = new WccMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
 
         return new CommunityProcedureFacade(
@@ -176,6 +184,7 @@ public final class CommunityProcedureFacade {
             louvainMutateStub,
             modularityOptimizationMutateStub,
             sccMutateStub,
+            triangleCountMutateStub,
             wccMutateStub,
             applicationsFacade,
             estimationModeRunner,
@@ -1109,6 +1118,10 @@ public final class CommunityProcedureFacade {
         );
 
         return Stream.of(result);
+    }
+
+    public TriangleCountMutateStub triangleCountMutateStub() {
+        return triangleCountMutateStub;
     }
 
     public WccMutateStub wccMutateStub() {

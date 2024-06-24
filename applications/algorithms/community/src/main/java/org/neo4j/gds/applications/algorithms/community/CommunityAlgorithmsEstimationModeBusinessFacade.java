@@ -44,6 +44,7 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationBaseConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationMemoryEstimateDefinition;
 import org.neo4j.gds.scc.SccBaseConfig;
 import org.neo4j.gds.scc.SccMemoryEstimateDefinition;
+import org.neo4j.gds.triangle.IntersectingTriangleCountMemoryEstimateDefinition;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientMemoryEstimateDefinition;
 import org.neo4j.gds.wcc.WccBaseConfig;
@@ -224,6 +225,10 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
             graphNameOrConfiguration,
             memoryEstimation
         );
+    }
+
+    public MemoryEstimation triangleCount() {
+        return new IntersectingTriangleCountMemoryEstimateDefinition().memoryEstimation();
     }
 
     public MemoryEstimation wcc(SeedConfig configuration) {

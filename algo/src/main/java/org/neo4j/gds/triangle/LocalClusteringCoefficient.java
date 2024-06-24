@@ -121,7 +121,8 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
             concurrency,
             maxDegree,
             DefaultPool.INSTANCE,
-            progressTracker
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         );
 
         return intersectingTriangleCount.compute().localTriangles();

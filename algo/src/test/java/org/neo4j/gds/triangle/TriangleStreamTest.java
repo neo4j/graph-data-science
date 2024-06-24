@@ -29,6 +29,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -101,7 +102,7 @@ class TriangleStreamTest {
         AtomicInteger centerAppearances = new AtomicInteger();
         AtomicInteger allAppearances = new AtomicInteger();
 
-        TriangleStream.create(graph, DefaultPool.INSTANCE, new Concurrency(concurrency))
+        TriangleStream.create(graph, DefaultPool.INSTANCE, new Concurrency(concurrency), TerminationFlag.RUNNING_TRUE)
             .compute()
             .forEach(r -> {
                 if (r.nodeA == centerId || r.nodeB == centerId || r.nodeC == centerId) {

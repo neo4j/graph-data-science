@@ -30,6 +30,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Collections;
 import java.util.List;
@@ -77,7 +78,8 @@ class IntersectingTriangleCountFilteredGraphTest {
             new Concurrency(4),
             Long.MAX_VALUE,
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
         var triangleCountResult = triangleCount.compute();
         assertThat(triangleCountResult.globalTriangles()).isEqualTo(1);

@@ -28,6 +28,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -102,7 +103,8 @@ class UnionGraphTriangleCountingTest {
             new Concurrency(1),
             Long.MAX_VALUE,
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
         var result = a.compute();
         assertThat(result.globalTriangles()).isEqualTo(0);

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.procedures.community.triangleCount;
 
+import org.neo4j.gds.procedures.algorithms.community.TriangleCountStatsResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
