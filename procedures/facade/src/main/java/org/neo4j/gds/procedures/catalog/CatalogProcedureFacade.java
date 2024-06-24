@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.procedures.catalog;
 
+import org.eclipse.collections.impl.parallel.ObjectIntProcedureFJTask;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -458,7 +459,7 @@ public class CatalogProcedureFacade {
     public Stream<GraphStreamRelationshipPropertiesResult> streamRelationshipProperties(
         String graphName,
         List<String> relationshipProperties,
-        List<String> relationshipTypes,
+        Object relationshipTypes,
         Map<String, Object> configuration
     ) {
         return streamRelationshipPropertyOrProperties(
@@ -657,7 +658,7 @@ public class CatalogProcedureFacade {
     private <T> Stream<T> streamRelationshipPropertyOrProperties(
         String graphName,
         List<String> relationshipProperties,
-        List<String> relationshipTypes,
+        Object relationshipTypes,
         Map<String, Object> configuration,
         GraphStreamRelationshipPropertyOrPropertiesResultProducer<T> outputMarshaller
     ) {

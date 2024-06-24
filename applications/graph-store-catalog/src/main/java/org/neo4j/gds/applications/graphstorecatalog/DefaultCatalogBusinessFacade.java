@@ -674,7 +674,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         UserLogRegistryFactory userLogRegistryFactory,
         String graphNameAsString,
         List<String> relationshipProperties,
-        List<String> relationshipTypes,
+        Object relationshipTypes,
         Map<String, Object> rawConfiguration,
         boolean usesPropertyNameColumn,
         GraphStreamRelationshipPropertyOrPropertiesResultProducer<T> outputMarshaller

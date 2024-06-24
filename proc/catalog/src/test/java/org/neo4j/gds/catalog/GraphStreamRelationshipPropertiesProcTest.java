@@ -42,6 +42,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Arrays.asList;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
@@ -135,6 +136,29 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
             Map.of("source", nodeB, "target", nodeB, "relationshipType", "REL1", "relationshipProperty", "relProp2", "propertyValue", 43D),
             Map.of("source", nodeB, "target", nodeB, "relationshipType", "REL2", "relationshipProperty", "relProp1", "propertyValue", 3D),
             Map.of("source", nodeB, "target", nodeB, "relationshipType", "REL2", "relationshipProperty", "relProp2", "propertyValue", 45D)
+        ));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"'REL1'", "['REL1']"})
+    void streamRelationshipPropertiesForTypesAsStringOrList(String stringOrList) {
+        var query = formatWithLocale("""
+            CALL gds.graph.relationshipProperties.stream(
+                '%s',
+                ['relProp1', 'relProp2'],
+                %s
+            ) 
+            YIELD sourceNodeId, targetNodeId, relationshipType, relationshipProperty, propertyValue
+            RETURN sourceNodeId AS source, targetNodeId AS target, relationshipType, relationshipProperty, propertyValue
+            """,
+            TEST_GRAPH_SAME_PROPERTIES, stringOrList
+        );
+
+        assertCypherResult(query, List.of(
+            Map.of("source", nodeA, "target", nodeA, "relationshipType", "REL1", "relationshipProperty", "relProp1", "propertyValue", 0D),
+            Map.of("source", nodeA, "target", nodeA, "relationshipType", "REL1", "relationshipProperty", "relProp2", "propertyValue", 42D),
+            Map.of("source", nodeB, "target", nodeB, "relationshipType", "REL1", "relationshipProperty", "relProp1", "propertyValue", 1D),
+            Map.of("source", nodeB, "target", nodeB, "relationshipType", "REL1", "relationshipProperty", "relProp2", "propertyValue", 43D)
         ));
     }
 
