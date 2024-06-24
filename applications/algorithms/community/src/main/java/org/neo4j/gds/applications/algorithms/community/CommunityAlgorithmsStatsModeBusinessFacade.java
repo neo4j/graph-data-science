@@ -43,6 +43,8 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
 import org.neo4j.gds.scc.SccStatsConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
+import org.neo4j.gds.triangle.TriangleCountResult;
+import org.neo4j.gds.triangle.TriangleCountStatsConfig;
 import org.neo4j.gds.wcc.WccStatsConfig;
 
 import java.util.Optional;
@@ -57,6 +59,7 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Modularity;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ModularityOptimization;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.SCC;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.TriangleCount;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
 
 public class CommunityAlgorithmsStatsModeBusinessFacade {
@@ -229,6 +232,22 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
             SCC,
             estimationFacade::scc,
             graph -> communityAlgorithms.scc(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT triangleCount(
+        GraphName graphName,
+        TriangleCountStatsConfig configuration,
+        ResultBuilder<TriangleCountStatsConfig, TriangleCountResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            TriangleCount,
+            estimationFacade::triangleCount,
+            graph -> communityAlgorithms.triangleCount(graph, configuration),
             Optional.empty(),
             resultBuilder
         );

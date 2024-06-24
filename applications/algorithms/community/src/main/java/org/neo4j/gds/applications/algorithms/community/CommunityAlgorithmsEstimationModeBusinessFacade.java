@@ -47,6 +47,7 @@ import org.neo4j.gds.scc.SccMemoryEstimateDefinition;
 import org.neo4j.gds.triangle.IntersectingTriangleCountMemoryEstimateDefinition;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientMemoryEstimateDefinition;
+import org.neo4j.gds.triangle.TriangleCountStatsConfig;
 import org.neo4j.gds.wcc.WccBaseConfig;
 import org.neo4j.gds.wcc.WccMemoryEstimateDefinition;
 
@@ -229,6 +230,16 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
 
     public MemoryEstimation triangleCount() {
         return new IntersectingTriangleCountMemoryEstimateDefinition().memoryEstimation();
+    }
+
+    public MemoryEstimateResult triangleCount(TriangleCountStatsConfig configuration, Object graphNameOrConfiguration) {
+        var memoryEstimation = triangleCount();
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
+        );
     }
 
     public MemoryEstimation wcc(SeedConfig configuration) {

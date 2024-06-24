@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
@@ -39,6 +40,13 @@ public class TriangleCountStatsResult extends StandardStatsResult {
         super(preProcessingMillis, computeMillis, 0L, configuration);
         this.globalTriangleCount = globalTriangleCount;
         this.nodeCount = nodeCount;
+    }
+
+    static TriangleCountStatsResult emptyFrom(
+        AlgorithmProcessingTimings timings,
+        Map<String, Object> configurationMap
+    ) {
+        return new TriangleCountStatsResult(0, 0, timings.preProcessingMillis, timings.computeMillis, configurationMap);
     }
 
     public static class Builder extends AbstractResultBuilder<TriangleCountStatsResult> {

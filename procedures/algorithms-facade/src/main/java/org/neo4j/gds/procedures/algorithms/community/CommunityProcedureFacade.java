@@ -74,6 +74,7 @@ import org.neo4j.gds.scc.SccWriteConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientWriteConfig;
+import org.neo4j.gds.triangle.TriangleCountStatsConfig;
 import org.neo4j.gds.wcc.WccStatsConfig;
 import org.neo4j.gds.wcc.WccStreamConfig;
 import org.neo4j.gds.wcc.WccWriteConfig;
@@ -1122,6 +1123,31 @@ public final class CommunityProcedureFacade {
 
     public TriangleCountMutateStub triangleCountMutateStub() {
         return triangleCountMutateStub;
+    }
+
+    public Stream<TriangleCountStatsResult> triangleCountStats(String graphName, Map<String, Object> configuration) {
+        var resultBuilder = new TriangleCountResultBuilderForStatsMode();
+
+        return algorithmExecutionScaffolding.runAlgorithm(
+            graphName,
+            configuration,
+            TriangleCountStatsConfig::of,
+            statsMode()::triangleCount,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> triangleCountStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            TriangleCountStatsConfig::of,
+            configuration -> estimationMode().triangleCount(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
     }
 
     public WccMutateStub wccMutateStub() {

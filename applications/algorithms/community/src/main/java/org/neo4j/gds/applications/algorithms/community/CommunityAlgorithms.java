@@ -72,7 +72,7 @@ import org.neo4j.gds.triangle.IntersectingTriangleCountFactory;
 import org.neo4j.gds.triangle.LocalClusteringCoefficient;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
-import org.neo4j.gds.triangle.TriangleCountMutateConfig;
+import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.wcc.Wcc;
 import org.neo4j.gds.wcc.WccBaseConfig;
@@ -369,7 +369,7 @@ public class CommunityAlgorithms {
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
-    TriangleCountResult triangleCount(Graph graph, TriangleCountMutateConfig configuration) {
+    TriangleCountResult triangleCount(Graph graph, TriangleCountBaseConfig configuration) {
         var task = Tasks.leaf(LabelForProgressTracking.TriangleCount.value, graph.nodeCount());
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
