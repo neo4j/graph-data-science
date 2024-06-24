@@ -21,7 +21,6 @@ package org.neo4j.gds.procedures;
 
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
-import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmStatsBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmStreamBusinessFacade;
@@ -133,7 +132,6 @@ class AlgorithmFacadeBuilder {
         var communityAlgorithmsFacade = new CommunityAlgorithmsFacade(algorithmRunner);
 
         var estimateBusinessFacade = new CommunityAlgorithmsEstimateBusinessFacade(algorithmEstimator);
-        var streamBusinessFacade = new CommunityAlgorithmsStreamBusinessFacade(communityAlgorithmsFacade);
         var writeBusinessFacade = new CommunityAlgorithmsWriteBusinessFacade(
             writeNodePropertyService, communityAlgorithmsFacade
         );
@@ -142,7 +140,6 @@ class AlgorithmFacadeBuilder {
         return new org.neo4j.gds.procedures.community.CommunityProcedureFacade(
             configurationCreator,
             estimateBusinessFacade,
-            streamBusinessFacade,
             writeBusinessFacade
         );
     }

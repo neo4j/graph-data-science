@@ -20,13 +20,10 @@
 package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsEstimateBusinessFacade;
-import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStreamResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountWriteResult;
-import org.neo4j.gds.triangle.TriangleCountStreamConfig;
 import org.neo4j.gds.triangle.TriangleCountWriteConfig;
 
 import java.util.Map;
@@ -38,34 +35,16 @@ public class CommunityProcedureFacade {
 
     // business logic
     private final CommunityAlgorithmsEstimateBusinessFacade estimateBusinessFacade;
-    private final CommunityAlgorithmsStreamBusinessFacade streamBusinessFacade;
     private final CommunityAlgorithmsWriteBusinessFacade writeBusinessFacade;
 
     public CommunityProcedureFacade(
         ConfigurationCreator configurationCreator,
         CommunityAlgorithmsEstimateBusinessFacade estimateBusinessFacade,
-        CommunityAlgorithmsStreamBusinessFacade streamBusinessFacade,
         CommunityAlgorithmsWriteBusinessFacade writeBusinessFacade
     ) {
         this.configurationCreator = configurationCreator;
         this.estimateBusinessFacade = estimateBusinessFacade;
-        this.streamBusinessFacade = streamBusinessFacade;
         this.writeBusinessFacade = writeBusinessFacade;
-    }
-
-    public Stream<TriangleCountStreamResult> triangleCountStream(
-        String graphName,
-        Map<String, Object> configuration
-
-    ) {
-        var streamConfig = configurationCreator.createConfigurationForStream(configuration, TriangleCountStreamConfig::of);
-
-        var computationResult = streamBusinessFacade.triangleCount(
-            graphName,
-            streamConfig
-        );
-
-        return TriangleCountComputationResultTransformer.toStreamResult(computationResult);
     }
 
     public Stream<TriangleCountWriteResult> triangleCountWrite(
@@ -80,14 +59,6 @@ public class CommunityProcedureFacade {
         );
 
         return Stream.of(TriangleCountComputationResultTransformer.toWriteResult(computationResult));
-    }
-
-    public Stream<MemoryEstimateResult> triangleCountEstimateStream(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, TriangleCountStreamConfig::of);
-        return Stream.of(estimateBusinessFacade.triangleCount(graphNameOrConfiguration, config));
     }
 
     public Stream<MemoryEstimateResult> triangleCountEstimateWrite(

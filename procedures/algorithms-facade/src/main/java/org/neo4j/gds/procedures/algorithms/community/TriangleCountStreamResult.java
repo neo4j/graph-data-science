@@ -17,15 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.community.triangleCount;
+package org.neo4j.gds.procedures.algorithms.community;
 
-@SuppressWarnings("unused")
 public class TriangleCountStreamResult {
-
     public final long nodeId;
     public final long triangleCount;
 
-    public TriangleCountStreamResult(long nodeId, long triangleCount) {
+    TriangleCountStreamResult(long nodeId, long triangleCount) {
         this.nodeId = nodeId;
         this.triangleCount = triangleCount;
     }

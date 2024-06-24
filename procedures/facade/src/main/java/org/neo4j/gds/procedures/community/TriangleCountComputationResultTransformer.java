@@ -20,30 +20,12 @@
 package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
-import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.community.specificfields.TriangleCountSpecificFields;
-import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStreamResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountWriteResult;
-import org.neo4j.gds.triangle.TriangleCountResult;
-
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 final class TriangleCountComputationResultTransformer {
 
     private TriangleCountComputationResultTransformer() {}
-
-    static Stream<TriangleCountStreamResult> toStreamResult(StreamComputationResult<TriangleCountResult> computationResult) {
-        return computationResult.result().map(result -> {
-            var graph = computationResult.graph();
-            return LongStream.range(0, graph.nodeCount())
-                .mapToObj(i -> new TriangleCountStreamResult(
-                    graph.toOriginalNodeId(i),
-                    result.localTriangles().get(i)
-                ));
-
-        }).orElseGet(Stream::empty);
-    }
 
     static TriangleCountWriteResult toWriteResult(NodePropertyWriteResult<TriangleCountSpecificFields> computationResult) {
         return new TriangleCountWriteResult(

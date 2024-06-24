@@ -75,6 +75,7 @@ import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientWriteConfig;
 import org.neo4j.gds.triangle.TriangleCountStatsConfig;
+import org.neo4j.gds.triangle.TriangleCountStreamConfig;
 import org.neo4j.gds.wcc.WccStatsConfig;
 import org.neo4j.gds.wcc.WccStreamConfig;
 import org.neo4j.gds.wcc.WccWriteConfig;
@@ -1144,6 +1145,34 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             TriangleCountStatsConfig::of,
+            configuration -> estimationMode().triangleCount(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<TriangleCountStreamResult> triangleCountStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new TriangleCountResultBuilderForStreamMode();
+
+        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+            graphName,
+            configuration,
+            TriangleCountStreamConfig::of,
+            streamMode()::triangleCount,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> triangleCountStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            TriangleCountStreamConfig::of,
             configuration -> estimationMode().triangleCount(configuration, graphNameOrConfiguration)
         );
 
