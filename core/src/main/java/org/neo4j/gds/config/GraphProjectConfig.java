@@ -55,7 +55,7 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
     String READ_CONCURRENCY_KEY = "readConcurrency";
     String VALIDATE_RELATIONSHIPS_KEY = "validateRelationships";
 
-    static GraphProjectConfig emptyWithName(String userName, String graphName) {
+    public static GraphProjectConfig emptyWithName(String userName, String graphName) {
         return GraphCatalogConfigImpl.builder()
             .username(userName)
             .graphName(graphName)
