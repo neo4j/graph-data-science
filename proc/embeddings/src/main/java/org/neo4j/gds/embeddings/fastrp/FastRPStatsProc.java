@@ -21,7 +21,7 @@ package org.neo4j.gds.embeddings.fastrp;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.embeddings.fastrp.FastRPStatsResult;
+import org.neo4j.gds.procedures.algorithms.embeddings.FastRPStatsResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -44,7 +44,7 @@ public class FastRPStatsProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.oldNodeEmbeddings().fastRP().stats(graphName, configuration);
+        return facade.algorithms().nodeEmbeddings().fastRPStats(graphName, configuration);
     }
 
     @Procedure(value = "gds.fastRP.stats.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class FastRPStatsProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.oldNodeEmbeddings().fastRP().statsEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().nodeEmbeddings().fastRPStatsEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

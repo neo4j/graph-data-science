@@ -19,13 +19,10 @@
  */
 package org.neo4j.gds.procedures.embeddings;
 
-import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
-import org.neo4j.gds.embeddings.fastrp.FastRPStatsConfig;
-import org.neo4j.gds.procedures.embeddings.fastrp.FastRPStatsResult;
 import org.neo4j.gds.procedures.embeddings.fastrp.FastRPStreamResult;
 
 import java.util.stream.LongStream;
@@ -49,16 +46,4 @@ public class FastRPComputationalResultTransformer {
 
         }).orElseGet(Stream::empty);
     }
-
-    public static FastRPStatsResult toStatsResult(StatsResult<Long> statsResult, FastRPStatsConfig config) {
-
-        return new FastRPStatsResult(
-            statsResult.algorithmSpecificFields().longValue(),
-            statsResult.preProcessingMillis(),
-            statsResult.computeMillis(),
-            config.toMap()
-        );
-
-    }
-
 }

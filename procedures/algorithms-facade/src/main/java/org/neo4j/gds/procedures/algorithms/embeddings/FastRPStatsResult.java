@@ -17,14 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.embeddings.fastrp;
+package org.neo4j.gds.procedures.algorithms.embeddings;
 
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
 public final class FastRPStatsResult {
-
     public final long nodeCount;
     public final long preProcessingMillis;
     public final long computeMillis;
@@ -42,8 +42,11 @@ public final class FastRPStatsResult {
         this.configuration = config;
     }
 
-    public static final class Builder extends AbstractResultBuilder<FastRPStatsResult> {
+    static FastRPStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+        return new FastRPStatsResult(0, timings.preProcessingMillis, timings.computeMillis, configurationMap);
+    }
 
+    public static final class Builder extends AbstractResultBuilder<FastRPStatsResult> {
         @Override
         public FastRPStatsResult build() {
             return new FastRPStatsResult(

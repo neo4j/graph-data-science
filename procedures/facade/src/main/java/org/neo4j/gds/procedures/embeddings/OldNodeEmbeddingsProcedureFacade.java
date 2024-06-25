@@ -19,13 +19,11 @@
  */
 package org.neo4j.gds.procedures.embeddings;
 
-import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmStatsBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmStreamBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsMutateBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsTrainBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsWriteBusinessFacade;
-import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.embeddings.fastrp.FastRPProcedure;
 import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageProcedure;
@@ -42,10 +40,8 @@ public class OldNodeEmbeddingsProcedureFacade {
 
     public OldNodeEmbeddingsProcedureFacade(
         ConfigurationCreator configurationCreator,
-        ProcedureReturnColumns procedureReturnColumns,
         NodeEmbeddingsAlgorithmsEstimateBusinessFacade estimateBusinessFacade,
         NodeEmbeddingsAlgorithmsMutateBusinessFacade mutateBusinessFacade,
-        NodeEmbeddingsAlgorithmStatsBusinessFacade statsBusinessFacade,
         NodeEmbeddingsAlgorithmStreamBusinessFacade streamBusinessFacade,
         NodeEmbeddingsAlgorithmsTrainBusinessFacade trainBusinessFacade,
         NodeEmbeddingsAlgorithmsWriteBusinessFacade writeBusinessFacade
@@ -55,7 +51,6 @@ public class OldNodeEmbeddingsProcedureFacade {
         this.fastRP = new FastRPProcedure(
             configurationCreator,
             estimateBusinessFacade,
-            statsBusinessFacade,
             streamBusinessFacade,
             writeBusinessFacade
         );

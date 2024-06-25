@@ -61,8 +61,8 @@ public final class PathFindingApplications {
     public static PathFindingApplications create(
         Log log,
         RequestScopedDependencies requestScopedDependencies,
-        AlgorithmProcessingTemplate algorithmProcessingTemplate,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
+        AlgorithmProcessingTemplate algorithmProcessingTemplate,
         ProgressTrackerCreator progressTrackerCreator
     ) {
         var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, progressTrackerCreator);

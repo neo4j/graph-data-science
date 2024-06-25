@@ -22,6 +22,8 @@ package org.neo4j.gds.applications;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithms;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsMutateModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsStatsModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
@@ -30,17 +32,22 @@ import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies
 public final class NodeEmbeddingApplications {
     private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationMode;
     private final NodeEmbeddingAlgorithmsMutateModeBusinessFacade mutateMode;
+    private final NodeEmbeddingAlgorithmsStatsModeBusinessFacade statsMode;
 
     private NodeEmbeddingApplications(
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationMode,
-        NodeEmbeddingAlgorithmsMutateModeBusinessFacade mutateMode
+        NodeEmbeddingAlgorithmsMutateModeBusinessFacade mutateMode,
+        NodeEmbeddingAlgorithmsStatsModeBusinessFacade statsMode
     ) {
         this.estimationMode = estimationMode;
         this.mutateMode = mutateMode;
+        this.statsMode = statsMode;
     }
 
     static NodeEmbeddingApplications create(
-        RequestScopedDependencies requestScopedDependencies, AlgorithmProcessingTemplate algorithmProcessingTemplate,
+        RequestScopedDependencies requestScopedDependencies,
+        AlgorithmEstimationTemplate algorithmEstimationTemplate,
+        AlgorithmProcessingTemplate algorithmProcessingTemplate,
         ProgressTrackerCreator progressTrackerCreator,
         MutateNodeProperty mutateNodeProperty
     ) {
@@ -49,22 +56,31 @@ public final class NodeEmbeddingApplications {
             requestScopedDependencies.getTerminationFlag()
         );
 
-        var estimationMode = new NodeEmbeddingAlgorithmsEstimationModeBusinessFacade();
+        var estimationMode = new NodeEmbeddingAlgorithmsEstimationModeBusinessFacade(algorithmEstimationTemplate);
         var mutateMode = new NodeEmbeddingAlgorithmsMutateModeBusinessFacade(
             estimationMode,
             algorithms,
             algorithmProcessingTemplate,
             mutateNodeProperty
         );
+        var statsMode = new NodeEmbeddingAlgorithmsStatsModeBusinessFacade(
+            estimationMode,
+            algorithms,
+            algorithmProcessingTemplate
+        );
 
-        return new NodeEmbeddingApplications(estimationMode, mutateMode);
+        return new NodeEmbeddingApplications(estimationMode, mutateMode, statsMode);
+    }
+
+    public NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimate() {
+        return estimationMode;
     }
 
     public NodeEmbeddingAlgorithmsMutateModeBusinessFacade mutate() {
         return mutateMode;
     }
 
-    public NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimate() {
-        return estimationMode;
+    public NodeEmbeddingAlgorithmsStatsModeBusinessFacade stats() {
+        return statsMode;
     }
 }

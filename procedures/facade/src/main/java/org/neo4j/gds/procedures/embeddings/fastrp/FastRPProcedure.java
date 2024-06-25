@@ -19,12 +19,10 @@
  */
 package org.neo4j.gds.procedures.embeddings.fastrp;
 
-import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmStatsBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmStreamBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.embeddings.fastrp.FastRPStatsConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPWriteConfig;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
@@ -38,7 +36,6 @@ import java.util.stream.Stream;
 public class FastRPProcedure {
     private final ConfigurationCreator configurationCreator;
     private final NodeEmbeddingsAlgorithmsEstimateBusinessFacade estimateBusinessFacade;
-    private final NodeEmbeddingsAlgorithmStatsBusinessFacade statsBusinessFacade;
     private final NodeEmbeddingsAlgorithmsWriteBusinessFacade writeBusinessFacade;
 
     private final NodeEmbeddingsAlgorithmStreamBusinessFacade streamBusinessFacade;
@@ -46,13 +43,11 @@ public class FastRPProcedure {
     public FastRPProcedure(
         ConfigurationCreator configurationCreator,
         NodeEmbeddingsAlgorithmsEstimateBusinessFacade estimateBusinessFacade,
-        NodeEmbeddingsAlgorithmStatsBusinessFacade statsBusinessFacade,
         NodeEmbeddingsAlgorithmStreamBusinessFacade streamBusinessFacade,
         NodeEmbeddingsAlgorithmsWriteBusinessFacade writeBusinessFacade
     ) {
         this.configurationCreator = configurationCreator;
         this.estimateBusinessFacade = estimateBusinessFacade;
-        this.statsBusinessFacade = statsBusinessFacade;
         this.streamBusinessFacade = streamBusinessFacade;
         this.writeBusinessFacade= writeBusinessFacade;
     }
@@ -69,20 +64,6 @@ public class FastRPProcedure {
         );
 
         return FastRPComputationalResultTransformer.toStreamResult(computationResult);
-    }
-
-    public Stream<FastRPStatsResult> stats(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var statsConfig = configurationCreator.createConfiguration(configuration, FastRPStatsConfig::of);
-
-        var computationResult = statsBusinessFacade.fastRP(
-            graphName,
-            statsConfig
-        );
-
-        return Stream.of(FastRPComputationalResultTransformer.toStatsResult(computationResult, statsConfig));
     }
 
     public Stream<DefaultNodeEmbeddingsWriteResult> write(
@@ -104,15 +85,6 @@ public class FastRPProcedure {
         Map<String, Object> configuration
     ) {
         var config = configurationCreator.createConfiguration(configuration, FastRPStreamConfig::of);
-
-        return Stream.of(estimateBusinessFacade.fastRP(graphNameOrConfiguration, config));
-    }
-
-    public Stream<MemoryEstimateResult> statsEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, FastRPStatsConfig::of);
 
         return Stream.of(estimateBusinessFacade.fastRP(graphNameOrConfiguration, config));
     }

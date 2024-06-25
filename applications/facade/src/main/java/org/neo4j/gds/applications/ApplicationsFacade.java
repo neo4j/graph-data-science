@@ -134,6 +134,7 @@ public final class ApplicationsFacade {
 
         var nodeEmbeddingApplications = NodeEmbeddingApplications.create(
             requestScopedDependencies,
+            algorithmEstimationTemplate,
             algorithmProcessingTemplate,
             progressTrackerCreator,
             mutateNodeProperty
@@ -142,8 +143,8 @@ public final class ApplicationsFacade {
         var pathFindingApplications = PathFindingApplications.create(
             log,
             requestScopedDependencies,
-            algorithmProcessingTemplate,
             algorithmEstimationTemplate,
+            algorithmProcessingTemplate,
             progressTrackerCreator
         );
 

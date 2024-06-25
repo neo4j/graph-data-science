@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.procedures;
 
-import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmStatsBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmStreamBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsFacade;
@@ -155,7 +154,12 @@ class AlgorithmProcedureFacadeBuilder {
     }
 
     NodeEmbeddingsProcedureFacade createNodeEmbeddingsProcedureFacade() {
-        return NodeEmbeddingsProcedureFacade.create(genericStub, applicationsFacade);
+        return NodeEmbeddingsProcedureFacade.create(
+            genericStub,
+            applicationsFacade,
+            estimationModeRunner,
+            algorithmExecutionScaffolding
+        );
     }
 
     OldNodeEmbeddingsProcedureFacade createOldNodeEmbeddingsProcedureFacade() {
@@ -169,8 +173,6 @@ class AlgorithmProcedureFacadeBuilder {
         );
 
         var streamBusinessFacade = new NodeEmbeddingsAlgorithmStreamBusinessFacade(nodeEmbeddingsAlgorithmsFacade);
-
-        var statsBusinessFacade = new NodeEmbeddingsAlgorithmStatsBusinessFacade(nodeEmbeddingsAlgorithmsFacade);
 
         var trainBusinessFacade = new NodeEmbeddingsAlgorithmsTrainBusinessFacade(
             nodeEmbeddingsAlgorithmsFacade,
@@ -190,10 +192,8 @@ class AlgorithmProcedureFacadeBuilder {
         // procedure facade
         return new OldNodeEmbeddingsProcedureFacade(
             configurationCreator,
-            procedureReturnColumns,
             estimateBusinessFacade,
             mutateBusinessFacade,
-            statsBusinessFacade,
             streamBusinessFacade,
             trainBusinessFacade,
             writeBusinessFacade

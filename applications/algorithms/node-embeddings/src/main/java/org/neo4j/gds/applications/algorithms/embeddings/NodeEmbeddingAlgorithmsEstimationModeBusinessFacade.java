@@ -19,12 +19,30 @@
  */
 package org.neo4j.gds.applications.algorithms.embeddings;
 
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.embeddings.fastrp.FastRPBaseConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPMemoryEstimateDefinition;
 import org.neo4j.gds.mem.MemoryEstimation;
 
 public class NodeEmbeddingAlgorithmsEstimationModeBusinessFacade {
+    private final AlgorithmEstimationTemplate algorithmEstimationTemplate;
+
+    public NodeEmbeddingAlgorithmsEstimationModeBusinessFacade(AlgorithmEstimationTemplate algorithmEstimationTemplate) {
+        this.algorithmEstimationTemplate = algorithmEstimationTemplate;
+    }
+
     public MemoryEstimation fastRP(FastRPBaseConfig configuration) {
         return new FastRPMemoryEstimateDefinition(configuration.toParameters()).memoryEstimation();
+    }
+
+    public MemoryEstimateResult fastRP(FastRPBaseConfig configuration, Object graphNameOrConfiguration) {
+        var memoryEstimation = fastRP(configuration);
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
+        );
     }
 }
