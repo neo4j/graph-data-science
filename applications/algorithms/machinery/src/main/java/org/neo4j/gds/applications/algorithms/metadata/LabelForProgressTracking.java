@@ -36,6 +36,7 @@ public enum LabelForProgressTracking {
     DFS("DFS"),
     Dijkstra("Dijkstra"),
     EigenVector("EigenVector"),
+    FastRP("FastRP"),
     FilteredKNN("Filtered K-Nearest Neighbours"),
     FilteredNodeSimilarity("Filtered Node Similarity"),
     HarmonicCentrality("HarmonicCentrality"),
@@ -86,6 +87,7 @@ public enum LabelForProgressTracking {
             case DFS -> DFS;
             case Dijkstra -> Dijkstra;
             case EigenVector -> EigenVector;
+            case FastRP -> FastRP;
             case FilteredKNN -> FilteredKNN;
             case FilteredNodeSimilarity -> FilteredNodeSimilarity;
             case HarmonicCentrality -> HarmonicCentrality;

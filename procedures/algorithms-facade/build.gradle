@@ -23,6 +23,7 @@ dependencies {
     implementation project(':defaults-and-limits-configuration')
     implementation project(':memory-estimation')
     implementation project(':memory-usage')
+    implementation project(':node-embedding-algorithms')
     implementation project(':neo4j-api')
     implementation project(':path-finding-algorithms')
     implementation project(':pregel')

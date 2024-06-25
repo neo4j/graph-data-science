@@ -132,7 +132,12 @@ public final class ApplicationsFacade {
             mutateNodeProperty
         );
 
-        var nodeEmbeddingApplications = NodeEmbeddingApplications.create();
+        var nodeEmbeddingApplications = NodeEmbeddingApplications.create(
+            requestScopedDependencies,
+            algorithmProcessingTemplate,
+            progressTrackerCreator,
+            mutateNodeProperty
+        );
 
         var pathFindingApplications = PathFindingApplications.create(
             log,

@@ -55,7 +55,6 @@ public class OldNodeEmbeddingsProcedureFacade {
         this.fastRP = new FastRPProcedure(
             configurationCreator,
             estimateBusinessFacade,
-            mutateBusinessFacade,
             statsBusinessFacade,
             streamBusinessFacade,
             writeBusinessFacade

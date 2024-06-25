@@ -155,7 +155,7 @@ class AlgorithmProcedureFacadeBuilder {
     }
 
     NodeEmbeddingsProcedureFacade createNodeEmbeddingsProcedureFacade() {
-        return NodeEmbeddingsProcedureFacade.create(applicationsFacade);
+        return NodeEmbeddingsProcedureFacade.create(genericStub, applicationsFacade);
     }
 
     OldNodeEmbeddingsProcedureFacade createOldNodeEmbeddingsProcedureFacade() {

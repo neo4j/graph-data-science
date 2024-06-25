@@ -20,22 +20,51 @@
 package org.neo4j.gds.applications;
 
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithms;
+import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsMutateModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 
-public class NodeEmbeddingApplications {
+public final class NodeEmbeddingApplications {
+    private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationMode;
     private final NodeEmbeddingAlgorithmsMutateModeBusinessFacade mutateMode;
 
-    private NodeEmbeddingApplications(NodeEmbeddingAlgorithmsMutateModeBusinessFacade mutateMode) {
+    private NodeEmbeddingApplications(
+        NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationMode,
+        NodeEmbeddingAlgorithmsMutateModeBusinessFacade mutateMode
+    ) {
+        this.estimationMode = estimationMode;
         this.mutateMode = mutateMode;
     }
 
-    static NodeEmbeddingApplications create() {
-        var algorithms = new NodeEmbeddingAlgorithms();
-        var mutateMode = new NodeEmbeddingAlgorithmsMutateModeBusinessFacade(algorithms);
-        return new NodeEmbeddingApplications(mutateMode);
+    static NodeEmbeddingApplications create(
+        RequestScopedDependencies requestScopedDependencies, AlgorithmProcessingTemplate algorithmProcessingTemplate,
+        ProgressTrackerCreator progressTrackerCreator,
+        MutateNodeProperty mutateNodeProperty
+    ) {
+        var algorithms = new NodeEmbeddingAlgorithms(
+            progressTrackerCreator,
+            requestScopedDependencies.getTerminationFlag()
+        );
+
+        var estimationMode = new NodeEmbeddingAlgorithmsEstimationModeBusinessFacade();
+        var mutateMode = new NodeEmbeddingAlgorithmsMutateModeBusinessFacade(
+            estimationMode,
+            algorithms,
+            algorithmProcessingTemplate,
+            mutateNodeProperty
+        );
+
+        return new NodeEmbeddingApplications(estimationMode, mutateMode);
     }
 
     public NodeEmbeddingAlgorithmsMutateModeBusinessFacade mutate() {
         return mutateMode;
+    }
+
+    public NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimate() {
+        return estimationMode;
     }
 }

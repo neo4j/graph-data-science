@@ -5,13 +5,13 @@ description = 'Neo4j Graph Data Science :: Node Embeddings'
 group = 'org.neo4j.gds'
 
 dependencies {
-//    implementation project(":algo")
-//    implementation project(":algo-common")
+    implementation project(":algo")
+    implementation project(":algo-common")
     implementation project(":algorithms-machinery")
-//    implementation project(":config-api")
-//    implementation project(":core")
-//    implementation project(":logging")
-//    implementation project(":memory-usage")
-//    implementation project(":progress-tracking")
-//    implementation project(":termination")
+    implementation project(":config-api")
+    implementation project(":core")
+    implementation project(":memory-usage")
+    implementation project(":ml-core")
+    implementation project(":progress-tracking")
+    implementation project(":termination")
 }

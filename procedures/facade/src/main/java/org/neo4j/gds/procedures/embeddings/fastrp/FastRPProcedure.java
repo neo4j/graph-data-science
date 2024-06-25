@@ -22,18 +22,15 @@ package org.neo4j.gds.procedures.embeddings.fastrp;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmStatsBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmStreamBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsEstimateBusinessFacade;
-import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsMutateBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsWriteBusinessFacade;
-import org.neo4j.gds.embeddings.fastrp.FastRPMutateConfig;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.embeddings.fastrp.FastRPStatsConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPWriteConfig;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.embeddings.DefaultNodeEmbeddingsComputationalResultTransformer;
 import org.neo4j.gds.procedures.embeddings.FastRPComputationalResultTransformer;
-import org.neo4j.gds.procedures.embeddings.results.DefaultNodeEmbeddingMutateResult;
 import org.neo4j.gds.procedures.embeddings.results.DefaultNodeEmbeddingsWriteResult;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -41,7 +38,6 @@ import java.util.stream.Stream;
 public class FastRPProcedure {
     private final ConfigurationCreator configurationCreator;
     private final NodeEmbeddingsAlgorithmsEstimateBusinessFacade estimateBusinessFacade;
-    private final NodeEmbeddingsAlgorithmsMutateBusinessFacade mutateBusinessFacade;
     private final NodeEmbeddingsAlgorithmStatsBusinessFacade statsBusinessFacade;
     private final NodeEmbeddingsAlgorithmsWriteBusinessFacade writeBusinessFacade;
 
@@ -50,14 +46,12 @@ public class FastRPProcedure {
     public FastRPProcedure(
         ConfigurationCreator configurationCreator,
         NodeEmbeddingsAlgorithmsEstimateBusinessFacade estimateBusinessFacade,
-        NodeEmbeddingsAlgorithmsMutateBusinessFacade mutateBusinessFacade,
         NodeEmbeddingsAlgorithmStatsBusinessFacade statsBusinessFacade,
         NodeEmbeddingsAlgorithmStreamBusinessFacade streamBusinessFacade,
         NodeEmbeddingsAlgorithmsWriteBusinessFacade writeBusinessFacade
     ) {
         this.configurationCreator = configurationCreator;
         this.estimateBusinessFacade = estimateBusinessFacade;
-        this.mutateBusinessFacade = mutateBusinessFacade;
         this.statsBusinessFacade = statsBusinessFacade;
         this.streamBusinessFacade = streamBusinessFacade;
         this.writeBusinessFacade= writeBusinessFacade;
@@ -91,20 +85,6 @@ public class FastRPProcedure {
         return Stream.of(FastRPComputationalResultTransformer.toStatsResult(computationResult, statsConfig));
     }
 
-    public Stream<DefaultNodeEmbeddingMutateResult> mutate(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var mutateConfig = configurationCreator.createConfiguration(configuration, FastRPMutateConfig::of);
-
-        var computationResult = mutateBusinessFacade.fastRP(
-            graphName,
-            mutateConfig
-        );
-
-        return Stream.of(DefaultNodeEmbeddingsComputationalResultTransformer.toMutateResult(computationResult));
-    }
-
     public Stream<DefaultNodeEmbeddingsWriteResult> write(
         String graphName,
         Map<String, Object> configuration
@@ -133,15 +113,6 @@ public class FastRPProcedure {
         Map<String, Object> configuration
     ) {
         var config = configurationCreator.createConfiguration(configuration, FastRPStatsConfig::of);
-
-        return Stream.of(estimateBusinessFacade.fastRP(graphNameOrConfiguration, config));
-    }
-
-    public Stream<MemoryEstimateResult> mutateEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, FastRPMutateConfig::of);
 
         return Stream.of(estimateBusinessFacade.fastRP(graphNameOrConfiguration, config));
     }

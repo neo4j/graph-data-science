@@ -26,6 +26,7 @@ import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
+import org.neo4j.gds.embeddings.fastrp.FastRPMutateConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityMutateConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationMutateConfig;
 import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
@@ -82,6 +83,7 @@ public class ConfigurationParsersForMutateMode {
             case DFS -> DfsMutateConfig::of;
             case Dijkstra -> ShortestPathDijkstraMutateConfig::of;
             case EigenVector -> PageRankMutateConfig::of;
+            case FastRP -> FastRPMutateConfig::of;
             case FilteredKNN -> FilteredKnnMutateConfig::of;
             case FilteredNodeSimilarity -> FilteredNodeSimilarityMutateConfig::of;
             case HarmonicCentrality -> HarmonicCentralityMutateConfig::of;

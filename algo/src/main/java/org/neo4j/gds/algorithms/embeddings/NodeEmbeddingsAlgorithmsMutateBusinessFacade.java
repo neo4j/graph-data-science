@@ -22,12 +22,11 @@ package org.neo4j.gds.algorithms.embeddings;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.embeddings.specificfields.Node2VecSpecificFields;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
-import org.neo4j.gds.embeddings.fastrp.FastRPMutateConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMutateConfig;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNMutateConfig;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
@@ -84,26 +83,6 @@ public class NodeEmbeddingsAlgorithmsMutateBusinessFacade {
         );
     }
 
-    public NodePropertyMutateResult<Long> fastRP(
-        String graphName,
-        FastRPMutateConfig configuration
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> nodeEmbeddingsAlgorithmsFacade.fastRP(graphName, configuration)
-        );
-
-        return mutateNodeProperty(
-            intermediateResult.algorithmResult,
-            configuration,
-            (result) -> NodePropertyValuesAdapter.adapt(result.embeddings()),
-            (result) -> intermediateResult.algorithmResult.graph().nodeCount(),
-            intermediateResult.computeMilliseconds,
-            () -> 0L
-
-        );
-    }
-
     public NodePropertyMutateResult<Long> hashGNN(
         String graphName,
         HashGNNMutateConfig configuration
@@ -119,7 +98,7 @@ public class NodeEmbeddingsAlgorithmsMutateBusinessFacade {
             HashGNNResult::embeddings,
             (result) -> intermediateResult.algorithmResult.graph().nodeCount(),
             intermediateResult.computeMilliseconds,
-            () -> 0l
+            () -> 0L
 
         );
     }

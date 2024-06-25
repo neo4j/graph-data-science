@@ -43,6 +43,7 @@ public enum Algorithm {
     DFS,
     Dijkstra,
     EigenVector,
+    FastRP,
     FilteredKNN,
     FilteredNodeSimilarity,
     HarmonicCentrality,

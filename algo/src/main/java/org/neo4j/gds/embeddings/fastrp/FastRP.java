@@ -35,6 +35,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.features.FeatureConsumer;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.features.FeatureExtractor;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 
 import java.util.Arrays;
@@ -86,7 +87,8 @@ public class FastRP extends Algorithm<FastRPResult> {
         int minBatchSize,
         List<FeatureExtractor> featureExtractors,
         ProgressTracker progressTracker,
-        Optional<Long> randomSeed
+        Optional<Long> randomSeed,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -112,6 +114,8 @@ public class FastRP extends Algorithm<FastRPResult> {
             ? this::addArrayValuesWeighted
             : (lhs, rhs, ignoreWeight) -> addInPlace(lhs, rhs);
         this.embeddings.setAll((i) -> new float[embeddingDimension]);
+
+        this.terminationFlag = terminationFlag;
     }
 
     @Override

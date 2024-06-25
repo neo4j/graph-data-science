@@ -31,6 +31,7 @@ import org.neo4j.gds.ml.pipeline.stubs.ClosenessCentralityStub;
 import org.neo4j.gds.ml.pipeline.stubs.DegreeCentralityStub;
 import org.neo4j.gds.ml.pipeline.stubs.DepthFirstSearchStub;
 import org.neo4j.gds.ml.pipeline.stubs.EigenVectorStub;
+import org.neo4j.gds.ml.pipeline.stubs.FastRPStub;
 import org.neo4j.gds.ml.pipeline.stubs.FilteredKnnStub;
 import org.neo4j.gds.ml.pipeline.stubs.FilteredNodeSimilarityStub;
 import org.neo4j.gds.ml.pipeline.stubs.HarmonicCentralityStub;
@@ -83,6 +84,7 @@ class StubbyHolder {
             case DFS -> new DepthFirstSearchStub();
             case Dijkstra -> new SinglePairShortestPathDijkstraStub();
             case EigenVector -> new EigenVectorStub();
+            case FastRP -> new FastRPStub();
             case FilteredKNN -> new FilteredKnnStub();
             case FilteredNodeSimilarity -> new FilteredNodeSimilarityStub();
             case HarmonicCentrality -> new HarmonicCentralityStub();

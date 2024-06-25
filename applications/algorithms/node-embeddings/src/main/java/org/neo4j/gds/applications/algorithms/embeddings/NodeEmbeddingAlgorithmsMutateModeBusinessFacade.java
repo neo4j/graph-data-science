@@ -19,10 +19,51 @@
  */
 package org.neo4j.gds.applications.algorithms.embeddings;
 
-public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
-    private final NodeEmbeddingAlgorithms algorithms;
+import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
+import org.neo4j.gds.embeddings.fastrp.FastRPMutateConfig;
+import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 
-    public NodeEmbeddingAlgorithmsMutateModeBusinessFacade(NodeEmbeddingAlgorithms algorithms) {
+import java.util.Optional;
+
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FastRP;
+
+public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
+    private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimation;
+    private final NodeEmbeddingAlgorithms algorithms;
+    private final AlgorithmProcessingTemplate template;
+    private final MutateNodeProperty mutateNodeProperty;
+
+    public NodeEmbeddingAlgorithmsMutateModeBusinessFacade(
+        NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimation,
+        NodeEmbeddingAlgorithms algorithms,
+        AlgorithmProcessingTemplate template,
+        MutateNodeProperty mutateNodeProperty
+    ) {
+        this.estimation = estimation;
         this.algorithms = algorithms;
+        this.template = template;
+        this.mutateNodeProperty = mutateNodeProperty;
+    }
+
+    public <RESULT> RESULT fastRP(
+        GraphName graphName,
+        FastRPMutateConfig configuration,
+        ResultBuilder<FastRPMutateConfig, FastRPResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var mutateStep = new FastRPMutateStep(mutateNodeProperty, configuration);
+
+        return template.processAlgorithm(
+            graphName,
+            configuration,
+            FastRP,
+            () -> estimation.fastRP(configuration),
+            graph -> algorithms.fastRP(graph, configuration),
+            Optional.of(mutateStep),
+            resultBuilder
+        );
     }
 }

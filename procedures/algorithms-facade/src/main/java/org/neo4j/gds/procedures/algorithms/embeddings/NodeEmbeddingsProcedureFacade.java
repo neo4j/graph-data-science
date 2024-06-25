@@ -20,15 +20,23 @@
 package org.neo4j.gds.procedures.algorithms.embeddings;
 
 import org.neo4j.gds.applications.ApplicationsFacade;
+import org.neo4j.gds.procedures.algorithms.embeddings.stubs.FastRPMutateStub;
+import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 
 public final class NodeEmbeddingsProcedureFacade {
-    private final ApplicationsFacade applicationsFacade;
+    private final FastRPMutateStub fastRPMutateStub;
 
-    private NodeEmbeddingsProcedureFacade(ApplicationsFacade applicationsFacade) {
-        this.applicationsFacade = applicationsFacade;
+    private NodeEmbeddingsProcedureFacade(FastRPMutateStub fastRPMutateStub) {
+        this.fastRPMutateStub = fastRPMutateStub;
     }
 
-    public static NodeEmbeddingsProcedureFacade create(ApplicationsFacade applicationsFacade) {
-        return new NodeEmbeddingsProcedureFacade(applicationsFacade);
+    public static NodeEmbeddingsProcedureFacade create(GenericStub genericStub, ApplicationsFacade applicationsFacade) {
+        var fastRPMutateStub = new FastRPMutateStub(genericStub, applicationsFacade);
+
+        return new NodeEmbeddingsProcedureFacade(fastRPMutateStub);
+    }
+
+    public FastRPMutateStub fastRPMutateStub() {
+        return fastRPMutateStub;
     }
 }
