@@ -19,10 +19,9 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
-import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecStreamResult;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -32,6 +31,8 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.embeddings.node2vec.Node2VecCompanion.NODE2VEC_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class Node2VecStreamProc {
@@ -39,7 +40,7 @@ public class Node2VecStreamProc {
     public GraphDataScienceProcedures facade;
     
     @Procedure(value = "gds.node2vec.stream", mode = READ)
-    @Description(Node2VecCompanion.DESCRIPTION)
+    @Description(NODE2VEC_DESCRIPTION)
     public Stream<Node2VecStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -48,7 +49,7 @@ public class Node2VecStreamProc {
     }
 
     @Procedure(value = "gds.node2vec.stream.estimate", mode = READ)
-    @Description(BaseProc.ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
@@ -57,7 +58,7 @@ public class Node2VecStreamProc {
     }
 
     @Procedure(value = "gds.beta.node2vec.stream", mode = READ, deprecatedBy = "gds.node2vec.stream")
-    @Description(Node2VecCompanion.DESCRIPTION)
+    @Description(NODE2VEC_DESCRIPTION)
     @Internal
     @Deprecated
     public Stream<Node2VecStreamResult> alphaStream(
@@ -73,7 +74,7 @@ public class Node2VecStreamProc {
     }
 
     @Procedure(value = "gds.beta.node2vec.stream.estimate", mode = READ, deprecatedBy = "gds.node2vec.stream.estimate")
-    @Description(BaseProc.ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     @Internal
     @Deprecated
     public Stream<MemoryEstimateResult> betaEstimate(

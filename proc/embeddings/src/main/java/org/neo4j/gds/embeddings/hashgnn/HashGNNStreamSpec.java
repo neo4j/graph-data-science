@@ -29,10 +29,10 @@ import org.neo4j.gds.procedures.embeddings.hashgnn.HashGNNStreamResult;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.embeddings.hashgnn.HashGNNProcCompanion.DESCRIPTION;
+import static org.neo4j.gds.embeddings.hashgnn.HashGNNProcCompanion.HASH_GNN_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
-@GdsCallable(name = "gds.hashgnn.stream", aliases = {"gds.beta.hashgnn.stream"}, description = DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.hashgnn.stream", aliases = {"gds.beta.hashgnn.stream"}, description = HASH_GNN_DESCRIPTION, executionMode = STREAM)
 public class HashGNNStreamSpec implements AlgorithmSpec<HashGNN, HashGNNResult, HashGNNStreamConfig, Stream<HashGNNStreamResult>, HashGNNFactory<HashGNNStreamConfig>> {
 
     @Override

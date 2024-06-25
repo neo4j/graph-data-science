@@ -34,10 +34,10 @@ import org.neo4j.gds.result.AbstractResultBuilder;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.embeddings.hashgnn.HashGNNProcCompanion.DESCRIPTION;
+import static org.neo4j.gds.embeddings.hashgnn.HashGNNProcCompanion.HASH_GNN_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 
-@GdsCallable(name = "gds.hashgnn.mutate", aliases = {"gds.beta.hashgnn.mutate"}, description = DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
+@GdsCallable(name = "gds.hashgnn.mutate", aliases = {"gds.beta.hashgnn.mutate"}, description = HASH_GNN_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class HashGNNMutateSpec implements AlgorithmSpec<HashGNN, HashGNNResult, HashGNNMutateConfig, Stream<DefaultNodeEmbeddingMutateResult>, HashGNNFactory<HashGNNMutateConfig>> {
 
     @Override

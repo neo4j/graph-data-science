@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.embeddings.results.DefaultNodeEmbeddingsWriteResult;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -30,7 +30,8 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.embeddings.fastrp.FastRPCompanion.DESCRIPTION;
+import static org.neo4j.gds.embeddings.fastrp.FastRPCompanion.FASTRP_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
@@ -39,7 +40,7 @@ public class FastRPWriteProc {
     public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.fastRP.write", mode = WRITE)
-    @Description(DESCRIPTION)
+    @Description(FASTRP_DESCRIPTION)
     public Stream<DefaultNodeEmbeddingsWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -48,12 +49,11 @@ public class FastRPWriteProc {
     }
 
     @Procedure(value = "gds.fastRP.write.estimate", mode = READ)
-    @Description(DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         return facade.oldNodeEmbeddings().fastRP().writeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
-
 }

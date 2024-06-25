@@ -34,7 +34,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 
-@GdsCallable(name = "gds.fastRP.mutate", description = FastRPCompanion.DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
+@GdsCallable(name = "gds.fastRP.mutate", description = FastRPCompanion.FASTRP_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class FastRPMutateSpec implements AlgorithmSpec<FastRP, FastRPResult, FastRPMutateConfig, Stream<DefaultNodeEmbeddingMutateResult>, FastRPFactory<FastRPMutateConfig>> {
     @Override
     public String name() {

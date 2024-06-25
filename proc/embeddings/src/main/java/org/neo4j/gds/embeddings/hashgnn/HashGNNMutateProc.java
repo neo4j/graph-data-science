@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.embeddings.results.DefaultNodeEmbeddingMutateResult;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -31,7 +31,8 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.embeddings.hashgnn.HashGNNProcCompanion.DESCRIPTION;
+import static org.neo4j.gds.embeddings.hashgnn.HashGNNProcCompanion.HASH_GNN_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class HashGNNMutateProc {
@@ -39,7 +40,7 @@ public class HashGNNMutateProc {
     public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.hashgnn.mutate", mode = READ)
-    @Description(DESCRIPTION)
+    @Description(HASH_GNN_DESCRIPTION)
     public Stream<DefaultNodeEmbeddingMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -50,7 +51,7 @@ public class HashGNNMutateProc {
     @Internal
     @Deprecated(forRemoval = true)
     @Procedure(value = "gds.beta.hashgnn.mutate", deprecatedBy = "gds.hashgnn.mutate", mode = READ)
-    @Description(DESCRIPTION)
+    @Description(HASH_GNN_DESCRIPTION)
     public Stream<DefaultNodeEmbeddingMutateResult> betaMutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -64,7 +65,7 @@ public class HashGNNMutateProc {
     }
 
     @Procedure(value = "gds.hashgnn.mutate.estimate", mode = READ)
-    @Description(DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
@@ -75,7 +76,7 @@ public class HashGNNMutateProc {
     @Internal
     @Deprecated(forRemoval = true)
     @Procedure(value = "gds.beta.hashgnn.mutate.estimate", deprecatedBy = "gds.hashgnn.mutate.estimate", mode = READ)
-    @Description(DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> betaEstimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration

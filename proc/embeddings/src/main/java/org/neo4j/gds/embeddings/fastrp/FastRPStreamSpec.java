@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
-@GdsCallable(name = "gds.fastRP.stream", description = FastRPCompanion.DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.fastRP.stream", description = FastRPCompanion.FASTRP_DESCRIPTION, executionMode = STREAM)
 public class FastRPStreamSpec implements AlgorithmSpec<FastRP, FastRPResult, FastRPStreamConfig, Stream<FastRPStreamResult>, FastRPFactory<FastRPStreamConfig>> {
     @Override
     public String name() {
