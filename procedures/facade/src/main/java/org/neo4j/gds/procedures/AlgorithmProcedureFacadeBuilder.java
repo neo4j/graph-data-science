@@ -44,15 +44,16 @@ import org.neo4j.gds.modelcatalogservices.ModelCatalogService;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
+import org.neo4j.gds.procedures.algorithms.embeddings.NodeEmbeddingsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
-import org.neo4j.gds.procedures.embeddings.NodeEmbeddingsProcedureFacade;
+import org.neo4j.gds.procedures.embeddings.OldNodeEmbeddingsProcedureFacade;
 import org.neo4j.gds.procedures.misc.MiscAlgorithmsProcedureFacade;
 
-class AlgorithmFacadeBuilder {
+class AlgorithmProcedureFacadeBuilder {
     // Request scoped parameters
     private final ConfigurationCreator configurationCreator;
     private final CloseableResourceRegistry closeableResourceRegistry;
@@ -69,7 +70,7 @@ class AlgorithmFacadeBuilder {
     private final AlgorithmExecutionScaffolding algorithmExecutionScaffolding;
     private final AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode;
 
-    AlgorithmFacadeBuilder(
+    AlgorithmProcedureFacadeBuilder(
         ConfigurationCreator configurationCreator,
         CloseableResourceRegistry closeableResourceRegistry,
         NodeLookup nodeLookup,
@@ -124,19 +125,7 @@ class AlgorithmFacadeBuilder {
         );
     }
 
-    SimilarityProcedureFacade createSimilarityProcedureFacade() {
-        return SimilarityProcedureFacade.create(
-            applicationsFacade,
-            genericStub,
-            procedureReturnColumns,
-            estimationModeRunner,
-            algorithmExecutionScaffolding,
-            algorithmExecutionScaffoldingForStreamMode
-        );
-    }
-
     MiscAlgorithmsProcedureFacade createMiscellaneousProcedureFacade() {
-
         // algorithm facade
         var miscAlgorithmsFacade = new MiscAlgorithmsFacade(algorithmRunner);
 
@@ -153,7 +142,6 @@ class AlgorithmFacadeBuilder {
             mutateNodePropertyService
         );
 
-
         // procedure facade
         return new MiscAlgorithmsProcedureFacade(
             configurationCreator,
@@ -166,25 +154,15 @@ class AlgorithmFacadeBuilder {
         );
     }
 
-    PathFindingProcedureFacade createPathFindingProcedureFacade() {
-        return PathFindingProcedureFacade.create(
-            closeableResourceRegistry,
-            nodeLookup,
-            procedureReturnColumns,
-            applicationsFacade,
-            genericStub,
-            estimationModeRunner,
-            algorithmExecutionScaffolding,
-            algorithmExecutionScaffoldingForStreamMode
-        );
+    NodeEmbeddingsProcedureFacade createNodeEmbeddingsProcedureFacade() {
+        return NodeEmbeddingsProcedureFacade.create(applicationsFacade);
     }
 
-    NodeEmbeddingsProcedureFacade createNodeEmbeddingsProcedureFacade() {
+    OldNodeEmbeddingsProcedureFacade createOldNodeEmbeddingsProcedureFacade() {
         // algorithms facade
         var nodeEmbeddingsAlgorithmsFacade = new NodeEmbeddingsAlgorithmsFacade(algorithmRunner, modelCatalogService);
 
         // mode-specific facades
-
         var mutateBusinessFacade = new NodeEmbeddingsAlgorithmsMutateBusinessFacade(
             nodeEmbeddingsAlgorithmsFacade,
             mutateNodePropertyService
@@ -210,7 +188,7 @@ class AlgorithmFacadeBuilder {
         );
 
         // procedure facade
-        return new NodeEmbeddingsProcedureFacade(
+        return new OldNodeEmbeddingsProcedureFacade(
             configurationCreator,
             procedureReturnColumns,
             estimateBusinessFacade,
@@ -219,6 +197,30 @@ class AlgorithmFacadeBuilder {
             streamBusinessFacade,
             trainBusinessFacade,
             writeBusinessFacade
+        );
+    }
+
+    PathFindingProcedureFacade createPathFindingProcedureFacade() {
+        return PathFindingProcedureFacade.create(
+            closeableResourceRegistry,
+            nodeLookup,
+            procedureReturnColumns,
+            applicationsFacade,
+            genericStub,
+            estimationModeRunner,
+            algorithmExecutionScaffolding,
+            algorithmExecutionScaffoldingForStreamMode
+        );
+    }
+
+    SimilarityProcedureFacade createSimilarityProcedureFacade() {
+        return SimilarityProcedureFacade.create(
+            applicationsFacade,
+            genericStub,
+            procedureReturnColumns,
+            estimationModeRunner,
+            algorithmExecutionScaffolding,
+            algorithmExecutionScaffoldingForStreamMode
         );
     }
 }

@@ -44,7 +44,7 @@ public class GraphSageTrainProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.nodeEmbeddings().graphSage().train(graphName, configuration);
+        return facade.oldNodeEmbeddings().graphSage().train(graphName, configuration);
     }
 
     @Description(MEMORY_ESTIMATION_DESCRIPTION)
@@ -53,6 +53,6 @@ public class GraphSageTrainProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.nodeEmbeddings().graphSage().trainEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.oldNodeEmbeddings().graphSage().trainEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

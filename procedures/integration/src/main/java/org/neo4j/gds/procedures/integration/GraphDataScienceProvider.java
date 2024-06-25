@@ -33,7 +33,7 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
-import org.neo4j.gds.procedures.AlgorithmFacadeBuilderFactory;
+import org.neo4j.gds.procedures.AlgorithmProcedureFacadeBuilderFactory;
 import org.neo4j.gds.procedures.CatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.DatabaseIdAccessor;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
@@ -65,7 +65,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
     private final Log log;
     private final DefaultsConfiguration defaultsConfiguration;
     private final LimitsConfiguration limitsConfiguration;
-    private final AlgorithmFacadeBuilderFactory algorithmFacadeBuilderFactory;
+    private final AlgorithmProcedureFacadeBuilderFactory algorithmProcedureFacadeBuilderFactory;
     private final AlgorithmMetricsService algorithmMetricsService;
     private final Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator;
     private final Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> catalogBusinessFacadeDecorator;
@@ -83,7 +83,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         Log log,
         DefaultsConfiguration defaultsConfiguration,
         LimitsConfiguration limitsConfiguration,
-        AlgorithmFacadeBuilderFactory algorithmFacadeBuilderFactory,
+        AlgorithmProcedureFacadeBuilderFactory algorithmProcedureFacadeBuilderFactory,
         AlgorithmMetricsService algorithmMetricsService,
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
         Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> catalogBusinessFacadeDecorator,
@@ -100,7 +100,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         this.log = log;
         this.defaultsConfiguration = defaultsConfiguration;
         this.limitsConfiguration = limitsConfiguration;
-        this.algorithmFacadeBuilderFactory = algorithmFacadeBuilderFactory;
+        this.algorithmProcedureFacadeBuilderFactory = algorithmProcedureFacadeBuilderFactory;
         this.algorithmMetricsService = algorithmMetricsService;
         this.algorithmProcessingTemplateDecorator = algorithmProcessingTemplateDecorator;
         this.catalogBusinessFacadeDecorator = catalogBusinessFacadeDecorator;
@@ -180,7 +180,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             catalogProcedureFacadeFactory,
             graphDatabaseService,
             procedureTransactionAccessor.getProcedureTransaction(context),
-            algorithmFacadeBuilderFactory,
+            algorithmProcedureFacadeBuilderFactory,
             deprecatedProceduresMetricService
         );
     }

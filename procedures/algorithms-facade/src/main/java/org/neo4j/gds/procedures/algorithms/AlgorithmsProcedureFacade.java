@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.algorithms;
 
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.community.CommunityProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.embeddings.NodeEmbeddingsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade;
 
@@ -31,17 +32,20 @@ import org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade;
 public class AlgorithmsProcedureFacade {
     private final CentralityProcedureFacade centralityProcedureFacade;
     private final CommunityProcedureFacade communityProcedureFacade;
+    private final NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade;
     private final PathFindingProcedureFacade pathFindingProcedureFacade;
     private final SimilarityProcedureFacade similarityProcedureFacade;
 
     public AlgorithmsProcedureFacade(
         CentralityProcedureFacade centralityProcedureFacade,
         CommunityProcedureFacade communityProcedureFacade,
+        NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade,
         PathFindingProcedureFacade pathFindingProcedureFacade,
         SimilarityProcedureFacade similarityProcedureFacade
     ) {
         this.centralityProcedureFacade = centralityProcedureFacade;
         this.communityProcedureFacade = communityProcedureFacade;
+        this.nodeEmbeddingsProcedureFacade = nodeEmbeddingsProcedureFacade;
         this.pathFindingProcedureFacade = pathFindingProcedureFacade;
         this.similarityProcedureFacade = similarityProcedureFacade;
     }
@@ -52,6 +56,10 @@ public class AlgorithmsProcedureFacade {
 
     public CommunityProcedureFacade community() {
         return communityProcedureFacade;
+    }
+
+    public NodeEmbeddingsProcedureFacade nodeEmbeddings() {
+        return nodeEmbeddingsProcedureFacade;
     }
 
     public PathFindingProcedureFacade pathFinding() {

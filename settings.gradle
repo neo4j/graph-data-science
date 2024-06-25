@@ -107,6 +107,9 @@ project(':centrality-algorithms').projectDir = file('applications/algorithms/cen
 include('community-algorithms')
 project(':community-algorithms').projectDir = file('applications/algorithms/community')
 
+include('node-embedding-algorithms')
+project(':node-embedding-algorithms').projectDir = file('applications/algorithms/node-embeddings')
+
 include('path-finding-algorithms')
 project(':path-finding-algorithms').projectDir = file('applications/algorithms/path-finding')
 

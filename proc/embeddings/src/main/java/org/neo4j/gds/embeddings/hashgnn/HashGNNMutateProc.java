@@ -35,7 +35,6 @@ import static org.neo4j.gds.embeddings.hashgnn.HashGNNProcCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class HashGNNMutateProc {
-
     @Context
     public GraphDataScienceProcedures facade;
 
@@ -45,7 +44,7 @@ public class HashGNNMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.nodeEmbeddings().hashGNN().mutate(graphName, configuration);
+        return facade.oldNodeEmbeddings().hashGNN().mutate(graphName, configuration);
     }
 
     @Internal
@@ -56,10 +55,9 @@ public class HashGNNMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        facade.deprecatedProcedures().called("gds.beta.hashgnn.mutate");
         facade
-            .deprecatedProcedures().called("gds.beta.hashgnn.mutate");
-
-        facade.log()
+            .log()
             .warn("Procedure `gds.beta.hashgnn.mutate` has been deprecated, please use `gds.hashgnn.mutate`.");
 
         return mutate(graphName, configuration);
@@ -71,7 +69,7 @@ public class HashGNNMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.nodeEmbeddings().hashGNN().mutateEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.oldNodeEmbeddings().hashGNN().mutateEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Internal
@@ -82,10 +80,9 @@ public class HashGNNMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
+        facade.deprecatedProcedures().called("gds.beta.hashgnn.mutate.estimate");
         facade
-            .deprecatedProcedures().called("gds.beta.hashgnn.mutate.estimate");
-
-        facade.log()
+            .log()
             .warn("Procedure `gds.beta.hashgnn.mutate.estimate` has been deprecated, please use `gds.hashgnn.mutate.estimate`.");
 
         return estimate(graphNameOrConfiguration, algoConfiguration);

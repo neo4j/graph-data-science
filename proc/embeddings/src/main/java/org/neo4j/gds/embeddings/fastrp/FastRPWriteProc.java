@@ -35,7 +35,6 @@ import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class FastRPWriteProc {
-
     @Context
     public GraphDataScienceProcedures facade;
 
@@ -45,7 +44,7 @@ public class FastRPWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.nodeEmbeddings().fastRP().write(graphName, configuration);
+        return facade.oldNodeEmbeddings().fastRP().write(graphName, configuration);
     }
 
     @Procedure(value = "gds.fastRP.write.estimate", mode = READ)
@@ -54,7 +53,7 @@ public class FastRPWriteProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.nodeEmbeddings().fastRP().writeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.oldNodeEmbeddings().fastRP().writeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
 }

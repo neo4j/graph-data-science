@@ -36,7 +36,6 @@ import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class Node2VecWriteProc {
-
     @Context
     public GraphDataScienceProcedures facade;
 
@@ -46,7 +45,7 @@ public class Node2VecWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.nodeEmbeddings().node2Vec().write(graphName, configuration);
+        return facade.oldNodeEmbeddings().node2Vec().write(graphName, configuration);
     }
 
     @Procedure(value = "gds.node2vec.write.estimate", mode = READ)
@@ -55,10 +54,7 @@ public class Node2VecWriteProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.nodeEmbeddings().node2Vec().writeEstimate(
-            graphNameOrConfiguration,
-            algoConfiguration
-        );
+        return facade.oldNodeEmbeddings().node2Vec().writeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Procedure(value = "gds.beta.node2vec.write", mode = WRITE, deprecatedBy = "gds.node2vec.write")
@@ -69,19 +65,16 @@ public class Node2VecWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        facade
-            .deprecatedProcedures().called("gds.beta.node2vec.write");
+        facade.deprecatedProcedures().called("gds.beta.node2vec.write");
 
         facade
             .log()
-            .warn(
-                "Procedure `gds.beta.node2vec.write` has been deprecated, please use `gds.node2vec.write`.");
+            .warn("Procedure `gds.beta.node2vec.write` has been deprecated, please use `gds.node2vec.write`.");
+
         return write(graphName, configuration);
     }
 
-    @Procedure(
-        value = "gds.beta.node2vec.write.estimate", mode = READ, deprecatedBy = "gds.node2vec.write.estimate"
-    )
+    @Procedure(value = "gds.beta.node2vec.write.estimate", mode = READ, deprecatedBy = "gds.node2vec.write.estimate")
     @Description(BaseProc.ESTIMATE_DESCRIPTION)
     @Internal
     @Deprecated
@@ -90,11 +83,10 @@ public class Node2VecWriteProc {
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         facade.deprecatedProcedures().called("gds.beta.node2vec.write.estimate");
+        facade
+            .log()
+            .warn("Procedure `gds.beta.node2vec.write.estimate` has been deprecated, please use `gds.node2vec.write.estimate`.");
 
-        facade.log()
-            .warn(
-                "Procedure `gds.beta.node2vec.write.estimate` has been deprecated, please use `gds.node2vec.write.estimate`.");
         return estimate(graphNameOrConfiguration, algoConfiguration);
     }
-
 }

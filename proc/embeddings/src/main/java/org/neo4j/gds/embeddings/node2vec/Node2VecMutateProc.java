@@ -35,7 +35,6 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 
 public class Node2VecMutateProc {
-
     @Context
     public GraphDataScienceProcedures facade;
 
@@ -45,7 +44,7 @@ public class Node2VecMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.nodeEmbeddings().node2Vec().mutate(graphName, configuration);
+        return facade.oldNodeEmbeddings().node2Vec().mutate(graphName, configuration);
     }
 
     @Procedure(value = "gds.node2vec.mutate.estimate", mode = READ)
@@ -54,7 +53,7 @@ public class Node2VecMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.nodeEmbeddings().node2Vec().mutateEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.oldNodeEmbeddings().node2Vec().mutateEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Procedure(value = "gds.beta.node2vec.mutate", mode = READ, deprecatedBy = "gds.node2vec.mutate")
@@ -65,19 +64,15 @@ public class Node2VecMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        facade
-            .deprecatedProcedures().called("gds.beta.node2vec.mutate");
-
+        facade.deprecatedProcedures().called("gds.beta.node2vec.mutate");
         facade
             .log()
-            .warn(
-                "Procedure `gds.beta.node2vec.mutate` has been deprecated, please use `gds.node2vec.mutate`.");
+            .warn("Procedure `gds.beta.node2vec.mutate` has been deprecated, please use `gds.node2vec.mutate`.");
+
         return mutate(graphName, configuration);
     }
 
-    @Procedure(
-        value = "gds.beta.node2vec.mutate.estimate", mode = READ, deprecatedBy = "gds.node2vec.mutate.estimate"
-    )
+    @Procedure(value = "gds.beta.node2vec.mutate.estimate", mode = READ, deprecatedBy = "gds.node2vec.mutate.estimate")
     @Description(BaseProc.ESTIMATE_DESCRIPTION)
     @Internal
     @Deprecated
@@ -85,13 +80,11 @@ public class Node2VecMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        facade
-            .deprecatedProcedures().called("gds.beta.node2vec.mutate.estimate");
-
+        facade.deprecatedProcedures().called("gds.beta.node2vec.mutate.estimate");
         facade
             .log()
-            .warn(
-                "Procedure `gds.beta.node2vec.mutate.estimate` has been deprecated, please use `gds.node2vec.mutate.estimate`.");
+            .warn("Procedure `gds.beta.node2vec.mutate.estimate` has been deprecated, please use `gds.node2vec.mutate.estimate`.");
+
         return estimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

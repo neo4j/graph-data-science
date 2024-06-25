@@ -34,7 +34,6 @@ import static org.neo4j.gds.embeddings.fastrp.FastRPCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class FastRPMutateProc {
-
     @Context
     public GraphDataScienceProcedures facade;
 
@@ -44,7 +43,7 @@ public class FastRPMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.nodeEmbeddings().fastRP().mutate(graphName, configuration);
+        return facade.oldNodeEmbeddings().fastRP().mutate(graphName, configuration);
     }
 
     @Procedure(value = "gds.fastRP.mutate.estimate", mode = READ)
@@ -53,6 +52,6 @@ public class FastRPMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.nodeEmbeddings().fastRP().mutateEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.oldNodeEmbeddings().fastRP().mutateEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

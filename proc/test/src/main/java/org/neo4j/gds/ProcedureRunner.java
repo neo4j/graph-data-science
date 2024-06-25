@@ -39,7 +39,7 @@ import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.modelcatalogservices.ModelCatalogServiceProvider;
-import org.neo4j.gds.procedures.AlgorithmFacadeBuilderFactory;
+import org.neo4j.gds.procedures.AlgorithmProcedureFacadeBuilderFactory;
 import org.neo4j.gds.procedures.CatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.DatabaseIdAccessor;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
@@ -170,7 +170,7 @@ public final class ProcedureRunner {
 
         var modelCatalog = new OpenModelCatalog();
 
-        var algorithmFacadeBuilderFactory = new AlgorithmFacadeBuilderFactory(
+        var algorithmFacadeBuilderFactory = new AlgorithmProcedureFacadeBuilderFactory(
             gdsLog,
             DefaultsConfiguration.Instance,
             LimitsConfiguration.Instance,

@@ -31,7 +31,7 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryGauge;
 import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.modelcatalogservices.ModelCatalogServiceProvider;
-import org.neo4j.gds.procedures.AlgorithmFacadeBuilderFactory;
+import org.neo4j.gds.procedures.AlgorithmProcedureFacadeBuilderFactory;
 import org.neo4j.gds.procedures.CatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
@@ -141,13 +141,13 @@ final class GraphDataScienceProviderFactory {
         );
     }
 
-    private AlgorithmFacadeBuilderFactory createAlgorithmFacadeBuilderFactory(
+    private AlgorithmProcedureFacadeBuilderFactory createAlgorithmFacadeBuilderFactory(
         GraphStoreCatalogService graphStoreCatalogService,
         boolean useMaxMemoryEstimation
     ) {
         var modelCatalogServiceProvider = new ModelCatalogServiceProvider(modelCatalog);
 
-        return new AlgorithmFacadeBuilderFactory(
+        return new AlgorithmProcedureFacadeBuilderFactory(
             log,
             defaultsConfiguration,
             limitsConfiguration,

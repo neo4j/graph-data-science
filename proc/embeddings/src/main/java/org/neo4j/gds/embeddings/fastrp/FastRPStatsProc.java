@@ -34,17 +34,16 @@ import static org.neo4j.gds.embeddings.fastrp.FastRPCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class FastRPStatsProc {
-
     @Context
     public GraphDataScienceProcedures facade;
+
     @Procedure(value = "gds.fastRP.stats", mode = READ)
     @Description("Random Projection produces node embeddings via the fastrp algorithm")
     public Stream<FastRPStatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.nodeEmbeddings().fastRP().stats(graphName, configuration);
-
+        return facade.oldNodeEmbeddings().fastRP().stats(graphName, configuration);
     }
 
     @Procedure(value = "gds.fastRP.stats.estimate", mode = READ)
@@ -53,6 +52,6 @@ public class FastRPStatsProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.nodeEmbeddings().fastRP().statsEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.oldNodeEmbeddings().fastRP().statsEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

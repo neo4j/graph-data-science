@@ -50,6 +50,7 @@ public final class ApplicationsFacade {
     private final CatalogBusinessFacade catalogBusinessFacade;
     private final CentralityApplications centralityApplications;
     private final CommunityApplications communityApplications;
+    private final NodeEmbeddingApplications nodeEmbeddingApplications;
     private final PathFindingApplications pathFindingApplications;
     private final SimilarityApplications similarityApplications;
 
@@ -57,12 +58,14 @@ public final class ApplicationsFacade {
         CatalogBusinessFacade catalogBusinessFacade,
         CentralityApplications centralityApplications,
         CommunityApplications communityApplications,
+        NodeEmbeddingApplications nodeEmbeddingApplications,
         PathFindingApplications pathFindingApplications,
         SimilarityApplications similarityApplications
     ) {
         this.catalogBusinessFacade = catalogBusinessFacade;
         this.centralityApplications = centralityApplications;
         this.communityApplications = communityApplications;
+        this.nodeEmbeddingApplications = nodeEmbeddingApplications;
         this.pathFindingApplications = pathFindingApplications;
         this.similarityApplications = similarityApplications;
     }
@@ -129,6 +132,8 @@ public final class ApplicationsFacade {
             mutateNodeProperty
         );
 
+        var nodeEmbeddingApplications = NodeEmbeddingApplications.create();
+
         var pathFindingApplications = PathFindingApplications.create(
             log,
             requestScopedDependencies,
@@ -152,6 +157,7 @@ public final class ApplicationsFacade {
             .with(catalogBusinessFacade)
             .with(centralityApplications)
             .with(communityApplications)
+            .with(nodeEmbeddingApplications)
             .with(pathFindingApplications)
             .with(similarityApplications)
             .build();
@@ -205,6 +211,10 @@ public final class ApplicationsFacade {
 
     public CommunityApplications community() {
         return communityApplications;
+    }
+
+    public NodeEmbeddingApplications nodeEmbeddings() {
+        return nodeEmbeddingApplications;
     }
 
     public PathFindingApplications pathFinding() {

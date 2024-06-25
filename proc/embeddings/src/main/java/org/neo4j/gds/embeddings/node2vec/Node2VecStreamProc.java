@@ -35,7 +35,6 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 
 public class Node2VecStreamProc {
-
     @Context
     public GraphDataScienceProcedures facade;
     
@@ -45,7 +44,7 @@ public class Node2VecStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.nodeEmbeddings().node2Vec().stream(graphName, configuration);
+        return facade.oldNodeEmbeddings().node2Vec().stream(graphName, configuration);
     }
 
     @Procedure(value = "gds.node2vec.stream.estimate", mode = READ)
@@ -54,7 +53,7 @@ public class Node2VecStreamProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.nodeEmbeddings().node2Vec().streamEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.oldNodeEmbeddings().node2Vec().streamEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Procedure(value = "gds.beta.node2vec.stream", mode = READ, deprecatedBy = "gds.node2vec.stream")
@@ -65,13 +64,11 @@ public class Node2VecStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        facade
-            .deprecatedProcedures().called("gds.beta.node2vec.stream");
-
+        facade.deprecatedProcedures().called("gds.beta.node2vec.stream");
         facade
             .log()
-            .warn(
-                "Procedure `gds.beta.node2vec.stream` has been deprecated, please use `gds.node2vec.stream`.");
+            .warn("Procedure `gds.beta.node2vec.stream` has been deprecated, please use `gds.node2vec.stream`.");
+
         return stream(graphName, configuration);
     }
 
@@ -83,13 +80,11 @@ public class Node2VecStreamProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        facade
-            .deprecatedProcedures().called("gds.beta.node2vec.stream.estimate");
-
+        facade.deprecatedProcedures().called("gds.beta.node2vec.stream.estimate");
         facade
             .log()
-            .warn(
-                "Procedure `gds.beta.node2vec.stream.estimate` has been deprecated, please use `gds.node2vec.stream.estimate`.");
+            .warn("Procedure `gds.beta.node2vec.stream.estimate` has been deprecated, please use `gds.node2vec.stream.estimate`.");
+
         return estimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

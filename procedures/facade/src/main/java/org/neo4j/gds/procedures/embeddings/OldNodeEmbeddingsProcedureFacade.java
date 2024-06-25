@@ -32,7 +32,7 @@ import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageProcedure;
 import org.neo4j.gds.procedures.embeddings.hashgnn.HashGNNProcedure;
 import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecProcedure;
 
-public class NodeEmbeddingsProcedureFacade {
+public class OldNodeEmbeddingsProcedureFacade {
 
     private final FastRPProcedure fastRP;
     private final HashGNNProcedure hashGNN;
@@ -40,7 +40,7 @@ public class NodeEmbeddingsProcedureFacade {
     private final GraphSageProcedure graphSage;
     // business logic
 
-    public NodeEmbeddingsProcedureFacade(
+    public OldNodeEmbeddingsProcedureFacade(
         ConfigurationCreator configurationCreator,
         ProcedureReturnColumns procedureReturnColumns,
         NodeEmbeddingsAlgorithmsEstimateBusinessFacade estimateBusinessFacade,

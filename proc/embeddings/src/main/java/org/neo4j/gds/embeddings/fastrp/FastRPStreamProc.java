@@ -34,7 +34,6 @@ import static org.neo4j.gds.embeddings.fastrp.FastRPCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class FastRPStreamProc {
-
     @Context
     public GraphDataScienceProcedures facade;
 
@@ -44,7 +43,7 @@ public class FastRPStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.nodeEmbeddings().fastRP().stream(graphName, configuration);
+        return facade.oldNodeEmbeddings().fastRP().stream(graphName, configuration);
     }
 
     @Procedure(value = "gds.fastRP.stream.estimate", mode = READ)
@@ -53,6 +52,6 @@ public class FastRPStreamProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.nodeEmbeddings().fastRP().streamEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.oldNodeEmbeddings().fastRP().streamEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

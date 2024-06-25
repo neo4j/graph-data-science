@@ -35,10 +35,8 @@ import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPH_SAGE_D
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphSageMutateProc {
-
     @Context
     public GraphDataScienceProcedures facade;
-
 
     @Procedure(value = "gds.beta.graphSage.mutate", mode = Mode.READ)
     @Description(GRAPH_SAGE_DESCRIPTION)
@@ -46,7 +44,7 @@ public class GraphSageMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.nodeEmbeddings().graphSage().mutate(graphName, configuration);
+        return facade.oldNodeEmbeddings().graphSage().mutate(graphName, configuration);
     }
 
     @Procedure(value = "gds.beta.graphSage.mutate.estimate", mode = READ)
@@ -55,8 +53,6 @@ public class GraphSageMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.nodeEmbeddings().graphSage().mutateEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.oldNodeEmbeddings().graphSage().mutateEstimate(graphNameOrConfiguration, algoConfiguration);
     }
-
-
 }

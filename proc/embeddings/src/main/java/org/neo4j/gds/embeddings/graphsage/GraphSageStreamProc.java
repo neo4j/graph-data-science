@@ -44,7 +44,7 @@ public class GraphSageStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.nodeEmbeddings().graphSage().stream(graphName, configuration);
+        return facade.oldNodeEmbeddings().graphSage().stream(graphName, configuration);
     }
 
     @Procedure(value = "gds.beta.graphSage.stream.estimate", mode = Mode.READ)
@@ -53,6 +53,6 @@ public class GraphSageStreamProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.nodeEmbeddings().graphSage().streamEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.oldNodeEmbeddings().graphSage().streamEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

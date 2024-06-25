@@ -44,7 +44,7 @@ import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.kernel.api.KernelTransaction;
 
-public class AlgorithmFacadeBuilderFactory {
+public class AlgorithmProcedureFacadeBuilderFactory {
     // dull utilities
     private final FictitiousGraphStoreEstimationService fictitiousGraphStoreEstimationService = new FictitiousGraphStoreEstimationService();
 
@@ -59,7 +59,7 @@ public class AlgorithmFacadeBuilderFactory {
     private final AlgorithmMetricsService algorithmMetricsService;
     private final ModelCatalogServiceProvider modelCatalogServiceProvider;
 
-    public AlgorithmFacadeBuilderFactory(
+    public AlgorithmProcedureFacadeBuilderFactory(
         Log log,
         DefaultsConfiguration defaultsConfiguration,
         LimitsConfiguration limitsConfiguration,
@@ -78,7 +78,7 @@ public class AlgorithmFacadeBuilderFactory {
         this.modelCatalogServiceProvider = modelCatalogServiceProvider;
     }
 
-    AlgorithmFacadeBuilder create(
+    AlgorithmProcedureFacadeBuilder create(
         ConfigurationParser configurationParser,
         ConfigurationCreator configurationCreator,
         RequestScopedDependencies requestScopedDependencies,
@@ -139,7 +139,7 @@ public class AlgorithmFacadeBuilderFactory {
         );
 
         // procedure facade
-        return new AlgorithmFacadeBuilder(
+        return new AlgorithmProcedureFacadeBuilder(
             configurationCreator,
             closeableResourceRegistry,
             nodeLookup,

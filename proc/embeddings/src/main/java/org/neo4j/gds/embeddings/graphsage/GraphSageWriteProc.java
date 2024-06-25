@@ -44,7 +44,7 @@ public class GraphSageWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.nodeEmbeddings().graphSage().write(graphName, configuration);
+        return facade.oldNodeEmbeddings().graphSage().write(graphName, configuration);
     }
 
     @Procedure(value = "gds.beta.graphSage.write.estimate", mode = Mode.READ)
@@ -53,6 +53,6 @@ public class GraphSageWriteProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.nodeEmbeddings().graphSage().writeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.oldNodeEmbeddings().graphSage().writeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

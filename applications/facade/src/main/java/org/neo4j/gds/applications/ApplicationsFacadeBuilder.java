@@ -28,6 +28,7 @@ public class ApplicationsFacadeBuilder {
     private CatalogBusinessFacade catalogBusinessFacade;
     private CentralityApplications centralityApplications;
     private CommunityApplications communityApplications;
+    private NodeEmbeddingApplications nodeEmbeddingApplications;
     private PathFindingApplications pathFindingApplications;
     private SimilarityApplications similarityApplications;
 
@@ -46,6 +47,11 @@ public class ApplicationsFacadeBuilder {
         return this;
     }
 
+    public ApplicationsFacadeBuilder with(NodeEmbeddingApplications nodeEmbeddingApplications) {
+        this.nodeEmbeddingApplications = nodeEmbeddingApplications;
+        return this;
+    }
+
     public ApplicationsFacadeBuilder with(PathFindingApplications pathFindingApplications) {
         this.pathFindingApplications = pathFindingApplications;
         return this;
@@ -61,6 +67,7 @@ public class ApplicationsFacadeBuilder {
             catalogBusinessFacade,
             centralityApplications,
             communityApplications,
+            nodeEmbeddingApplications,
             pathFindingApplications,
             similarityApplications
         );
