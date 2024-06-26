@@ -22,8 +22,10 @@ package org.neo4j.gds.procedures.algorithms.embeddings;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsStatsModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.embeddings.fastrp.FastRPStatsConfig;
+import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
 import org.neo4j.gds.procedures.algorithms.embeddings.stubs.FastRPMutateStub;
 import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
@@ -39,24 +41,28 @@ public final class NodeEmbeddingsProcedureFacade {
 
     private final EstimationModeRunner estimationMode;
     private final AlgorithmExecutionScaffolding algorithmExecutionScaffolding;
+    private final AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode;
 
     private NodeEmbeddingsProcedureFacade(
         FastRPMutateStub fastRPMutateStub,
         ApplicationsFacade applicationsFacade,
         EstimationModeRunner estimationMode,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffolding
+        AlgorithmExecutionScaffolding algorithmExecutionScaffolding,
+        AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode
     ) {
         this.fastRPMutateStub = fastRPMutateStub;
         this.applicationsFacade = applicationsFacade;
         this.estimationMode = estimationMode;
         this.algorithmExecutionScaffolding = algorithmExecutionScaffolding;
+        this.algorithmExecutionScaffoldingForStreamMode = algorithmExecutionScaffoldingForStreamMode;
     }
 
     public static NodeEmbeddingsProcedureFacade create(
         GenericStub genericStub,
         ApplicationsFacade applicationsFacade,
         EstimationModeRunner estimationModeRunner,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffolding
+        AlgorithmExecutionScaffolding algorithmExecutionScaffolding,
+        AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode
     ) {
         var fastRPMutateStub = new FastRPMutateStub(genericStub, applicationsFacade);
 
@@ -64,7 +70,8 @@ public final class NodeEmbeddingsProcedureFacade {
             fastRPMutateStub,
             applicationsFacade,
             estimationModeRunner,
-            algorithmExecutionScaffolding
+            algorithmExecutionScaffolding,
+            algorithmExecutionScaffoldingForStreamMode
         );
     }
 
@@ -100,11 +107,43 @@ public final class NodeEmbeddingsProcedureFacade {
         return Stream.of(result);
     }
 
+    public Stream<FastRPStreamResult> fastRPStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new FastRPResultBuilderForStreamMode();
+
+        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+            graphName,
+            configuration,
+            FastRPStreamConfig::of,
+            streamMode()::fastRP,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> fastRPStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            FastRPStreamConfig::of,
+            configuration -> estimationMode().fastRP(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
     private NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationMode() {
         return applicationsFacade.nodeEmbeddings().estimate();
     }
 
     private NodeEmbeddingAlgorithmsStatsModeBusinessFacade statsMode() {
         return applicationsFacade.nodeEmbeddings().stats();
+    }
+
+    private NodeEmbeddingAlgorithmsStreamModeBusinessFacade streamMode() {
+        return applicationsFacade.nodeEmbeddings().stream();
     }
 }

@@ -158,7 +158,8 @@ class AlgorithmProcedureFacadeBuilder {
             genericStub,
             applicationsFacade,
             estimationModeRunner,
-            algorithmExecutionScaffolding
+            algorithmExecutionScaffolding,
+            algorithmExecutionScaffoldingForStreamMode
         );
     }
 

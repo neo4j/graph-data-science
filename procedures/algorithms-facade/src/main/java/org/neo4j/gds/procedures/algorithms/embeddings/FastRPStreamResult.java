@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.embeddings.fastrp;
+package org.neo4j.gds.procedures.algorithms.embeddings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,11 +26,16 @@ public final class FastRPStreamResult {
     public final long nodeId;
     public final List<Double> embedding;
 
-    public FastRPStreamResult(long nodeId, float[] embedding) {
+    private FastRPStreamResult(long nodeId, List<Double> embedding) {
         this.nodeId = nodeId;
-        this.embedding = new ArrayList<>(embedding.length);
-        for (var f : embedding) {
-            this.embedding.add((double) f);
+        this.embedding = embedding;
+    }
+
+    static FastRPStreamResult create(long nodeId, float[] embeddingAsArray) {
+        var embedding = new ArrayList<Double>(embeddingAsArray.length);
+        for (var f : embeddingAsArray) {
+            embedding.add((double) f);
         }
+        return new FastRPStreamResult(nodeId, embedding);
     }
 }
