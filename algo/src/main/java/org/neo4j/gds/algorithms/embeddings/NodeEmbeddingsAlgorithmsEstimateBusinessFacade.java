@@ -20,8 +20,7 @@
 package org.neo4j.gds.algorithms.embeddings;
 
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
-import org.neo4j.gds.embeddings.fastrp.FastRPBaseConfig;
-import org.neo4j.gds.embeddings.fastrp.FastRPMemoryEstimateDefinition;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMemoryEstimateDefinition;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
@@ -31,7 +30,6 @@ import org.neo4j.gds.embeddings.hashgnn.HashGNNMemoryEstimateDefinition;
 import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecMemoryEstimateDefinition;
 import org.neo4j.gds.modelcatalogservices.ModelCatalogService;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 
 import java.util.Optional;
 
@@ -89,18 +87,6 @@ public class NodeEmbeddingsAlgorithmsEstimateBusinessFacade {
             configuration,
             configuration.relationshipWeightProperty(),
             new GraphSageTrainEstimateDefinition(configuration.toMemoryEstimateParameters())
-        );
-    }
-
-    public <C extends FastRPBaseConfig> MemoryEstimateResult fastRP(
-        Object graphNameOrConfiguration,
-        C configuration
-    ) {
-        return algorithmEstimator.estimate(
-            graphNameOrConfiguration,
-            configuration,
-            configuration.relationshipWeightProperty(),
-            new FastRPMemoryEstimateDefinition(configuration.toParameters())
         );
     }
 

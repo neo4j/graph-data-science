@@ -133,6 +133,7 @@ public final class ApplicationsFacade {
         );
 
         var nodeEmbeddingApplications = NodeEmbeddingApplications.create(
+            log,
             requestScopedDependencies,
             algorithmEstimationTemplate,
             algorithmProcessingTemplate,

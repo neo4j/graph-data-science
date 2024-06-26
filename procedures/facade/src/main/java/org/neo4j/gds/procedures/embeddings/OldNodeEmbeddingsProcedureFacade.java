@@ -25,14 +25,12 @@ import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsMutateBusines
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsTrainBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.embeddings.fastrp.FastRPProcedure;
 import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageProcedure;
 import org.neo4j.gds.procedures.embeddings.hashgnn.HashGNNProcedure;
 import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecProcedure;
 
 public class OldNodeEmbeddingsProcedureFacade {
 
-    private final FastRPProcedure fastRP;
     private final HashGNNProcedure hashGNN;
     private final Node2VecProcedure node2Vec;
     private final GraphSageProcedure graphSage;
@@ -46,13 +44,6 @@ public class OldNodeEmbeddingsProcedureFacade {
         NodeEmbeddingsAlgorithmsTrainBusinessFacade trainBusinessFacade,
         NodeEmbeddingsAlgorithmsWriteBusinessFacade writeBusinessFacade
     ) {
-
-
-        this.fastRP = new FastRPProcedure(
-            configurationCreator,
-            estimateBusinessFacade,
-            writeBusinessFacade
-        );
         this.hashGNN = new HashGNNProcedure(
             configurationCreator,
             estimateBusinessFacade,
@@ -76,10 +67,6 @@ public class OldNodeEmbeddingsProcedureFacade {
             trainBusinessFacade,
             writeBusinessFacade
         );
-    }
-
-    public FastRPProcedure fastRP() {
-        return fastRP;
     }
 
     public HashGNNProcedure hashGNN() {

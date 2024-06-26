@@ -24,31 +24,37 @@ import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsE
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsStatsModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsStreamModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsWriteModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.logging.Log;
 
 public final class NodeEmbeddingApplications {
     private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationMode;
     private final NodeEmbeddingAlgorithmsMutateModeBusinessFacade mutateMode;
     private final NodeEmbeddingAlgorithmsStatsModeBusinessFacade statsMode;
     private final NodeEmbeddingAlgorithmsStreamModeBusinessFacade streamMode;
+    private final NodeEmbeddingAlgorithmsWriteModeBusinessFacade writeMode;
 
     private NodeEmbeddingApplications(
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationMode,
         NodeEmbeddingAlgorithmsMutateModeBusinessFacade mutateMode,
         NodeEmbeddingAlgorithmsStatsModeBusinessFacade statsMode,
-        NodeEmbeddingAlgorithmsStreamModeBusinessFacade streamMode
+        NodeEmbeddingAlgorithmsStreamModeBusinessFacade streamMode,
+        NodeEmbeddingAlgorithmsWriteModeBusinessFacade writeMode
     ) {
         this.estimationMode = estimationMode;
         this.mutateMode = mutateMode;
         this.statsMode = statsMode;
         this.streamMode = streamMode;
+        this.writeMode = writeMode;
     }
 
     static NodeEmbeddingApplications create(
+        Log log,
         RequestScopedDependencies requestScopedDependencies,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
@@ -77,8 +83,15 @@ public final class NodeEmbeddingApplications {
             algorithms,
             algorithmProcessingTemplate
         );
+        var writeMode = NodeEmbeddingAlgorithmsWriteModeBusinessFacade.create(
+            log,
+            requestScopedDependencies,
+            estimationMode,
+            algorithms,
+            algorithmProcessingTemplate
+        );
 
-        return new NodeEmbeddingApplications(estimationMode, mutateMode, statsMode, streamMode);
+        return new NodeEmbeddingApplications(estimationMode, mutateMode, statsMode, streamMode, writeMode);
     }
 
     public NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimate() {
@@ -95,5 +108,9 @@ public final class NodeEmbeddingApplications {
 
     public NodeEmbeddingAlgorithmsStreamModeBusinessFacade stream() {
         return streamMode;
+    }
+
+    public NodeEmbeddingAlgorithmsWriteModeBusinessFacade write() {
+        return writeMode;
     }
 }

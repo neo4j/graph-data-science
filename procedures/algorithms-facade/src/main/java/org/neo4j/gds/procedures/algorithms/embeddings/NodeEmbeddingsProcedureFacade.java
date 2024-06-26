@@ -23,9 +23,11 @@ import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsStatsModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsStreamModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsWriteModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.embeddings.fastrp.FastRPStatsConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
+import org.neo4j.gds.embeddings.fastrp.FastRPWriteConfig;
 import org.neo4j.gds.procedures.algorithms.embeddings.stubs.FastRPMutateStub;
 import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
@@ -135,6 +137,34 @@ public final class NodeEmbeddingsProcedureFacade {
         return Stream.of(result);
     }
 
+    public Stream<DefaultNodeEmbeddingsWriteResult> fastRPWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new FastRPResultBuilderForWriteMode();
+
+        return algorithmExecutionScaffolding.runAlgorithm(
+            graphName,
+            configuration,
+            FastRPWriteConfig::of,
+            writeMode()::fastRP,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> fastRPWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            FastRPWriteConfig::of,
+            configuration -> estimationMode().fastRP(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
     private NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationMode() {
         return applicationsFacade.nodeEmbeddings().estimate();
     }
@@ -145,5 +175,9 @@ public final class NodeEmbeddingsProcedureFacade {
 
     private NodeEmbeddingAlgorithmsStreamModeBusinessFacade streamMode() {
         return applicationsFacade.nodeEmbeddings().stream();
+    }
+
+    private NodeEmbeddingAlgorithmsWriteModeBusinessFacade writeMode() {
+        return applicationsFacade.nodeEmbeddings().write();
     }
 }

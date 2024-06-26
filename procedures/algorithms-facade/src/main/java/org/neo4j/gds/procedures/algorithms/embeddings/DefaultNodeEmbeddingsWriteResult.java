@@ -17,14 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.embeddings.results;
+package org.neo4j.gds.procedures.algorithms.embeddings;
 
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
 public final class DefaultNodeEmbeddingsWriteResult {
-
     public final long nodeCount;
     public final long nodePropertiesWritten;
     public final long preProcessingMillis;
@@ -48,9 +48,21 @@ public final class DefaultNodeEmbeddingsWriteResult {
         this.configuration = configuration;
     }
 
-    @SuppressWarnings("unused")
-    public static class Builder extends AbstractResultBuilder<DefaultNodeEmbeddingsWriteResult> {
+    static DefaultNodeEmbeddingsWriteResult emptyFrom(
+        AlgorithmProcessingTimings timings,
+        Map<String, Object> configurationMap
+    ) {
+        return new DefaultNodeEmbeddingsWriteResult(
+            0,
+            0,
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.mutateOrWriteMillis,
+            configurationMap
+        );
+    }
 
+    public static class Builder extends AbstractResultBuilder<DefaultNodeEmbeddingsWriteResult> {
         @Override
         public DefaultNodeEmbeddingsWriteResult build() {
             return new DefaultNodeEmbeddingsWriteResult(
