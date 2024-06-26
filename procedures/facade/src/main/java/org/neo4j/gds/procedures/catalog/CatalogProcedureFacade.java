@@ -458,7 +458,7 @@ public class CatalogProcedureFacade {
     public Stream<GraphStreamRelationshipPropertiesResult> streamRelationshipProperties(
         String graphName,
         List<String> relationshipProperties,
-        List<String> relationshipTypes,
+        Object relationshipTypes,
         Map<String, Object> configuration
     ) {
         return streamRelationshipPropertyOrProperties(
@@ -473,7 +473,7 @@ public class CatalogProcedureFacade {
     public Stream<GraphStreamRelationshipPropertyResult> streamRelationshipProperty(
         String graphName,
         String relationshipProperty,
-        List<String> relationshipTypes,
+        Object relationshipTypes,
         Map<String, Object> configuration
     ) {
         return streamRelationshipPropertyOrProperties(
@@ -492,7 +492,7 @@ public class CatalogProcedureFacade {
 
     public Stream<TopologyResult> streamRelationships(
         String graphName,
-        List<String> relationshipTypes,
+        Object relationshipTypes,
         Map<String, Object> configuration
     ) {
         return catalog().streamRelationships(
@@ -657,7 +657,7 @@ public class CatalogProcedureFacade {
     private <T> Stream<T> streamRelationshipPropertyOrProperties(
         String graphName,
         List<String> relationshipProperties,
-        List<String> relationshipTypes,
+        Object relationshipTypes,
         Map<String, Object> configuration,
         GraphStreamRelationshipPropertyOrPropertiesResultProducer<T> outputMarshaller
     ) {

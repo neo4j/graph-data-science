@@ -88,7 +88,7 @@ public interface GraphStreamRelationshipPropertiesConfig extends GraphStreamRela
     static GraphStreamRelationshipPropertiesConfig of(
         String graphName,
         List<String> relationshipProperties,
-        List<String> relationshipTypes,
+        Object relationshipTypes,
         CypherMapWrapper config
     ) {
         return new GraphStreamRelationshipPropertiesConfigImpl(

@@ -25,6 +25,7 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.ConcurrencyConfig;
+import org.neo4j.gds.config.UserInputAsStringOrListOfString;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.ArrayList;
@@ -43,10 +44,14 @@ public interface GraphStreamRelationshipsConfig extends BaseConfig, ConcurrencyC
     Optional<String> graphName();
 
     @Configuration.Parameter
+    @Configuration.ConvertWith(method = "org.neo4j.gds.applications.graphstorecatalog.GraphStreamRelationshipsConfig#parseRelationshipTypes")
     default List<String> relationshipTypes() {
         return Collections.singletonList(ElementProjection.PROJECT_ALL);
     }
 
+    static List<String> parseRelationshipTypes(Object userInput) {
+        return UserInputAsStringOrListOfString.parse(userInput, "relationshipTypes");
+    }
     @Configuration.Ignore
     default Collection<RelationshipType> relationshipTypeIdentifiers(GraphStore graphStore) {
         return relationshipTypes().contains(ElementProjection.PROJECT_ALL)
@@ -73,7 +78,7 @@ public interface GraphStreamRelationshipsConfig extends BaseConfig, ConcurrencyC
 
     static GraphStreamRelationshipsConfig of(
         String graphName,
-        List<String> relationshipTypes,
+        Object relationshipTypes,
         CypherMapWrapper config
     ) {
         return new GraphStreamRelationshipsConfigImpl(

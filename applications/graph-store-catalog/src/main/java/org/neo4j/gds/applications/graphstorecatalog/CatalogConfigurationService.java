@@ -245,7 +245,7 @@ public class CatalogConfigurationService {
     GraphStreamRelationshipPropertiesConfig parseGraphStreamRelationshipPropertiesConfiguration(
         GraphName graphName,
         List<String> relationshipProperties,
-        List<String> relationshipTypes,
+        Object relationshipTypes,
         Map<String, Object> rawConfiguration
     ) {
         var cypherConfig = CypherMapWrapper.create(rawConfiguration);
@@ -264,7 +264,7 @@ public class CatalogConfigurationService {
 
     GraphStreamRelationshipsConfig parseGraphStreamRelationshipsConfiguration(
         GraphName graphName,
-        List<String> relationshipTypes,
+        Object relationshipTypes,
         Map<String, Object> rawConfiguration
     ) {
         var cypherConfig = CypherMapWrapper.create(rawConfiguration);

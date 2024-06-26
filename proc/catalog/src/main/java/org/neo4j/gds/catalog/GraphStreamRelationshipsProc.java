@@ -42,7 +42,7 @@ public class GraphStreamRelationshipsProc {
     @Description(STREAM_RELATIONSHIPS_DESCRIPTION)
     public Stream<TopologyResult> streamRelationships(
         @Name(value = "graphName") String graphName,
-        @Name(value = "relationshipTypes", defaultValue = "['*']") List<String> relationshipTypes,
+        @Name(value = "relationshipTypes", defaultValue = "['*']") Object relationshipTypes,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return facade.catalog().streamRelationships(graphName, relationshipTypes, configuration);

@@ -46,7 +46,7 @@ public class GraphStreamRelationshipPropertiesProc {
     public Stream<GraphStreamRelationshipPropertiesResult> streamRelationshipProperties(
         @Name(value = "graphName") String graphName,
         @Name(value = "relationshipProperties") List<String> relationshipProperties,
-        @Name(value = "relationshipTypes", defaultValue = "['*']") List<String> relationshipTypes,
+        @Name(value = "relationshipTypes", defaultValue = "['*']") Object relationshipTypes,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return facade.catalog().streamRelationshipProperties(
@@ -85,7 +85,7 @@ public class GraphStreamRelationshipPropertiesProc {
     public Stream<GraphStreamRelationshipPropertyResult> streamRelationshipProperty(
         @Name(value = "graphName") String graphName,
         @Name(value = "relationshipProperty") String relationshipProperty,
-        @Name(value = "relationshipTypes", defaultValue = "['*']") List<String> relationshipTypes,
+        @Name(value = "relationshipTypes", defaultValue = "['*']") Object relationshipTypes,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return facade.catalog().streamRelationshipProperty(
