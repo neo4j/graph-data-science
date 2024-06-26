@@ -9,7 +9,7 @@ content:
     # Includes previous version, current, and preview (master).
     # When updating this, update the version in the
     # `page-add-notes-versions` below too.
-    branches: ['2.5', '2.6', '2.7']
+    branches: ['2.5', '2.6', '2.7', '2.8']
     start_path: public/doc
     include: public/doc/
     exclude:
@@ -35,7 +35,7 @@ antora:
     repo: https://github.com/neo4j/graph-data-science
     start_path: doc
     link_to_edit_page: true
-    
+
 
 asciidoc:
   extensions:
