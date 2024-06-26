@@ -23,6 +23,7 @@ import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithms;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsStatsModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
@@ -33,15 +34,18 @@ public final class NodeEmbeddingApplications {
     private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationMode;
     private final NodeEmbeddingAlgorithmsMutateModeBusinessFacade mutateMode;
     private final NodeEmbeddingAlgorithmsStatsModeBusinessFacade statsMode;
+    private final NodeEmbeddingAlgorithmsStreamModeBusinessFacade streamMode;
 
     private NodeEmbeddingApplications(
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationMode,
         NodeEmbeddingAlgorithmsMutateModeBusinessFacade mutateMode,
-        NodeEmbeddingAlgorithmsStatsModeBusinessFacade statsMode
+        NodeEmbeddingAlgorithmsStatsModeBusinessFacade statsMode,
+        NodeEmbeddingAlgorithmsStreamModeBusinessFacade streamMode
     ) {
         this.estimationMode = estimationMode;
         this.mutateMode = mutateMode;
         this.statsMode = statsMode;
+        this.streamMode = streamMode;
     }
 
     static NodeEmbeddingApplications create(
@@ -68,8 +72,13 @@ public final class NodeEmbeddingApplications {
             algorithms,
             algorithmProcessingTemplate
         );
+        var streamMode = new NodeEmbeddingAlgorithmsStreamModeBusinessFacade(
+            estimationMode,
+            algorithms,
+            algorithmProcessingTemplate
+        );
 
-        return new NodeEmbeddingApplications(estimationMode, mutateMode, statsMode);
+        return new NodeEmbeddingApplications(estimationMode, mutateMode, statsMode, streamMode);
     }
 
     public NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimate() {
@@ -82,5 +91,9 @@ public final class NodeEmbeddingApplications {
 
     public NodeEmbeddingAlgorithmsStatsModeBusinessFacade stats() {
         return statsMode;
+    }
+
+    public NodeEmbeddingAlgorithmsStreamModeBusinessFacade stream() {
+        return streamMode;
     }
 }

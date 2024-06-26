@@ -51,7 +51,6 @@ public class OldNodeEmbeddingsProcedureFacade {
         this.fastRP = new FastRPProcedure(
             configurationCreator,
             estimateBusinessFacade,
-            streamBusinessFacade,
             writeBusinessFacade
         );
         this.hashGNN = new HashGNNProcedure(
