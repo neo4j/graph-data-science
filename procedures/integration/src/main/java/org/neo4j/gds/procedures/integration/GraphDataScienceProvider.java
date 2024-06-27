@@ -23,8 +23,8 @@ import org.neo4j.configuration.Config;
 import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
-import org.neo4j.gds.applications.algorithms.machinery.ProcedureContext;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
@@ -149,16 +149,15 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             log
         );
 
-        var procedureContext = ProcedureContext.builder()
+        var procedureContext = WriteContext.builder()
             .with(nodeLabelExporterBuilder)
             .with(nodePropertyExporterBuilder)
-            .with(procedureReturnColumns)
             .with(relationshipExporterBuilder)
             .with(relationshipPropertiesExporterBuilder)
             .with(relationshipStreamExporterBuilder)
             .build();
 
-        var requestScopedDependencies = RequestScopedDependencies.<ProcedureContext>builder()
+        var requestScopedDependencies = RequestScopedDependencies.builder()
             .with(databaseId)
             .with(graphLoaderContext)
             .with(taskRegistryFactory)
@@ -182,6 +181,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             kernelTransaction,
             requestScopedDependencies,
             procedureContext,
+            procedureReturnColumns,
             catalogProcedureFacadeFactory,
             graphDatabaseService,
             procedureTransactionAccessor.getProcedureTransaction(context),

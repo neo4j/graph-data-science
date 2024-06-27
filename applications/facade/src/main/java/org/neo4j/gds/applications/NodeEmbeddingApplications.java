@@ -28,9 +28,9 @@ import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsW
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
-import org.neo4j.gds.applications.algorithms.machinery.ProcedureContext;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.logging.Log;
 
 public final class NodeEmbeddingApplications {
@@ -57,7 +57,7 @@ public final class NodeEmbeddingApplications {
     static NodeEmbeddingApplications create(
         Log log,
         RequestScopedDependencies requestScopedDependencies,
-        ProcedureContext procedureContext,
+        WriteContext writeContext,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
         ProgressTrackerCreator progressTrackerCreator,
@@ -88,7 +88,7 @@ public final class NodeEmbeddingApplications {
         var writeMode = NodeEmbeddingAlgorithmsWriteModeBusinessFacade.create(
             log,
             requestScopedDependencies,
-            procedureContext,
+            writeContext,
             estimationMode,
             algorithms,
             algorithmProcessingTemplate

@@ -23,10 +23,11 @@ import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
-import org.neo4j.gds.applications.algorithms.machinery.ProcedureContext;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
@@ -87,7 +88,8 @@ public class AlgorithmProcedureFacadeBuilderFactory {
         GraphDatabaseService graphDatabaseService,
         AlgorithmMetaDataSetter algorithmMetaDataSetter,
         ApplicationsFacade applicationsFacade,
-        ProcedureContext procedureContext
+        WriteContext writeContext,
+        ProcedureReturnColumns procedureReturnColumns
     ) {
         /*
          * GDS services derived from Procedure Context.
@@ -98,10 +100,9 @@ public class AlgorithmProcedureFacadeBuilderFactory {
         var algorithmMemoryValidationService = new AlgorithmMemoryValidationService(log, useMaxMemoryEstimation);
         var mutateNodePropertyService = new MutateNodePropertyService(log);
         var nodeLookup = new TransactionNodeLookup(kernelTransaction);
-        var procedureReturnColumns = procedureContext.getProcedureReturnColumns();
 
         // Second layer
-        var writeNodePropertyService = new WriteNodePropertyService(log, requestScopedDependencies,procedureContext);
+        var writeNodePropertyService = new WriteNodePropertyService(log, requestScopedDependencies, writeContext);
 
         // Third layer
         var databaseGraphStoreEstimationService = new DatabaseGraphStoreEstimationService(

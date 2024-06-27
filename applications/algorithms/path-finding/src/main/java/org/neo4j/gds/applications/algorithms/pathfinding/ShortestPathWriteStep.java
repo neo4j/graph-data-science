@@ -27,8 +27,8 @@ import org.neo4j.gds.api.ImmutableExportedRelationship;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.ProcedureContext;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.config.JobIdConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
@@ -56,18 +56,18 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
     MutateOrWriteStep<PathFindingResult, RelationshipsWritten> {
     private final Log log;
     private final RequestScopedDependencies requestScopedDependencies;
-    private final ProcedureContext procedureContext;
+    private final WriteContext writeContext;
     private final CONFIGURATION configuration;
 
     ShortestPathWriteStep(
         Log log,
         RequestScopedDependencies requestScopedDependencies,
-        ProcedureContext procedureContext,
+        WriteContext writeContext,
         CONFIGURATION configuration
     ) {
         this.log = log;
         this.requestScopedDependencies = requestScopedDependencies;
-        this.procedureContext = procedureContext;
+        this.writeContext = writeContext;
         this.configuration = configuration;
     }
 
@@ -120,7 +120,7 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
                 .orElse(relationshipStream);
 
             // configure the exporter
-            var relationshipStreamExporter = procedureContext.getRelationshipStreamExporterBuilder()
+            var relationshipStreamExporter = writeContext.getRelationshipStreamExporterBuilder()
                 .withConcurrency(configuration.writeConcurrency())
                 .withArrowConnectionInfo(
                     configuration.arrowConnectionInfo(),

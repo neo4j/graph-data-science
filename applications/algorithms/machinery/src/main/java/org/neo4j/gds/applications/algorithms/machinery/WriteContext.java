@@ -27,20 +27,18 @@ import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipPropertiesExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 
-public class ProcedureContext {
+public class WriteContext {
 
     private final NodeLabelExporterBuilder nodeLabelExporterBuilder;
     private final NodePropertyExporterBuilder nodePropertyExporterBuilder;
-    private final ProcedureReturnColumns procedureReturnColumns;
     private final RelationshipExporterBuilder relationshipExporterBuilder;
     private final RelationshipPropertiesExporterBuilder relationshipPropertiesExporterBuilder;
     private final RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
 
 
-    private ProcedureContext(
+    private WriteContext(
         NodeLabelExporterBuilder nodeLabelExporterBuilder,
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
-        ProcedureReturnColumns procedureReturnColumns,
         RelationshipExporterBuilder relationshipExporterBuilder,
         RelationshipPropertiesExporterBuilder relationshipPropertiesExporterBuilder,
         RelationshipStreamExporterBuilder relationshipStreamExporterBuilder
@@ -48,7 +46,6 @@ public class ProcedureContext {
 
         this.nodeLabelExporterBuilder = nodeLabelExporterBuilder;
         this.nodePropertyExporterBuilder = nodePropertyExporterBuilder;
-        this.procedureReturnColumns = procedureReturnColumns;
         this.relationshipExporterBuilder = relationshipExporterBuilder;
         this.relationshipPropertiesExporterBuilder = relationshipPropertiesExporterBuilder;
         this.relationshipStreamExporterBuilder = relationshipStreamExporterBuilder;
@@ -62,9 +59,6 @@ public class ProcedureContext {
         return nodePropertyExporterBuilder;
     }
 
-    public ProcedureReturnColumns getProcedureReturnColumns() {
-        return procedureReturnColumns;
-    }
 
     public RelationshipExporterBuilder getRelationshipExporterBuilder() {
         return relationshipExporterBuilder;
@@ -101,11 +95,6 @@ public class ProcedureContext {
             return this;
         }
 
-        public ProcedureContextBuilder with(ProcedureReturnColumns procedureReturnColumns) {
-            this.procedureReturnColumns = procedureReturnColumns;
-            return this;
-        }
-
         public ProcedureContextBuilder with(RelationshipExporterBuilder relationshipExporterBuilder) {
             this.relationshipExporterBuilder = relationshipExporterBuilder;
             return this;
@@ -122,11 +111,10 @@ public class ProcedureContext {
         }
 
 
-        public ProcedureContext build() {
-            return new ProcedureContext(
+        public WriteContext build() {
+            return new WriteContext(
                 nodeLabelExporterBuilder,
                 nodePropertyExporterBuilder,
-                procedureReturnColumns,
                 relationshipExporterBuilder,
                 relationshipPropertiesExporterBuilder,
                 relationshipStreamExporterBuilder

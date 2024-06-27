@@ -49,8 +49,8 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
-import org.neo4j.gds.applications.algorithms.machinery.ProcedureContext;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
@@ -527,7 +527,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
             new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
             null,
             requestScopedDependencies,
-            ProcedureContext.builder().build()
+            WriteContext.builder().build()
         );
         var communityProcedureFacade = CommunityProcedureFacade.create(
             genericStub,

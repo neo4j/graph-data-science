@@ -26,9 +26,9 @@ import org.neo4j.gds.applications.algorithms.machinery.DefaultAlgorithmProcessin
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
-import org.neo4j.gds.applications.algorithms.machinery.ProcedureContext;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.applications.graphstorecatalog.DefaultCatalogBusinessFacade;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -83,7 +83,7 @@ public final class ApplicationsFacade {
         AlgorithmMetricsService algorithmMetricsService,
         ProjectionMetricsService projectionMetricsService,
         RequestScopedDependencies requestScopedDependencies,
-        ProcedureContext procedureContext
+        WriteContext writeContext
     ) {
         var catalogBusinessFacade = createCatalogBusinessFacade(
             log,
@@ -119,7 +119,7 @@ public final class ApplicationsFacade {
         var centralityApplications = CentralityApplications.create(
             log,
             requestScopedDependencies,
-            procedureContext,
+            writeContext,
             algorithmEstimationTemplate,
             algorithmProcessingTemplate,
             progressTrackerCreator,
@@ -129,7 +129,7 @@ public final class ApplicationsFacade {
         var communityApplications = CommunityApplications.create(
             log,
             requestScopedDependencies,
-            procedureContext,
+            writeContext,
             algorithmEstimationTemplate,
             algorithmProcessingTemplate,
             progressTrackerCreator,
@@ -139,7 +139,7 @@ public final class ApplicationsFacade {
         var nodeEmbeddingApplications = NodeEmbeddingApplications.create(
             log,
             requestScopedDependencies,
-            procedureContext,
+            writeContext,
             algorithmEstimationTemplate,
             algorithmProcessingTemplate,
             progressTrackerCreator,
@@ -149,13 +149,13 @@ public final class ApplicationsFacade {
         var pathFindingApplications = PathFindingApplications.create(
             log,
             requestScopedDependencies,
-            procedureContext,
+            writeContext,
             algorithmEstimationTemplate,
             algorithmProcessingTemplate,
             progressTrackerCreator
         );
 
-        var writeRelationshipService = new WriteRelationshipService(log, requestScopedDependencies,procedureContext);
+        var writeRelationshipService = new WriteRelationshipService(log, requestScopedDependencies, writeContext);
 
         var similarityApplications = SimilarityApplications.create(
             log,

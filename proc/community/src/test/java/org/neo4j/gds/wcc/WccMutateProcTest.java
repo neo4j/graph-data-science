@@ -49,8 +49,8 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
-import org.neo4j.gds.applications.algorithms.machinery.ProcedureContext;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
@@ -579,7 +579,7 @@ class WccMutateProcTest extends BaseProcTest {
         when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
 
         var graphStoreCatalogService = new GraphStoreCatalogService();
-        var requestScopedDependencies = RequestScopedDependencies.<ProcedureContext>builder()
+        var requestScopedDependencies = RequestScopedDependencies.builder()
             .with(DatabaseId.of(db.databaseName()))
             .with(GraphLoaderContext.NULL_CONTEXT)
             .with(TaskRegistryFactory.empty())
@@ -588,7 +588,7 @@ class WccMutateProcTest extends BaseProcTest {
             .with(EmptyUserLogRegistryFactory.INSTANCE)
             .build();
         var applicationsFacade = ApplicationsFacade.create(logMock, Optional.empty(), Optional.empty(), graphStoreCatalogService, MemoryGuard.DISABLED, new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()), new ProjectionMetricsService(new PassthroughExecutionMetricRegistrar()), requestScopedDependencies,
-            ProcedureContext.builder().build());
+            WriteContext.builder().build());
         var configurationParser = new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance);
         var configurationCreator = new ConfigurationCreator(configurationParser, null, requestScopedDependencies.getUser());
         var genericStub = GenericStub.create(

@@ -24,8 +24,8 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.applications.algorithms.machinery.ProcedureContext;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.JobId;
@@ -36,11 +36,12 @@ import java.util.Optional;
 public class WriteRelationshipService {
     private final Log log;
     private final RequestScopedDependencies requestScopedDependencies;
-    private final  ProcedureContext procedureContext;
-    public WriteRelationshipService(Log log, RequestScopedDependencies requestScopedDependencies, ProcedureContext procedureContext) {
+    private final WriteContext writeContext;
+
+    public WriteRelationshipService(Log log, RequestScopedDependencies requestScopedDependencies, WriteContext writeContext) {
         this.log = log;
         this.requestScopedDependencies = requestScopedDependencies;
-        this.procedureContext  =procedureContext;
+        this.writeContext = writeContext;
     }
 
     public WriteRelationshipResult write(
@@ -60,7 +61,7 @@ public class WriteRelationshipService {
             writeRelationshipType,
             writeProperty,
             requestScopedDependencies.getTaskRegistryFactory(),
-            procedureContext.getRelationshipExporterBuilder(),
+            writeContext.getRelationshipExporterBuilder(),
             graph,
             graphStore,
             rootIdMap,

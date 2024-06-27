@@ -49,8 +49,8 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
-import org.neo4j.gds.applications.algorithms.machinery.ProcedureContext;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
@@ -502,7 +502,7 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
 
         final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
         var configurationParser = new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance);
-        var requestScopedDependencies = RequestScopedDependencies.<ProcedureContext>builder()
+        var requestScopedDependencies = RequestScopedDependencies.builder()
             .with(DatabaseId.of(db.databaseName()))
             .with(TaskRegistryFactory.empty())
             .with(TerminationFlag.RUNNING_TRUE)
@@ -531,7 +531,7 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
             new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
             new ProjectionMetricsService(new PassthroughExecutionMetricRegistrar()),
             requestScopedDependencies,
-            ProcedureContext.builder().build()
+            WriteContext.builder().build()
         );
         var communityProcedureFacade = CommunityProcedureFacade.create(
             genericStub,

@@ -23,9 +23,9 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmComputation;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.ProcedureContext;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -69,7 +69,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
 
     private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
     private final RequestScopedDependencies requestScopedDependencies;
-    private final ProcedureContext procedureContext;
+    private final WriteContext writeContext;
     private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final PathFindingAlgorithms pathFindingAlgorithms;
 
@@ -77,14 +77,14 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         Log log,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
         RequestScopedDependencies requestScopedDependencies,
-        ProcedureContext procedureContext,
+        WriteContext writeContext,
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         PathFindingAlgorithms pathFindingAlgorithms
     ) {
         this.log = log;
         this.algorithmProcessingTemplate = algorithmProcessingTemplate;
         this.requestScopedDependencies = requestScopedDependencies;
-        this.procedureContext = procedureContext;
+        this.writeContext = writeContext;
         this.estimationFacade = estimationFacade;
         this.pathFindingAlgorithms = pathFindingAlgorithms;
     }
@@ -97,7 +97,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         var writeStep = new BellmanFordWriteStep(
             log,
             requestScopedDependencies,
-            procedureContext,
+            writeContext,
             configuration
         );
 
@@ -135,7 +135,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         var writeStep = new KSpanningTreeWriteStep(
             log,
             requestScopedDependencies,
-            procedureContext,
+            writeContext,
             configuration
         );
 
@@ -218,7 +218,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         var writeStep = new SpanningTreeWriteStep(
             log,
             requestScopedDependencies,
-            procedureContext,
+            writeContext,
             configuration
         );
 
@@ -238,7 +238,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         SteinerTreeWriteConfig configuration,
         ResultBuilder<SteinerTreeWriteConfig, SteinerTreeResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
-        var writeStep = new SteinerTreeWriteStep(requestScopedDependencies, procedureContext, configuration);
+        var writeStep = new SteinerTreeWriteStep(requestScopedDependencies, writeContext, configuration);
 
         return runAlgorithmAndWrite(
             graphName,
@@ -265,7 +265,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         var writeStep = new ShortestPathWriteStep<>(
             log,
             requestScopedDependencies,
-            procedureContext,
+            writeContext,
             configuration
         );
 

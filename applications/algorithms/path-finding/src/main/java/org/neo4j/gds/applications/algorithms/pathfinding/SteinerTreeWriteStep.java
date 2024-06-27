@@ -24,8 +24,8 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.ProcedureContext;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -37,16 +37,16 @@ import org.neo4j.gds.steiner.SteinerTreeWriteConfig;
 class SteinerTreeWriteStep implements MutateOrWriteStep<SteinerTreeResult, RelationshipsWritten> {
     private final RequestScopedDependencies requestScopedDependencies;
     private final SteinerTreeWriteConfig configuration;
-    private final ProcedureContext procedureContext;
+    private final WriteContext writeContext;
 
     SteinerTreeWriteStep(
         RequestScopedDependencies requestScopedDependencies,
-        ProcedureContext procedureContext,
+        WriteContext writeContext,
         SteinerTreeWriteConfig configuration
     ) {
         this.requestScopedDependencies = requestScopedDependencies;
         this.configuration = configuration;
-        this.procedureContext=procedureContext;
+        this.writeContext = writeContext;
     }
 
     @Override
@@ -69,7 +69,7 @@ class SteinerTreeWriteStep implements MutateOrWriteStep<SteinerTreeResult, Relat
         );
         var spanningGraph = new SpanningGraph(graph, spanningTree);
 
-        var relationshipExporter = procedureContext.getRelationshipExporterBuilder()
+        var relationshipExporter = writeContext.getRelationshipExporterBuilder()
             .withGraph(spanningGraph)
             .withIdMappingOperator(spanningGraph::toOriginalNodeId)
             .withTerminationFlag(requestScopedDependencies.getTerminationFlag())

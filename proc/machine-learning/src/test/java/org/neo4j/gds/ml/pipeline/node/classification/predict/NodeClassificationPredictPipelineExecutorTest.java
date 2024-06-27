@@ -34,8 +34,8 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.applications.ApplicationsFacade;
-import org.neo4j.gds.applications.algorithms.machinery.ProcedureContext;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -426,7 +426,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
      * But let's be honest, there is enough work in front of us that such a fix is lower priority right now.
      */
     private static AlgorithmsProcedureFacade createAlgorithmsProcedureFacade() {
-        var requestScopedDependencies = RequestScopedDependencies.<ProcedureContext>builder()
+        var requestScopedDependencies = RequestScopedDependencies.builder()
             .with(TerminationFlag.RUNNING_TRUE)
             .build();
         var applicationsFacade = ApplicationsFacade.create(
@@ -438,7 +438,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             null,
             null,
             requestScopedDependencies,
-            ProcedureContext.builder().build()
+            WriteContext.builder().build()
         );
         var configurationParser = new ConfigurationParser(null, null);
         var genericStub = GenericStub.create(null, null, null, null, configurationParser, requestScopedDependencies);

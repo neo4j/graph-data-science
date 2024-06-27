@@ -24,8 +24,8 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.ProcedureContext;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -37,19 +37,19 @@ import org.neo4j.gds.spanningtree.SpanningTree;
 class KSpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree, Void> {
     private final Log log;
     private final RequestScopedDependencies requestScopedDependencies;
-    private final ProcedureContext procedureContext;
+    private final WriteContext writeContext;
     private final KSpanningTreeWriteConfig configuration;
 
 
     KSpanningTreeWriteStep(
         Log log,
         RequestScopedDependencies requestScopedDependencies,
-        ProcedureContext procedureContext,
+        WriteContext writeContext,
         KSpanningTreeWriteConfig configuration
     ) {
         this.log = log;
         this.requestScopedDependencies = requestScopedDependencies;
-        this.procedureContext = procedureContext;
+        this.writeContext = writeContext;
         this.configuration = configuration;
     }
 
@@ -70,7 +70,7 @@ class KSpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree, Void> {
             requestScopedDependencies.getTaskRegistryFactory()
         );
 
-        var nodePropertyExporter = procedureContext.getNodePropertyExporterBuilder()
+        var nodePropertyExporter = writeContext.getNodePropertyExporterBuilder()
             .withIdMap(graph)
             .withTerminationFlag(requestScopedDependencies.getTerminationFlag())
             .withProgressTracker(progressTracker)

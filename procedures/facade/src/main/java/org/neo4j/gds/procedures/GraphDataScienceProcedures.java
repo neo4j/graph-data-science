@@ -20,11 +20,12 @@
 package org.neo4j.gds.procedures;
 
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
-import org.neo4j.gds.applications.algorithms.machinery.ProcedureContext;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
@@ -92,7 +93,8 @@ public class GraphDataScienceProcedures {
         AlgorithmMetaDataSetter algorithmMetaDataSetter,
         KernelTransaction kernelTransaction,
         RequestScopedDependencies requestScopedDependencies,
-        ProcedureContext procedureContext,
+        WriteContext writeContext,
+        ProcedureReturnColumns procedureReturnColumns,
         CatalogProcedureFacadeFactory catalogProcedureFacadeFactory,
         GraphDatabaseService graphDatabaseService,
         Transaction transaction,
@@ -115,7 +117,7 @@ public class GraphDataScienceProcedures {
             algorithmMetricsService,
             projectionMetricsService,
             requestScopedDependencies,
-            procedureContext
+            writeContext
         );
 
         var catalogProcedureFacade = catalogProcedureFacadeFactory.createCatalogProcedureFacade(
@@ -124,7 +126,8 @@ public class GraphDataScienceProcedures {
             kernelTransaction,
             transaction,
             requestScopedDependencies,
-            procedureContext
+            writeContext,
+            procedureReturnColumns
         );
 
         var algorithmProcedureFacadeBuilder = algorithmProcedureFacadeBuilderFactory.create(
@@ -135,7 +138,8 @@ public class GraphDataScienceProcedures {
             graphDatabaseService,
             algorithmMetaDataSetter,
             applicationsFacade,
-            procedureContext
+            writeContext,
+            procedureReturnColumns
         );
 
         var centralityProcedureFacade = algorithmProcedureFacadeBuilder.createCentralityProcedureFacade();

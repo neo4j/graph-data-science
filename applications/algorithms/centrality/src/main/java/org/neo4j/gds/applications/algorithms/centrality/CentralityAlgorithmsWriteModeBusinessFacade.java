@@ -22,9 +22,9 @@ package org.neo4j.gds.applications.algorithms.centrality;
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
-import org.neo4j.gds.applications.algorithms.machinery.ProcedureContext;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
@@ -71,12 +71,12 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
     public static CentralityAlgorithmsWriteModeBusinessFacade create(
         Log log,
         RequestScopedDependencies requestScopedDependencies,
-        ProcedureContext procedureContext,
+        WriteContext writeContext,
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         CentralityAlgorithms centralityAlgorithms,
         AlgorithmProcessingTemplate algorithmProcessingTemplate
     ) {
-        var writeNodePropertyService = new WriteNodePropertyService(log, requestScopedDependencies,procedureContext);
+        var writeNodePropertyService = new WriteNodePropertyService(log, requestScopedDependencies, writeContext);
         var writeToDatabase = new WriteToDatabase(writeNodePropertyService);
 
         return new CentralityAlgorithmsWriteModeBusinessFacade(
