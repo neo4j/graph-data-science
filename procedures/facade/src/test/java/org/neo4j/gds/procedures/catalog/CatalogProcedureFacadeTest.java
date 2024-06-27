@@ -45,6 +45,7 @@ import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.applications.ApplicationsFacadeBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.ProcedureContext;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.config.GraphProjectConfig;
@@ -74,7 +75,7 @@ class CatalogProcedureFacadeTest {
     void shouldDetermineIfGraphExists() {
         var businessFacade = mock(CatalogBusinessFacade.class);
         var catalogFacade = new CatalogProcedureFacade(
-            RequestScopedDependencies.builder()
+            RequestScopedDependencies.<ProcedureContext>builder()
                 .with(DatabaseId.of("current database"))
                 .with(new User("current user", false))
                 .build(),
@@ -108,7 +109,7 @@ class CatalogProcedureFacadeTest {
         var userLogStore = mock(UserLogStore.class);
         var businessFacade = mock(CatalogBusinessFacade.class);
         var catalogFacade = new CatalogProcedureFacade(
-            RequestScopedDependencies.builder()
+            RequestScopedDependencies.<ProcedureContext>builder()
                 .with(DatabaseId.of("current database"))
                 .with(new User("current user", false))
                 .with(userLogStore)
@@ -135,9 +136,11 @@ class CatalogProcedureFacadeTest {
     void shouldListGraphsWithoutDegreeDistribution() {
         var procedureReturnColumns = mock(ProcedureReturnColumns.class);
         var businessFacade = mock(CatalogBusinessFacade.class);
+
+        var procedureContext =  ProcedureContext.builder().with(procedureReturnColumns).build();
         var catalogFacade = new CatalogProcedureFacade(
-            RequestScopedDependencies.builder()
-                .with(procedureReturnColumns)
+            RequestScopedDependencies.<ProcedureContext>builder()
+                .with(procedureContext)
                 .with(new User("Bob", false))
                 .build(),
             null,
@@ -168,9 +171,11 @@ class CatalogProcedureFacadeTest {
     void shouldListGraphsWithDegreeDistribution() {
         var procedureReturnColumns = mock(ProcedureReturnColumns.class);
         var businessFacade = mock(CatalogBusinessFacade.class);
+        var procedureContext =  ProcedureContext.builder().with(procedureReturnColumns).build();
+
         var catalogFacade = new CatalogProcedureFacade(
-            RequestScopedDependencies.builder()
-                .with(procedureReturnColumns)
+            RequestScopedDependencies.<ProcedureContext>builder()
+                .with(procedureContext)
                 .with(new User("Bob", false))
                 .build(),
             null,
@@ -213,9 +218,11 @@ class CatalogProcedureFacadeTest {
     void shouldListGraphsWithoutMemoryUsage() {
         var procedureReturnColumns = mock(ProcedureReturnColumns.class);
         var businessFacade = mock(CatalogBusinessFacade.class);
+        var procedureContext =  ProcedureContext.builder().with(procedureReturnColumns).build();
+
         var catalogFacade = new CatalogProcedureFacade(
-            RequestScopedDependencies.builder()
-                .with(procedureReturnColumns)
+            RequestScopedDependencies.<ProcedureContext>builder()
+                .with(procedureContext)
                 .with(new User("Bob", false))
                 .build(),
             null,
@@ -249,9 +256,11 @@ class CatalogProcedureFacadeTest {
     void shouldListGraphsWithMemoryUsage(String returnColumn) {
         var procedureReturnColumns = mock(ProcedureReturnColumns.class);
         var businessFacade = mock(CatalogBusinessFacade.class);
+        var procedureContext =  ProcedureContext.builder().with(procedureReturnColumns).build();
+
         var catalogFacade = new CatalogProcedureFacade(
-            RequestScopedDependencies.builder()
-                .with(procedureReturnColumns)
+            RequestScopedDependencies.<ProcedureContext>builder()
+                .with(procedureContext)
                 .with(new User("Bob", false))
                 .build(),
             null,

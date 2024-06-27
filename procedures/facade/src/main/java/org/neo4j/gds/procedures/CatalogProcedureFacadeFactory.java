@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures;
 
 import org.neo4j.gds.applications.ApplicationsFacade;
+import org.neo4j.gds.applications.algorithms.machinery.ProcedureContext;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.graphstorecatalog.GraphProjectMemoryUsageService;
 import org.neo4j.gds.compat.Neo4jProxy;
@@ -63,7 +64,7 @@ public class CatalogProcedureFacadeFactory {
         GraphDatabaseService graphDatabaseService,
         KernelTransaction kernelTransaction,
         Transaction procedureTransaction,
-        RequestScopedDependencies requestScopedDependencies
+        RequestScopedDependencies<ProcedureContext> requestScopedDependencies
     ) {
         // Derived data and services
         var graphProjectMemoryUsageService = new GraphProjectMemoryUsageService(log, graphDatabaseService);

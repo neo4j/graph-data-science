@@ -24,6 +24,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.ProcedureContext;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.utils.progress.JobId;
@@ -34,11 +35,11 @@ import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.steiner.SteinerTreeWriteConfig;
 
 class SteinerTreeWriteStep implements MutateOrWriteStep<SteinerTreeResult, RelationshipsWritten> {
-    private final RequestScopedDependencies requestScopedDependencies;
+    private final RequestScopedDependencies<ProcedureContext> requestScopedDependencies;
     private final SteinerTreeWriteConfig configuration;
 
     SteinerTreeWriteStep(
-        RequestScopedDependencies requestScopedDependencies,
+        RequestScopedDependencies<ProcedureContext> requestScopedDependencies,
         SteinerTreeWriteConfig configuration
     ) {
         this.requestScopedDependencies = requestScopedDependencies;
@@ -65,7 +66,7 @@ class SteinerTreeWriteStep implements MutateOrWriteStep<SteinerTreeResult, Relat
         );
         var spanningGraph = new SpanningGraph(graph, spanningTree);
 
-        var relationshipExporter = requestScopedDependencies.getRelationshipExporterBuilder()
+        var relationshipExporter = requestScopedDependencies.getDomainContext().getRelationshipExporterBuilder()
             .withGraph(spanningGraph)
             .withIdMappingOperator(spanningGraph::toOriginalNodeId)
             .withTerminationFlag(requestScopedDependencies.getTerminationFlag())

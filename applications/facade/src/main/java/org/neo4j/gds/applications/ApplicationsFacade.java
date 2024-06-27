@@ -26,6 +26,7 @@ import org.neo4j.gds.applications.algorithms.machinery.DefaultAlgorithmProcessin
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
+import org.neo4j.gds.applications.algorithms.machinery.ProcedureContext;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
@@ -81,7 +82,7 @@ public final class ApplicationsFacade {
         MemoryGuard memoryGuard,
         AlgorithmMetricsService algorithmMetricsService,
         ProjectionMetricsService projectionMetricsService,
-        RequestScopedDependencies requestScopedDependencies
+        RequestScopedDependencies<ProcedureContext> requestScopedDependencies
     ) {
         var catalogBusinessFacade = createCatalogBusinessFacade(
             log,

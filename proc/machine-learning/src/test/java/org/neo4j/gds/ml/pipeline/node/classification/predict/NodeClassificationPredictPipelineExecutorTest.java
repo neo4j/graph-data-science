@@ -34,6 +34,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.applications.ApplicationsFacade;
+import org.neo4j.gds.applications.algorithms.machinery.ProcedureContext;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
@@ -41,9 +42,9 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.OpenModelCatalog;
-import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
 import org.neo4j.gds.ml.decisiontree.TreeNode;
@@ -425,7 +426,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
      * But let's be honest, there is enough work in front of us that such a fix is lower priority right now.
      */
     private static AlgorithmsProcedureFacade createAlgorithmsProcedureFacade() {
-        var requestScopedDependencies = RequestScopedDependencies.builder()
+        var requestScopedDependencies = RequestScopedDependencies.<ProcedureContext>builder()
             .with(TerminationFlag.RUNNING_TRUE)
             .build();
         var applicationsFacade = ApplicationsFacade.create(

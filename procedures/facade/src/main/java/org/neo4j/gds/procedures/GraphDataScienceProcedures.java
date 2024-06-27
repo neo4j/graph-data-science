@@ -23,6 +23,7 @@ import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
+import org.neo4j.gds.applications.algorithms.machinery.ProcedureContext;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
@@ -90,7 +91,7 @@ public class GraphDataScienceProcedures {
         ProjectionMetricsService projectionMetricsService,
         AlgorithmMetaDataSetter algorithmMetaDataSetter,
         KernelTransaction kernelTransaction,
-        RequestScopedDependencies requestScopedDependencies,
+        RequestScopedDependencies<ProcedureContext> requestScopedDependencies,
         CatalogProcedureFacadeFactory catalogProcedureFacadeFactory,
         GraphDatabaseService graphDatabaseService,
         Transaction transaction,

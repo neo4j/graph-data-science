@@ -49,6 +49,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
+import org.neo4j.gds.applications.algorithms.machinery.ProcedureContext;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
@@ -578,7 +579,7 @@ class WccMutateProcTest extends BaseProcTest {
         when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
 
         var graphStoreCatalogService = new GraphStoreCatalogService();
-        var requestScopedDependencies = RequestScopedDependencies.builder()
+        var requestScopedDependencies = RequestScopedDependencies.<ProcedureContext>builder()
             .with(DatabaseId.of(db.databaseName()))
             .with(GraphLoaderContext.NULL_CONTEXT)
             .with(TaskRegistryFactory.empty())

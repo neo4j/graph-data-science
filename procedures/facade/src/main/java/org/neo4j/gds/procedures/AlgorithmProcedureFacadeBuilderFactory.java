@@ -25,6 +25,7 @@ import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
+import org.neo4j.gds.applications.algorithms.machinery.ProcedureContext;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
@@ -81,7 +82,7 @@ public class AlgorithmProcedureFacadeBuilderFactory {
     AlgorithmProcedureFacadeBuilder create(
         ConfigurationParser configurationParser,
         ConfigurationCreator configurationCreator,
-        RequestScopedDependencies requestScopedDependencies,
+        RequestScopedDependencies<ProcedureContext> requestScopedDependencies,
         KernelTransaction kernelTransaction,
         GraphDatabaseService graphDatabaseService,
         AlgorithmMetaDataSetter algorithmMetaDataSetter,
@@ -96,7 +97,7 @@ public class AlgorithmProcedureFacadeBuilderFactory {
         var algorithmMemoryValidationService = new AlgorithmMemoryValidationService(log, useMaxMemoryEstimation);
         var mutateNodePropertyService = new MutateNodePropertyService(log);
         var nodeLookup = new TransactionNodeLookup(kernelTransaction);
-        var procedureReturnColumns = requestScopedDependencies.getProcedureReturnColumns();
+        var procedureReturnColumns = requestScopedDependencies.getDomainContext().getProcedureReturnColumns();
 
         // Second layer
         var writeNodePropertyService = new WriteNodePropertyService(log, requestScopedDependencies);

@@ -21,31 +21,20 @@ package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogStore;
-import org.neo4j.gds.core.write.NodeLabelExporterBuilder;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.core.write.RelationshipExporterBuilder;
-import org.neo4j.gds.core.write.RelationshipPropertiesExporterBuilder;
-import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.termination.TerminationFlag;
 
 /**
  * This is a handy class for transporting similarly scoped dependencies through layers.
  * And especially useful when that list grows or shrinks - fewer sites to edit innit.
  */
-public final class RequestScopedDependencies {
+public final class RequestScopedDependencies<CONTEXT> {
     private final DatabaseId databaseId;
     private final GraphLoaderContext graphLoaderContext;
-    private final NodeLabelExporterBuilder nodeLabelExporterBuilder;
-    private final NodePropertyExporterBuilder nodePropertyExporterBuilder;
-    private final ProcedureReturnColumns procedureReturnColumns;
-    private final RelationshipExporterBuilder relationshipExporterBuilder;
-    private final RelationshipPropertiesExporterBuilder relationshipPropertiesExporterBuilder;
-    private final RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
+    private final CONTEXT domainContext;
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationFlag terminationFlag;
     private final User user;
@@ -60,35 +49,24 @@ public final class RequestScopedDependencies {
     private RequestScopedDependencies(
         DatabaseId databaseId,
         GraphLoaderContext graphLoaderContext,
-        NodeLabelExporterBuilder nodeLabelExporterBuilder,
-        NodePropertyExporterBuilder nodePropertyExporterBuilder,
-        ProcedureReturnColumns procedureReturnColumns,
-        RelationshipExporterBuilder relationshipExporterBuilder,
-        RelationshipPropertiesExporterBuilder relationshipPropertiesExporterBuilder,
-        RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         User user,
+        CONTEXT domainContext,
         UserLogRegistryFactory userLogRegistryFactory,
         UserLogStore userLogStore
     ) {
         this.databaseId = databaseId;
         this.graphLoaderContext = graphLoaderContext;
-        this.nodeLabelExporterBuilder = nodeLabelExporterBuilder;
-        this.nodePropertyExporterBuilder = nodePropertyExporterBuilder;
-        this.procedureReturnColumns = procedureReturnColumns;
-        this.relationshipExporterBuilder = relationshipExporterBuilder;
-        this.relationshipPropertiesExporterBuilder = relationshipPropertiesExporterBuilder;
-        this.relationshipStreamExporterBuilder = relationshipStreamExporterBuilder;
+        this.domainContext = domainContext;
         this.taskRegistryFactory = taskRegistryFactory;
         this.terminationFlag = terminationFlag;
         this.user = user;
         this.userLogRegistryFactory = userLogRegistryFactory;
         this.userLogStore = userLogStore;
     }
-
-    public static RequestScopedDependenciesBuilder builder() {
-        return new RequestScopedDependenciesBuilder();
+    public static <R> RequestScopedDependenciesBuilder<R> builder(){
+        return  new RequestScopedDependenciesBuilder<R>();
     }
 
     public DatabaseId getDatabaseId() {
@@ -99,29 +77,6 @@ public final class RequestScopedDependencies {
         return graphLoaderContext;
     }
 
-    public NodeLabelExporterBuilder getNodeLabelExporterBuilder() {
-        return nodeLabelExporterBuilder;
-    }
-
-    public NodePropertyExporterBuilder getNodePropertyExporterBuilder() {
-        return nodePropertyExporterBuilder;
-    }
-
-    public ProcedureReturnColumns getProcedureReturnColumns() {
-        return procedureReturnColumns;
-    }
-
-    public RelationshipExporterBuilder getRelationshipExporterBuilder() {
-        return relationshipExporterBuilder;
-    }
-
-    public RelationshipPropertiesExporterBuilder getRelationshipPropertiesExporterBuilder() {
-        return relationshipPropertiesExporterBuilder;
-    }
-
-    public RelationshipStreamExporterBuilder getRelationshipStreamExporterBuilder() {
-        return relationshipStreamExporterBuilder;
-    }
 
     public TaskRegistryFactory getTaskRegistryFactory() {
         return taskRegistryFactory;
@@ -143,104 +98,76 @@ public final class RequestScopedDependencies {
         return userLogStore;
     }
 
+    public CONTEXT getDomainContext() {
+        return domainContext;
+    }
+
+
     /**
      * A handy builder where you can include as many or as few components as you are interested in.
      * We deliberately do not have defaults,
      * because trying to reconcile convenience across all usages is an error-prone form of coupling.
      */
-    public static class RequestScopedDependenciesBuilder {
+    public static class RequestScopedDependenciesBuilder<CONTEXT> {
         private DatabaseId databaseId;
         private GraphLoaderContext graphLoaderContext;
-        private NodeLabelExporterBuilder nodeLabelExporterBuilder;
-        private NodePropertyExporterBuilder nodePropertyExporterBuilder;
-        private ProcedureReturnColumns procedureReturnColumns;
-        private RelationshipExporterBuilder relationshipExporterBuilder;
-        private RelationshipPropertiesExporterBuilder relationshipPropertiesExporterBuilder;
-        private RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
+        private CONTEXT context;
         private TerminationFlag terminationFlag;
         private TaskRegistryFactory taskRegistryFactory;
         private User user;
         private UserLogRegistryFactory userLogRegistryFactory;
         private UserLogStore userLogStore;
 
-        public RequestScopedDependenciesBuilder with(DatabaseId databaseId) {
+        public RequestScopedDependenciesBuilder<CONTEXT> with(DatabaseId databaseId) {
             this.databaseId = databaseId;
             return this;
         }
 
-        public RequestScopedDependenciesBuilder with(GraphLoaderContext graphLoaderContext) {
+        public RequestScopedDependenciesBuilder<CONTEXT> with(GraphLoaderContext graphLoaderContext) {
             this.graphLoaderContext = graphLoaderContext;
             return this;
         }
 
-        public RequestScopedDependenciesBuilder with(NodeLabelExporterBuilder nodeLabelExporterBuilder) {
-            this.nodeLabelExporterBuilder = nodeLabelExporterBuilder;
-            return this;
-        }
 
-        public RequestScopedDependenciesBuilder with(NodePropertyExporterBuilder nodePropertyExporterBuilder) {
-            this.nodePropertyExporterBuilder = nodePropertyExporterBuilder;
-            return this;
-        }
 
-        public RequestScopedDependenciesBuilder with(ProcedureReturnColumns procedureReturnColumns) {
-            this.procedureReturnColumns = procedureReturnColumns;
-            return this;
-        }
-
-        public RequestScopedDependenciesBuilder with(RelationshipExporterBuilder relationshipExporterBuilder) {
-            this.relationshipExporterBuilder = relationshipExporterBuilder;
-            return this;
-        }
-
-        public RequestScopedDependenciesBuilder with(RelationshipPropertiesExporterBuilder relationshipPropertiesExporterBuilder) {
-            this.relationshipPropertiesExporterBuilder = relationshipPropertiesExporterBuilder;
-            return this;
-        }
-
-        public RequestScopedDependenciesBuilder with(RelationshipStreamExporterBuilder relationshipStreamExporterBuilder) {
-            this.relationshipStreamExporterBuilder = relationshipStreamExporterBuilder;
-            return this;
-        }
-
-        public RequestScopedDependenciesBuilder with(TaskRegistryFactory taskRegistryFactory) {
+        public RequestScopedDependenciesBuilder<CONTEXT> with(TaskRegistryFactory taskRegistryFactory) {
             this.taskRegistryFactory = taskRegistryFactory;
             return this;
         }
 
-        public RequestScopedDependenciesBuilder with(TerminationFlag terminationFlag) {
+        public RequestScopedDependenciesBuilder<CONTEXT> with(TerminationFlag terminationFlag) {
             this.terminationFlag = terminationFlag;
             return this;
         }
 
-        public RequestScopedDependenciesBuilder with(User user) {
+        public RequestScopedDependenciesBuilder<CONTEXT> with(User user) {
             this.user = user;
             return this;
         }
 
-        public RequestScopedDependenciesBuilder with(UserLogRegistryFactory userLogRegistryFactory) {
+        public RequestScopedDependenciesBuilder<CONTEXT> with(UserLogRegistryFactory userLogRegistryFactory) {
             this.userLogRegistryFactory = userLogRegistryFactory;
             return this;
         }
 
-        public RequestScopedDependenciesBuilder with(UserLogStore userLogStore) {
+        public RequestScopedDependenciesBuilder<CONTEXT> with(UserLogStore userLogStore) {
             this.userLogStore = userLogStore;
             return this;
         }
 
-        public RequestScopedDependencies build() {
-            return new RequestScopedDependencies(
+        public RequestScopedDependenciesBuilder<CONTEXT> with(CONTEXT context) {
+            this.context = context;
+            return this;
+        }
+
+        public RequestScopedDependencies<CONTEXT> build() {
+            return new RequestScopedDependencies<>(
                 databaseId,
                 graphLoaderContext,
-                nodeLabelExporterBuilder,
-                nodePropertyExporterBuilder,
-                procedureReturnColumns,
-                relationshipExporterBuilder,
-                relationshipPropertiesExporterBuilder,
-                relationshipStreamExporterBuilder,
                 taskRegistryFactory,
                 terminationFlag,
                 user,
+                context,
                 userLogRegistryFactory,
                 userLogStore
             );

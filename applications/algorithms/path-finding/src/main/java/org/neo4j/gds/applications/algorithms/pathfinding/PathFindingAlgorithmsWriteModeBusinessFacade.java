@@ -23,6 +23,7 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmComputation;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.ProcedureContext;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
@@ -67,7 +68,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     private final Log log;
 
     private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
-    private final RequestScopedDependencies requestScopedDependencies;
+    private final RequestScopedDependencies<ProcedureContext> requestScopedDependencies;
 
     private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final PathFindingAlgorithms pathFindingAlgorithms;
@@ -75,7 +76,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     public PathFindingAlgorithmsWriteModeBusinessFacade(
         Log log,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
-        RequestScopedDependencies requestScopedDependencies,
+        RequestScopedDependencies<ProcedureContext> requestScopedDependencies,
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         PathFindingAlgorithms pathFindingAlgorithms
     ) {

@@ -23,6 +23,7 @@ import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
+import org.neo4j.gds.applications.algorithms.machinery.ProcedureContext;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
@@ -155,10 +156,14 @@ public final class ProcedureRunner {
     ) {
         var gdsLog = new LogAdapter(log);
 
-        var requestScopedDependencies = RequestScopedDependencies.builder()
+        var procedureContext = ProcedureContext.builder()
+            .with(new ProcedureCallContextReturnColumns(procedureCallContext))
+            .build();
+
+        var requestScopedDependencies = RequestScopedDependencies.<ProcedureContext>builder()
             .with(new DatabaseIdAccessor().getDatabaseId(graphDatabaseService))
             .with(GraphLoaderContext.NULL_CONTEXT)
-            .with(new ProcedureCallContextReturnColumns(procedureCallContext))
+            .with(procedureContext)
             .with(taskRegistryFactory)
             .with(new User(username.username(), false))
             .with(EmptyUserLogRegistryFactory.INSTANCE)

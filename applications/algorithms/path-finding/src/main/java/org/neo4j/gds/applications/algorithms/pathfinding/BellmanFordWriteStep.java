@@ -27,6 +27,7 @@ import org.neo4j.gds.api.ImmutableExportedRelationship;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.ProcedureContext;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -48,12 +49,12 @@ import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfi
 
 class BellmanFordWriteStep implements MutateOrWriteStep<BellmanFordResult, RelationshipsWritten> {
     private final Log log;
-    private final RequestScopedDependencies requestScopedDependencies;
+    private final RequestScopedDependencies<ProcedureContext> requestScopedDependencies;
     private final BellmanFordWriteConfig configuration;
 
     BellmanFordWriteStep(
         Log log,
-        RequestScopedDependencies requestScopedDependencies,
+        RequestScopedDependencies<ProcedureContext> requestScopedDependencies,
         BellmanFordWriteConfig configuration
     ) {
         this.log = log;
@@ -94,7 +95,7 @@ class BellmanFordWriteStep implements MutateOrWriteStep<BellmanFordResult, Relat
             requestScopedDependencies.getTaskRegistryFactory()
         );
 
-        var exporter = requestScopedDependencies.getRelationshipStreamExporterBuilder()
+        var exporter = requestScopedDependencies.getDomainContext().getRelationshipStreamExporterBuilder()
             .withIdMappingOperator(graph::toOriginalNodeId)
             .withRelationships(relationshipStream)
             .withTerminationFlag(requestScopedDependencies.getTerminationFlag())
