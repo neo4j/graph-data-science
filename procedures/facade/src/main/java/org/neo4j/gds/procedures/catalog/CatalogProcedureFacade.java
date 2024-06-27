@@ -19,9 +19,11 @@
  */
 package org.neo4j.gds.procedures.catalog;
 
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.applications.graphstorecatalog.GraphGenerationStats;
 import org.neo4j.gds.applications.graphstorecatalog.GraphMemoryUsage;
@@ -72,6 +74,8 @@ public class CatalogProcedureFacade {
     public static final String NO_VALUE_PLACEHOLDER = "d9b6394a-9482-4929-adab-f97df578a6c6";
 
     private final RequestScopedDependencies requestScopedDependencies;
+    private final ProcedureReturnColumns procedureReturnColumns;
+    private final WriteContext writeContext;
     private final Consumer<AutoCloseable> streamCloser;
     private final GraphDatabaseService graphDatabaseService;
     private final GraphProjectMemoryUsageService graphProjectMemoryUsageService;
@@ -89,7 +93,9 @@ public class CatalogProcedureFacade {
         GraphDatabaseService graphDatabaseService,
         GraphProjectMemoryUsageService graphProjectMemoryUsageService,
         TransactionContext transactionContext,
-        ApplicationsFacade applicationsFacade
+        ApplicationsFacade applicationsFacade,
+        WriteContext writeContext,
+        ProcedureReturnColumns procedureReturnColumns
     ) {
         this.requestScopedDependencies = requestScopedDependencies;
         this.streamCloser = streamCloser;
@@ -98,6 +104,8 @@ public class CatalogProcedureFacade {
         this.transactionContext = transactionContext;
 
         this.applicationsFacade = applicationsFacade;
+        this.writeContext = writeContext;
+        this.procedureReturnColumns = procedureReturnColumns;
     }
 
     /**
@@ -164,7 +172,7 @@ public class CatalogProcedureFacade {
     public Stream<GraphInfoWithHistogram> listGraphs(String graphName) {
         graphName = validateValue(graphName);
 
-        var displayDegreeDistribution = requestScopedDependencies.getProcedureReturnColumns().contains("degreeDistribution");
+        var displayDegreeDistribution = procedureReturnColumns.contains("degreeDistribution");
 
         var results = catalog().listGraphs(
             requestScopedDependencies.getUser(),
@@ -174,8 +182,8 @@ public class CatalogProcedureFacade {
         );
 
         // we convert here from domain type to Neo4j display type
-        var computeGraphSize = requestScopedDependencies.getProcedureReturnColumns().contains("memoryUsage")
-            || requestScopedDependencies.getProcedureReturnColumns().contains("sizeInBytes");
+        var computeGraphSize = procedureReturnColumns.contains("memoryUsage")
+            || procedureReturnColumns.contains("sizeInBytes");
         return results.stream().map(p -> GraphInfoWithHistogram.of(
             p.getLeft().config(),
             p.getLeft().graphStore(),
@@ -435,7 +443,7 @@ public class CatalogProcedureFacade {
         Map<String, Object> configuration,
         GraphStreamNodePropertyOrPropertiesResultProducer<T> outputMarshaller
     ) {
-        var usesPropertyNameColumn = requestScopedDependencies.getProcedureReturnColumns().contains("nodeProperty");
+        var usesPropertyNameColumn = procedureReturnColumns.contains("nodeProperty");
 
         var resultStream = catalog().streamNodeProperties(
             requestScopedDependencies.getUser(),
@@ -513,7 +521,7 @@ public class CatalogProcedureFacade {
         var result = catalog().writeNodeProperties(
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId(),
-            requestScopedDependencies.getNodePropertyExporterBuilder(),
+            writeContext.getNodePropertyExporterBuilder(),
             requestScopedDependencies.getTaskRegistryFactory(),
             requestScopedDependencies.getTerminationFlag(),
             requestScopedDependencies.getUserLogRegistryFactory(),
@@ -535,7 +543,7 @@ public class CatalogProcedureFacade {
         var result = catalog().writeRelationshipProperties(
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId(),
-            requestScopedDependencies.getRelationshipPropertiesExporterBuilder(),
+            writeContext.getRelationshipPropertiesExporterBuilder(),
             requestScopedDependencies.getTerminationFlag(),
             graphName,
             relationshipType,
@@ -554,7 +562,7 @@ public class CatalogProcedureFacade {
         var result = catalog().writeNodeLabel(
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId(),
-            requestScopedDependencies.getNodeLabelExporterBuilder(),
+            writeContext.getNodeLabelExporterBuilder(),
             requestScopedDependencies.getTerminationFlag(),
             graphName,
             nodeLabel,
@@ -573,7 +581,7 @@ public class CatalogProcedureFacade {
         var result = catalog().writeRelationships(
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId(),
-            requestScopedDependencies.getRelationshipExporterBuilder(),
+            writeContext.getRelationshipExporterBuilder(),
             requestScopedDependencies.getTaskRegistryFactory(),
             requestScopedDependencies.getTerminationFlag(),
             requestScopedDependencies.getUserLogRegistryFactory(),
@@ -661,7 +669,7 @@ public class CatalogProcedureFacade {
         Map<String, Object> configuration,
         GraphStreamRelationshipPropertyOrPropertiesResultProducer<T> outputMarshaller
     ) {
-        var usesPropertyNameColumn = requestScopedDependencies.getProcedureReturnColumns().contains("relationshipProperty");
+        var usesPropertyNameColumn = procedureReturnColumns.contains("relationshipProperty");
 
         var resultStream = catalog().streamRelationshipProperties(
             requestScopedDependencies.getUser(),

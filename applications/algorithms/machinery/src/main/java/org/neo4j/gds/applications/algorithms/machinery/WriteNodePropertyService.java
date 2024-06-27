@@ -33,10 +33,12 @@ import java.util.Optional;
 public class WriteNodePropertyService {
     private final Log log;
     private final RequestScopedDependencies requestScopedDependencies;
+    private final WriteContext writeContext;
 
-    public WriteNodePropertyService(Log log, RequestScopedDependencies requestScopedDependencies) {
+    public WriteNodePropertyService(Log log, RequestScopedDependencies requestScopedDependencies, WriteContext writeContext) {
         this.log = log;
         this.requestScopedDependencies = requestScopedDependencies;
+        this.writeContext = writeContext;
     }
 
     public WriteNodePropertyResult write(
@@ -51,7 +53,7 @@ public class WriteNodePropertyService {
         JobId jobId
     ) {
         return Neo4jDatabaseNodePropertyWriter.writeNodeProperty(
-            requestScopedDependencies.getNodePropertyExporterBuilder(),
+            writeContext.getNodePropertyExporterBuilder(),
             requestScopedDependencies.getTaskRegistryFactory(),
             graph,
             graphStore,

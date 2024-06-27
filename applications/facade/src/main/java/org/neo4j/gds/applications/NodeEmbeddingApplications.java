@@ -30,6 +30,7 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTempla
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.logging.Log;
 
 public final class NodeEmbeddingApplications {
@@ -56,6 +57,7 @@ public final class NodeEmbeddingApplications {
     static NodeEmbeddingApplications create(
         Log log,
         RequestScopedDependencies requestScopedDependencies,
+        WriteContext writeContext,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
         ProgressTrackerCreator progressTrackerCreator,
@@ -86,6 +88,7 @@ public final class NodeEmbeddingApplications {
         var writeMode = NodeEmbeddingAlgorithmsWriteModeBusinessFacade.create(
             log,
             requestScopedDependencies,
+            writeContext,
             estimationMode,
             algorithms,
             algorithmProcessingTemplate

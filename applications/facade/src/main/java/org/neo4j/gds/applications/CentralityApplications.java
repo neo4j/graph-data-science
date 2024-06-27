@@ -30,6 +30,7 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTempla
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.logging.Log;
 
 public final class CentralityApplications {
@@ -56,6 +57,7 @@ public final class CentralityApplications {
     static CentralityApplications create(
         Log log,
         RequestScopedDependencies requestScopedDependencies,
+        WriteContext writeContext,
         AlgorithmEstimationTemplate estimationTemplate,
         AlgorithmProcessingTemplate processingTemplate,
         ProgressTrackerCreator progressTrackerCreator,
@@ -77,6 +79,7 @@ public final class CentralityApplications {
         var writing = CentralityAlgorithmsWriteModeBusinessFacade.create(
             log,
             requestScopedDependencies,
+            writeContext,
             estimation,
             algorithms,
             processingTemplate

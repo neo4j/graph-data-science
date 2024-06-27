@@ -50,6 +50,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
@@ -529,7 +530,8 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
             MemoryGuard.DISABLED,
             new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
             new ProjectionMetricsService(new PassthroughExecutionMetricRegistrar()),
-            requestScopedDependencies
+            requestScopedDependencies,
+            WriteContext.builder().build()
         );
         var communityProcedureFacade = CommunityProcedureFacade.create(
             genericStub,

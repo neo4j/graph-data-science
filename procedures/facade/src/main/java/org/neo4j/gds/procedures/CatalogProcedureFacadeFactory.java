@@ -19,8 +19,10 @@
  */
 package org.neo4j.gds.procedures;
 
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.graphstorecatalog.GraphProjectMemoryUsageService;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.logging.Log;
@@ -63,7 +65,9 @@ public class CatalogProcedureFacadeFactory {
         GraphDatabaseService graphDatabaseService,
         KernelTransaction kernelTransaction,
         Transaction procedureTransaction,
-        RequestScopedDependencies requestScopedDependencies
+        RequestScopedDependencies requestScopedDependencies,
+        WriteContext writeContext,
+        ProcedureReturnColumns procedureReturnColumns
     ) {
         // Derived data and services
         var graphProjectMemoryUsageService = new GraphProjectMemoryUsageService(log, graphDatabaseService);
@@ -84,7 +88,9 @@ public class CatalogProcedureFacadeFactory {
             graphDatabaseService,
             graphProjectMemoryUsageService,
             transactionContext,
-            applicationsFacade
+            applicationsFacade,
+            writeContext,
+            procedureReturnColumns
         );
     }
 }

@@ -28,6 +28,7 @@ import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.config.JobIdConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
@@ -55,15 +56,18 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
     MutateOrWriteStep<PathFindingResult, RelationshipsWritten> {
     private final Log log;
     private final RequestScopedDependencies requestScopedDependencies;
+    private final WriteContext writeContext;
     private final CONFIGURATION configuration;
 
     ShortestPathWriteStep(
         Log log,
         RequestScopedDependencies requestScopedDependencies,
+        WriteContext writeContext,
         CONFIGURATION configuration
     ) {
         this.log = log;
         this.requestScopedDependencies = requestScopedDependencies;
+        this.writeContext = writeContext;
         this.configuration = configuration;
     }
 
@@ -116,7 +120,7 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
                 .orElse(relationshipStream);
 
             // configure the exporter
-            var relationshipStreamExporter = requestScopedDependencies.getRelationshipStreamExporterBuilder()
+            var relationshipStreamExporter = writeContext.getRelationshipStreamExporterBuilder()
                 .withConcurrency(configuration.writeConcurrency())
                 .withArrowConnectionInfo(
                     configuration.arrowConnectionInfo(),

@@ -46,6 +46,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.applications.ApplicationsFacadeBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.Capabilities;
@@ -82,7 +83,9 @@ class CatalogProcedureFacadeTest {
             null,
             null,
             null,
-            new ApplicationsFacadeBuilder().with(businessFacade).build()
+            new ApplicationsFacadeBuilder().with(businessFacade).build(),
+            WriteContext.builder().build(),
+            null
         );
 
         catalogFacade.graphExists("some graph");
@@ -117,7 +120,9 @@ class CatalogProcedureFacadeTest {
             null,
             null,
             null,
-            new ApplicationsFacadeBuilder().with(businessFacade).build()
+            new ApplicationsFacadeBuilder().with(businessFacade).build(),
+            WriteContext.builder().build(),
+            null
         );
 
         var expectedWarnings = Stream.of(
@@ -135,16 +140,19 @@ class CatalogProcedureFacadeTest {
     void shouldListGraphsWithoutDegreeDistribution() {
         var procedureReturnColumns = mock(ProcedureReturnColumns.class);
         var businessFacade = mock(CatalogBusinessFacade.class);
+
+        var procedureContext =  WriteContext.builder().build();
         var catalogFacade = new CatalogProcedureFacade(
             RequestScopedDependencies.builder()
-                .with(procedureReturnColumns)
                 .with(new User("Bob", false))
                 .build(),
             null,
             null,
             null,
             null,
-            new ApplicationsFacadeBuilder().with(businessFacade).build()
+            new ApplicationsFacadeBuilder().with(businessFacade).build(),
+            procedureContext,
+            procedureReturnColumns
         );
 
         // the return columns mock returns false by default (all simple types get defaults btw) - should I code that explicitly?
@@ -168,16 +176,19 @@ class CatalogProcedureFacadeTest {
     void shouldListGraphsWithDegreeDistribution() {
         var procedureReturnColumns = mock(ProcedureReturnColumns.class);
         var businessFacade = mock(CatalogBusinessFacade.class);
+        var procedureContext =  WriteContext.builder().build();
+
         var catalogFacade = new CatalogProcedureFacade(
             RequestScopedDependencies.builder()
-                .with(procedureReturnColumns)
                 .with(new User("Bob", false))
                 .build(),
             null,
             null,
             null,
             null,
-            new ApplicationsFacadeBuilder().with(businessFacade).build()
+            new ApplicationsFacadeBuilder().with(businessFacade).build(),
+            procedureContext,
+            procedureReturnColumns
         );
 
         when(procedureReturnColumns.contains("degreeDistribution")).thenReturn(true);
@@ -213,16 +224,19 @@ class CatalogProcedureFacadeTest {
     void shouldListGraphsWithoutMemoryUsage() {
         var procedureReturnColumns = mock(ProcedureReturnColumns.class);
         var businessFacade = mock(CatalogBusinessFacade.class);
+        var procedureContext =  WriteContext.builder().build();
+
         var catalogFacade = new CatalogProcedureFacade(
             RequestScopedDependencies.builder()
-                .with(procedureReturnColumns)
                 .with(new User("Bob", false))
                 .build(),
             null,
             null,
             null,
             null,
-            new ApplicationsFacadeBuilder().with(businessFacade).build()
+            new ApplicationsFacadeBuilder().with(businessFacade).build(),
+            procedureContext,
+            procedureReturnColumns
         );
 
         // the return columns mock returns false by default (all simple types get defaults btw) - should I code that explicitly?
@@ -249,16 +263,19 @@ class CatalogProcedureFacadeTest {
     void shouldListGraphsWithMemoryUsage(String returnColumn) {
         var procedureReturnColumns = mock(ProcedureReturnColumns.class);
         var businessFacade = mock(CatalogBusinessFacade.class);
+        var procedureContext =  WriteContext.builder().build();
+
         var catalogFacade = new CatalogProcedureFacade(
             RequestScopedDependencies.builder()
-                .with(procedureReturnColumns)
                 .with(new User("Bob", false))
                 .build(),
             null,
             null,
             null,
             null,
-            new ApplicationsFacadeBuilder().with(businessFacade).build()
+            new ApplicationsFacadeBuilder().with(businessFacade).build(),
+            procedureContext,
+            procedureReturnColumns
         );
 
         when(procedureReturnColumns.contains(returnColumn)).thenReturn(true);
