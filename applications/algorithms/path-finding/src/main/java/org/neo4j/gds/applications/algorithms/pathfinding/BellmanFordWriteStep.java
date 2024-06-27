@@ -49,17 +49,20 @@ import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfi
 
 class BellmanFordWriteStep implements MutateOrWriteStep<BellmanFordResult, RelationshipsWritten> {
     private final Log log;
-    private final RequestScopedDependencies<ProcedureContext> requestScopedDependencies;
+    private final RequestScopedDependencies requestScopedDependencies;
+    private final ProcedureContext procedureContext;
     private final BellmanFordWriteConfig configuration;
 
     BellmanFordWriteStep(
         Log log,
-        RequestScopedDependencies<ProcedureContext> requestScopedDependencies,
+        RequestScopedDependencies requestScopedDependencies,
+        ProcedureContext procedureContext,
         BellmanFordWriteConfig configuration
     ) {
         this.log = log;
         this.requestScopedDependencies = requestScopedDependencies;
         this.configuration = configuration;
+        this.procedureContext = procedureContext;
     }
 
     @Override
@@ -95,7 +98,7 @@ class BellmanFordWriteStep implements MutateOrWriteStep<BellmanFordResult, Relat
             requestScopedDependencies.getTaskRegistryFactory()
         );
 
-        var exporter = requestScopedDependencies.getDomainContext().getRelationshipStreamExporterBuilder()
+        var exporter = procedureContext.getRelationshipStreamExporterBuilder()
             .withIdMappingOperator(graph::toOriginalNodeId)
             .withRelationships(relationshipStream)
             .withTerminationFlag(requestScopedDependencies.getTerminationFlag())

@@ -36,16 +36,20 @@ import org.neo4j.gds.spanningtree.SpanningTree;
 
 class KSpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree, Void> {
     private final Log log;
-    private final RequestScopedDependencies<ProcedureContext> requestScopedDependencies;
+    private final RequestScopedDependencies requestScopedDependencies;
+    private final ProcedureContext procedureContext;
     private final KSpanningTreeWriteConfig configuration;
+
 
     KSpanningTreeWriteStep(
         Log log,
-        RequestScopedDependencies<ProcedureContext> requestScopedDependencies,
+        RequestScopedDependencies requestScopedDependencies,
+        ProcedureContext procedureContext,
         KSpanningTreeWriteConfig configuration
     ) {
         this.log = log;
         this.requestScopedDependencies = requestScopedDependencies;
+        this.procedureContext = procedureContext;
         this.configuration = configuration;
     }
 
@@ -66,7 +70,7 @@ class KSpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree, Void> {
             requestScopedDependencies.getTaskRegistryFactory()
         );
 
-        var nodePropertyExporter = requestScopedDependencies.getDomainContext().getNodePropertyExporterBuilder()
+        var nodePropertyExporter = procedureContext.getNodePropertyExporterBuilder()
             .withIdMap(graph)
             .withTerminationFlag(requestScopedDependencies.getTerminationFlag())
             .withProgressTracker(progressTracker)

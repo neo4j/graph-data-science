@@ -55,16 +55,19 @@ import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfi
 class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & WritePathOptionsConfig & JobIdConfig> implements
     MutateOrWriteStep<PathFindingResult, RelationshipsWritten> {
     private final Log log;
-    private final RequestScopedDependencies<ProcedureContext> requestScopedDependencies;
+    private final RequestScopedDependencies requestScopedDependencies;
+    private final ProcedureContext procedureContext;
     private final CONFIGURATION configuration;
 
     ShortestPathWriteStep(
         Log log,
-        RequestScopedDependencies<ProcedureContext> requestScopedDependencies,
+        RequestScopedDependencies requestScopedDependencies,
+        ProcedureContext procedureContext,
         CONFIGURATION configuration
     ) {
         this.log = log;
         this.requestScopedDependencies = requestScopedDependencies;
+        this.procedureContext = procedureContext;
         this.configuration = configuration;
     }
 
@@ -117,7 +120,7 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
                 .orElse(relationshipStream);
 
             // configure the exporter
-            var relationshipStreamExporter = requestScopedDependencies.getDomainContext().getRelationshipStreamExporterBuilder()
+            var relationshipStreamExporter = procedureContext.getRelationshipStreamExporterBuilder()
                 .withConcurrency(configuration.writeConcurrency())
                 .withArrowConnectionInfo(
                     configuration.arrowConnectionInfo(),

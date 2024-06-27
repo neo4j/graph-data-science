@@ -91,7 +91,8 @@ public class GraphDataScienceProcedures {
         ProjectionMetricsService projectionMetricsService,
         AlgorithmMetaDataSetter algorithmMetaDataSetter,
         KernelTransaction kernelTransaction,
-        RequestScopedDependencies<ProcedureContext> requestScopedDependencies,
+        RequestScopedDependencies requestScopedDependencies,
+        ProcedureContext procedureContext,
         CatalogProcedureFacadeFactory catalogProcedureFacadeFactory,
         GraphDatabaseService graphDatabaseService,
         Transaction transaction,
@@ -113,7 +114,8 @@ public class GraphDataScienceProcedures {
             memoryGuard,
             algorithmMetricsService,
             projectionMetricsService,
-            requestScopedDependencies
+            requestScopedDependencies,
+            procedureContext
         );
 
         var catalogProcedureFacade = catalogProcedureFacadeFactory.createCatalogProcedureFacade(
@@ -121,7 +123,8 @@ public class GraphDataScienceProcedures {
             graphDatabaseService,
             kernelTransaction,
             transaction,
-            requestScopedDependencies
+            requestScopedDependencies,
+            procedureContext
         );
 
         var algorithmProcedureFacadeBuilder = algorithmProcedureFacadeBuilderFactory.create(
@@ -131,7 +134,8 @@ public class GraphDataScienceProcedures {
             kernelTransaction,
             graphDatabaseService,
             algorithmMetaDataSetter,
-            applicationsFacade
+            applicationsFacade,
+            procedureContext
         );
 
         var centralityProcedureFacade = algorithmProcedureFacadeBuilder.createCentralityProcedureFacade();

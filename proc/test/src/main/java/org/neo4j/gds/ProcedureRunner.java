@@ -163,7 +163,6 @@ public final class ProcedureRunner {
         var requestScopedDependencies = RequestScopedDependencies.<ProcedureContext>builder()
             .with(new DatabaseIdAccessor().getDatabaseId(graphDatabaseService))
             .with(GraphLoaderContext.NULL_CONTEXT)
-            .with(procedureContext)
             .with(taskRegistryFactory)
             .with(new User(username.username(), false))
             .with(EmptyUserLogRegistryFactory.INSTANCE)
@@ -198,6 +197,7 @@ public final class ProcedureRunner {
             AlgorithmMetaDataSetter.EMPTY,
             kernelTransaction,
             requestScopedDependencies,
+            procedureContext,
             catalogProcedureFacadeFactory,
             graphDatabaseService,
             procedureTransaction,

@@ -35,11 +35,12 @@ import java.util.Optional;
 
 public class WriteRelationshipService {
     private final Log log;
-    private final RequestScopedDependencies<ProcedureContext> requestScopedDependencies;
-
-    public WriteRelationshipService(Log log, RequestScopedDependencies<ProcedureContext> requestScopedDependencies) {
+    private final RequestScopedDependencies requestScopedDependencies;
+    private final  ProcedureContext procedureContext;
+    public WriteRelationshipService(Log log, RequestScopedDependencies requestScopedDependencies, ProcedureContext procedureContext) {
         this.log = log;
         this.requestScopedDependencies = requestScopedDependencies;
+        this.procedureContext  =procedureContext;
     }
 
     public WriteRelationshipResult write(
@@ -59,7 +60,7 @@ public class WriteRelationshipService {
             writeRelationshipType,
             writeProperty,
             requestScopedDependencies.getTaskRegistryFactory(),
-            requestScopedDependencies.getDomainContext().getRelationshipExporterBuilder(),
+            procedureContext.getRelationshipExporterBuilder(),
             graph,
             graphStore,
             rootIdMap,

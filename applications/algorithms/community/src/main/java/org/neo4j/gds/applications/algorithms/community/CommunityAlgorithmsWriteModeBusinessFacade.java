@@ -23,6 +23,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.ProcedureContext;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
@@ -88,11 +89,12 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
     public static CommunityAlgorithmsWriteModeBusinessFacade create(
         Log log,
         RequestScopedDependencies requestScopedDependencies,
+        ProcedureContext procedureContext,
         CommunityAlgorithmsEstimationModeBusinessFacade estimation,
         CommunityAlgorithms algorithms,
         AlgorithmProcessingTemplate algorithmProcessingTemplate
     ) {
-        var writeNodePropertyService = new WriteNodePropertyService(log, requestScopedDependencies);
+        var writeNodePropertyService = new WriteNodePropertyService(log, requestScopedDependencies,procedureContext);
         var writeToDatabase = new WriteToDatabase(writeNodePropertyService);
 
         return new CommunityAlgorithmsWriteModeBusinessFacade(

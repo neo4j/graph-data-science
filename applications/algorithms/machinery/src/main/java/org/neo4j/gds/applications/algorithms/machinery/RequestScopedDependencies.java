@@ -31,10 +31,9 @@ import org.neo4j.gds.termination.TerminationFlag;
  * This is a handy class for transporting similarly scoped dependencies through layers.
  * And especially useful when that list grows or shrinks - fewer sites to edit innit.
  */
-public final class RequestScopedDependencies<CONTEXT> {
+public final class RequestScopedDependencies {
     private final DatabaseId databaseId;
     private final GraphLoaderContext graphLoaderContext;
-    private final CONTEXT domainContext;
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationFlag terminationFlag;
     private final User user;
@@ -52,21 +51,19 @@ public final class RequestScopedDependencies<CONTEXT> {
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         User user,
-        CONTEXT domainContext,
         UserLogRegistryFactory userLogRegistryFactory,
         UserLogStore userLogStore
     ) {
         this.databaseId = databaseId;
         this.graphLoaderContext = graphLoaderContext;
-        this.domainContext = domainContext;
         this.taskRegistryFactory = taskRegistryFactory;
         this.terminationFlag = terminationFlag;
         this.user = user;
         this.userLogRegistryFactory = userLogRegistryFactory;
         this.userLogStore = userLogStore;
     }
-    public static <R> RequestScopedDependenciesBuilder<R> builder(){
-        return  new RequestScopedDependenciesBuilder<R>();
+    public static RequestScopedDependenciesBuilder builder(){
+        return  new RequestScopedDependenciesBuilder();
     }
 
     public DatabaseId getDatabaseId() {
@@ -98,9 +95,6 @@ public final class RequestScopedDependencies<CONTEXT> {
         return userLogStore;
     }
 
-    public CONTEXT getDomainContext() {
-        return domainContext;
-    }
 
 
     /**
@@ -108,66 +102,61 @@ public final class RequestScopedDependencies<CONTEXT> {
      * We deliberately do not have defaults,
      * because trying to reconcile convenience across all usages is an error-prone form of coupling.
      */
-    public static class RequestScopedDependenciesBuilder<CONTEXT> {
+    public static class RequestScopedDependenciesBuilder {
         private DatabaseId databaseId;
         private GraphLoaderContext graphLoaderContext;
-        private CONTEXT context;
         private TerminationFlag terminationFlag;
         private TaskRegistryFactory taskRegistryFactory;
         private User user;
         private UserLogRegistryFactory userLogRegistryFactory;
         private UserLogStore userLogStore;
 
-        public RequestScopedDependenciesBuilder<CONTEXT> with(DatabaseId databaseId) {
+        public RequestScopedDependenciesBuilder with(DatabaseId databaseId) {
             this.databaseId = databaseId;
             return this;
         }
 
-        public RequestScopedDependenciesBuilder<CONTEXT> with(GraphLoaderContext graphLoaderContext) {
+        public RequestScopedDependenciesBuilder with(GraphLoaderContext graphLoaderContext) {
             this.graphLoaderContext = graphLoaderContext;
             return this;
         }
 
 
 
-        public RequestScopedDependenciesBuilder<CONTEXT> with(TaskRegistryFactory taskRegistryFactory) {
+        public RequestScopedDependenciesBuilder with(TaskRegistryFactory taskRegistryFactory) {
             this.taskRegistryFactory = taskRegistryFactory;
             return this;
         }
 
-        public RequestScopedDependenciesBuilder<CONTEXT> with(TerminationFlag terminationFlag) {
+        public RequestScopedDependenciesBuilder with(TerminationFlag terminationFlag) {
             this.terminationFlag = terminationFlag;
             return this;
         }
 
-        public RequestScopedDependenciesBuilder<CONTEXT> with(User user) {
+        public RequestScopedDependenciesBuilder with(User user) {
             this.user = user;
             return this;
         }
 
-        public RequestScopedDependenciesBuilder<CONTEXT> with(UserLogRegistryFactory userLogRegistryFactory) {
+        public RequestScopedDependenciesBuilder with(UserLogRegistryFactory userLogRegistryFactory) {
             this.userLogRegistryFactory = userLogRegistryFactory;
             return this;
         }
 
-        public RequestScopedDependenciesBuilder<CONTEXT> with(UserLogStore userLogStore) {
+        public RequestScopedDependenciesBuilder with(UserLogStore userLogStore) {
             this.userLogStore = userLogStore;
             return this;
         }
 
-        public RequestScopedDependenciesBuilder<CONTEXT> with(CONTEXT context) {
-            this.context = context;
-            return this;
-        }
 
-        public RequestScopedDependencies<CONTEXT> build() {
-            return new RequestScopedDependencies<>(
+
+        public RequestScopedDependencies build() {
+            return new RequestScopedDependencies(
                 databaseId,
                 graphLoaderContext,
                 taskRegistryFactory,
                 terminationFlag,
                 user,
-                context,
                 userLogRegistryFactory,
                 userLogStore
             );

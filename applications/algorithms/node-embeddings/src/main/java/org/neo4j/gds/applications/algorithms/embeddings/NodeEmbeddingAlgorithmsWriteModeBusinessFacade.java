@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.algorithms.embeddings;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.ProcedureContext;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
@@ -55,11 +56,12 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
     public static NodeEmbeddingAlgorithmsWriteModeBusinessFacade create(
         Log log,
         RequestScopedDependencies requestScopedDependencies,
+        ProcedureContext procedureContext,
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         NodeEmbeddingAlgorithms algorithms,
         AlgorithmProcessingTemplate algorithmProcessingTemplate
     ) {
-        var writeNodePropertyService = new WriteNodePropertyService(log, requestScopedDependencies);
+        var writeNodePropertyService = new WriteNodePropertyService(log, requestScopedDependencies,procedureContext);
         var writeToDatabase = new WriteToDatabase(writeNodePropertyService);
 
         return new NodeEmbeddingAlgorithmsWriteModeBusinessFacade(

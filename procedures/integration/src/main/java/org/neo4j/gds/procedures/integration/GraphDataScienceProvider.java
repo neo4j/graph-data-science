@@ -161,7 +161,6 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         var requestScopedDependencies = RequestScopedDependencies.<ProcedureContext>builder()
             .with(databaseId)
             .with(graphLoaderContext)
-            .with(procedureContext)
             .with(taskRegistryFactory)
             .with(terminationFlag)
             .with(user)
@@ -182,6 +181,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             algorithmMetaDataSetter,
             kernelTransaction,
             requestScopedDependencies,
+            procedureContext,
             catalogProcedureFacadeFactory,
             graphDatabaseService,
             procedureTransactionAccessor.getProcedureTransaction(context),

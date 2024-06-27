@@ -68,21 +68,23 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     private final Log log;
 
     private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
-    private final RequestScopedDependencies<ProcedureContext> requestScopedDependencies;
-
+    private final RequestScopedDependencies requestScopedDependencies;
+    private final ProcedureContext procedureContext;
     private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final PathFindingAlgorithms pathFindingAlgorithms;
 
     public PathFindingAlgorithmsWriteModeBusinessFacade(
         Log log,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
-        RequestScopedDependencies<ProcedureContext> requestScopedDependencies,
+        RequestScopedDependencies requestScopedDependencies,
+        ProcedureContext procedureContext,
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         PathFindingAlgorithms pathFindingAlgorithms
     ) {
         this.log = log;
         this.algorithmProcessingTemplate = algorithmProcessingTemplate;
         this.requestScopedDependencies = requestScopedDependencies;
+        this.procedureContext = procedureContext;
         this.estimationFacade = estimationFacade;
         this.pathFindingAlgorithms = pathFindingAlgorithms;
     }
@@ -95,6 +97,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         var writeStep = new BellmanFordWriteStep(
             log,
             requestScopedDependencies,
+            procedureContext,
             configuration
         );
 
@@ -132,6 +135,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         var writeStep = new KSpanningTreeWriteStep(
             log,
             requestScopedDependencies,
+            procedureContext,
             configuration
         );
 
@@ -214,6 +218,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         var writeStep = new SpanningTreeWriteStep(
             log,
             requestScopedDependencies,
+            procedureContext,
             configuration
         );
 
@@ -233,7 +238,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         SteinerTreeWriteConfig configuration,
         ResultBuilder<SteinerTreeWriteConfig, SteinerTreeResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
-        var writeStep = new SteinerTreeWriteStep(requestScopedDependencies, configuration);
+        var writeStep = new SteinerTreeWriteStep(requestScopedDependencies, procedureContext, configuration);
 
         return runAlgorithmAndWrite(
             graphName,
@@ -260,6 +265,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         var writeStep = new ShortestPathWriteStep<>(
             log,
             requestScopedDependencies,
+            procedureContext,
             configuration
         );
 

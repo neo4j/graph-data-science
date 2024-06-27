@@ -75,7 +75,7 @@ class CatalogProcedureFacadeTest {
     void shouldDetermineIfGraphExists() {
         var businessFacade = mock(CatalogBusinessFacade.class);
         var catalogFacade = new CatalogProcedureFacade(
-            RequestScopedDependencies.<ProcedureContext>builder()
+            RequestScopedDependencies.builder()
                 .with(DatabaseId.of("current database"))
                 .with(new User("current user", false))
                 .build(),
@@ -83,7 +83,8 @@ class CatalogProcedureFacadeTest {
             null,
             null,
             null,
-            new ApplicationsFacadeBuilder().with(businessFacade).build()
+            new ApplicationsFacadeBuilder().with(businessFacade).build(),
+            ProcedureContext.builder().build()
         );
 
         catalogFacade.graphExists("some graph");
@@ -109,7 +110,7 @@ class CatalogProcedureFacadeTest {
         var userLogStore = mock(UserLogStore.class);
         var businessFacade = mock(CatalogBusinessFacade.class);
         var catalogFacade = new CatalogProcedureFacade(
-            RequestScopedDependencies.<ProcedureContext>builder()
+            RequestScopedDependencies.builder()
                 .with(DatabaseId.of("current database"))
                 .with(new User("current user", false))
                 .with(userLogStore)
@@ -118,7 +119,8 @@ class CatalogProcedureFacadeTest {
             null,
             null,
             null,
-            new ApplicationsFacadeBuilder().with(businessFacade).build()
+            new ApplicationsFacadeBuilder().with(businessFacade).build(),
+            ProcedureContext.builder().build()
         );
 
         var expectedWarnings = Stream.of(
@@ -140,14 +142,14 @@ class CatalogProcedureFacadeTest {
         var procedureContext =  ProcedureContext.builder().with(procedureReturnColumns).build();
         var catalogFacade = new CatalogProcedureFacade(
             RequestScopedDependencies.<ProcedureContext>builder()
-                .with(procedureContext)
                 .with(new User("Bob", false))
                 .build(),
             null,
             null,
             null,
             null,
-            new ApplicationsFacadeBuilder().with(businessFacade).build()
+            new ApplicationsFacadeBuilder().with(businessFacade).build(),
+            procedureContext
         );
 
         // the return columns mock returns false by default (all simple types get defaults btw) - should I code that explicitly?
@@ -175,14 +177,14 @@ class CatalogProcedureFacadeTest {
 
         var catalogFacade = new CatalogProcedureFacade(
             RequestScopedDependencies.<ProcedureContext>builder()
-                .with(procedureContext)
                 .with(new User("Bob", false))
                 .build(),
             null,
             null,
             null,
             null,
-            new ApplicationsFacadeBuilder().with(businessFacade).build()
+            new ApplicationsFacadeBuilder().with(businessFacade).build(),
+            procedureContext
         );
 
         when(procedureReturnColumns.contains("degreeDistribution")).thenReturn(true);
@@ -222,14 +224,14 @@ class CatalogProcedureFacadeTest {
 
         var catalogFacade = new CatalogProcedureFacade(
             RequestScopedDependencies.<ProcedureContext>builder()
-                .with(procedureContext)
                 .with(new User("Bob", false))
                 .build(),
             null,
             null,
             null,
             null,
-            new ApplicationsFacadeBuilder().with(businessFacade).build()
+            new ApplicationsFacadeBuilder().with(businessFacade).build(),
+            procedureContext
         );
 
         // the return columns mock returns false by default (all simple types get defaults btw) - should I code that explicitly?
@@ -259,15 +261,15 @@ class CatalogProcedureFacadeTest {
         var procedureContext =  ProcedureContext.builder().with(procedureReturnColumns).build();
 
         var catalogFacade = new CatalogProcedureFacade(
-            RequestScopedDependencies.<ProcedureContext>builder()
-                .with(procedureContext)
+            RequestScopedDependencies.builder()
                 .with(new User("Bob", false))
                 .build(),
             null,
             null,
             null,
             null,
-            new ApplicationsFacadeBuilder().with(businessFacade).build()
+            new ApplicationsFacadeBuilder().with(businessFacade).build(),
+            procedureContext
         );
 
         when(procedureReturnColumns.contains(returnColumn)).thenReturn(true);

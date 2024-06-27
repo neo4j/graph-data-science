@@ -530,7 +530,8 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
             MemoryGuard.DISABLED,
             new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
             new ProjectionMetricsService(new PassthroughExecutionMetricRegistrar()),
-            requestScopedDependencies
+            requestScopedDependencies,
+            ProcedureContext.builder().build()
         );
         var communityProcedureFacade = CommunityProcedureFacade.create(
             genericStub,

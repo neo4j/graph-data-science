@@ -64,7 +64,8 @@ public class CatalogProcedureFacadeFactory {
         GraphDatabaseService graphDatabaseService,
         KernelTransaction kernelTransaction,
         Transaction procedureTransaction,
-        RequestScopedDependencies<ProcedureContext> requestScopedDependencies
+        RequestScopedDependencies requestScopedDependencies,
+        ProcedureContext procedureContext
     ) {
         // Derived data and services
         var graphProjectMemoryUsageService = new GraphProjectMemoryUsageService(log, graphDatabaseService);
@@ -85,7 +86,8 @@ public class CatalogProcedureFacadeFactory {
             graphDatabaseService,
             graphProjectMemoryUsageService,
             transactionContext,
-            applicationsFacade
+            applicationsFacade,
+            procedureContext
         );
     }
 }

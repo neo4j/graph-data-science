@@ -72,7 +72,8 @@ public class CatalogProcedureFacade {
      */
     public static final String NO_VALUE_PLACEHOLDER = "d9b6394a-9482-4929-adab-f97df578a6c6";
 
-    private final RequestScopedDependencies<ProcedureContext> requestScopedDependencies;
+    private final RequestScopedDependencies requestScopedDependencies;
+    private final ProcedureContext procedureContext;
     private final Consumer<AutoCloseable> streamCloser;
     private final GraphDatabaseService graphDatabaseService;
     private final GraphProjectMemoryUsageService graphProjectMemoryUsageService;
@@ -85,12 +86,13 @@ public class CatalogProcedureFacade {
      * @param streamCloser A special thing needed for property streaming
      */
     public CatalogProcedureFacade(
-        RequestScopedDependencies<ProcedureContext> requestScopedDependencies,
+        RequestScopedDependencies requestScopedDependencies,
         Consumer<AutoCloseable> streamCloser,
         GraphDatabaseService graphDatabaseService,
         GraphProjectMemoryUsageService graphProjectMemoryUsageService,
         TransactionContext transactionContext,
-        ApplicationsFacade applicationsFacade
+        ApplicationsFacade applicationsFacade,
+        ProcedureContext procedureContext
     ) {
         this.requestScopedDependencies = requestScopedDependencies;
         this.streamCloser = streamCloser;
@@ -99,6 +101,7 @@ public class CatalogProcedureFacade {
         this.transactionContext = transactionContext;
 
         this.applicationsFacade = applicationsFacade;
+        this.procedureContext = procedureContext;
     }
 
     /**
@@ -165,7 +168,7 @@ public class CatalogProcedureFacade {
     public Stream<GraphInfoWithHistogram> listGraphs(String graphName) {
         graphName = validateValue(graphName);
 
-        var displayDegreeDistribution = requestScopedDependencies.getDomainContext().getProcedureReturnColumns().contains("degreeDistribution");
+        var displayDegreeDistribution = procedureContext.getProcedureReturnColumns().contains("degreeDistribution");
 
         var results = catalog().listGraphs(
             requestScopedDependencies.getUser(),
@@ -175,8 +178,8 @@ public class CatalogProcedureFacade {
         );
 
         // we convert here from domain type to Neo4j display type
-        var computeGraphSize = requestScopedDependencies.getDomainContext().getProcedureReturnColumns().contains("memoryUsage")
-            || requestScopedDependencies.getDomainContext().getProcedureReturnColumns().contains("sizeInBytes");
+        var computeGraphSize = procedureContext.getProcedureReturnColumns().contains("memoryUsage")
+            || procedureContext.getProcedureReturnColumns().contains("sizeInBytes");
         return results.stream().map(p -> GraphInfoWithHistogram.of(
             p.getLeft().config(),
             p.getLeft().graphStore(),
@@ -436,7 +439,7 @@ public class CatalogProcedureFacade {
         Map<String, Object> configuration,
         GraphStreamNodePropertyOrPropertiesResultProducer<T> outputMarshaller
     ) {
-        var usesPropertyNameColumn = requestScopedDependencies.getDomainContext().getProcedureReturnColumns().contains("nodeProperty");
+        var usesPropertyNameColumn = procedureContext.getProcedureReturnColumns().contains("nodeProperty");
 
         var resultStream = catalog().streamNodeProperties(
             requestScopedDependencies.getUser(),
@@ -514,7 +517,7 @@ public class CatalogProcedureFacade {
         var result = catalog().writeNodeProperties(
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId(),
-            requestScopedDependencies.getDomainContext().getNodePropertyExporterBuilder(),
+            procedureContext.getNodePropertyExporterBuilder(),
             requestScopedDependencies.getTaskRegistryFactory(),
             requestScopedDependencies.getTerminationFlag(),
             requestScopedDependencies.getUserLogRegistryFactory(),
@@ -536,7 +539,7 @@ public class CatalogProcedureFacade {
         var result = catalog().writeRelationshipProperties(
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId(),
-            requestScopedDependencies.getDomainContext().getRelationshipPropertiesExporterBuilder(),
+            procedureContext.getRelationshipPropertiesExporterBuilder(),
             requestScopedDependencies.getTerminationFlag(),
             graphName,
             relationshipType,
@@ -555,7 +558,7 @@ public class CatalogProcedureFacade {
         var result = catalog().writeNodeLabel(
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId(),
-            requestScopedDependencies.getDomainContext().getNodeLabelExporterBuilder(),
+            procedureContext.getNodeLabelExporterBuilder(),
             requestScopedDependencies.getTerminationFlag(),
             graphName,
             nodeLabel,
@@ -574,7 +577,7 @@ public class CatalogProcedureFacade {
         var result = catalog().writeRelationships(
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId(),
-            requestScopedDependencies.getDomainContext().getRelationshipExporterBuilder(),
+            procedureContext.getRelationshipExporterBuilder(),
             requestScopedDependencies.getTaskRegistryFactory(),
             requestScopedDependencies.getTerminationFlag(),
             requestScopedDependencies.getUserLogRegistryFactory(),
@@ -662,7 +665,7 @@ public class CatalogProcedureFacade {
         Map<String, Object> configuration,
         GraphStreamRelationshipPropertyOrPropertiesResultProducer<T> outputMarshaller
     ) {
-        var usesPropertyNameColumn = requestScopedDependencies.getDomainContext().getProcedureReturnColumns().contains("relationshipProperty");
+        var usesPropertyNameColumn = procedureContext.getProcedureReturnColumns().contains("relationshipProperty");
 
         var resultStream = catalog().streamRelationshipProperties(
             requestScopedDependencies.getUser(),

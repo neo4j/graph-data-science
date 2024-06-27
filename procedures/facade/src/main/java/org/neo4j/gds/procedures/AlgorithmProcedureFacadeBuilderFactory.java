@@ -82,11 +82,12 @@ public class AlgorithmProcedureFacadeBuilderFactory {
     AlgorithmProcedureFacadeBuilder create(
         ConfigurationParser configurationParser,
         ConfigurationCreator configurationCreator,
-        RequestScopedDependencies<ProcedureContext> requestScopedDependencies,
+        RequestScopedDependencies requestScopedDependencies,
         KernelTransaction kernelTransaction,
         GraphDatabaseService graphDatabaseService,
         AlgorithmMetaDataSetter algorithmMetaDataSetter,
-        ApplicationsFacade applicationsFacade
+        ApplicationsFacade applicationsFacade,
+        ProcedureContext procedureContext
     ) {
         /*
          * GDS services derived from Procedure Context.
@@ -97,10 +98,10 @@ public class AlgorithmProcedureFacadeBuilderFactory {
         var algorithmMemoryValidationService = new AlgorithmMemoryValidationService(log, useMaxMemoryEstimation);
         var mutateNodePropertyService = new MutateNodePropertyService(log);
         var nodeLookup = new TransactionNodeLookup(kernelTransaction);
-        var procedureReturnColumns = requestScopedDependencies.getDomainContext().getProcedureReturnColumns();
+        var procedureReturnColumns = procedureContext.getProcedureReturnColumns();
 
         // Second layer
-        var writeNodePropertyService = new WriteNodePropertyService(log, requestScopedDependencies);
+        var writeNodePropertyService = new WriteNodePropertyService(log, requestScopedDependencies,procedureContext);
 
         // Third layer
         var databaseGraphStoreEstimationService = new DatabaseGraphStoreEstimationService(

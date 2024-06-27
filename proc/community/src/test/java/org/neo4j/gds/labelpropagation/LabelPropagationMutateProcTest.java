@@ -494,7 +494,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
 
         final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
 
-        var requestScopedDependencies = RequestScopedDependencies.<ProcedureContext>builder()
+        var requestScopedDependencies = RequestScopedDependencies.builder()
             .with(DatabaseId.of(db.databaseName()))
             .with(TaskRegistryFactory.empty())
             .with(TerminationFlag.RUNNING_TRUE)
@@ -526,7 +526,8 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
             MemoryGuard.DISABLED,
             new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
             null,
-            requestScopedDependencies
+            requestScopedDependencies,
+            ProcedureContext.builder().build()
         );
         var communityProcedureFacade = CommunityProcedureFacade.create(
             genericStub,

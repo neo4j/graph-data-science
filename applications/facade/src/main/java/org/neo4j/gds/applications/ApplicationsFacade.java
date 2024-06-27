@@ -82,7 +82,8 @@ public final class ApplicationsFacade {
         MemoryGuard memoryGuard,
         AlgorithmMetricsService algorithmMetricsService,
         ProjectionMetricsService projectionMetricsService,
-        RequestScopedDependencies<ProcedureContext> requestScopedDependencies
+        RequestScopedDependencies requestScopedDependencies,
+        ProcedureContext procedureContext
     ) {
         var catalogBusinessFacade = createCatalogBusinessFacade(
             log,
@@ -118,6 +119,7 @@ public final class ApplicationsFacade {
         var centralityApplications = CentralityApplications.create(
             log,
             requestScopedDependencies,
+            procedureContext,
             algorithmEstimationTemplate,
             algorithmProcessingTemplate,
             progressTrackerCreator,
@@ -127,6 +129,7 @@ public final class ApplicationsFacade {
         var communityApplications = CommunityApplications.create(
             log,
             requestScopedDependencies,
+            procedureContext,
             algorithmEstimationTemplate,
             algorithmProcessingTemplate,
             progressTrackerCreator,
@@ -136,6 +139,7 @@ public final class ApplicationsFacade {
         var nodeEmbeddingApplications = NodeEmbeddingApplications.create(
             log,
             requestScopedDependencies,
+            procedureContext,
             algorithmEstimationTemplate,
             algorithmProcessingTemplate,
             progressTrackerCreator,
@@ -145,12 +149,13 @@ public final class ApplicationsFacade {
         var pathFindingApplications = PathFindingApplications.create(
             log,
             requestScopedDependencies,
+            procedureContext,
             algorithmEstimationTemplate,
             algorithmProcessingTemplate,
             progressTrackerCreator
         );
 
-        var writeRelationshipService = new WriteRelationshipService(log, requestScopedDependencies);
+        var writeRelationshipService = new WriteRelationshipService(log, requestScopedDependencies,procedureContext);
 
         var similarityApplications = SimilarityApplications.create(
             log,

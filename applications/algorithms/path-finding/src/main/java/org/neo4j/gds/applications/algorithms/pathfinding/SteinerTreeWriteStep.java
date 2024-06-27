@@ -35,15 +35,18 @@ import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.steiner.SteinerTreeWriteConfig;
 
 class SteinerTreeWriteStep implements MutateOrWriteStep<SteinerTreeResult, RelationshipsWritten> {
-    private final RequestScopedDependencies<ProcedureContext> requestScopedDependencies;
+    private final RequestScopedDependencies requestScopedDependencies;
     private final SteinerTreeWriteConfig configuration;
+    private final ProcedureContext procedureContext;
 
     SteinerTreeWriteStep(
-        RequestScopedDependencies<ProcedureContext> requestScopedDependencies,
+        RequestScopedDependencies requestScopedDependencies,
+        ProcedureContext procedureContext,
         SteinerTreeWriteConfig configuration
     ) {
         this.requestScopedDependencies = requestScopedDependencies;
         this.configuration = configuration;
+        this.procedureContext=procedureContext;
     }
 
     @Override
@@ -66,7 +69,7 @@ class SteinerTreeWriteStep implements MutateOrWriteStep<SteinerTreeResult, Relat
         );
         var spanningGraph = new SpanningGraph(graph, spanningTree);
 
-        var relationshipExporter = requestScopedDependencies.getDomainContext().getRelationshipExporterBuilder()
+        var relationshipExporter = procedureContext.getRelationshipExporterBuilder()
             .withGraph(spanningGraph)
             .withIdMappingOperator(spanningGraph::toOriginalNodeId)
             .withTerminationFlag(requestScopedDependencies.getTerminationFlag())

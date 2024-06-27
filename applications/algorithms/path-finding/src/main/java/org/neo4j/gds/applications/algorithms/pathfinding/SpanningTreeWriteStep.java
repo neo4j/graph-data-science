@@ -38,16 +38,19 @@ import org.neo4j.gds.spanningtree.SpanningTreeWriteConfig;
 
 class SpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree, RelationshipsWritten> {
     private final Log log;
-    private final RequestScopedDependencies<ProcedureContext> requestScopedDependencies;
+    private final RequestScopedDependencies requestScopedDependencies;
+    private final ProcedureContext procedureContext;
     private final SpanningTreeWriteConfig configuration;
 
     SpanningTreeWriteStep(
         Log log,
-        RequestScopedDependencies<ProcedureContext> requestScopedDependencies,
+        RequestScopedDependencies requestScopedDependencies,
+        ProcedureContext procedureContext,
         SpanningTreeWriteConfig configuration
     ) {
         this.log = log;
         this.requestScopedDependencies = requestScopedDependencies;
+        this.procedureContext  = procedureContext;
         this.configuration = configuration;
     }
 
@@ -68,7 +71,7 @@ class SpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree, Relations
             requestScopedDependencies.getTaskRegistryFactory()
         );
 
-        var relationshipExporter = requestScopedDependencies.getDomainContext().getRelationshipExporterBuilder()
+        var relationshipExporter = procedureContext.getRelationshipExporterBuilder()
             .withGraph(spanningGraph)
             .withIdMappingOperator(spanningGraph::toOriginalNodeId)
             .withTerminationFlag(requestScopedDependencies.getTerminationFlag())
