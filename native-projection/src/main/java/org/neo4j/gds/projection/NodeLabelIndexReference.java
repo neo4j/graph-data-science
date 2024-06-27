@@ -25,6 +25,7 @@ import org.neo4j.gds.core.loading.NodeLabelTokenSet;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.internal.kernel.api.Read;
+import org.neo4j.storageengine.api.LongReference;
 
 public class NodeLabelIndexReference implements NodeReference {
 
@@ -56,7 +57,7 @@ public class NodeLabelIndexReference implements NodeReference {
         if (nodeCursor.next()) {
             return nodeCursor.relationshipsReference();
         } else {
-            return Read.NO_ID;
+            return LongReference.NULL;
         }
     }
 
