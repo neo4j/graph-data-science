@@ -29,7 +29,8 @@ YIELD
   relationshipType: String,
   relationshipsWritten: Integer,
   relationshipProperty: String,
-  propertiesWritten: Integer
+  propertiesWritten: Integer,
+  configuration: Map
 ----
 
 .Parameters
@@ -60,6 +61,7 @@ YIELD
 | relationshipsWritten  | Integer                  | Number relationships written.
 | relationshipProperty  | String                   | The name of the relationship property that was written.
 | propertiesWritten     | Integer                  | Number relationships properties written.
+| configuration         | Map                      | The configuration used to run the procedure.
 |===
 ======
 
@@ -79,7 +81,8 @@ YIELD
   relationshipType: String,
   relationshipsWritten: Integer,
   relationshipProperties: List of String,
-  propertiesWritten: Integer
+  propertiesWritten: Integer,
+  configuration: Map
 ----
 
 .Parameters
@@ -103,6 +106,7 @@ YIELD
 | relationshipsWritten      | Integer                  | Number relationships written.
 | relationshipProperties    | String                   | The name of the relationship properties that were written.
 | propertiesWritten         | Integer                  | Number relationships properties written.
+| configuration             | Map                      | The configuration used to run the procedure.
 |===
 ======
 ====
