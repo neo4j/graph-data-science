@@ -106,7 +106,9 @@ public class WriteNodePropertiesApplication {
                     progressTracker
                 );
 
-                builder.withPropertiesWritten(propertiesWritten);
+                builder
+                    .withPropertiesWritten(propertiesWritten)
+                    .withConfig(configuration.toMap());
             } catch (RuntimeException e) {
                 log.warn("Node property writing failed", e);
                 throw e;
