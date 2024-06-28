@@ -20,6 +20,7 @@
 package org.neo4j.gds.applications.graphstorecatalog;
 
 import java.util.List;
+import java.util.Map;
 
 public final class WriteRelationshipPropertiesResult {
     public final long writeMillis;
@@ -28,13 +29,15 @@ public final class WriteRelationshipPropertiesResult {
     public final List<String> relationshipProperties;
     public final long relationshipsWritten;
     public final long propertiesWritten;
+    public final Map<String, Object> configuration;
 
     private WriteRelationshipPropertiesResult(
         long writeMillis,
         String graphName,
         String relationshipType,
         List<String> relationshipProperties,
-        long relationshipsWritten
+        long relationshipsWritten,
+        Map<String, Object> configuration
     ) {
         this.writeMillis = writeMillis;
         this.graphName = graphName;
@@ -42,6 +45,7 @@ public final class WriteRelationshipPropertiesResult {
         this.relationshipProperties = relationshipProperties;
         this.relationshipsWritten = relationshipsWritten;
         this.propertiesWritten = relationshipsWritten * relationshipProperties.size();
+        this.configuration = configuration;
     }
 
     public static class Builder {
@@ -50,6 +54,7 @@ public final class WriteRelationshipPropertiesResult {
         private final List<String> relationProperties;
         private long writeMillis;
         private long relationshipsWritten;
+        private Map<String, Object> configuration;
 
         public Builder(String graphName, String relationshipType, List<String> relationProperties) {
             this.graphName = graphName;
@@ -57,12 +62,19 @@ public final class WriteRelationshipPropertiesResult {
             this.relationProperties = relationProperties;
         }
 
-        public void withWriteMillis(long writeMillis) {
+        public Builder withWriteMillis(long writeMillis) {
             this.writeMillis = writeMillis;
+            return this;
         }
 
-        public void withRelationshipsWritten(long relationshipsWritten) {
+        public Builder withRelationshipsWritten(long relationshipsWritten) {
             this.relationshipsWritten = relationshipsWritten;
+            return this;
+        }
+
+        public Builder withConfiguration(Map<String, Object> configuration) {
+            this.configuration = configuration;
+            return this;
         }
 
         public WriteRelationshipPropertiesResult build() {
@@ -71,7 +83,8 @@ public final class WriteRelationshipPropertiesResult {
                 graphName,
                 relationshipType,
                 relationProperties,
-                relationshipsWritten
+                relationshipsWritten,
+                configuration
             );
         }
     }
