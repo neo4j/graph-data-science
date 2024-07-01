@@ -30,12 +30,12 @@ import org.neo4j.gds.procedures.algorithms.centrality.CentralityMutateResult;
 
 import java.util.Optional;
 
-class DegreeCentralityResultBuilderForMutateMode implements ResultBuilder<DegreeCentralityMutateConfig, DegreeCentralityResult, CentralityMutateResult, NodePropertiesWritten> {
+public class DegreeCentralityResultBuilderForMutateMode implements ResultBuilder<DegreeCentralityMutateConfig, DegreeCentralityResult, CentralityMutateResult, NodePropertiesWritten> {
     private final GenericCentralityResultBuilderForMutateMode genericResultBuilder = new GenericCentralityResultBuilderForMutateMode();
 
     private final boolean shouldComputeCentralityDistribution;
 
-    DegreeCentralityResultBuilderForMutateMode(boolean shouldComputeCentralityDistribution) {
+    public DegreeCentralityResultBuilderForMutateMode(boolean shouldComputeCentralityDistribution) {
         this.shouldComputeCentralityDistribution = shouldComputeCentralityDistribution;
     }
 

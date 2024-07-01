@@ -229,7 +229,7 @@ public final class CommunityCompanion {
         if (nodePropertyValues.valueType() != ValueType.LONG) {
             throw new IllegalArgumentException(
                 formatWithLocale(
-                    " Provided seeding property `%s`  does not comprise exclusively of long values",
+                    "Provided seeding property `%s` does not comprise exclusively of long values",
                     seedingProperty
                 ));
         }

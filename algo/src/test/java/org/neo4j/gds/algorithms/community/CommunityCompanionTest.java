@@ -57,6 +57,6 @@ import static org.mockito.Mockito.when;
 
             assertThatThrownBy(()-> CommunityCompanion.extractSeedingNodePropertyValues(graph,"foo"))
                 .hasMessageContaining(
-                "Provided seeding property `foo`  does not comprise exclusively of long values");
+                "Provided seeding property `foo` does not comprise exclusively of long values");
         }
 }
