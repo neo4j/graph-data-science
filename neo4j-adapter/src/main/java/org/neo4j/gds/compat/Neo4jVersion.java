@@ -49,10 +49,6 @@ public sealed interface Neo4jVersion {
         return !(this instanceof Unsupported);
     }
 
-    default boolean isUnstable() {
-        return this instanceof Unstable;
-    }
-
     record MajorMinor(int major, int minor) {
         @Override
         public String toString() {
@@ -61,13 +57,6 @@ public sealed interface Neo4jVersion {
     }
 
     record Known(int major, int minor, String fullVersion) implements Neo4jVersion {
-        @Override
-        public String toString() {
-            return this.major + "." + this.minor;
-        }
-    }
-
-    record Unstable(int major, int minor, String fullVersion) implements Neo4jVersion {
         @Override
         public String toString() {
             return this.major + "." + this.minor;

@@ -105,9 +105,7 @@ class SysInfoProcTest extends BaseProcTest {
 
         var neo4jVersion = GraphDatabaseApiProxy.neo4jVersion();
 
-        var expectedCompatibility = neo4jVersion.isUnstable()
-            ? Set.of("Neo4j %s".formatted(neo4jVersion), "Neo4j RC", "Neo4j DEV")
-            : Set.of("Neo4j %s".formatted(neo4jVersion));
+        var expectedCompatibility = Set.of("Neo4j %s".formatted(neo4jVersion));
 
         var allCompatibilities = new HashSet<>(ALL_COMPATIBILITIES);
         allCompatibilities.removeAll(expectedCompatibility);

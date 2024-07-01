@@ -55,7 +55,6 @@ final class Neo4jVersionLookup {
     }
 
     private static final int SUPPORTED_MAJOR_VERSION = 5;
-    private static final int NUM_SUPPORTED_MINOR_VERSIONS = 6;
     private static final int MIN_SUPPORTED_MINOR_VERSION = 16;
 
     @VisibleForTesting
@@ -79,16 +78,6 @@ final class Neo4jVersionLookup {
 
         if (majorVersion != SUPPORTED_MAJOR_VERSION || minorVersion < MIN_SUPPORTED_MINOR_VERSION) {
             return new Neo4jVersion.Unsupported(majorVersion, minorVersion, fullVersion);
-        }
-
-        if (fullVersion.contains("SNAPSHOT")) {
-            return new Neo4jVersion.Unstable(majorVersion, minorVersion, fullVersion);
-        }
-
-        // TODO: remove this once we have a layer for that particular version, not "dev"
-        var LATEST_SUPPORTED_MINOR_VERSION = MIN_SUPPORTED_MINOR_VERSION + NUM_SUPPORTED_MINOR_VERSIONS - 1; // -1 because the range is inclusive
-        if (minorVersion > LATEST_SUPPORTED_MINOR_VERSION) {
-            return new Neo4jVersion.Unstable(majorVersion, minorVersion, fullVersion);
         }
 
         return new Neo4jVersion.Known(majorVersion, minorVersion, fullVersion);

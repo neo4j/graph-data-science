@@ -44,8 +44,7 @@ class Neo4jVersionLookupTest {
     void testParse(String input, int major, int minor) {
         assertThat(Neo4jVersionLookup.parse(input, input))
             .returns(new Neo4jVersion.MajorMinor(major, minor), Neo4jVersion::semanticVersion)
-            .returns(true, Neo4jVersion::isSupported)
-            .returns(false, Neo4jVersion::isUnstable);
+            .returns(true, Neo4jVersion::isSupported);
     }
 
     @ParameterizedTest
@@ -58,8 +57,7 @@ class Neo4jVersionLookupTest {
     void testParseNext(String input, int major, int minor) {
         assertThat(Neo4jVersionLookup.parse(input, input))
             .returns(true, v -> v.matches(major, minor))
-            .returns(true, Neo4jVersion::isSupported)
-            .returns(true, Neo4jVersion::isUnstable);
+            .returns(true, Neo4jVersion::isSupported);
     }
 
     @ParameterizedTest

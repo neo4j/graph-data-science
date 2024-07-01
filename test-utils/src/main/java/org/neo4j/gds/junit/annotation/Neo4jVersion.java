@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.junit.annotation;
 
-@SuppressWarnings("all")
+@SuppressWarnings("all") // squelch checkstyle
 public enum Neo4jVersion {
     V_5_16(16),
     V_5_17(17),
@@ -29,7 +29,6 @@ public enum Neo4jVersion {
     V_5_21(21),
     V_5_22(22),
     V_5_23(23),
-    V_Dev(-2),
     ;
 
     private final int minor;
@@ -39,8 +38,6 @@ public enum Neo4jVersion {
     }
 
     public boolean matches(org.neo4j.gds.compat.Neo4jVersion version) {
-        return (this == V_Dev)
-            ? version.isUnstable()
-            : version.major() == 5 && version.minor() == this.minor;
+        return version.matches(5, this.minor);
     }
 }
