@@ -72,11 +72,13 @@ public class GraphStoreCatalogService {
         AlgoBaseConfig config,
         Optional<String> relationshipProperty,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        Optional<Iterable<PostGraphStoreLoadValidationHook>> postGraphStoreLoadValidationHooks
     ) {
         var graphStoreCatalogEntry = getGraphStoreCatalogEntry(graphName, config, user, databaseId);
         var graphStore = graphStoreCatalogEntry.graphStore();
-        // TODO: Maybe validation of the graph store, where do this happen? Is this the right place?
+
+        postGraphStoreLoadValidationHooks.ifPresent(hooks -> validateGraphStore(graphStore, hooks));
 
         var nodeLabels = config.nodeLabelsFilter();
 
@@ -97,6 +99,17 @@ public class GraphStoreCatalogService {
 
         var graph = graphStore.getGraph(nodeLabels, relationshipTypes, relationshipProperty);
         return new GraphResources(graphStore, graph, graphStoreCatalogEntry.resultStore());
+    }
+
+    /**
+     * Some use cases need special validation. We do this right after loading.
+     *
+     * @throws java.lang.IllegalArgumentException if the graph store did not conform to desired invariants
+     */
+    private void validateGraphStore(GraphStore graphStore, Iterable<PostGraphStoreLoadValidationHook> validationHooks) {
+        for (PostGraphStoreLoadValidationHook hook : validationHooks) {
+            hook.onGraphStoreLoaded(graphStore);
+        }
     }
 
     /**
@@ -129,7 +142,7 @@ public class GraphStoreCatalogService {
      * @throws java.lang.IllegalArgumentException if graph does not exist in graph catalog
      */
     public void ensureGraphExists(User user, DatabaseId databaseId, GraphName graphName) {
-        if (! graphExists(user, databaseId, graphName)) {
+        if (!graphExists(user, databaseId, graphName)) {
             String message = formatWithLocale(
                 "The graph '%s' does not exist.",
                 graphName

@@ -22,6 +22,7 @@ package org.neo4j.gds.applications.algorithms.machinery;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.core.loading.PostGraphStoreLoadValidationHook;
 import org.neo4j.gds.mem.MemoryEstimation;
 
 import java.util.Optional;
@@ -57,6 +58,7 @@ public interface AlgorithmProcessingTemplate {
     RESULT_TO_CALLER processAlgorithm(
         GraphName graphName,
         CONFIGURATION configuration,
+        Optional<Iterable<PostGraphStoreLoadValidationHook>> postGraphStoreLoadValidationHooks,
         LabelForProgressTracking label,
         Supplier<MemoryEstimation> estimationFactory,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,

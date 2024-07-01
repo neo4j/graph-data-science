@@ -86,7 +86,8 @@ public final class AlgorithmRunner {
             config,
             relationshipProperty,
             requestScopedDependencies.getUser(),
-            requestScopedDependencies.getDatabaseId()
+            requestScopedDependencies.getDatabaseId(),
+            Optional.empty()
         );
 
         var graph = graphResources.graph();

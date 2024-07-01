@@ -59,6 +59,7 @@ public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
         return template.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             FastRP,
             () -> estimation.fastRP(configuration),
             graph -> algorithms.fastRP(graph, configuration),

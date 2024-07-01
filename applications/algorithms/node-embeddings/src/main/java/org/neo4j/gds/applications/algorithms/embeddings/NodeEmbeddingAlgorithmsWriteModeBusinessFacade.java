@@ -82,6 +82,7 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             FastRP,
             () -> estimationFacade.fastRP(configuration),
             graph -> algorithms.fastRP(graph, configuration),

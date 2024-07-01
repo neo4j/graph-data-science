@@ -30,6 +30,7 @@ import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.loading.PostGraphStoreLoadValidationHook;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.metrics.ExecutionMetric;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
@@ -74,7 +75,8 @@ class DefaultAlgorithmProcessingTemplateTest {
             configuration,
             Optional.empty(),
             user,
-            databaseId
+            databaseId,
+            Optional.empty()
         )).thenReturn(new GraphResources(graphStore, graph, ResultStore.EMPTY));
 
         // We need it to not be null :shrug:
@@ -109,6 +111,7 @@ class DefaultAlgorithmProcessingTemplateTest {
         var resultStream = algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             Dijkstra,
             null,
             computation,
@@ -150,7 +153,8 @@ class DefaultAlgorithmProcessingTemplateTest {
             configuration,
             Optional.empty(),
             user,
-            databaseId
+            databaseId,
+            Optional.empty()
         )).thenReturn(new GraphResources(graphStore, graph, ResultStore.EMPTY));
 
         var pathFindingResult = mock(ExampleResult.class);
@@ -197,6 +201,7 @@ class DefaultAlgorithmProcessingTemplateTest {
         var relationshipsWritten = algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             KNN,
             null,
             computation,
@@ -220,7 +225,8 @@ class DefaultAlgorithmProcessingTemplateTest {
             <CONFIGURATION extends AlgoBaseConfig> GraphResources graphLoadAndValidationWithTiming(
                 AlgorithmProcessingTimingsBuilder timingsBuilder,
                 GraphName graphName,
-                CONFIGURATION configuration
+                CONFIGURATION configuration,
+                Optional<Iterable<PostGraphStoreLoadValidationHook>> postGraphStoreLoadValidationHooks
             ) {
                 timingsBuilder.withPreProcessingMillis(23);
                 return new GraphResources(null, mock(Graph.class), null);
@@ -280,6 +286,7 @@ class DefaultAlgorithmProcessingTemplateTest {
         var resultMap = algorithmProcessingTemplate.processAlgorithm(
             null,
             new ExampleConfiguration(),
+            Optional.empty(),
             null,
             null,
             null,

@@ -68,6 +68,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             BellmanFord,
             () -> estimationFacade.bellmanFord(configuration),
             graph -> pathFindingAlgorithms.bellmanFord(graph, configuration),
@@ -84,6 +85,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             BFS,
             estimationFacade::breadthFirstSearch,
             graph -> pathFindingAlgorithms.breadthFirstSearch(graph, configuration),
@@ -100,6 +102,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             DeltaStepping,
             estimationFacade::deltaStepping,
             graph -> pathFindingAlgorithms.deltaStepping(graph, configuration),
@@ -116,6 +119,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             RandomWalk,
             () -> estimationFacade.randomWalk(configuration),
             graph -> pathFindingAlgorithms.randomWalk(graph, configuration),
@@ -132,6 +136,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             LabelForProgressTracking.SpanningTree,
             estimationFacade::spanningTree,
             graph -> pathFindingAlgorithms.spanningTree(graph, configuration),
@@ -148,6 +153,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             SteinerTree,
             () -> estimationFacade.steinerTree(configuration),
             graph -> pathFindingAlgorithms.steinerTree(graph, configuration),

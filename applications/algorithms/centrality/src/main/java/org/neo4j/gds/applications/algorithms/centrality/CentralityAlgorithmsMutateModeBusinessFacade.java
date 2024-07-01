@@ -76,6 +76,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         return template.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             ArticleRank,
             estimation::pageRank,
             graph -> algorithms.articleRank(graph, configuration),
@@ -94,6 +95,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         return template.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             BetweennessCentrality,
             () -> estimation.betweennessCentrality(configuration),
             graph -> algorithms.betweennessCentrality(graph, configuration),
@@ -112,6 +114,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         return template.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             CELF,
             () -> estimation.celf(configuration),
             graph -> algorithms.celf(graph, configuration),
@@ -130,6 +133,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         return template.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             ClosenessCentrality,
             () -> estimation.closenessCentrality(configuration),
             graph -> algorithms.closenessCentrality(graph, configuration),
@@ -148,6 +152,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         return template.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             DegreeCentrality,
             () -> estimation.degreeCentrality(configuration),
             graph -> algorithms.degreeCentrality(graph, configuration),
@@ -166,6 +171,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         return template.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             EigenVector,
             estimation::pageRank,
             graph -> algorithms.eigenVector(graph, configuration),
@@ -184,6 +190,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         return template.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             HarmonicCentrality,
             estimation::harmonicCentrality,
             graph -> algorithms.harmonicCentrality(graph, configuration),
@@ -202,6 +209,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         return template.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             PageRank,
             estimation::pageRank,
             graph -> algorithms.pageRank(graph, configuration),

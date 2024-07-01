@@ -28,6 +28,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.loading.PostGraphStoreLoadValidationHook;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.logging.Log;
@@ -65,6 +66,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
     public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER processAlgorithm(
         GraphName graphName,
         CONFIGURATION configuration,
+        Optional<Iterable<PostGraphStoreLoadValidationHook>> postGraphStoreLoadValidationHooks,
         LabelForProgressTracking label,
         Supplier<MemoryEstimation> estimationFactory,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
@@ -77,7 +79,8 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         var graphResources = graphLoadAndValidationWithTiming(
             timingsBuilder,
             graphName,
-            configuration
+            configuration,
+            postGraphStoreLoadValidationHooks
         );
 
         var graph = graphResources.graph();
@@ -141,23 +144,21 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
     <CONFIGURATION extends AlgoBaseConfig> GraphResources graphLoadAndValidationWithTiming(
         AlgorithmProcessingTimingsBuilder timingsBuilder,
         GraphName graphName,
-        CONFIGURATION configuration
+        CONFIGURATION configuration,
+        Optional<Iterable<PostGraphStoreLoadValidationHook>> postGraphStoreLoadValidationHooks
     ) {
         try (ProgressTimer ignored = ProgressTimer.start(timingsBuilder::withPreProcessingMillis)) {
             // tee up the graph we want to work on
             var relationshipProperty = extractRelationshipProperty(configuration);
 
-            var graphResources = graphStoreCatalogService.getGraphResources(
+            return graphStoreCatalogService.getGraphResources(
                 graphName,
                 configuration,
                 relationshipProperty,
                 requestScopedDependencies.getUser(),
-                requestScopedDependencies.getDatabaseId()
+                requestScopedDependencies.getDatabaseId(),
+                postGraphStoreLoadValidationHooks
             );
-
-            // ValidationConfiguration post-load stuff would go here
-
-            return graphResources;
         }
     }
 

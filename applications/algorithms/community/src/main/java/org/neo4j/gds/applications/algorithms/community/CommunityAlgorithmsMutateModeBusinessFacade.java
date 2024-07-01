@@ -94,6 +94,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         return template.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             ApproximateMaximumKCut,
             () -> estimation.approximateMaximumKCut(configuration),
             graph -> algorithms.approximateMaximumKCut(graph, configuration),
@@ -112,6 +113,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         return template.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             K1Coloring,
             estimation::k1Coloring,
             graph -> algorithms.k1Coloring(graph, configuration),
@@ -130,6 +132,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         return template.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             KCore,
             estimation::kCore,
             graph -> algorithms.kCore(graph, configuration),
@@ -148,6 +151,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         return template.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             KMeans,
             () -> estimation.kMeans(configuration),
             graph -> algorithms.kMeans(graph, configuration),
@@ -166,6 +170,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         return template.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             LabelPropagation,
             estimation::labelPropagation,
             graph -> algorithms.labelPropagation(graph, configuration),
@@ -184,6 +189,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         return template.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             LCC,
             () -> estimation.lcc(configuration),
             graph -> algorithms.lcc(graph, configuration),
@@ -202,6 +208,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         return template.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             Leiden,
             () -> estimation.leiden(configuration),
             graph -> algorithms.leiden(graph, configuration),
@@ -220,6 +227,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         return template.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             Louvain,
             () -> estimation.louvain(configuration),
             graph -> algorithms.louvain(graph, configuration),
@@ -238,6 +246,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         return template.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             ModularityOptimization,
             estimation::modularityOptimization,
             graph -> algorithms.modularityOptimization(graph, configuration),
@@ -256,6 +265,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         return template.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             SCC,
             estimation::scc,
             graph -> algorithms.scc(graph, configuration),
@@ -274,6 +284,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         return template.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             TriangleCount,
             estimation::triangleCount,
             graph -> algorithms.triangleCount(graph, configuration),
@@ -292,6 +303,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         return template.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             WCC,
             () -> estimation.wcc(configuration),
             graph -> algorithms.wcc(graph, configuration),

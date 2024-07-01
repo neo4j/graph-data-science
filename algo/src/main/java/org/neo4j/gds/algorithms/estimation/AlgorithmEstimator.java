@@ -84,7 +84,8 @@ public class AlgorithmEstimator {
                 config,
                 maybeRelationshipProperty,
                 requestScopedDependencies.getUser(),
-                requestScopedDependencies.getDatabaseId()
+                requestScopedDependencies.getDatabaseId(),
+                Optional.empty()
             ).graphStore();
             dimensions = GraphDimensionsComputer.of(graphStore, config);
         } else {

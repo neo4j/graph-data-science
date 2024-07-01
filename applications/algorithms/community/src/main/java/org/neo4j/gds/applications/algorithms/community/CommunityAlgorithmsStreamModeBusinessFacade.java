@@ -95,6 +95,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             ApproximateMaximumKCut,
             () -> estimationFacade.approximateMaximumKCut(configuration),
             graph -> algorithms.approximateMaximumKCut(graph, configuration),
@@ -111,6 +112,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             Conductance,
             estimationFacade::conductance,
             graph -> algorithms.conductance(graph, configuration),
@@ -127,6 +129,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             K1Coloring,
             estimationFacade::k1Coloring,
             graph -> algorithms.k1Coloring(graph, configuration),
@@ -143,6 +146,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             KCore,
             estimationFacade::kCore,
             graph -> algorithms.kCore(graph, configuration),
@@ -159,6 +163,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             KMeans,
             () -> estimationFacade.kMeans(configuration),
             graph -> algorithms.kMeans(graph, configuration),
@@ -175,6 +180,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             LabelPropagation,
             estimationFacade::labelPropagation,
             graph -> algorithms.labelPropagation(graph, configuration),
@@ -191,6 +197,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             LCC,
             () -> estimationFacade.lcc(configuration),
             graph -> algorithms.lcc(graph, configuration),
@@ -207,6 +214,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             Leiden,
             () -> estimationFacade.leiden(configuration),
             graph -> algorithms.leiden(graph, configuration),
@@ -223,6 +231,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             Louvain,
             () -> estimationFacade.louvain(configuration),
             graph -> algorithms.louvain(graph, configuration),
@@ -239,6 +248,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             Modularity,
             estimationFacade::modularity,
             graph -> algorithms.modularity(graph, configuration),
@@ -255,6 +265,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             ModularityOptimization,
             estimationFacade::modularityOptimization,
             graph -> algorithms.modularityOptimization(graph, configuration),
@@ -271,6 +282,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             SCC,
             estimationFacade::scc,
             graph -> algorithms.scc(graph, configuration),
@@ -287,6 +299,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             TriangleCount,
             estimationFacade::triangleCount,
             graph -> algorithms.triangleCount(graph, configuration),
@@ -303,6 +316,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             Triangles,
             estimationFacade::triangles,
             graph -> algorithms.triangles(graph, configuration),
@@ -319,6 +333,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             WCC,
             () -> estimationFacade.wcc(configuration),
             graph -> algorithms.wcc(graph, configuration),

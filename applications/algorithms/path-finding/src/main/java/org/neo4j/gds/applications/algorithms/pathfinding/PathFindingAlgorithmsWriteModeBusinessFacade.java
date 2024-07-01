@@ -292,6 +292,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             label,
             memoryEstimation,
             algorithm,

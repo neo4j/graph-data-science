@@ -66,6 +66,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             ArticleRank,
             estimationFacade::pageRank,
             graph -> centralityAlgorithms.articleRank(graph, configuration),
@@ -82,6 +83,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             BetweennessCentrality,
             () -> estimationFacade.betweennessCentrality(configuration),
             graph -> centralityAlgorithms.betweennessCentrality(graph, configuration),
@@ -98,6 +100,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             CELF,
             () -> estimationFacade.celf(configuration),
             graph -> centralityAlgorithms.celf(graph, configuration),
@@ -114,6 +117,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             ClosenessCentrality,
             () -> estimationFacade.closenessCentrality(configuration),
             graph -> centralityAlgorithms.closenessCentrality(graph, configuration),
@@ -130,6 +134,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             DegreeCentrality,
             () -> estimationFacade.degreeCentrality(configuration),
             graph -> centralityAlgorithms.degreeCentrality(graph, configuration),
@@ -146,6 +151,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             EigenVector,
             estimationFacade::pageRank,
             graph -> centralityAlgorithms.eigenVector(graph, configuration),
@@ -162,6 +168,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             HarmonicCentrality,
             estimationFacade::harmonicCentrality,
             graph -> centralityAlgorithms.harmonicCentrality(graph, configuration),
@@ -178,6 +185,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             PageRank,
             estimationFacade::pageRank,
             graph -> centralityAlgorithms.pageRank(graph, configuration),

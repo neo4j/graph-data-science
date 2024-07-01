@@ -74,6 +74,7 @@ public class SimilarityAlgorithmsWriteModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             FilteredKNN,
             () -> estimationFacade.filteredKnn(configuration),
             graph -> similarityAlgorithms.filteredKnn(graph, configuration),
@@ -97,6 +98,7 @@ public class SimilarityAlgorithmsWriteModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             FilteredNodeSimilarity,
             () -> estimationFacade.filteredNodeSimilarity(configuration),
             graph -> similarityAlgorithms.filteredNodeSimilarity(graph, configuration),
@@ -120,6 +122,7 @@ public class SimilarityAlgorithmsWriteModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             KNN,
             () -> estimationFacade.knn(configuration),
             graph -> similarityAlgorithms.knn(graph, configuration),
@@ -143,6 +146,7 @@ public class SimilarityAlgorithmsWriteModeBusinessFacade {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
+            Optional.empty(),
             NodeSimilarity,
             () -> estimationFacade.nodeSimilarity(configuration),
             graph -> similarityAlgorithms.nodeSimilarity(graph, configuration),
