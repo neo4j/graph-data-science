@@ -20,7 +20,7 @@
 package org.neo4j.gds.applications;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
@@ -64,7 +64,7 @@ public final class PathFindingApplications {
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
-        AlgorithmProcessingTemplate algorithmProcessingTemplate,
+        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         ProgressTrackerCreator progressTrackerCreator
     ) {
         var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, progressTrackerCreator);
@@ -74,24 +74,24 @@ public final class PathFindingApplications {
         var mutateModeFacade = new PathFindingAlgorithmsMutateModeBusinessFacade(
             estimationModeFacade,
             pathFindingAlgorithms,
-            algorithmProcessingTemplate
+            algorithmProcessingTemplateConvenience
         );
 
         var statsModeFacade = new PathFindingAlgorithmsStatsModeBusinessFacade(
-            algorithmProcessingTemplate,
+            algorithmProcessingTemplateConvenience,
             estimationModeFacade,
             pathFindingAlgorithms
         );
 
         var streamModeFacade = new PathFindingAlgorithmsStreamModeBusinessFacade(
-            algorithmProcessingTemplate,
+            algorithmProcessingTemplateConvenience,
             estimationModeFacade,
             pathFindingAlgorithms
         );
 
         var writeModeFacade = new PathFindingAlgorithmsWriteModeBusinessFacade(
             log,
-            algorithmProcessingTemplate,
+            algorithmProcessingTemplateConvenience,
             requestScopedDependencies,
             writeContext,
             estimationModeFacade,
