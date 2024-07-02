@@ -32,7 +32,7 @@ import java.util.Optional;
 public class K1ColoringResultBuilderForMutateMode implements ResultBuilder<K1ColoringMutateConfig, K1ColoringResult, K1ColoringMutateResult, Void> {
     private final boolean computeUsedColors;
 
-    K1ColoringResultBuilderForMutateMode(boolean computeUsedColors) {
+    public K1ColoringResultBuilderForMutateMode(boolean computeUsedColors) {
         this.computeUsedColors = computeUsedColors;
     }
 
