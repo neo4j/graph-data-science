@@ -21,7 +21,7 @@ package org.neo4j.gds.applications.algorithms.centrality;
 
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
@@ -39,8 +39,6 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankWriteConfig;
 
-import java.util.Optional;
-
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ArticleRank;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BetweennessCentrality;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.CELF;
@@ -53,18 +51,18 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 public final class CentralityAlgorithmsWriteModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final CentralityAlgorithms centralityAlgorithms;
-    private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
+    private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final WriteToDatabase writeToDatabase;
 
     private CentralityAlgorithmsWriteModeBusinessFacade(
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         CentralityAlgorithms centralityAlgorithms,
-        AlgorithmProcessingTemplate algorithmProcessingTemplate,
+        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         WriteToDatabase writeToDatabase
     ) {
         this.estimationFacade = estimationFacade;
         this.centralityAlgorithms = centralityAlgorithms;
-        this.algorithmProcessingTemplate = algorithmProcessingTemplate;
+        this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.writeToDatabase = writeToDatabase;
     }
 
@@ -74,7 +72,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         WriteContext writeContext,
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         CentralityAlgorithms centralityAlgorithms,
-        AlgorithmProcessingTemplate algorithmProcessingTemplate
+        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience
     ) {
         var writeNodePropertyService = new WriteNodePropertyService(log, requestScopedDependencies, writeContext);
         var writeToDatabase = new WriteToDatabase(writeNodePropertyService);
@@ -82,7 +80,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         return new CentralityAlgorithmsWriteModeBusinessFacade(
             estimationFacade,
             centralityAlgorithms,
-            algorithmProcessingTemplate,
+            algorithmProcessingTemplateConvenience,
             writeToDatabase
         );
     }
@@ -94,15 +92,13 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new PageRankWriteStep(writeToDatabase, configuration, ArticleRank);
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             ArticleRank,
             estimationFacade::pageRank,
             graph -> centralityAlgorithms.articleRank(graph, configuration),
-            Optional.of(writeStep),
+            writeStep,
             resultBuilder
         );
     }
@@ -114,15 +110,13 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new BetweennessCentralityWriteStep(writeToDatabase, configuration);
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             BetweennessCentrality,
             () -> estimationFacade.betweennessCentrality(configuration),
             graph -> centralityAlgorithms.betweennessCentrality(graph, configuration),
-            Optional.of(writeStep),
+            writeStep,
             resultBuilder
         );
     }
@@ -134,15 +128,13 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new CelfWriteStep(writeToDatabase, configuration);
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             CELF,
             () -> estimationFacade.celf(configuration),
             graph -> centralityAlgorithms.celf(graph, configuration),
-            Optional.of(writeStep),
+            writeStep,
             resultBuilder
         );
     }
@@ -154,15 +146,13 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new ClosenessCentralityWriteStep(writeToDatabase, configuration);
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             ClosenessCentrality,
             () -> estimationFacade.closenessCentrality(configuration),
             graph -> centralityAlgorithms.closenessCentrality(graph, configuration),
-            Optional.of(writeStep),
+            writeStep,
             resultBuilder
         );
     }
@@ -174,15 +164,13 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new DegreeCentralityWriteStep(writeToDatabase, configuration);
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             DegreeCentrality,
             () -> estimationFacade.degreeCentrality(configuration),
             graph -> centralityAlgorithms.degreeCentrality(graph, configuration),
-            Optional.of(writeStep),
+            writeStep,
             resultBuilder
         );
     }
@@ -194,15 +182,13 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new PageRankWriteStep(writeToDatabase, configuration, EigenVector);
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             EigenVector,
             estimationFacade::pageRank,
             graph -> centralityAlgorithms.eigenVector(graph, configuration),
-            Optional.of(writeStep),
+            writeStep,
             resultBuilder
         );
     }
@@ -214,15 +200,13 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new HarmonicCentralityWriteStep(writeToDatabase, configuration);
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             HarmonicCentrality,
             estimationFacade::harmonicCentrality,
             graph -> centralityAlgorithms.harmonicCentrality(graph, configuration),
-            Optional.of(writeStep),
+            writeStep,
             resultBuilder
         );
     }
@@ -234,15 +218,13 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new PageRankWriteStep(writeToDatabase, configuration, ArticleRank);
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             PageRank,
             estimationFacade::pageRank,
             graph -> centralityAlgorithms.pageRank(graph, configuration),
-            Optional.of(writeStep),
+            writeStep,
             resultBuilder
         );
     }

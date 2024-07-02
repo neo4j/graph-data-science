@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
@@ -69,41 +70,48 @@ public class GraphStoreCatalogService {
         return GraphStoreCatalog.get(catalogRequest, graphName.getValue());
     }
 
+    /**
+     * Load graphstore and graph, with copious validation.
+     */
     public GraphResources getGraphResources(
         GraphName graphName,
-        AlgoBaseConfig config,
+        AlgoBaseConfig configuration,
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
         Optional<String> relationshipProperty,
         User user,
         DatabaseId databaseId
     ) {
-        var graphStoreCatalogEntry = getGraphStoreCatalogEntry(graphName, config, user, databaseId);
+        var graphStoreCatalogEntry = getGraphStoreCatalogEntry(graphName, configuration, user, databaseId);
+
         var graphStore = graphStoreCatalogEntry.graphStore();
 
         postGraphStoreLoadValidationHooks.ifPresent(hooks -> validateGraphStore(graphStore, hooks));
 
-        var nodeLabels = config.nodeLabelsFilter();
-
-        Collection<RelationshipType> relationshipTypes;
-        if (config.projectAllRelationshipTypes()) {
-            relationshipTypes = graphStore.relationshipTypes();
-        } else {
-            relationshipTypes = config.relationshipTypesFilter();
-        }
-
-        //if nodeLabels is empty, we are not getting any node properties
-        if (nodeLabels.isEmpty()) {
-            nodeLabels = graphStore.nodeLabels();
-        }
+        var nodeLabels = getNodeLabels(configuration, graphStore);
+        var relationshipTypes = getRelationshipTypes(configuration, graphStore);
 
         // Validate the graph store before going any further
-        config.graphStoreValidation(graphStore, nodeLabels, relationshipTypes);
+        configuration.graphStoreValidation(graphStore, nodeLabels, relationshipTypes);
 
         var graph = graphStore.getGraph(nodeLabels, relationshipTypes, relationshipProperty);
 
         postGraphStoreLoadValidationHooks.ifPresent(hooks -> validateGraph(graph, hooks));
 
         return new GraphResources(graphStore, graph, graphStoreCatalogEntry.resultStore());
+    }
+
+    private static Collection<RelationshipType> getRelationshipTypes(AlgoBaseConfig config, GraphStore graphStore) {
+        if (config.projectAllRelationshipTypes()) return graphStore.relationshipTypes();
+
+        return config.relationshipTypesFilter();
+    }
+
+    private static Collection<NodeLabel> getNodeLabels(AlgoBaseConfig config, GraphStore graphStore) {
+        var nodeLabels = config.nodeLabelsFilter();
+
+        if (nodeLabels.isEmpty()) return graphStore.nodeLabels();
+
+        return nodeLabels;
     }
 
     /**
@@ -135,6 +143,7 @@ public class GraphStoreCatalogService {
         DatabaseId databaseId
     ) {
         var catalogRequest = CatalogRequest.of(user, databaseId, config.usernameOverride());
+
         return get(catalogRequest, graphName);
     }
 

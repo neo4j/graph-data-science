@@ -155,7 +155,7 @@ class AlgorithmRunnerTest {
             @Override
             public GraphResources getGraphResources(
                 GraphName graphName,
-                AlgoBaseConfig config,
+                AlgoBaseConfig configuration,
                 Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
                 Optional<String> relationshipProperty,
                 User user,

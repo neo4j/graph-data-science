@@ -22,6 +22,7 @@ package org.neo4j.gds.applications;
 import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.DefaultAlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
@@ -112,6 +113,7 @@ public final class ApplicationsFacade {
             algorithmMetricsService,
             requestScopedDependencies
         );
+        var algorithmProcessingTemplateConvenience = new AlgorithmProcessingTemplateConvenience(algorithmProcessingTemplate);
 
         var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
 
@@ -123,7 +125,7 @@ public final class ApplicationsFacade {
             requestScopedDependencies,
             writeContext,
             algorithmEstimationTemplate,
-            algorithmProcessingTemplate,
+            algorithmProcessingTemplateConvenience,
             progressTrackerCreator,
             mutateNodeProperty
         );
