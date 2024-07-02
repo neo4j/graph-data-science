@@ -30,7 +30,7 @@ import org.neo4j.gds.procedures.algorithms.centrality.CELFMutateResult;
 
 import java.util.Optional;
 
-class CelfResultBuilderForMutateMode implements ResultBuilder<InfluenceMaximizationMutateConfig, CELFResult, CELFMutateResult, NodePropertiesWritten> {
+public class CelfResultBuilderForMutateMode implements ResultBuilder<InfluenceMaximizationMutateConfig, CELFResult, CELFMutateResult, NodePropertiesWritten> {
     @Override
     public CELFMutateResult build(
         Graph graph,

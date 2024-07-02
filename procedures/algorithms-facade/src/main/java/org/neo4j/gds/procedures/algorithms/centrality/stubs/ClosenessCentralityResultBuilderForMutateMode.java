@@ -30,12 +30,12 @@ import org.neo4j.gds.procedures.algorithms.centrality.CentralityMutateResult;
 
 import java.util.Optional;
 
-class ClosenessCentralityResultBuilderForMutateMode implements ResultBuilder<ClosenessCentralityMutateConfig, ClosenessCentralityResult, CentralityMutateResult, NodePropertiesWritten> {
+public class ClosenessCentralityResultBuilderForMutateMode implements ResultBuilder<ClosenessCentralityMutateConfig, ClosenessCentralityResult, CentralityMutateResult, NodePropertiesWritten> {
     private final GenericCentralityResultBuilderForMutateMode genericResultBuilder = new GenericCentralityResultBuilderForMutateMode();
 
     private final boolean shouldComputeCentralityDistribution;
 
-    ClosenessCentralityResultBuilderForMutateMode(boolean shouldComputeCentralityDistribution) {
+    public   ClosenessCentralityResultBuilderForMutateMode(boolean shouldComputeCentralityDistribution) {
         this.shouldComputeCentralityDistribution = shouldComputeCentralityDistribution;
     }
 
