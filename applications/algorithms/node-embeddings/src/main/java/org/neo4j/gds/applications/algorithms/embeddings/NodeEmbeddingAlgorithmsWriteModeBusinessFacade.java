@@ -29,9 +29,12 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 import org.neo4j.gds.embeddings.fastrp.FastRPWriteConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
 import org.neo4j.gds.logging.Log;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FastRP;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.GraphSage;
 
 public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
     private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade;
@@ -83,6 +86,24 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
             FastRP,
             () -> estimationFacade.fastRP(configuration),
             graph -> algorithms.fastRP(graph, configuration),
+            writeStep,
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT graphSage(
+        GraphName graphName,
+        GraphSageWriteConfig configuration,
+        ResultBuilder<GraphSageWriteConfig, GraphSageResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var writeStep = new GraphSageWriteStep(writeToDatabase, configuration);
+
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+            graphName,
+            configuration,
+            GraphSage,
+            () -> estimationFacade.graphSage(configuration, false),
+            graph -> algorithms.graphSage(graph, configuration),
             writeStep,
             resultBuilder
         );

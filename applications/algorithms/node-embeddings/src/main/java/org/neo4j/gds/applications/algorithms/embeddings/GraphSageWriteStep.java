@@ -27,16 +27,16 @@ import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
 import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.embeddings.fastrp.FastRPResult;
-import org.neo4j.gds.embeddings.fastrp.FastRPWriteConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
 
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FastRP;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.GraphSage;
 
-class FastRPWriteStep implements MutateOrWriteStep<FastRPResult, NodePropertiesWritten> {
+class GraphSageWriteStep implements MutateOrWriteStep<GraphSageResult, NodePropertiesWritten> {
     private final WriteToDatabase writeToDatabase;
-    private final FastRPWriteConfig configuration;
+    private final GraphSageWriteConfig configuration;
 
-    FastRPWriteStep(WriteToDatabase writeToDatabase, FastRPWriteConfig configuration) {
+    GraphSageWriteStep(WriteToDatabase writeToDatabase, GraphSageWriteConfig configuration) {
         this.writeToDatabase = writeToDatabase;
         this.configuration = configuration;
     }
@@ -46,7 +46,7 @@ class FastRPWriteStep implements MutateOrWriteStep<FastRPResult, NodePropertiesW
         Graph graph,
         GraphStore graphStore,
         ResultStore resultStore,
-        FastRPResult result,
+        GraphSageResult result,
         JobId jobId
     ) {
         var nodePropertyValues = NodePropertyValuesAdapter.adapt(result.embeddings());
@@ -57,7 +57,7 @@ class FastRPWriteStep implements MutateOrWriteStep<FastRPResult, NodePropertiesW
             resultStore,
             configuration,
             configuration,
-            FastRP,
+            GraphSage,
             jobId,
             nodePropertyValues
         );

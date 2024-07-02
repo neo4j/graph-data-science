@@ -62,8 +62,7 @@ public class OldNodeEmbeddingsProcedureFacade {
         this.graphSage = new GraphSageProcedure(
             configurationCreator,
             estimateBusinessFacade,
-            trainBusinessFacade,
-            writeBusinessFacade
+            trainBusinessFacade
         );
     }
 

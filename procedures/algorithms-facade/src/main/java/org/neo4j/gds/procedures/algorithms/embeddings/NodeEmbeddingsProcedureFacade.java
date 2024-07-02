@@ -30,6 +30,7 @@ import org.neo4j.gds.embeddings.fastrp.FastRPStatsConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPWriteConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageStreamConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
 import org.neo4j.gds.procedures.algorithms.embeddings.stubs.FastRPMutateStub;
 import org.neo4j.gds.procedures.algorithms.embeddings.stubs.GraphSageMutateStub;
 import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
@@ -207,6 +208,40 @@ public final class NodeEmbeddingsProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             cypherMapWrapper -> GraphSageStreamConfig.of(
+                requestScopedDependencies.getUser().getUsername(),
+                cypherMapWrapper
+            ),
+            configuration -> estimationMode().graphSage(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<DefaultNodeEmbeddingsWriteResult> graphSageWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new GraphSageResultBuilderForWriteMode();
+
+        return algorithmExecutionScaffolding.runAlgorithm(
+            graphName,
+            configuration,
+            cypherMapWrapper -> GraphSageWriteConfig.of(
+                requestScopedDependencies.getUser().getUsername(),
+                cypherMapWrapper
+            ),
+            writeMode()::graphSage,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> graphSageWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            cypherMapWrapper -> GraphSageWriteConfig.of(
                 requestScopedDependencies.getUser().getUsername(),
                 cypherMapWrapper
             ),
