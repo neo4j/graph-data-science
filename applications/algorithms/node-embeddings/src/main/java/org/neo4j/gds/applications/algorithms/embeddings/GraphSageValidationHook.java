@@ -26,16 +26,16 @@ import org.neo4j.gds.core.loading.PostLoadValidationHook;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMutateConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.ml.core.EmbeddingUtils;
 
 class GraphSageValidationHook implements PostLoadValidationHook {
-    private final GraphSageMutateConfig configuration;
+    private final GraphSageBaseConfig configuration;
     private final Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model;
 
     GraphSageValidationHook(
-        GraphSageMutateConfig configuration,
+        GraphSageBaseConfig configuration,
         Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model
     ) {
         this.configuration = configuration;
