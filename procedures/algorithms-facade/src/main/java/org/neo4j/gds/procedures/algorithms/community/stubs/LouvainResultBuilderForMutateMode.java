@@ -38,7 +38,7 @@ public class LouvainResultBuilderForMutateMode implements ResultBuilder<LouvainM
 
     private final StatisticsComputationInstructions statisticsComputationInstructions;
 
-    LouvainResultBuilderForMutateMode(StatisticsComputationInstructions statisticsComputationInstructions) {
+    public LouvainResultBuilderForMutateMode(StatisticsComputationInstructions statisticsComputationInstructions) {
         this.statisticsComputationInstructions = statisticsComputationInstructions;
     }
 
