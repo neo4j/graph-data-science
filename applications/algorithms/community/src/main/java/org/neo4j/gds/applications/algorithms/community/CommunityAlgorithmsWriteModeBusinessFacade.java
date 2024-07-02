@@ -22,7 +22,7 @@ package org.neo4j.gds.applications.algorithms.community;
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
@@ -54,8 +54,6 @@ import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.triangle.TriangleCountWriteConfig;
 import org.neo4j.gds.wcc.WccWriteConfig;
 
-import java.util.Optional;
-
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.K1Coloring;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KCore;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KMeans;
@@ -71,18 +69,18 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 public final class CommunityAlgorithmsWriteModeBusinessFacade {
     private final CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final CommunityAlgorithms algorithms;
-    private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
+    private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final WriteToDatabase writeToDatabase;
 
     private CommunityAlgorithmsWriteModeBusinessFacade(
         CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         CommunityAlgorithms algorithms,
-        AlgorithmProcessingTemplate algorithmProcessingTemplate,
+        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         WriteToDatabase writeToDatabase
     ) {
         this.estimationFacade = estimationFacade;
         this.algorithms = algorithms;
-        this.algorithmProcessingTemplate = algorithmProcessingTemplate;
+        this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.writeToDatabase = writeToDatabase;
     }
 
@@ -92,7 +90,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         WriteContext writeContext,
         CommunityAlgorithmsEstimationModeBusinessFacade estimation,
         CommunityAlgorithms algorithms,
-        AlgorithmProcessingTemplate algorithmProcessingTemplate
+        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience
     ) {
         var writeNodePropertyService = new WriteNodePropertyService(log, requestScopedDependencies, writeContext);
         var writeToDatabase = new WriteToDatabase(writeNodePropertyService);
@@ -100,7 +98,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         return new CommunityAlgorithmsWriteModeBusinessFacade(
             estimation,
             algorithms,
-            algorithmProcessingTemplate,
+            algorithmProcessingTemplateConvenience,
             writeToDatabase
         );
     }
@@ -112,15 +110,13 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new K1ColoringWriteStep(writeToDatabase, configuration);
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             K1Coloring,
             estimationFacade::k1Coloring,
             graph -> algorithms.k1Coloring(graph, configuration),
-            Optional.of(writeStep),
+            writeStep,
             resultBuilder
         );
     }
@@ -132,15 +128,13 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new KCoreWriteStep(writeToDatabase, configuration);
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             KCore,
             estimationFacade::kCore,
             graph -> algorithms.kCore(graph, configuration),
-            Optional.of(writeStep),
+            writeStep,
             resultBuilder
         );
     }
@@ -152,15 +146,13 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new KMeansWriteStep(writeToDatabase, configuration);
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             KMeans,
             () -> estimationFacade.kMeans(configuration),
             graph -> algorithms.kMeans(graph, configuration),
-            Optional.of(writeStep),
+            writeStep,
             resultBuilder
         );
     }
@@ -172,15 +164,13 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new LabelPropagationWriteStep(writeToDatabase, configuration);
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             LabelPropagation,
             estimationFacade::labelPropagation,
             graph -> algorithms.labelPropagation(graph, configuration),
-            Optional.of(writeStep),
+            writeStep,
             resultBuilder
         );
     }
@@ -192,15 +182,13 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new LccWriteStep(writeToDatabase, configuration);
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             LCC,
             () -> estimationFacade.lcc(configuration),
             graph -> algorithms.lcc(graph, configuration),
-            Optional.of(writeStep),
+            writeStep,
             resultBuilder
         );
     }
@@ -212,15 +200,13 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new LeidenWriteStep(writeToDatabase, configuration);
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             Leiden,
             () -> estimationFacade.leiden(configuration),
             graph -> algorithms.leiden(graph, configuration),
-            Optional.of(writeStep),
+            writeStep,
             resultBuilder
         );
     }
@@ -232,15 +218,13 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new LouvainWriteStep(writeToDatabase, configuration);
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             Louvain,
             () -> estimationFacade.louvain(configuration),
             graph -> algorithms.louvain(graph, configuration),
-            Optional.of(writeStep),
+            writeStep,
             resultBuilder
         );
     }
@@ -252,15 +236,13 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new ModularityOptimizationWriteStep(writeToDatabase, configuration);
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             ModularityOptimization,
             estimationFacade::modularityOptimization,
             graph -> algorithms.modularityOptimization(graph, configuration),
-            Optional.of(writeStep),
+            writeStep,
             resultBuilder
         );
     }
@@ -272,15 +254,13 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new SccWriteStep(writeToDatabase, configuration);
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             SCC,
             estimationFacade::scc,
             graph -> algorithms.scc(graph, configuration),
-            Optional.of(writeStep),
+            writeStep,
             resultBuilder
         );
     }
@@ -292,15 +272,13 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new SccAlphaWriteStep(writeToDatabase, configuration);
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             SCC,
             estimationFacade::scc,
             graph -> algorithms.scc(graph, configuration),
-            Optional.of(writeStep),
+            writeStep,
             resultBuilder
         );
     }
@@ -312,15 +290,13 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new TriangleCountWriteStep(writeToDatabase, configuration);
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             TriangleCount,
             estimationFacade::triangleCount,
             graph -> algorithms.triangleCount(graph, configuration),
-            Optional.of(writeStep),
+            writeStep,
             resultBuilder
         );
     }
@@ -332,15 +308,13 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new WccWriteStep(writeToDatabase, configuration);
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             WCC,
             () -> estimationFacade.wcc(configuration),
             graph -> algorithms.wcc(graph, configuration),
-            Optional.of(writeStep),
+            writeStep,
             resultBuilder
         );
     }

@@ -20,7 +20,7 @@
 package org.neo4j.gds.applications.algorithms.community;
 
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
@@ -53,7 +53,6 @@ import org.neo4j.gds.triangle.TriangleCountStreamConfig;
 import org.neo4j.gds.triangle.TriangleStreamResult;
 import org.neo4j.gds.wcc.WccStreamConfig;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ApproximateMaximumKCut;
@@ -75,16 +74,16 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 public class CommunityAlgorithmsStreamModeBusinessFacade {
     private final CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final CommunityAlgorithms algorithms;
-    private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
+    private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
 
     public CommunityAlgorithmsStreamModeBusinessFacade(
         CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         CommunityAlgorithms algorithms,
-        AlgorithmProcessingTemplate algorithmProcessingTemplate
+        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience
     ) {
         this.estimationFacade = estimationFacade;
         this.algorithms = algorithms;
-        this.algorithmProcessingTemplate = algorithmProcessingTemplate;
+        this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
     }
 
     public <RESULT> RESULT approximateMaximumKCut(
@@ -92,15 +91,12 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         ApproxMaxKCutStreamConfig configuration,
         ResultBuilder<ApproxMaxKCutStreamConfig, ApproxMaxKCutResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
-            Optional.empty(),
             ApproximateMaximumKCut,
             () -> estimationFacade.approximateMaximumKCut(configuration),
             graph -> algorithms.approximateMaximumKCut(graph, configuration),
-            Optional.empty(),
             resultBuilder
         );
     }
@@ -110,15 +106,12 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         ConductanceStreamConfig configuration,
         ResultBuilder<ConductanceStreamConfig, ConductanceResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
-            Optional.empty(),
             Conductance,
             estimationFacade::conductance,
             graph -> algorithms.conductance(graph, configuration),
-            Optional.empty(),
             resultBuilder
         );
     }
@@ -128,15 +121,12 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         K1ColoringStreamConfig configuration,
         ResultBuilder<K1ColoringStreamConfig, K1ColoringResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
-            Optional.empty(),
             K1Coloring,
             estimationFacade::k1Coloring,
             graph -> algorithms.k1Coloring(graph, configuration),
-            Optional.empty(),
             resultBuilder
         );
     }
@@ -146,15 +136,12 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         KCoreDecompositionStreamConfig configuration,
         ResultBuilder<KCoreDecompositionStreamConfig, KCoreDecompositionResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
-            Optional.empty(),
             KCore,
             estimationFacade::kCore,
             graph -> algorithms.kCore(graph, configuration),
-            Optional.empty(),
             resultBuilder
         );
     }
@@ -164,15 +151,12 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         KmeansStreamConfig configuration,
         ResultBuilder<KmeansStreamConfig, KmeansResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
-            Optional.empty(),
             KMeans,
             () -> estimationFacade.kMeans(configuration),
             graph -> algorithms.kMeans(graph, configuration),
-            Optional.empty(),
             resultBuilder
         );
     }
@@ -182,15 +166,12 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         LabelPropagationStreamConfig configuration,
         ResultBuilder<LabelPropagationStreamConfig, LabelPropagationResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
-            Optional.empty(),
             LabelPropagation,
             estimationFacade::labelPropagation,
             graph -> algorithms.labelPropagation(graph, configuration),
-            Optional.empty(),
             resultBuilder
         );
     }
@@ -200,15 +181,12 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         LocalClusteringCoefficientStreamConfig configuration,
         ResultBuilder<LocalClusteringCoefficientStreamConfig, LocalClusteringCoefficientResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
-            Optional.empty(),
             LCC,
             () -> estimationFacade.lcc(configuration),
             graph -> algorithms.lcc(graph, configuration),
-            Optional.empty(),
             resultBuilder
         );
     }
@@ -218,15 +196,12 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         LeidenStreamConfig configuration,
         ResultBuilder<LeidenStreamConfig, LeidenResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
-            Optional.empty(),
             Leiden,
             () -> estimationFacade.leiden(configuration),
             graph -> algorithms.leiden(graph, configuration),
-            Optional.empty(),
             resultBuilder
         );
     }
@@ -236,15 +211,12 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         LouvainStreamConfig configuration,
         ResultBuilder<LouvainStreamConfig, LouvainResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
-            Optional.empty(),
             Louvain,
             () -> estimationFacade.louvain(configuration),
             graph -> algorithms.louvain(graph, configuration),
-            Optional.empty(),
             resultBuilder
         );
     }
@@ -254,15 +226,12 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         ModularityStreamConfig configuration,
         ResultBuilder<ModularityStreamConfig, ModularityResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
-            Optional.empty(),
             Modularity,
             estimationFacade::modularity,
             graph -> algorithms.modularity(graph, configuration),
-            Optional.empty(),
             resultBuilder
         );
     }
@@ -272,15 +241,12 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         ModularityOptimizationStreamConfig configuration,
         ResultBuilder<ModularityOptimizationStreamConfig, ModularityOptimizationResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
-            Optional.empty(),
             ModularityOptimization,
             estimationFacade::modularityOptimization,
             graph -> algorithms.modularityOptimization(graph, configuration),
-            Optional.empty(),
             resultBuilder
         );
     }
@@ -290,15 +256,12 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         SccStreamConfig configuration,
         ResultBuilder<SccStreamConfig, HugeLongArray, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
-            Optional.empty(),
             SCC,
             estimationFacade::scc,
             graph -> algorithms.scc(graph, configuration),
-            Optional.empty(),
             resultBuilder
         );
     }
@@ -308,15 +271,12 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         TriangleCountStreamConfig configuration,
         ResultBuilder<TriangleCountStreamConfig, TriangleCountResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
-            Optional.empty(),
             TriangleCount,
             estimationFacade::triangleCount,
             graph -> algorithms.triangleCount(graph, configuration),
-            Optional.empty(),
             resultBuilder
         );
     }
@@ -326,15 +286,12 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         TriangleCountBaseConfig configuration,
         ResultBuilder<TriangleCountBaseConfig, Stream<TriangleStreamResult>, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
-            Optional.empty(),
             Triangles,
             estimationFacade::triangles,
             graph -> algorithms.triangles(graph, configuration),
-            Optional.empty(),
             resultBuilder
         );
     }
@@ -344,15 +301,12 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         WccStreamConfig configuration,
         ResultBuilder<WccStreamConfig, DisjointSetStruct, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
-            Optional.empty(),
             WCC,
             () -> estimationFacade.wcc(configuration),
             graph -> algorithms.wcc(graph, configuration),
-            Optional.empty(),
             resultBuilder
         );
     }

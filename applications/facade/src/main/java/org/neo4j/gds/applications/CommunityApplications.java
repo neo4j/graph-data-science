@@ -26,7 +26,7 @@ import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsStatsM
 import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsWriteModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -59,7 +59,7 @@ public final class CommunityApplications {
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
-        AlgorithmProcessingTemplate algorithmProcessingTemplate,
+        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         ProgressTrackerCreator progressTrackerCreator,
         MutateNodeProperty mutateNodeProperty
     ) {
@@ -71,14 +71,18 @@ public final class CommunityApplications {
         var mutation = new CommunityAlgorithmsMutateModeBusinessFacade(
             estimation,
             algorithms,
-            algorithmProcessingTemplate,
+            algorithmProcessingTemplateConvenience,
             mutateNodeProperty
         );
-        var stats = new CommunityAlgorithmsStatsModeBusinessFacade(estimation, algorithms, algorithmProcessingTemplate);
+        var stats = new CommunityAlgorithmsStatsModeBusinessFacade(
+            estimation,
+            algorithms,
+            algorithmProcessingTemplateConvenience
+        );
         var stream = new CommunityAlgorithmsStreamModeBusinessFacade(
             estimation,
             algorithms,
-            algorithmProcessingTemplate
+            algorithmProcessingTemplateConvenience
         );
         var write = CommunityAlgorithmsWriteModeBusinessFacade.create(
             log,
@@ -86,7 +90,7 @@ public final class CommunityApplications {
             writeContext,
             estimation,
             algorithms,
-            algorithmProcessingTemplate
+            algorithmProcessingTemplateConvenience
         );
 
         return new CommunityApplications(estimation, mutation, stats, stream, write);

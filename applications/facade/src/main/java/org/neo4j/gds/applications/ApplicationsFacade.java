@@ -135,7 +135,7 @@ public final class ApplicationsFacade {
             requestScopedDependencies,
             writeContext,
             algorithmEstimationTemplate,
-            algorithmProcessingTemplate,
+            algorithmProcessingTemplateConvenience,
             progressTrackerCreator,
             mutateNodeProperty
         );
