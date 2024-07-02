@@ -20,7 +20,7 @@
 package org.neo4j.gds.applications.algorithms.embeddings;
 
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
@@ -31,25 +31,23 @@ import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 import org.neo4j.gds.embeddings.fastrp.FastRPWriteConfig;
 import org.neo4j.gds.logging.Log;
 
-import java.util.Optional;
-
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FastRP;
 
 public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
     private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final NodeEmbeddingAlgorithms algorithms;
-    private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
+    private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final WriteToDatabase writeToDatabase;
 
     private NodeEmbeddingAlgorithmsWriteModeBusinessFacade(
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         NodeEmbeddingAlgorithms algorithms,
-        AlgorithmProcessingTemplate algorithmProcessingTemplate,
+        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         WriteToDatabase writeToDatabase
     ) {
         this.estimationFacade = estimationFacade;
         this.algorithms = algorithms;
-        this.algorithmProcessingTemplate = algorithmProcessingTemplate;
+        this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.writeToDatabase = writeToDatabase;
     }
 
@@ -59,7 +57,7 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
         WriteContext writeContext,
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         NodeEmbeddingAlgorithms algorithms,
-        AlgorithmProcessingTemplate algorithmProcessingTemplate
+        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience
     ) {
         var writeNodePropertyService = new WriteNodePropertyService(log, requestScopedDependencies, writeContext);
         var writeToDatabase = new WriteToDatabase(writeNodePropertyService);
@@ -67,7 +65,7 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
         return new NodeEmbeddingAlgorithmsWriteModeBusinessFacade(
             estimationFacade,
             algorithms,
-            algorithmProcessingTemplate,
+            algorithmProcessingTemplateConvenience,
             writeToDatabase
         );
     }
@@ -79,15 +77,13 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new FastRPWriteStep(writeToDatabase, configuration);
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             FastRP,
             () -> estimationFacade.fastRP(configuration),
             graph -> algorithms.fastRP(graph, configuration),
-            Optional.of(writeStep),
+            writeStep,
             resultBuilder
         );
     }
