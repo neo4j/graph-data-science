@@ -49,16 +49,13 @@ public class ResultStoreRelationshipPropertiesExporter implements RelationshipPr
     public void write(String relationshipType, List<String> propertyKeys) {
         if (propertyKeys.isEmpty()) {
             var graph = graphStore.getGraph(RelationshipType.of(relationshipType));
-            resultStore.addRelationship(relationshipType, graph, graph::toOriginalNodeId);
             resultStore.add(jobId, new ResultStoreEntry.RelationshipTopology(relationshipType, graph, graph::toOriginalNodeId));
         } else if (propertyKeys.size() == 1) {
             var propertyKey = propertyKeys.get(0);
             var graph = graphStore.getGraph(RelationshipType.of(relationshipType), Optional.of(propertyKey));
-            resultStore.addRelationship(relationshipType, propertyKey, graph, graph::toOriginalNodeId);
             resultStore.add(jobId, new ResultStoreEntry.RelationshipsFromGraph(relationshipType, propertyKey, graph, graph::toOriginalNodeId));
         } else {
             var relationshipIterator = graphStore.getCompositeRelationshipIterator(RelationshipType.of(relationshipType), propertyKeys);
-            resultStore.addRelationshipIterator(relationshipType, propertyKeys, relationshipIterator, graphStore.nodes()::toOriginalNodeId);
             resultStore.add(
                 jobId,
                 new ResultStoreEntry.RelationshipIterators(relationshipType,

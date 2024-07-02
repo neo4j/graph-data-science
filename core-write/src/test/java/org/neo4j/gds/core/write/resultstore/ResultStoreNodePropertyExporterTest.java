@@ -48,7 +48,6 @@ class ResultStoreNodePropertyExporterTest {
         nodePropertyExporter.write("prop", nodePropertyValues);
 
         assertThat(nodePropertyExporter.propertiesWritten()).isEqualTo(42L);
-        assertThat(resultStore.getNodePropertyValues(List.of("A"), "prop")).isEqualTo(nodePropertyValues);
 
         var entry = resultStore.get(jobId);
         assertThat(entry).isInstanceOf(ResultStoreEntry.NodeProperties.class);
@@ -80,8 +79,6 @@ class ResultStoreNodePropertyExporterTest {
         );
 
         assertThat(nodePropertyExporter.propertiesWritten()).isEqualTo(85L);
-        assertThat(resultStore.getNodePropertyValues(List.of(PROJECT_ALL), "prop1")).isEqualTo(nodePropertyValues1);
-        assertThat(resultStore.getNodePropertyValues(List.of(PROJECT_ALL), "prop2")).isEqualTo(nodePropertyValues2);
 
         var entry = resultStore.get(jobId);
         assertThat(entry).isInstanceOf(ResultStoreEntry.NodeProperties.class);
