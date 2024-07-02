@@ -41,7 +41,7 @@ public class LeidenResultBuilderForMutateMode implements ResultBuilder<LeidenMut
 
     private final StatisticsComputationInstructions statisticsComputationInstructions;
 
-    LeidenResultBuilderForMutateMode(StatisticsComputationInstructions statisticsComputationInstructions) {
+    public LeidenResultBuilderForMutateMode(StatisticsComputationInstructions statisticsComputationInstructions) {
         this.statisticsComputationInstructions = statisticsComputationInstructions;
     }
 
