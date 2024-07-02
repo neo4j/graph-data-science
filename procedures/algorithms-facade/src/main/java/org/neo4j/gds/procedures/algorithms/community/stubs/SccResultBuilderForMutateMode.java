@@ -39,7 +39,7 @@ public class SccResultBuilderForMutateMode implements ResultBuilder<SccMutateCon
 
     private final StatisticsComputationInstructions statisticsComputationInstructions;
 
-    SccResultBuilderForMutateMode(StatisticsComputationInstructions statisticsComputationInstructions) {
+    public SccResultBuilderForMutateMode(StatisticsComputationInstructions statisticsComputationInstructions) {
         this.statisticsComputationInstructions = statisticsComputationInstructions;
     }
 
