@@ -40,7 +40,7 @@ public class KMeansResultBuilderForMutateMode implements ResultBuilder<KmeansMut
     private final StatisticsComputationInstructions statisticsComputationInstructions;
     private final boolean shouldComputeListOfCentroids;
 
-    KMeansResultBuilderForMutateMode(
+    public KMeansResultBuilderForMutateMode(
         StatisticsComputationInstructions statisticsComputationInstructions,
         boolean shouldComputeListOfCentroids
     ) {
