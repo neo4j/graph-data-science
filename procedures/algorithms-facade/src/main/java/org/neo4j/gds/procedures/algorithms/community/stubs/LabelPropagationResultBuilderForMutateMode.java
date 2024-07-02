@@ -34,12 +34,12 @@ import org.neo4j.gds.result.StatisticsComputationInstructions;
 
 import java.util.Optional;
 
-class LabelPropagationResultBuilderForMutateMode implements ResultBuilder<LabelPropagationMutateConfig, LabelPropagationResult, LabelPropagationMutateResult, NodePropertiesWritten> {
+public class LabelPropagationResultBuilderForMutateMode implements ResultBuilder<LabelPropagationMutateConfig, LabelPropagationResult, LabelPropagationMutateResult, NodePropertiesWritten> {
     private final CommunityStatisticsWithTimingComputer communityStatisticsWithTimingComputer = new CommunityStatisticsWithTimingComputer();
 
     private final StatisticsComputationInstructions statisticsComputationInstructions;
 
-    LabelPropagationResultBuilderForMutateMode(StatisticsComputationInstructions statisticsComputationInstructions) {
+    public LabelPropagationResultBuilderForMutateMode(StatisticsComputationInstructions statisticsComputationInstructions) {
         this.statisticsComputationInstructions = statisticsComputationInstructions;
     }
 
