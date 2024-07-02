@@ -24,8 +24,11 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTempla
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageStreamConfig;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FastRP;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.GraphSage;
 
 public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
     private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade;
@@ -53,6 +56,21 @@ public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
             FastRP,
             () -> estimationFacade.fastRP(configuration),
             graph -> algorithms.fastRP(graph, configuration),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT graphSage(
+        GraphName graphName,
+        GraphSageStreamConfig configuration,
+        ResultBuilder<GraphSageStreamConfig, GraphSageResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+            graphName,
+            configuration,
+            GraphSage,
+            () -> estimationFacade.graphSage(configuration, false),
+            graph -> algorithms.graphSage(graph, configuration),
             resultBuilder
         );
     }

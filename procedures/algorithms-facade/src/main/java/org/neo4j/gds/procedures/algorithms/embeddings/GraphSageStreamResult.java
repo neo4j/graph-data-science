@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.embeddings.graphsage;
+package org.neo4j.gds.procedures.algorithms.embeddings;
 
 import java.util.Arrays;
 import java.util.List;
@@ -27,7 +27,7 @@ public class GraphSageStreamResult {
     public long nodeId;
     public List<Double> embedding;
 
-    public GraphSageStreamResult(long nodeId, double[] embeddings) {
+    GraphSageStreamResult(long nodeId, double[] embeddings) {
         this.nodeId = nodeId;
         this.embedding = Arrays.stream(embeddings).boxed().collect(Collectors.toList());
     }

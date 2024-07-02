@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageStreamResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.algorithms.embeddings.GraphSageStreamResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -44,7 +44,7 @@ public class GraphSageStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.oldNodeEmbeddings().graphSage().stream(graphName, configuration);
+        return facade.algorithms().nodeEmbeddings().graphSageStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.beta.graphSage.stream.estimate", mode = Mode.READ)
@@ -53,6 +53,9 @@ public class GraphSageStreamProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.oldNodeEmbeddings().graphSage().streamEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().nodeEmbeddings().graphSageStreamEstimate(
+            graphNameOrConfiguration,
+            algoConfiguration
+        );
     }
 }

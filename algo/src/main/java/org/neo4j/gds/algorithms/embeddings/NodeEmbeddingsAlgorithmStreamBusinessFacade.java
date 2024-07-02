@@ -21,8 +21,6 @@ package org.neo4j.gds.algorithms.embeddings;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageStreamConfig;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNStreamConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
@@ -40,18 +38,6 @@ public class NodeEmbeddingsAlgorithmStreamBusinessFacade {
         Node2VecStreamConfig config
     ) {
         var result = this.nodeEmbeddingsAlgorithmsFacade.node2Vec(
-            graphName,
-            config
-        );
-
-        return createStreamComputationResult(result);
-    }
-
-    public StreamComputationResult<GraphSageResult> graphSage(
-        String graphName,
-        GraphSageStreamConfig config
-    ) {
-        var result = this.nodeEmbeddingsAlgorithmsFacade.graphSage(
             graphName,
             config
         );
