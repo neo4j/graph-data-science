@@ -29,22 +29,31 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 import org.neo4j.gds.embeddings.fastrp.FastRPWriteConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
 import org.neo4j.gds.logging.Log;
 
+import java.util.List;
+import java.util.Optional;
+
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FastRP;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.GraphSage;
 
 public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
+    private final GraphSageModelCatalog graphSageModelCatalog;
     private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final NodeEmbeddingAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final WriteToDatabase writeToDatabase;
 
     private NodeEmbeddingAlgorithmsWriteModeBusinessFacade(
+        GraphSageModelCatalog graphSageModelCatalog,
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         NodeEmbeddingAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         WriteToDatabase writeToDatabase
     ) {
+        this.graphSageModelCatalog = graphSageModelCatalog;
         this.estimationFacade = estimationFacade;
         this.algorithms = algorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
@@ -53,6 +62,7 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
 
     public static NodeEmbeddingAlgorithmsWriteModeBusinessFacade create(
         Log log,
+        GraphSageModelCatalog graphSageModelCatalog,
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade,
@@ -63,6 +73,7 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
         var writeToDatabase = new WriteToDatabase(writeNodePropertyService);
 
         return new NodeEmbeddingAlgorithmsWriteModeBusinessFacade(
+            graphSageModelCatalog,
             estimationFacade,
             algorithms,
             algorithmProcessingTemplateConvenience,
@@ -84,6 +95,31 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
             () -> estimationFacade.fastRP(configuration),
             graph -> algorithms.fastRP(graph, configuration),
             writeStep,
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT graphSage(
+        GraphName graphName,
+        GraphSageWriteConfig configuration,
+        ResultBuilder<GraphSageWriteConfig, GraphSageResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var model = graphSageModelCatalog.get(configuration);
+        var relationshipWeightPropertyFromTrainConfiguration = model.trainConfig().relationshipWeightProperty();
+
+        var validationHook = new GraphSageValidationHook(configuration, model);
+
+        var writeStep = new GraphSageWriteStep(writeToDatabase, configuration);
+
+        return algorithmProcessingTemplateConvenience.processAlgorithm(
+            relationshipWeightPropertyFromTrainConfiguration,
+            graphName,
+            configuration,
+            Optional.of(List.of(validationHook)),
+            GraphSage,
+            () -> estimationFacade.graphSage(configuration, false),
+            graph -> algorithms.graphSage(graph, configuration),
+            Optional.of(writeStep),
             resultBuilder
         );
     }

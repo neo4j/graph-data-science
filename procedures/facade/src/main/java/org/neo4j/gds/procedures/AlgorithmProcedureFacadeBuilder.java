@@ -190,8 +190,7 @@ class AlgorithmProcedureFacadeBuilder {
         );
 
         var estimateBusinessFacade = new NodeEmbeddingsAlgorithmsEstimateBusinessFacade(
-            algorithmEstimator,
-            modelCatalogService
+            algorithmEstimator
         );
 
         // procedure facade

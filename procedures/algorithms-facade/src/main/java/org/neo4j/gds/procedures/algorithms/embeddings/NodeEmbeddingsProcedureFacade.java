@@ -29,6 +29,8 @@ import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies
 import org.neo4j.gds.embeddings.fastrp.FastRPStatsConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPWriteConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageStreamConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
 import org.neo4j.gds.procedures.algorithms.embeddings.stubs.FastRPMutateStub;
 import org.neo4j.gds.procedures.algorithms.embeddings.stubs.GraphSageMutateStub;
 import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
@@ -39,6 +41,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public final class NodeEmbeddingsProcedureFacade {
+    private final RequestScopedDependencies requestScopedDependencies;
     private final FastRPMutateStub fastRPMutateStub;
     private final GraphSageMutateStub graphSageMutateStub;
 
@@ -49,6 +52,7 @@ public final class NodeEmbeddingsProcedureFacade {
     private final AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode;
 
     private NodeEmbeddingsProcedureFacade(
+        RequestScopedDependencies requestScopedDependencies,
         FastRPMutateStub fastRPMutateStub,
         GraphSageMutateStub graphSageMutateStub,
         ApplicationsFacade applicationsFacade,
@@ -56,6 +60,7 @@ public final class NodeEmbeddingsProcedureFacade {
         AlgorithmExecutionScaffolding algorithmExecutionScaffolding,
         AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode
     ) {
+        this.requestScopedDependencies = requestScopedDependencies;
         this.fastRPMutateStub = fastRPMutateStub;
         this.graphSageMutateStub = graphSageMutateStub;
         this.applicationsFacade = applicationsFacade;
@@ -76,6 +81,7 @@ public final class NodeEmbeddingsProcedureFacade {
         var graphSageMutateStub = new GraphSageMutateStub(requestScopedDependencies, genericStub, applicationsFacade);
 
         return new NodeEmbeddingsProcedureFacade(
+            requestScopedDependencies,
             fastRPMutateStub,
             graphSageMutateStub,
             applicationsFacade,
@@ -175,6 +181,74 @@ public final class NodeEmbeddingsProcedureFacade {
 
     public GraphSageMutateStub graphSageMutateStub() {
         return graphSageMutateStub;
+    }
+
+    public Stream<GraphSageStreamResult> graphSageStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new GraphSageResultBuilderForStreamMode();
+
+        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+            graphName,
+            configuration,
+            cypherMapWrapper -> GraphSageStreamConfig.of(
+                requestScopedDependencies.getUser().getUsername(),
+                cypherMapWrapper
+            ),
+            streamMode()::graphSage,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> graphSageStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            cypherMapWrapper -> GraphSageStreamConfig.of(
+                requestScopedDependencies.getUser().getUsername(),
+                cypherMapWrapper
+            ),
+            configuration -> estimationMode().graphSage(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<DefaultNodeEmbeddingsWriteResult> graphSageWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new GraphSageResultBuilderForWriteMode();
+
+        return algorithmExecutionScaffolding.runAlgorithm(
+            graphName,
+            configuration,
+            cypherMapWrapper -> GraphSageWriteConfig.of(
+                requestScopedDependencies.getUser().getUsername(),
+                cypherMapWrapper
+            ),
+            writeMode()::graphSage,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> graphSageWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            cypherMapWrapper -> GraphSageWriteConfig.of(
+                requestScopedDependencies.getUser().getUsername(),
+                cypherMapWrapper
+            ),
+            configuration -> estimationMode().graphSage(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
     }
 
     private NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationMode() {

@@ -24,19 +24,28 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTempla
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageStreamConfig;
+
+import java.util.List;
+import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FastRP;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.GraphSage;
 
 public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
+    private final GraphSageModelCatalog graphSageModelCatalog;
     private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final NodeEmbeddingAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
 
     public NodeEmbeddingAlgorithmsStreamModeBusinessFacade(
+        GraphSageModelCatalog graphSageModelCatalog,
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         NodeEmbeddingAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience
     ) {
+        this.graphSageModelCatalog = graphSageModelCatalog;
         this.estimationFacade = estimationFacade;
         this.algorithms = algorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
@@ -53,6 +62,29 @@ public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
             FastRP,
             () -> estimationFacade.fastRP(configuration),
             graph -> algorithms.fastRP(graph, configuration),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT graphSage(
+        GraphName graphName,
+        GraphSageStreamConfig configuration,
+        ResultBuilder<GraphSageStreamConfig, GraphSageResult, RESULT, Void> resultBuilder
+    ) {
+        var model = graphSageModelCatalog.get(configuration);
+        var relationshipWeightPropertyFromTrainConfiguration = model.trainConfig().relationshipWeightProperty();
+
+        var validationHook = new GraphSageValidationHook(configuration, model);
+
+        return algorithmProcessingTemplateConvenience.processAlgorithm(
+            relationshipWeightPropertyFromTrainConfiguration,
+            graphName,
+            configuration,
+            Optional.of(List.of(validationHook)),
+            GraphSage,
+            () -> estimationFacade.graphSage(configuration, false),
+            graph -> algorithms.graphSage(graph, configuration),
+            Optional.empty(),
             resultBuilder
         );
     }

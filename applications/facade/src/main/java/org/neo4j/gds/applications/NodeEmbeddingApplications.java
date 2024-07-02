@@ -91,12 +91,14 @@ public final class NodeEmbeddingApplications {
             algorithmProcessingTemplateConvenience
         );
         var streamMode = new NodeEmbeddingAlgorithmsStreamModeBusinessFacade(
+            graphSageModelCatalog,
             estimationMode,
             algorithms,
             algorithmProcessingTemplateConvenience
         );
         var writeMode = NodeEmbeddingAlgorithmsWriteModeBusinessFacade.create(
             log,
+            graphSageModelCatalog,
             requestScopedDependencies,
             writeContext,
             estimationMode,
