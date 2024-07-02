@@ -21,7 +21,7 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
@@ -41,8 +41,6 @@ import org.neo4j.gds.spanningtree.SpanningTreeMutateConfig;
 import org.neo4j.gds.steiner.SteinerTreeMutateConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 
-import java.util.Optional;
-
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.AStar;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BFS;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BellmanFord;
@@ -60,16 +58,16 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 public class PathFindingAlgorithmsMutateModeBusinessFacade {
     private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final PathFindingAlgorithms pathFindingAlgorithms;
-    private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
+    private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
 
     public PathFindingAlgorithmsMutateModeBusinessFacade(
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         PathFindingAlgorithms pathFindingAlgorithms,
-        AlgorithmProcessingTemplate algorithmProcessingTemplate
+        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience
     ) {
-        this.algorithmProcessingTemplate = algorithmProcessingTemplate;
         this.pathFindingAlgorithms = pathFindingAlgorithms;
         this.estimationFacade = estimationFacade;
+        this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
     }
 
     public <RESULT> RESULT bellmanFord(
@@ -79,15 +77,13 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new BellmanFordMutateStep(configuration);
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             BellmanFord,
             () -> estimationFacade.bellmanFord(configuration),
             graph -> pathFindingAlgorithms.bellmanFord(graph, configuration),
-            Optional.of(mutateStep),
+            mutateStep,
             resultBuilder
         );
     }
@@ -100,15 +96,13 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
         var mutateStep = new SearchMutateStep(mutateRelationshipType);
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             BFS,
             estimationFacade::breadthFirstSearch,
             graph -> pathFindingAlgorithms.breadthFirstSearch(graph, configuration),
-            Optional.of(mutateStep),
+            mutateStep,
             resultBuilder
         );
     }
@@ -120,15 +114,13 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new ShortestPathMutateStep(configuration);
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             DeltaStepping,
             estimationFacade::deltaStepping,
             graph -> pathFindingAlgorithms.deltaStepping(graph, configuration),
-            Optional.of(mutateStep),
+            mutateStep,
             resultBuilder
         );
     }
@@ -141,15 +133,13 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
         var mutateStep = new SearchMutateStep(mutateRelationshipType);
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             DFS,
             estimationFacade::depthFirstSearch,
             graph -> pathFindingAlgorithms.depthFirstSearch(graph, configuration),
-            Optional.of(mutateStep),
+            mutateStep,
             resultBuilder
         );
     }
@@ -161,15 +151,13 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new ShortestPathMutateStep(configuration);
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             AStar,
             estimationFacade::singlePairShortestPathAStar,
             graph -> pathFindingAlgorithms.singlePairShortestPathAStar(graph, configuration),
-            Optional.of(mutateStep),
+            mutateStep,
             resultBuilder
         );
     }
@@ -181,15 +169,13 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new ShortestPathMutateStep(configuration);
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             Dijkstra,
             () -> estimationFacade.singlePairShortestPathDijkstra(configuration),
             graph -> pathFindingAlgorithms.singlePairShortestPathDijkstra(graph, configuration),
-            Optional.of(mutateStep),
+            mutateStep,
             resultBuilder
         );
     }
@@ -201,15 +187,13 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new ShortestPathMutateStep(configuration);
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             Yens,
             () -> estimationFacade.singlePairShortestPathYens(configuration),
             graph -> pathFindingAlgorithms.singlePairShortestPathYens(graph, configuration),
-            Optional.of(mutateStep),
+            mutateStep,
             resultBuilder
         );
     }
@@ -221,15 +205,13 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new ShortestPathMutateStep(configuration);
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             SingleSourceDijkstra,
             () -> estimationFacade.singleSourceShortestPathDijkstra(configuration),
             graph -> pathFindingAlgorithms.singleSourceShortestPathDijkstra(graph, configuration),
-            Optional.of(mutateStep),
+            mutateStep,
             resultBuilder
         );
     }
@@ -239,17 +221,15 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         SpanningTreeMutateConfig configuration,
         ResultBuilder<SpanningTreeMutateConfig, SpanningTree, RESULT, RelationshipsWritten> resultBuilder
     ) {
-        var mutateOrWriteStep = new SpanningTreeMutateStep(configuration);
+        var mutateStep = new SpanningTreeMutateStep(configuration);
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             LabelForProgressTracking.SpanningTree,
             estimationFacade::spanningTree,
             graph -> pathFindingAlgorithms.spanningTree(graph, configuration),
-            Optional.of(mutateOrWriteStep),
+            mutateStep,
             resultBuilder
         );
     }
@@ -259,17 +239,15 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         SteinerTreeMutateConfig configuration,
         ResultBuilder<SteinerTreeMutateConfig, SteinerTreeResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
-        var mutateOrWriteStep = new SteinerTreeMutateStep(configuration);
+        var mutateStep = new SteinerTreeMutateStep(configuration);
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             SteinerTree,
             () -> estimationFacade.steinerTree(configuration),
             graph -> pathFindingAlgorithms.steinerTree(graph, configuration),
-            Optional.of(mutateOrWriteStep),
+            mutateStep,
             resultBuilder
         );
     }

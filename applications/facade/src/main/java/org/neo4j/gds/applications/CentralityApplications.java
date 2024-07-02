@@ -26,7 +26,7 @@ import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsStat
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsWriteModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -59,7 +59,7 @@ public final class CentralityApplications {
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
         AlgorithmEstimationTemplate estimationTemplate,
-        AlgorithmProcessingTemplate processingTemplate,
+        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         ProgressTrackerCreator progressTrackerCreator,
         MutateNodeProperty mutateNodeProperty
     ) {
@@ -71,18 +71,26 @@ public final class CentralityApplications {
         var mutation = new CentralityAlgorithmsMutateModeBusinessFacade(
             estimation,
             algorithms,
-            processingTemplate,
+            algorithmProcessingTemplateConvenience,
             mutateNodeProperty
         );
-        var stats = new CentralityAlgorithmsStatsModeBusinessFacade(estimation, algorithms, processingTemplate);
-        var streaming = new CentralityAlgorithmsStreamModeBusinessFacade(estimation, algorithms, processingTemplate);
+        var stats = new CentralityAlgorithmsStatsModeBusinessFacade(
+            estimation,
+            algorithms,
+            algorithmProcessingTemplateConvenience
+        );
+        var streaming = new CentralityAlgorithmsStreamModeBusinessFacade(
+            estimation,
+            algorithms,
+            algorithmProcessingTemplateConvenience
+        );
         var writing = CentralityAlgorithmsWriteModeBusinessFacade.create(
             log,
             requestScopedDependencies,
             writeContext,
             estimation,
             algorithms,
-            processingTemplate
+            algorithmProcessingTemplateConvenience
         );
 
         return new CentralityApplications(estimation, mutation, stats, streaming, writing);

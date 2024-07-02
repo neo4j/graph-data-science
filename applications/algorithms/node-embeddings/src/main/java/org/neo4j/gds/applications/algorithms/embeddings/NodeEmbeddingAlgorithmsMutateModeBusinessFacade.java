@@ -20,7 +20,7 @@
 package org.neo4j.gds.applications.algorithms.embeddings;
 
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
@@ -39,20 +39,20 @@ public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
     private final GraphSageModelCatalog graphSageModelCatalog;
     private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimation;
     private final NodeEmbeddingAlgorithms algorithms;
-    private final AlgorithmProcessingTemplate template;
+    private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final MutateNodeProperty mutateNodeProperty;
 
     public NodeEmbeddingAlgorithmsMutateModeBusinessFacade(
         GraphSageModelCatalog graphSageModelCatalog,
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimation,
         NodeEmbeddingAlgorithms algorithms,
-        AlgorithmProcessingTemplate template,
+        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         MutateNodeProperty mutateNodeProperty
     ) {
         this.graphSageModelCatalog = graphSageModelCatalog;
         this.estimation = estimation;
         this.algorithms = algorithms;
-        this.template = template;
+        this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.mutateNodeProperty = mutateNodeProperty;
     }
 
@@ -63,15 +63,13 @@ public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new FastRPMutateStep(mutateNodeProperty, configuration);
 
-        return template.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             FastRP,
             () -> estimation.fastRP(configuration),
             graph -> algorithms.fastRP(graph, configuration),
-            Optional.of(mutateStep),
+            mutateStep,
             resultBuilder
         );
     }
@@ -88,7 +86,7 @@ public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
 
         var mutateStep = new GraphSageMutateStep(mutateNodeProperty, configuration);
 
-        return template.processAlgorithm(
+        return algorithmProcessingTemplateConvenience.processAlgorithm(
             relationshipWeightPropertyFromTrainConfiguration,
             graphName,
             configuration,

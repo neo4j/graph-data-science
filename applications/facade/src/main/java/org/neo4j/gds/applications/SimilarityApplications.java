@@ -21,7 +21,7 @@ package org.neo4j.gds.applications;
 
 import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithms;
@@ -57,7 +57,7 @@ public final class SimilarityApplications {
         Log log,
         RequestScopedDependencies requestScopedDependencies,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
-        AlgorithmProcessingTemplate algorithmProcessingTemplate,
+        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         ProgressTrackerCreator progressTrackerCreator,
         WriteRelationshipService writeRelationshipService
     ) {
@@ -68,25 +68,25 @@ public final class SimilarityApplications {
             log,
             estimationModeFacade,
             similarityAlgorithms,
-            algorithmProcessingTemplate
+            algorithmProcessingTemplateConvenience
         );
 
         var statsModeFacade = new SimilarityAlgorithmsStatsModeBusinessFacade(
             estimationModeFacade,
             similarityAlgorithms,
-            algorithmProcessingTemplate
+            algorithmProcessingTemplateConvenience
         );
 
         var streamModeFacade = new SimilarityAlgorithmsStreamModeBusinessFacade(
             estimationModeFacade,
             similarityAlgorithms,
-            algorithmProcessingTemplate
+            algorithmProcessingTemplateConvenience
         );
 
         var writeModeFacade = new SimilarityAlgorithmsWriteModeBusinessFacade(
             estimationModeFacade,
             similarityAlgorithms,
-            algorithmProcessingTemplate,
+            algorithmProcessingTemplateConvenience,
             writeRelationshipService
         );
 

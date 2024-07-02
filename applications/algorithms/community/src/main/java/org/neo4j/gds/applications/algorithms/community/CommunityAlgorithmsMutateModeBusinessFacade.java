@@ -22,7 +22,7 @@ package org.neo4j.gds.applications.algorithms.community;
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
@@ -51,8 +51,6 @@ import org.neo4j.gds.triangle.TriangleCountMutateConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.wcc.WccMutateConfig;
 
-import java.util.Optional;
-
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ApproximateMaximumKCut;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.K1Coloring;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KCore;
@@ -69,18 +67,18 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 public class CommunityAlgorithmsMutateModeBusinessFacade {
     private final CommunityAlgorithmsEstimationModeBusinessFacade estimation;
     private final CommunityAlgorithms algorithms;
-    private final AlgorithmProcessingTemplate template;
+    private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final MutateNodeProperty mutateNodeProperty;
 
     public CommunityAlgorithmsMutateModeBusinessFacade(
         CommunityAlgorithmsEstimationModeBusinessFacade estimation,
         CommunityAlgorithms algorithms,
-        AlgorithmProcessingTemplate template,
+        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         MutateNodeProperty mutateNodeProperty
     ) {
         this.estimation = estimation;
         this.algorithms = algorithms;
-        this.template = template;
+        this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.mutateNodeProperty = mutateNodeProperty;
     }
 
@@ -91,15 +89,13 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new ApproxMaxKCutMutateStep(mutateNodeProperty, configuration);
 
-        return template.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             ApproximateMaximumKCut,
             () -> estimation.approximateMaximumKCut(configuration),
             graph -> algorithms.approximateMaximumKCut(graph, configuration),
-            Optional.of(mutateStep),
+            mutateStep,
             resultBuilder
         );
     }
@@ -111,15 +107,13 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new K1ColoringMutateStep(mutateNodeProperty, configuration);
 
-        return template.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             K1Coloring,
             estimation::k1Coloring,
             graph -> algorithms.k1Coloring(graph, configuration),
-            Optional.of(mutateStep),
+            mutateStep,
             resultBuilder
         );
     }
@@ -131,15 +125,13 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new KCoreMutateStep(mutateNodeProperty, configuration);
 
-        return template.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             KCore,
             estimation::kCore,
             graph -> algorithms.kCore(graph, configuration),
-            Optional.of(mutateStep),
+            mutateStep,
             resultBuilder
         );
     }
@@ -151,15 +143,13 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new KMeansMutateStep(mutateNodeProperty, configuration);
 
-        return template.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             KMeans,
             () -> estimation.kMeans(configuration),
             graph -> algorithms.kMeans(graph, configuration),
-            Optional.of(mutateStep),
+            mutateStep,
             resultBuilder
         );
     }
@@ -171,15 +161,13 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new LabelPropagationMutateStep(mutateNodeProperty, configuration);
 
-        return template.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             LabelPropagation,
             estimation::labelPropagation,
             graph -> algorithms.labelPropagation(graph, configuration),
-            Optional.of(mutateStep),
+            mutateStep,
             resultBuilder
         );
     }
@@ -191,15 +179,13 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new LccMutateStep(mutateNodeProperty, configuration);
 
-        return template.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             LCC,
             () -> estimation.lcc(configuration),
             graph -> algorithms.lcc(graph, configuration),
-            Optional.of(mutateStep),
+            mutateStep,
             resultBuilder
         );
     }
@@ -211,15 +197,13 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new LeidenMutateStep(mutateNodeProperty, configuration);
 
-        return template.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             Leiden,
             () -> estimation.leiden(configuration),
             graph -> algorithms.leiden(graph, configuration),
-            Optional.of(mutateStep),
+            mutateStep,
             resultBuilder
         );
     }
@@ -231,15 +215,13 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new LouvainMutateStep(mutateNodeProperty, configuration);
 
-        return template.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             Louvain,
             () -> estimation.louvain(configuration),
             graph -> algorithms.louvain(graph, configuration),
-            Optional.of(mutateStep),
+            mutateStep,
             resultBuilder
         );
     }
@@ -251,15 +233,13 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new ModularityOptimizationMutateStep(mutateNodeProperty, configuration);
 
-        return template.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             ModularityOptimization,
             estimation::modularityOptimization,
             graph -> algorithms.modularityOptimization(graph, configuration),
-            Optional.of(mutateStep),
+            mutateStep,
             resultBuilder
         );
     }
@@ -271,15 +251,13 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new SccMutateStep(mutateNodeProperty, configuration);
 
-        return template.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             SCC,
             estimation::scc,
             graph -> algorithms.scc(graph, configuration),
-            Optional.of(mutateStep),
+            mutateStep,
             resultBuilder
         );
     }
@@ -291,15 +269,13 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new TriangleCountMutateStep(mutateNodeProperty, configuration);
 
-        return template.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             TriangleCount,
             estimation::triangleCount,
             graph -> algorithms.triangleCount(graph, configuration),
-            Optional.of(mutateStep),
+            mutateStep,
             resultBuilder
         );
     }
@@ -311,15 +287,13 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new WccMutateStep(mutateNodeProperty, configuration);
 
-        return template.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             WCC,
             () -> estimation.wcc(configuration),
             graph -> algorithms.wcc(graph, configuration),
-            Optional.of(mutateStep),
+            mutateStep,
             resultBuilder
         );
     }

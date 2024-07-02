@@ -27,7 +27,7 @@ import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsS
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsWriteModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -61,7 +61,7 @@ public final class NodeEmbeddingApplications {
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
-        AlgorithmProcessingTemplate algorithmProcessingTemplate,
+        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         ProgressTrackerCreator progressTrackerCreator,
         MutateNodeProperty mutateNodeProperty,
         ModelCatalog modelCatalog
@@ -82,18 +82,18 @@ public final class NodeEmbeddingApplications {
             graphSageModelCatalog,
             estimationMode,
             algorithms,
-            algorithmProcessingTemplate,
+            algorithmProcessingTemplateConvenience,
             mutateNodeProperty
         );
         var statsMode = new NodeEmbeddingAlgorithmsStatsModeBusinessFacade(
             estimationMode,
             algorithms,
-            algorithmProcessingTemplate
+            algorithmProcessingTemplateConvenience
         );
         var streamMode = new NodeEmbeddingAlgorithmsStreamModeBusinessFacade(
             estimationMode,
             algorithms,
-            algorithmProcessingTemplate
+            algorithmProcessingTemplateConvenience
         );
         var writeMode = NodeEmbeddingAlgorithmsWriteModeBusinessFacade.create(
             log,
@@ -101,7 +101,7 @@ public final class NodeEmbeddingApplications {
             writeContext,
             estimationMode,
             algorithms,
-            algorithmProcessingTemplate
+            algorithmProcessingTemplateConvenience
         );
 
         return new NodeEmbeddingApplications(estimationMode, mutateMode, statsMode, streamMode, writeMode);

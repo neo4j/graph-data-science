@@ -20,7 +20,7 @@
 package org.neo4j.gds.applications.algorithms.centrality;
 
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
@@ -37,8 +37,6 @@ import org.neo4j.gds.influenceMaximization.InfluenceMaximizationMutateConfig;
 import org.neo4j.gds.pagerank.PageRankMutateConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 
-import java.util.Optional;
-
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ArticleRank;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BetweennessCentrality;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.CELF;
@@ -51,18 +49,18 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 public class CentralityAlgorithmsMutateModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimation;
     private final CentralityAlgorithms algorithms;
-    private final AlgorithmProcessingTemplate template;
+    private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final MutateNodeProperty mutateNodeProperty;
 
     public CentralityAlgorithmsMutateModeBusinessFacade(
         CentralityAlgorithmsEstimationModeBusinessFacade estimation,
         CentralityAlgorithms algorithms,
-        AlgorithmProcessingTemplate template,
+        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         MutateNodeProperty mutateNodeProperty
     ) {
         this.estimation = estimation;
         this.algorithms = algorithms;
-        this.template = template;
+        this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.mutateNodeProperty = mutateNodeProperty;
     }
 
@@ -73,15 +71,13 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new PageRankMutateStep(mutateNodeProperty, configuration);
 
-        return template.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             ArticleRank,
             estimation::pageRank,
             graph -> algorithms.articleRank(graph, configuration),
-            Optional.of(mutateStep),
+            mutateStep,
             resultBuilder
         );
     }
@@ -93,15 +89,13 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new BetweennessCentralityMutateStep(mutateNodeProperty, configuration);
 
-        return template.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             BetweennessCentrality,
             () -> estimation.betweennessCentrality(configuration),
             graph -> algorithms.betweennessCentrality(graph, configuration),
-            Optional.of(mutateStep),
+            mutateStep,
             resultBuilder
         );
     }
@@ -113,15 +107,13 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new CelfMutateStep(mutateNodeProperty, configuration);
 
-        return template.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             CELF,
             () -> estimation.celf(configuration),
             graph -> algorithms.celf(graph, configuration),
-            Optional.of(mutateStep),
+            mutateStep,
             resultBuilder
         );
     }
@@ -133,15 +125,13 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new ClosenessCentralityMutateStep(mutateNodeProperty, configuration);
 
-        return template.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             ClosenessCentrality,
             () -> estimation.closenessCentrality(configuration),
             graph -> algorithms.closenessCentrality(graph, configuration),
-            Optional.of(mutateStep),
+            mutateStep,
             resultBuilder
         );
     }
@@ -153,15 +143,13 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new DegreeCentralityMutateStep(mutateNodeProperty, configuration);
 
-        return template.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             DegreeCentrality,
             () -> estimation.degreeCentrality(configuration),
             graph -> algorithms.degreeCentrality(graph, configuration),
-            Optional.of(mutateStep),
+            mutateStep,
             resultBuilder
         );
     }
@@ -173,15 +161,13 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new PageRankMutateStep(mutateNodeProperty, configuration);
 
-        return template.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             EigenVector,
             estimation::pageRank,
             graph -> algorithms.eigenVector(graph, configuration),
-            Optional.of(mutateStep),
+            mutateStep,
             resultBuilder
         );
     }
@@ -193,15 +179,13 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new HarmonicCentralityMutateStep(mutateNodeProperty, configuration);
 
-        return template.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             HarmonicCentrality,
             estimation::harmonicCentrality,
             graph -> algorithms.harmonicCentrality(graph, configuration),
-            Optional.of(mutateStep),
+            mutateStep,
             resultBuilder
         );
     }
@@ -213,15 +197,13 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new PageRankMutateStep(mutateNodeProperty, configuration);
 
-        return template.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             PageRank,
             estimation::pageRank,
             graph -> algorithms.pageRank(graph, configuration),
-            Optional.of(mutateStep),
+            mutateStep,
             resultBuilder
         );
     }
