@@ -30,7 +30,7 @@ import org.neo4j.gds.procedures.algorithms.community.ApproxMaxKCutMutateResult;
 
 import java.util.Optional;
 
-class ApproxMaxKCutResultBuilderForMutateMode implements ResultBuilder<ApproxMaxKCutMutateConfig, ApproxMaxKCutResult, ApproxMaxKCutMutateResult, NodePropertiesWritten> {
+public class ApproxMaxKCutResultBuilderForMutateMode implements ResultBuilder<ApproxMaxKCutMutateConfig, ApproxMaxKCutResult, ApproxMaxKCutMutateResult, NodePropertiesWritten> {
     @Override
     public ApproxMaxKCutMutateResult build(
         Graph graph,
