@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
-import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
@@ -97,7 +96,6 @@ public class WriteNodePropertiesApplication {
         try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
             try {
                 var propertiesWritten = writeNodeProperties(
-                    graphStore,
                     resultStore,
                     configuration,
                     subGraph,
@@ -119,7 +117,6 @@ public class WriteNodePropertiesApplication {
     }
 
     private static long writeNodeProperties(
-        GraphStore graphStore,
         ResultStore resultStore,
         GraphWriteNodePropertiesConfig config,
         Graph subGraph,
@@ -134,10 +131,6 @@ public class WriteNodePropertiesApplication {
                 .withTerminationFlag(terminationFlag)
                 .parallel(DefaultPool.INSTANCE, config.writeConcurrency())
                 .withProgressTracker(progressTracker)
-                .withArrowConnectionInfo(
-                    config.arrowConnectionInfo(),
-                    graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
-                )
                 .withResultStore(config.resolveResultStore(resultStore))
                 .withJobId(config.jobId())
                 .build();

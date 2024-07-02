@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
-import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
@@ -121,10 +120,6 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
 
             // configure the exporter
             var relationshipStreamExporter = writeContext.getRelationshipStreamExporterBuilder()
-                .withArrowConnectionInfo(
-                    configuration.arrowConnectionInfo(),
-                    graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
-                )
                 .withResultStore(maybeResultStore)
                 .withIdMappingOperator(graph::toOriginalNodeId)
                 .withProgressTracker(progressTracker)

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
-import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
@@ -68,10 +67,6 @@ public class WriteNodeLabelApplication {
             var nodeLabelExporter = nodeLabelExporterBuilder
                 .withIdMap(filteredNodes.idMap())
                 .withTerminationFlag(terminationFlag)
-                .withArrowConnectionInfo(
-                    configuration.arrowConnectionInfo(),
-                    graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
-                )
                 .withResultStore(configuration.resolveResultStore(resultStore))
                 .withJobId(configuration.jobId())
                 .parallel(DefaultPool.INSTANCE, configuration.writeConcurrency())

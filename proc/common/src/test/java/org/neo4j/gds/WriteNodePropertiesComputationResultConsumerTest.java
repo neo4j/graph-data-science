@@ -40,7 +40,6 @@ import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.config.ImmutableArrowConnectionInfo;
 import org.neo4j.gds.core.huge.HugeGraphBuilder;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
@@ -110,24 +109,6 @@ class WriteNodePropertiesComputationResultConsumerTest extends BaseTest {
             .hasMessageContaining("propertyKey=foo, propertyState=REMOTE");
     }
 
-    @Test
-    void shouldThrowWhenArrowConnectionInfoIsMissing() {
-        var config = TestWriteConfigImpl.builder().writeProperty("writeProp").build();
-
-        assertThatThrownBy(() -> executeWrite(config, PropertyState.REMOTE, WriteMode.REMOTE))
-            .hasMessageContaining("Missing arrow connection info");
-    }
-
-    @Test
-    void shouldThrowWhenArrowConnectionInfoIsGivenForLocalWriteBack() {
-        var config = TestWriteConfigImpl.builder()
-            .writeProperty("writeProp")
-            .arrowConnectionInfo(ImmutableArrowConnectionInfo.of("localhost", 1337, "token", false))
-            .build();
-
-        assertThatThrownBy(() -> executeWrite(config, PropertyState.PERSISTENT, WriteMode.LOCAL))
-            .hasMessageContaining("write operation is targeting a local database");
-    }
 
     @Test
     void shouldThrowWhenWriteModeIsNone() {

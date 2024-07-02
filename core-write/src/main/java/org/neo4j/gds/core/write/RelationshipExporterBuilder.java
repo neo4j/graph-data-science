@@ -21,7 +21,6 @@ package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -40,7 +39,6 @@ public abstract class RelationshipExporterBuilder {
     protected Graph graph;
     protected ProgressTracker progressTracker = ProgressTracker.NULL_TRACKER;
     protected RelationshipPropertyTranslator propertyTranslator = Values::doubleValue;
-    protected Optional<ArrowConnectionInfo> arrowConnectionInfo = Optional.empty();
     protected long batchSize = NativeNodePropertyExporter.MIN_BATCH_SIZE;
     protected Optional<String> remoteDatabaseName; // coupled with arrowConnectionInfo, but should not appear in external API
     protected Optional<ResultStore> resultStore;
@@ -79,12 +77,6 @@ public abstract class RelationshipExporterBuilder {
      */
     public RelationshipExporterBuilder withProgressTracker(ProgressTracker progressTracker) {
         this.progressTracker = progressTracker;
-        return this;
-    }
-
-    public RelationshipExporterBuilder withArrowConnectionInfo(Optional<ArrowConnectionInfo> arrowConnectionInfo, Optional<String> remoteDatabaseName) {
-        this.remoteDatabaseName = remoteDatabaseName;
-        this.arrowConnectionInfo = arrowConnectionInfo;
         return this;
     }
 

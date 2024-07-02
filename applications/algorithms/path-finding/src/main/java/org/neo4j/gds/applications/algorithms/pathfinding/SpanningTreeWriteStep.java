@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
-import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
@@ -76,10 +75,6 @@ class SpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree, Relations
             .withIdMappingOperator(spanningGraph::toOriginalNodeId)
             .withTerminationFlag(requestScopedDependencies.getTerminationFlag())
             .withProgressTracker(progressTracker)
-            .withArrowConnectionInfo(
-                configuration.arrowConnectionInfo(),
-                graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
-            )
             .withResultStore(configuration.resolveResultStore(resultStore))
             .withJobId(configuration.jobId())
             .build();

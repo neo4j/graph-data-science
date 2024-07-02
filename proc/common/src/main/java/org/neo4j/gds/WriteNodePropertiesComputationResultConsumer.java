@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -40,7 +39,6 @@ import org.neo4j.gds.result.AbstractResultBuilder;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
@@ -67,16 +65,10 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
     private static void validatePropertiesCanBeWritten(
         WriteMode writeMode,
         Map<String, PropertySchema> propertySchemas,
-        Collection<NodeProperty> nodeProperties,
-        boolean hasArrowConnectionInfo
+        Collection<NodeProperty> nodeProperties
     ) {
-        if (writeMode == WriteMode.REMOTE && !hasArrowConnectionInfo) {
+        if (writeMode == WriteMode.REMOTE) {
             throw new IllegalArgumentException("Missing arrow connection information");
-        }
-        if (writeMode == WriteMode.LOCAL && hasArrowConnectionInfo) {
-            throw new IllegalArgumentException(
-                "Arrow connection info was given although the write operation is targeting a local database"
-            );
         }
 
         var expectedPropertyState = expectedPropertyStateForWriteMode(writeMode);
@@ -100,7 +92,7 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
                     propertySchemas.get(nodeProperty.propertyKey()).state()
                 )
             )
-            .collect(Collectors.toList());
+            .toList();
 
         if (!unexpectedProperties.isEmpty()) {
             throw new IllegalStateException(
@@ -186,8 +178,7 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
             validatePropertiesCanBeWritten(
                 writeMode,
                 nodePropertySchema,
-                nodeProperties,
-                config.arrowConnectionInfo().isPresent()
+                nodeProperties
             );
 
             var resultStore = config.resolveResultStore(computationResult.resultStore());
@@ -196,10 +187,6 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
                 .withIdMap(graph)
                 .withTerminationFlag(computationResult.algorithm().terminationFlag)
                 .withProgressTracker(progressTracker)
-                .withArrowConnectionInfo(
-                    config.arrowConnectionInfo(),
-                    computationResult.graphStore().databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
-                )
                 .withResultStore(resultStore)
                 .withJobId(config.jobId())
                 .parallel(DefaultPool.INSTANCE, config.writeConcurrency())

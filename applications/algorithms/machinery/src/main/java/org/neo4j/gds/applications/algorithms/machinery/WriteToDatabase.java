@@ -60,7 +60,6 @@ public class WriteToDatabase {
             writeConfiguration.writeConcurrency(),
             writePropertyConfiguration.writeProperty(),
             label.value,
-            writeConfiguration.arrowConnectionInfo(),
             writeConfiguration.resolveResultStore(resultStore),
             jobId,
             requestScopedDependencies.getTerminationFlag(),

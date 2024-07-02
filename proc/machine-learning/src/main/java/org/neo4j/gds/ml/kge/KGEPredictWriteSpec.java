@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.kge;
 
-import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
@@ -84,10 +83,6 @@ public class KGEPredictWriteSpec implements
                             RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY,
                             executionContext
                         )
-                    )
-                    .withArrowConnectionInfo(
-                        config.arrowConnectionInfo(),
-                        computationResult.graphStore().databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                     )
                     .withResultStore(config.resolveResultStore(computationResult.resultStore()))
                     .withJobId(config.jobId())

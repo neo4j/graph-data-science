@@ -20,7 +20,6 @@
 package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.PropertyState;
@@ -28,7 +27,6 @@ import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.Capabilities;
@@ -69,7 +67,6 @@ final class Neo4jDatabaseNodePropertyWriter {
         Concurrency writeConcurrency,
         String writeProperty,
         String procedureName,
-        Optional<ArrowConnectionInfo> arrowConnectionInfo,
         Optional<ResultStore> resultStore,
         JobId jobId,
         TerminationFlag terminationFlag,
@@ -94,7 +91,6 @@ final class Neo4jDatabaseNodePropertyWriter {
             writeMode,
             nodePropertySchema,
             nodeProperties,
-            arrowConnectionInfo.isPresent(),
             resultStore.isPresent()
         );
 
@@ -102,10 +98,6 @@ final class Neo4jDatabaseNodePropertyWriter {
             .withIdMap(graph)
             .withTerminationFlag(terminationFlag)
             .withProgressTracker(progressTracker)
-            .withArrowConnectionInfo(
-                arrowConnectionInfo,
-                graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
-            )
             .withResultStore(resultStore)
             .withJobId(jobId)
             .parallel(DefaultPool.INSTANCE, writeConcurrency)
@@ -140,13 +132,12 @@ final class Neo4jDatabaseNodePropertyWriter {
         Capabilities.WriteMode writeMode,
         Map<String, PropertySchema> propertySchemas,
         Collection<NodeProperty> nodeProperties,
-        boolean hasArrowConnectionInfo,
         boolean useResultStore
     ) {
-        if (writeMode == Capabilities.WriteMode.REMOTE && !(hasArrowConnectionInfo || useResultStore)) {
+        if (writeMode == Capabilities.WriteMode.REMOTE && !useResultStore) {
             throw new IllegalArgumentException("Missing arrow connection information");
         }
-        if (writeMode == Capabilities.WriteMode.LOCAL && hasArrowConnectionInfo) {
+        if (writeMode == Capabilities.WriteMode.LOCAL) {
             throw new IllegalArgumentException(
                 "Arrow connection info was given although the write operation is targeting a local database"
             );

@@ -48,18 +48,6 @@ public interface WriteConfig extends ConcurrencyConfig {
             .validate(writeConcurrency().value(), WRITE_CONCURRENCY_KEY, ConcurrencyConfig.CONCURRENCY_LIMITATION);
     }
 
-    /**
-     * This config option will only exist temporarily for testing the "serverless"
-     * architecture. It should only be used for arrow write-back.
-     * In the final version we will no longer pass this information in procedure
-     * calls, but replace those calls with an arrow protocol.
-     * Note that not every write-back path supports forwarding this information to the
-     * export builders.
-     */
-    @Configuration.ConvertWith(method = "org.neo4j.gds.config.ArrowConnectionInfo#parse")
-    @Configuration.ToMapValue(value = "org.neo4j.gds.config.ArrowConnectionInfo#toMap")
-    Optional<ArrowConnectionInfo> arrowConnectionInfo();
-
     default boolean writeToResultStore() {
         return false;
     }
