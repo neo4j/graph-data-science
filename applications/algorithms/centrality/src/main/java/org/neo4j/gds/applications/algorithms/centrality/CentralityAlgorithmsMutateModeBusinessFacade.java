@@ -74,6 +74,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         var mutateStep = new PageRankMutateStep(mutateNodeProperty, configuration);
 
         return template.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -93,6 +94,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         var mutateStep = new BetweennessCentralityMutateStep(mutateNodeProperty, configuration);
 
         return template.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -112,6 +114,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         var mutateStep = new CelfMutateStep(mutateNodeProperty, configuration);
 
         return template.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -131,6 +134,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         var mutateStep = new ClosenessCentralityMutateStep(mutateNodeProperty, configuration);
 
         return template.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -150,6 +154,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         var mutateStep = new DegreeCentralityMutateStep(mutateNodeProperty, configuration);
 
         return template.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -169,6 +174,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         var mutateStep = new PageRankMutateStep(mutateNodeProperty, configuration);
 
         return template.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -188,6 +194,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         var mutateStep = new HarmonicCentralityMutateStep(mutateNodeProperty, configuration);
 
         return template.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -207,6 +214,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         var mutateStep = new PageRankMutateStep(mutateNodeProperty, configuration);
 
         return template.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),

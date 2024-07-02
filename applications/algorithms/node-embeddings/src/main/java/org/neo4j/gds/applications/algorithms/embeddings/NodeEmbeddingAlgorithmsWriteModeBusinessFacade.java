@@ -80,6 +80,7 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
         var writeStep = new FastRPWriteStep(writeToDatabase, configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),

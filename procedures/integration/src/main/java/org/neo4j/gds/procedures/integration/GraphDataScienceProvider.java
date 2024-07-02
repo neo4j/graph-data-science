@@ -29,6 +29,7 @@ import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
@@ -79,6 +80,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
     private final TaskRegistryFactoryService taskRegistryFactoryService;
     private final UserLogServices userLogServices;
     private final Config config;
+    private final ModelCatalog modelCatalog;
 
     GraphDataScienceProvider(
         Log log,
@@ -96,7 +98,8 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         ProjectionMetricsService projectionMetricsService,
         TaskRegistryFactoryService taskRegistryFactoryService,
         UserLogServices userLogServices,
-        Config config
+        Config config,
+        ModelCatalog modelCatalog
     ) {
         this.log = log;
         this.defaultsConfiguration = defaultsConfiguration;
@@ -114,6 +117,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.userLogServices = userLogServices;
         this.config = config;
+        this.modelCatalog = modelCatalog;
     }
 
     @Override
@@ -186,7 +190,8 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             graphDatabaseService,
             procedureTransactionAccessor.getProcedureTransaction(context),
             algorithmProcedureFacadeBuilderFactory,
-            deprecatedProceduresMetricService
+            deprecatedProceduresMetricService,
+            modelCatalog
         );
     }
 }

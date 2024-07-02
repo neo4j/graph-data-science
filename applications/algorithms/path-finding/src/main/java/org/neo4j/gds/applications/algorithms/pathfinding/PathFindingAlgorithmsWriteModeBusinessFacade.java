@@ -290,6 +290,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),

@@ -81,9 +81,9 @@ class GraphStoreCatalogServiceGetGraphTest {
             GraphName.parse("bogus"),
             configMock,
             Optional.empty(),
+            Optional.empty(),
             new User("bogusUser", false),
-            DatabaseId.EMPTY,
-            Optional.empty()
+            DatabaseId.EMPTY
         );
 
         assertThat(graphResources.graphStore()).isSameAs(graphStore);
@@ -125,9 +125,9 @@ class GraphStoreCatalogServiceGetGraphTest {
             GraphName.parse("bogus"),
             configMock,
             Optional.empty(),
+            Optional.empty(),
             new User("bogusUser", false),
-            DatabaseId.EMPTY,
-            Optional.empty()
+            DatabaseId.EMPTY
         );
 
         assertThat(graphResources.graphStore()).isSameAs(graphStore);
@@ -169,9 +169,9 @@ class GraphStoreCatalogServiceGetGraphTest {
             GraphName.parse("bogus"),
             configMock,
             Optional.empty(),
+            Optional.empty(),
             new User("bogusUser", false),
-            DatabaseId.EMPTY,
-            Optional.empty()
+            DatabaseId.EMPTY
         );
 
         assertThat(graphResources.graphStore()).isSameAs(graphStore);
@@ -214,9 +214,9 @@ class GraphStoreCatalogServiceGetGraphTest {
             GraphName.parse("bogus"),
             configMock,
             Optional.empty(),
+            Optional.empty(),
             new User("bogusUser", false),
-            DatabaseId.EMPTY,
-            Optional.empty()
+            DatabaseId.EMPTY
         );
 
         assertThat(graphResources.graphStore()).isSameAs(graphStore);
@@ -260,9 +260,9 @@ class GraphStoreCatalogServiceGetGraphTest {
             GraphName.parse("bogus"),
             configMock,
             Optional.empty(),
+            Optional.empty(),
             new User("bogusUser", false),
-            DatabaseId.EMPTY,
-            Optional.empty()
+            DatabaseId.EMPTY
         );
 
         assertThat(graphResources.graphStore()).isSameAs(graphStore);

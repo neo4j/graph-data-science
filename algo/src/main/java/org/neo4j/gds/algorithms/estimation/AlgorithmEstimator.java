@@ -79,13 +79,12 @@ public class AlgorithmEstimator {
             estimationBuilder.add("graph", graphMemoryEstimation.estimateMemoryUsageAfterLoading());
         } else if (graphNameOrConfiguration instanceof String) {
             var graphStore = graphStoreCatalogService.getGraphResources(
-                GraphName.parse(
-                    (String) graphNameOrConfiguration),
+                GraphName.parse((String) graphNameOrConfiguration),
                 config,
+                Optional.empty(),
                 maybeRelationshipProperty,
                 requestScopedDependencies.getUser(),
-                requestScopedDependencies.getDatabaseId(),
-                Optional.empty()
+                requestScopedDependencies.getDatabaseId()
             ).graphStore();
             dimensions = GraphDimensionsComputer.of(graphStore, config);
         } else {

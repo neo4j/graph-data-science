@@ -38,6 +38,7 @@ import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.modelcatalogservices.ModelCatalogService;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityProcedureFacade;
@@ -53,7 +54,7 @@ import org.neo4j.gds.procedures.embeddings.OldNodeEmbeddingsProcedureFacade;
 import org.neo4j.gds.procedures.misc.MiscAlgorithmsProcedureFacade;
 
 class AlgorithmProcedureFacadeBuilder {
-    // Request scoped parameters
+    private final RequestScopedDependencies requestScopedDependencies;
     private final ConfigurationCreator configurationCreator;
     private final CloseableResourceRegistry closeableResourceRegistry;
     private final NodeLookup nodeLookup;
@@ -70,6 +71,7 @@ class AlgorithmProcedureFacadeBuilder {
     private final AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode;
 
     AlgorithmProcedureFacadeBuilder(
+        RequestScopedDependencies requestScopedDependencies,
         ConfigurationCreator configurationCreator,
         CloseableResourceRegistry closeableResourceRegistry,
         NodeLookup nodeLookup,
@@ -85,6 +87,7 @@ class AlgorithmProcedureFacadeBuilder {
         AlgorithmExecutionScaffolding algorithmExecutionScaffolding,
         AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode
     ) {
+        this.requestScopedDependencies = requestScopedDependencies;
         this.configurationCreator = configurationCreator;
         this.closeableResourceRegistry = closeableResourceRegistry;
         this.nodeLookup = nodeLookup;
@@ -155,6 +158,7 @@ class AlgorithmProcedureFacadeBuilder {
 
     NodeEmbeddingsProcedureFacade createNodeEmbeddingsProcedureFacade() {
         return NodeEmbeddingsProcedureFacade.create(
+            requestScopedDependencies,
             genericStub,
             applicationsFacade,
             estimationModeRunner,

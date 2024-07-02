@@ -143,6 +143,7 @@ public class AlgorithmProcedureFacadeBuilderFactory {
 
         // procedure facade
         return new AlgorithmProcedureFacadeBuilder(
+            requestScopedDependencies,
             configurationCreator,
             closeableResourceRegistry,
             nodeLookup,

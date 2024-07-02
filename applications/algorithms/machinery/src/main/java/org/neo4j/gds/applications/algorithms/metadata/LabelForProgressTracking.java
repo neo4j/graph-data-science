@@ -39,6 +39,7 @@ public enum LabelForProgressTracking {
     FastRP("FastRP"),
     FilteredKNN("Filtered K-Nearest Neighbours"),
     FilteredNodeSimilarity("Filtered Node Similarity"),
+    GraphSage("GraphSage"),
     HarmonicCentrality("HarmonicCentrality"),
     K1Coloring("K1Coloring"),
     KCore("KCoreDecomposition"),
@@ -90,6 +91,7 @@ public enum LabelForProgressTracking {
             case FastRP -> FastRP;
             case FilteredKNN -> FilteredKNN;
             case FilteredNodeSimilarity -> FilteredNodeSimilarity;
+            case GraphSage -> GraphSage;
             case HarmonicCentrality -> HarmonicCentrality;
             case K1Coloring -> K1Coloring;
             case KCore -> KCore;

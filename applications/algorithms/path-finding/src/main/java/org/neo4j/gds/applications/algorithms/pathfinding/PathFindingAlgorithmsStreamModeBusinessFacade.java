@@ -88,6 +88,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<AllShortestPathsConfig, Stream<AllShortestPathsStreamResult>, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -105,6 +106,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<BellmanFordStreamConfig, BellmanFordResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -122,6 +124,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<BfsStreamConfig, HugeLongArray, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -139,6 +142,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<AllShortestPathsDeltaStreamConfig, PathFindingResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -156,6 +160,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<DfsStreamConfig, HugeLongArray, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -173,6 +178,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<DagLongestPathStreamConfig, PathFindingResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -190,6 +196,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<RandomWalkStreamConfig, Stream<long[]>, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -207,6 +214,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<ShortestPathAStarStreamConfig, PathFindingResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -224,6 +232,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<ShortestPathDijkstraStreamConfig, PathFindingResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -241,6 +250,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<ShortestPathYensStreamConfig, PathFindingResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -258,6 +268,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<AllShortestPathsDijkstraStreamConfig, PathFindingResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -275,6 +286,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<SpanningTreeStreamConfig, SpanningTree, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -292,6 +304,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<SteinerTreeStreamConfig, SteinerTreeResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -309,6 +322,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<TopologicalSortStreamConfig, TopologicalSortResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),

@@ -531,7 +531,8 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
             new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
             new ProjectionMetricsService(new PassthroughExecutionMetricRegistrar()),
             requestScopedDependencies,
-            WriteContext.builder().build()
+            WriteContext.builder().build(),
+            null
         );
         var communityProcedureFacade = CommunityProcedureFacade.create(
             genericStub,

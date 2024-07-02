@@ -65,6 +65,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<PageRankStreamConfig, PageRankResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -82,6 +83,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<BetweennessCentralityStreamConfig, CentralityAlgorithmResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -99,6 +101,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<InfluenceMaximizationStreamConfig, CELFResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -116,6 +119,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<ClosenessCentralityStreamConfig, CentralityAlgorithmResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -133,6 +137,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<DegreeCentralityStreamConfig, CentralityAlgorithmResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -150,6 +155,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<PageRankStreamConfig, PageRankResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -167,6 +173,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<HarmonicCentralityStreamConfig, HarmonicResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -184,6 +191,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<PageRankStreamConfig, PageRankResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),

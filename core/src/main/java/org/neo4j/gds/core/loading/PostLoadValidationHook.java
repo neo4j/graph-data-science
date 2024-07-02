@@ -19,8 +19,15 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 
-public interface PostGraphStoreLoadValidationHook {
+/**
+ * Some use cases (GraphSage, looking at you!) need extra validation done after we load graph and graph store.
+ * This is the hook for it.
+ */
+public interface PostLoadValidationHook {
     void onGraphStoreLoaded(GraphStore graphStore);
+
+    void onGraphLoaded(Graph graph);
 }

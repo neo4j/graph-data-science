@@ -26,23 +26,30 @@ import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.embeddings.fastrp.FastRPMutateConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMutateConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FastRP;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.GraphSage;
 
 public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
+    private final GraphSageModelCatalog graphSageModelCatalog;
     private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimation;
     private final NodeEmbeddingAlgorithms algorithms;
     private final AlgorithmProcessingTemplate template;
     private final MutateNodeProperty mutateNodeProperty;
 
     public NodeEmbeddingAlgorithmsMutateModeBusinessFacade(
+        GraphSageModelCatalog graphSageModelCatalog,
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimation,
         NodeEmbeddingAlgorithms algorithms,
         AlgorithmProcessingTemplate template,
         MutateNodeProperty mutateNodeProperty
     ) {
+        this.graphSageModelCatalog = graphSageModelCatalog;
         this.estimation = estimation;
         this.algorithms = algorithms;
         this.template = template;
@@ -57,12 +64,38 @@ public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
         var mutateStep = new FastRPMutateStep(mutateNodeProperty, configuration);
 
         return template.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
             FastRP,
             () -> estimation.fastRP(configuration),
             graph -> algorithms.fastRP(graph, configuration),
+            Optional.of(mutateStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT graphSage(
+        GraphName graphName,
+        GraphSageMutateConfig configuration,
+        ResultBuilder<GraphSageMutateConfig, GraphSageResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var model = graphSageModelCatalog.get(configuration);
+        var relationshipWeightPropertyFromTrainConfiguration = model.trainConfig().relationshipWeightProperty();
+
+        var validationHook = new GraphSageValidationHook(configuration, model);
+
+        var mutateStep = new GraphSageMutateStep(mutateNodeProperty, configuration);
+
+        return template.processAlgorithm(
+            relationshipWeightPropertyFromTrainConfiguration,
+            graphName,
+            configuration,
+            Optional.of(List.of(validationHook)),
+            GraphSage,
+            () -> estimation.graphSage(configuration, true),
+            graph -> algorithms.graphSage(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
         );

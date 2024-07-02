@@ -46,6 +46,7 @@ public enum Algorithm {
     FastRP,
     FilteredKNN,
     FilteredNodeSimilarity,
+    GraphSage,
     HarmonicCentrality,
     K1Coloring,
     KCore,

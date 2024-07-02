@@ -23,11 +23,15 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.gds.embeddings.fastrp.FastRPBaseConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -37,10 +41,17 @@ import java.util.List;
 public class NodeEmbeddingAlgorithms {
     private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
 
+    private final GraphSageModelCatalog graphSageModelCatalog;
+
     private final ProgressTrackerCreator progressTrackerCreator;
     private final TerminationFlag terminationFlag;
 
-    public NodeEmbeddingAlgorithms(ProgressTrackerCreator progressTrackerCreator, TerminationFlag terminationFlag) {
+    public NodeEmbeddingAlgorithms(
+        GraphSageModelCatalog graphSageModelCatalog,
+        ProgressTrackerCreator progressTrackerCreator,
+        TerminationFlag terminationFlag
+    ) {
+        this.graphSageModelCatalog = graphSageModelCatalog;
         this.progressTrackerCreator = progressTrackerCreator;
         this.terminationFlag = terminationFlag;
     }
@@ -62,6 +73,25 @@ public class NodeEmbeddingAlgorithms {
             progressTracker,
             configuration.randomSeed(),
             terminationFlag
+        );
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+    }
+
+    GraphSageResult graphSage(Graph graph, GraphSageBaseConfig configuration) {
+        var task = Tasks.leaf(LabelForProgressTracking.GraphSage.value, graph.nodeCount());
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var model = graphSageModelCatalog.get(configuration);
+        var parameters = configuration.toParameters();
+
+        var algorithm = new GraphSage(
+            graph,
+            model,
+            parameters.concurrency(),
+            parameters.batchSize(),
+            DefaultPool.INSTANCE,
+            progressTracker
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);

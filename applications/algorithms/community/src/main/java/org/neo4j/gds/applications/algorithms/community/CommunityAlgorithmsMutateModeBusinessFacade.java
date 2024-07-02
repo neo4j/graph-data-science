@@ -92,6 +92,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         var mutateStep = new ApproxMaxKCutMutateStep(mutateNodeProperty, configuration);
 
         return template.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -111,6 +112,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         var mutateStep = new K1ColoringMutateStep(mutateNodeProperty, configuration);
 
         return template.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -130,6 +132,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         var mutateStep = new KCoreMutateStep(mutateNodeProperty, configuration);
 
         return template.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -149,6 +152,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         var mutateStep = new KMeansMutateStep(mutateNodeProperty, configuration);
 
         return template.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -168,6 +172,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         var mutateStep = new LabelPropagationMutateStep(mutateNodeProperty, configuration);
 
         return template.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -187,6 +192,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         var mutateStep = new LccMutateStep(mutateNodeProperty, configuration);
 
         return template.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -206,6 +212,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         var mutateStep = new LeidenMutateStep(mutateNodeProperty, configuration);
 
         return template.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -225,6 +232,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         var mutateStep = new LouvainMutateStep(mutateNodeProperty, configuration);
 
         return template.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -244,6 +252,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         var mutateStep = new ModularityOptimizationMutateStep(mutateNodeProperty, configuration);
 
         return template.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -263,6 +272,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         var mutateStep = new SccMutateStep(mutateNodeProperty, configuration);
 
         return template.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -282,6 +292,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         var mutateStep = new TriangleCountMutateStep(mutateNodeProperty, configuration);
 
         return template.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -301,6 +312,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
         var mutateStep = new WccMutateStep(mutateNodeProperty, configuration);
 
         return template.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),

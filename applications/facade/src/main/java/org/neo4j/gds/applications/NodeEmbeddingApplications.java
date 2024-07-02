@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications;
 
+import org.neo4j.gds.applications.algorithms.embeddings.GraphSageModelCatalog;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithms;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsMutateModeBusinessFacade;
@@ -31,6 +32,7 @@ import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.logging.Log;
 
 public final class NodeEmbeddingApplications {
@@ -61,15 +63,23 @@ public final class NodeEmbeddingApplications {
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
         ProgressTrackerCreator progressTrackerCreator,
-        MutateNodeProperty mutateNodeProperty
+        MutateNodeProperty mutateNodeProperty,
+        ModelCatalog modelCatalog
     ) {
+        var graphSageModelCatalog = new GraphSageModelCatalog(modelCatalog);
+
         var algorithms = new NodeEmbeddingAlgorithms(
+            graphSageModelCatalog,
             progressTrackerCreator,
             requestScopedDependencies.getTerminationFlag()
         );
 
-        var estimationMode = new NodeEmbeddingAlgorithmsEstimationModeBusinessFacade(algorithmEstimationTemplate);
+        var estimationMode = new NodeEmbeddingAlgorithmsEstimationModeBusinessFacade(
+            graphSageModelCatalog,
+            algorithmEstimationTemplate
+        );
         var mutateMode = new NodeEmbeddingAlgorithmsMutateModeBusinessFacade(
+            graphSageModelCatalog,
             estimationMode,
             algorithms,
             algorithmProcessingTemplate,

@@ -72,6 +72,7 @@ public class SimilarityAlgorithmsWriteModeBusinessFacade {
         );
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -96,6 +97,7 @@ public class SimilarityAlgorithmsWriteModeBusinessFacade {
         );
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -120,6 +122,7 @@ public class SimilarityAlgorithmsWriteModeBusinessFacade {
         );
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -144,6 +147,7 @@ public class SimilarityAlgorithmsWriteModeBusinessFacade {
         );
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),

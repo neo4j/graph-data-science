@@ -28,7 +28,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.loading.PostGraphStoreLoadValidationHook;
+import org.neo4j.gds.core.loading.PostLoadValidationHook;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.logging.Log;
@@ -64,9 +64,10 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
 
     @Override
     public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER processAlgorithm(
+        Optional<String> relationshipWeightOverride,
         GraphName graphName,
         CONFIGURATION configuration,
-        Optional<Iterable<PostGraphStoreLoadValidationHook>> postGraphStoreLoadValidationHooks,
+        Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
         LabelForProgressTracking label,
         Supplier<MemoryEstimation> estimationFactory,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
@@ -78,6 +79,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
 
         var graphResources = graphLoadAndValidationWithTiming(
             timingsBuilder,
+            relationshipWeightOverride,
             graphName,
             configuration,
             postGraphStoreLoadValidationHooks
@@ -143,29 +145,38 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
      */
     <CONFIGURATION extends AlgoBaseConfig> GraphResources graphLoadAndValidationWithTiming(
         AlgorithmProcessingTimingsBuilder timingsBuilder,
+        Optional<String> relationshipWeightOverride,
         GraphName graphName,
         CONFIGURATION configuration,
-        Optional<Iterable<PostGraphStoreLoadValidationHook>> postGraphStoreLoadValidationHooks
+        Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks
     ) {
         try (ProgressTimer ignored = ProgressTimer.start(timingsBuilder::withPreProcessingMillis)) {
-            // tee up the graph we want to work on
-            var relationshipProperty = extractRelationshipProperty(configuration);
+            var relationshipProperty = determineRelationshipProperty(configuration, relationshipWeightOverride);
 
             return graphStoreCatalogService.getGraphResources(
                 graphName,
                 configuration,
+                postGraphStoreLoadValidationHooks,
                 relationshipProperty,
                 requestScopedDependencies.getUser(),
-                requestScopedDependencies.getDatabaseId(),
-                postGraphStoreLoadValidationHooks
+                requestScopedDependencies.getDatabaseId()
             );
         }
+    }
+
+    private <CONFIGURATION> Optional<String> determineRelationshipProperty(
+        CONFIGURATION configuration,
+        Optional<String> relationshipWeightOverride
+    ) {
+        if (relationshipWeightOverride.isPresent()) return relationshipWeightOverride;
+
+        return extractRelationshipProperty(configuration);
     }
 
     /**
      * Not the prettiest. Better to pass an Optional for this flag? Debatable. This is quick tho.
      */
-    private static <CONFIGURATION> Optional<String> extractRelationshipProperty(CONFIGURATION configuration) {
+    private <CONFIGURATION> Optional<String> extractRelationshipProperty(CONFIGURATION configuration) {
         if (configuration instanceof RelationshipWeightConfig)
             return ((RelationshipWeightConfig) configuration).relationshipWeightProperty();
 
@@ -194,7 +205,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             executionMetric.start();
 
             return algorithmComputation.compute(graph);
-            } catch (RuntimeException e) {
+        } catch (RuntimeException e) {
             log.warn("computation failed, halting metrics gathering", e);
             executionMetric.failed(e);
             throw e;

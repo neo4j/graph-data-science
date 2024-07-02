@@ -67,6 +67,7 @@ public class SimilarityAlgorithmsMutateModeBusinessFacade {
         var mutateStep = FilteredKnnMutateStep.create(log, configuration, shouldComputeSimilarityDistribution);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -91,6 +92,7 @@ public class SimilarityAlgorithmsMutateModeBusinessFacade {
         );
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -111,6 +113,7 @@ public class SimilarityAlgorithmsMutateModeBusinessFacade {
         var mutateStep = KnnMutateStep.create(log, configuration, shouldComputeSimilarityDistribution);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -131,6 +134,7 @@ public class SimilarityAlgorithmsMutateModeBusinessFacade {
         var mutateStep = NodeSimilarityMutateStep.create(log, configuration, shouldComputeSimilarityDistribution);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),

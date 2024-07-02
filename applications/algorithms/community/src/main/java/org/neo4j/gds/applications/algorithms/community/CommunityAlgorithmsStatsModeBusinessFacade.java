@@ -83,6 +83,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
         ResultBuilder<K1ColoringStatsConfig, K1ColoringResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -100,6 +101,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
         ResultBuilder<KCoreDecompositionStatsConfig, KCoreDecompositionResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -117,6 +119,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
         ResultBuilder<KmeansStatsConfig, KmeansResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -134,6 +137,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
         ResultBuilder<LabelPropagationStatsConfig, LabelPropagationResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -151,6 +155,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
         ResultBuilder<LocalClusteringCoefficientStatsConfig, LocalClusteringCoefficientResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -168,6 +173,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
         ResultBuilder<LeidenStatsConfig, LeidenResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -185,6 +191,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
         ResultBuilder<LouvainStatsConfig, LouvainResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -202,6 +209,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
         ResultBuilder<ModularityStatsConfig, ModularityResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -219,6 +227,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
         ResultBuilder<ModularityOptimizationStatsConfig, ModularityOptimizationResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -236,6 +245,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
         ResultBuilder<SccStatsConfig, HugeLongArray, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -253,6 +263,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
         ResultBuilder<TriangleCountStatsConfig, TriangleCountResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -270,6 +281,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
         ResultBuilder<WccStatsConfig, DisjointSetStruct, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),

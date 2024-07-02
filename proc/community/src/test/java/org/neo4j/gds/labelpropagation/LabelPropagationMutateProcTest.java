@@ -527,7 +527,8 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
             new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
             null,
             requestScopedDependencies,
-            WriteContext.builder().build()
+            WriteContext.builder().build(),
+            null
         );
         var communityProcedureFacade = CommunityProcedureFacade.create(
             genericStub,

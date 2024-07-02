@@ -202,7 +202,8 @@ public final class ProcedureRunner {
             graphDatabaseService,
             procedureTransaction,
             algorithmFacadeBuilderFactory,
-            DeprecatedProceduresMetricService.PASSTHROUGH
+            DeprecatedProceduresMetricService.PASSTHROUGH,
+            modelCatalog
         );
     }
 }

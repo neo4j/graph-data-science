@@ -50,6 +50,7 @@ public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<FastRPStreamConfig, FastRPResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),

@@ -95,6 +95,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         var writeStep = new PageRankWriteStep(writeToDatabase, configuration, ArticleRank);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -114,6 +115,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         var writeStep = new BetweennessCentralityWriteStep(writeToDatabase, configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -133,6 +135,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         var writeStep = new CelfWriteStep(writeToDatabase, configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -152,6 +155,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         var writeStep = new ClosenessCentralityWriteStep(writeToDatabase, configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -171,6 +175,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         var writeStep = new DegreeCentralityWriteStep(writeToDatabase, configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -190,6 +195,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         var writeStep = new PageRankWriteStep(writeToDatabase, configuration, EigenVector);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -209,6 +215,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         var writeStep = new HarmonicCentralityWriteStep(writeToDatabase, configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -228,6 +235,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         var writeStep = new PageRankWriteStep(writeToDatabase, configuration, ArticleRank);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),

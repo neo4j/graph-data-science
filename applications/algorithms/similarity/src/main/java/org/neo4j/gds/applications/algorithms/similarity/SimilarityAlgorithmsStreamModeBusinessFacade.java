@@ -58,6 +58,7 @@ public class SimilarityAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<FilteredKnnStreamConfig, FilteredKnnResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -75,6 +76,7 @@ public class SimilarityAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<FilteredNodeSimilarityStreamConfig, NodeSimilarityResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -92,6 +94,7 @@ public class SimilarityAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<KnnStreamConfig, KnnResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -109,6 +112,7 @@ public class SimilarityAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<NodeSimilarityStreamConfig, NodeSimilarityResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),

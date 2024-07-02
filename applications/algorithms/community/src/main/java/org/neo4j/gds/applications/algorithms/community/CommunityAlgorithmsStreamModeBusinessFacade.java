@@ -93,6 +93,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<ApproxMaxKCutStreamConfig, ApproxMaxKCutResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -110,6 +111,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<ConductanceStreamConfig, ConductanceResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -127,6 +129,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<K1ColoringStreamConfig, K1ColoringResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -144,6 +147,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<KCoreDecompositionStreamConfig, KCoreDecompositionResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -161,6 +165,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<KmeansStreamConfig, KmeansResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -178,6 +183,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<LabelPropagationStreamConfig, LabelPropagationResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -195,6 +201,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<LocalClusteringCoefficientStreamConfig, LocalClusteringCoefficientResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -212,6 +219,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<LeidenStreamConfig, LeidenResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -229,6 +237,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<LouvainStreamConfig, LouvainResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -246,6 +255,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<ModularityStreamConfig, ModularityResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -263,6 +273,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<ModularityOptimizationStreamConfig, ModularityOptimizationResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -280,6 +291,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<SccStreamConfig, HugeLongArray, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -297,6 +309,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<TriangleCountStreamConfig, TriangleCountResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -314,6 +327,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<TriangleCountBaseConfig, Stream<TriangleStreamResult>, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -331,6 +345,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         ResultBuilder<WccStreamConfig, DisjointSetStruct, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),

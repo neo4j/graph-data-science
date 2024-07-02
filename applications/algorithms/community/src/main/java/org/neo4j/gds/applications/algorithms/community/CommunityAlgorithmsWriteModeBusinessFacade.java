@@ -113,6 +113,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         var writeStep = new K1ColoringWriteStep(writeToDatabase, configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -132,6 +133,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         var writeStep = new KCoreWriteStep(writeToDatabase, configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -151,6 +153,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         var writeStep = new KMeansWriteStep(writeToDatabase, configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -170,6 +173,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         var writeStep = new LabelPropagationWriteStep(writeToDatabase, configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -189,6 +193,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         var writeStep = new LccWriteStep(writeToDatabase, configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -208,6 +213,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         var writeStep = new LeidenWriteStep(writeToDatabase, configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -227,6 +233,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         var writeStep = new LouvainWriteStep(writeToDatabase, configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -246,6 +253,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         var writeStep = new ModularityOptimizationWriteStep(writeToDatabase, configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -265,6 +273,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         var writeStep = new SccWriteStep(writeToDatabase, configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -284,6 +293,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         var writeStep = new SccAlphaWriteStep(writeToDatabase, configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -303,6 +313,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         var writeStep = new TriangleCountWriteStep(writeToDatabase, configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -322,6 +333,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
         var writeStep = new WccWriteStep(writeToDatabase, configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),

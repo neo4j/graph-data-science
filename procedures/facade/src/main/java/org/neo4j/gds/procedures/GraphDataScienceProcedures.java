@@ -30,6 +30,7 @@ import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
@@ -99,7 +100,8 @@ public class GraphDataScienceProcedures {
         GraphDatabaseService graphDatabaseService,
         Transaction transaction,
         AlgorithmProcedureFacadeBuilderFactory algorithmProcedureFacadeBuilderFactory,
-        DeprecatedProceduresMetricService deprecatedProceduresMetricService
+        DeprecatedProceduresMetricService deprecatedProceduresMetricService,
+        ModelCatalog modelCatalog
     ) {
         var configurationParser = new ConfigurationParser(defaultsConfiguration, limitsConfiguration);
         var configurationCreator = new ConfigurationCreator(
@@ -117,7 +119,8 @@ public class GraphDataScienceProcedures {
             algorithmMetricsService,
             projectionMetricsService,
             requestScopedDependencies,
-            writeContext
+            writeContext,
+            modelCatalog
         );
 
         var catalogProcedureFacade = catalogProcedureFacadeFactory.createCatalogProcedureFacade(

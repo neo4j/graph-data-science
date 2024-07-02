@@ -25,8 +25,10 @@ import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.Username;
 import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPMutateConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMutateConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityMutateConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationMutateConfig;
 import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
@@ -86,6 +88,7 @@ public class ConfigurationParsersForMutateMode {
             case FastRP -> FastRPMutateConfig::of;
             case FilteredKNN -> FilteredKnnMutateConfig::of;
             case FilteredNodeSimilarity -> FilteredNodeSimilarityMutateConfig::of;
+            case GraphSage -> graphSageParser();
             case HarmonicCentrality -> HarmonicCentralityMutateConfig::of;
             case K1Coloring -> K1ColoringMutateConfig::of;
             case KCore -> KCoreDecompositionMutateConfig::of;
@@ -112,5 +115,15 @@ public class ConfigurationParsersForMutateMode {
             case WCC -> WccMutateConfig::of;
             case Yens -> ShortestPathYensMutateConfig::of;
         };
+    }
+
+    /**
+     * GraphSage is special. Did it need to be? Not sure.
+     * But anyway, for this use case, we produce configurations for validating anonymously.
+     * Hence, {@link org.neo4j.gds.core.Username#EMPTY_USERNAME} can be used here,
+     * to fulfil the requirement of specifying _some_ user.
+     */
+    private static Function<CypherMapWrapper, AlgoBaseConfig> graphSageParser() {
+        return cypherMapWrapper -> GraphSageMutateConfig.of(Username.EMPTY_USERNAME.username(), cypherMapWrapper);
     }
 }

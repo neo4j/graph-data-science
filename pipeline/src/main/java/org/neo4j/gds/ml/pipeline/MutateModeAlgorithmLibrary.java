@@ -77,6 +77,7 @@ final class MutateModeAlgorithmLibrary {
             case FastRP -> CanonicalProcedureName.parse("gds.fastRP");
             case FilteredKNN -> CanonicalProcedureName.parse("gds.knn.filtered");
             case FilteredNodeSimilarity -> CanonicalProcedureName.parse("gds.nodeSimilarity.filtered");
+            case GraphSage -> CanonicalProcedureName.parse("gds.beta.graphSage");
             case HarmonicCentrality -> CanonicalProcedureName.parse("gds.closeness.harmonic");
             case K1Coloring -> CanonicalProcedureName.parse("gds.k1coloring");
             case KCore -> CanonicalProcedureName.parse("gds.kcore");

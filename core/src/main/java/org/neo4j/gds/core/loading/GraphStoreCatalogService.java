@@ -21,10 +21,12 @@ package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog.GraphStoreCatalogEntryWithUsername;
 
@@ -70,10 +72,10 @@ public class GraphStoreCatalogService {
     public GraphResources getGraphResources(
         GraphName graphName,
         AlgoBaseConfig config,
+        Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
         Optional<String> relationshipProperty,
         User user,
-        DatabaseId databaseId,
-        Optional<Iterable<PostGraphStoreLoadValidationHook>> postGraphStoreLoadValidationHooks
+        DatabaseId databaseId
     ) {
         var graphStoreCatalogEntry = getGraphStoreCatalogEntry(graphName, config, user, databaseId);
         var graphStore = graphStoreCatalogEntry.graphStore();
@@ -98,6 +100,9 @@ public class GraphStoreCatalogService {
         config.graphStoreValidation(graphStore, nodeLabels, relationshipTypes);
 
         var graph = graphStore.getGraph(nodeLabels, relationshipTypes, relationshipProperty);
+
+        postGraphStoreLoadValidationHooks.ifPresent(hooks -> validateGraph(graph, hooks));
+
         return new GraphResources(graphStore, graph, graphStoreCatalogEntry.resultStore());
     }
 
@@ -106,17 +111,29 @@ public class GraphStoreCatalogService {
      *
      * @throws java.lang.IllegalArgumentException if the graph store did not conform to desired invariants
      */
-    private void validateGraphStore(GraphStore graphStore, Iterable<PostGraphStoreLoadValidationHook> validationHooks) {
-        for (PostGraphStoreLoadValidationHook hook : validationHooks) {
+    private void validateGraphStore(GraphStore graphStore, Iterable<PostLoadValidationHook> validationHooks) {
+        for (PostLoadValidationHook hook : validationHooks) {
             hook.onGraphStoreLoaded(graphStore);
         }
     }
 
     /**
-     * @deprecated Push RequestScopedDependencies down and use it instead of database id + user parameters
+     * Some use cases need special validation. We do this right after loading.
+     *
+     * @throws java.lang.IllegalArgumentException if the graph did not conform to desired invariants
      */
-    @Deprecated
-    public GraphStoreCatalogEntry getGraphStoreCatalogEntry(GraphName graphName, AlgoBaseConfig config, User user, DatabaseId databaseId) {
+    private void validateGraph(Graph graph, Iterable<PostLoadValidationHook> validationHooks) {
+        for (PostLoadValidationHook hook : validationHooks) {
+            hook.onGraphLoaded(graph);
+        }
+    }
+
+    public GraphStoreCatalogEntry getGraphStoreCatalogEntry(
+        GraphName graphName,
+        BaseConfig config,
+        User user,
+        DatabaseId databaseId
+    ) {
         var catalogRequest = CatalogRequest.of(user, databaseId, config.usernameOverride());
         return get(catalogRequest, graphName);
     }

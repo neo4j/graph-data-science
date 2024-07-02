@@ -33,7 +33,7 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.loading.PostGraphStoreLoadValidationHook;
+import org.neo4j.gds.core.loading.PostLoadValidationHook;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.ExecutionMetric;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
@@ -156,10 +156,10 @@ class AlgorithmRunnerTest {
             public GraphResources getGraphResources(
                 GraphName graphName,
                 AlgoBaseConfig config,
+                Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
                 Optional<String> relationshipProperty,
                 User user,
-                DatabaseId databaseId,
-                Optional<Iterable<PostGraphStoreLoadValidationHook>> postGraphStoreLoadValidationHooks
+                DatabaseId databaseId
             ) {
                 // this gets called right after the preconditions check
                 // so, we save ourselves trouble and shunt the rest of the method

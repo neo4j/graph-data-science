@@ -66,6 +66,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         ResultBuilder<BellmanFordStatsConfig, BellmanFordResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -83,6 +84,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         ResultBuilder<BfsStatsConfig, HugeLongArray, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -100,6 +102,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         ResultBuilder<AllShortestPathsDeltaStatsConfig, PathFindingResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -117,6 +120,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         ResultBuilder<RandomWalkStatsConfig, Stream<long[]>, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -134,6 +138,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         ResultBuilder<SpanningTreeStatsConfig, SpanningTree, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -151,6 +156,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         ResultBuilder<SteinerTreeStatsConfig, SteinerTreeResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),

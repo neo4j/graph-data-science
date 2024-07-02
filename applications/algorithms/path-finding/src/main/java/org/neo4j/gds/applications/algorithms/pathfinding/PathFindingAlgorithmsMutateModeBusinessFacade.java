@@ -80,6 +80,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         var mutateStep = new BellmanFordMutateStep(configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -100,6 +101,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         var mutateStep = new SearchMutateStep(mutateRelationshipType);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -119,6 +121,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         var mutateStep = new ShortestPathMutateStep(configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -139,6 +142,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         var mutateStep = new SearchMutateStep(mutateRelationshipType);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -158,6 +162,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         var mutateStep = new ShortestPathMutateStep(configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -177,6 +182,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         var mutateStep = new ShortestPathMutateStep(configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -196,6 +202,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         var mutateStep = new ShortestPathMutateStep(configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -215,6 +222,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         var mutateStep = new ShortestPathMutateStep(configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -234,6 +242,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         var mutateOrWriteStep = new SpanningTreeMutateStep(configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),
@@ -253,6 +262,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         var mutateOrWriteStep = new SteinerTreeMutateStep(configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
             Optional.empty(),

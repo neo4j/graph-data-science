@@ -32,6 +32,7 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.applications.graphstorecatalog.DefaultCatalogBusinessFacade;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
@@ -83,7 +84,8 @@ public final class ApplicationsFacade {
         AlgorithmMetricsService algorithmMetricsService,
         ProjectionMetricsService projectionMetricsService,
         RequestScopedDependencies requestScopedDependencies,
-        WriteContext writeContext
+        WriteContext writeContext,
+        ModelCatalog modelCatalog
     ) {
         var catalogBusinessFacade = createCatalogBusinessFacade(
             log,
@@ -143,7 +145,8 @@ public final class ApplicationsFacade {
             algorithmEstimationTemplate,
             algorithmProcessingTemplate,
             progressTrackerCreator,
-            mutateNodeProperty
+            mutateNodeProperty,
+            modelCatalog
         );
 
         var pathFindingApplications = PathFindingApplications.create(
