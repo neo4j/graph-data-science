@@ -166,7 +166,7 @@ public final class ApplicationsFacade {
             log,
             requestScopedDependencies,
             algorithmEstimationTemplate,
-            algorithmProcessingTemplate,
+            algorithmProcessingTemplateConvenience,
             progressTrackerCreator,
             writeRelationshipService
         );

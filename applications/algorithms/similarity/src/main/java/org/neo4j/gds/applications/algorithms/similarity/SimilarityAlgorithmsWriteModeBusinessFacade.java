@@ -22,7 +22,7 @@ package org.neo4j.gds.applications.algorithms.similarity;
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
@@ -34,7 +34,6 @@ import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteConfig;
 
 import java.util.Map;
-import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FilteredKNN;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FilteredNodeSimilarity;
@@ -44,18 +43,18 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 public class SimilarityAlgorithmsWriteModeBusinessFacade {
     private final SimilarityAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final SimilarityAlgorithms similarityAlgorithms;
-    private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
+    private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final WriteRelationshipService writeRelationshipService;
 
     public SimilarityAlgorithmsWriteModeBusinessFacade(
         SimilarityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         SimilarityAlgorithms similarityAlgorithms,
-        AlgorithmProcessingTemplate algorithmProcessingTemplate,
+        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         WriteRelationshipService writeRelationshipService
     ) {
         this.estimationFacade = estimationFacade;
         this.similarityAlgorithms = similarityAlgorithms;
-        this.algorithmProcessingTemplate = algorithmProcessingTemplate;
+        this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.writeRelationshipService = writeRelationshipService;
     }
 
@@ -71,15 +70,13 @@ public class SimilarityAlgorithmsWriteModeBusinessFacade {
             writeRelationshipService
         );
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             FilteredKNN,
             () -> estimationFacade.filteredKnn(configuration),
             graph -> similarityAlgorithms.filteredKnn(graph, configuration),
-            Optional.of(writeStep),
+            writeStep,
             resultBuilder
         );
     }
@@ -96,15 +93,13 @@ public class SimilarityAlgorithmsWriteModeBusinessFacade {
             shouldComputeSimilarityDistribution
         );
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             FilteredNodeSimilarity,
             () -> estimationFacade.filteredNodeSimilarity(configuration),
             graph -> similarityAlgorithms.filteredNodeSimilarity(graph, configuration),
-            Optional.of(writeStep),
+            writeStep,
             resultBuilder
         );
     }
@@ -121,15 +116,13 @@ public class SimilarityAlgorithmsWriteModeBusinessFacade {
             writeRelationshipService
         );
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             KNN,
             () -> estimationFacade.knn(configuration),
             graph -> similarityAlgorithms.knn(graph, configuration),
-            Optional.of(writeStep),
+            writeStep,
             resultBuilder
         );
     }
@@ -146,15 +139,13 @@ public class SimilarityAlgorithmsWriteModeBusinessFacade {
             shouldComputeSimilarityDistribution
         );
 
-        return algorithmProcessingTemplate.processAlgorithm(
-            Optional.empty(),
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
             graphName,
             configuration,
-            Optional.empty(),
             NodeSimilarity,
             () -> estimationFacade.nodeSimilarity(configuration),
             graph -> similarityAlgorithms.nodeSimilarity(graph, configuration),
-            Optional.of(writeStep),
+            writeStep,
             resultBuilder
         );
     }
