@@ -19,9 +19,8 @@
  */
 package org.neo4j.gds.k1coloring;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.k1coloring.K1ColoringMutateResult;
+import org.neo4j.gds.procedures.algorithms.community.K1ColoringMutateResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -36,8 +35,7 @@ import static org.neo4j.gds.k1coloring.K1ColoringSpecificationHelper.K1_COLORING
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class K1ColoringMutateProc extends BaseProc {
-
+public class K1ColoringMutateProc {
     @Context
     public GraphDataScienceProcedures facade;
 
@@ -47,7 +45,7 @@ public class K1ColoringMutateProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().k1ColoringMutate(graphName, configuration);
+        return facade.algorithms().community().k1ColoringMutateStub().execute(graphName, configuration);
     }
 
     @Procedure(value = "gds.k1coloring.mutate.estimate", mode = READ)
@@ -56,7 +54,7 @@ public class K1ColoringMutateProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().k1ColoringEstimateMutate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().community().k1ColoringMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Procedure(value = "gds.beta.k1coloring.mutate", mode = READ, deprecatedBy = "gds.beta.k1coloring.mutate")
@@ -67,10 +65,8 @@ public class K1ColoringMutateProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.beta.k1coloring.mutate");
-        executionContext()
+        facade.deprecatedProcedures().called("gds.beta.k1coloring.mutate");
+        facade
             .log()
             .warn(
                 "Procedure `gds.beta.k1coloring.mutate` has been deprecated, please use `gds.k1coloring.mutate`.");
@@ -78,17 +74,15 @@ public class K1ColoringMutateProc extends BaseProc {
     }
 
     @Procedure(value = "gds.beta.k1coloring.mutate.estimate", mode = READ, deprecatedBy = "gds.k1coloring.mutate.estimate")
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     @Internal
     @Deprecated(forRemoval = true)
     public Stream<MemoryEstimateResult> betaEstimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.beta.k1coloring.mutate.estimate");
-        executionContext()
+        facade.deprecatedProcedures().called("gds.beta.k1coloring.mutate.estimate");
+        facade
             .log()
             .warn(
                 "Procedure `gds.beta.k1coloring.mutate.estimate` has been deprecated, please use `gds.k1coloring.mutate.estimate`.");

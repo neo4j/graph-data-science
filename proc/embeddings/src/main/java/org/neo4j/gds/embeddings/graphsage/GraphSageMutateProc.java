@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.embeddings.results.DefaultNodeEmbeddingMutateResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.algorithms.embeddings.DefaultNodeEmbeddingMutateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -32,13 +32,12 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPH_SAGE_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphSageMutateProc {
-
     @Context
     public GraphDataScienceProcedures facade;
-
 
     @Procedure(value = "gds.beta.graphSage.mutate", mode = Mode.READ)
     @Description(GRAPH_SAGE_DESCRIPTION)
@@ -46,17 +45,15 @@ public class GraphSageMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.nodeEmbeddings().graphSage().mutate(graphName, configuration);
+        return facade.algorithms().nodeEmbeddings().graphSageMutateStub().execute(graphName, configuration);
     }
 
     @Procedure(value = "gds.beta.graphSage.mutate.estimate", mode = READ)
-    @Description(GRAPH_SAGE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.nodeEmbeddings().graphSage().mutateEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().nodeEmbeddings().graphSageMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
     }
-
-
 }

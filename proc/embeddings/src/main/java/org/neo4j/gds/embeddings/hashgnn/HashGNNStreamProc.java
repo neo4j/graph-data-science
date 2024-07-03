@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.embeddings.hashgnn.HashGNNStreamResult;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -31,61 +31,59 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.embeddings.hashgnn.HashGNNProcCompanion.DESCRIPTION;
+import static org.neo4j.gds.embeddings.hashgnn.HashGNNProcCompanion.HASH_GNN_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class HashGNNStreamProc {
-
     @Context
     public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.hashgnn.stream", mode = READ)
-    @Description(DESCRIPTION)
+    @Description(HASH_GNN_DESCRIPTION)
     public Stream<HashGNNStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.nodeEmbeddings().hashGNN().stream(graphName, configuration);
+        return facade.oldNodeEmbeddings().hashGNN().stream(graphName, configuration);
     }
 
     @Internal
     @Deprecated(forRemoval = true)
     @Procedure(value = "gds.beta.hashgnn.stream", deprecatedBy = "gds.hashgnn.stream", mode = READ)
-    @Description(DESCRIPTION)
+    @Description(HASH_GNN_DESCRIPTION)
     public Stream<HashGNNStreamResult> betaStream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        facade.deprecatedProcedures().called("gds.beta.hashgnn.stream");
         facade
-            .deprecatedProcedures().called("gds.beta.hashgnn.stream");
-
-        facade.log()
+            .log()
             .warn("Procedure `gds.beta.hashgnn.stream` has been deprecated, please use `gds.hashgnn.stream`.");
 
         return stream(graphName, configuration);
     }
 
     @Procedure(value = "gds.hashgnn.stream.estimate", mode = READ)
-    @Description(DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.nodeEmbeddings().hashGNN().streamEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.oldNodeEmbeddings().hashGNN().streamEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Internal
     @Deprecated(forRemoval = true)
     @Procedure(value = "gds.beta.hashgnn.stream.estimate", deprecatedBy = "gds.hashgnn.stream.estimate", mode = READ)
-    @Description(DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> betaEstimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
+        facade.deprecatedProcedures().called("gds.beta.hashgnn.stream.estimate");
         facade
-            .deprecatedProcedures().called("gds.beta.hashgnn.stream.estimate");
-
-        facade.log()
+            .log()
             .warn("Procedure `gds.beta.hashgnn.stream.estimate` has been deprecated, please use `gds.hashgnn.stream.estimate`.");
 
         return estimate(graphNameOrConfiguration, algoConfiguration);

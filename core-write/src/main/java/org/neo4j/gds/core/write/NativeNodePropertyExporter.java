@@ -22,15 +22,16 @@ package org.neo4j.gds.core.write;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.Write;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.gds.utils.StatementApi;
-import org.neo4j.internal.kernel.api.Write;
 import org.neo4j.values.storable.Value;
 
 import java.util.Collection;
@@ -161,7 +162,7 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
         acceptInTransaction(stmt -> {
             terminationFlag.assertRunning();
             long progress = 0L;
-            Write ops = stmt.dataWrite();
+            Write ops = Neo4jProxy.dataWrite(stmt);
             for (long i = 0L; i < nodeCount; i++) {
                 writer.accept(ops, i);
                 progressTracker.logProgress();
@@ -186,7 +187,7 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
                 acceptInTransaction(stmt -> {
                     terminationFlag.assertRunning();
                     long end = start + len;
-                    Write ops = stmt.dataWrite();
+                    Write ops = Neo4jProxy.dataWrite(stmt);
                     for (long currentNode = start; currentNode < end; currentNode++) {
                         writer.accept(ops, currentNode);
                         progressTracker.logProgress();

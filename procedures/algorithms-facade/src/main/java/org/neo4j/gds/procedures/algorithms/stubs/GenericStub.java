@@ -22,22 +22,25 @@ package org.neo4j.gds.procedures.algorithms.stubs;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.procedures.algorithms.AlgorithmHandle;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public class GenericStub {
+public final class GenericStub {
     private final DefaultsConfiguration defaultsConfiguration;
     private final LimitsConfiguration limitsConfiguration;
     private final ConfigurationCreator configurationCreator;
@@ -45,7 +48,7 @@ public class GenericStub {
     private final User user;
     private final AlgorithmEstimationTemplate algorithmEstimationTemplate;
 
-    public GenericStub(
+    private GenericStub(
         DefaultsConfiguration defaultsConfiguration,
         LimitsConfiguration limitsConfiguration,
         ConfigurationCreator configurationCreator,
@@ -59,6 +62,34 @@ public class GenericStub {
         this.configurationParser = configurationParser;
         this.user = user;
         this.algorithmEstimationTemplate = algorithmEstimationTemplate;
+    }
+
+    public static GenericStub create(
+        DefaultsConfiguration defaultsConfiguration,
+        LimitsConfiguration limitsConfiguration,
+        GraphStoreCatalogService graphStoreCatalogService,
+        ConfigurationCreator configurationCreator,
+        ConfigurationParser configurationParser,
+        RequestScopedDependencies requestScopedDependencies
+    ) {
+        var databaseGraphStoreEstimationService = new DatabaseGraphStoreEstimationService(
+            requestScopedDependencies.getGraphLoaderContext(),
+            requestScopedDependencies.getUser()
+        );
+        var algorithmEstimationTemplate = new AlgorithmEstimationTemplate(
+            graphStoreCatalogService,
+            databaseGraphStoreEstimationService,
+            requestScopedDependencies
+        );
+
+        return new GenericStub(
+            defaultsConfiguration,
+            limitsConfiguration,
+            configurationCreator,
+            configurationParser,
+            requestScopedDependencies.getUser(),
+            algorithmEstimationTemplate
+        );
     }
 
     /**

@@ -25,7 +25,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
-import org.neo4j.gds.procedures.community.k1coloring.K1ColoringStreamResult;
+import org.neo4j.gds.procedures.algorithms.community.K1ColoringStreamResult;
 
 import java.util.stream.Stream;
 

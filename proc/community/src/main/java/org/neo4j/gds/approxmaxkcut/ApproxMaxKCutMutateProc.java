@@ -19,10 +19,9 @@
  */
 package org.neo4j.gds.approxmaxkcut;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutMutateResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.algorithms.community.ApproxMaxKCutMutateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -33,28 +32,29 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.approxmaxkcut.ApproxMaxKCut.APPROX_MAX_K_CUT_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class ApproxMaxKCutMutateProc extends BaseProc {
-
+public class ApproxMaxKCutMutateProc {
     @Context
     public GraphDataScienceProcedures facade;
+
     @Procedure(value = "gds.maxkcut.mutate", mode = READ)
     @Description(APPROX_MAX_K_CUT_DESCRIPTION)
     public Stream<ApproxMaxKCutMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().approxMaxKCutMutate(graphName, configuration);
+        return facade.algorithms().community().approximateMaximumKCutMutateStub().execute(graphName, configuration);
     }
 
     @Procedure(value = "gds.maxkcut.mutate.estimate", mode = READ)
-    @Description(APPROX_MAX_K_CUT_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().approxMaxKCutEstimateMutate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().community().approximateMaximumKCutMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Deprecated
@@ -65,11 +65,8 @@ public class ApproxMaxKCutMutateProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.alpha.maxkcut.mutate");
-
-        executionContext()
+        facade.deprecatedProcedures().called("gds.alpha.maxkcut.mutate");
+        facade
             .log()
             .warn("Procedure `gds.alpha.maxkcut.mutate` has been deprecated, please use `gds.maxkcut.mutate`.");
 
@@ -79,20 +76,16 @@ public class ApproxMaxKCutMutateProc extends BaseProc {
     @Deprecated
     @Internal
     @Procedure(value = "gds.alpha.maxkcut.mutate.estimate", mode = READ, deprecatedBy = "gds.maxkcut.mutate.estimate")
-    @Description(APPROX_MAX_K_CUT_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimateAlpha(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.alpha.maxkcut.mutate.estimate");
-
-        executionContext()
+        facade.deprecatedProcedures().called("gds.alpha.maxkcut.mutate.estimate");
+        facade
             .log()
             .warn("Procedure `gds.alpha.maxkcut.mutate.estimate` has been deprecated, please use `gds.maxkcut.mutate.estimate`.");
 
         return estimate(graphNameOrConfiguration, algoConfiguration);
     }
-
 }

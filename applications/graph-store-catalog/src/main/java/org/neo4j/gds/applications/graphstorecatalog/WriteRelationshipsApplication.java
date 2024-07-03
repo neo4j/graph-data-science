@@ -92,7 +92,9 @@ public class WriteRelationshipsApplication {
                     configuration.jobId()
                 );
 
-                builder.withRelationshipsWritten(relationshipsWritten);
+                builder
+                    .withRelationshipsWritten(relationshipsWritten)
+                    .withConfiguration(configuration.toMap());
 
                 // result
                 return builder.build();

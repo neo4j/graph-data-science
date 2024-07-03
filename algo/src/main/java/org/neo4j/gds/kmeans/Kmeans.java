@@ -62,7 +62,7 @@ public final class Kmeans extends Algorithm<KmeansResult> {
     private long[] nodesInCluster;
 
 
-    public static Kmeans createKmeans(Graph graph, KmeansParameters parameters, KmeansContext context) {
+    public static Kmeans createKmeans(Graph graph, KmeansParameters parameters, KmeansContext context, TerminationFlag terminationFlag) {
         String nodeWeightProperty = parameters.nodeProperty();
         NodePropertyValues nodeProperties = graph.nodeProperties(nodeWeightProperty);
         if (nodeProperties == null) {
@@ -74,7 +74,8 @@ public final class Kmeans extends Algorithm<KmeansResult> {
             graph,
             parameters,
             getSplittableRandom(parameters.randomSeed()),
-            nodeProperties
+            nodeProperties,
+            terminationFlag
         );
     }
 
@@ -84,7 +85,8 @@ public final class Kmeans extends Algorithm<KmeansResult> {
         Graph graph,
         KmeansParameters parameters,
         SplittableRandom random,
-        NodePropertyValues nodePropertyValues
+        NodePropertyValues nodePropertyValues,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.executorService = executorService;
@@ -103,6 +105,7 @@ public final class Kmeans extends Algorithm<KmeansResult> {
         this.parameters = parameters;
         this.concurrency = parameters.concurrency();
         this.nodesInCluster = new long[parameters.k()];
+        this.terminationFlag = terminationFlag;
     }
 
     @Override

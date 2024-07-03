@@ -31,6 +31,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.k1coloring.K1ColoringAlgorithmFactory;
 import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
 import org.neo4j.gds.k1coloring.K1ColoringStreamConfigImpl;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 
@@ -82,7 +83,8 @@ public class ModularityOptimizationFactory<CONFIG extends ModularityOptimization
             parameters.concurrency(),
             parameters.batchSize(),
             DefaultPool.INSTANCE,
-            progressTracker
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         );
     }
 

@@ -8,10 +8,10 @@ dependencies {
     // I want to not have this opaque stuff everywhere. Let's stick it in a leaf module
     annotationProcessor project(':annotations')
     annotationProcessor project(':config-generator')
-    annotationProcessor group: 'org.immutables', name: 'builder', version: ver.'immutables'
-    annotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
-    compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
-    compileOnly group: 'org.jetbrains', name: 'annotations', version: ver.'jetbrains-annotations'
+    annotationProcessor openGds.immutables.builder
+    annotationProcessor openGds.immutables.value
+    compileOnly openGds.immutables.value.annotations
+    compileOnly openGds.jetbrains.annotations
 
     // we should get rid of Neo4j dependencies from this, the application layer
     neodeps().each {
@@ -21,9 +21,11 @@ dependencies {
     }
 
     // graph store filter errors
-    implementation group: 'org.opencypher', name: 'cypher-javacc-parser-9.0', version: ver.'opencypher-front-end', transitive: false
+    implementation(openGds.opencypher.ccparser) {
+        transitive = false
+    }
     // graph memory usage
-    implementation group: 'org.openjdk.jol', name: 'jol-core', version: ver.'jol'
+    implementation openGds.jol.core
 
     // the necessary GDS things for the extension to construct the application
     implementation project(':algo')
@@ -49,12 +51,12 @@ dependencies {
     implementation project(':termination')
     implementation project(':transaction')
 
-    testImplementation group: 'org.assertj', name: 'assertj-core', version: ver.'assertj'
-    testImplementation platform(dep.junit5bom)
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: ver.'junit5bom'
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: ver.'junit5bom'
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: ver.'junit5bom'
-    testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: ver.'mockito-junit-jupiter'
+    testImplementation openGds.assertj.core
+    testImplementation platform(openGds.junit5bom)
+    testImplementation openGds.junit5.jupiter.api
+    testImplementation openGds.junit5.jupiter.engine
+    testImplementation openGds.junit5.jupiter.params
+    testImplementation openGds.mockito.junit.jupiter
 
     testImplementation project(":core-utils")
     testImplementation project(":neo4j-api")

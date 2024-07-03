@@ -19,10 +19,9 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
-import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecMutateResult;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -32,66 +31,61 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.embeddings.node2vec.Node2VecCompanion.NODE2VEC_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class Node2VecMutateProc {
-
     @Context
     public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.node2vec.mutate", mode = READ)
-    @Description(Node2VecCompanion.DESCRIPTION)
+    @Description(NODE2VEC_DESCRIPTION)
     public Stream<Node2VecMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.nodeEmbeddings().node2Vec().mutate(graphName, configuration);
+        return facade.oldNodeEmbeddings().node2Vec().mutate(graphName, configuration);
     }
 
     @Procedure(value = "gds.node2vec.mutate.estimate", mode = READ)
-    @Description(BaseProc.ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.nodeEmbeddings().node2Vec().mutateEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.oldNodeEmbeddings().node2Vec().mutateEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Procedure(value = "gds.beta.node2vec.mutate", mode = READ, deprecatedBy = "gds.node2vec.mutate")
-    @Description(Node2VecCompanion.DESCRIPTION)
+    @Description(NODE2VEC_DESCRIPTION)
     @Internal
     @Deprecated
     public Stream<Node2VecMutateResult> betaMutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        facade
-            .deprecatedProcedures().called("gds.beta.node2vec.mutate");
-
+        facade.deprecatedProcedures().called("gds.beta.node2vec.mutate");
         facade
             .log()
-            .warn(
-                "Procedure `gds.beta.node2vec.mutate` has been deprecated, please use `gds.node2vec.mutate`.");
+            .warn("Procedure `gds.beta.node2vec.mutate` has been deprecated, please use `gds.node2vec.mutate`.");
+
         return mutate(graphName, configuration);
     }
 
-    @Procedure(
-        value = "gds.beta.node2vec.mutate.estimate", mode = READ, deprecatedBy = "gds.node2vec.mutate.estimate"
-    )
-    @Description(BaseProc.ESTIMATE_DESCRIPTION)
+    @Procedure(value = "gds.beta.node2vec.mutate.estimate", mode = READ, deprecatedBy = "gds.node2vec.mutate.estimate")
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     @Internal
     @Deprecated
     public Stream<MemoryEstimateResult> betaEstimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        facade
-            .deprecatedProcedures().called("gds.beta.node2vec.mutate.estimate");
-
+        facade.deprecatedProcedures().called("gds.beta.node2vec.mutate.estimate");
         facade
             .log()
-            .warn(
-                "Procedure `gds.beta.node2vec.mutate.estimate` has been deprecated, please use `gds.node2vec.mutate.estimate`.");
+            .warn("Procedure `gds.beta.node2vec.mutate.estimate` has been deprecated, please use `gds.node2vec.mutate.estimate`.");
+
         return estimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

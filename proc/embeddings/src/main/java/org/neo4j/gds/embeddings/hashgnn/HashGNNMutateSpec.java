@@ -28,16 +28,16 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
-import org.neo4j.gds.procedures.embeddings.results.DefaultNodeEmbeddingMutateResult;
+import org.neo4j.gds.procedures.algorithms.embeddings.DefaultNodeEmbeddingMutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.embeddings.hashgnn.HashGNNProcCompanion.DESCRIPTION;
+import static org.neo4j.gds.embeddings.hashgnn.HashGNNProcCompanion.HASH_GNN_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 
-@GdsCallable(name = "gds.hashgnn.mutate", aliases = {"gds.beta.hashgnn.mutate"}, description = DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
+@GdsCallable(name = "gds.hashgnn.mutate", aliases = {"gds.beta.hashgnn.mutate"}, description = HASH_GNN_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class HashGNNMutateSpec implements AlgorithmSpec<HashGNN, HashGNNResult, HashGNNMutateConfig, Stream<DefaultNodeEmbeddingMutateResult>, HashGNNFactory<HashGNNMutateConfig>> {
 
     @Override

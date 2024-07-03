@@ -22,6 +22,7 @@ package org.neo4j.gds.core.write;
 import org.neo4j.gds.api.ExportedRelationship;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -41,8 +42,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public final class NativeRelationshipStreamExporter extends StatementApi implements RelationshipStreamExporter {
-
-    private static final int QUEUE_CAPACITY = 2;
 
     private final LongUnaryOperator toOriginalId;
     private final Stream<ExportedRelationship> relationships;
@@ -214,7 +213,7 @@ public final class NativeRelationshipStreamExporter extends StatementApi impleme
 
             acceptInTransaction(stmt -> {
                 terminationFlag.assertRunning();
-                var ops = stmt.dataWrite();
+                var ops = Neo4jProxy.dataWrite(stmt);
 
                 for (int i = 0; i < bufferSize; i++) {
                     // create relationship

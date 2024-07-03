@@ -28,6 +28,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +57,8 @@ public class FastRPFactory<CONFIG extends FastRPBaseConfig> extends GraphAlgorit
             minBatchSize,
             featureExtractors,
             progressTracker,
-            randomSeed
+            randomSeed,
+            TerminationFlag.RUNNING_TRUE
         );
     }
 

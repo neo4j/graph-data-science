@@ -34,7 +34,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 @GdsCallable(
     name = "gds.node2vec.stream",
     aliases = "gds.beta.node2vec.stream",
-    description = Node2VecCompanion.DESCRIPTION,
+    description = Node2VecCompanion.NODE2VEC_DESCRIPTION,
     executionMode = STREAM
 )
 public class Node2VecStreamSpec implements AlgorithmSpec<Node2Vec, Node2VecResult, Node2VecStreamConfig, Stream<Node2VecStreamResult>, Node2VecAlgorithmFactory<Node2VecStreamConfig>> {

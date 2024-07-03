@@ -28,6 +28,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.loading.PostLoadValidationHook;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.logging.Log;
@@ -38,14 +39,11 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTemplate {
-    // global dependencies
     private final Log log;
     private final AlgorithmMetricsService algorithmMetricsService;
     private final GraphStoreCatalogService graphStoreCatalogService;
     private final MemoryGuard memoryGuard;
     private final RequestScopedDependencies requestScopedDependencies;
-
-    // request scoped parameters
 
     public DefaultAlgorithmProcessingTemplate(
         Log log,
@@ -63,26 +61,29 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
 
     @Override
     public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER processAlgorithm(
+        Optional<String> relationshipWeightOverride,
         GraphName graphName,
         CONFIGURATION configuration,
+        Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
         LabelForProgressTracking label,
         Supplier<MemoryEstimation> estimationFactory,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
         Optional<MutateOrWriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA>> mutateOrWriteStep,
         ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
     ) {
-        // as we progress through the steps we gather some metadata
+        // as we progress through the steps we gather timings
         var timingsBuilder = new AlgorithmProcessingTimingsBuilder();
 
         var graphResources = graphLoadAndValidationWithTiming(
             timingsBuilder,
+            relationshipWeightOverride,
             graphName,
-            configuration
+            configuration,
+            postGraphStoreLoadValidationHooks
         );
 
         var graph = graphResources.graph();
         var graphStore = graphResources.graphStore();
-        var resultStore = graphResources.resultStore();
 
         if (graph.isEmpty()) return resultBuilder.build(
             graph,
@@ -102,6 +103,8 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             algorithmComputation,
             graph
         );
+
+        var resultStore = graphResources.resultStore();
 
         // do any side effects
         MUTATE_OR_WRITE_METADATA metadata = mutateOrWriteWithTiming(
@@ -126,45 +129,39 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
     }
 
     /**
-     * To fully generalise this out from pathfinding, there are two issues to solve here:
-     *
-     * <ul>
-     *     <li>Having to have configurations inherit from both AlgoBaseConfig and RelationshipWeightConfig is not good.
-     *     The stipulation for RelationshipWeightConfig could be solved with a conditional, or by lifting relationship weights up as a first class thing.
-     *     (We can have a longer talk about configurations inheritance another time)</li>
-     *     <li>ValidationConfiguration are a thing that is not used in path finding and so it is left out for now.
-     *     Generally though there are hooks that are needed for validation: before loading, after loading, ...
-     *     <p>
-     *     We can add that when needed as more instrumentation.</li>
-     * </ul>
+     * We have a convention here for determining relationship property. Most use cases follow the convention.
+     * But because at least one use case does not, there is _also_ an override.
      */
     <CONFIGURATION extends AlgoBaseConfig> GraphResources graphLoadAndValidationWithTiming(
         AlgorithmProcessingTimingsBuilder timingsBuilder,
+        Optional<String> relationshipWeightOverride,
         GraphName graphName,
-        CONFIGURATION configuration
+        CONFIGURATION configuration,
+        Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks
     ) {
         try (ProgressTimer ignored = ProgressTimer.start(timingsBuilder::withPreProcessingMillis)) {
-            // tee up the graph we want to work on
-            var relationshipProperty = extractRelationshipProperty(configuration);
+            var relationshipProperty = determineRelationshipProperty(configuration, relationshipWeightOverride);
 
-            var graphResources = graphStoreCatalogService.getGraphResources(
+            return graphStoreCatalogService.getGraphResources(
                 graphName,
                 configuration,
+                postGraphStoreLoadValidationHooks,
                 relationshipProperty,
                 requestScopedDependencies.getUser(),
                 requestScopedDependencies.getDatabaseId()
             );
-
-            // ValidationConfiguration post-load stuff would go here
-
-            return graphResources;
         }
     }
 
     /**
-     * Not the prettiest. Better to pass an Optional for this flag? Debatable. This is quick tho.
+     * Use the override if supplied; otherwise interrogate if the type is RelationshipWeightConfig, and if so, use that.
      */
-    private static <CONFIGURATION> Optional<String> extractRelationshipProperty(CONFIGURATION configuration) {
+    private <CONFIGURATION> Optional<String> determineRelationshipProperty(
+        CONFIGURATION configuration,
+        Optional<String> relationshipWeightOverride
+    ) {
+        if (relationshipWeightOverride.isPresent()) return relationshipWeightOverride;
+
         if (configuration instanceof RelationshipWeightConfig)
             return ((RelationshipWeightConfig) configuration).relationshipWeightProperty();
 
@@ -193,7 +190,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             executionMetric.start();
 
             return algorithmComputation.compute(graph);
-            } catch (RuntimeException e) {
+        } catch (RuntimeException e) {
             log.warn("computation failed, halting metrics gathering", e);
             executionMetric.failed(e);
             throw e;

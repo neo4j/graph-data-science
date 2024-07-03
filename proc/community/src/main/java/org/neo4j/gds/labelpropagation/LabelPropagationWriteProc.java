@@ -20,7 +20,7 @@
 package org.neo4j.gds.labelpropagation;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationWriteResult;
+import org.neo4j.gds.procedures.algorithms.community.LabelPropagationWriteResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -45,7 +45,7 @@ public class LabelPropagationWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().labelPropagationWrite(graphName, configuration);
+        return facade.algorithms().community().labelPropagationWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.labelPropagation.write.estimate", mode = READ)
@@ -54,6 +54,6 @@ public class LabelPropagationWriteProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().labelPropagationEstimateWrite(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().community().labelPropagationWriteEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

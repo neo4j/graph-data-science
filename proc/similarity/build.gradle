@@ -8,8 +8,8 @@ dependencies {
     annotationProcessor project(':annotations')
     annotationProcessor project(':procedure-collector')
 
-    annotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
-    annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
+    annotationProcessor openGds.immutables.builder
+    annotationProcessor openGds.immutables.value
 
     api project(':proc-common')
 
@@ -31,10 +31,10 @@ dependencies {
     implementation project(':termination')
     implementation project(':transaction')
 
-    implementation group: 'org.hdrhistogram', name: 'HdrHistogram', version: ver.'HdrHistogram'
+    implementation openGds.hdrhistogram
 
-    compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
-    compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
+    compileOnly openGds.immutables.value.annotations
+    compileOnly openGds.jetbrains.annotations
 
 
     neodeps().each {
@@ -48,9 +48,9 @@ dependencies {
     testImplementation project(':proc-test')
     testImplementation project(':proc-common')
     testImplementation project(':ml-core')
-    testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
-    testCompileOnly group: 'org.immutables', name: 'builder',           version: ver.'immutables'
-    testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
+    testCompileOnly openGds.immutables.value.annotations
+    testCompileOnly openGds.immutables.builder
+    testCompileOnly openGds.jetbrains.annotations
 
 
     testImplementation project(':opengds-extension')

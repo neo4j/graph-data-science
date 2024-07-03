@@ -20,7 +20,6 @@
 package org.neo4j.gds.junit.annotation;
 
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.neo4j.gds.compat.Neo4jVersion;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;

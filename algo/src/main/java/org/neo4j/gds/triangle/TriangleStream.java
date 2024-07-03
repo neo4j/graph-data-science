@@ -50,7 +50,7 @@ import java.util.stream.StreamSupport;
  * emitting the nodeId and the number of triangles the node is part of,
  * this impl. streams the actual nodeIds of each triangle once.
  */
-public final class TriangleStream extends Algorithm<Stream<TriangleStream.Result>> {
+public final class TriangleStream extends Algorithm<Stream<TriangleStreamResult>> {
 
     private final Graph graph;
     private final RelationshipIntersectFactory intersectFactory;
@@ -60,26 +60,28 @@ public final class TriangleStream extends Algorithm<Stream<TriangleStream.Result
     private final Concurrency concurrency;
     private final int nodeCount;
     private final AtomicInteger runningThreads;
-    private final BlockingQueue<Result> resultQueue;
+    private final BlockingQueue<TriangleStreamResult> resultQueue;
 
     public static TriangleStream create(
         Graph graph,
         ExecutorService executorService,
-        Concurrency concurrency
+        Concurrency concurrency,
+        TerminationFlag terminationFlag
     ) {
         var factory = RelationshipIntersectFactoryLocator
             .lookup(graph)
             .orElseThrow(
                 () -> new IllegalArgumentException("No relationship intersect factory registered for graph: " + graph.getClass())
             );
-        return new TriangleStream(graph, factory, executorService, concurrency);
+        return new TriangleStream(graph, factory, executorService, concurrency, terminationFlag);
     }
 
     private TriangleStream(
         Graph graph,
         RelationshipIntersectFactory intersectFactory,
         ExecutorService executorService,
-        Concurrency concurrency
+        Concurrency concurrency,
+        TerminationFlag terminationFlag
     ) {
         super(ProgressTracker.NULL_TRACKER);
         this.graph = graph;
@@ -91,18 +93,20 @@ public final class TriangleStream extends Algorithm<Stream<TriangleStream.Result
         this.resultQueue = new ArrayBlockingQueue<>(concurrency.value() << 10);
         this.runningThreads = new AtomicInteger();
         this.queue = new AtomicInteger();
+
+        this.terminationFlag = terminationFlag;
     }
 
     @Override
-    public Stream<Result> compute() {
+    public Stream<TriangleStreamResult> compute() {
         progressTracker.beginSubTask(graph.nodeCount());
         submitTasks();
         final TerminationFlag flag = getTerminationFlag();
-        final Iterator<Result> it = new AbstractIterator<>() {
+        final Iterator<TriangleStreamResult> it = new AbstractIterator<>() {
 
             @Override
-            protected Result fetch() {
-                Result result = null;
+            protected TriangleStreamResult fetch() {
+                TriangleStreamResult result = null;
                 while (result == null && flag.running() && (runningThreads.get() > 0 || !resultQueue.isEmpty())) {
                     result = resultQueue.poll();
                 }
@@ -146,7 +150,7 @@ public final class TriangleStream extends Algorithm<Stream<TriangleStream.Result
         abstract void evaluateNode(int nodeId);
 
         void emit(long nodeA, long nodeB, long nodeC) {
-            Result result = new Result(
+            var result = new TriangleStreamResult(
                     graph.toOriginalNodeId(nodeA),
                     graph.toOriginalNodeId(nodeB),
                     graph.toOriginalNodeId(nodeC));
@@ -173,28 +177,4 @@ public final class TriangleStream extends Algorithm<Stream<TriangleStream.Result
         }
     }
 
-    /**
-     * result type
-     */
-    public static class Result {
-
-        public final long nodeA;
-        public final long nodeB;
-        public final long nodeC;
-
-        public Result(long nodeA, long nodeB, long nodeC) {
-            this.nodeA = nodeA;
-            this.nodeB = nodeB;
-            this.nodeC = nodeC;
-        }
-
-        @Override
-        public String toString() {
-            return "Triangle{" +
-                    nodeA +
-                    ", " + nodeB +
-                    ", " + nodeC +
-                    '}';
-        }
-    }
 }

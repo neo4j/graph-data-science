@@ -25,6 +25,7 @@ import org.neo4j.gds.approxmaxkcut.localsearch.LocalSearch;
 import org.neo4j.gds.collections.ha.HugeByteArray;
 import org.neo4j.gds.core.concurrency.AtomicDouble;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.SplittableRandom;
@@ -67,7 +68,8 @@ public final class ApproxMaxKCut extends Algorithm<ApproxMaxKCutResult> {
         Graph graph,
         ApproxMaxKCutParameters parameters,
         ExecutorService executor,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         var random = new SplittableRandom(parameters.randomSeed().orElseGet(() -> new SplittableRandom().nextLong()));
         var comparator = parameters.minimize() ? MINIMIZING : MAXIMIZING;
@@ -122,7 +124,8 @@ public final class ApproxMaxKCut extends Algorithm<ApproxMaxKCutResult> {
             parameters.vnsMaxNeighborhoodOrder(),
             parameters.minCommunitySizes(),
             parameters.k(),
-            parameters.iterations()
+            parameters.iterations(),
+            terminationFlag
         );
     }
 
@@ -139,7 +142,8 @@ public final class ApproxMaxKCut extends Algorithm<ApproxMaxKCutResult> {
         int vnsMaxNeighborhoodOrder,
         List<Long> minCommunitySizes,
         byte k,
-        int iterations
+        int iterations,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -154,6 +158,7 @@ public final class ApproxMaxKCut extends Algorithm<ApproxMaxKCutResult> {
         this.minCommunitySizes = minCommunitySizes;
         this.k = k;
         this.iterations = iterations;
+        this.terminationFlag = terminationFlag;
     }
 
     @FunctionalInterface

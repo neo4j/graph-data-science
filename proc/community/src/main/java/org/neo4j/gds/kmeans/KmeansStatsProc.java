@@ -19,9 +19,8 @@
  */
 package org.neo4j.gds.kmeans;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.kmeans.KmeansStatsResult;
+import org.neo4j.gds.procedures.algorithms.community.KmeansStatsResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -36,8 +35,7 @@ import static org.neo4j.gds.kmeans.Kmeans.KMEANS_DESCRIPTION;
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class KmeansStatsProc extends BaseProc {
-
+public class KmeansStatsProc {
     @Context
     public GraphDataScienceProcedures facade;
 
@@ -47,8 +45,7 @@ public class KmeansStatsProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().kmeansStats(graphName, configuration);
-
+        return facade.algorithms().community().kmeansStats(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)
@@ -59,10 +56,9 @@ public class KmeansStatsProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.beta.kmeans.stats");
-        executionContext().log()
+        facade.deprecatedProcedures().called("gds.beta.kmeans.stats");
+        facade
+            .log()
             .warn("Procedure `gds.beta.kmeans.stats` has been deprecated, please use `gds.kmeans.stats`.");
         return stats(graphName, configuration);
     }
@@ -73,7 +69,7 @@ public class KmeansStatsProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        return facade.community().kmeansEstimateStats(graphName, configuration);
+        return facade.algorithms().community().kmeansStatsEstimate(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)
@@ -84,10 +80,9 @@ public class KmeansStatsProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.beta.kmeans.stats.estimate");
-        executionContext().log()
+        facade.deprecatedProcedures().called("gds.beta.kmeans.stats.estimate");
+        facade
+            .log()
             .warn("Procedure `gds.beta.kmeans.stats.estimate` has been deprecated, please use `gds.kmeans.stats.estimate`.");
         return estimate(graphName, configuration);
     }

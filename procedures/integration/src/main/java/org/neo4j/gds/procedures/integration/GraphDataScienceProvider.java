@@ -19,20 +19,23 @@
  */
 package org.neo4j.gds.procedures.integration;
 
+import org.neo4j.configuration.Config;
 import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
-import org.neo4j.gds.procedures.AlgorithmFacadeBuilderFactory;
+import org.neo4j.gds.procedures.AlgorithmProcedureFacadeBuilderFactory;
 import org.neo4j.gds.procedures.CatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.DatabaseIdAccessor;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
@@ -64,7 +67,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
     private final Log log;
     private final DefaultsConfiguration defaultsConfiguration;
     private final LimitsConfiguration limitsConfiguration;
-    private final AlgorithmFacadeBuilderFactory algorithmFacadeBuilderFactory;
+    private final AlgorithmProcedureFacadeBuilderFactory algorithmProcedureFacadeBuilderFactory;
     private final AlgorithmMetricsService algorithmMetricsService;
     private final Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator;
     private final Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> catalogBusinessFacadeDecorator;
@@ -76,12 +79,14 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
     private final ProjectionMetricsService projectionMetricsService;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
     private final UserLogServices userLogServices;
+    private final Config config;
+    private final ModelCatalog modelCatalog;
 
     GraphDataScienceProvider(
         Log log,
         DefaultsConfiguration defaultsConfiguration,
         LimitsConfiguration limitsConfiguration,
-        AlgorithmFacadeBuilderFactory algorithmFacadeBuilderFactory,
+        AlgorithmProcedureFacadeBuilderFactory algorithmProcedureFacadeBuilderFactory,
         AlgorithmMetricsService algorithmMetricsService,
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
         Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> catalogBusinessFacadeDecorator,
@@ -92,12 +97,14 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         MemoryGuard memoryGuard,
         ProjectionMetricsService projectionMetricsService,
         TaskRegistryFactoryService taskRegistryFactoryService,
-        UserLogServices userLogServices
+        UserLogServices userLogServices,
+        Config config,
+        ModelCatalog modelCatalog
     ) {
         this.log = log;
         this.defaultsConfiguration = defaultsConfiguration;
         this.limitsConfiguration = limitsConfiguration;
-        this.algorithmFacadeBuilderFactory = algorithmFacadeBuilderFactory;
+        this.algorithmProcedureFacadeBuilderFactory = algorithmProcedureFacadeBuilderFactory;
         this.algorithmMetricsService = algorithmMetricsService;
         this.algorithmProcessingTemplateDecorator = algorithmProcessingTemplateDecorator;
         this.catalogBusinessFacadeDecorator = catalogBusinessFacadeDecorator;
@@ -109,6 +116,8 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         this.projectionMetricsService = projectionMetricsService;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.userLogServices = userLogServices;
+        this.config = config;
+        this.modelCatalog = modelCatalog;
     }
 
     @Override
@@ -120,7 +129,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         var graphDatabaseService = context.graphDatabaseAPI();
         var databaseId = databaseIdAccessor.getDatabaseId(graphDatabaseService);
 
-        var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(graphDatabaseService);
+        var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(graphDatabaseService, config);
         var exporterContext = new ExporterContext.ProcedureContextWrapper(context);
         var nodeLabelExporterBuilder = exportBuildersProvider.nodeLabelExporterBuilder(exporterContext);
         var nodePropertyExporterBuilder = exportBuildersProvider.nodePropertyExporterBuilder(exporterContext);
@@ -135,21 +144,6 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
         var userLogStore = userLogServices.getUserLogStore(databaseId);
 
-        var requestScopedDependencies = RequestScopedDependencies.builder()
-            .with(databaseId)
-            .with(nodeLabelExporterBuilder)
-            .with(nodePropertyExporterBuilder)
-            .with(procedureReturnColumns)
-            .with(relationshipExporterBuilder)
-            .with(relationshipPropertiesExporterBuilder)
-            .with(relationshipStreamExporterBuilder)
-            .with(taskRegistryFactory)
-            .with(terminationFlag)
-            .with(user)
-            .with(userLogRegistryFactory)
-            .with(userLogStore)
-            .build();
-
         var graphLoaderContext = GraphLoaderContextProvider.buildGraphLoaderContext(
             context,
             databaseId,
@@ -158,6 +152,24 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             userLogRegistryFactory,
             log
         );
+
+        var procedureContext = WriteContext.builder()
+            .with(nodeLabelExporterBuilder)
+            .with(nodePropertyExporterBuilder)
+            .with(relationshipExporterBuilder)
+            .with(relationshipPropertiesExporterBuilder)
+            .with(relationshipStreamExporterBuilder)
+            .build();
+
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .with(databaseId)
+            .with(graphLoaderContext)
+            .with(taskRegistryFactory)
+            .with(terminationFlag)
+            .with(user)
+            .with(userLogRegistryFactory)
+            .with(userLogStore)
+            .build();
 
         return GraphDataScienceProcedures.create(
             log,
@@ -171,13 +183,15 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             projectionMetricsService,
             algorithmMetaDataSetter,
             kernelTransaction,
-            graphLoaderContext,
             requestScopedDependencies,
+            procedureContext,
+            procedureReturnColumns,
             catalogProcedureFacadeFactory,
             graphDatabaseService,
             procedureTransactionAccessor.getProcedureTransaction(context),
-            algorithmFacadeBuilderFactory,
-            deprecatedProceduresMetricService
+            algorithmProcedureFacadeBuilderFactory,
+            deprecatedProceduresMetricService,
+            modelCatalog
         );
     }
 }

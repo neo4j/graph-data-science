@@ -23,15 +23,12 @@ import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.embeddings.specificfields.Node2VecSpecificFields;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
-import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.embeddings.fastrp.FastRPWriteConfig;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
 
 import java.util.Optional;
@@ -74,55 +71,6 @@ public class NodeEmbeddingsAlgorithmsWriteBusinessFacade {
             configuration.writeConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(intermediateResult.algorithmResult.resultStore())
-        );
-    }
-
-    public NodePropertyWriteResult<Long> graphSage(
-        String graphName,
-        GraphSageWriteConfig configuration
-    ) {
-
-        var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> nodeEmbeddingsAlgorithmsFacade.graphSage(graphName, configuration)
-        );
-
-        return writeToDatabase(
-            intermediateResult.algorithmResult,
-            configuration,
-            (result) -> NodePropertyValuesAdapter.adapt(result.embeddings()),
-            (result) -> intermediateResult.algorithmResult.graph().nodeCount(),
-            intermediateResult.computeMilliseconds,
-            () -> 0l,
-            "GraphSageWrite",
-            configuration.writeConcurrency(),
-            configuration.writeProperty(),
-            configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(intermediateResult.algorithmResult.resultStore())
-        );
-    }
-
-    public NodePropertyWriteResult<Long> fastRP(
-        String graphName,
-        FastRPWriteConfig configuration
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> nodeEmbeddingsAlgorithmsFacade.fastRP(graphName, configuration)
-        );
-
-        return writeToDatabase(
-            intermediateResult.algorithmResult,
-            configuration,
-            (result) -> NodePropertyValuesAdapter.adapt(result.embeddings()),
-            (result) -> intermediateResult.algorithmResult.graph().nodeCount(),
-            intermediateResult.computeMilliseconds,
-            () -> 0L,
-            "FastRPWrite",
-            configuration.writeConcurrency(),
-            configuration.writeProperty(),
-            configuration.arrowConnectionInfo(),
-
             configuration.resolveResultStore(intermediateResult.algorithmResult.resultStore())
         );
     }

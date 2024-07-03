@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.scc;
 
-import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.scc.SccMutateResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.algorithms.community.SccMutateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -44,7 +44,7 @@ public class SccMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().sccMutate(graphName, configuration);
+        return facade.algorithms().community().sccMutateStub().execute(graphName, configuration);
     }
 
     @Procedure(value = "gds.scc.mutate.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class SccMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().sccEstimateMutate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().community().sccMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

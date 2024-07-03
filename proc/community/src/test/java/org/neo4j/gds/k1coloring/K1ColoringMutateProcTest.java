@@ -30,19 +30,15 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
-import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.extension.Neo4jGraph;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -53,9 +49,6 @@ import static org.assertj.core.api.Assertions.assertThatException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -255,22 +248,6 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
     }
 
     @Test
-    void testExceptionLogging() {
-        List<TestLog> log = new ArrayList<>(1);
-        assertThrows(
-            NullPointerException.class,
-            ()->TestProcedureRunner.applyOnProcedure(db, K1ColoringMutateProc.class,
-                procedure -> {
-                var computationResult = mock(ComputationResult.class);
-                log.add(0, ((TestLog) procedure.log));
-                new K1ColoringMutateSpecification().computationResultConsumer().consume(computationResult, procedure.executionContext());
-            })
-        );
-
-        assertTrue(log.get(0).containsMessage(TestLog.WARN, "Graph mutation failed"));
-    }
-
-    @Test
     void testRunOnEmptyGraph() {
         // Create a dummy node with label "X" so that "X" is a valid label to put use for property mappings later
 
@@ -291,7 +268,7 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
 
         var rowCount=runQueryWithRowConsumer(query, row -> {
             AssertionsForClassTypes.assertThat(row.getNumber("preProcessingMillis").longValue()).isNotEqualTo(-1);
-            AssertionsForClassTypes.assertThat(row.getNumber("computeMillis").longValue()).isEqualTo(0);
+            AssertionsForClassTypes.assertThat(row.getNumber("computeMillis").longValue()).isEqualTo(-1);
             AssertionsForClassTypes.assertThat(row.getNumber("nodeCount").longValue()).isEqualTo(0);
             AssertionsForClassTypes.assertThat(row.getNumber("colorCount").longValue()).isEqualTo(0);
             AssertionsForClassTypes.assertThat(row.getNumber("ranIterations").longValue()).isEqualTo(0);

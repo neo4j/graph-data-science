@@ -77,7 +77,9 @@ public class WriteRelationshipPropertiesApplication {
             try {
                 relationshipPropertiesExporter.write(relationshipType, relationshipProperties);
 
-                resultBuilder.withRelationshipsWritten(relationshipCount);
+                resultBuilder
+                    .withRelationshipsWritten(relationshipCount)
+                    .withConfiguration(configuration.toMap());
             } catch (RuntimeException e) {
                 log.warn("Writing relationships failed", e);
                 throw e;

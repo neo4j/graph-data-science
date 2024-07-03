@@ -31,6 +31,7 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -88,7 +89,8 @@ final class MultiSourceBFSAccessMethodsTest {
                 graph,
                 (i, d, s) -> bfsConsumerMock.accept(i + 1, d, toList(s, x -> x + 1)),
                 (i, p, d, s) -> bfsWithPredecessorConsumerMock.accept(i + 1, p + 1, d, toList(s, x -> x + 1)),
-                Optional.of(new long[]{0, 1})
+                Optional.of(new long[]{0, 1}),
+                TerminationFlag.RUNNING_TRUE
             );
 
             msbfs.run(ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY, DefaultPool.INSTANCE);
@@ -127,7 +129,8 @@ final class MultiSourceBFSAccessMethodsTest {
                 graph.nodeCount(),
                 graph,
                 (i, d, s) -> mock.accept(i + 1, d, toList(s, x -> x + 1)),
-                Optional.of(new long[]{0, 1})
+                Optional.of(new long[]{0, 1}),
+                TerminationFlag.RUNNING_TRUE
             );
 
             msbfs.run(ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY, DefaultPool.INSTANCE);
@@ -149,7 +152,8 @@ final class MultiSourceBFSAccessMethodsTest {
                 graph,
                 (i, d, s) -> {},
                 (i, p, d, s) -> mock.accept(i + 1, p + 1, d, toList(s, x -> x + 1)),
-                Optional.empty()
+                Optional.empty(),
+                TerminationFlag.RUNNING_TRUE
             );
 
             msbfs.run(ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY, DefaultPool.INSTANCE);
@@ -201,7 +205,8 @@ final class MultiSourceBFSAccessMethodsTest {
                 graph.nodeCount(),
                 graph,
                 (i, d, s) -> mock.accept(i + 1, d, toList(s, x -> x + 1)),
-                Optional.empty()
+                Optional.empty(),
+                TerminationFlag.RUNNING_TRUE
             );
 
             msbfs.run(ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY, DefaultPool.INSTANCE);
@@ -289,7 +294,8 @@ final class MultiSourceBFSAccessMethodsTest {
                     );
                     assertTrue(seen.add(Pair.of(i, d)), message);
                 },
-                Optional.empty()
+                Optional.empty(),
+                TerminationFlag.RUNNING_TRUE
             );
             msbfs.run(new Concurrency(1), null);
 
@@ -342,7 +348,8 @@ final class MultiSourceBFSAccessMethodsTest {
                         }
                     }
                 },
-                Optional.empty()
+                Optional.empty(),
+                TerminationFlag.RUNNING_TRUE
             );
             msbfs.run(ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY, DefaultPool.INSTANCE);
 
@@ -390,7 +397,8 @@ final class MultiSourceBFSAccessMethodsTest {
 
                     assertEquals(expectedSize, s.size());
                 },
-                Optional.empty()
+                Optional.empty(),
+                TerminationFlag.RUNNING_TRUE
             );
             // run sequentially to guarantee order
             msbfs.run(new Concurrency(1), null);
@@ -422,7 +430,8 @@ final class MultiSourceBFSAccessMethodsTest {
                 nodeCount,
                 iter,
                 bfsConsumer,
-                Optional.of(sources)
+                Optional.of(sources),
+                TerminationFlag.RUNNING_TRUE
             );
             msbfs.run(ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY, DefaultPool.INSTANCE);
 

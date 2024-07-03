@@ -20,7 +20,7 @@
 package org.neo4j.gds.conductance;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.conductance.ConductanceStreamResult;
+import org.neo4j.gds.procedures.algorithms.community.ConductanceStreamResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.conductance.Conductance.CONDUCTANCE_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class ConductanceStreamProc {
@@ -43,13 +44,13 @@ public class ConductanceStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().conductanceStream(graphName, configuration);
+        return facade.algorithms().community().conductanceStream(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)
     @Internal
     @Procedure(value = "gds.alpha.conductance.stream", mode = READ, deprecatedBy = "gds.conductance.stream")
-    @Description(CONDUCTANCE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<ConductanceStreamResult> streamAlpha(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -58,7 +59,6 @@ public class ConductanceStreamProc {
         facade
             .log()
             .warn("Procedure `gds.alpha.conductance.stream` has been deprecated, please use `gds.conductance.stream`.");
-
         return stream(graphName, configuration);
     }
 }

@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
-import org.neo4j.gds.compat.OutputStreamLogBuilder;
+import org.neo4j.gds.compat.OutputStreamLog;
 import org.neo4j.gds.graphbuilder.GraphBuilder;
 import org.neo4j.logging.Level;
 import org.neo4j.logging.Log;
@@ -76,6 +76,6 @@ class ProgressLoggingTest extends BaseTest {
 
     private static Log testLogger(StringWriter writer) {
         var outStream = new WriterOutputStream(writer, StandardCharsets.UTF_8);
-        return new OutputStreamLogBuilder(outStream).level(Level.DEBUG).category("Test").build();
+        return OutputStreamLog.builder(outStream).level(Level.DEBUG).category("Test").build().log();
     }
 }

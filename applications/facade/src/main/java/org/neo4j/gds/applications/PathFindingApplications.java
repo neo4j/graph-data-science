@@ -19,10 +19,11 @@
  */
 package org.neo4j.gds.applications;
 
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
@@ -61,8 +62,9 @@ public final class PathFindingApplications {
     public static PathFindingApplications create(
         Log log,
         RequestScopedDependencies requestScopedDependencies,
-        AlgorithmProcessingTemplate algorithmProcessingTemplate,
+        WriteContext writeContext,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
+        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         ProgressTrackerCreator progressTrackerCreator
     ) {
         var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, progressTrackerCreator);
@@ -72,25 +74,26 @@ public final class PathFindingApplications {
         var mutateModeFacade = new PathFindingAlgorithmsMutateModeBusinessFacade(
             estimationModeFacade,
             pathFindingAlgorithms,
-            algorithmProcessingTemplate
+            algorithmProcessingTemplateConvenience
         );
 
         var statsModeFacade = new PathFindingAlgorithmsStatsModeBusinessFacade(
-            algorithmProcessingTemplate,
+            algorithmProcessingTemplateConvenience,
             estimationModeFacade,
             pathFindingAlgorithms
         );
 
         var streamModeFacade = new PathFindingAlgorithmsStreamModeBusinessFacade(
-            algorithmProcessingTemplate,
+            algorithmProcessingTemplateConvenience,
             estimationModeFacade,
             pathFindingAlgorithms
         );
 
         var writeModeFacade = new PathFindingAlgorithmsWriteModeBusinessFacade(
             log,
-            algorithmProcessingTemplate,
+            algorithmProcessingTemplateConvenience,
             requestScopedDependencies,
+            writeContext,
             estimationModeFacade,
             pathFindingAlgorithms
         );

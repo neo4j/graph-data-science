@@ -94,7 +94,8 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         Concurrency concurrency,
         int minBatchSize,
         ExecutorService executor,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -113,6 +114,8 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         }
 
         this.modularityManager = ModularityManager.create(graph, concurrency);
+
+        this.terminationFlag = terminationFlag;
     }
 
     @Override

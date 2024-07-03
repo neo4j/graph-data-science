@@ -1,0 +1,21 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Node Embeddings'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    implementation project(":algo")
+    implementation project(":algo-common")
+    implementation project(":algorithms-machinery")
+    implementation project(":config-api")
+    implementation project(":core")
+    implementation project(":graph-schema-api")
+    implementation project(":logging")
+    implementation project(":memory-usage")
+    implementation project(":ml-algo")
+    implementation project(":ml-core")
+    implementation project(":model-catalog-api")
+    implementation project(":progress-tracking")
+    implementation project(":termination")
+}

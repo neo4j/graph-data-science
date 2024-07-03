@@ -20,31 +20,44 @@
 package org.neo4j.gds.compat._518;
 
 import org.neo4j.configuration.Config;
+import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.compat.CompatMonitor;
 import org.neo4j.gds.compat.GlobalProcedureRegistry;
 import org.neo4j.gds.compat.Neo4jProxyApi;
+import org.neo4j.gds.compat.Write;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.Monitor;
 import org.neo4j.internal.batchimport.input.Collector;
+import org.neo4j.internal.kernel.api.exceptions.InvalidTransactionTypeKernelException;
+import org.neo4j.internal.kernel.api.procs.FieldSignature;
+import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
 import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
+import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.context.CursorContextFactory;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
+import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
 import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.memory.EmptyMemoryTracker;
+import org.neo4j.procedure.Mode;
 import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.storageengine.api.StorageEngineFactory;
+import org.neo4j.values.storable.Value;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
+
+import static java.util.function.Predicate.not;
 
 public final class Neo4jProxyImpl implements Neo4jProxyApi {
 
@@ -123,4 +136,97 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             }
         };
     }
+
+    @Override
+    public Write dataWrite(KernelTransaction kernelTransaction) throws InvalidTransactionTypeKernelException {
+        var neoWrite = kernelTransaction.dataWrite();
+        return new Write() {
+
+            @Override
+            public void nodeAddLabel(long node, int nodeLabelToken) throws KernelException {
+                neoWrite.nodeAddLabel(node, nodeLabelToken);
+            }
+
+            @Override
+            public void nodeSetProperty(long node, int propertyKey, Value value) throws KernelException {
+                neoWrite.nodeSetProperty(node, propertyKey, value);
+            }
+            @Override
+            public long relationshipCreate(long source, int relationshipToken, long target) throws KernelException {
+                return neoWrite.relationshipCreate(source, relationshipToken, target);
+            }
+
+            @Override
+            public void relationshipSetProperty(long relationship, int propertyKey, Value value) throws
+                KernelException {
+                neoWrite.relationshipSetProperty(relationship, propertyKey, value);
+            }
+        };
+    }
+
+    @Override
+    public ProcedureSignature procedureSignature(
+        QualifiedName name,
+        List<FieldSignature> inputSignature,
+        List<FieldSignature> outputSignature,
+        Mode mode,
+        boolean admin,
+        Optional<String> deprecatedBy,
+        String description,
+        String warning,
+        boolean eager,
+        boolean caseInsensitive,
+        boolean systemProcedure,
+        boolean internal,
+        boolean allowExpiredCredentials,
+        boolean threadSafe
+    ) {
+        var deprecated = deprecatedBy.filter(not(String::isEmpty));
+        return new ProcedureSignature(
+            name,
+            inputSignature,
+            outputSignature,
+            mode,
+            admin,
+            deprecated.orElse(null),
+            description,
+            warning,
+            eager,
+            caseInsensitive,
+            systemProcedure,
+            internal,
+            allowExpiredCredentials,
+            threadSafe
+        );
+    }
+
+    @Override
+    public UserFunctionSignature userFunctionSignature(
+        QualifiedName name,
+        List<FieldSignature> inputSignature,
+        Neo4jTypes.AnyType type,
+        String description,
+        Optional<String> deprecatedBy,
+        boolean internal,
+        boolean threadSafe
+    ) {
+        String category = null;      // No predefined categpry (like temporal or math)
+        var caseInsensitive = false; // case sensitive name match
+        var isBuiltIn = false;       // is built in; never true for GDS
+        var deprecated = deprecatedBy.filter(not(String::isEmpty));
+
+        return new UserFunctionSignature(
+            name,
+            inputSignature,
+            type,
+            deprecated.orElse(null),
+            description,
+            category,
+            caseInsensitive,
+            isBuiltIn,
+            internal,
+            threadSafe
+        );
+    }
+
 }

@@ -21,7 +21,7 @@ package org.neo4j.gds.applications.algorithms.centrality;
 
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityStatsConfig;
@@ -32,8 +32,6 @@ import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankStatsConfig;
 
-import java.util.Optional;
-
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ArticleRank;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BetweennessCentrality;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.CELF;
@@ -41,20 +39,21 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.DegreeCentrality;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.EigenVector;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.HarmonicCentrality;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.PageRank;
 
 public class CentralityAlgorithmsStatsModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final CentralityAlgorithms centralityAlgorithms;
-    private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
+    private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
 
     public CentralityAlgorithmsStatsModeBusinessFacade(
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         CentralityAlgorithms centralityAlgorithms,
-        AlgorithmProcessingTemplate algorithmProcessingTemplate
+        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience
     ) {
         this.estimationFacade = estimationFacade;
         this.centralityAlgorithms = centralityAlgorithms;
-        this.algorithmProcessingTemplate = algorithmProcessingTemplate;
+        this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
     }
 
     public <RESULT> RESULT articleRank(
@@ -62,13 +61,12 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
         PageRankStatsConfig configuration,
         ResultBuilder<PageRankStatsConfig, PageRankResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
             ArticleRank,
             estimationFacade::pageRank,
             graph -> centralityAlgorithms.articleRank(graph, configuration),
-            Optional.empty(),
             resultBuilder
         );
     }
@@ -78,77 +76,12 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
         BetweennessCentralityStatsConfig configuration,
         ResultBuilder<BetweennessCentralityStatsConfig, CentralityAlgorithmResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
             BetweennessCentrality,
             () -> estimationFacade.betweennessCentrality(configuration),
             graph -> centralityAlgorithms.betweennessCentrality(graph, configuration),
-            Optional.empty(),
-            resultBuilder
-        );
-    }
-
-    public <RESULT> RESULT closenessCentrality(
-        GraphName graphName,
-        ClosenessCentralityStatsConfig configuration,
-        ResultBuilder<ClosenessCentralityStatsConfig, CentralityAlgorithmResult, RESULT, Void> resultBuilder
-    ) {
-        return algorithmProcessingTemplate.processAlgorithm(
-            graphName,
-            configuration,
-            ClosenessCentrality,
-            () -> estimationFacade.closenessCentrality(configuration),
-            graph -> centralityAlgorithms.closenessCentrality(graph, configuration),
-            Optional.empty(),
-            resultBuilder
-        );
-    }
-
-    public <RESULT> RESULT degreeCentrality(
-        GraphName graphName,
-        DegreeCentralityStatsConfig configuration,
-        ResultBuilder<DegreeCentralityStatsConfig, CentralityAlgorithmResult, RESULT, Void> resultBuilder
-    ) {
-        return algorithmProcessingTemplate.processAlgorithm(
-            graphName,
-            configuration,
-            DegreeCentrality,
-            () -> estimationFacade.degreeCentrality(configuration),
-            graph -> centralityAlgorithms.degreeCentrality(graph, configuration),
-            Optional.empty(),
-            resultBuilder
-        );
-    }
-
-    public <RESULT> RESULT eigenVector(
-        GraphName graphName,
-        PageRankStatsConfig configuration,
-        ResultBuilder<PageRankStatsConfig, PageRankResult, RESULT, Void> resultBuilder
-    ) {
-        return algorithmProcessingTemplate.processAlgorithm(
-            graphName,
-            configuration,
-            EigenVector,
-            estimationFacade::pageRank,
-            graph -> centralityAlgorithms.eigenVector(graph, configuration),
-            Optional.empty(),
-            resultBuilder
-        );
-    }
-
-    public <RESULT> RESULT harmonicCentrality(
-        GraphName graphName,
-        HarmonicCentralityStatsConfig configuration,
-        ResultBuilder<HarmonicCentralityStatsConfig, CentralityAlgorithmResult, RESULT, Void> resultBuilder
-    ) {
-        return algorithmProcessingTemplate.processAlgorithm(
-            graphName,
-            configuration,
-            HarmonicCentrality,
-            estimationFacade::harmonicCentrality,
-            graph -> centralityAlgorithms.harmonicCentrality(graph, configuration),
-            Optional.empty(),
             resultBuilder
         );
     }
@@ -158,13 +91,87 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
         InfluenceMaximizationStatsConfig configuration,
         ResultBuilder<InfluenceMaximizationStatsConfig, CELFResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
             CELF,
             () -> estimationFacade.celf(configuration),
             graph -> centralityAlgorithms.celf(graph, configuration),
-            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT closenessCentrality(
+        GraphName graphName,
+        ClosenessCentralityStatsConfig configuration,
+        ResultBuilder<ClosenessCentralityStatsConfig, CentralityAlgorithmResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+            graphName,
+            configuration,
+            ClosenessCentrality,
+            () -> estimationFacade.closenessCentrality(configuration),
+            graph -> centralityAlgorithms.closenessCentrality(graph, configuration),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT degreeCentrality(
+        GraphName graphName,
+        DegreeCentralityStatsConfig configuration,
+        ResultBuilder<DegreeCentralityStatsConfig, CentralityAlgorithmResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+            graphName,
+            configuration,
+            DegreeCentrality,
+            () -> estimationFacade.degreeCentrality(configuration),
+            graph -> centralityAlgorithms.degreeCentrality(graph, configuration),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT eigenVector(
+        GraphName graphName,
+        PageRankStatsConfig configuration,
+        ResultBuilder<PageRankStatsConfig, PageRankResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+            graphName,
+            configuration,
+            EigenVector,
+            estimationFacade::pageRank,
+            graph -> centralityAlgorithms.eigenVector(graph, configuration),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT harmonicCentrality(
+        GraphName graphName,
+        HarmonicCentralityStatsConfig configuration,
+        ResultBuilder<HarmonicCentralityStatsConfig, CentralityAlgorithmResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+            graphName,
+            configuration,
+            HarmonicCentrality,
+            estimationFacade::harmonicCentrality,
+            graph -> centralityAlgorithms.harmonicCentrality(graph, configuration),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT pageRank(
+        GraphName graphName,
+        PageRankStatsConfig configuration,
+        ResultBuilder<PageRankStatsConfig, PageRankResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+            graphName,
+            configuration,
+            PageRank,
+            estimationFacade::pageRank,
+            graph -> centralityAlgorithms.pageRank(graph, configuration),
             resultBuilder
         );
     }

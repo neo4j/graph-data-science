@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.pipeline;
 
 import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
+import org.neo4j.gds.ml.pipeline.stubs.ApproximateMaximumKCutStub;
 import org.neo4j.gds.ml.pipeline.stubs.ArticleRankStub;
 import org.neo4j.gds.ml.pipeline.stubs.BellmanFordStub;
 import org.neo4j.gds.ml.pipeline.stubs.BetaClosenessCentralityStub;
@@ -30,12 +31,23 @@ import org.neo4j.gds.ml.pipeline.stubs.ClosenessCentralityStub;
 import org.neo4j.gds.ml.pipeline.stubs.DegreeCentralityStub;
 import org.neo4j.gds.ml.pipeline.stubs.DepthFirstSearchStub;
 import org.neo4j.gds.ml.pipeline.stubs.EigenVectorStub;
+import org.neo4j.gds.ml.pipeline.stubs.FastRPStub;
 import org.neo4j.gds.ml.pipeline.stubs.FilteredKnnStub;
 import org.neo4j.gds.ml.pipeline.stubs.FilteredNodeSimilarityStub;
+import org.neo4j.gds.ml.pipeline.stubs.GraphSageStub;
 import org.neo4j.gds.ml.pipeline.stubs.HarmonicCentralityStub;
+import org.neo4j.gds.ml.pipeline.stubs.K1ColoringStub;
+import org.neo4j.gds.ml.pipeline.stubs.KCoreStub;
+import org.neo4j.gds.ml.pipeline.stubs.KMeansStub;
 import org.neo4j.gds.ml.pipeline.stubs.KnnStub;
+import org.neo4j.gds.ml.pipeline.stubs.LabelPropagationStub;
+import org.neo4j.gds.ml.pipeline.stubs.LccStub;
+import org.neo4j.gds.ml.pipeline.stubs.LeidenStub;
+import org.neo4j.gds.ml.pipeline.stubs.LouvainStub;
+import org.neo4j.gds.ml.pipeline.stubs.ModularityOptimizationStub;
 import org.neo4j.gds.ml.pipeline.stubs.NodeSimilarityStub;
 import org.neo4j.gds.ml.pipeline.stubs.PageRankStub;
+import org.neo4j.gds.ml.pipeline.stubs.SccStub;
 import org.neo4j.gds.ml.pipeline.stubs.SinglePairShortestPathAStarStub;
 import org.neo4j.gds.ml.pipeline.stubs.SinglePairShortestPathDijkstraStub;
 import org.neo4j.gds.ml.pipeline.stubs.SinglePairShortestPathYensStub;
@@ -43,6 +55,8 @@ import org.neo4j.gds.ml.pipeline.stubs.SingleSourceShortestPathDeltaStub;
 import org.neo4j.gds.ml.pipeline.stubs.SingleSourceShortestPathDijkstraStub;
 import org.neo4j.gds.ml.pipeline.stubs.SpanningTreeStub;
 import org.neo4j.gds.ml.pipeline.stubs.SteinerTreeStub;
+import org.neo4j.gds.ml.pipeline.stubs.TriangleCountStub;
+import org.neo4j.gds.ml.pipeline.stubs.WccStub;
 
 /**
  * :flag-au:
@@ -56,6 +70,7 @@ class StubbyHolder {
     Stub get(Algorithm algorithm) {
         return switch (algorithm) {
             case AllShortestPaths -> null;
+            case ApproximateMaximumKCut -> new ApproximateMaximumKCutStub();
             case ArticleRank -> new ArticleRankStub();
             case AStar -> new SinglePairShortestPathAStarStub();
             case BellmanFord -> new BellmanFordStub();
@@ -64,24 +79,40 @@ class StubbyHolder {
             case BFS -> new BreadthFirstSearchStub();
             case CELF -> new CelfStub();
             case ClosenessCentrality -> new ClosenessCentralityStub();
+            case Conductance -> null;
             case DegreeCentrality -> new DegreeCentralityStub();
             case DeltaStepping -> new SingleSourceShortestPathDeltaStub();
             case DFS -> new DepthFirstSearchStub();
             case Dijkstra -> new SinglePairShortestPathDijkstraStub();
             case EigenVector -> new EigenVectorStub();
+            case FastRP -> new FastRPStub();
             case FilteredKNN -> new FilteredKnnStub();
             case FilteredNodeSimilarity -> new FilteredNodeSimilarityStub();
+            case GraphSage -> new GraphSageStub();
             case HarmonicCentrality -> new HarmonicCentralityStub();
+            case K1Coloring -> new K1ColoringStub();
+            case KCore -> new KCoreStub();
+            case KMeans -> new KMeansStub();
             case KNN -> new KnnStub();
             case KSpanningTree -> null;
+            case LabelPropagation -> new LabelPropagationStub();
+            case LCC -> new LccStub();
+            case Leiden -> new LeidenStub();
+            case Louvain -> new LouvainStub();
             case LongestPath -> null;
+            case Modularity -> null;
+            case ModularityOptimization -> new ModularityOptimizationStub();
             case NodeSimilarity -> new NodeSimilarityStub();
             case PageRank -> new PageRankStub();
             case RandomWalk -> null;
+            case SCC -> new SccStub();
             case SingleSourceDijkstra -> new SingleSourceShortestPathDijkstraStub();
             case SpanningTree -> new SpanningTreeStub();
             case SteinerTree -> new SteinerTreeStub();
             case TopologicalSort -> null;
+            case TriangleCount -> new TriangleCountStub();
+            case Triangles -> null;
+            case WCC -> new WccStub();
             case Yens -> new SinglePairShortestPathYensStub();
         };
     }

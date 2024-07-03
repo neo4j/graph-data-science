@@ -257,6 +257,101 @@ Arrow import processes will be aborted automatically if no data or instructions 
 The timeout can be configured via the `gds.arrow.abortion_timeout` setting, for more information see the xref:installation/configure-apache-arrow-server.adoc[installation chapter].
 ====
 
+
+== Appending new data to an existing graph
+
+Once a graph has been created, it is possible to append additional data to the existing graph.
+This avoids dropping the graph and re-importing all data.
+The process is similar to the initial import process but with a few differences.
+
+=== Appending new node properties
+
+Once a graph has been created, it is possible to append additional node properties to the existing graph.
+To do so, the client needs to send the node records with the same node ids as the existing nodes.
+The server will update the existing nodes with the new properties, potentially limited to a set of node labels.
+A node record is identified by the `nodeId` column, which must be unique across all node records and must match the node ids of the existing nodes.
+
+It is not required to send node property values for all nodes in the existing graph.
+If a node record is not represented in the new data, that record will receive the default value for the property type.
+
+The process will fail if the property already exists or if one of the provided node ids does not match an existing node.
+
+The import process is initialized by sending a Flight action using the action type `v1/PUT_NODE_PROPERTIES` with the following action body:
+
+----
+{
+    name: "my_graph", <1>
+    database_name: "neo4j", <2>
+    concurrency: 4, <3>
+    node_labels: ["*"], <4>
+    consecutive_ids: false <5>
+}
+----
+<1> The name of the existing in-memory graph. It is also used to identify the import process.
+<2> The name of the database on which the projected graph is available.
+<3> (optional) The level of concurrency that will be used to build the property data structures on the server.
+<4> (optional) A set of node labels that will be updated with the new properties. A wildcard (`*`) can be used to include all the labels.
+<5> (optional) If data is associated with a graph that has been exported using consecutive node ids, set this to `true`.
+
+Node properties need to be turned into Arrow record batches and sent to the server via a Flight stream.
+Each stream needs to target an import process on the server.
+That information is encoded in the Flight descriptor body as a JSON document:
+
+----
+{
+    name: "PUT_COMMAND",
+    version: "v1",
+    body: {
+        name: "my_graph",
+        entity_type: "node_properties",
+    }
+}
+----
+
+As with sending nodes and relationships, the overall throughput depends on the number of parallel Flight streams and the record batch size.
+
+Similar to the node import, the server expects the node records to adhere to a specific schema.
+Given an example node such as `({ yob: 1984, magic: 1.8, rank: 42 })`, it's record must be represented as follows:
+
+[[arrow-node-properties-schema]]
+[opts=header,cols="1,1,1,1"]
+|===
+| nodeId |  yob  | magic | rank
+| 0      |  1984 | 1.8   | 42
+|===
+
+The following table describes the node columns with reserved names.
+
+[[arrow-node-properties-columns]]
+[opts=header,cols="1m,1,1,1,1"]
+|===
+| Name      | Type     | Optional | Nullable   | Description
+| nodeId    | Integer  | No       | No         | Unique 64-bit node identifiers for the in-memory graph. Must be positive values.
+|===
+
+Any additional column except `nodeId` is interpreted as a new node property to append.
+The supported data types are equivalent to the GDS node property types, i.e., `long`, `double`, `long[]`, `double[]` and `float[]`.
+
+
+Once all node record batches are sent to the server, the client needs to indicate that node appending is done.
+This is achieved by sending another Flight action with the action type `v1/PUT_NODE_PROPERTIES_DONE` and the following JSON document as action body:
+
+----
+{
+    name: "my_graph"
+}
+----
+
+The server acknowledges the action by returning a JSON document including the name of the import process and the number of nodes that have been updated:
+
+----
+{
+    name: "my_graph",
+    node_count: 1
+}
+----
+
+
 == Creating a Neo4j database
 
 include::partial$/common-usage/not-on-aurads-note.adoc[]

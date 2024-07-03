@@ -67,6 +67,7 @@ import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.instanceOf;
@@ -1124,6 +1125,35 @@ class CypherAggregationTest extends BaseProcTest {
         );
         assertThatCode(() -> runQuery(query))
             .doesNotThrowAnyException();
+    }
+
+    @Test
+    void shouldFailOnEmptyGraphName() {
+        var query =
+            """
+                UNWIND [
+                  [0, 1, 'a', {}, 'rel', {}],\s
+                  [2, 3, 'b', {x:1}, 'rel2', {weight: 0.1}],
+                  [5, 6, 'c', {y:1}, 'rel3', {hq: 0.1}]
+                ] AS data
+                 RETURN gds.graph.project(
+                    '',
+                    data[0],
+                    data[1],
+                    {
+                        sourceNodeLabels: data[2],
+                        targetNodeLabels: null,
+                        sourceNodeProperties: data[3],
+                        targetNodeProperties: null,
+                        relationshipType: data[4],
+                        relationshipProperties: data[5]
+                    }
+                )
+                """;
+
+        assertThatException()
+            .isThrownBy(() -> runQuery(query))
+            .withMessageContaining("`graphName` can not be null or blank");
     }
 
     @Nested

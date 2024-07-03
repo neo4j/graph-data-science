@@ -139,6 +139,7 @@ class WriteNodePropertiesApplicationTest {
         assertThat(writeResult.graphName).isEqualTo("g");
         assertThat(writeResult.nodeProperties).containsExactly("nodeProp1", "nodeProp2");
         assertThat(writeResult.propertiesWritten).isEqualTo(8L);
+        assertThat(writeResult.configuration).isNotNull();
 
         verify(nodePropertyExporterMock, times(1)).propertiesWritten();
         verify(nodePropertyExporterMock, times(1)).write(captor.capture());
@@ -184,6 +185,7 @@ class WriteNodePropertiesApplicationTest {
         assertThat(writeResult.graphName).isEqualTo("propertiesSubsetGraph");
         assertThat(writeResult.nodeProperties).containsExactly("nodeProp1", "nodeProp2");
         assertThat(writeResult.propertiesWritten).isEqualTo(11L);
+        assertThat(writeResult.configuration).isNotNull();
 
         // Only for NodeLabel `A` because it is the one that has all the properties.
         verify(nodePropertyExporterMock, times(1)).propertiesWritten();
@@ -221,6 +223,7 @@ class WriteNodePropertiesApplicationTest {
         assertThat(writeResult.writeMillis).isGreaterThan(-1);
         assertThat(writeResult.graphName).isEqualTo("g");
         assertThat(writeResult.nodeProperties).containsExactly("nodeProp1", "nodeProp2");
+        assertThat(writeResult.configuration).isNotNull();
 
         // Only for NodeLabel `A` because it is the one that was requested.
         verify(nodePropertyExporterMock, times(1)).propertiesWritten();
@@ -257,6 +260,7 @@ class WriteNodePropertiesApplicationTest {
         assertThat(writeResult.writeMillis).isGreaterThan(-1);
         assertThat(writeResult.graphName).isEqualTo("g");
         assertThat(writeResult.nodeProperties).containsExactly("foo");
+        assertThat(writeResult.configuration).isNotNull();
 
         verify(nodePropertyExporterMock, times(1)).propertiesWritten();
         verify(nodePropertyExporterMock, times(1)).write(captor.capture());
@@ -292,6 +296,7 @@ class WriteNodePropertiesApplicationTest {
         assertThat(writeResult.writeMillis).isGreaterThan(-1);
         assertThat(writeResult.graphName).isEqualTo("g");
         assertThat(writeResult.nodeProperties).containsExactlyInAnyOrder("foo", "bar", "nodeProp1");
+        assertThat(writeResult.configuration).isNotNull();
 
         // Only for NodeLabel `A` because it is the one that was requested.
         verify(nodePropertyExporterMock, times(1)).propertiesWritten();

@@ -32,16 +32,15 @@ import static org.neo4j.gds.extension.ExtensionUtil.injectInstance;
 
 public class FakeClockSupportExtension implements BeforeEachCallback, AfterEachCallback {
 
-    private static final FakeClock FAKE_CLOCK = Clocks.fakeClock();
-
     private Clock clockBefore;
 
     @Override
-    public void beforeEach(ExtensionContext context) throws Exception {
+    public void beforeEach(ExtensionContext context) {
         clockBefore = ClockService.clock();
-        ClockService.setClock(FAKE_CLOCK);
+        var fakeClock = Clocks.fakeClock();
+        ClockService.setClock(fakeClock);
         context.getRequiredTestInstances().getAllInstances().forEach(testInstance -> {
-            injectInstance(testInstance, FAKE_CLOCK, FakeClock.class);
+            injectInstance(testInstance, fakeClock, FakeClock.class);
         });
     }
 

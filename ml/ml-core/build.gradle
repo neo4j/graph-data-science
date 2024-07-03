@@ -6,13 +6,13 @@ group = 'org.neo4j.gds'
 
 dependencies {
     annotationProcessor project(':annotations')
-    annotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
-    annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
+    annotationProcessor openGds.immutables.builder
+    annotationProcessor openGds.immutables.value
     annotationProcessor group: 'org.neo4j',                name: 'annotations',        version: ver.'neo4j'
 
-    compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
-    compileOnly group: 'org.immutables', name: 'builder',           version: ver.'immutables'
-    compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
+    compileOnly openGds.immutables.value.annotations
+    compileOnly openGds.immutables.builder
+    compileOnly openGds.jetbrains.annotations
 
     neodeps().each {
         compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
@@ -20,8 +20,8 @@ dependencies {
         }
     }
 
-    implementation group: 'org.ejml', name: 'ejml-core',   version: ver.'ejml'
-    implementation group: 'org.ejml', name: 'ejml-ddense', version: ver.'ejml'
+    implementation openGds.ejml.core
+    implementation openGds.ejml.ddense
 
     implementation project(':annotations')
     implementation project(':core')
@@ -31,12 +31,12 @@ dependencies {
 
     // TEST DEPENDENCIES
 
-    testCompileOnly group: 'org.immutables',      name: 'value-annotations',    version: ver.'immutables'
-    testCompileOnly group: 'org.jetbrains',       name: 'annotations',          version: ver.'jetbrains-annotations'
+    testCompileOnly openGds.immutables.value.annotations
+    testCompileOnly openGds.jetbrains.annotations
 
     testImplementation project(':test-utils')
     testImplementation project(':graph-schema-api')
     testImplementation project(':ml-test-utils')
 
-    testImplementation group: 'net.jqwik', name: 'jqwik', version: ver.'jqwik'
+    testImplementation openGds.jqwik
 }

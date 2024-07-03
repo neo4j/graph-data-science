@@ -20,9 +20,7 @@
 package org.neo4j.gds.procedures.embeddings;
 
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
-import org.neo4j.gds.algorithms.NodePropertyWriteResult;
-import org.neo4j.gds.procedures.embeddings.results.DefaultNodeEmbeddingMutateResult;
-import org.neo4j.gds.procedures.embeddings.results.DefaultNodeEmbeddingsWriteResult;
+import org.neo4j.gds.procedures.algorithms.embeddings.DefaultNodeEmbeddingMutateResult;
 
 public class DefaultNodeEmbeddingsComputationalResultTransformer {
 
@@ -39,19 +37,4 @@ public class DefaultNodeEmbeddingsComputationalResultTransformer {
         );
 
     }
-
-    public static DefaultNodeEmbeddingsWriteResult toWriteResult(NodePropertyWriteResult<Long> writeResult) {
-
-        return new DefaultNodeEmbeddingsWriteResult(
-            writeResult.algorithmSpecificFields().longValue(),
-            writeResult.nodePropertiesWritten(),
-            writeResult.preProcessingMillis(),
-            writeResult.computeMillis(),
-            writeResult.writeMillis(),
-            writeResult.configuration().toMap()
-        );
-
-    }
-
-
 }

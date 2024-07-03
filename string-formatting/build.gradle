@@ -6,13 +6,11 @@ group = 'org.neo4j.gds'
 
 dependencies {
 
-    implementation (
-        [group: 'org.apache.commons',      name: 'commons-text',             version: ver.'commons-text'],
-    )
-    compileOnly group: 'org.jetbrains', name: 'annotations', version: ver.'jetbrains-annotations'
+    implementation openGds.commons.text
+    compileOnly openGds.jetbrains.annotations
 
-    testImplementation platform(dep.junit5bom)
-    testImplementation dep.junit5jupiter
-    testImplementation group: 'org.assertj',             name: 'assertj-core',            version: ver.'assertj'
-    testImplementation group: 'org.hamcrest',            name: 'hamcrest-library',        version: ver.'hamcrest'
+    testImplementation platform(openGds.junit5bom)
+    testImplementation openGds.junit5.jupiter
+    testImplementation openGds.assertj.core
+    testImplementation openGds.hamcrest
 }

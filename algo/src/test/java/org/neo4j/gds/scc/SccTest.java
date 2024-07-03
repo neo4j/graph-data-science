@@ -32,6 +32,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.HashMap;
 import java.util.List;
@@ -75,7 +76,7 @@ class SccTest {
 
     @Test
     void testDirect() {
-        var scc = new Scc(graph, ProgressTracker.NULL_TRACKER);
+        var scc = new Scc(graph, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE);
         var components = scc.compute();
 
         assertCC(components);
@@ -102,7 +103,7 @@ class SccTest {
 
     @Test
     void testHugeIterativeScc() {
-        Scc algo = new Scc(graph, ProgressTracker.NULL_TRACKER);
+        Scc algo = new Scc(graph, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE);
         HugeLongArray components = algo.compute();
         assertCC(components);
     }

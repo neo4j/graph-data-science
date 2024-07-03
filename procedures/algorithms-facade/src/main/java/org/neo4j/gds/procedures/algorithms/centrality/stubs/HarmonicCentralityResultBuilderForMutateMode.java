@@ -30,12 +30,12 @@ import org.neo4j.gds.procedures.algorithms.centrality.CentralityMutateResult;
 
 import java.util.Optional;
 
-class HarmonicCentralityResultBuilderForMutateMode implements ResultBuilder<HarmonicCentralityMutateConfig, HarmonicResult, CentralityMutateResult, NodePropertiesWritten> {
+public class HarmonicCentralityResultBuilderForMutateMode implements ResultBuilder<HarmonicCentralityMutateConfig, HarmonicResult, CentralityMutateResult, NodePropertiesWritten> {
     private final GenericCentralityResultBuilderForMutateMode genericResultBuilder = new GenericCentralityResultBuilderForMutateMode();
 
     private final boolean shouldComputeCentralityDistribution;
 
-    HarmonicCentralityResultBuilderForMutateMode(boolean shouldComputeCentralityDistribution) {
+    public  HarmonicCentralityResultBuilderForMutateMode(boolean shouldComputeCentralityDistribution) {
         this.shouldComputeCentralityDistribution = shouldComputeCentralityDistribution;
     }
 

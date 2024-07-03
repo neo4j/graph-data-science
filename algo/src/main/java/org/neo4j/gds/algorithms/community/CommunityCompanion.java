@@ -113,7 +113,7 @@ public final class CommunityCompanion {
         return nodePropertyValues(consecutiveIds, resultAfterMinFilter);
     }
 
-    static LongArrayNodePropertyValues createIntermediateCommunitiesNodePropertyValues(
+    public static LongArrayNodePropertyValues createIntermediateCommunitiesNodePropertyValues(
         LongToObjectFunction<long[]> intermediateCommunitiesProvider,
         long size
     ) {
@@ -229,7 +229,7 @@ public final class CommunityCompanion {
         if (nodePropertyValues.valueType() != ValueType.LONG) {
             throw new IllegalArgumentException(
                 formatWithLocale(
-                    " Provided seeding property `%s`  does not comprise exclusively of long values",
+                    "Provided seeding property `%s` does not comprise exclusively of long values",
                     seedingProperty
                 ));
         }

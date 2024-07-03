@@ -25,7 +25,8 @@ YIELD
     writeMillis: Integer,
     propertiesWritten: Integer,
     graphName: String,
-    nodeProperties: String or List of String
+    nodeProperties: String or List of String,
+    configuration: Map
 ----
 
 .Parameters
@@ -54,6 +55,7 @@ YIELD
 | propertiesWritten | Integer                  | Number of properties written.
 | graphName         | String                   | The name of a graph stored in the catalog.
 | nodeProperties    | String or List of String | The written node properties.
+| configuration     | Map                      | The configuration used to run the procedure.
 |===
 ======
 

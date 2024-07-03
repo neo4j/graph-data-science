@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.louvain;
 
-import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.louvain.LouvainWriteResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.algorithms.community.LouvainWriteResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -45,7 +45,7 @@ public class LouvainWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().louvainWrite(graphName, configuration);
+        return facade.algorithms().community().louvainWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.louvain.write.estimate", mode = READ)
@@ -54,6 +54,6 @@ public class LouvainWriteProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        return facade.community().louvainEstimateWrite(graphName, configuration);
+        return facade.algorithms().community().louvainWriteEstimate(graphName, configuration);
     }
 }

@@ -19,14 +19,15 @@
  */
 package org.neo4j.gds.compat;
 
-import org.immutables.value.Value;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.gds.annotation.GenerateBuilder;
 import org.neo4j.gds.annotation.SuppressForbidden;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.logging.Log;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -36,7 +37,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public final class ProxyUtil {
 
@@ -116,9 +116,9 @@ public final class ProxyUtil {
 
             availabilityLog.add("selected: " + factory.get().description());
 
-            var builder = ImmutableProxyInfo.<FACTORY, PROXY>builder().from(proxyInfo);
+            var builder = ProxyInfoBuilder.builder(proxyInfo);
             var proxy = factory.get().load();
-            builder.proxy(__ -> proxy);
+            builder.maybeProxy(__ -> proxy);
             return builder.build();
 
         } finally {
@@ -141,8 +141,9 @@ public final class ProxyUtil {
     }
 
     private static <PROXY, FACTORY extends ProxyFactory<PROXY>> ProxyInfo<FACTORY, PROXY> loadProxyInfo(Class<FACTORY> factoryClass) {
-        var builder = ImmutableProxyInfo
+        var builder = ProxyInfoBuilder
             .<FACTORY, PROXY>builder()
+            .availability(new LinkedHashMap<>())
             .factoryType(factoryClass)
             .neo4jVersion(NEO4J_VERSION_INFO)
             .gdsVersion(GdsVersionInfoProvider.GDS_VERSION_INFO)
@@ -155,20 +156,14 @@ public final class ProxyUtil {
                 .map(ServiceLoader.Provider::get)
                 .filter(f -> {
                     var canLoad = f.canLoad(NEO4J_VERSION_INFO.neo4jVersion());
-                    builder.putAvailability(f.description(), canLoad);
+                    builder.availability().put(f.description(), canLoad);
                     return canLoad;
                 })
-                .collect(Collectors.toList());
+                .toList();
 
             builder.factory(availableProxies.stream().findFirst());
         } catch (Exception e) {
-            builder.error(ImmutableErrorInfo
-                .builder()
-                .logLevel(LogLevel.ERROR)
-                .message("Could not load GDS proxy: " + e.getMessage())
-                .reason(e)
-                .build()
-            );
+            builder.error(new ErrorInfo("Could not load GDS proxy: " + e.getMessage(), LogLevel.ERROR, e));
         }
 
         return builder.build();
@@ -179,29 +174,30 @@ public final class ProxyUtil {
     private static Neo4jVersionInfo loadNeo4jVersion() {
         try {
             var neo4jVersion = GraphDatabaseApiProxy.neo4jVersion();
-            return ImmutableNeo4jVersionInfo.builder().neo4jVersion(neo4jVersion).build();
+            var error =
+                neo4jVersion.isSupported()
+                    ? Optional.<ErrorInfo>empty()
+                    : Optional.of(new ErrorInfo(
+                        "GDS does not support Neo4j version " + neo4jVersion,
+                        LogLevel.ERROR,
+                        new UnsupportedOperationException("GDS does not support Neo4j version " + neo4jVersion)
+                    ));
+
+            return new Neo4jVersionInfo(neo4jVersion, error);
         } catch (Exception e) {
-            return ImmutableNeo4jVersionInfo.builder()
-                .error(ImmutableErrorInfo
-                    .builder()
-                    .logLevel(LogLevel.WARN)
-                    .message("Could not determine Neo4j version: " + e.getMessage())
-                    .reason(e)
-                    .build()
-                )
-                .neo4jVersion(Neo4jVersion.V_Dev)
-                .build();
+            var error = new ErrorInfo("Could not determine Neo4j version: " + e.getMessage(), LogLevel.ERROR, e);
+            return new Neo4jVersionInfo(new Neo4jVersion.Unsupported(-1, -1, "unknown"), Optional.of(error));
         }
     }
 
     private static final JavaInfo JAVA_INFO = loadJavaInfo();
 
     private static JavaInfo loadJavaInfo() {
-        return ImmutableJavaInfo.builder()
-            .javaVendor(System.getProperty("java.vendor"))
-            .javaVersion(System.getProperty("java.version"))
-            .javaHome(System.getProperty("java.home"))
-            .build();
+        return new JavaInfo(
+            System.getProperty("java.vendor"),
+            System.getProperty("java.version"),
+            System.getProperty("java.home")
+        );
     }
 
     /**
@@ -225,60 +221,50 @@ public final class ProxyUtil {
         YES, NO
     }
 
-    @ValueClass
-    public interface ProxyInfo<T, U> {
-        Class<T> factoryType();
+    @GenerateBuilder
+    public record ProxyInfo<T, U>(
+        @NotNull Class<T> factoryType,
+        @NotNull Neo4jVersionInfo neo4jVersion,
+        @NotNull GdsVersionInfoProvider.GdsVersionInfo gdsVersion,
+        @NotNull JavaInfo javaInfo,
+        @NotNull LinkedHashMap<String, Boolean> availability,
+        @NotNull Optional<T> factory,
+        @NotNull Optional<ErrorInfo> error,
+        @NotNull Optional<Function<MayLogToStdout, U>> maybeProxy
+    ) {
+        Function<MayLogToStdout, U> proxy() {
+            return this.maybeProxy.orElse(this::unsupported);
+        }
 
-        Neo4jVersionInfo neo4jVersion();
-
-        GdsVersionInfoProvider.GdsVersionInfo gdsVersion();
-
-        JavaInfo javaInfo();
-
-        Map<String, Boolean> availability();
-
-        Optional<T> factory();
-
-        Optional<ErrorInfo> error();
-
-        @Value.Default
         @SuppressForbidden(reason = "We need to log to stdout here")
-        default Function<MayLogToStdout, U> proxy() {
-            return (mayLogToStdout) -> {
-                if (mayLogToStdout == MayLogToStdout.YES) {
-                    // since we are throwing and potentially aborting the database startup, we might as well
-                    // log all messages we have accumulated so far to provide more debugging context
-                    ProxyUtil.dumpLogMessages(new OutputStreamLogBuilder(System.out).build());
-                }
+        private U unsupported(MayLogToStdout mayLogToStdout) {
+            if (mayLogToStdout == MayLogToStdout.YES) {
+                // since we are throwing and potentially aborting the database startup, we might as well
+                // log all messages we have accumulated so far to provide more debugging context
+                ProxyUtil.dumpLogMessages(OutputStreamLog.builder(System.out).build().log());
+            }
 
-                throw new LinkageError(String.format(
-                    Locale.ENGLISH,
-                    "GDS %s is not compatible with Neo4j version: %s",
-                    gdsVersion().gdsVersion(),
-                    neo4jVersion().neo4jVersion()
-                ));
-            };
+            throw new LinkageError(String.format(
+                Locale.ENGLISH,
+                "GDS %s is not compatible with Neo4j version: %s",
+                gdsVersion.gdsVersion(),
+                neo4jVersion.neo4jVersion().fullVersion()
+            ));
         }
     }
 
-    @ValueClass
-    public interface Neo4jVersionInfo {
-
-        Neo4jVersion neo4jVersion();
-
-        Optional<ErrorInfo> error();
+    public record Neo4jVersionInfo(
+        @NotNull Neo4jVersion neo4jVersion,
+        @NotNull Optional<ErrorInfo> error
+    ) {
     }
 
-    @ValueClass
-    public interface ErrorInfo {
-
-        String message();
-
-        LogLevel logLevel();
-
-        Throwable reason();
-
-        default void log(ProxyLog log) {
+    public record ErrorInfo(
+        @NotNull String message,
+        @NotNull LogLevel logLevel,
+        @NotNull Throwable reason
+    ) {
+        void log(ProxyLog log) {
             log.log(logLevel(), message(), reason());
         }
     }
@@ -290,13 +276,11 @@ public final class ProxyUtil {
         ERROR
     }
 
-    @ValueClass
-    public interface JavaInfo {
-        String javaVendor();
-
-        String javaVersion();
-
-        String javaHome();
+    public record JavaInfo(
+        @NotNull String javaVendor,
+        @NotNull String javaVersion,
+        @NotNull String javaHome
+    ) {
     }
 
     interface ProxyLog {
@@ -307,15 +291,12 @@ public final class ProxyUtil {
         void replayInto(Log log);
     }
 
-    @ValueClass
-    interface LogMessage {
-        LogLevel logLevel();
-
-        String message();
-
-        Optional<Throwable> reason();
-
-        Optional<Object[]> args();
+    private record LogMessage(
+        @NotNull LogLevel logLevel,
+        @NotNull String message,
+        Optional<Throwable> reason,
+        Optional<Object[]> args
+    ) {
     }
 
     private static final class BufferingLog implements ProxyLog {
@@ -323,12 +304,12 @@ public final class ProxyUtil {
 
         @Override
         public void log(LogLevel logLevel, String message, Throwable reason) {
-            messages.add(ImmutableLogMessage.of(logLevel, message, Optional.ofNullable(reason), Optional.empty()));
+            messages.add(new LogMessage(logLevel, message, Optional.ofNullable(reason), Optional.empty()));
         }
 
         @Override
         public void log(LogLevel logLevel, String format, Object... args) {
-            messages.add(ImmutableLogMessage.of(logLevel, format, Optional.empty(), Optional.of(args)));
+            messages.add(new LogMessage(logLevel, format, Optional.empty(), Optional.of(args)));
         }
 
         @Override
@@ -336,34 +317,18 @@ public final class ProxyUtil {
             messages.forEach(message -> {
                 message.reason().ifPresent(reason -> {
                     switch (message.logLevel()) {
-                        case DEBUG:
-                            log.debug(message.message(), reason);
-                            break;
-                        case INFO:
-                            log.info(message.message(), reason);
-                            break;
-                        case WARN:
-                            log.warn(message.message(), reason);
-                            break;
-                        case ERROR:
-                            log.error(message.message(), reason);
-                            break;
+                        case DEBUG -> log.debug(message.message(), reason);
+                        case INFO -> log.info(message.message(), reason);
+                        case WARN -> log.warn(message.message(), reason);
+                        case ERROR -> log.error(message.message(), reason);
                     }
                 });
                 message.args().ifPresent(args -> {
                     switch (message.logLevel()) {
-                        case DEBUG:
-                            log.debug(message.message(), args);
-                            break;
-                        case INFO:
-                            log.info(message.message(), args);
-                            break;
-                        case WARN:
-                            log.warn(message.message(), args);
-                            break;
-                        case ERROR:
-                            log.error(message.message(), args);
-                            break;
+                        case DEBUG -> log.debug(message.message(), args);
+                        case INFO -> log.info(message.message(), args);
+                        case WARN -> log.warn(message.message(), args);
+                        case ERROR -> log.error(message.message(), args);
                     }
                 });
             });

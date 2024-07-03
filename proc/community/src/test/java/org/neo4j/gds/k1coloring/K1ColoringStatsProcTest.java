@@ -110,7 +110,7 @@ class K1ColoringStatsProcTest extends BaseProcTest {
 
         var rowCount=runQueryWithRowConsumer(query, row -> {
             assertThat(row.getNumber("preProcessingMillis").longValue()).isNotEqualTo(-1);
-            assertThat(row.getNumber("computeMillis").longValue()).isEqualTo(0);
+            assertThat(row.getNumber("computeMillis").longValue()).isEqualTo(-1);
             assertThat(row.getNumber("nodeCount").longValue()).isEqualTo(0);
             assertThat(row.getNumber("colorCount").longValue()).isEqualTo(0);
             assertThat(row.getNumber("ranIterations").longValue()).isEqualTo(0);

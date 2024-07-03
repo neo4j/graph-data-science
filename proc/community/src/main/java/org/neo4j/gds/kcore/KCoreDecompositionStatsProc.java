@@ -20,7 +20,7 @@
 package org.neo4j.gds.kcore;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionStatsResult;
+import org.neo4j.gds.procedures.algorithms.community.KCoreDecompositionStatsResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.kcore.KCoreDecomposition.KCORE_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class KCoreDecompositionStatsProc {
@@ -43,15 +44,15 @@ public class KCoreDecompositionStatsProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().kCoreStats(graphName, configuration);
+        return facade.algorithms().community().kCoreStats(graphName, configuration);
     }
 
     @Procedure(value = "gds.kcore.stats.estimate", mode = READ)
-    @Description(KCORE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().kCoreEstimateStats(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().community().kCoreStatsEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

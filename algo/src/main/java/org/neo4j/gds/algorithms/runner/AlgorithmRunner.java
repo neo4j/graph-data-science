@@ -84,6 +84,7 @@ public final class AlgorithmRunner {
         var graphResources = graphStoreCatalogService.getGraphResources(
             GraphName.parse(graphName),
             config,
+            Optional.empty(),
             relationshipProperty,
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId()

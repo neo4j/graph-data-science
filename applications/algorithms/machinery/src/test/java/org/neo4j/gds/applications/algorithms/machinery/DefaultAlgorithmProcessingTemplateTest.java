@@ -30,6 +30,7 @@ import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.loading.PostLoadValidationHook;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.metrics.ExecutionMetric;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
@@ -73,6 +74,7 @@ class DefaultAlgorithmProcessingTemplateTest {
             graphName,
             configuration,
             Optional.empty(),
+            Optional.empty(),
             user,
             databaseId
         )).thenReturn(new GraphResources(graphStore, graph, ResultStore.EMPTY));
@@ -107,8 +109,10 @@ class DefaultAlgorithmProcessingTemplateTest {
         };
 
         var resultStream = algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
+            Optional.empty(),
             Dijkstra,
             null,
             computation,
@@ -148,6 +152,7 @@ class DefaultAlgorithmProcessingTemplateTest {
         when(graphStoreCatalogService.getGraphResources(
             graphName,
             configuration,
+            Optional.empty(),
             Optional.empty(),
             user,
             databaseId
@@ -195,8 +200,10 @@ class DefaultAlgorithmProcessingTemplateTest {
         };
 
         var relationshipsWritten = algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             graphName,
             configuration,
+            Optional.empty(),
             KNN,
             null,
             computation,
@@ -219,8 +226,10 @@ class DefaultAlgorithmProcessingTemplateTest {
             @Override
             <CONFIGURATION extends AlgoBaseConfig> GraphResources graphLoadAndValidationWithTiming(
                 AlgorithmProcessingTimingsBuilder timingsBuilder,
+                Optional<String> relationshipWeightOverride,
                 GraphName graphName,
-                CONFIGURATION configuration
+                CONFIGURATION configuration,
+                Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks
             ) {
                 timingsBuilder.withPreProcessingMillis(23);
                 return new GraphResources(null, mock(Graph.class), null);
@@ -278,8 +287,10 @@ class DefaultAlgorithmProcessingTemplateTest {
         };
 
         var resultMap = algorithmProcessingTemplate.processAlgorithm(
+            Optional.empty(),
             null,
             new ExampleConfiguration(),
+            Optional.empty(),
             null,
             null,
             null,

@@ -57,7 +57,7 @@ YIELD
 |===
 ======
 
-[.include-with-stream]
+[.include-with-stream-multiple-properties]
 ======
 [source, cypher, role=noplay]
 ----

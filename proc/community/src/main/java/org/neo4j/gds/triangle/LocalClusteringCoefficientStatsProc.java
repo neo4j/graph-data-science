@@ -20,7 +20,7 @@
 package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientStatsResult;
+import org.neo4j.gds.procedures.algorithms.community.LocalClusteringCoefficientStatsResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -44,7 +44,7 @@ public class LocalClusteringCoefficientStatsProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().localClusteringCoefficientStats(graphName, configuration);
+        return facade.algorithms().community().localClusteringCoefficientStats(graphName, configuration);
     }
 
     @Procedure(value = "gds.localClusteringCoefficient.stats.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class LocalClusteringCoefficientStatsProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().localClusteringCoefficientEstimateStats(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().community().localClusteringCoefficientStatsEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

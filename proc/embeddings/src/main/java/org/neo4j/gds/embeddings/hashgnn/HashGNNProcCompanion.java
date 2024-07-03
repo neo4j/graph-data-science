@@ -20,8 +20,7 @@
 package org.neo4j.gds.embeddings.hashgnn;
 
 final class HashGNNProcCompanion {
-
-    public static final String DESCRIPTION = "HashGNN creates node embeddings by hashing and message passing.";
+    static final String HASH_GNN_DESCRIPTION = "HashGNN creates node embeddings by hashing and message passing.";
 
     private HashGNNProcCompanion() {}
 }

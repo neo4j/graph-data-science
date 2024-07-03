@@ -25,6 +25,7 @@ import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.termination.TerminationFlag;
 
 public class SccAlgorithmFactory<CONFIG extends SccCommonBaseConfig> extends GraphAlgorithmFactory<Scc, CONFIG> {
 
@@ -32,7 +33,8 @@ public class SccAlgorithmFactory<CONFIG extends SccCommonBaseConfig> extends Gra
     public Scc build(Graph graph, CONFIG configuration, ProgressTracker progressTracker) {
         return new Scc(
             graph,
-            progressTracker
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         );
     }
 

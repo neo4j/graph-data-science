@@ -20,7 +20,7 @@
 package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.leiden.LeidenStatsResult;
+import org.neo4j.gds.procedures.algorithms.community.LeidenStatsResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -45,7 +45,7 @@ public class LeidenStatsProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().leidenStats(graphName, configuration);
+        return facade.algorithms().community().leidenStats(graphName, configuration);
     }
 
     @Procedure(value = "gds.leiden.stats.estimate", mode = READ)
@@ -54,7 +54,7 @@ public class LeidenStatsProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        return facade.community().leidenEstimateStats(graphName, configuration);
+        return facade.algorithms().community().leidenStatsEstimate(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)

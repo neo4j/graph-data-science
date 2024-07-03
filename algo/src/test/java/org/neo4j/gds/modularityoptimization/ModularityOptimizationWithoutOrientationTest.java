@@ -50,6 +50,7 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.mem.Estimate;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.logging.Log;
 
 import java.util.Optional;
@@ -283,7 +284,8 @@ class ModularityOptimizationWithoutOrientationTest {
             concurrency,
             minBatchSize,
             DefaultPool.INSTANCE,
-            progressTracker
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
     }
 

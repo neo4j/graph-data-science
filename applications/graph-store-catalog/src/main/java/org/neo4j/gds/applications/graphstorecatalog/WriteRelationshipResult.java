@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
+import java.util.Map;
 import java.util.Optional;
 
 public final class WriteRelationshipResult {
@@ -28,19 +29,22 @@ public final class WriteRelationshipResult {
     public final String relationshipProperty;
     public final long relationshipsWritten;
     public final long propertiesWritten;
+    public final Map<String, Object> configuration;
 
     private WriteRelationshipResult(
         long writeMillis,
         String graphName,
         String relationshipType,
         Optional<String> relationshipProperty,
-        long relationshipsWritten
+        long relationshipsWritten,
+        Map<String, Object> configuration
     ) {
         this.writeMillis = writeMillis;
         this.graphName = graphName;
         this.relationshipType = relationshipType;
         this.relationshipProperty = relationshipProperty.orElse(null);
         this.relationshipsWritten = relationshipsWritten;
+        this.configuration = configuration;
         this.propertiesWritten = relationshipProperty.isPresent() ? relationshipsWritten : 0L;
     }
 
@@ -51,6 +55,13 @@ public final class WriteRelationshipResult {
 
         private long writeMillis;
         private long relationshipsWritten;
+        private Map<String, Object> configuration;
+
+        Builder(String graphName, String relationshipType, Optional<String> maybeRelationshipProperty) {
+            this.graphName = graphName;
+            this.relationshipType = relationshipType;
+            this.maybeRelationshipProperty = maybeRelationshipProperty;
+        }
 
         Builder withWriteMillis(long writeMillis) {
             this.writeMillis = writeMillis;
@@ -62,10 +73,9 @@ public final class WriteRelationshipResult {
             return this;
         }
 
-        Builder(String graphName, String relationshipType, Optional<String> maybeRelationshipProperty) {
-            this.graphName = graphName;
-            this.relationshipType = relationshipType;
-            this.maybeRelationshipProperty = maybeRelationshipProperty;
+        Builder withConfiguration(Map<String, Object> configuration) {
+            this.configuration = configuration;
+            return this;
         }
 
         WriteRelationshipResult build() {
@@ -74,7 +84,8 @@ public final class WriteRelationshipResult {
                 graphName,
                 relationshipType,
                 maybeRelationshipProperty,
-                relationshipsWritten
+                relationshipsWritten,
+                configuration
             );
         }
     }

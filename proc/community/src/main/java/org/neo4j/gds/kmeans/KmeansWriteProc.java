@@ -19,9 +19,8 @@
  */
 package org.neo4j.gds.kmeans;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.kmeans.KmeansWriteResult;
+import org.neo4j.gds.procedures.algorithms.community.KmeansWriteResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -37,16 +36,17 @@ import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESC
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class KmeansWriteProc extends BaseProc {
+public class KmeansWriteProc {
     @Context
     public GraphDataScienceProcedures facade;
+
     @Procedure(value = "gds.kmeans.write", mode = WRITE)
     @Description(KMEANS_DESCRIPTION)
     public Stream<KmeansWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().kmeansWrite(graphName, configuration);
+        return facade.algorithms().community().kmeansWrite(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)
@@ -57,10 +57,9 @@ public class KmeansWriteProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.beta.kmeans.write");
-        executionContext().log()
+        facade.deprecatedProcedures().called("gds.beta.kmeans.write");
+        facade
+            .log()
             .warn("Procedure `gds.beta.kmeans.write.estimate` has been deprecated, please use `gds.kmeans.write.estimate`.");
         return write(graphName, configuration);
     }
@@ -71,7 +70,7 @@ public class KmeansWriteProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        return facade.community().kmeansEstimateWrite(graphName, configuration);
+        return facade.algorithms().community().kmeansWriteEstimate(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)
@@ -82,13 +81,10 @@ public class KmeansWriteProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.beta.kmeans.write.estimate");
-        executionContext().log()
+        facade.deprecatedProcedures().called("gds.beta.kmeans.write.estimate");
+        facade
+            .log()
             .warn("Procedure `gds.beta.kmeans.write.estimate` has been deprecated, please use `gds.kmeans.write.estimate`.");
         return estimate(graphName, configuration);
     }
-
-
 }

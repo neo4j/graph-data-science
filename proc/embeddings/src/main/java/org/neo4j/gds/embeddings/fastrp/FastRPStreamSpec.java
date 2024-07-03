@@ -25,13 +25,13 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
-import org.neo4j.gds.procedures.embeddings.fastrp.FastRPStreamResult;
+import org.neo4j.gds.procedures.algorithms.embeddings.FastRPStreamResult;
 
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
-@GdsCallable(name = "gds.fastRP.stream", description = FastRPCompanion.DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.fastRP.stream", description = FastRPCompanion.FASTRP_DESCRIPTION, executionMode = STREAM)
 public class FastRPStreamSpec implements AlgorithmSpec<FastRP, FastRPResult, FastRPStreamConfig, Stream<FastRPStreamResult>, FastRPFactory<FastRPStreamConfig>> {
     @Override
     public String name() {

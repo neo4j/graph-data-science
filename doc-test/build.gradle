@@ -7,8 +7,8 @@ group = 'org.neo4j.gds'
 dependencies {
     annotationProcessor project(':annotations')
 
-    annotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
-    annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
+    annotationProcessor openGds.immutables.builder
+    annotationProcessor openGds.immutables.value
 
     implementation     project(':algo-common')
     implementation     project(':annotations')
@@ -23,8 +23,8 @@ dependencies {
     implementation     project(':string-formatting')
     implementation     project(':test-utils')
 
-    implementation     group: 'org.asciidoctor', name: 'asciidoctorj', version: ver.doc.'asciidoctorj'
-    implementation     group: 'org.reflections', name: 'reflections',  version: ver.doc.'reflections'
+    implementation     openGds.asciidoctorj
+    implementation     openGds.reflections
 
     testImplementation project(':cypher-aggregation')
     testImplementation project(':proc')
@@ -34,7 +34,7 @@ dependencies {
     testImplementation project(':proc-sysinfo')
     testImplementation project(':ml-algo')
 
-    testImplementation group: 'org.reflections',  name: 'reflections',       version: ver.doc.'reflections'
+    testImplementation openGds.reflections
 
     testImplementation project(':opengds-extension')
 }

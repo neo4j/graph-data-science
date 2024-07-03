@@ -11,8 +11,8 @@ test {
 dependencies {
     implementation project(':string-formatting')
 
-    testImplementation platform(dep.junit5bom)
+    testImplementation platform(openGds.junit5bom)
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api'
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine'
-    testImplementation group: 'org.assertj', name: 'assertj-core', version: ver.'assertj'
+    testImplementation openGds.assertj.core
 }

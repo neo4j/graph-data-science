@@ -48,6 +48,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Optional;
@@ -142,7 +143,8 @@ class FastRPTest {
             minBatchSize,
             FeatureExtraction.propertyExtractors(graph, parameters.featureProperties()),
             ProgressTracker.NULL_TRACKER,
-            Optional.of(42L)
+            Optional.of(42L),
+            TerminationFlag.RUNNING_TRUE
         );
 
         fastRP.initDegreePartition();
@@ -185,7 +187,8 @@ class FastRPTest {
             minBatchSize,
             FeatureExtraction.propertyExtractors(graph, parameters.featureProperties()),
             ProgressTracker.NULL_TRACKER,
-            Optional.of(42L)
+            Optional.of(42L),
+            TerminationFlag.RUNNING_TRUE
         );
 
         fastRP.initDegreePartition();
@@ -233,7 +236,8 @@ class FastRPTest {
             minBatchSize,
             FeatureExtraction.propertyExtractors(graph, parameters.featureProperties()),
             ProgressTracker.NULL_TRACKER,
-            Optional.of(42L)
+            Optional.of(42L),
+            TerminationFlag.RUNNING_TRUE
         );
 
         fastRP.initDegreePartition();
@@ -303,7 +307,8 @@ class FastRPTest {
             minBatchSize,
             FeatureExtraction.propertyExtractors(graph, parameters.featureProperties()),
             ProgressTracker.NULL_TRACKER,
-            Optional.of(42L)
+            Optional.of(42L),
+            TerminationFlag.RUNNING_TRUE
         );
 
         fastRP.initPropertyVectors();
@@ -369,7 +374,8 @@ class FastRPTest {
             minBatchSize,
             FeatureExtraction.propertyExtractors(graph, parameters.featureProperties()),
             ProgressTracker.NULL_TRACKER,
-            Optional.of(42L)
+            Optional.of(42L),
+            TerminationFlag.RUNNING_TRUE
         );
 
         concurrentFastRP.compute();
@@ -382,7 +388,8 @@ class FastRPTest {
             minBatchSize,
             FeatureExtraction.propertyExtractors(graph, parameters.featureProperties()),
             ProgressTracker.NULL_TRACKER,
-            Optional.of(42L)
+            Optional.of(42L),
+            TerminationFlag.RUNNING_TRUE
         );
 
         sequentialFastRP.compute();
@@ -421,7 +428,8 @@ class FastRPTest {
             minBatchSize,
             FeatureExtraction.propertyExtractors(graph, parameters.featureProperties()),
             ProgressTracker.NULL_TRACKER,
-            Optional.of(42L)
+            Optional.of(42L),
+            TerminationFlag.RUNNING_TRUE
         );
 
         fastRP.initDegreePartition();
@@ -468,7 +476,8 @@ class FastRPTest {
             minBatchSize,
             List.of(),
             ProgressTracker.NULL_TRACKER,
-            Optional.empty()
+            Optional.empty(),
+            TerminationFlag.RUNNING_TRUE
         );
 
         fastRP.initPropertyVectors();
@@ -524,7 +533,8 @@ class FastRPTest {
             minBatchSize,
             List.of(),
             ProgressTracker.NULL_TRACKER,
-            Optional.of(42L)
+            Optional.of(42L),
+            TerminationFlag.RUNNING_TRUE
         );
 
         var embeddings = fastRP.embeddings();
@@ -567,7 +577,8 @@ class FastRPTest {
             minBatchSize,
             List.of(),
             progressTracker,
-            Optional.of(42L)
+            Optional.of(42L),
+            TerminationFlag.RUNNING_TRUE
         ).compute();
 
         assertThat(log.getMessages(TestLog.INFO))
@@ -631,7 +642,8 @@ class FastRPTest {
                 minBatchSize,
                 FeatureExtraction.propertyExtractors(graph, List.of("prop")),
                 ProgressTracker.NULL_TRACKER,
-                Optional.empty()
+                Optional.empty(),
+                TerminationFlag.RUNNING_TRUE
             );
 
             assertThatThrownBy(fastRP::initRandomVectors)
@@ -670,7 +682,8 @@ class FastRPTest {
                 minBatchSize,
                 List.of(),
                 ProgressTracker.NULL_TRACKER,
-                Optional.of(42L)
+                Optional.of(42L),
+                TerminationFlag.RUNNING_TRUE
             );
 
             assertThatThrownBy(fastRP::compute)
@@ -768,7 +781,8 @@ class FastRPTest {
             minBatchSize,
             List.of(),
             ProgressTracker.NULL_TRACKER,
-            Optional.of(1337L)
+            Optional.of(1337L),
+            TerminationFlag.RUNNING_TRUE
         ).compute().embeddings();
 
         var secondEmbeddings = new FastRP(
@@ -778,7 +792,8 @@ class FastRPTest {
             minBatchSize,
             List.of(),
             ProgressTracker.NULL_TRACKER,
-            Optional.of(1337L)
+            Optional.of(1337L),
+            TerminationFlag.RUNNING_TRUE
         ).compute().embeddings();
 
         double cosineSum = 0;
@@ -810,7 +825,8 @@ class FastRPTest {
             minBatchSize,
             FeatureExtraction.propertyExtractors(graph, properties),
             ProgressTracker.NULL_TRACKER,
-            Optional.of(42L)
+            Optional.of(42L),
+            TerminationFlag.RUNNING_TRUE
         );
         return fastRPArray.compute().embeddings();
     }

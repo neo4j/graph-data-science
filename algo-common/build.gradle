@@ -7,10 +7,10 @@ group = 'org.neo4j.gds'
 dependencies {
     annotationProcessor project(':annotations')
     annotationProcessor project(':config-generator')
-    annotationProcessor group: 'org.immutables', name: 'value', version: ver.immutables
+    annotationProcessor openGds.immutables.value
 
-    compileOnly group: 'org.jetbrains',     name: 'annotations',        version: ver.'jetbrains-annotations'
-    compileOnly group: 'org.immutables',    name: 'value-annotations',  version: ver.'immutables'
+    compileOnly openGds.jetbrains.annotations
+    compileOnly openGds.immutables.value.annotations
     neodeps().each {
         compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
             transitive = false
@@ -27,9 +27,9 @@ dependencies {
     implementation project(':string-formatting')
     implementation project(':termination')
 
-    testImplementation group: 'org.assertj', name: 'assertj-core',          version: ver.'assertj'
+    testImplementation openGds.assertj.core
 
-    implementation group: 'org.hdrhistogram', name: 'HdrHistogram', version: ver.'HdrHistogram'
+    implementation openGds.hdrhistogram
 
     testImplementation project(':test-utils')
     testImplementation project(':graph-schema-api')

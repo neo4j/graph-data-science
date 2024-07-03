@@ -27,6 +27,7 @@ import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 
@@ -58,7 +59,7 @@ public final class KmeansAlgorithmFactory<CONFIG extends KmeansBaseConfig> exten
             .builder()
             .progressTracker(progressTracker)
             .executor(DefaultPool.INSTANCE)
-            .build());
+            .build(), TerminationFlag.RUNNING_TRUE);
     }
 
     @Override

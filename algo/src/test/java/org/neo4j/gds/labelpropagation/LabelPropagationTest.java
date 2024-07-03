@@ -40,6 +40,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -97,7 +98,8 @@ class LabelPropagationTest {
             graph,
             new LabelPropagationParameters(new Concurrency(4), 1, null, null),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
         assertArrayEquals(
             new long[]{
@@ -119,7 +121,8 @@ class LabelPropagationTest {
             graph,
             new LabelPropagationParameters(new Concurrency(4), 1, null, "seedId"),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         assertArrayEquals(
@@ -156,7 +159,8 @@ class LabelPropagationTest {
             graph,
             DEFAULT_PARAMETERS,
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
         lp.withBatchSize(batchSize);
 
@@ -226,7 +230,8 @@ class LabelPropagationTest {
             graph,
             DEFAULT_PARAMETERS,
             DefaultPool.INSTANCE,
-            testTracker
+            testTracker,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var result = lp.compute();

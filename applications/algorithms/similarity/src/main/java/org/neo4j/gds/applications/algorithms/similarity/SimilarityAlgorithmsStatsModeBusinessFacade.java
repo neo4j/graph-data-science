@@ -20,7 +20,7 @@
 package org.neo4j.gds.applications.algorithms.similarity;
 
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnStatsConfig;
@@ -30,8 +30,6 @@ import org.neo4j.gds.similarity.knn.KnnStatsConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
 
-import java.util.Optional;
-
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FilteredKNN;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FilteredNodeSimilarity;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KNN;
@@ -40,16 +38,16 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 public class SimilarityAlgorithmsStatsModeBusinessFacade {
     private final SimilarityAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final SimilarityAlgorithms similarityAlgorithms;
-    private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
+    private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
 
     public SimilarityAlgorithmsStatsModeBusinessFacade(
         SimilarityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         SimilarityAlgorithms similarityAlgorithms,
-        AlgorithmProcessingTemplate algorithmProcessingTemplate
+        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience
     ) {
         this.estimationFacade = estimationFacade;
         this.similarityAlgorithms = similarityAlgorithms;
-        this.algorithmProcessingTemplate = algorithmProcessingTemplate;
+        this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
     }
 
     public <RESULT> RESULT filteredKnn(
@@ -57,13 +55,12 @@ public class SimilarityAlgorithmsStatsModeBusinessFacade {
         FilteredKnnStatsConfig configuration,
         ResultBuilder<FilteredKnnStatsConfig, FilteredKnnResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
             FilteredKNN,
             () -> estimationFacade.filteredKnn(configuration),
             graph -> similarityAlgorithms.filteredKnn(graph, configuration),
-            Optional.empty(),
             resultBuilder
         );
     }
@@ -73,13 +70,12 @@ public class SimilarityAlgorithmsStatsModeBusinessFacade {
         FilteredNodeSimilarityStatsConfig configuration,
         ResultBuilder<FilteredNodeSimilarityStatsConfig, NodeSimilarityResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
             FilteredNodeSimilarity,
             () -> estimationFacade.filteredNodeSimilarity(configuration),
             graph -> similarityAlgorithms.filteredNodeSimilarity(graph, configuration),
-            Optional.empty(),
             resultBuilder
         );
     }
@@ -89,13 +85,12 @@ public class SimilarityAlgorithmsStatsModeBusinessFacade {
         KnnStatsConfig configuration,
         ResultBuilder<KnnStatsConfig, KnnResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
             KNN,
             () -> estimationFacade.knn(configuration),
             graph -> similarityAlgorithms.knn(graph, configuration),
-            Optional.empty(),
             resultBuilder
         );
     }
@@ -105,13 +100,12 @@ public class SimilarityAlgorithmsStatsModeBusinessFacade {
         NodeSimilarityStatsConfig configuration,
         ResultBuilder<NodeSimilarityStatsConfig, NodeSimilarityResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
             NodeSimilarity,
             () -> estimationFacade.nodeSimilarity(configuration),
             graph -> similarityAlgorithms.nodeSimilarity(graph, configuration),
-            Optional.empty(),
             resultBuilder
         );
     }

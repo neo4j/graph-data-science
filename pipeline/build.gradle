@@ -28,12 +28,12 @@ dependencies {
     annotationProcessor project(':annotations')
     annotationProcessor project(':config-generator')
 
-    annotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
+    annotationProcessor openGds.immutables.value
 
-    compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
-    compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
+    compileOnly openGds.immutables.value.annotations
+    compileOnly openGds.jetbrains.annotations
 
-    implementation group: 'org.reflections',  name: 'reflections',       version: ver.doc.'reflections'
+    implementation openGds.reflections
 
     implementation project(':algo')
     implementation project(':algo-common')
@@ -65,11 +65,11 @@ dependencies {
     }
 
     testAnnotationProcessor project(':annotations')
-    testAnnotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
+    testAnnotationProcessor openGds.immutables.value
 
-    testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
-    testCompileOnly group: 'org.immutables', name: 'builder', version: ver.'immutables'
-    testCompileOnly group: 'org.jetbrains',  name: 'annotations', version: ver.'jetbrains-annotations'
+    testCompileOnly openGds.immutables.value.annotations
+    testCompileOnly openGds.immutables.builder
+    testCompileOnly openGds.jetbrains.annotations
 
     testImplementation project(':open-model-catalog')
     testImplementation project(':test-utils')

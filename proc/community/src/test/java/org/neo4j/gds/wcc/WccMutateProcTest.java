@@ -32,34 +32,32 @@ import org.neo4j.gds.ImmutablePropertyMappings;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.ProcedureMethodHelper;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.TestNativeGraphLoader;
-import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
-import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
-import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacade;
-import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
-import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.applications.ApplicationsFacade;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.configuration.DefaultsConfiguration;
+import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphLoader;
@@ -69,41 +67,40 @@ import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
+import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.GraphDataScienceProceduresBuilder;
+import org.neo4j.gds.procedures.algorithms.community.CommunityProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.community.WccMutateResult;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
-import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfigImpl;
 import org.neo4j.gds.termination.TerminationFlag;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
@@ -345,65 +342,15 @@ class WccMutateProcTest extends BaseProcTest {
         GraphLoader loader = storeLoaderBuilder.build();
         GraphStoreCatalog.set(loader.projectConfig(), loader.graphStore());
 
-        var logMock = mock(org.neo4j.gds.logging.Log.class);
-        when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
+        var facade = constructGraphDataScienceProcedures();
 
-        final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
-        final AlgorithmMemoryValidationService memoryUsageValidator = new AlgorithmMemoryValidationService(
-            logMock,
-            false
-        );
-        var algorithmsMutateBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
-            new CommunityAlgorithmsFacade(
-                new AlgorithmRunner(
-                    logMock,
-                    graphStoreCatalogService,
-                    new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
-                    memoryUsageValidator,
-                    RequestScopedDependencies.builder()
-                        .with(DatabaseId.of(db.databaseName()))
-                        .with(TaskRegistryFactory.empty())
-                        .with(TerminationFlag.RUNNING_TRUE)
-                        .with(new User(getUsername(), false))
-                        .with(EmptyUserLogRegistryFactory.INSTANCE)
-                        .build()
-                )
-            ),
-            new MutateNodePropertyService(logMock)
-        );
+        var wccMutateProc = new WccMutateProc();
+        wccMutateProc.facade = facade;
 
-        applyOnProcedure(procedure -> {
-            procedure.facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
-                .with(new CommunityProcedureFacade(
-                    new ConfigurationCreator(
-                        ConfigurationParser.EMPTY,
-                        null,
-                        new User(getUsername(), false)
-                    ),
-                    ProcedureReturnColumns.EMPTY,
-                    null,
-                    algorithmsMutateBusinessFacade,
-                    null,
-                    null,
-                    null
-                ))
-                .with(DeprecatedProceduresMetricService.PASSTHROUGH)
-                .build();
-
-            ProcedureMethodHelper.mutateMethods(procedure)
-                .forEach(mutateMethod -> {
-                    var config = Map.of(
-                        "nodeLabels", List.of("B"),
-                        "mutateProperty", MUTATE_PROPERTY
-                    );
-                    try {
-                        mutateMethod.invoke(procedure, graphName, config);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        fail(e);
-                    }
-                });
-            }
-        );
+        wccMutateProc.mutate(graphName, Map.of(
+            "nodeLabels", List.of("B"),
+            "mutateProperty", MUTATE_PROPERTY
+        ));
 
         String graphWriteQuery =
             "CALL gds.graph.nodeProperties.write(" +
@@ -479,160 +426,55 @@ class WccMutateProcTest extends BaseProcTest {
     void testMutateFailsOnExistingToken() {
         String graphName = ensureGraphExists();
 
-        applyOnProcedure(procedure -> {
-            var logMock = mock(org.neo4j.gds.logging.Log.class);
-            when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
-            final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
-            final AlgorithmMemoryValidationService memoryUsageValidator = new AlgorithmMemoryValidationService(
-                logMock,
-                false
-            );
-            var algorithmsBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
-                new CommunityAlgorithmsFacade(
-                    new AlgorithmRunner(
-                        logMock,
-                        graphStoreCatalogService,
-                        new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
-                        memoryUsageValidator,
-                        RequestScopedDependencies.builder()
-                            .with(DatabaseId.of(db.databaseName()))
-                            .with(TaskRegistryFactory.empty())
-                            .with(TerminationFlag.RUNNING_TRUE)
-                            .with(new User(getUsername(), false))
-                            .with(EmptyUserLogRegistryFactory.INSTANCE)
-                            .build()
-                    )
-                ),
-                new MutateNodePropertyService(logMock)
-            );
+        var facade = constructGraphDataScienceProcedures();
+        var wccMutateProc = new WccMutateProc();
+        wccMutateProc.facade = facade;
 
-            procedure.facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
-                .with(new CommunityProcedureFacade(
-                    new ConfigurationCreator(
-                        ConfigurationParser.EMPTY,
-                        null,
-                        new User(getUsername(), false)
-                    ),
-                    ProcedureReturnColumns.EMPTY,
-                    null,
-                    algorithmsBusinessFacade,
-                    null,
-                    null,
-                    null
-                ))
-                .with(DeprecatedProceduresMetricService.PASSTHROUGH)
-                .build();
-                ProcedureMethodHelper.mutateMethods(procedure)
-                    .forEach(mutateMethod -> {
-                        Map<String, Object> config = Map.of("mutateProperty", MUTATE_PROPERTY);
-                        try {
-                            // mutate first time
-                            mutateMethod.invoke(procedure, graphName, config);
-                            // mutate second time using same `mutateProperty`
-                            assertThatThrownBy(() -> mutateMethod.invoke(procedure, graphName, config))
-                                .hasRootCauseInstanceOf(IllegalArgumentException.class)
-                                .hasRootCauseMessage(formatWithLocale(
-                                    "Node property `%s` already exists in the in-memory graph.",
-                                    MUTATE_PROPERTY
-                                ));
-                        } catch (IllegalAccessException | InvocationTargetException e) {
-                            fail(e);
-                        }
-                    });
-            }
-        );
+        // plant the name in the system
+        wccMutateProc.mutate(graphName, Map.of("mutateProperty", MUTATE_PROPERTY));
+
+        try {
+            // now fail because name already there
+            wccMutateProc.mutate(graphName, Map.of("mutateProperty", MUTATE_PROPERTY));
+
+            fail();
+        } catch (IllegalArgumentException e) {
+            assertThat(e).hasMessage(formatWithLocale(
+                "Node property `%s` already exists in the in-memory graph.",
+                MUTATE_PROPERTY
+            ));
+        }
 
         Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), graphName).graphStore().getUnion();
         assertGraphEquals(fromGdl(EXPECTED_MUTATED_GRAPH), mutatedGraph);
     }
 
     @Test
-    void testExceptionLogging() {
-        List<TestLog> log = new ArrayList<>(1);
-        assertThrows(
-            NullPointerException.class,
-            () -> applyOnProcedure(procedure -> {
-                var computationResult = mock(ComputationResult.class);
-                log.add(0, ((TestLog) procedure.log));
-                new WccMutateSpecification().computationResultConsumer().consume(computationResult, procedure.executionContext());
-            })
-        );
-
-        assertTrue(log.get(0).containsMessage(TestLog.WARN, "Graph mutation failed"));
-    }
-
-    @Test
     void testRunOnEmptyGraph() {
-        applyOnProcedure((proc) -> {
-            final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
-            final AlgorithmMemoryValidationService memoryUsageValidator = new AlgorithmMemoryValidationService(
-                null,
-                false
-            );
-            var algorithmsBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
-                new CommunityAlgorithmsFacade(
-                    new AlgorithmRunner(
-                        null,
-                        graphStoreCatalogService,
-                        new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
-                        memoryUsageValidator,
-                        RequestScopedDependencies.builder()
-                            .with(DatabaseId.of(db.databaseName()))
-                            .with(TaskRegistryFactory.empty())
-                            .with(new User(getUsername(), false))
-                            .with(EmptyUserLogRegistryFactory.INSTANCE)
-                            .build()
-                    )
-                ),
-                new MutateNodePropertyService(null)
-            );
-            proc.facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
-                .with(new CommunityProcedureFacade(
-                    new ConfigurationCreator(
-                        ConfigurationParser.EMPTY,
-                        null,
-                        new User(getUsername(), false)
-                    ),
-                    ProcedureReturnColumns.EMPTY,
-                    null,
-                    algorithmsBusinessFacade,
-                    null,
-                    null,
-                    null
-                ))
-                .with(DeprecatedProceduresMetricService.PASSTHROUGH)
-                .build();
+        var facade = constructGraphDataScienceProcedures();
+        var wccMutateProc = new WccMutateProc();
+        wccMutateProc.facade = facade;
 
-            var methods = ProcedureMethodHelper.mutateMethods(proc).collect(Collectors.toList());
+        // Create a dummy node with label "X" so that "X" is a valid label to put use for property mappings later
+        runQuery("CALL db.createLabel('X')");
+        runQuery("MATCH (n) DETACH DELETE n");
+        GraphStoreCatalog.removeAllLoadedGraphs();
 
-            if (!methods.isEmpty()) {
-                // Create a dummy node with label "X" so that "X" is a valid label to put use for property mappings later
-                runQuery("CALL db.createLabel('X')");
-                runQuery("MATCH (n) DETACH DELETE n");
-                GraphStoreCatalog.removeAllLoadedGraphs();
+        var graphProjectConfig = GraphProjectFromStoreConfigImpl.builder()
+            .username(TEST_USERNAME)
+            .graphName(GRAPH_NAME)
+            .nodeProjections(
+                ImmutableNodeProjections.of(
+                    Map.of(NodeLabel.of("X"), ImmutableNodeProjection.of("X", ImmutablePropertyMappings.of()))
+                )
+            )
+            .relationshipProjections(RelationshipProjections.ALL)
+            .build();
+        GraphStoreCatalog.set(graphProjectConfig, graphLoader(graphProjectConfig).graphStore());
 
-                var graphProjectConfig = GraphProjectFromStoreConfigImpl.builder()
-                    .username(TEST_USERNAME)
-                    .graphName(GRAPH_NAME)
-                    .nodeProjections(
-                        ImmutableNodeProjections.of(
-                            Map.of(NodeLabel.of("X"), ImmutableNodeProjection.of("X", ImmutablePropertyMappings.of()))
-                        )
-                    )
-                    .relationshipProjections(RelationshipProjections.ALL)
-                    .build();
-                GraphStoreCatalog.set(graphProjectConfig, graphLoader(graphProjectConfig).graphStore());
-                methods.forEach(method -> {
-                    Map<String, Object> configMap = Map.of("mutateProperty", MUTATE_PROPERTY);
-                    try {
-                        Stream<?> result = (Stream<?>) method.invoke(proc, GRAPH_NAME, configMap);
-                        assertEquals(1, result.count());
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        fail(e);
-                    }
-                });
-            }
-        });
+        Map<String, Object> configMap = Map.of("mutateProperty", MUTATE_PROPERTY);
+        Stream<WccMutateResult> result = wccMutateProc.mutate(GRAPH_NAME, configMap);
+        assertEquals(1, result.count());
     }
 
     @NotNull
@@ -647,70 +489,14 @@ class WccMutateProcTest extends BaseProcTest {
 
     @NotNull
     private GraphStore runMutation(String graphName, Map<String, Object> additionalConfig) {
-        var logMock = mock(org.neo4j.gds.logging.Log.class);
-        when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
-        final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
-        final AlgorithmMemoryValidationService memoryUsageValidator = new AlgorithmMemoryValidationService(
-            logMock,
-            false
-        );
-        var algorithmsBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
-            new CommunityAlgorithmsFacade(
-                new AlgorithmRunner(
-                    logMock,
-                    graphStoreCatalogService,
-                    new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
-                    memoryUsageValidator,
-                    RequestScopedDependencies.builder()
-                        .with(DatabaseId.of(db.databaseName()))
-                        .with(TaskRegistryFactory.empty())
-                        .with(TerminationFlag.RUNNING_TRUE)
-                        .with(new User(getUsername(), false))
-                        .with(EmptyUserLogRegistryFactory.INSTANCE)
-                        .build()
-                )
-            ),
-            new MutateNodePropertyService(logMock)
-        );
-
-        applyOnProcedure(procedure ->
-            ProcedureMethodHelper.mutateMethods(procedure)
-                .forEach(mutateMethod -> {
-                    procedure.facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
-                        .with(new CommunityProcedureFacade(
-                            new ConfigurationCreator(
-                                ConfigurationParser.EMPTY,
-                                null,
-                                new User(getUsername(), false)
-                            ),
-                            ProcedureReturnColumns.EMPTY,
-                            null,
-                            algorithmsBusinessFacade,
-                            null,
-                            null,
-                            null
-                        ))
-                        .with(DeprecatedProceduresMetricService.PASSTHROUGH)
-                        .build();
-                    Map<String, Object> config = new HashMap<>(additionalConfig);
-                    config.put("mutateProperty", MUTATE_PROPERTY);
-                    try {
-                        mutateMethod.invoke(procedure, graphName, config);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        fail(e);
-                    }
-                })
-        );
+        var facade = constructGraphDataScienceProcedures();
+        var wccMutateProc = new WccMutateProc();
+        wccMutateProc.facade = facade;
+        Map<String, Object> config = new HashMap<>(additionalConfig);
+        config.put("mutateProperty", MUTATE_PROPERTY);
+        wccMutateProc.mutate(graphName, config);
 
         return GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), graphName).graphStore();
-    }
-
-    void applyOnProcedure(Consumer<WccMutateProc> func) {
-        TestProcedureRunner.applyOnProcedure(
-            db,
-            WccMutateProc.class,
-            func
-        );
     }
 
     private GraphProjectFromStoreConfig withNameAndRelationshipProjections(
@@ -782,6 +568,49 @@ class WccMutateProcTest extends BaseProcTest {
                 .build())
             .username("")
             .projectConfig(graphProjectConfig)
+            .build();
+    }
+
+    /**
+     * Construct just enough scaffolding to power this test
+     */
+    private GraphDataScienceProcedures constructGraphDataScienceProcedures() {
+        var logMock = mock(Log.class);
+        when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
+
+        var graphStoreCatalogService = new GraphStoreCatalogService();
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .with(DatabaseId.of(db.databaseName()))
+            .with(GraphLoaderContext.NULL_CONTEXT)
+            .with(TaskRegistryFactory.empty())
+            .with(TerminationFlag.RUNNING_TRUE)
+            .with(new User(getUsername(), false))
+            .with(EmptyUserLogRegistryFactory.INSTANCE)
+            .build();
+        var applicationsFacade = ApplicationsFacade.create(logMock, Optional.empty(), Optional.empty(), graphStoreCatalogService, MemoryGuard.DISABLED, new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()), new ProjectionMetricsService(new PassthroughExecutionMetricRegistrar()), requestScopedDependencies, WriteContext.builder().build(), null);
+        var configurationParser = new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance);
+        var configurationCreator = new ConfigurationCreator(configurationParser, null, requestScopedDependencies.getUser());
+        var genericStub = GenericStub.create(
+            DefaultsConfiguration.Instance,
+            LimitsConfiguration.Instance,
+            graphStoreCatalogService,
+            configurationCreator,
+            configurationParser,
+            requestScopedDependencies
+        );
+        var communityProcedureFacade = CommunityProcedureFacade.create(
+            genericStub,
+            applicationsFacade,
+            null,
+            ProcedureReturnColumns.EMPTY,
+            null,
+            null,
+            null
+        );
+
+        return new GraphDataScienceProceduresBuilder(Log.noOpLog())
+            .with(communityProcedureFacade)
+            .with(DeprecatedProceduresMetricService.PASSTHROUGH)
             .build();
     }
 }

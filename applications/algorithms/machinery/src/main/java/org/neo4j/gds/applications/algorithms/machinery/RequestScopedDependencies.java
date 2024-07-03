@@ -20,16 +20,11 @@
 package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogStore;
-import org.neo4j.gds.core.write.NodeLabelExporterBuilder;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.core.write.RelationshipExporterBuilder;
-import org.neo4j.gds.core.write.RelationshipPropertiesExporterBuilder;
-import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.termination.TerminationFlag;
 
 /**
@@ -38,12 +33,7 @@ import org.neo4j.gds.termination.TerminationFlag;
  */
 public final class RequestScopedDependencies {
     private final DatabaseId databaseId;
-    private final NodeLabelExporterBuilder nodeLabelExporterBuilder;
-    private final NodePropertyExporterBuilder nodePropertyExporterBuilder;
-    private final ProcedureReturnColumns procedureReturnColumns;
-    private final RelationshipExporterBuilder relationshipExporterBuilder;
-    private final RelationshipPropertiesExporterBuilder relationshipPropertiesExporterBuilder;
-    private final RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
+    private final GraphLoaderContext graphLoaderContext;
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationFlag terminationFlag;
     private final User user;
@@ -56,12 +46,8 @@ public final class RequestScopedDependencies {
      * I just really like the <code>RequestScopedDependencies.builder().build()</code> form
      */
     private RequestScopedDependencies(
-        DatabaseId databaseId, NodeLabelExporterBuilder nodeLabelExporterBuilder,
-        NodePropertyExporterBuilder nodePropertyExporterBuilder,
-        ProcedureReturnColumns procedureReturnColumns,
-        RelationshipExporterBuilder relationshipExporterBuilder,
-        RelationshipPropertiesExporterBuilder relationshipPropertiesExporterBuilder,
-        RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
+        DatabaseId databaseId,
+        GraphLoaderContext graphLoaderContext,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         User user,
@@ -69,50 +55,25 @@ public final class RequestScopedDependencies {
         UserLogStore userLogStore
     ) {
         this.databaseId = databaseId;
-        this.nodeLabelExporterBuilder = nodeLabelExporterBuilder;
-        this.nodePropertyExporterBuilder = nodePropertyExporterBuilder;
-        this.procedureReturnColumns = procedureReturnColumns;
-        this.relationshipExporterBuilder = relationshipExporterBuilder;
-        this.relationshipPropertiesExporterBuilder = relationshipPropertiesExporterBuilder;
-        this.relationshipStreamExporterBuilder = relationshipStreamExporterBuilder;
+        this.graphLoaderContext = graphLoaderContext;
         this.taskRegistryFactory = taskRegistryFactory;
         this.terminationFlag = terminationFlag;
         this.user = user;
         this.userLogRegistryFactory = userLogRegistryFactory;
         this.userLogStore = userLogStore;
     }
-
-    public static RequestScopedDependenciesBuilder builder() {
-        return new RequestScopedDependenciesBuilder();
+    public static RequestScopedDependenciesBuilder builder(){
+        return  new RequestScopedDependenciesBuilder();
     }
 
     public DatabaseId getDatabaseId() {
         return databaseId;
     }
 
-    public NodeLabelExporterBuilder getNodeLabelExporterBuilder() {
-        return nodeLabelExporterBuilder;
+    public GraphLoaderContext getGraphLoaderContext() {
+        return graphLoaderContext;
     }
 
-    public NodePropertyExporterBuilder getNodePropertyExporterBuilder() {
-        return nodePropertyExporterBuilder;
-    }
-
-    public ProcedureReturnColumns getProcedureReturnColumns() {
-        return procedureReturnColumns;
-    }
-
-    public RelationshipExporterBuilder getRelationshipExporterBuilder() {
-        return relationshipExporterBuilder;
-    }
-
-    public RelationshipPropertiesExporterBuilder getRelationshipPropertiesExporterBuilder() {
-        return relationshipPropertiesExporterBuilder;
-    }
-
-    public RelationshipStreamExporterBuilder getRelationshipStreamExporterBuilder() {
-        return relationshipStreamExporterBuilder;
-    }
 
     public TaskRegistryFactory getTaskRegistryFactory() {
         return taskRegistryFactory;
@@ -134,6 +95,8 @@ public final class RequestScopedDependencies {
         return userLogStore;
     }
 
+
+
     /**
      * A handy builder where you can include as many or as few components as you are interested in.
      * We deliberately do not have defaults,
@@ -141,12 +104,7 @@ public final class RequestScopedDependencies {
      */
     public static class RequestScopedDependenciesBuilder {
         private DatabaseId databaseId;
-        private NodeLabelExporterBuilder nodeLabelExporterBuilder;
-        private NodePropertyExporterBuilder nodePropertyExporterBuilder;
-        private ProcedureReturnColumns procedureReturnColumns;
-        private RelationshipExporterBuilder relationshipExporterBuilder;
-        private RelationshipPropertiesExporterBuilder relationshipPropertiesExporterBuilder;
-        private RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
+        private GraphLoaderContext graphLoaderContext;
         private TerminationFlag terminationFlag;
         private TaskRegistryFactory taskRegistryFactory;
         private User user;
@@ -158,35 +116,12 @@ public final class RequestScopedDependencies {
             return this;
         }
 
-        public RequestScopedDependenciesBuilder with(NodeLabelExporterBuilder nodeLabelExporterBuilder) {
-            this.nodeLabelExporterBuilder = nodeLabelExporterBuilder;
+        public RequestScopedDependenciesBuilder with(GraphLoaderContext graphLoaderContext) {
+            this.graphLoaderContext = graphLoaderContext;
             return this;
         }
 
-        public RequestScopedDependenciesBuilder with(NodePropertyExporterBuilder nodePropertyExporterBuilder) {
-            this.nodePropertyExporterBuilder = nodePropertyExporterBuilder;
-            return this;
-        }
 
-        public RequestScopedDependenciesBuilder with(ProcedureReturnColumns procedureReturnColumns) {
-            this.procedureReturnColumns = procedureReturnColumns;
-            return this;
-        }
-
-        public RequestScopedDependenciesBuilder with(RelationshipExporterBuilder relationshipExporterBuilder) {
-            this.relationshipExporterBuilder = relationshipExporterBuilder;
-            return this;
-        }
-
-        public RequestScopedDependenciesBuilder with(RelationshipPropertiesExporterBuilder relationshipPropertiesExporterBuilder) {
-            this.relationshipPropertiesExporterBuilder = relationshipPropertiesExporterBuilder;
-            return this;
-        }
-
-        public RequestScopedDependenciesBuilder with(RelationshipStreamExporterBuilder relationshipStreamExporterBuilder) {
-            this.relationshipStreamExporterBuilder = relationshipStreamExporterBuilder;
-            return this;
-        }
 
         public RequestScopedDependenciesBuilder with(TaskRegistryFactory taskRegistryFactory) {
             this.taskRegistryFactory = taskRegistryFactory;
@@ -213,15 +148,12 @@ public final class RequestScopedDependencies {
             return this;
         }
 
+
+
         public RequestScopedDependencies build() {
             return new RequestScopedDependencies(
                 databaseId,
-                nodeLabelExporterBuilder,
-                nodePropertyExporterBuilder,
-                procedureReturnColumns,
-                relationshipExporterBuilder,
-                relationshipPropertiesExporterBuilder,
-                relationshipStreamExporterBuilder,
+                graphLoaderContext,
                 taskRegistryFactory,
                 terminationFlag,
                 user,

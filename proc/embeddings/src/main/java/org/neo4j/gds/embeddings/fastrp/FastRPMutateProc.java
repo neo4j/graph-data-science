@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
-import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.embeddings.results.DefaultNodeEmbeddingMutateResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.algorithms.embeddings.DefaultNodeEmbeddingMutateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -30,29 +30,29 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.embeddings.fastrp.FastRPCompanion.DESCRIPTION;
+import static org.neo4j.gds.embeddings.fastrp.FastRPCompanion.FASTRP_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class FastRPMutateProc {
-
     @Context
     public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.fastRP.mutate", mode = READ)
-    @Description(FastRPCompanion.DESCRIPTION)
+    @Description(FASTRP_DESCRIPTION)
     public Stream<DefaultNodeEmbeddingMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.nodeEmbeddings().fastRP().mutate(graphName, configuration);
+        return facade.algorithms().nodeEmbeddings().fastRPMutateStub().execute(graphName, configuration);
     }
 
     @Procedure(value = "gds.fastRP.mutate.estimate", mode = READ)
-    @Description(DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.nodeEmbeddings().fastRP().mutateEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().nodeEmbeddings().fastRPMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

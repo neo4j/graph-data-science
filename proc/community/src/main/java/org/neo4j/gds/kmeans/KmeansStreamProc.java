@@ -20,7 +20,7 @@
 package org.neo4j.gds.kmeans;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.kmeans.KmeansStreamResult;
+import org.neo4j.gds.procedures.algorithms.community.KmeansStreamResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -31,6 +31,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.kmeans.Kmeans.KMEANS_DESCRIPTION;
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
@@ -39,18 +40,18 @@ public class KmeansStreamProc {
     public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.kmeans.stream", mode = READ)
-    @Description(Kmeans.KMEANS_DESCRIPTION)
+    @Description(KMEANS_DESCRIPTION)
     public Stream<KmeansStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().kmeansStream(graphName, configuration);
+        return facade.algorithms().community().kmeansStream(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)
     @Internal
     @Procedure(value = "gds.beta.kmeans.stream", mode = READ, deprecatedBy = "gds.kmeans.stream")
-    @Description(Kmeans.KMEANS_DESCRIPTION)
+    @Description(KMEANS_DESCRIPTION)
     public Stream<KmeansStreamResult> betaStream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -67,7 +68,7 @@ public class KmeansStreamProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        return facade.community().kmeansEstimateStream(graphName, configuration);
+        return facade.algorithms().community().kmeansStreamEstimate(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)

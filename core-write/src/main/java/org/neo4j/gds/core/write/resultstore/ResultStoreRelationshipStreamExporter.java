@@ -51,7 +51,6 @@ public class ResultStoreRelationshipStreamExporter implements RelationshipStream
 
     @Override
     public long write(String relationshipType, List<String> propertyKeys, List<ValueType> propertyTypes) {
-        resultStore.addRelationshipStream(relationshipType, propertyKeys, propertyTypes, relationshipStream, toOriginalId);
         resultStore.add(jobId, new ResultStoreEntry.RelationshipStream(relationshipType, propertyKeys, propertyTypes, relationshipStream, toOriginalId));
         // TODO: return the number of relationships written
         return 0;

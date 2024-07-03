@@ -19,18 +19,18 @@
  */
 package org.neo4j.gds.applications;
 
-import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithms;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsStatsModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsWriteModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.centrality.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.logging.Log;
 
 public final class CentralityApplications {
@@ -57,28 +57,40 @@ public final class CentralityApplications {
     static CentralityApplications create(
         Log log,
         RequestScopedDependencies requestScopedDependencies,
+        WriteContext writeContext,
         AlgorithmEstimationTemplate estimationTemplate,
-        AlgorithmProcessingTemplate processingTemplate,
-        ProgressTrackerCreator progressTrackerCreator
+        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
+        ProgressTrackerCreator progressTrackerCreator,
+        MutateNodeProperty mutateNodeProperty
     ) {
         var estimation = new CentralityAlgorithmsEstimationModeBusinessFacade(estimationTemplate);
-        var algorithms = new CentralityAlgorithms(progressTrackerCreator, requestScopedDependencies.getTerminationFlag());
-        var mutateNodePropertyService = new MutateNodePropertyService(log);
-        var mutateNodeProperty = new MutateNodeProperty(mutateNodePropertyService);
+        var algorithms = new CentralityAlgorithms(
+            progressTrackerCreator,
+            requestScopedDependencies.getTerminationFlag()
+        );
         var mutation = new CentralityAlgorithmsMutateModeBusinessFacade(
             estimation,
             algorithms,
-            processingTemplate,
+            algorithmProcessingTemplateConvenience,
             mutateNodeProperty
         );
-        var stats = new CentralityAlgorithmsStatsModeBusinessFacade(estimation, algorithms, processingTemplate);
-        var streaming = new CentralityAlgorithmsStreamModeBusinessFacade(estimation, algorithms, processingTemplate);
+        var stats = new CentralityAlgorithmsStatsModeBusinessFacade(
+            estimation,
+            algorithms,
+            algorithmProcessingTemplateConvenience
+        );
+        var streaming = new CentralityAlgorithmsStreamModeBusinessFacade(
+            estimation,
+            algorithms,
+            algorithmProcessingTemplateConvenience
+        );
         var writing = CentralityAlgorithmsWriteModeBusinessFacade.create(
             log,
             requestScopedDependencies,
+            writeContext,
             estimation,
             algorithms,
-            processingTemplate
+            algorithmProcessingTemplateConvenience
         );
 
         return new CentralityApplications(estimation, mutation, stats, streaming, writing);

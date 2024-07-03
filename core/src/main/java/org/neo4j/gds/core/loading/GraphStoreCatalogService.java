@@ -19,12 +19,15 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog.GraphStoreCatalogEntryWithUsername;
 
@@ -67,44 +70,80 @@ public class GraphStoreCatalogService {
         return GraphStoreCatalog.get(catalogRequest, graphName.getValue());
     }
 
+    /**
+     * Load graphstore and graph, with copious validation.
+     */
     public GraphResources getGraphResources(
         GraphName graphName,
-        AlgoBaseConfig config,
+        AlgoBaseConfig configuration,
+        Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
         Optional<String> relationshipProperty,
         User user,
         DatabaseId databaseId
     ) {
-        var graphStoreCatalogEntry = getGraphStoreCatalogEntry(graphName, config, user, databaseId);
+        var graphStoreCatalogEntry = getGraphStoreCatalogEntry(graphName, configuration, user, databaseId);
+
         var graphStore = graphStoreCatalogEntry.graphStore();
-        // TODO: Maybe validation of the graph store, where do this happen? Is this the right place?
 
-        var nodeLabels = config.nodeLabelsFilter();
+        postGraphStoreLoadValidationHooks.ifPresent(hooks -> validateGraphStore(graphStore, hooks));
 
-        Collection<RelationshipType> relationshipTypes;
-        if (config.projectAllRelationshipTypes()) {
-            relationshipTypes = graphStore.relationshipTypes();
-        } else {
-            relationshipTypes = config.relationshipTypesFilter();
-        }
-
-        //if nodeLabels is empty, we are not getting any node properties
-        if (nodeLabels.isEmpty()) {
-            nodeLabels = graphStore.nodeLabels();
-        }
+        var nodeLabels = getNodeLabels(configuration, graphStore);
+        var relationshipTypes = getRelationshipTypes(configuration, graphStore);
 
         // Validate the graph store before going any further
-        config.graphStoreValidation(graphStore, nodeLabels, relationshipTypes);
+        configuration.graphStoreValidation(graphStore, nodeLabels, relationshipTypes);
 
         var graph = graphStore.getGraph(nodeLabels, relationshipTypes, relationshipProperty);
+
+        postGraphStoreLoadValidationHooks.ifPresent(hooks -> validateGraph(graph, hooks));
+
         return new GraphResources(graphStore, graph, graphStoreCatalogEntry.resultStore());
     }
 
+    private static Collection<RelationshipType> getRelationshipTypes(AlgoBaseConfig config, GraphStore graphStore) {
+        if (config.projectAllRelationshipTypes()) return graphStore.relationshipTypes();
+
+        return config.relationshipTypesFilter();
+    }
+
+    private static Collection<NodeLabel> getNodeLabels(AlgoBaseConfig config, GraphStore graphStore) {
+        var nodeLabels = config.nodeLabelsFilter();
+
+        if (nodeLabels.isEmpty()) return graphStore.nodeLabels();
+
+        return nodeLabels;
+    }
+
     /**
-     * @deprecated Push RequestScopedDependencies down and use it instead of database id + user parameters
+     * Some use cases need special validation. We do this right after loading.
+     *
+     * @throws java.lang.IllegalArgumentException if the graph store did not conform to desired invariants
      */
-    @Deprecated
-    public GraphStoreCatalogEntry getGraphStoreCatalogEntry(GraphName graphName, AlgoBaseConfig config, User user, DatabaseId databaseId) {
+    private void validateGraphStore(GraphStore graphStore, Iterable<PostLoadValidationHook> validationHooks) {
+        for (PostLoadValidationHook hook : validationHooks) {
+            hook.onGraphStoreLoaded(graphStore);
+        }
+    }
+
+    /**
+     * Some use cases need special validation. We do this right after loading.
+     *
+     * @throws java.lang.IllegalArgumentException if the graph did not conform to desired invariants
+     */
+    private void validateGraph(Graph graph, Iterable<PostLoadValidationHook> validationHooks) {
+        for (PostLoadValidationHook hook : validationHooks) {
+            hook.onGraphLoaded(graph);
+        }
+    }
+
+    public GraphStoreCatalogEntry getGraphStoreCatalogEntry(
+        GraphName graphName,
+        BaseConfig config,
+        User user,
+        DatabaseId databaseId
+    ) {
         var catalogRequest = CatalogRequest.of(user, databaseId, config.usernameOverride());
+
         return get(catalogRequest, graphName);
     }
 
@@ -129,7 +168,7 @@ public class GraphStoreCatalogService {
      * @throws java.lang.IllegalArgumentException if graph does not exist in graph catalog
      */
     public void ensureGraphExists(User user, DatabaseId databaseId, GraphName graphName) {
-        if (! graphExists(user, databaseId, graphName)) {
+        if (!graphExists(user, databaseId, graphName)) {
             String message = formatWithLocale(
                 "The graph '%s' does not exist.",
                 graphName

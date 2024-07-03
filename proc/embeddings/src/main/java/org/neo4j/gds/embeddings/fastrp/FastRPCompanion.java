@@ -26,7 +26,7 @@ import org.neo4j.gds.executor.ComputationResult;
 
 final class FastRPCompanion {
 
-    static final String DESCRIPTION = "Random Projection produces node embeddings via the fastrp algorithm";
+    static final String FASTRP_DESCRIPTION = "Random Projection produces node embeddings via the fastrp algorithm";
 
     private FastRPCompanion() {}
 

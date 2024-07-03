@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.graphstorecatalog;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public final class NodePropertiesWriteResult {
@@ -28,17 +29,20 @@ public final class NodePropertiesWriteResult {
     public final String graphName;
     public final List<String> nodeProperties;
     public final long propertiesWritten;
+    public final Map<String, Object> configuration;
 
     private NodePropertiesWriteResult(
         long writeMillis,
         String graphName,
         Collection<String> nodeProperties,
-        long propertiesWritten
+        long propertiesWritten,
+        Map<String, Object> configuration
     ) {
         this.writeMillis = writeMillis;
         this.graphName = graphName;
         this.nodeProperties = nodeProperties.stream().sorted().collect(Collectors.toList());
         this.propertiesWritten = propertiesWritten;
+        this.configuration = configuration;
     }
 
     public static class Builder {
@@ -46,6 +50,7 @@ public final class NodePropertiesWriteResult {
         private final List<String> nodeProperties;
         private long propertiesWritten;
         private long writeMillis;
+        public Map<String, Object> configuration;
 
         public Builder(String graphName, List<String> nodeProperties) {
             this.graphName = graphName;
@@ -56,12 +61,18 @@ public final class NodePropertiesWriteResult {
             this.writeMillis = writeMillis;
         }
 
-        void withPropertiesWritten(long propertiesWritten) {
+        Builder withPropertiesWritten(long propertiesWritten) {
             this.propertiesWritten = propertiesWritten;
+            return this;
+        }
+
+        Builder withConfig(Map<String, Object> configuration) {
+            this.configuration = configuration;
+            return this;
         }
 
         public NodePropertiesWriteResult build() {
-            return new NodePropertiesWriteResult(writeMillis, graphName, nodeProperties, propertiesWritten);
+            return new NodePropertiesWriteResult(writeMillis, graphName, nodeProperties, propertiesWritten, configuration);
         }
     }
 }

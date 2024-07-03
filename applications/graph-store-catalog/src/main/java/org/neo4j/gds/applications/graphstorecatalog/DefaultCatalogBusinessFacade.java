@@ -674,7 +674,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         UserLogRegistryFactory userLogRegistryFactory,
         String graphNameAsString,
         List<String> relationshipProperties,
-        List<String> relationshipTypes,
+        Object relationshipTypes,
         Map<String, Object> rawConfiguration,
         boolean usesPropertyNameColumn,
         GraphStreamRelationshipPropertyOrPropertiesResultProducer<T> outputMarshaller
@@ -707,7 +707,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         User user,
         DatabaseId databaseId,
         String graphNameAsString,
-        List<String> relationshipTypes,
+        Object relationshipTypes,
         Map<String, Object> rawConfiguration
     ) {
         var graphName = graphNameValidationService.validate(graphNameAsString);
@@ -987,6 +987,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
 
         var samplingMetric = projectionMetricsService.createRandomWakSampling(samplerType.name());
         try (samplingMetric) {
+            samplingMetric.start();
             return graphSamplingApplication.sample(
                 user,
                 taskRegistryFactory,

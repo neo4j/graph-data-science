@@ -35,15 +35,16 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.OpenModelCatalog;
-import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
 import org.neo4j.gds.ml.decisiontree.TreeNode;
@@ -425,6 +426,9 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
      * But let's be honest, there is enough work in front of us that such a fix is lower priority right now.
      */
     private static AlgorithmsProcedureFacade createAlgorithmsProcedureFacade() {
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .with(TerminationFlag.RUNNING_TRUE)
+            .build();
         var applicationsFacade = ApplicationsFacade.create(
             null,
             Optional.empty(),
@@ -433,22 +437,21 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             null,
             null,
             null,
-            null,
-            RequestScopedDependencies.builder().with(
-                TerminationFlag.RUNNING_TRUE).build()
+            requestScopedDependencies,
+            WriteContext.builder().build(),
+            null
         );
         var configurationParser = new ConfigurationParser(null, null);
-        var genericStub = new GenericStub(null, null, null, configurationParser, null, null);
+        var genericStub = GenericStub.create(null, null, null, null, configurationParser, requestScopedDependencies);
         var centralityProcedureFacade = CentralityProcedureFacade.create(
             genericStub,
             applicationsFacade,
             null,
             null,
             null,
-            null,
             null
         );
-        return new AlgorithmsProcedureFacade(centralityProcedureFacade, null, null);
+        return new AlgorithmsProcedureFacade(centralityProcedureFacade, null, null, null, null);
     }
 
 

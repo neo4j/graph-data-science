@@ -5,7 +5,7 @@ if (shouldCheckstyle) {
         proj.apply plugin: 'checkstyle'
 
         proj.checkstyle {
-            toolVersion = ver.checkStyle
+            toolVersion = openGds.versions.checkStyle.get()
             configFile = file("$publicDir/etc/checkstyle/checkstyle.xml")
             configProperties = [
                     'org.checkstyle.sun.suppressionfilter.config':

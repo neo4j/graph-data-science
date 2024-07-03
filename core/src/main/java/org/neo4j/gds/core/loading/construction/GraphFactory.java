@@ -97,6 +97,9 @@ public final class GraphFactory {
             .orElse(false);
         var threadCount = concurrency.orElse(new Concurrency(1));
 
+        // Make sure that we do not pass on negative values to the id map builders.
+        maxOriginalId = maxOriginalId.filter(id -> id > 0);
+
         var idMapBehavior = IdMapBehaviorServiceProvider.idMapBehavior();
 
         var idMapType = idMapBuilderType.orElse(IdMap.NO_TYPE);

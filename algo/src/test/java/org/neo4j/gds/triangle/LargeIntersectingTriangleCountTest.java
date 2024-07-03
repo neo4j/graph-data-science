@@ -29,6 +29,7 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -50,7 +51,8 @@ class LargeIntersectingTriangleCountTest {
             new Concurrency(concurrency),
             Long.MAX_VALUE,
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
 
         assertThat(result.globalTriangles()).isEqualTo(TRIANGLE_COUNT);

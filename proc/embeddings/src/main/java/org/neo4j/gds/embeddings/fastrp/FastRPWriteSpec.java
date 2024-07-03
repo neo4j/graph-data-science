@@ -26,13 +26,13 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
-import org.neo4j.gds.procedures.embeddings.results.DefaultNodeEmbeddingsWriteResult;
+import org.neo4j.gds.procedures.algorithms.embeddings.DefaultNodeEmbeddingsWriteResult;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.embeddings.fastrp.FastRPCompanion.DESCRIPTION;
+import static org.neo4j.gds.embeddings.fastrp.FastRPCompanion.FASTRP_DESCRIPTION;
 
-@GdsCallable(name = "gds.fastRP.write", description = DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
+@GdsCallable(name = "gds.fastRP.write", description = FASTRP_DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
 public class FastRPWriteSpec implements AlgorithmSpec<FastRP, FastRPResult, FastRPWriteConfig, Stream<DefaultNodeEmbeddingsWriteResult>, FastRPFactory<FastRPWriteConfig>> {
     @Override
     public String name() {

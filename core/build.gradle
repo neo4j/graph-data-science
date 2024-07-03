@@ -7,13 +7,13 @@ group = 'org.neo4j.gds'
 dependencies {
     annotationProcessor project(':annotations')
     annotationProcessor project(':config-generator')
-    annotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
-    annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
+    annotationProcessor openGds.immutables.builder
+    annotationProcessor openGds.immutables.value
     annotationProcessor group: 'org.neo4j',                name: 'annotations',        version: ver.'neo4j'
 
-    compileOnly         group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
-    compileOnly         group: 'org.immutables',           name: 'value-annotations',  version: ver.'immutables'
-    compileOnly         group: 'org.jetbrains',            name: 'annotations',        version: ver.'jetbrains-annotations'
+    compileOnly         openGds.immutables.builder
+    compileOnly         openGds.immutables.value.annotations
+    compileOnly         openGds.jetbrains.annotations
     compileOnly project(':progress-tracking')
 
     compileOnly group: 'org.neo4j', name: 'annotations', version: ver.'neo4j'
@@ -43,22 +43,26 @@ dependencies {
             project(':collections'),
             project(':concurrency'),
 
-            [group: 'org.agrona',              name: 'agrona',                   version: ver.'agrona'],
-            [group: 'org.apache.commons',      name: 'commons-text',             version: ver.'commons-text'],
-            [group: 'org.eclipse.collections', name: 'eclipse-collections-api',  version: ver.'eclipse-collections'],
-            [group: 'org.eclipse.collections', name: 'eclipse-collections',      version: ver.'eclipse-collections'],
-            [group: 'com.carrotsearch',        name: 'hppc',                     version: ver.'hppc'],
-            [group: 'org.hdrhistogram',        name: 'HdrHistogram',             version: ver.'HdrHistogram'],
-            [group: 'com.github.chrisvest',    name: 'stormpot',                 version: "3.1"],
+            openGds.agrona,
+            openGds.commons.text,
+            openGds.eclipse.collections.api,
+            openGds.eclipse.collections,
+            openGds.hppc,
+            openGds.hdrhistogram,
+    )
+
+    implementation (
+            openGds.caffeine,
+            openGds.stormpot,
     )
 
     // TEST DEPENDENCIES
 
-    testCompileOnly group: 'org.immutables', name: 'builder', version: ver.'immutables'
+    testCompileOnly openGds.immutables.builder
 
     testAnnotationProcessor project(':annotations')
     testAnnotationProcessor project(':config-generator')
-    testAnnotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
+    testAnnotationProcessor openGds.immutables.value
 
     testImplementation project(':legacy-cypher-projection')
     testImplementation project(':edition-api')
@@ -66,7 +70,7 @@ dependencies {
     testImplementation project(':test-graph-loaders')
     testImplementation project(':test-utils')
 
-    testImplementation group: 'net.jqwik',          name: 'jqwik',                  version: ver.'jqwik'
-    testImplementation group: 'io.qala.datagen',    name: 'qala-datagen-junit5',    version: ver.'qala-datagen'
-    testImplementation group: 'org.junit-pioneer',  name: 'junit-pioneer',          version: ver.'junit-pioneer'
+    testImplementation openGds.jqwik
+    testImplementation openGds.qaladatagen
+    testImplementation openGds.junit.pioneer
 }

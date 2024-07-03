@@ -19,21 +19,12 @@
  */
 package org.neo4j.gds.procedures.embeddings.graphsage;
 
-import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmStreamBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsEstimateBusinessFacade;
-import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsMutateBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsTrainBusinessFacade;
-import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsWriteBusinessFacade;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMutateConfig;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageStreamConfig;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
-import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.embeddings.DefaultNodeEmbeddingsComputationalResultTransformer;
-import org.neo4j.gds.procedures.embeddings.GraphSageComputationalResultTransformer;
-import org.neo4j.gds.procedures.embeddings.results.DefaultNodeEmbeddingMutateResult;
-import org.neo4j.gds.procedures.embeddings.results.DefaultNodeEmbeddingsWriteResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
+import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
+import org.neo4j.gds.procedures.embeddings.GraphSageComputationalResultTransformer;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -41,94 +32,16 @@ import java.util.stream.Stream;
 public class GraphSageProcedure {
     private final ConfigurationCreator configurationCreator;
     private final NodeEmbeddingsAlgorithmsEstimateBusinessFacade estimateBusinessFacade;
-    private final NodeEmbeddingsAlgorithmsMutateBusinessFacade mutateBusinessFacade;
-    private final NodeEmbeddingsAlgorithmsWriteBusinessFacade writeBusinessFacade;
     private final NodeEmbeddingsAlgorithmsTrainBusinessFacade trainBusinessFacade;
-    private final NodeEmbeddingsAlgorithmStreamBusinessFacade streamBusinessFacade;
 
     public GraphSageProcedure(
         ConfigurationCreator configurationCreator,
         NodeEmbeddingsAlgorithmsEstimateBusinessFacade estimateBusinessFacade,
-        NodeEmbeddingsAlgorithmsMutateBusinessFacade mutateBusinessFacade,
-        NodeEmbeddingsAlgorithmStreamBusinessFacade streamBusinessFacade,
-        NodeEmbeddingsAlgorithmsTrainBusinessFacade trainBusinessFacade,
-        NodeEmbeddingsAlgorithmsWriteBusinessFacade writeBusinessFacade
+        NodeEmbeddingsAlgorithmsTrainBusinessFacade trainBusinessFacade
     ) {
         this.configurationCreator = configurationCreator;
         this.estimateBusinessFacade = estimateBusinessFacade;
-        this.mutateBusinessFacade = mutateBusinessFacade;
-        this.streamBusinessFacade = streamBusinessFacade;
-        this.writeBusinessFacade= writeBusinessFacade;
         this.trainBusinessFacade=trainBusinessFacade;
-    }
-
-    public Stream<GraphSageStreamResult> stream(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var streamConfig = configurationCreator.createConfigurationForStream(configuration, GraphSageStreamConfig::of);
-
-        var computationResult = streamBusinessFacade.graphSage(
-            graphName,
-            streamConfig
-        );
-
-        return GraphSageComputationalResultTransformer.toStreamResult(computationResult);
-    }
-
-    public Stream<DefaultNodeEmbeddingMutateResult> mutate(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var mutateConfig = configurationCreator.createConfiguration(configuration, GraphSageMutateConfig::of);
-
-        var computationResult = mutateBusinessFacade.graphSage(
-            graphName,
-            mutateConfig
-        );
-
-        return Stream.of(DefaultNodeEmbeddingsComputationalResultTransformer.toMutateResult(computationResult));
-    }
-
-    public Stream<DefaultNodeEmbeddingsWriteResult> write(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var writeConfig = configurationCreator.createConfiguration(configuration, GraphSageWriteConfig::of);
-
-        var computationResult = writeBusinessFacade.graphSage(
-            graphName,
-            writeConfig
-        );
-
-        return Stream.of(DefaultNodeEmbeddingsComputationalResultTransformer.toWriteResult(computationResult));
-    }
-
-    public Stream<MemoryEstimateResult> streamEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, GraphSageStreamConfig::of);
-
-        return Stream.of(estimateBusinessFacade.graphSage(graphNameOrConfiguration, config, false));
-    }
-
-    public Stream<MemoryEstimateResult> mutateEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, GraphSageMutateConfig::of);
-
-        return Stream.of(estimateBusinessFacade.graphSage(graphNameOrConfiguration, config, true));
-    }
-
-    public Stream<MemoryEstimateResult> writeEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, GraphSageWriteConfig::of);
-
-        return Stream.of(estimateBusinessFacade.graphSage(graphNameOrConfiguration, config, false));
     }
 
     public Stream<GraphSageTrainResult> train(

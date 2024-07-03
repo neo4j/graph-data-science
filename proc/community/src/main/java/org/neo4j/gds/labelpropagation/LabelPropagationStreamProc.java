@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.labelpropagation;
 
-import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationStreamResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.algorithms.community.LabelPropagationStreamResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -44,7 +44,7 @@ public class LabelPropagationStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().labelPropagationStream(graphName, configuration);
+        return facade.algorithms().community().labelPropagationStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.labelPropagation.stream.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class LabelPropagationStreamProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().labelPropagationEstimateStream(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().community().labelPropagationStreamEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

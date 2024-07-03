@@ -21,7 +21,7 @@ package org.neo4j.gds.applications.algorithms.centrality;
 
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityStreamConfig;
@@ -33,8 +33,6 @@ import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStreamConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankStreamConfig;
 
-import java.util.Optional;
-
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ArticleRank;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BetweennessCentrality;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.CELF;
@@ -42,20 +40,21 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.DegreeCentrality;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.EigenVector;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.HarmonicCentrality;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.PageRank;
 
 public class CentralityAlgorithmsStreamModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final CentralityAlgorithms centralityAlgorithms;
-    private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
+    private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
 
     public CentralityAlgorithmsStreamModeBusinessFacade(
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         CentralityAlgorithms centralityAlgorithms,
-        AlgorithmProcessingTemplate algorithmProcessingTemplate
+        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience
     ) {
         this.estimationFacade = estimationFacade;
         this.centralityAlgorithms = centralityAlgorithms;
-        this.algorithmProcessingTemplate = algorithmProcessingTemplate;
+        this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
     }
 
     public <RESULT> RESULT articleRank(
@@ -63,13 +62,12 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
         PageRankStreamConfig configuration,
         ResultBuilder<PageRankStreamConfig, PageRankResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
             ArticleRank,
             estimationFacade::pageRank,
             graph -> centralityAlgorithms.articleRank(graph, configuration),
-            Optional.empty(),
             resultBuilder
         );
     }
@@ -79,13 +77,12 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
         BetweennessCentralityStreamConfig configuration,
         ResultBuilder<BetweennessCentralityStreamConfig, CentralityAlgorithmResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
             BetweennessCentrality,
             () -> estimationFacade.betweennessCentrality(configuration),
             graph -> centralityAlgorithms.betweennessCentrality(graph, configuration),
-            Optional.empty(),
             resultBuilder
         );
     }
@@ -95,13 +92,12 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
         InfluenceMaximizationStreamConfig configuration,
         ResultBuilder<InfluenceMaximizationStreamConfig, CELFResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
             CELF,
             () -> estimationFacade.celf(configuration),
             graph -> centralityAlgorithms.celf(graph, configuration),
-            Optional.empty(),
             resultBuilder
         );
     }
@@ -111,13 +107,12 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
         ClosenessCentralityStreamConfig configuration,
         ResultBuilder<ClosenessCentralityStreamConfig, CentralityAlgorithmResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
             ClosenessCentrality,
             () -> estimationFacade.closenessCentrality(configuration),
             graph -> centralityAlgorithms.closenessCentrality(graph, configuration),
-            Optional.empty(),
             resultBuilder
         );
     }
@@ -127,13 +122,12 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
         DegreeCentralityStreamConfig configuration,
         ResultBuilder<DegreeCentralityStreamConfig, CentralityAlgorithmResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
             DegreeCentrality,
             () -> estimationFacade.degreeCentrality(configuration),
             graph -> centralityAlgorithms.degreeCentrality(graph, configuration),
-            Optional.empty(),
             resultBuilder
         );
     }
@@ -143,13 +137,12 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
         PageRankStreamConfig configuration,
         ResultBuilder<PageRankStreamConfig, PageRankResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
             EigenVector,
             estimationFacade::pageRank,
             graph -> centralityAlgorithms.eigenVector(graph, configuration),
-            Optional.empty(),
             resultBuilder
         );
     }
@@ -159,13 +152,27 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
         HarmonicCentralityStreamConfig configuration,
         ResultBuilder<HarmonicCentralityStreamConfig, HarmonicResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
             HarmonicCentrality,
             estimationFacade::harmonicCentrality,
             graph -> centralityAlgorithms.harmonicCentrality(graph, configuration),
-            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT pageRank(
+        GraphName graphName,
+        PageRankStreamConfig configuration,
+        ResultBuilder<PageRankStreamConfig, PageRankResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+            graphName,
+            configuration,
+            PageRank,
+            estimationFacade::pageRank,
+            graph -> centralityAlgorithms.pageRank(graph, configuration),
             resultBuilder
         );
     }

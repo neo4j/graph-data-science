@@ -29,39 +29,13 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.InvocationCountingTaskStore;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.TestProcedureRunner;
-import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
-import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
-import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacade;
-import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
-import org.neo4j.gds.api.AlgorithmMetaDataSetter;
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.api.User;
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.core.utils.progress.TaskRegistry;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.IdToVariable;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.Estimate;
-import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
-import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
-import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
-import org.neo4j.gds.procedures.GraphDataScienceProceduresBuilder;
-import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -72,8 +46,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class K1ColoringStreamProcTest extends BaseProcTest {
 
@@ -181,65 +153,6 @@ class K1ColoringStreamProcTest extends BaseProcTest {
         });
 
         assertEquals(coloringResult, expectedResult);
-    }
-
-    @Test
-    void shouldRegisterTaskWithCorrectJobId() {
-        var taskStore = new InvocationCountingTaskStore();
-
-        var logMock = mock(org.neo4j.gds.logging.Log.class);
-        when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
-
-        final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
-        final AlgorithmMemoryValidationService memoryUsageValidator = new AlgorithmMemoryValidationService(
-            logMock,
-            false
-        );
-
-
-        TestProcedureRunner.applyOnProcedure(db, K1ColoringStreamProc.class, proc -> {
-
-            TaskRegistryFactory taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
-            proc.taskRegistryFactory = taskRegistryFactory;
-
-            var algorithmsStreamBusinessFacade = new CommunityAlgorithmsStreamBusinessFacade(
-                new CommunityAlgorithmsFacade(
-                    new AlgorithmRunner(
-                        logMock,
-                        graphStoreCatalogService,
-                        new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
-                        memoryUsageValidator,
-                        RequestScopedDependencies.builder()
-                            .with(DatabaseId.of(db.databaseName()))
-                            .with(taskRegistryFactory)
-                            .with(TerminationFlag.RUNNING_TRUE)
-                            .with(new User(getUsername(), false))
-                            .with(EmptyUserLogRegistryFactory.INSTANCE)
-                            .build()
-                    )
-                ));
-            proc.facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
-                .with(new CommunityProcedureFacade(
-                    new ConfigurationCreator(
-                        ConfigurationParser.EMPTY,
-                        mock(AlgorithmMetaDataSetter.class),
-                        new User(getUsername(), false)
-                    ),
-                    ProcedureReturnColumns.EMPTY,
-                    null,
-                    null,
-                    null,
-                    algorithmsStreamBusinessFacade,
-                    null
-                ))
-                .with(DeprecatedProceduresMetricService.PASSTHROUGH)
-                .build();
-            var someJobId = new JobId();
-            Map<String, Object> configMap = Map.of("jobId", someJobId);
-            proc.stream(K1COLORING_GRAPH, configMap);
-
-            assertThat(taskStore.seenJobIds).containsExactly(someJobId);
-        });
     }
 
     @Test

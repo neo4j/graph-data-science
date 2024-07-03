@@ -120,7 +120,22 @@ class OpenModelCatalogTest {
     @Test
     void shouldNotifyListeners() {
         var counter = new Counter();
-        modelCatalog.registerListener(model -> counter.increment());
+        modelCatalog.registerListener(new ModelCatalogListener() {
+            @Override
+            public void onInsert(Model<?, ?, ?> model) {
+                counter.increment();
+            }
+
+            @Override
+            public void onStore(Model<?, ?, ?> model) {
+
+            }
+
+            @Override
+            public void onLoad() {
+
+            }
+        });
 
         var model = Model.of(
             "testAlgo",

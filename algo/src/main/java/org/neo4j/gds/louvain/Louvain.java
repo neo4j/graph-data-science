@@ -205,9 +205,9 @@ public final class Louvain extends Algorithm<LouvainResult> {
             concurrency,
             DEFAULT_BATCH_SIZE,
             DefaultPool.INSTANCE,
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
-        modularityOptimization.setTerminationFlag(terminationFlag);
 
         return modularityOptimization.compute();
     }

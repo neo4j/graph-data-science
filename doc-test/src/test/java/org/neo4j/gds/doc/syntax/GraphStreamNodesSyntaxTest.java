@@ -27,7 +27,7 @@ class GraphStreamNodesSyntaxTest extends SyntaxTestBase {
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
             SyntaxModeMeta.of(SyntaxMode.STREAM_SINGLE_PROPERTY),
-            SyntaxModeMeta.of(SyntaxMode.STREAM)
+            SyntaxModeMeta.of(SyntaxMode.STREAM_MULTIPLE_PROPERTIES)
         );
     }
 

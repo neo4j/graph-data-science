@@ -6,6 +6,8 @@ ext {
         '5.18': properties.getOrDefault('neo4jVersion518', '5.18.1'),
         '5.19': properties.getOrDefault('neo4jVersion519', '5.19.0'),
         '5.20': properties.getOrDefault('neo4jVersion520', '5.20.0'),
+        '5.21': properties.getOrDefault('neo4jVersion521', '5.21.0'),
+        '5.22': properties.getOrDefault('neo4jVersion522', '5.22.0'),
     ]
 
     neo4jDefault = neos.'5.20'
@@ -19,6 +21,7 @@ ext {
         '5.19': '2.13.11',
         '5.20': '2.13.11',
         '5.21': '2.13.11',
+        '5.22': '2.13.11',
     ]
 
     log4js = [
@@ -29,6 +32,7 @@ ext {
         '5.19': '2.20.0',
         '5.20': '2.20.0',
         '5.21': '2.20.0',
+        '5.22': '2.20.0',
     ]
 
     shiros = [
@@ -39,61 +43,14 @@ ext {
         '5.19': '2.0.0',
         '5.20': '2.0.0',
         '5.21': '2.0.0',
+        '5.22': '2.0.0',
     ]
 
     ver = [
-        doc                    : [
-            'asciidoctorj'        : '2.5.12',
-            'reflections'         : '0.10.2'
-        ],
-        'agrona'               : '1.21.1',
-        'assertj'              : '3.25.3',
-        'auto-common'          : '1.2.2',
-        'auto-service'         : '1.1.1',
-        'bouncycastle-prov'    : '1.78.1',
-        'checkStyle'           : '10.12.1',
-        'commons-io'           : '2.16.1',
-        'commons-lang3'        : '3.14.0',
-        'commons-math3'        : '3.6.1',
-        'commons-text'         : '1.12.0',
-        'compile-testing'      : '0.21.0',
-        'cypher-dsl'           : '2021.2.0',
-        'eclipse-collections'  : '11.1.0',
-        'ejml'                 : '0.43.1',
-        'fastcsv'              : '3.1.0',
-        'gdl'                  : '0.3.9',
-        'hamcrest'             : '2.2',
-        'HdrHistogram'         : '2.2.1',
-        'hppc'                 : '0.7.3',
-        'immutables'           : '2.10.1',
-        'ipaddress'            : '5.3.3',
-        'jackson'              : '2.17.1',
-        'javapoet'             : '1.13.0',
-        'jetbrains-annotations': '24.1.0',
-        'jjwt'                 : '0.12.5',
-        'jol'                  : '0.17',
-        'jqwik'                : '1.8.4',
-        'junit-pioneer'        : '2.2.0',
-        'junit5bom'            : '5.10.2',
         'log4j'                : log4js[neo4j_minor],
-        'memoryfilesystem'     : '2.8.0',
-        'mockito'              : '4.11.0',
-        'mockito-junit-jupiter': '5.11.0',
         'neo4j'                : properties.getOrDefault('neo4jVersion', neo4jDefault),
-        'opencypher-front-end' : '9.0.20210312',
-        'picocli'              : '4.7.6',
-        'qala-datagen'         : '2.5.1',
-        'record-builder'       : '41',
-        'sb-contrib'           : '7.6.3',
         'scala'                : scalas[neo4j_minor],
-        'protobuf'             : '3.25.3',
-        'shiro'                : shiros[neo4j_minor]
-    ]
-    dep = [
-        junit5bom:          "org.junit:junit-bom:${ver.junit5bom}",
-        junit5jupiter:      "org.junit.jupiter:junit-jupiter",
-        junit5platform:     "org.junit.platform:junit-platform-launcher",
-        junit5migration:    "org.junit.jupiter:junit-jupiter-migrationsupport",
+        'shiro'                : shiros[neo4j_minor],
     ]
 }
 

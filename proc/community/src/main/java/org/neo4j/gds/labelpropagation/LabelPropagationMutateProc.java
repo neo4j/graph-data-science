@@ -19,9 +19,8 @@
  */
 package org.neo4j.gds.labelpropagation;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationMutateResult;
+import org.neo4j.gds.procedures.algorithms.community.LabelPropagationMutateResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -35,8 +34,7 @@ import static org.neo4j.gds.labelpropagation.LabelPropagation.LABEL_PROPAGATION_
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class LabelPropagationMutateProc extends BaseProc {
-
+public class LabelPropagationMutateProc {
     @Context
     public GraphDataScienceProcedures facade;
 
@@ -46,7 +44,7 @@ public class LabelPropagationMutateProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().labelPropagationMutate(graphName, configuration);
+        return facade.algorithms().community().labelPropagationMutateStub().execute(graphName, configuration);
     }
 
     @Procedure(value = "gds.labelPropagation.mutate.estimate", mode = READ)
@@ -55,6 +53,6 @@ public class LabelPropagationMutateProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().labelPropagationEstimateMutate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().community().labelPropagationMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

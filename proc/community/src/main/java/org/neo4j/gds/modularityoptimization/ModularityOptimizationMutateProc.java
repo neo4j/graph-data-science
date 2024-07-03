@@ -19,9 +19,8 @@
  */
 package org.neo4j.gds.modularityoptimization;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationMutateResult;
+import org.neo4j.gds.procedures.algorithms.community.ModularityOptimizationMutateResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -36,8 +35,7 @@ import static org.neo4j.gds.modularityoptimization.ModularityOptimizationSpecifi
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class ModularityOptimizationMutateProc extends BaseProc {
-
+public class ModularityOptimizationMutateProc {
     @Context
     public GraphDataScienceProcedures facade;
 
@@ -47,7 +45,7 @@ public class ModularityOptimizationMutateProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().modularityOptimizationMutate(graphName, configuration);
+        return facade.algorithms().community().modularityOptimizationMutateStub().execute(graphName, configuration);
     }
 
     @Procedure(value = "gds.modularityOptimization.mutate.estimate", mode = READ)
@@ -56,7 +54,7 @@ public class ModularityOptimizationMutateProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().modularityOptimizationEstimateMutate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().community().modularityOptimizationMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Deprecated(forRemoval = true)
@@ -67,10 +65,8 @@ public class ModularityOptimizationMutateProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.beta.modularityOptimization.mutate");
-        executionContext()
+        facade.deprecatedProcedures().called("gds.beta.modularityOptimization.mutate");
+        facade
             .log()
             .warn("Procedure `gds.beta.modularityOptimization.mutate` has been deprecated, please use `gds.modularityOptimization.mutate`.");
 
@@ -85,10 +81,8 @@ public class ModularityOptimizationMutateProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.beta.modularityOptimization.mutate.estimate");
-        executionContext()
+        facade.deprecatedProcedures().called("gds.beta.modularityOptimization.mutate.estimate");
+        facade
             .log()
             .warn("Procedure `gds.beta.modularityOptimization.mutate.estimate` has been deprecated, please use `gds.modularityOptimization.mutate.estimate`.");
 

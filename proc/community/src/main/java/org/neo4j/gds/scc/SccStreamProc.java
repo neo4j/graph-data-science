@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.scc;
 
-import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.community.scc.SccStreamResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.algorithms.community.SccStreamResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -31,14 +31,11 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.gds.scc.Scc.SCC_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class SccStreamProc {
-
-    private static final String ESTIMATE_DESCRIPTION = "Returns an estimation of the memory consumption for that procedure.";
-
-
     @Context
     public GraphDataScienceProcedures facade;
 
@@ -48,16 +45,16 @@ public class SccStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().sccStream(graphName, configuration);
+        return facade.algorithms().community().sccStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.scc.stream.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().sccEstimateStream(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().community().sccStreamEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Procedure(value = "gds.alpha.scc.stream", mode = READ, deprecatedBy = "gds.scc.stream")
@@ -69,12 +66,7 @@ public class SccStreamProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         facade.deprecatedProcedures().called("gds.alpha.scc.stream");
-        facade
-            .log()
-            .warn(
-                "Procedure `gds.alpha.scc.stream` has been deprecated, please use `gds.scc.stream`.");
+        facade.log().warn("Procedure `gds.alpha.scc.stream` has been deprecated, please use `gds.scc.stream`.");
         return stream(graphName, configuration);
     }
-
-
 }

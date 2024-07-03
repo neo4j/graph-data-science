@@ -6,20 +6,20 @@ group = 'org.neo4j.gds'
 
 dependencies {
     annotationProcessor project(':annotations')
-    annotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
-    annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
+    annotationProcessor openGds.immutables.builder
+    annotationProcessor openGds.immutables.value
 
     compileOnly project(':annotations')
-    compileOnly         group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
-    compileOnly         group: 'org.immutables',           name: 'value-annotations',  version: ver.'immutables'
+    compileOnly         openGds.immutables.builder
+    compileOnly         openGds.immutables.value.annotations
 
     implementation project(':graph-projection-api')
     implementation project(':string-formatting')
 
 
-    testImplementation platform(dep.junit5bom)
-    testImplementation dep.junit5jupiter
-    testImplementation dep.junit5migration
-    testImplementation group: 'org.assertj', name: 'assertj-core', version: ver.'assertj'
+    testImplementation platform(openGds.junit5bom)
+    testImplementation openGds.junit5.jupiter
+    testImplementation openGds.junit5.migration
+    testImplementation openGds.assertj.core
 
 }

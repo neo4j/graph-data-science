@@ -20,13 +20,14 @@
 package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.JobIdConfig;
 import org.neo4j.gds.config.WriteConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Configuration
-public interface WriteRelationshipPropertiesConfig extends ConcurrencyConfig, WriteConfig, JobIdConfig {
+public interface WriteRelationshipPropertiesConfig extends BaseConfig, ConcurrencyConfig, WriteConfig, JobIdConfig {
 
     static WriteRelationshipPropertiesConfig of(CypherMapWrapper userInput) {
         return new WriteRelationshipPropertiesConfigImpl(userInput);

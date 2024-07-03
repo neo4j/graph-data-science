@@ -45,7 +45,7 @@ public class PageRankWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.centrality().pageRankWrite(graphName, configuration);
+        return facade.algorithms().centrality().pageRankWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.pageRank.write.estimate", mode = READ)
@@ -54,6 +54,6 @@ public class PageRankWriteProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.centrality().pageRankWriteEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().centrality().pageRankWriteEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

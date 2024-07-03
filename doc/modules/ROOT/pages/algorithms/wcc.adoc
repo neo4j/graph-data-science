@@ -285,7 +285,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 :stream-details: For example, we can order the results to see the nodes that belong to the same component displayed next to each other.
 include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 
-[role=query-example]
+[role=query-example, no-result=true]
 --
 .The following will run the algorithm and stream results:
 [source, cypher, role=noplay]
@@ -314,6 +314,13 @@ This can be verified in the xref:algorithms/wcc.adoc#algorithms-wcc-examples[exa
 
 The default behaviour of the algorithm is to run `unweighted`, e.g. without using `relationship` weights.
 The `weighted` option will be demonstrated in xref:algorithms/wcc.adoc#algorithms-wcc-examples-weighted[Weighted]
+
+[NOTE]
+====
+The actual component ids may differ because the order of nodes projected in the in-memory graph is not guaranteed.
+For this  case it is equally plausible to get the inverse solution, f.i. when our community `0` nodes are mapped to community `3` instead, and vice versa.
+====
+
 
 [[algorithms-wcc-examples-stats]]
 === Stats
@@ -399,7 +406,7 @@ We do this by specifying the threshold value with the `threshold` configuration 
 
 If a relationship does not have the specified weight property, the algorithm falls back to using a default value of zero.
 
-[role=query-example]
+[role=query-example, no-result=true]
 --
 .The following will run the algorithm using relationship weight and stream results:
 [source, cypher, role=noplay]
@@ -426,6 +433,12 @@ ORDER BY ComponentId, Name
 --
 
 As we can see from the results, the node named 'Bridget' is now in its own component, due to its relationship weight being less than the configured threshold and thus ignored.
+
+[NOTE]
+====
+The actual component ids may differ because the order of nodes projected in the in-memory graph is not guaranteed.
+For this  case it is equally plausible to get the inverse solution, f.i. when our community `0` nodes are mapped to community `3` instead, and vice versa.
+====
 
 NOTE: We are using stream mode to illustrate running the algorithm as weighted or unweighted, all the other  algorithm modes also support this configuration parameter.
 
@@ -529,7 +542,7 @@ _Step 4_
 [role=query-example, group=seeding, no-result=true]
 --
 .The following will run the algorithm in `stream` mode using `seedProperty`:
-[source, cypher, role=noplay]
+[source, cypher, role=noplay, no-result=true]
 ----
 CALL gds.wcc.stream('myGraph-seeded', {
   seedProperty: 'componentId',
@@ -556,6 +569,13 @@ ORDER BY componentId, name
 
 The result shows that despite not having the `seedProperty` when it was projected, the node 'Mats' has been assigned to the same component as the node 'Bridget'.
 This is correct because these two nodes are connected.
+
+[NOTE]
+====
+The actual component ids may differ because the order of nodes projected in the in-memory graph is not guaranteed.
+For this  case it is equally plausible to get the inverse solution, f.i. when our community `0` nodes are mapped to community `3` instead, and vice versa.
+====
+
 
 [[algorithms-wcc-examples-seed-write]]
 === Writing Seeded components
@@ -640,7 +660,7 @@ This time, we execute WCC on `myIndexedGraph` which will allow the algorithm to 
 .The following will run the algorithm with sampled strategy and stream results:
 [source, cypher, role=noplay]
 ----
-CALL gds.wcc.stream('myIndexedGraph', {concurrency: 1, consecutiveIds: true})
+CALL gds.wcc.stream('myIndexedGraph')
 YIELD nodeId, componentId
 RETURN gds.util.asNode(nodeId).name AS name, componentId
 ORDER BY componentId, name
@@ -653,15 +673,14 @@ ORDER BY componentId, name
 | "Alice"   | 0
 | "Bridget" | 0
 | "Charles" | 0
-| "Doug"    | 1
-| "Mark"    | 1
-| "Michael" | 1
+| "Doug"    | 3
+| "Mark"    | 3
+| "Michael" | 3
 |===
 --
 
 [NOTE]
 ====
-Because of the randomness in the Graph sampling optimization we are using `concurrency: 1` in the example.
-Running it with higher concurrency may yield different componentIds but the actual components should stay the same.
-For our case here it would be equally plausible to get the inverse solution, f.i. when our community `0` nodes are mapped to community `3` instead, and vice versa.
+The actual component ids may differ due to the randomness in the Graph sampling optimization.
+For this  case it is equally plausible to get the inverse solution, f.i. when our community `0` nodes are mapped to community `3` instead, and vice versa.
 ====

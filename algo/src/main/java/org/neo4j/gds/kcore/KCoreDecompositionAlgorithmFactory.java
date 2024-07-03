@@ -25,12 +25,13 @@ import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.termination.TerminationFlag;
 
 public class KCoreDecompositionAlgorithmFactory<CONFIG extends KCoreDecompositionBaseConfig> extends GraphAlgorithmFactory<KCoreDecomposition, CONFIG> {
     @Override
     public KCoreDecomposition build(Graph graph, CONFIG configuration, ProgressTracker progressTracker) {
 
-        return new KCoreDecomposition(graph, configuration.concurrency(), progressTracker);
+        return new KCoreDecomposition(graph, configuration.concurrency(), progressTracker, TerminationFlag.RUNNING_TRUE);
     }
 
     @Override

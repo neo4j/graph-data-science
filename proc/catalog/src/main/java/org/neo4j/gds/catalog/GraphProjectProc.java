@@ -20,11 +20,11 @@
 package org.neo4j.gds.catalog;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.beta.filter.GraphFilterResult;
 import org.neo4j.gds.legacycypherprojection.GraphProjectCypherResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.projection.GraphProjectNativeResult;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -34,8 +34,8 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.BaseProc.ESTIMATE_DESCRIPTION;
 import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.PROJECT_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphProjectProc {
@@ -66,7 +66,7 @@ public class GraphProjectProc {
     }
 
     @Procedure(name = "gds.graph.project.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> projectEstimate(
         @Name(value = "nodeProjection") @Nullable Object nodeProjection,
         @Name(value = "relationshipProjection") @Nullable Object relationshipProjection,
@@ -75,10 +75,7 @@ public class GraphProjectProc {
         return facade.catalog().estimateNativeProject(nodeProjection, relationshipProjection, configuration);
     }
 
-    @Procedure(
-        name = "gds.graph.project.cypher", mode = READ,
-        deprecatedBy = "gds.graph.project Cypher projection as an aggregation function"
-    )
+    @Procedure(name = "gds.graph.project.cypher", mode = READ, deprecatedBy = "gds.graph.project Cypher projection as an aggregation function")
     @Deprecated
     @Description(PROJECT_DESCRIPTION)
     public Stream<GraphProjectCypherResult> projectCypher(
@@ -89,19 +86,14 @@ public class GraphProjectProc {
     ) {
         facade
             .log()
-            .warn(
-                "Procedure `gds.graph.project.cypher` has been deprecated, please look into cypher projection via `gds.graph.project`");
+            .warn("Procedure `gds.graph.project.cypher` has been deprecated, please look into cypher projection via `gds.graph.project`");
 
         return facade.catalog().cypherProject(graphName, nodeQuery, relationshipQuery, configuration);
     }
 
-    @Procedure(
-        name = "gds.graph.project.cypher.estimate", mode = READ,
-        deprecatedBy = "gds.graph.project Cypher projection as an aggregation function"
-    )
-    @Description(ESTIMATE_DESCRIPTION)
+    @Procedure(name = "gds.graph.project.cypher.estimate", mode = READ, deprecatedBy = "gds.graph.project Cypher projection as an aggregation function")
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     @Deprecated
-
     public Stream<MemoryEstimateResult> projectCypherEstimate(
         @Name(value = "nodeQuery") String nodeQuery,
         @Name(value = "relationshipQuery") String relationshipQuery,
@@ -109,8 +101,7 @@ public class GraphProjectProc {
     ) {
         facade
             .log()
-            .warn(
-                "Procedure `gds.graph.project.cypher` has been deprecated, please look into cypher projection via `gds.graph.project`");
+            .warn("Procedure `gds.graph.project.cypher` has been deprecated, please look into cypher projection via `gds.graph.project`");
 
         return facade.catalog().estimateCypherProject(nodeQuery, relationshipQuery, configuration);
     }

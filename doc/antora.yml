@@ -1,9 +1,18 @@
 name: graph-data-science
 title: Neo4j Graph Data Science
-version: '2.7-preview'
+version: '2.8-preview'
 start_page: ROOT:index.adoc
 nav:
 - modules/ROOT/content-nav.adoc
 asciidoc:
   attributes:
-    docs-version: '2.7'
+    docs-version: '2.8'
+    ga-promos-uri: https://raw.githubusercontent.com/neo4j-graphacademy/courses/main/asciidoc/promos
+    ga-promo: analytics
+    page-ad-icon: mortarboard
+    page-ad-title: Graph Data Science courses on GraphAcademy
+    page-ad-description: Follow our Graph Data Analytics learning path to learn how to apply graph thinking to your machine learning pipelines.
+    page-ad-link: https://graphacademy.neo4j.com/categories/analytics/?ref=docs-ad-analytics
+    page-ad-underline-role: button
+    page-ad-underline: Enroll now
+

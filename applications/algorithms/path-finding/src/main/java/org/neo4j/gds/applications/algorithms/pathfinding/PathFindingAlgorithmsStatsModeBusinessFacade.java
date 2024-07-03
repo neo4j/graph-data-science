@@ -20,7 +20,7 @@
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -35,7 +35,6 @@ import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.steiner.SteinerTreeStatsConfig;
 import org.neo4j.gds.traversal.RandomWalkStatsConfig;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BFS;
@@ -45,17 +44,17 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.SteinerTree;
 
 public class PathFindingAlgorithmsStatsModeBusinessFacade {
-    private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
+    private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
 
     private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final PathFindingAlgorithms pathFindingAlgorithms;
 
     public PathFindingAlgorithmsStatsModeBusinessFacade(
-        AlgorithmProcessingTemplate algorithmProcessingTemplate,
+        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         PathFindingAlgorithms pathFindingAlgorithms
     ) {
-        this.algorithmProcessingTemplate = algorithmProcessingTemplate;
+        this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.estimationFacade = estimationFacade;
         this.pathFindingAlgorithms = pathFindingAlgorithms;
     }
@@ -65,13 +64,12 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         BellmanFordStatsConfig configuration,
         ResultBuilder<BellmanFordStatsConfig, BellmanFordResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
             BellmanFord,
             () -> estimationFacade.bellmanFord(configuration),
             graph -> pathFindingAlgorithms.bellmanFord(graph, configuration),
-            Optional.empty(),
             resultBuilder
         );
     }
@@ -81,13 +79,12 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         BfsStatsConfig configuration,
         ResultBuilder<BfsStatsConfig, HugeLongArray, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
             BFS,
             estimationFacade::breadthFirstSearch,
             graph -> pathFindingAlgorithms.breadthFirstSearch(graph, configuration),
-            Optional.empty(),
             resultBuilder
         );
     }
@@ -97,13 +94,12 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         AllShortestPathsDeltaStatsConfig configuration,
         ResultBuilder<AllShortestPathsDeltaStatsConfig, PathFindingResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
             DeltaStepping,
             estimationFacade::deltaStepping,
             graph -> pathFindingAlgorithms.deltaStepping(graph, configuration),
-            Optional.empty(),
             resultBuilder
         );
     }
@@ -113,13 +109,12 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         RandomWalkStatsConfig configuration,
         ResultBuilder<RandomWalkStatsConfig, Stream<long[]>, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
             RandomWalk,
             () -> estimationFacade.randomWalk(configuration),
             graph -> pathFindingAlgorithms.randomWalk(graph, configuration),
-            Optional.empty(),
             resultBuilder
         );
     }
@@ -129,13 +124,12 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         SpanningTreeStatsConfig configuration,
         ResultBuilder<SpanningTreeStatsConfig, SpanningTree, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
             LabelForProgressTracking.SpanningTree,
             estimationFacade::spanningTree,
             graph -> pathFindingAlgorithms.spanningTree(graph, configuration),
-            Optional.empty(),
             resultBuilder
         );
     }
@@ -145,13 +139,12 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         SteinerTreeStatsConfig configuration,
         ResultBuilder<SteinerTreeStatsConfig, SteinerTreeResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
             SteinerTree,
             () -> estimationFacade.steinerTree(configuration),
             graph -> pathFindingAlgorithms.steinerTree(graph, configuration),
-            Optional.empty(),
             resultBuilder
         );
     }

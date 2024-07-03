@@ -28,6 +28,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.intersect.ImmutableRelationshipIntersectConfig;
 import org.neo4j.gds.triangle.intersect.RelationshipIntersectConfig;
 import org.neo4j.gds.triangle.intersect.RelationshipIntersectFactory;
@@ -74,14 +75,15 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
         Concurrency concurrency,
         long maxDegree,
         ExecutorService executorService,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         var factory = RelationshipIntersectFactoryLocator
             .lookup(graph)
             .orElseThrow(
                 () -> new IllegalArgumentException("No relationship intersect factory registered for graph: " + graph.getClass())
             );
-        return new IntersectingTriangleCount(graph, factory, concurrency, maxDegree, executorService, progressTracker);
+        return new IntersectingTriangleCount(graph, factory, concurrency, maxDegree, executorService, progressTracker, terminationFlag);
     }
 
     private IntersectingTriangleCount(
@@ -90,7 +92,8 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
         Concurrency concurrency,
         long maxDegree,
         ExecutorService executorService,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -102,6 +105,8 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
         this.executorService = executorService;
         this.globalTriangleCounter = new LongAdder();
         this.queue = new AtomicLong();
+
+        this.terminationFlag = terminationFlag;
     }
 
     @Override

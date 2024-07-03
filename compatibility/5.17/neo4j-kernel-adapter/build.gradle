@@ -7,12 +7,12 @@ group = 'org.neo4j.gds'
 dependencies {
     annotationProcessor project(':annotations')
     annotationProcessor group: 'org.neo4j', name: 'annotations', version: neos.'5.17'
-    annotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
+    annotationProcessor openGds.immutables.value
 
     compileOnly project(':annotations')
     compileOnly group: 'org.neo4j', name: 'annotations', version: neos.'5.17'
     compileOnly group: 'org.neo4j', name: 'neo4j', version: neos.'5.17'
-    compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
+    compileOnly openGds.immutables.value.annotations
 
     implementation project(':neo4j-kernel-adapter-api')
 }

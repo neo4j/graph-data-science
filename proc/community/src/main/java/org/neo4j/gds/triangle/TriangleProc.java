@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -31,38 +31,33 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class TriangleProc extends BaseProc {
-
+public class TriangleProc {
     static final String DESCRIPTION = "Triangles streams the nodeIds of each triangle in the graph.";
+
+    @Context
+    public GraphDataScienceProcedures facade;
 
     @Procedure(name = "gds.triangles", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<TriangleStream.Result> stream(
+    public Stream<TriangleStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new TriangleStreamSpecification(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.algorithms().community().trianglesStream(graphName, configuration);
     }
 
     @Procedure(name = "gds.alpha.triangles", mode = READ, deprecatedBy = "gds.triangles")
     @Description(DESCRIPTION)
     @Internal
     @Deprecated(forRemoval = true)
-    public Stream<TriangleStream.Result> alphaStream(
+    public Stream<TriangleStreamResult> alphaStream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.alpha.triangles");
-
-        executionContext()
+        facade.deprecatedProcedures().called("gds.alpha.triangles");
+        facade
             .log()
-            .warn(
-                "Procedure `gds.alpha.triangles` has been deprecated, please use `gds.triangles`.");
+            .warn("Procedure `gds.alpha.triangles` has been deprecated, please use `gds.triangles`.");
 
         return stream(graphName, configuration);
     }

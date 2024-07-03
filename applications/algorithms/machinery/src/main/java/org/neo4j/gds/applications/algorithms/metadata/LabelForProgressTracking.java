@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.algorithms.metadata;
 
 public enum LabelForProgressTracking {
     AllShortestPaths("All Shortest Paths"),
+    ApproximateMaximumKCut("ApproxMaxKCut"),
     ArticleRank("ArticleRank"),
     AStar("AStar"),
     BellmanFord("Bellman-Ford"),
@@ -29,24 +30,40 @@ public enum LabelForProgressTracking {
     BFS("BFS"),
     CELF("CELF"),
     ClosenessCentrality("Closeness Centrality"),
+    Conductance("Conductance"),
     DegreeCentrality("DegreeCentrality"),
     DeltaStepping("Delta Stepping"),
     DFS("DFS"),
     Dijkstra("Dijkstra"),
     EigenVector("EigenVector"),
+    FastRP("FastRP"),
     FilteredKNN("Filtered K-Nearest Neighbours"),
     FilteredNodeSimilarity("Filtered Node Similarity"),
+    GraphSage("GraphSage"),
     HarmonicCentrality("HarmonicCentrality"),
+    K1Coloring("K1Coloring"),
+    KCore("KCoreDecomposition"),
+    KMeans("K-Means"),
     KNN("K-Nearest Neighbours"),
     KSpanningTree("K Spanning Tree"),
+    LabelPropagation("Label Propagation"),
+    LCC("LocalClusteringCoefficient"),
+    Leiden("Leiden"),
+    Louvain("Louvain"),
     LongestPath("LongestPath"),
+    Modularity("Modularity"),
+    ModularityOptimization("ModularityOptimization"),
     NodeSimilarity("Node Similarity"),
     PageRank("PageRank"),
     RandomWalk("RandomWalk"),
+    SCC("SCC"),
     SingleSourceDijkstra("All Shortest Paths"),
     SpanningTree("SpanningTree"),
     SteinerTree("SteinerTree"),
     TopologicalSort("TopologicalSort"),
+    TriangleCount("TriangleCount"),
+    Triangles("Triangles"),
+    WCC("WCC"),
     Yens("Yens");
 
     public final String value;
@@ -56,6 +73,7 @@ public enum LabelForProgressTracking {
     public static LabelForProgressTracking from(Algorithm algorithm) {
         return switch (algorithm) {
             case AllShortestPaths -> AllShortestPaths;
+            case ApproximateMaximumKCut -> ApproximateMaximumKCut;
             case ArticleRank -> ArticleRank;
             case AStar -> AStar;
             case BellmanFord -> BellmanFord;
@@ -64,24 +82,40 @@ public enum LabelForProgressTracking {
             case BFS -> BFS;
             case CELF -> CELF;
             case ClosenessCentrality -> ClosenessCentrality;
+            case Conductance -> Conductance;
             case DegreeCentrality -> DegreeCentrality;
             case DeltaStepping -> DeltaStepping;
             case DFS -> DFS;
             case Dijkstra -> Dijkstra;
             case EigenVector -> EigenVector;
+            case FastRP -> FastRP;
             case FilteredKNN -> FilteredKNN;
             case FilteredNodeSimilarity -> FilteredNodeSimilarity;
+            case GraphSage -> GraphSage;
             case HarmonicCentrality -> HarmonicCentrality;
+            case K1Coloring -> K1Coloring;
+            case KCore -> KCore;
+            case KMeans -> KMeans;
             case KNN -> KNN;
             case KSpanningTree -> KSpanningTree;
+            case LabelPropagation -> LabelPropagation;
+            case LCC -> LCC;
+            case Leiden -> Leiden;
+            case Louvain -> Louvain;
             case LongestPath -> LongestPath;
+            case Modularity -> Modularity;
+            case ModularityOptimization -> ModularityOptimization;
             case NodeSimilarity -> NodeSimilarity;
             case PageRank -> PageRank;
             case RandomWalk -> RandomWalk;
+            case SCC -> SCC;
             case SingleSourceDijkstra -> SingleSourceDijkstra;
             case SpanningTree -> SpanningTree;
             case SteinerTree -> SteinerTree;
             case TopologicalSort -> TopologicalSort;
+            case TriangleCount -> TriangleCount;
+            case Triangles -> Triangles;
+            case WCC -> WCC;
             case Yens -> Yens;
         };
     }

@@ -36,6 +36,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Collections;
 import java.util.Map;
@@ -169,7 +170,8 @@ final class ApproxMaxKCutTest {
                 minimize
             ),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var result = approxMaxKCut.compute();
@@ -217,7 +219,8 @@ final class ApproxMaxKCutTest {
                 false
             ),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var cardinalities = new long[2];

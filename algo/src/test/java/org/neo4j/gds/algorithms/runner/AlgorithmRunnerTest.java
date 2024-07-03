@@ -19,14 +19,29 @@
  */
 package org.neo4j.gds.algorithms.runner;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.Preconditions;
+import org.neo4j.gds.PreconditionsProvider;
+import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.api.User;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.core.loading.GraphResources;
+import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.loading.PostLoadValidationHook;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.ExecutionMetric;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThatException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
@@ -37,7 +52,23 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 class AlgorithmRunnerTest {
+    /**
+     * Save the preconditions before each test, restore them after
+     * That way, there will be no global effects - fingers crossed
+     * Now, the fact that there _could_ be global effects is just hella scary
+     * Luckily I am fixing that, one little mess after another
+     */
+    private Preconditions preconditions;
 
+    @BeforeEach
+    public void before() {
+        preconditions = PreconditionsProvider.preconditions();
+    }
+
+    @AfterEach
+    public void after() {
+        PreconditionsProvider.preconditions(preconditions);
+    }
 
     @Test
     void shouldRegisterAlgorithmMetricCountForSuccess() {
@@ -107,5 +138,43 @@ class AlgorithmRunnerTest {
         );
     }
 
+    @Test
+    void shouldFailWhenPreconditionsAreNotMet() {
+        PreconditionsProvider.preconditions(() -> {
+            throw new IllegalStateException("Here be dragons");
+        });
+        var algorithmRunner = new AlgorithmRunner(null, null, null, null, null);
 
+        assertThatThrownBy(() -> algorithmRunner.run(null, null, null, null)).hasMessageContaining("Here be dragons");
+    }
+
+    @Test
+    void shouldSucceedWhenPreconditionsAreMet() {
+        PreconditionsProvider.preconditions(() -> {});
+        var graphStoreCatalogService = new GraphStoreCatalogService() {
+            @Override
+            public GraphResources getGraphResources(
+                GraphName graphName,
+                AlgoBaseConfig configuration,
+                Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
+                Optional<String> relationshipProperty,
+                User user,
+                DatabaseId databaseId
+            ) {
+                // this gets called right after the preconditions check
+                // so, we save ourselves trouble and shunt the rest of the method
+                throw new RuntimeException("just a shortcut");
+            }
+        };
+        var algorithmRunner = new AlgorithmRunner(
+            null,
+            graphStoreCatalogService,
+            null,
+            null,
+            RequestScopedDependencies.builder().build()
+        );
+
+        assertThatThrownBy(() -> algorithmRunner.run("doesn't matter", null, null, null))
+            .hasMessageContaining("just a shortcut");
+    }
 }
