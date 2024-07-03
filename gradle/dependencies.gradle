@@ -1,6 +1,5 @@
 ext {
     neos = [
-        '5.15': properties.getOrDefault('neo4jVersion515', '5.15.0'),
         '5.16': properties.getOrDefault('neo4jVersion516', '5.16.0'),
         '5.17': properties.getOrDefault('neo4jVersion517', '5.17.0'),
         '5.18': properties.getOrDefault('neo4jVersion518', '5.18.1'),
@@ -14,7 +13,6 @@ ext {
     neo4j_minor = properties.getOrDefault('neo4jVersion', neo4jDefault).toString().split('\\.')[0..1].join('.')
 
     scalas = [
-        '5.15': '2.13.11',
         '5.16': '2.13.11',
         '5.17': '2.13.11',
         '5.18': '2.13.11',
@@ -25,7 +23,6 @@ ext {
     ]
 
     log4js = [
-        '5.15': '2.20.0',
         '5.16': '2.20.0',
         '5.17': '2.20.0',
         '5.18': '2.20.0',
@@ -36,7 +33,6 @@ ext {
     ]
 
     shiros = [
-        '5.15': '1.13.0',
         '5.16': '1.13.0',
         '5.17': '1.13.0',
         '5.18': '1.13.0',
