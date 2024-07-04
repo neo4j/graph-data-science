@@ -21,7 +21,6 @@ package org.neo4j.gds.junit.annotation;
 
 @SuppressWarnings("all")
 public enum Neo4jVersion {
-    V_5_15(15),
     V_5_16(16),
     V_5_17(17),
     V_5_18(18),

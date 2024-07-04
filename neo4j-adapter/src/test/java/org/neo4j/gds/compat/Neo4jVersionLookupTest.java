@@ -33,12 +33,12 @@ class Neo4jVersionLookupTest {
     @ParameterizedTest
     @CsvSource(
         {
-            "5.15.0, 5, 15",
             "5.16.0, 5, 16",
             "5.17.0, 5, 17",
             "5.18.1, 5, 18",
             "5.19.0, 5, 19",
             "5.20.0, 5, 20",
+            "5.21.0, 5, 21",
         }
     )
     void testParse(String input, int major, int minor) {
@@ -51,7 +51,6 @@ class Neo4jVersionLookupTest {
     @ParameterizedTest
     @CsvSource(
         {
-            "5.21.0, 5, 21",
             "5.21.0-SNAPSHOT, 5, 21",
             "5.99.0-SNAPSHOT, 5, 99"
         }
@@ -106,7 +105,6 @@ class Neo4jVersionLookupTest {
     @ParameterizedTest
     @CsvSource(
         {
-            "5.15.0, 5, 15",
             "5.16.0, 5, 16",
             "5.17.0, 5, 17",
             "5.18.1, 5, 18",
