@@ -66,7 +66,7 @@ import static java.util.function.Predicate.not;
 
 public final class Neo4jProxyImpl implements Neo4jProxyApi {
 
-    public CursorContextFactory cursorContextFactory(Optional<PageCacheTracer> pageCacheTracer) {
+    private CursorContextFactory cursorContextFactory(Optional<PageCacheTracer> pageCacheTracer) {
         return pageCacheTracer.map(cacheTracer -> new CursorContextFactory(
             cacheTracer,
             FixedVersionContextSupplier.EMPTY_CONTEXT_SUPPLIER
