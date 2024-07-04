@@ -30,6 +30,8 @@ import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.Monitor;
 import org.neo4j.internal.batchimport.input.Collector;
+import org.neo4j.internal.kernel.api.PropertyCursor;
+import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.exceptions.InvalidTransactionTypeKernelException;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
 import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
@@ -49,6 +51,8 @@ import org.neo4j.logging.internal.LogService;
 import org.neo4j.memory.EmptyMemoryTracker;
 import org.neo4j.procedure.Mode;
 import org.neo4j.scheduler.JobScheduler;
+import org.neo4j.storageengine.api.PropertySelection;
+import org.neo4j.storageengine.api.Reference;
 import org.neo4j.storageengine.api.StorageEngineFactory;
 import org.neo4j.values.storable.Value;
 
@@ -238,5 +242,17 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             internal,
             threadSafe
         );
+    }
+
+    @Override
+    public void relationshipProperties(
+        Read read,
+        long relationshipReference,
+        long startNodeReference,
+        Reference reference,
+        PropertySelection selection,
+        PropertyCursor cursor
+    ) {
+        read.relationshipProperties(relationshipReference, reference, selection, cursor);
     }
 }

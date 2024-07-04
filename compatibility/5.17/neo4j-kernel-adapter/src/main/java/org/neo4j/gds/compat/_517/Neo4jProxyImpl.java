@@ -23,6 +23,8 @@ import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.compat.GlobalProcedureRegistry;
 import org.neo4j.gds.compat.Neo4jProxyApi;
 import org.neo4j.gds.compat.Write;
+import org.neo4j.internal.kernel.api.PropertyCursor;
+import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.exceptions.InvalidTransactionTypeKernelException;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
 import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
@@ -32,6 +34,8 @@ import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.procedure.Mode;
+import org.neo4j.storageengine.api.PropertySelection;
+import org.neo4j.storageengine.api.Reference;
 import org.neo4j.values.storable.Value;
 
 import java.util.List;
@@ -155,4 +159,15 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         );
     }
 
+    @Override
+    public void relationshipProperties(
+        Read read,
+        long relationshipReference,
+        long startNodeReference,
+        Reference reference,
+        PropertySelection selection,
+        PropertyCursor cursor
+    ) {
+        read.relationshipProperties(relationshipReference, reference, selection, cursor);
+    }
 }
