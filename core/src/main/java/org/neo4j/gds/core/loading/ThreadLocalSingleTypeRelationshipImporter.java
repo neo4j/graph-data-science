@@ -68,7 +68,7 @@ public abstract class ThreadLocalSingleTypeRelationshipImporter<PROPERTY_REF> {
                 relationshipsBatchBuffer,
                 propertyReader
             )
-                : new Natural(adjacencyBuffer, relationshipsBatchBuffer, propertyReader);
+                : new Natural<>(adjacencyBuffer, relationshipsBatchBuffer, propertyReader);
         } else if (orientation == Orientation.REVERSE) {
             return loadProperties
                 ? new ReverseWithProperties<>(
@@ -99,23 +99,21 @@ public abstract class ThreadLocalSingleTypeRelationshipImporter<PROPERTY_REF> {
         return relationshipsBatchBuffer;
     }
 
-    protected RelationshipsBatchBuffer<PROPERTY_REF> sourceBuffer() {
+    RelationshipsBatchBuffer<PROPERTY_REF> sourceBuffer() {
         return relationshipsBatchBuffer;
     }
 
-    protected AdjacencyBuffer targetBuffer() {
+    AdjacencyBuffer targetBuffer() {
         return adjacencyBuffer;
     }
 
-    protected int importRelationships(
-        RelationshipsBatchBuffer<PROPERTY_REF> sourceBuffer,
-        long[] batch,
+    int importRelationships(
+        RelationshipsBatchBuffer.View<PROPERTY_REF> sourceBuffer,
         long[][] properties,
         AdjacencyBuffer targetBuffer
     ) {
-        int batchLength = sourceBuffer.length();
-
-        // TODO: to we need to pass sourceBuffer in addition?
+        long[] batch = sourceBuffer.batch();
+        int batchLength = sourceBuffer.batchLength();
         int[] offsets = sourceBuffer.spareInts();
         long[] targets = sourceBuffer.spareLongs();
 
@@ -158,10 +156,10 @@ public abstract class ThreadLocalSingleTypeRelationshipImporter<PROPERTY_REF> {
 
         @Override
         public long importRelationships() {
-            long[] batch = sourceBuffer().sortBySource();
-            int importedOut = importRelationships(sourceBuffer(), batch, null, targetBuffer());
-            batch = sourceBuffer().sortByTarget();
-            int importedIn = importRelationships(sourceBuffer(), batch, null, targetBuffer());
+            var bySource = sourceBuffer().changeToSourceOrder();
+            int importedOut = importRelationships(bySource, null, targetBuffer());
+            var byTarget = sourceBuffer().changeToTargetOrder();
+            int importedIn = importRelationships(byTarget, null, targetBuffer());
             return RawValues.combineIntInt(importedOut + importedIn, 0);
         }
     }
@@ -178,30 +176,25 @@ public abstract class ThreadLocalSingleTypeRelationshipImporter<PROPERTY_REF> {
 
         @Override
         public long importRelationships() {
-            int batchLength = sourceBuffer().length();
-            long[] batch = sourceBuffer().sortBySource();
-            long[][] outProperties = propertyReader.readProperty(
-                sourceBuffer().relationshipReferences(),
-                sourceBuffer().propertyReferences(),
-                batchLength / RelationshipsBatchBuffer.ENTRIES_PER_RELATIONSHIP,
+            var bySource = sourceBuffer().changeToSourceOrder();
+            long[][] outProperties = propertyReader.readProperties(
+                bySource,
                 targetBuffer().getPropertyKeyIds(),
                 targetBuffer().getDefaultValues(),
                 targetBuffer().getAggregations(),
                 targetBuffer().atLeastOnePropertyToLoad()
             );
-            int importedOut = importRelationships(sourceBuffer(), batch, outProperties, targetBuffer());
+            int importedOut = importRelationships(bySource, outProperties, targetBuffer());
 
-            batch = sourceBuffer().sortByTarget();
-            long[][] inProperties = propertyReader.readProperty(
-                sourceBuffer().relationshipReferences(),
-                sourceBuffer().propertyReferences(),
-                batchLength / RelationshipsBatchBuffer.ENTRIES_PER_RELATIONSHIP,
+            var byTarget = sourceBuffer().changeToTargetOrder();
+            long[][] inProperties = propertyReader.readProperties(
+                byTarget,
                 targetBuffer().getPropertyKeyIds(),
                 targetBuffer().getDefaultValues(),
                 targetBuffer().getAggregations(),
                 targetBuffer().atLeastOnePropertyToLoad()
             );
-            int importedIn = importRelationships(sourceBuffer(), batch, inProperties, targetBuffer());
+            int importedIn = importRelationships(byTarget, inProperties, targetBuffer());
 
             return RawValues.combineIntInt(importedOut + importedIn, importedOut + importedIn);
         }
@@ -219,13 +212,8 @@ public abstract class ThreadLocalSingleTypeRelationshipImporter<PROPERTY_REF> {
 
         @Override
         public long importRelationships() {
-            long[] batch = sourceBuffer().sortBySource();
-            return RawValues.combineIntInt(importRelationships(
-                sourceBuffer(),
-                batch,
-                null,
-                targetBuffer()
-            ), 0);
+            var bySource = sourceBuffer().changeToSourceOrder();
+            return RawValues.combineIntInt(importRelationships(bySource, null, targetBuffer()), 0);
         }
     }
 
@@ -241,18 +229,19 @@ public abstract class ThreadLocalSingleTypeRelationshipImporter<PROPERTY_REF> {
 
         @Override
         public long importRelationships() {
-            int batchLength = sourceBuffer().length();
-            long[] batch = sourceBuffer().sortBySource();
-            long[][] outProperties = propertyReader.readProperty(
-                sourceBuffer().relationshipReferences(),
-                sourceBuffer().propertyReferences(),
-                batchLength / 2,
+            var propertiesProducer = sourceBuffer().changeToSourceOrder();
+            long[][] outProperties = propertyReader.readProperties(
+                propertiesProducer,
                 targetBuffer().getPropertyKeyIds(),
                 targetBuffer().getDefaultValues(),
                 targetBuffer().getAggregations(),
                 targetBuffer().atLeastOnePropertyToLoad()
             );
-            int importedOut = importRelationships(sourceBuffer(), batch, outProperties, targetBuffer());
+            int importedOut = importRelationships(
+                propertiesProducer,
+                outProperties,
+                targetBuffer()
+            );
             return RawValues.combineIntInt(importedOut, importedOut);
         }
     }
@@ -269,13 +258,8 @@ public abstract class ThreadLocalSingleTypeRelationshipImporter<PROPERTY_REF> {
 
         @Override
         public long importRelationships() {
-            long[] batch = sourceBuffer().sortByTarget();
-            return RawValues.combineIntInt(importRelationships(
-                sourceBuffer(),
-                batch,
-                null,
-                targetBuffer()
-            ), 0);
+            var byTarget = sourceBuffer().changeToTargetOrder();
+            return RawValues.combineIntInt(importRelationships(byTarget, null, targetBuffer()), 0);
         }
     }
 
@@ -291,18 +275,15 @@ public abstract class ThreadLocalSingleTypeRelationshipImporter<PROPERTY_REF> {
 
         @Override
         public long importRelationships() {
-            int batchLength = sourceBuffer().length();
-            long[] batch = sourceBuffer().sortByTarget();
-            long[][] inProperties = propertyReader.readProperty(
-                sourceBuffer().relationshipReferences(),
-                sourceBuffer().propertyReferences(),
-                batchLength / 2,
+            var byTarget = sourceBuffer().changeToTargetOrder();
+            long[][] inProperties = propertyReader.readProperties(
+                byTarget,
                 targetBuffer().getPropertyKeyIds(),
                 targetBuffer().getDefaultValues(),
                 targetBuffer().getAggregations(),
                 targetBuffer().atLeastOnePropertyToLoad()
             );
-            int importedIn = importRelationships(sourceBuffer(), batch, inProperties, targetBuffer());
+            int importedIn = importRelationships(byTarget, inProperties, targetBuffer());
             return RawValues.combineIntInt(importedIn, importedIn);
         }
     }

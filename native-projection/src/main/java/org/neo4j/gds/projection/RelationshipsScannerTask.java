@@ -43,7 +43,7 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public final class RelationshipsScannerTask extends StatementAction implements RecordScannerTask {
+final class RelationshipsScannerTask extends StatementAction implements RecordScannerTask {
 
     public static RecordScannerTaskRunner.RecordScannerTaskFactory factory(
         GraphLoaderContext loadingContext,
@@ -206,42 +206,42 @@ public final class RelationshipsScannerTask extends StatementAction implements R
 
     @NotNull
     private static PropertyReader<PropertyReference> emptyPropertyReader() {
-        return (relationshipReferences, propertyReferences, numberOfReferences, propertyKeyIds, defaultValues, aggregations, atLeastOnePropertyToLoad) -> new long[propertyKeyIds.length][0];
+        return (producer, propertyKeyIds, defaultValues, aggregations, atLeastOnePropertyToLoad) -> new long[propertyKeyIds.length][0];
     }
 
     @NotNull
     private static PropertyReader<PropertyReference> storeBackedPropertyReader(KernelTransaction kernelTransaction) {
-        return (relationshipReferences, propertyReferences, numberOfReferences, relationshipProperties, defaultPropertyValues, aggregations, atLeastOnePropertyToLoad) -> {
-            long[][] properties = new long[relationshipProperties.length][numberOfReferences];
+        return (producer, propertyKeyIds, defaultPropertyValues, aggregations, atLeastOnePropertyToLoad) -> {
+            long[][] properties = new long[propertyKeyIds.length][producer.numberOfElements()];
             if (atLeastOnePropertyToLoad) {
                 try (PropertyCursor pc = Neo4jProxy.allocatePropertyCursor(kernelTransaction)) {
-                    double[] relProps = new double[relationshipProperties.length];
-                    for (int i = 0; i < numberOfReferences; i++) {
+                    double[] relProps = new double[propertyKeyIds.length];
+                    producer.forEach((index, source, target, relationshipReference, propertyReference) -> {
                         Neo4jProxy.relationshipProperties(
                             kernelTransaction,
-                            relationshipReferences[i],
-                            propertyReferences[i],
+                            relationshipReference,
+                            propertyReference,
                             pc
                         );
                         ReadHelper.readProperties(
                             pc,
-                            relationshipProperties,
+                            propertyKeyIds,
                             defaultPropertyValues,
                             aggregations,
                             relProps
                         );
                         for (int j = 0; j < relProps.length; j++) {
-                            properties[j][i] = Double.doubleToLongBits(relProps[j]);
+                            properties[j][index] = Double.doubleToLongBits(relProps[j]);
                         }
-                    }
+                    });
                 }
             } else {
-                for (int i = 0; i < numberOfReferences; i++) {
+                producer.forEach((index, source, target, relationshipReference, propertyReference) -> {
                     for (int j = 0; j < defaultPropertyValues.length; j++) {
                         double value = aggregations[j].normalizePropertyValue(defaultPropertyValues[j]);
-                        properties[j][i] = Double.doubleToLongBits(value);
+                        properties[j][index] = Double.doubleToLongBits(value);
                     }
-                }
+                });
             }
             return properties;
         };

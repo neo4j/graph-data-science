@@ -21,26 +21,37 @@ package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.core.Aggregation;
 
-import java.util.Arrays;
-
 public interface PropertyReader<PROPERTY_REF> {
+
+    interface Consumer<PROPERTY_REF> {
+        void accept(
+            int index,
+            long source,
+            long target,
+            long relationshipReference,
+            PROPERTY_REF propertyReference
+        );
+    }
+
+    interface Producer<PROPERTY_REF> {
+        int numberOfElements();
+
+        void forEach(Consumer<PROPERTY_REF> consumer);
+    }
+
     /**
      * Load the relationship properties for the given batch of relationships.
      * Relationships are represented as two arrays from the {@link RelationshipsBatchBuffer}.
      *
-     * @param relationshipReferences   relationship references (IDs)
-     * @param propertyReferences       property references (IDs or References)
-     * @param numberOfReferences       number of valid entries in the first two arrays
+     * @param producer                 A producer that can produce a number of properties
      * @param propertyKeyIds           property key ids to load
      * @param defaultValues            default weight for each property key
      * @param aggregations             the aggregation for each property
      * @param atLeastOnePropertyToLoad true iff there is at least one value in {@code propertyKeyIds} that is not {@link org.neo4j.kernel.api.StatementConstants#NO_SUCH_PROPERTY_KEY} (-1).
      * @return list of property values per relationship property id
      */
-    long[][] readProperty(
-        long[] relationshipReferences,
-        PROPERTY_REF[] propertyReferences,
-        int numberOfReferences,
+    long[][] readProperties(
+        Producer<PROPERTY_REF> producer,
         int[] propertyKeyIds,
         double[] defaultValues,
         Aggregation[] aggregations,
@@ -48,8 +59,11 @@ public interface PropertyReader<PROPERTY_REF> {
     );
 
     static PropertyReader<Integer> preLoaded() {
-        return (relationshipReferences, propertyReferences, numberOfReferences, weightProperty, defaultWeight, aggregations, atLeastOnePropertyToLoad) -> {
-            long[] properties = Arrays.copyOf(relationshipReferences, numberOfReferences);
+        return (producer, propertyKeyIds, defaultValues, aggregations, atLeastOnePropertyToLoad) -> {
+            long[] properties = new long[producer.numberOfElements()];
+            producer.forEach((index, source, target, relationshipReference, propertyReference) -> {
+                properties[index] = relationshipReference;
+            });
             return new long[][]{properties};
         };
     }
@@ -73,27 +87,26 @@ public interface PropertyReader<PROPERTY_REF> {
         }
 
         @Override
-        public long[][] readProperty(
-            long[] relationshipReferences,
-            PROPERTY_REF[] propertyReferences,
-            int numberOfReferences,
+        public long[][] readProperties(
+            Producer<PROPERTY_REF> producer,
             int[] propertyKeyIds,
             double[] defaultValues,
             Aggregation[] aggregations,
             boolean atLeastOnePropertyToLoad
         ) {
-            long[][] resultBuffer = new long[propertyCount][numberOfReferences];
+            long[][] resultBuffer = new long[propertyCount][producer.numberOfElements()];
 
-            for (int propertyKeyId = 0; propertyKeyId < propertyCount; propertyKeyId++) {
-                long[] propertyValues = new long[numberOfReferences];
-                for (int relationshipOffset = 0; relationshipOffset < numberOfReferences; relationshipOffset++) {
-                    int relationshipId = (int) relationshipReferences[relationshipOffset];
+            for (int propertyIndex = 0; propertyIndex < propertyCount; propertyIndex++) {
+                long[] buffered = this.buffer[propertyIndex];
+                long[] propertyValues = new long[producer.numberOfElements()];
+                producer.forEach((index, source, target, relationshipReference, propertyReference) -> {
+                    int relationshipId = (int) relationshipReference;
                     // We need to fill this consecutively indexed
                     // in the same order as the relationships are
                     // stored in the batch.
-                    propertyValues[relationshipOffset] = buffer[propertyKeyId][relationshipId];
-                }
-                resultBuffer[propertyKeyId] = propertyValues;
+                    propertyValues[index] = buffered[relationshipId];
+                });
+                resultBuffer[propertyIndex] = propertyValues;
             }
 
             return resultBuffer;
