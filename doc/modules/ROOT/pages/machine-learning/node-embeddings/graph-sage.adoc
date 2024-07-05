@@ -396,17 +396,21 @@ CREATE
 
 [source, cypher, role=noplay graph-project-query]
 ----
-MATCH (source:Person)-[r:KNOWS]->(target:Person)
+MATCH (source:Person)
+OPTIONAL MATCH (source:Person)-[r:KNOWS]->(target:Person)
 WITH gds.graph.project(
   'persons',
   source,
   target,
   {
+    sourceNodeLabels: labels(source),
+    targetNodeLabels: labels(target),
     sourceNodeProperties: source { .age, .heightAndWeight },
     targetNodeProperties: target { .age, .heightAndWeight },
+    relationshipType: type(r),
     relationshipProperties: r { .relWeight }
   },
-  { undirectedRelationshipTypes: ['*'] }
+  { undirectedRelationshipTypes: ['KNOWS'] }
 ) AS g
 RETURN
   g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
@@ -448,7 +452,7 @@ RETURN
 .Results
 |===
 | modelName           | didConverge | ranEpochs | epochLosses
-| "exampleTrainModel" | true        | 1         | [26.578495437666277]
+| "exampleTrainModel" | true        | 1         | [26.5784954435]
 |===
 --
 
@@ -528,11 +532,13 @@ WITH gds.graph.project(
   source,
   target,
   {
+    sourceNodeLabels: labels(source),
     sourceNodeProperties: source { .age, .heightAndWeight },
+    targetNodeLabels: labels(target),
     targetNodeProperties: target { .cost },
     relationshipProperties: r { .relWeight }
   },
-  { undirectedRelationshipTypes: ['*'] }
+  { undirectedRelationshipTypes: ['KNOWS', 'LIKES'] }
 ) AS g
 RETURN
   g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
@@ -666,19 +672,21 @@ CALL gds.beta.graphSage.stream(
   }
 )
 YIELD nodeId, embedding
+RETURN gds.util.asNode(nodeId).name AS person, embedding
+ORDER BY person, embedding
 ----
 
 [opts="header",cols="1,5"]
 .Results
 |===
-| nodeId | embedding
-| 0      | [0.528500257482333, 0.468218186911235, 0.708137844620235]
-| 1      | [0.528500257482782, 0.468218186911469, 0.708137844619745]
-| 2      | [0.528500257482316, 0.468218186911227, 0.708137844620253]
-| 3      | [0.528500257480933, 0.468218186910508, 0.708137844621761]
-| 4      | [0.528500257525252, 0.468218186933538, 0.708137844573457]
-| 5      | [0.528500257587681, 0.468218186965977, 0.708137844505415]
-| 6      | [0.528500257481127, 0.468218186910609, 0.708137844621549]
+| person  | embedding
+| "Annie" | [0.5285002573, 0.4682181872, 0.7081378445]
+| "Brie"  | [0.5285002574, 0.4682181872, 0.7081378445]
+| "Dan"   | [0.5285002573, 0.4682181872, 0.7081378445]
+| "Elsa"  | [0.5285002575, 0.4682181872, 0.7081378444]
+| "Jeff"  | [0.5285002573, 0.4682181872, 0.7081378445]
+| "John"  | [0.5285002573, 0.4682181872, 0.7081378445]
+| "Matt"  | [0.5285002573, 0.4682181872, 0.7081378445]
 |===
 --
 

@@ -28,6 +28,7 @@ import org.neo4j.gds.embeddings.graphsage.GraphSageMutateProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageStreamProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageTrainProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageWriteProc;
+import org.neo4j.gds.functions.AsNodeFunc;
 
 import java.util.List;
 
@@ -43,6 +44,11 @@ class GraphSageDocTest extends SingleFileDocTestBase {
             GraphSageWriteProc.class,
             DegreeCentralityMutateProc.class
         );
+    }
+
+    @Override
+    protected List<Class<?>> functions() {
+        return List.of(AsNodeFunc.class);
     }
 
     @Override
