@@ -316,12 +316,12 @@ ORDER BY name
 [opts="header"]
 |===
 | name      | communityId
-| "Alice"   | 4
+| "Alice"   | 3
 | "Bridget" | 1
 | "Charles" | 1
 | "Doug"    | 1
-| "Elton"   | 4
-| "Frank"   | 4
+| "Elton"   | 3
+| "Frank"   | 3
 |===
 --
 
