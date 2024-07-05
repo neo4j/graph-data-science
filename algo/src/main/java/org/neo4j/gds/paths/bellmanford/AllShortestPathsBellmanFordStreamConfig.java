@@ -23,20 +23,10 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Configuration
-public interface BellmanFordStatsConfig extends BellmanFordBaseConfig {
+public interface AllShortestPathsBellmanFordStreamConfig extends AllShortestPathsBellmanFordBaseConfig {
 
-    @Configuration.Ignore
-    default boolean trackNegativeCycles() {
-        return false;
-    }
-
-    @Configuration.Ignore
-    default boolean trackPaths() {
-        return false;
-    }
-
-    static BellmanFordStatsConfig of(CypherMapWrapper userInput) {
-        return new BellmanFordStatsConfigImpl(userInput);
+    static AllShortestPathsBellmanFordStreamConfig of(CypherMapWrapper userInput) {
+        return new AllShortestPathsBellmanFordStreamConfigImpl(userInput);
     }
 
 }

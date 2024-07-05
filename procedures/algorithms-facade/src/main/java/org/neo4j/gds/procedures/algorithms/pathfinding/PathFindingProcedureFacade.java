@@ -39,9 +39,9 @@ import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
 import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarWriteConfig;
-import org.neo4j.gds.paths.bellmanford.BellmanFordStatsConfig;
-import org.neo4j.gds.paths.bellmanford.BellmanFordStreamConfig;
-import org.neo4j.gds.paths.bellmanford.BellmanFordWriteConfig;
+import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStatsConfig;
+import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStreamConfig;
+import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordWriteConfig;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStatsConfig;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStreamConfig;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaWriteConfig;
@@ -274,7 +274,7 @@ public final class PathFindingProcedureFacade {
         return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
             graphName,
             configuration,
-            BellmanFordStreamConfig::of,
+            AllShortestPathsBellmanFordStreamConfig::of,
             streamMode()::bellmanFord,
             resultBuilder
         );
@@ -286,7 +286,7 @@ public final class PathFindingProcedureFacade {
     ) {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
-            BellmanFordStreamConfig::of,
+            AllShortestPathsBellmanFordStreamConfig::of,
             configuration -> estimationMode().bellmanFord(
                 configuration,
                 graphNameOrConfiguration
@@ -302,7 +302,7 @@ public final class PathFindingProcedureFacade {
         return algorithmExecutionScaffolding.runAlgorithm(
             graphName,
             configuration,
-            BellmanFordStatsConfig::of,
+            AllShortestPathsBellmanFordStatsConfig::of,
             statsMode()::bellmanFord,
             resultBuilder
         );
@@ -314,7 +314,7 @@ public final class PathFindingProcedureFacade {
     ) {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
-            BellmanFordStatsConfig::of,
+            AllShortestPathsBellmanFordStatsConfig::of,
             configuration -> estimationMode().bellmanFord(
                 configuration,
                 graphNameOrConfiguration
@@ -334,7 +334,7 @@ public final class PathFindingProcedureFacade {
             algorithmExecutionScaffolding.runAlgorithm(
                 graphName,
                 configuration,
-                BellmanFordWriteConfig::of,
+                AllShortestPathsBellmanFordWriteConfig::of,
                 writeMode()::bellmanFord,
                 resultBuilder
             )
@@ -347,7 +347,7 @@ public final class PathFindingProcedureFacade {
     ) {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
-            BellmanFordWriteConfig::of,
+            AllShortestPathsBellmanFordWriteConfig::of,
             configuration -> estimationMode().bellmanFord(
                 configuration,
                 graphNameOrConfiguration

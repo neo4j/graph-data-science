@@ -20,18 +20,18 @@
 package org.neo4j.gds.procedures.algorithms.pathfinding.stubs;
 
 import org.neo4j.gds.applications.ApplicationsFacade;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.paths.bellmanford.BellmanFordMutateConfig;
+import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordMutateConfig;
 import org.neo4j.gds.procedures.algorithms.pathfinding.BellmanFordMutateResult;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class BellmanFordMutateStub implements MutateStub<BellmanFordMutateConfig, BellmanFordMutateResult> {
+public class BellmanFordMutateStub implements MutateStub<AllShortestPathsBellmanFordMutateConfig, BellmanFordMutateResult> {
     private final GenericStub genericStub;
     private final ApplicationsFacade applicationsFacade;
 
@@ -44,8 +44,8 @@ public class BellmanFordMutateStub implements MutateStub<BellmanFordMutateConfig
     }
 
     @Override
-    public BellmanFordMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(BellmanFordMutateConfig::of, configuration);
+    public AllShortestPathsBellmanFordMutateConfig parseConfiguration(Map<String, Object> configuration) {
+        return genericStub.parseConfiguration(AllShortestPathsBellmanFordMutateConfig::of, configuration);
     }
 
     @Override
@@ -53,7 +53,7 @@ public class BellmanFordMutateStub implements MutateStub<BellmanFordMutateConfig
         return genericStub.getMemoryEstimation(
             username,
             configuration,
-            BellmanFordMutateConfig::of,
+            AllShortestPathsBellmanFordMutateConfig::of,
             estimationMode()::bellmanFord
         );
     }
@@ -63,7 +63,7 @@ public class BellmanFordMutateStub implements MutateStub<BellmanFordMutateConfig
         return genericStub.estimate(
             graphName,
             configuration,
-            BellmanFordMutateConfig::of,
+            AllShortestPathsBellmanFordMutateConfig::of,
             estimationMode()::bellmanFord
         );
     }
@@ -75,7 +75,7 @@ public class BellmanFordMutateStub implements MutateStub<BellmanFordMutateConfig
         return genericStub.execute(
             graphName,
             configuration,
-            BellmanFordMutateConfig::of,
+            AllShortestPathsBellmanFordMutateConfig::of,
             applicationsFacade.pathFinding().mutate()::bellmanFord,
             resultBuilder
         );

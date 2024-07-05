@@ -27,7 +27,7 @@ import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
-import org.neo4j.gds.paths.bellmanford.BellmanFordMutateConfig;
+import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordMutateConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaMutateConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
@@ -72,8 +72,8 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
 
     public <RESULT> RESULT bellmanFord(
         GraphName graphName,
-        BellmanFordMutateConfig configuration,
-        ResultBuilder<BellmanFordMutateConfig, BellmanFordResult, RESULT, RelationshipsWritten> resultBuilder
+        AllShortestPathsBellmanFordMutateConfig configuration,
+        ResultBuilder<AllShortestPathsBellmanFordMutateConfig, BellmanFordResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
         var mutateStep = new BellmanFordMutateStep(configuration);
 

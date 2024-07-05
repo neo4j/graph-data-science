@@ -24,8 +24,8 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTempla
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStatsConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
-import org.neo4j.gds.paths.bellmanford.BellmanFordStatsConfig;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStatsConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.traverse.BfsStatsConfig;
@@ -61,8 +61,8 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
 
     public <RESULT> RESULT bellmanFord(
         GraphName graphName,
-        BellmanFordStatsConfig configuration,
-        ResultBuilder<BellmanFordStatsConfig, BellmanFordResult, RESULT, Void> resultBuilder
+        AllShortestPathsBellmanFordStatsConfig configuration,
+        ResultBuilder<AllShortestPathsBellmanFordStatsConfig, BellmanFordResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,

@@ -24,7 +24,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.config.SourceNodeConfig;
 
-public interface BellmanFordBaseConfig extends AlgoBaseConfig, SourceNodeConfig, RelationshipWeightConfig {
+public interface AllShortestPathsBellmanFordBaseConfig extends AlgoBaseConfig, SourceNodeConfig, RelationshipWeightConfig {
 
     @Configuration.Ignore
     default boolean trackNegativeCycles() {

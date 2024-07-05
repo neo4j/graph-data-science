@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.ml.pipeline.stubs;
 
-import org.neo4j.gds.paths.bellmanford.BellmanFordMutateConfig;
+import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordMutateConfig;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.pathfinding.BellmanFordMutateResult;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
-public class BellmanFordStub extends AbstractStub<BellmanFordMutateConfig, BellmanFordMutateResult> {
-    protected MutateStub<BellmanFordMutateConfig, BellmanFordMutateResult> stub(AlgorithmsProcedureFacade facade) {
+public class BellmanFordStub extends AbstractStub<AllShortestPathsBellmanFordMutateConfig, BellmanFordMutateResult> {
+    protected MutateStub<AllShortestPathsBellmanFordMutateConfig, BellmanFordMutateResult> stub(AlgorithmsProcedureFacade facade) {
         return facade.pathFinding().bellmanFordMutateStub();
     }
 }

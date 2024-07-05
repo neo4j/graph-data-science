@@ -24,10 +24,10 @@ import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStreamConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFord;
 import org.neo4j.gds.paths.bellmanford.BellmanFordAlgorithmFactory;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
-import org.neo4j.gds.paths.bellmanford.BellmanFordStreamConfig;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.algorithms.pathfinding.BellmanFordStreamResult;
 
@@ -38,7 +38,7 @@ import static org.neo4j.gds.paths.singlesource.SingleSourceShortestPathConstants
 
 @GdsCallable(name = "gds.bellmanFord.stream", description = BELLMAN_FORD_DESCRIPTION, executionMode = STREAM)
 public class BellmanFordStreamSpec implements
-    AlgorithmSpec<BellmanFord, BellmanFordResult, BellmanFordStreamConfig, Stream<BellmanFordStreamResult>, BellmanFordAlgorithmFactory<BellmanFordStreamConfig>> {
+    AlgorithmSpec<BellmanFord, BellmanFordResult, AllShortestPathsBellmanFordStreamConfig, Stream<BellmanFordStreamResult>, BellmanFordAlgorithmFactory<AllShortestPathsBellmanFordStreamConfig>> {
 
     @Override
     public String name() {
@@ -46,17 +46,17 @@ public class BellmanFordStreamSpec implements
     }
 
     @Override
-    public BellmanFordAlgorithmFactory<BellmanFordStreamConfig> algorithmFactory(ExecutionContext executionContext) {
+    public BellmanFordAlgorithmFactory<AllShortestPathsBellmanFordStreamConfig> algorithmFactory(ExecutionContext executionContext) {
         return new BellmanFordAlgorithmFactory<>();
     }
 
     @Override
-    public NewConfigFunction<BellmanFordStreamConfig> newConfigFunction() {
-        return (username, configuration) -> BellmanFordStreamConfig.of(configuration);
+    public NewConfigFunction<AllShortestPathsBellmanFordStreamConfig> newConfigFunction() {
+        return (username, configuration) -> AllShortestPathsBellmanFordStreamConfig.of(configuration);
     }
 
     @Override
-    public ComputationResultConsumer<BellmanFord, BellmanFordResult, BellmanFordStreamConfig, Stream<BellmanFordStreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<BellmanFord, BellmanFordResult, AllShortestPathsBellmanFordStreamConfig, Stream<BellmanFordStreamResult>> computationResultConsumer() {
         return new NullComputationResultConsumer<>();
     }
 

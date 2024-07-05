@@ -25,7 +25,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.WritePathOptionsConfig;
 
 @Configuration
-public interface BellmanFordWriteConfig extends BellmanFordBaseConfig, WriteRelationshipConfig, WritePathOptionsConfig {
+public interface AllShortestPathsBellmanFordWriteConfig extends AllShortestPathsBellmanFordBaseConfig, WriteRelationshipConfig, WritePathOptionsConfig {
 
     default boolean writeNegativeCycles() {
         return false;
@@ -37,7 +37,7 @@ public interface BellmanFordWriteConfig extends BellmanFordBaseConfig, WriteRela
         return writeNegativeCycles();
     }
 
-    static BellmanFordWriteConfig of(CypherMapWrapper userInput) {
-        return new BellmanFordWriteConfigImpl(userInput);
+    static AllShortestPathsBellmanFordWriteConfig of(CypherMapWrapper userInput) {
+        return new AllShortestPathsBellmanFordWriteConfigImpl(userInput);
     }
 }

@@ -24,18 +24,18 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
-import org.neo4j.gds.paths.bellmanford.BellmanFordMutateConfig;
+import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordMutateConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.BellmanFordMutateResult;
 
 import java.util.Optional;
 
-class BellmanFordResultBuilderForMutateMode implements ResultBuilder<BellmanFordMutateConfig, BellmanFordResult, BellmanFordMutateResult, RelationshipsWritten> {
+public class BellmanFordResultBuilderForMutateMode implements ResultBuilder<AllShortestPathsBellmanFordMutateConfig, BellmanFordResult, BellmanFordMutateResult, RelationshipsWritten> {
     @Override
     public BellmanFordMutateResult build(
         Graph graph,
         GraphStore graphStore,
-        BellmanFordMutateConfig configuration,
+        AllShortestPathsBellmanFordMutateConfig configuration,
         Optional<BellmanFordResult> result,
         AlgorithmProcessingTimings timings,
         Optional<RelationshipsWritten> metadata

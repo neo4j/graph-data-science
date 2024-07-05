@@ -23,18 +23,18 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStatsConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
-import org.neo4j.gds.paths.bellmanford.BellmanFordStatsConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class BellmanFordResultBuilderForStatsMode implements ResultBuilder<BellmanFordStatsConfig, BellmanFordResult, Stream<BellmanFordStatsResult>, Void> {
+class BellmanFordResultBuilderForStatsMode implements ResultBuilder<AllShortestPathsBellmanFordStatsConfig, BellmanFordResult, Stream<BellmanFordStatsResult>, Void> {
     @Override
     public Stream<BellmanFordStatsResult> build(
         Graph graph,
         GraphStore graphStore,
-        BellmanFordStatsConfig configuration,
+        AllShortestPathsBellmanFordStatsConfig configuration,
         Optional<BellmanFordResult> result,
         AlgorithmProcessingTimings timings,
         Optional<Void> metadata

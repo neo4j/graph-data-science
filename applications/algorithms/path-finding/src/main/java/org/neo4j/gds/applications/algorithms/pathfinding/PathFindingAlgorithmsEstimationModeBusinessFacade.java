@@ -20,12 +20,13 @@
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
+import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.paths.astar.AStarMemoryEstimateDefinition;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
-import org.neo4j.gds.paths.bellmanford.BellmanFordBaseConfig;
+import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordBaseConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordMemoryEstimateDefinition;
 import org.neo4j.gds.paths.delta.DeltaSteppingMemoryEstimateDefinition;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaBaseConfig;
@@ -38,7 +39,6 @@ import org.neo4j.gds.paths.traverse.DfsBaseConfig;
 import org.neo4j.gds.paths.traverse.DfsMemoryEstimateDefinition;
 import org.neo4j.gds.paths.yens.YensMemoryEstimateDefinition;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.spanningtree.SpanningTreeBaseConfig;
 import org.neo4j.gds.spanningtree.SpanningTreeMemoryEstimateDefinition;
 import org.neo4j.gds.steiner.SteinerTreeBaseConfig;
@@ -61,13 +61,13 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         throw new MemoryEstimationNotImplementedException();
     }
 
-    public MemoryEstimateResult bellmanFord(BellmanFordBaseConfig configuration, Object graphNameOrConfiguration) {
+    public MemoryEstimateResult bellmanFord(AllShortestPathsBellmanFordBaseConfig configuration, Object graphNameOrConfiguration) {
         var memoryEstimation = bellmanFord(configuration);
 
         return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
     }
 
-    public MemoryEstimation bellmanFord(BellmanFordBaseConfig configuration) {
+    public MemoryEstimation bellmanFord(AllShortestPathsBellmanFordBaseConfig configuration) {
         return new BellmanFordMemoryEstimateDefinition(configuration.trackNegativeCycles()).memoryEstimation();
     }
 

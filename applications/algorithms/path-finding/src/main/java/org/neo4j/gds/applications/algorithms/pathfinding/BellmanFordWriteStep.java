@@ -36,8 +36,8 @@ import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.paths.PathResult;
+import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordWriteConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
-import org.neo4j.gds.paths.bellmanford.BellmanFordWriteConfig;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -51,13 +51,13 @@ class BellmanFordWriteStep implements MutateOrWriteStep<BellmanFordResult, Relat
     private final Log log;
     private final RequestScopedDependencies requestScopedDependencies;
     private final WriteContext writeContext;
-    private final BellmanFordWriteConfig configuration;
+    private final AllShortestPathsBellmanFordWriteConfig configuration;
 
     BellmanFordWriteStep(
         Log log,
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
-        BellmanFordWriteConfig configuration
+        AllShortestPathsBellmanFordWriteConfig configuration
     ) {
         this.log = log;
         this.requestScopedDependencies = requestScopedDependencies;

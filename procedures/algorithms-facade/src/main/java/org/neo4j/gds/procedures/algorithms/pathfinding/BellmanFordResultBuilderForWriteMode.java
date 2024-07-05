@@ -24,17 +24,17 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
+import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordWriteConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
-import org.neo4j.gds.paths.bellmanford.BellmanFordWriteConfig;
 
 import java.util.Optional;
 
-class BellmanFordResultBuilderForWriteMode implements ResultBuilder<BellmanFordWriteConfig, BellmanFordResult, BellmanFordWriteResult, RelationshipsWritten> {
+class BellmanFordResultBuilderForWriteMode implements ResultBuilder<AllShortestPathsBellmanFordWriteConfig, BellmanFordResult, BellmanFordWriteResult, RelationshipsWritten> {
     @Override
     public BellmanFordWriteResult build(
         Graph graph,
         GraphStore graphStore,
-        BellmanFordWriteConfig configuration,
+        AllShortestPathsBellmanFordWriteConfig configuration,
         Optional<BellmanFordResult> result,
         AlgorithmProcessingTimings timings,
         Optional<RelationshipsWritten> metadata

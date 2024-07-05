@@ -20,25 +20,23 @@
 package org.neo4j.gds.paths.bellmanford;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Configuration
-public interface BellmanFordMutateConfig extends BellmanFordBaseConfig, MutateRelationshipConfig {
+public interface AllShortestPathsBellmanFordStatsConfig extends AllShortestPathsBellmanFordBaseConfig {
 
-    default boolean mutateNegativeCycles() {
+    @Configuration.Ignore
+    default boolean trackNegativeCycles() {
         return false;
     }
 
-    @Override
     @Configuration.Ignore
-    default boolean trackNegativeCycles() {
-        return mutateNegativeCycles();
+    default boolean trackPaths() {
+        return false;
     }
 
-
-    static BellmanFordMutateConfig of(CypherMapWrapper userInput) {
-        return new BellmanFordMutateConfigImpl(userInput);
+    static AllShortestPathsBellmanFordStatsConfig of(CypherMapWrapper userInput) {
+        return new AllShortestPathsBellmanFordStatsConfigImpl(userInput);
     }
 
 }

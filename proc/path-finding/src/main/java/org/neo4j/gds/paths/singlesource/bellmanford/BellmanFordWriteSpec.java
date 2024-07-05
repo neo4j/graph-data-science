@@ -24,10 +24,10 @@ import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordWriteConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFord;
 import org.neo4j.gds.paths.bellmanford.BellmanFordAlgorithmFactory;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
-import org.neo4j.gds.paths.bellmanford.BellmanFordWriteConfig;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.algorithms.pathfinding.BellmanFordWriteResult;
 
@@ -37,24 +37,24 @@ import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
 import static org.neo4j.gds.paths.singlesource.SingleSourceShortestPathConstants.BELLMAN_FORD_DESCRIPTION;
 
 @GdsCallable(name = "gds.bellmanFord.write", description = BELLMAN_FORD_DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
-public class BellmanFordWriteSpec implements AlgorithmSpec<BellmanFord, BellmanFordResult, BellmanFordWriteConfig, Stream<BellmanFordWriteResult>, BellmanFordAlgorithmFactory<BellmanFordWriteConfig>> {
+public class BellmanFordWriteSpec implements AlgorithmSpec<BellmanFord, BellmanFordResult, AllShortestPathsBellmanFordWriteConfig, Stream<BellmanFordWriteResult>, BellmanFordAlgorithmFactory<AllShortestPathsBellmanFordWriteConfig>> {
     @Override
     public String name() {
         return "BellmanFordWrite";
     }
 
     @Override
-    public BellmanFordAlgorithmFactory<BellmanFordWriteConfig> algorithmFactory(ExecutionContext executionContext) {
+    public BellmanFordAlgorithmFactory<AllShortestPathsBellmanFordWriteConfig> algorithmFactory(ExecutionContext executionContext) {
         return new BellmanFordAlgorithmFactory<>();
     }
 
     @Override
-    public NewConfigFunction<BellmanFordWriteConfig> newConfigFunction() {
-        return (username, configuration) -> BellmanFordWriteConfig.of(configuration);
+    public NewConfigFunction<AllShortestPathsBellmanFordWriteConfig> newConfigFunction() {
+        return (username, configuration) -> AllShortestPathsBellmanFordWriteConfig.of(configuration);
     }
 
     @Override
-    public ComputationResultConsumer<BellmanFord, BellmanFordResult, BellmanFordWriteConfig, Stream<BellmanFordWriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<BellmanFord, BellmanFordResult, AllShortestPathsBellmanFordWriteConfig, Stream<BellmanFordWriteResult>> computationResultConsumer() {
         return new NullComputationResultConsumer<>();
     }
 }

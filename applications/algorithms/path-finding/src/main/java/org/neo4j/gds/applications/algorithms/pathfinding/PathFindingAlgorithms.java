@@ -46,8 +46,8 @@ import org.neo4j.gds.kspanningtree.KSpanningTree;
 import org.neo4j.gds.kspanningtree.KSpanningTreeBaseConfig;
 import org.neo4j.gds.paths.astar.AStar;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
+import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordBaseConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFord;
-import org.neo4j.gds.paths.bellmanford.BellmanFordBaseConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.delta.DeltaStepping;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaBaseConfig;
@@ -103,7 +103,7 @@ public class PathFindingAlgorithms {
         return algorithm.compute();
     }
 
-    BellmanFordResult bellmanFord(Graph graph, BellmanFordBaseConfig configuration) {
+    BellmanFordResult bellmanFord(Graph graph, AllShortestPathsBellmanFordBaseConfig configuration) {
         var task = Tasks.iterativeOpen(
             LabelForProgressTracking.BellmanFord.value,
             () -> List.of(

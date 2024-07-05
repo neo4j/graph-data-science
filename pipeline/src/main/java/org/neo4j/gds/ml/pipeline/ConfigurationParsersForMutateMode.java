@@ -40,7 +40,7 @@ import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
 import org.neo4j.gds.pagerank.PageRankMutateConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
-import org.neo4j.gds.paths.bellmanford.BellmanFordMutateConfig;
+import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordMutateConfig;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaMutateConfig;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraMutateConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraMutateConfig;
@@ -73,7 +73,7 @@ public class ConfigurationParsersForMutateMode {
             case ApproximateMaximumKCut -> ApproxMaxKCutMutateConfig::of;
             case ArticleRank -> PageRankMutateConfig::of;
             case AStar -> ShortestPathAStarMutateConfig::of;
-            case BellmanFord -> BellmanFordMutateConfig::of;
+            case BellmanFord -> AllShortestPathsBellmanFordMutateConfig::of;
             case BetaClosenessCentrality -> ClosenessCentralityMutateConfig::of;
             case BetweennessCentrality -> BetweennessCentralityMutateConfig::of;
             case BFS -> BfsMutateConfig::of;
