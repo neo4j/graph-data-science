@@ -155,7 +155,7 @@ public interface GraphSageTrainConfig extends
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        if (selectedRelationshipTypes.stream().mapToLong(graphStore::relationshipCount).sum() == 0) {
+        if (selectedRelationshipTypes.stream().filter(graphStore::hasRelationshipType).mapToLong(graphStore::relationshipCount).sum() == 0) {
             throw new IllegalArgumentException("There should be at least one relationship in the graph.");
         }
     }
