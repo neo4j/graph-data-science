@@ -63,6 +63,16 @@ public class LogAdapter implements Log {
     }
 
     @Override
+    public void error(String errorMessage, Throwable throwable) {
+        neo4jUserLog.error(errorMessage, throwable);
+    }
+
+    @Override
+    public void error(String messageFormat, Throwable exception, Object... arguments) {
+        neo4jUserLog.error(messageFormat.formatted(arguments), exception);
+    }
+
+    @Override
     public Object getNeo4jLog() {
         return neo4jUserLog;
     }
