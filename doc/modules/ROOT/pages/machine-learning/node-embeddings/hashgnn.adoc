@@ -401,7 +401,8 @@ For the relationships we will use the `UNDIRECTED` orientation.
 .The following statement will project a graph using a Cypher projection and store it in the graph catalog under the name 'persons'.
 [source, cypher, role=noplay graph-project-query]
 ----
-MATCH (source:Person)-[r:LIKES|KNOWS]->(target:Fruit|Person)
+MATCH (source)
+OPTIONAL MATCH (source)-[r]->(target)
 WITH gds.graph.project(
   'persons',
   source,
@@ -427,7 +428,7 @@ WITH gds.graph.project(
     },
     relationshipType: type(r)
   },
-  { undirectedRelationshipTypes: ['*'] }
+  { undirectedRelationshipTypes: ['KNOWS', 'LIKES'] }
 ) AS g
 RETURN
   g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
@@ -492,19 +493,21 @@ CALL gds.hashgnn.stream('persons',
   }
 )
 YIELD nodeId, embedding
+RETURN gds.util.asNode(nodeId).name AS person, embedding
+ORDER BY person
 ----
 
 [opts=header]
 .Results
 |===
-| nodeId | embedding
-| 0      | [0.0, 1.0, 0.0, 0.0]
-| 1      | [1.0, 0.0, 1.0, 0.0]
-| 2      | [1.0, 1.0, 0.0, 0.0]
-| 3      | [1.0, 0.0, 1.0, 0.0]
-| 4      | [1.0, 0.0, 0.0, 0.0]
-| 5      | [1.0, 0.0, 1.0, 0.0]
-| 6      | [1.0, 1.0, 0.0, 0.0]
+| person | embedding
+| "Annie"     | [1.0, 0.0, 1.0, 0.0]
+| "Brie"      | [1.0, 0.0, 0.0, 0.0]
+| "Dan"      | [0.0, 1.0, 0.0, 0.0]
+| "Elsa"     | [1.0, 0.0, 1.0, 0.0]
+| "Jeff"      | [1.0, 0.0, 1.0, 0.0]
+| "John"      | [1.0, 1.0, 0.0, 0.0]
+| "Matt"     | [1.0, 1.0, 0.0, 0.0]
 |===
 --
 
@@ -531,19 +534,21 @@ CALL gds.hashgnn.stream('persons',
   }
 )
 YIELD nodeId, embedding
+RETURN gds.util.asNode(nodeId).name AS person, embedding
+ORDER BY person
 ----
 
 [opts=header]
 .Results
 |===
-| nodeId | embedding
-| 0      | [0.0]
-| 1      | [0.0]
-| 2      | [0.0]
-| 3      | [0.0]
-| 4      | [1.0]
-| 5      | [1.0]
-| 6      | [0.0]
+| person       | embedding
+| "Annie"      | [0.0]
+| "Brie"       | [1.0]
+| "Dan"        | [0.0]
+| "Elsa"       | [1.0]
+| "Jeff"       | [0.0]
+| "John"       | [0.0]
+| "Matt"       | [0.0]
 |===
 --
 
@@ -564,19 +569,21 @@ CALL gds.hashgnn.stream('persons',
   }
 )
 YIELD nodeId, embedding
+RETURN gds.util.asNode(nodeId).name AS person, embedding
+ORDER BY person
 ----
 
 [opts=header]
 .Results
 |===
-| nodeId | embedding
-| 0      | [0.0, 0.0, 1.0, 0.0, 0.0, 0.0]
-| 1      | [0.0, 0.0, 1.0, 0.0, 1.0, 0.0]
-| 2      | [0.0, 0.0, 0.0, 0.0, 1.0, 0.0]
-| 3      | [0.0, 0.0, 0.0, 1.0, 1.0, 0.0]
-| 4      | [0.0, 0.0, 0.0, 0.0, 1.0, 0.0]
-| 5      | [0.0, 0.0, 1.0, 0.0, 0.0, 0.0]
-| 6      | [0.0, 0.0, 0.0, 0.0, 1.0, 0.0]
+| person  | embedding
+| "Annie" | [0.0, 0.0, 1.0, 0.0, 1.0, 0.0]
+| "Brie"  | [0.0, 0.0, 0.0, 0.0, 1.0, 0.0]
+| "Dan"   | [0.0, 0.0, 1.0, 0.0, 0.0, 0.0]
+| "Elsa"  | [0.0, 0.0, 1.0, 0.0, 0.0, 0.0]
+| "Jeff"  | [0.0, 0.0, 0.0, 1.0, 1.0, 0.0]
+| "John"  | [0.0, 0.0, 0.0, 0.0, 1.0, 0.0]
+| "Matt"  | [0.0, 0.0, 0.0, 0.0, 1.0, 0.0]
 |===
 --
 
@@ -599,23 +606,25 @@ CALL gds.hashgnn.stream('persons',
   }
 )
 YIELD nodeId, embedding
+RETURN gds.util.asNode(nodeId).name AS name, embedding
+ORDER BY name
 ----
 
 [opts=header]
 .Results
 |===
-| nodeId | embedding
-| 0      | [1.0, 1.0, 0.0, 0.0, 0.0, 1.0]
-| 1      | [1.0, 1.0, 1.0, 0.0, 0.0, 0.0]
-| 2      | [1.0, 1.0, 1.0, 0.0, 0.0, 0.0]
-| 3      | [1.0, 0.0, 1.0, 0.0, 0.0, 0.0]
-| 4      | [1.0, 1.0, 1.0, 0.0, 0.0, 0.0]
-| 5      | [1.0, 1.0, 0.0, 0.0, 0.0, 0.0]
-| 6      | [1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
-| 7      | [1.0, 0.0, 1.0, 0.0, 0.0, 0.0]
-| 8      | [1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
-| 9      | [1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
-| 10     | [1.0, 0.0, 1.0, 0.0, 0.0, 0.0]
+| name | embedding
+| "Annie" | [1.0, 1.0, 1.0, 0.0, 0.0, 0.0]
+| "Apple" | [1.0, 0.0, 1.0, 0.0, 0.0, 0.0]
+| "Banana" | [1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+| "Brie" | [1.0, 1.0, 1.0, 0.0, 0.0, 0.0]
+| "Dan" | [1.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+| "Elsa" | [1.0, 1.0, 0.0, 0.0, 0.0, 0.0]
+| "Jeff" | [1.0, 0.0, 1.0, 0.0, 0.0, 0.0]
+| "John" | [1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+| "Mango" | [1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+| "Matt" | [1.0, 1.0, 1.0, 0.0, 0.0, 0.0]
+| "Plum" | [1.0, 0.0, 1.0, 0.0, 0.0, 0.0]
 |===
 --
 
@@ -636,23 +645,25 @@ CALL gds.hashgnn.stream('persons',
   }
 )
 YIELD nodeId, embedding
+RETURN gds.util.asNode(nodeId).name AS name, embedding
+ORDER BY name
 ----
 
 [opts=header]
 .Results
 |===
-| nodeId | embedding
-| 0      | [0.0, 0.8660253882408142, -1.7320507764816284, 0.8660253882408142]
-| 1      | [0.0, 0.8660253882408142, -1.7320507764816284, 0.8660253882408142]
-| 2      | [0.0, 0.8660253882408142, -1.7320507764816284, 0.8660253882408142]
-| 3      | [0.0, 0.0, -1.7320507764816284, 0.8660253882408142]
-| 4      | [0.0, 0.8660253882408142, -1.7320507764816284, 0.8660253882408142]
-| 5      | [0.0, 0.8660253882408142, -0.8660253882408142, 0.0]
-| 6      | [0.0, 0.0, -1.7320507764816284, 0.8660253882408142]
-| 7      | [0.0, 0.0, -1.7320507764816284, 0.8660253882408142]
-| 8      | [0.0, 0.0, -1.7320507764816284, 0.8660253882408142]
-| 9      | [0.0, 0.0, -1.7320507764816284, 0.8660253882408142]
-| 10     | [0.0, 0.0, -1.7320507764816284, 0.8660253882408142]
+| name | embedding
+| "Annie" | [0.0, 0.8660253882, -1.7320507765, 0.8660253882]
+| "Apple" | [0.0, 0.0, -1.7320507765, 0.8660253882]
+| "Banana" | [0.0, 0.0, -1.7320507765, 0.8660253882]
+| "Brie" | [0.0, 0.8660253882, -1.7320507765, 0.8660253882]
+| "Dan" | [0.0, 0.8660253882, -1.7320507765, 0.8660253882]
+| "Elsa" | [0.0, 0.8660253882, -0.8660253882, 0.0]
+| "Jeff" | [0.0, 0.0, -1.7320507765, 0.8660253882]
+| "John" | [0.0, 0.0, -1.7320507765, 0.8660253882]
+| "Mango" | [0.0, 0.0, -1.7320507765, 0.8660253882]
+| "Matt" | [0.0, 0.8660253882, -1.7320507765, 0.8660253882]
+| "Plum" | [0.0, 0.0, -1.7320507765, 0.8660253882]
 |===
 --
 
