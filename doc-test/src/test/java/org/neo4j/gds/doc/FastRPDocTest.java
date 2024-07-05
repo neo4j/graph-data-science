@@ -24,6 +24,7 @@ import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPStatsProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPWriteProc;
+import org.neo4j.gds.functions.AsNodeFunc;
 
 import java.util.List;
 
@@ -38,6 +39,11 @@ class FastRPDocTest extends SingleFileDocTestBase {
             FastRPWriteProc.class,
             GraphProjectProc.class
         );
+    }
+
+    @Override
+    protected List<Class<?>> functions() {
+        return List.of(AsNodeFunc.class);
     }
 
     @Override

@@ -511,10 +511,10 @@ ORDER BY nodeA, nodeB, nodeC ASC
 .Results
 [opts="header"]
 |===
-| nodeA     | nodeB   | nodeC
-| "Michael" | "Chris" | "Will"
-| "Michael" | "Karin" | "Chris"
-| "Michael" | "Will"  | "Mark"
+| nodeA      | nodeB | nodeC
+| "Michael"   | "Chris" | "Karin"
+| "Michael"   | "Mark"  | "Will"
+| "Michael"   | "Will"  | "Chris"
 |===
 --
 

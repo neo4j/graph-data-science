@@ -289,25 +289,25 @@ include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 CALL gds.scc.stream('graph', {})
 YIELD nodeId, componentId
 RETURN gds.util.asNode(nodeId).name AS Name, componentId AS Component
-ORDER BY Component DESC
+ORDER BY Component, Name DESC
 ----
 
 .Results
 [opts="header",cols="1m,1m"]
 |===
 | Name      | Component
-| "Doug"    | 3
-| "Mark"    | 3
-| "Charles" | 2
-| "Alice"   | 0
-| "Bridget" | 0
 | "Michael" | 0
+| "Bridget" | 0
+| "Alice"   | 0
+| "Charles" | 3
+| "Mark"    | 4
+| "Doug"    | 4
 |===
 --
 // tag::stream-sample-graph-explanation[]
 We have 3 strongly connected components in our sample graph.
 
-The first, and biggest, component has members Alice, Bridget, and Michael, while the second component has Doug and Mark.
+The first, and biggest, component has members Alice, Bridget, and Michael, while the second biggest component has Doug and Mark.
 Charles ends up in his own component because there isn't an outgoing relationship from that node to any of the others.
 
 [[algorithms-scc-stats-example]]
