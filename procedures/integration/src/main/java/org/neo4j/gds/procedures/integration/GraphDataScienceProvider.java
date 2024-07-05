@@ -51,7 +51,6 @@ import org.neo4j.gds.procedures.UserLogServices;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
-import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -83,8 +82,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
     private final UserLogServices userLogServices;
     private final Config config;
     private final ModelCatalog modelCatalog;
-    private final Optional<Function<GraphSageModelRepository, GraphSageModelRepository>> graphSageModelRepositoryDecorator;
-    private final Path modelStoreDirectory;
+    private final GraphSageModelRepository graphSageModelRepository;
 
     GraphDataScienceProvider(
         Log log,
@@ -104,8 +102,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         UserLogServices userLogServices,
         Config config,
         ModelCatalog modelCatalog,
-        Optional<Function<GraphSageModelRepository, GraphSageModelRepository>> graphSageModelRepositoryDecorator,
-        Path modelStoreDirectory
+        GraphSageModelRepository graphSageModelRepository
     ) {
         this.log = log;
         this.defaultsConfiguration = defaultsConfiguration;
@@ -124,8 +121,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         this.userLogServices = userLogServices;
         this.config = config;
         this.modelCatalog = modelCatalog;
-        this.graphSageModelRepositoryDecorator = graphSageModelRepositoryDecorator;
-        this.modelStoreDirectory = modelStoreDirectory;
+        this.graphSageModelRepository = graphSageModelRepository;
     }
 
     @Override
@@ -204,8 +200,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             algorithmProcedureFacadeBuilderFactory,
             deprecatedProceduresMetricService,
             modelCatalog,
-            graphSageModelRepositoryDecorator,
-            modelStoreDirectory
+            graphSageModelRepository
         );
     }
 }

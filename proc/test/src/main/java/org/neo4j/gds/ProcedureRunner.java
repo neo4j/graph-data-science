@@ -202,8 +202,7 @@ public final class ProcedureRunner {
             algorithmFacadeBuilderFactory,
             DeprecatedProceduresMetricService.PASSTHROUGH,
             modelCatalog,
-            Optional.empty(), // currently no license check for model storing
-            null // but also no model storing
+            null
         );
     }
 }

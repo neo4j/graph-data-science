@@ -40,7 +40,6 @@ import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 
-import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -89,8 +88,7 @@ public final class ApplicationsFacade {
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
         ModelCatalog modelCatalog,
-        Optional<Function<GraphSageModelRepository, GraphSageModelRepository>> graphSageModelRepositoryDecorator,
-        Path modelStoreDirectory
+        GraphSageModelRepository graphSageModelRepository
     ) {
         var catalogBusinessFacade = createCatalogBusinessFacade(
             log,
@@ -153,8 +151,7 @@ public final class ApplicationsFacade {
             progressTrackerCreator,
             mutateNodeProperty,
             modelCatalog,
-            graphSageModelRepositoryDecorator,
-            modelStoreDirectory
+            graphSageModelRepository
         );
 
         var pathFindingApplications = PathFindingApplications.create(

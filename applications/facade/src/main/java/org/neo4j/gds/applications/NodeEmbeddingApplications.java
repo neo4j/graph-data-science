@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.applications;
 
-import org.neo4j.gds.applications.algorithms.embeddings.DefaultGraphSageModelRepository;
 import org.neo4j.gds.applications.algorithms.embeddings.GraphSageModelCatalog;
 import org.neo4j.gds.applications.algorithms.embeddings.GraphSageModelRepository;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithms;
@@ -37,10 +36,6 @@ import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.logging.Log;
-
-import java.nio.file.Path;
-import java.util.Optional;
-import java.util.function.Function;
 
 public final class NodeEmbeddingApplications {
     private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationMode;
@@ -75,15 +70,9 @@ public final class NodeEmbeddingApplications {
         ProgressTrackerCreator progressTrackerCreator,
         MutateNodeProperty mutateNodeProperty,
         ModelCatalog modelCatalog,
-        Optional<Function<GraphSageModelRepository, GraphSageModelRepository>> graphSageModelRepositoryDecorator,
-        Path modelStoreDirectory
+        GraphSageModelRepository graphSageModelRepository
     ) {
         var graphSageModelCatalog = new GraphSageModelCatalog(modelCatalog);
-        var graphSageModelRepository = constructGraphSageModelRepository(
-            graphSageModelRepositoryDecorator,
-            modelCatalog,
-            modelStoreDirectory
-        );
 
         var algorithms = new NodeEmbeddingAlgorithms(
             graphSageModelCatalog,
@@ -131,18 +120,6 @@ public final class NodeEmbeddingApplications {
         );
 
         return new NodeEmbeddingApplications(estimationMode, mutateMode, statsMode, streamMode, trainMode, writeMode);
-    }
-
-    private static GraphSageModelRepository constructGraphSageModelRepository(
-        Optional<Function<GraphSageModelRepository, GraphSageModelRepository>> graphSageModelRepositoryDecorator,
-        ModelCatalog modelCatalog,
-        Path modelStoreDirectory
-    ) {
-        var graphSageModelRepository = new DefaultGraphSageModelRepository(modelCatalog, modelStoreDirectory);
-
-        if (graphSageModelRepositoryDecorator.isEmpty()) return graphSageModelRepository;
-
-        return graphSageModelRepositoryDecorator.get().apply(graphSageModelRepository);
     }
 
     public NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimate() {

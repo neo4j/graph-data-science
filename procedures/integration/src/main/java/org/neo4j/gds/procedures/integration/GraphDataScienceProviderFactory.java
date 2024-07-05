@@ -37,7 +37,6 @@ import org.neo4j.gds.procedures.ExporterBuildersProviderService;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.UserLogServices;
 
-import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -65,7 +64,7 @@ final class GraphDataScienceProviderFactory {
     private final MetricsFacade metricsFacade;
     private final ModelCatalog modelCatalog;
     private final Config config;
-    private final Optional<Function<GraphSageModelRepository, GraphSageModelRepository>> graphSageModelRepositoryDecorator;
+    private final GraphSageModelRepository graphSageModelRepository;
 
     private GraphDataScienceProviderFactory(
         Log log,
@@ -76,7 +75,7 @@ final class GraphDataScienceProviderFactory {
         MetricsFacade metricsFacade,
         ModelCatalog modelCatalog,
         Config config,
-        Optional<Function<GraphSageModelRepository, GraphSageModelRepository>> graphSageModelRepositoryDecorator
+        GraphSageModelRepository graphSageModelRepository
     ) {
         this.log = log;
         this.algorithmProcessingTemplateDecorator = algorithmProcessingTemplateDecorator;
@@ -86,14 +85,13 @@ final class GraphDataScienceProviderFactory {
         this.metricsFacade = metricsFacade;
         this.modelCatalog = modelCatalog;
         this.config = config;
-        this.graphSageModelRepositoryDecorator = graphSageModelRepositoryDecorator;
+        this.graphSageModelRepository = graphSageModelRepository;
     }
 
     GraphDataScienceProvider createGraphDataScienceProvider(
         TaskRegistryFactoryService taskRegistryFactoryService,
         boolean useMaxMemoryEstimation,
-        UserLogServices userLogServices,
-        Path modelStoreDirectory
+        UserLogServices userLogServices
     ) {
         var catalogProcedureFacadeFactory = new CatalogProcedureFacadeFactory(log);
 
@@ -122,8 +120,7 @@ final class GraphDataScienceProviderFactory {
             userLogServices,
             this.config,
             modelCatalog,
-            graphSageModelRepositoryDecorator,
-            modelStoreDirectory
+            graphSageModelRepository
         );
     }
 
@@ -136,7 +133,7 @@ final class GraphDataScienceProviderFactory {
         MetricsFacade metricsFacade,
         ModelCatalog modelCatalog,
         Config config,
-        Optional<Function<GraphSageModelRepository, GraphSageModelRepository>> graphSageModelRepositoryDecorator
+        GraphSageModelRepository graphSageModelRepository
     ) {
         return new GraphDataScienceProviderFactory(
             log,
@@ -147,7 +144,7 @@ final class GraphDataScienceProviderFactory {
             metricsFacade,
             modelCatalog,
             config,
-            graphSageModelRepositoryDecorator
+            graphSageModelRepository
         );
     }
 

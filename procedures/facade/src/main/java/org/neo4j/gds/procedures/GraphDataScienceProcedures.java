@@ -47,7 +47,6 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.api.KernelTransaction;
 
-import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -104,8 +103,7 @@ public class GraphDataScienceProcedures {
         AlgorithmProcedureFacadeBuilderFactory algorithmProcedureFacadeBuilderFactory,
         DeprecatedProceduresMetricService deprecatedProceduresMetricService,
         ModelCatalog modelCatalog,
-        Optional<Function<GraphSageModelRepository, GraphSageModelRepository>> graphSageModelRepositoryDecorator,
-        Path modelStoreDirectory
+        GraphSageModelRepository graphSageModelRepository
     ) {
         var configurationParser = new ConfigurationParser(defaultsConfiguration, limitsConfiguration);
         var configurationCreator = new ConfigurationCreator(
@@ -125,8 +123,7 @@ public class GraphDataScienceProcedures {
             requestScopedDependencies,
             writeContext,
             modelCatalog,
-            graphSageModelRepositoryDecorator,
-            modelStoreDirectory
+            graphSageModelRepository
         );
 
         var catalogProcedureFacade = catalogProcedureFacadeFactory.createCatalogProcedureFacade(

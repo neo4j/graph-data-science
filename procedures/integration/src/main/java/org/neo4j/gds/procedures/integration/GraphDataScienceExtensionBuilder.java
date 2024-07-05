@@ -43,7 +43,6 @@ import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.lifecycle.Lifecycle;
 
 import java.lang.management.ManagementFactory;
-import java.nio.file.Path;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
@@ -71,7 +70,6 @@ public final class GraphDataScienceExtensionBuilder {
     private final Boolean useMaxMemoryEstimation;
     private final UserLogServices userLogServices;
     private final Lifecycle gcListener;
-    private final Path modelStoreDirectory;
 
     private GraphDataScienceExtensionBuilder(
         Log log,
@@ -83,8 +81,7 @@ public final class GraphDataScienceExtensionBuilder {
         TaskRegistryFactoryService taskRegistryFactoryService,
         Boolean useMaxMemoryEstimation,
         UserLogServices userLogServices,
-        Lifecycle gcListener,
-        Path modelStoreDirectory
+        Lifecycle gcListener
     ) {
         this.log = log;
         this.componentRegistration = componentRegistration;
@@ -96,7 +93,6 @@ public final class GraphDataScienceExtensionBuilder {
         this.useMaxMemoryEstimation = useMaxMemoryEstimation;
         this.userLogServices = userLogServices;
         this.gcListener = gcListener;
-        this.modelStoreDirectory = modelStoreDirectory;
     }
 
     /**
@@ -113,8 +109,7 @@ public final class GraphDataScienceExtensionBuilder {
         MetricsFacade metricsFacade,
         ModelCatalog modelCatalog,
         Config config,
-        Optional<Function<GraphSageModelRepository, GraphSageModelRepository>> graphSageModelRepositoryDecorator,
-        Path modelStoreDirectory
+        GraphSageModelRepository graphSageModelRepository
     ) {
         // Read some configuration used to select behaviour
         var progressTrackingEnabled = neo4jConfiguration.get(ProgressFeatureSettings.progress_tracking_enabled);
@@ -158,7 +153,7 @@ public final class GraphDataScienceExtensionBuilder {
             metricsFacade,
             modelCatalog,
             config,
-            graphSageModelRepositoryDecorator
+            graphSageModelRepository
         );
 
         return new GraphDataScienceExtensionBuilder(
@@ -171,8 +166,7 @@ public final class GraphDataScienceExtensionBuilder {
             taskRegistryFactoryService,
             useMaxMemoryEstimation,
             userLogServices,
-            gcListener,
-            modelStoreDirectory
+            gcListener
         );
     }
 
@@ -200,8 +194,7 @@ public final class GraphDataScienceExtensionBuilder {
         var graphDataScienceProvider = graphDataScienceProviderFactory.createGraphDataScienceProvider(
             taskRegistryFactoryService,
             useMaxMemoryEstimation,
-            userLogServices,
-            modelStoreDirectory
+            userLogServices
         );
 
         componentRegistration.registerComponent(

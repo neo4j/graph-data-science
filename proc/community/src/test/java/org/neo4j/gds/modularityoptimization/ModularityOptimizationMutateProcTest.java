@@ -533,7 +533,6 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
             requestScopedDependencies,
             WriteContext.builder().build(),
             null,
-            Optional.empty(),
             null
         );
         var communityProcedureFacade = CommunityProcedureFacade.create(
