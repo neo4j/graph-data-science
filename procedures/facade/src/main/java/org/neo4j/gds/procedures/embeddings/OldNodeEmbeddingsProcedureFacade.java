@@ -22,10 +22,8 @@ package org.neo4j.gds.procedures.embeddings;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmStreamBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsMutateBusinessFacade;
-import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsTrainBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageProcedure;
 import org.neo4j.gds.procedures.embeddings.hashgnn.HashGNNProcedure;
 import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecProcedure;
 
@@ -33,15 +31,12 @@ public class OldNodeEmbeddingsProcedureFacade {
 
     private final HashGNNProcedure hashGNN;
     private final Node2VecProcedure node2Vec;
-    private final GraphSageProcedure graphSage;
-    // business logic
 
     public OldNodeEmbeddingsProcedureFacade(
         ConfigurationCreator configurationCreator,
         NodeEmbeddingsAlgorithmsEstimateBusinessFacade estimateBusinessFacade,
         NodeEmbeddingsAlgorithmsMutateBusinessFacade mutateBusinessFacade,
         NodeEmbeddingsAlgorithmStreamBusinessFacade streamBusinessFacade,
-        NodeEmbeddingsAlgorithmsTrainBusinessFacade trainBusinessFacade,
         NodeEmbeddingsAlgorithmsWriteBusinessFacade writeBusinessFacade
     ) {
         this.hashGNN = new HashGNNProcedure(
@@ -58,12 +53,6 @@ public class OldNodeEmbeddingsProcedureFacade {
             streamBusinessFacade,
             writeBusinessFacade
         );
-
-        this.graphSage = new GraphSageProcedure(
-            configurationCreator,
-            estimateBusinessFacade,
-            trainBusinessFacade
-        );
     }
 
     public HashGNNProcedure hashGNN() {
@@ -73,10 +62,5 @@ public class OldNodeEmbeddingsProcedureFacade {
     public Node2VecProcedure node2Vec() {
         return node2Vec;
     }
-
-    public GraphSageProcedure graphSage() {
-        return graphSage;
-    }
-
 
 }

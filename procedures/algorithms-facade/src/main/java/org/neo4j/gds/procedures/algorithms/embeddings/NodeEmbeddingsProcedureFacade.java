@@ -23,6 +23,7 @@ import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsStatsModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsStreamModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsTrainModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsWriteModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -30,6 +31,7 @@ import org.neo4j.gds.embeddings.fastrp.FastRPStatsConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPWriteConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageStreamConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
 import org.neo4j.gds.procedures.algorithms.embeddings.stubs.FastRPMutateStub;
 import org.neo4j.gds.procedures.algorithms.embeddings.stubs.GraphSageMutateStub;
@@ -217,6 +219,40 @@ public final class NodeEmbeddingsProcedureFacade {
         return Stream.of(result);
     }
 
+    public Stream<GraphSageTrainResult> graphSageTrain(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new GraphSageResultBuilderForTrainMode();
+
+        return algorithmExecutionScaffolding.runAlgorithm(
+            graphName,
+            configuration,
+            cypherMapWrapper -> GraphSageTrainConfig.of(
+                requestScopedDependencies.getUser().getUsername(),
+                cypherMapWrapper
+            ),
+            trainMode()::graphSage,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> graphSageTrainEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            cypherMapWrapper -> GraphSageTrainConfig.of(
+                requestScopedDependencies.getUser().getUsername(),
+                cypherMapWrapper
+            ),
+            configuration -> estimationMode().graphSageTrain(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
     public Stream<DefaultNodeEmbeddingsWriteResult> graphSageWrite(
         String graphName,
         Map<String, Object> configuration
@@ -261,6 +297,10 @@ public final class NodeEmbeddingsProcedureFacade {
 
     private NodeEmbeddingAlgorithmsStreamModeBusinessFacade streamMode() {
         return applicationsFacade.nodeEmbeddings().stream();
+    }
+
+    private NodeEmbeddingAlgorithmsTrainModeBusinessFacade trainMode() {
+        return applicationsFacade.nodeEmbeddings().train();
     }
 
     private NodeEmbeddingAlgorithmsWriteModeBusinessFacade writeMode() {

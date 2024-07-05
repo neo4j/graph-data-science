@@ -47,6 +47,7 @@ public enum Algorithm {
     FilteredKNN,
     FilteredNodeSimilarity,
     GraphSage,
+    GraphSageTrain,
     HarmonicCentrality,
     K1Coloring,
     KCore,

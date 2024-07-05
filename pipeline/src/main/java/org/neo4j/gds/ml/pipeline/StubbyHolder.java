@@ -89,6 +89,7 @@ class StubbyHolder {
             case FilteredKNN -> new FilteredKnnStub();
             case FilteredNodeSimilarity -> new FilteredNodeSimilarityStub();
             case GraphSage -> new GraphSageStub();
+            case GraphSageTrain -> null;
             case HarmonicCentrality -> new HarmonicCentralityStub();
             case K1Coloring -> new K1ColoringStub();
             case KCore -> new KCoreStub();

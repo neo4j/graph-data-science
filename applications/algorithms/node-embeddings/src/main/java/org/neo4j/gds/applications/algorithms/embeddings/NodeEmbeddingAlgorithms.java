@@ -23,15 +23,24 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
+import org.neo4j.gds.compat.GdsVersionInfoProvider;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.gds.embeddings.fastrp.FastRPBaseConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
+import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
+import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrain;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.MultiLabelGraphSageTrain;
+import org.neo4j.gds.embeddings.graphsage.algo.SingleLabelGraphSageTrain;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -95,6 +104,59 @@ public class NodeEmbeddingAlgorithms {
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+    }
+
+    Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> graphSageTrain(
+        Graph graph,
+        GraphSageTrainConfig configuration
+    ) {
+        var parameters = configuration.toParameters();
+
+        var task = Tasks.task(
+            LabelForProgressTracking.GraphSageTrain.value,
+            GraphSageModelTrainer.progressTasks(
+                parameters.numberOfBatches(graph.nodeCount()),
+                parameters.batchesPerIteration(graph.nodeCount()),
+                parameters.maxIterations(),
+                parameters.epochs()
+            )
+        );
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var algorithm = constructGraphSageTrainAlgorithm(
+            graph,
+            configuration,
+            progressTracker
+        );
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+    }
+
+    private static GraphSageTrain constructGraphSageTrainAlgorithm(
+        Graph graph,
+        GraphSageTrainConfig configuration,
+        ProgressTracker progressTracker
+    ) {
+        String gdsVersion = GdsVersionInfoProvider.GDS_VERSION_INFO.gdsVersion();
+
+        if (configuration.isMultiLabel()) return new MultiLabelGraphSageTrain(
+            graph,
+            configuration.toParameters(),
+            configuration.projectedFeatureDimension().orElseThrow(),
+            DefaultPool.INSTANCE,
+            progressTracker,
+            gdsVersion,
+            configuration
+        );
+
+        return new SingleLabelGraphSageTrain(
+            graph,
+            configuration.toParameters(),
+            DefaultPool.INSTANCE,
+            progressTracker,
+            gdsVersion,
+            configuration
+        );
     }
 
     private Task progressTask(Graph graph, Number nodeSelfInfluence, int iterationWeightsSize) {

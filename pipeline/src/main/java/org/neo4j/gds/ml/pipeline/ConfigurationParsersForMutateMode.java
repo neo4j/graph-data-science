@@ -89,6 +89,7 @@ public class ConfigurationParsersForMutateMode {
             case FilteredKNN -> FilteredKnnMutateConfig::of;
             case FilteredNodeSimilarity -> FilteredNodeSimilarityMutateConfig::of;
             case GraphSage -> graphSageParser();
+            case GraphSageTrain -> null;
             case HarmonicCentrality -> HarmonicCentralityMutateConfig::of;
             case K1Coloring -> K1ColoringMutateConfig::of;
             case KCore -> KCoreDecompositionMutateConfig::of;

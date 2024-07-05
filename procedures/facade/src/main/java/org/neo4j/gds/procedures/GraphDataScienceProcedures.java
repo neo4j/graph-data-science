@@ -22,6 +22,7 @@ package org.neo4j.gds.procedures;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
+import org.neo4j.gds.applications.algorithms.embeddings.GraphSageModelRepository;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -101,7 +102,8 @@ public class GraphDataScienceProcedures {
         Transaction transaction,
         AlgorithmProcedureFacadeBuilderFactory algorithmProcedureFacadeBuilderFactory,
         DeprecatedProceduresMetricService deprecatedProceduresMetricService,
-        ModelCatalog modelCatalog
+        ModelCatalog modelCatalog,
+        GraphSageModelRepository graphSageModelRepository
     ) {
         var configurationParser = new ConfigurationParser(defaultsConfiguration, limitsConfiguration);
         var configurationCreator = new ConfigurationCreator(
@@ -120,7 +122,8 @@ public class GraphDataScienceProcedures {
             projectionMetricsService,
             requestScopedDependencies,
             writeContext,
-            modelCatalog
+            modelCatalog,
+            graphSageModelRepository
         );
 
         var catalogProcedureFacade = catalogProcedureFacadeFactory.createCatalogProcedureFacade(
@@ -138,7 +141,6 @@ public class GraphDataScienceProcedures {
             configurationCreator,
             requestScopedDependencies,
             kernelTransaction,
-            graphDatabaseService,
             algorithmMetaDataSetter,
             applicationsFacade,
             writeContext,

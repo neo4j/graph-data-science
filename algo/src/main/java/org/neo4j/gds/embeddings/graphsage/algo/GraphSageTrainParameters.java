@@ -50,7 +50,7 @@ public record GraphSageTrainParameters(
     ActivationFunction activationFunction
 ) {
 
-    long numberOfBatches(long nodeCount) {
+    public long numberOfBatches(long nodeCount) {
         return (long) Math.ceil(nodeCount / (double) batchSize);
     }
     public int batchesPerIteration(long nodeCount) {

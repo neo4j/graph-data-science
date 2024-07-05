@@ -17,23 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.modelcatalogservices;
+package org.neo4j.gds.applications.algorithms.embeddings;
 
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.logging.Log;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
+import org.neo4j.gds.embeddings.graphsage.ModelData;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 
-public class ModelCatalogServiceProvider {
-
-    private final ModelCatalog modelCatalog;
-
-    public ModelCatalogServiceProvider(ModelCatalog modelCatalog) {
-        this.modelCatalog = modelCatalog;
-    }
-
-    public ModelCatalogService createService(GraphDatabaseService graphDatabaseService, Log log) {
-
-        return new ModelCatalogService(modelCatalog,graphDatabaseService, log);
-    }
-
+public interface GraphSageModelRepository {
+    void store(Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model);
 }

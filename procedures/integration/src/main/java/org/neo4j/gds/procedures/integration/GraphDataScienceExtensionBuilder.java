@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.configuration.Config;
+import org.neo4j.gds.applications.algorithms.embeddings.GraphSageModelRepository;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -107,7 +108,8 @@ public final class GraphDataScienceExtensionBuilder {
         ExporterBuildersProviderService exporterBuildersProviderService,
         MetricsFacade metricsFacade,
         ModelCatalog modelCatalog,
-        Config config
+        Config config,
+        GraphSageModelRepository graphSageModelRepository
     ) {
         // Read some configuration used to select behaviour
         var progressTrackingEnabled = neo4jConfiguration.get(ProgressFeatureSettings.progress_tracking_enabled);
@@ -150,7 +152,8 @@ public final class GraphDataScienceExtensionBuilder {
             memoryGauge,
             metricsFacade,
             modelCatalog,
-            config
+            config,
+            graphSageModelRepository
         );
 
         return new GraphDataScienceExtensionBuilder(
@@ -194,7 +197,11 @@ public final class GraphDataScienceExtensionBuilder {
             userLogServices
         );
 
-        componentRegistration.registerComponent("Graph Data Science", GraphDataScienceProcedures.class, graphDataScienceProvider);
+        componentRegistration.registerComponent(
+            "Graph Data Science",
+            GraphDataScienceProcedures.class,
+            graphDataScienceProvider
+        );
     }
 
     /**
