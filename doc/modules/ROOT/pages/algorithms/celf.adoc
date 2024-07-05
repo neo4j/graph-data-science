@@ -246,7 +246,8 @@ CREATE
 .The following statement will project the graph and store it in the graph catalog.
 [source, cypher, role=graph-project-query no-play]
 ----
-MATCH (source:Person)-[r:FRIEND_OF]->(target:Person)
+MATCH (source:Person)
+OPTIONAL MATCH (source)-[r:FRIEND_OF]->(target:Person)
 WITH gds.graph.project(
   'myGraph',
   source,
@@ -334,9 +335,9 @@ ORDER BY spread DESC, name ASC
 [opts="header"]
 |===
 | name      | spread
-| "Alice"   | 1.6
-| "Ceri"    | 1.08
-| "Michael" | 1.08
+| "Alice"   | 1.46
+| "Ethan"   | 1.2
+| "Michael" | 1.1
 |===
 --
 
@@ -384,11 +385,11 @@ ORDER BY spread DESC, name ASC
 [opts="header"]
 |===
 | name        | spread
-| "Alice"     | 1.6
-| "Ceri"      | 1.08
-| "Michael"   | 1.08
+| "Alice"     | 1.46
+| "Ethan"     | 1.2
+| "Michael"   | 1.1
 | "Amir"      | 0.0
-| "Ethan"     | 0.0
+| "Ceri"      | 0.0
 | "Jack"      | 0.0
 | "Jimmy"     | 0.0
 | "Lara"      | 0.0
@@ -440,11 +441,11 @@ ORDER BY spread DESC, name ASC
 [opts="header"]
 |===
 | name        | spread
-| "Alice"     | 1.6
-| "Ceri"      | 1.08
-| "Michael"   | 1.08
+| "Alice"     | 1.46
+| "Ethan"      | 1.2
+| "Michael"   | 1.1
 | "Amir"      | 0.0
-| "Ethan"     | 0.0
+| "Ceri"     | 0.0
 | "Jack"      | 0.0
 | "Jimmy"     | 0.0
 | "Lara"      | 0.0

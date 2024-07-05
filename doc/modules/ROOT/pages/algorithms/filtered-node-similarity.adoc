@@ -288,7 +288,8 @@ The Filtered Node Similarity algorithm will only compute similarity for nodes th
 .The following statement will project the graph and store it in the graph catalog.
 [source, cypher, role=noplay graph-project-query]
 ----
-MATCH (source:Person|Singer)-[r:LIKES]->(target:Instrument)
+MATCH (source)
+OPTIONAL MATCH (source:Person|Singer)-[r:LIKES]->(target:Instrument)
 WITH gds.graph.project(
   'myGraph',
   source,

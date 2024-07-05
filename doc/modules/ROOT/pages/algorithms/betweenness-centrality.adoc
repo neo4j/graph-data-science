@@ -479,7 +479,7 @@ The seed value is an arbitrary integer, where using the same value will yield th
 .The following will run the algorithm in `stream` mode with a sampling size of two:
 [source, cypher, role=noplay]
 ----
-CALL gds.betweenness.stream('myGraph', {samplingSize: 2, samplingSeed: 0})
+CALL gds.betweenness.stream('myGraph', {samplingSize: 2, samplingSeed: 4})
 YIELD nodeId, score
 RETURN gds.util.asNode(nodeId).name AS name, score
 ORDER BY name ASC
