@@ -528,6 +528,8 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
             null,
             requestScopedDependencies,
             WriteContext.builder().build(),
+            null,
+            Optional.empty(),
             null
         );
         var communityProcedureFacade = CommunityProcedureFacade.create(

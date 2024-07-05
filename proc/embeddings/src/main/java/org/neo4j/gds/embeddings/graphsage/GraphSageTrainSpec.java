@@ -28,7 +28,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
-import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageTrainResult;
+import org.neo4j.gds.procedures.algorithms.embeddings.GraphSageTrainResult;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.stream.Stream;
@@ -79,7 +79,7 @@ public class GraphSageTrainSpec implements AlgorithmSpec<
                         throw e;
                     }
                 }
-                return Stream.of(new GraphSageTrainResult(model, computationResult.computeMillis()
+                return Stream.of(GraphSageTrainResult.create(model, computationResult.computeMillis()
                 ));
             }).orElseGet(Stream::empty);
         };

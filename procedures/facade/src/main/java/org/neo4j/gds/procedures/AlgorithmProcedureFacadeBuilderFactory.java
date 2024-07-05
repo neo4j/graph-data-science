@@ -36,14 +36,12 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
-import org.neo4j.gds.modelcatalogservices.ModelCatalogServiceProvider;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.runners.DefaultAlgorithmExecutionScaffolding;
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
 import org.neo4j.gds.procedures.algorithms.runners.MetadataSetter;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.kernel.api.KernelTransaction;
 
 public class AlgorithmProcedureFacadeBuilderFactory {
@@ -59,7 +57,6 @@ public class AlgorithmProcedureFacadeBuilderFactory {
 
     // Request scoped state and services
     private final AlgorithmMetricsService algorithmMetricsService;
-    private final ModelCatalogServiceProvider modelCatalogServiceProvider;
 
     public AlgorithmProcedureFacadeBuilderFactory(
         Log log,
@@ -67,8 +64,7 @@ public class AlgorithmProcedureFacadeBuilderFactory {
         LimitsConfiguration limitsConfiguration,
         GraphStoreCatalogService graphStoreCatalogService,
         boolean useMaxMemoryEstimation,
-        AlgorithmMetricsService algorithmMetricsService,
-        ModelCatalogServiceProvider modelCatalogServiceProvider
+        AlgorithmMetricsService algorithmMetricsService
     ) {
         this.log = log;
         this.defaultsConfiguration = defaultsConfiguration;
@@ -77,7 +73,6 @@ public class AlgorithmProcedureFacadeBuilderFactory {
         this.useMaxMemoryEstimation = useMaxMemoryEstimation;
 
         this.algorithmMetricsService = algorithmMetricsService;
-        this.modelCatalogServiceProvider = modelCatalogServiceProvider;
     }
 
     AlgorithmProcedureFacadeBuilder create(
@@ -85,7 +80,6 @@ public class AlgorithmProcedureFacadeBuilderFactory {
         ConfigurationCreator configurationCreator,
         RequestScopedDependencies requestScopedDependencies,
         KernelTransaction kernelTransaction,
-        GraphDatabaseService graphDatabaseService,
         AlgorithmMetaDataSetter algorithmMetaDataSetter,
         ApplicationsFacade applicationsFacade,
         WriteContext writeContext,
@@ -141,7 +135,6 @@ public class AlgorithmProcedureFacadeBuilderFactory {
             algorithmExecutionScaffolding
         );
 
-        // procedure facade
         return new AlgorithmProcedureFacadeBuilder(
             requestScopedDependencies,
             configurationCreator,
@@ -152,7 +145,6 @@ public class AlgorithmProcedureFacadeBuilderFactory {
             writeNodePropertyService,
             algorithmRunner,
             algorithmEstimator,
-            modelCatalogServiceProvider.createService(graphDatabaseService, log),
             applicationsFacade,
             genericStub,
             estimationModeRunner,

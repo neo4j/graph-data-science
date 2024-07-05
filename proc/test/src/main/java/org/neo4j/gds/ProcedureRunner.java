@@ -39,7 +39,6 @@ import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
-import org.neo4j.gds.modelcatalogservices.ModelCatalogServiceProvider;
 import org.neo4j.gds.procedures.AlgorithmProcedureFacadeBuilderFactory;
 import org.neo4j.gds.procedures.CatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.DatabaseIdAccessor;
@@ -179,8 +178,7 @@ public final class ProcedureRunner {
             LimitsConfiguration.Instance,
             graphStoreCatalogService,
             false,
-            new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
-            new ModelCatalogServiceProvider(modelCatalog)
+            new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar())
         );
 
         return GraphDataScienceProcedures.create(
@@ -203,7 +201,9 @@ public final class ProcedureRunner {
             procedureTransaction,
             algorithmFacadeBuilderFactory,
             DeprecatedProceduresMetricService.PASSTHROUGH,
-            modelCatalog
+            modelCatalog,
+            Optional.empty(), // currently no license check for model storing
+            null // but also no model storing
         );
     }
 }

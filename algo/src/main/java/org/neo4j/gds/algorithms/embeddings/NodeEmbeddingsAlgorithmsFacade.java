@@ -21,38 +21,23 @@ package org.neo4j.gds.algorithms.embeddings;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
-import org.neo4j.gds.algorithms.validation.AfterLoadValidation;
-import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
-import org.neo4j.gds.embeddings.graphsage.ModelData;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageModelResolver;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainAlgorithmFactory;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNConfig;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNFactory;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
 import org.neo4j.gds.embeddings.node2vec.Node2VecAlgorithmFactory;
 import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
-import org.neo4j.gds.modelcatalogservices.ModelCatalogService;
 
-import java.util.List;
 import java.util.Optional;
 
 public class NodeEmbeddingsAlgorithmsFacade {
 
     private final AlgorithmRunner algorithmRunner;
-    private final ModelCatalogService modelCatalogService;
 
     public NodeEmbeddingsAlgorithmsFacade(
-        AlgorithmRunner algorithmRunner,
-        ModelCatalogService modelCatalogService
+        AlgorithmRunner algorithmRunner
     ) {
         this.algorithmRunner = algorithmRunner;
-        this.modelCatalogService = modelCatalogService;
     }
 
     AlgorithmComputationResult<Node2VecResult> node2Vec(
@@ -64,46 +49,6 @@ public class NodeEmbeddingsAlgorithmsFacade {
             config,
             config.relationshipWeightProperty(),
             new Node2VecAlgorithmFactory<>()
-        );
-    }
-
-    AlgorithmComputationResult<GraphSageResult> graphSage(
-        String graphName,
-        GraphSageBaseConfig config
-    ) {
-        Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model = GraphSageModelResolver.resolveModel(
-            modelCatalogService.get(),
-            config.username(),
-            config.modelName()
-        );
-
-        AfterLoadValidation validationCondition = (graphStore) -> {
-            GraphSageTrainConfig trainConfig = model.trainConfig();
-            trainConfig.graphStoreValidation(
-                graphStore,
-                config.nodeLabelIdentifiers(graphStore),
-                config.internalRelationshipTypes(graphStore)
-            );
-        };
-        
-        return algorithmRunner.run(
-            graphName,
-            config,
-            model.trainConfig().relationshipWeightProperty(),
-            new GraphSageAlgorithmFactory<>(modelCatalogService.get()),
-            List.of(validationCondition)
-        );
-    }
-
-    AlgorithmComputationResult<Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>> graphSageTrain(
-        String graphName,
-        GraphSageTrainConfig config
-    ) {
-        return algorithmRunner.run(
-            graphName,
-            config,
-            config.relationshipWeightProperty(),
-            new GraphSageTrainAlgorithmFactory()
         );
     }
 

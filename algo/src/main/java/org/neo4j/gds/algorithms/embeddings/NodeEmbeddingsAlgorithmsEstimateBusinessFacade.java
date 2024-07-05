@@ -21,8 +21,6 @@ package org.neo4j.gds.algorithms.embeddings;
 
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainEstimateDefinition;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNConfig;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNMemoryEstimateDefinition;
 import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
@@ -50,18 +48,6 @@ public class NodeEmbeddingsAlgorithmsEstimateBusinessFacade {
             configuration,
             configuration.relationshipWeightProperty(),
             new Node2VecMemoryEstimateDefinition(configuration.node2VecParameters())
-        );
-    }
-
-    public <C extends GraphSageTrainConfig> MemoryEstimateResult graphSageTrain(
-        Object graphNameOrConfiguration,
-        C configuration
-    ) {
-        return algorithmEstimator.estimate(
-            graphNameOrConfiguration,
-            configuration,
-            configuration.relationshipWeightProperty(),
-            new GraphSageTrainEstimateDefinition(configuration.toMemoryEstimateParameters())
         );
     }
 

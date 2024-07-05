@@ -17,22 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.embeddings;
+package org.neo4j.gds.extension;
 
-import org.neo4j.gds.algorithms.TrainResult;
+import org.neo4j.gds.applications.algorithms.embeddings.GraphSageModelRepository;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
-import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageTrainResult;
 
-public class GraphSageComputationalResultTransformer {
+class DisableGraphSageModelRepository implements GraphSageModelRepository {
+    private static final String ERROR_MESSAGE = """
+                Storing models is not available in openGDS.
+                Please consider licensing the Graph Data Science library.
+                See documentation at https://neo4j.com/docs/graph-data-science/
+        """;
 
-
-    public static GraphSageTrainResult toTrainResult(
-        TrainResult<Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>> trainResult
-    ) {
-
-        return new GraphSageTrainResult(trainResult.algorithmSpecificFields(), trainResult.trainMillis());
+    @Override
+    public void store(Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model) {
+        throw new IllegalStateException(ERROR_MESSAGE);
     }
 }

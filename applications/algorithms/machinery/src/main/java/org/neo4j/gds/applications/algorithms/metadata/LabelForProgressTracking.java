@@ -40,6 +40,7 @@ public enum LabelForProgressTracking {
     FilteredKNN("Filtered K-Nearest Neighbours"),
     FilteredNodeSimilarity("Filtered Node Similarity"),
     GraphSage("GraphSage"),
+    GraphSageTrain("GraphSageTrain"),
     HarmonicCentrality("HarmonicCentrality"),
     K1Coloring("K1Coloring"),
     KCore("KCoreDecomposition"),
@@ -92,6 +93,7 @@ public enum LabelForProgressTracking {
             case FilteredKNN -> FilteredKNN;
             case FilteredNodeSimilarity -> FilteredNodeSimilarity;
             case GraphSage -> GraphSage;
+            case GraphSageTrain -> GraphSageTrain;
             case HarmonicCentrality -> HarmonicCentrality;
             case K1Coloring -> K1Coloring;
             case KCore -> KCore;

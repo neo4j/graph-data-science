@@ -587,7 +587,20 @@ class WccMutateProcTest extends BaseProcTest {
             .with(new User(getUsername(), false))
             .with(EmptyUserLogRegistryFactory.INSTANCE)
             .build();
-        var applicationsFacade = ApplicationsFacade.create(logMock, Optional.empty(), Optional.empty(), graphStoreCatalogService, MemoryGuard.DISABLED, new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()), new ProjectionMetricsService(new PassthroughExecutionMetricRegistrar()), requestScopedDependencies, WriteContext.builder().build(), null);
+        var applicationsFacade = ApplicationsFacade.create(
+            logMock,
+            Optional.empty(),
+            Optional.empty(),
+            graphStoreCatalogService,
+            MemoryGuard.DISABLED,
+            new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
+            new ProjectionMetricsService(new PassthroughExecutionMetricRegistrar()),
+            requestScopedDependencies,
+            WriteContext.builder().build(),
+            null,
+            Optional.empty(),
+            null
+        );
         var configurationParser = new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance);
         var configurationCreator = new ConfigurationCreator(configurationParser, null, requestScopedDependencies.getUser());
         var genericStub = GenericStub.create(

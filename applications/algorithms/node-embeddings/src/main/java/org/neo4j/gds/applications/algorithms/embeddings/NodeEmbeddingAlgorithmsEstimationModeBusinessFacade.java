@@ -25,6 +25,8 @@ import org.neo4j.gds.embeddings.fastrp.FastRPBaseConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPMemoryEstimateDefinition;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMemoryEstimateDefinition;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainEstimateDefinition;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.model.ModelConfig;
 
@@ -64,6 +66,20 @@ public class NodeEmbeddingAlgorithmsEstimationModeBusinessFacade {
 
     public MemoryEstimateResult graphSage(GraphSageBaseConfig configuration, Object graphNameOrConfiguration) {
         var memoryEstimation = graphSage(configuration, false);
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
+        );
+    }
+
+    MemoryEstimation graphSageTrain(GraphSageTrainConfig configuration) {
+        return new GraphSageTrainEstimateDefinition(configuration.toMemoryEstimateParameters()).memoryEstimation();
+    }
+
+    public MemoryEstimateResult graphSageTrain(GraphSageTrainConfig configuration, Object graphNameOrConfiguration) {
+        var memoryEstimation = graphSageTrain(configuration);
 
         return algorithmEstimationTemplate.estimate(
             configuration,

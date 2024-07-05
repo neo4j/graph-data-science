@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.configuration.Config;
+import org.neo4j.gds.applications.algorithms.embeddings.GraphSageModelRepository;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.DefaultMemoryGuard;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
@@ -30,13 +31,13 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryGauge;
 import org.neo4j.gds.metrics.MetricsFacade;
-import org.neo4j.gds.modelcatalogservices.ModelCatalogServiceProvider;
 import org.neo4j.gds.procedures.AlgorithmProcedureFacadeBuilderFactory;
 import org.neo4j.gds.procedures.CatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.UserLogServices;
 
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -64,6 +65,7 @@ final class GraphDataScienceProviderFactory {
     private final MetricsFacade metricsFacade;
     private final ModelCatalog modelCatalog;
     private final Config config;
+    private final Optional<Function<GraphSageModelRepository, GraphSageModelRepository>> graphSageModelRepositoryDecorator;
 
     private GraphDataScienceProviderFactory(
         Log log,
@@ -73,7 +75,8 @@ final class GraphDataScienceProviderFactory {
         MemoryGauge memoryGauge,
         MetricsFacade metricsFacade,
         ModelCatalog modelCatalog,
-        Config config
+        Config config,
+        Optional<Function<GraphSageModelRepository, GraphSageModelRepository>> graphSageModelRepositoryDecorator
     ) {
         this.log = log;
         this.algorithmProcessingTemplateDecorator = algorithmProcessingTemplateDecorator;
@@ -83,12 +86,14 @@ final class GraphDataScienceProviderFactory {
         this.metricsFacade = metricsFacade;
         this.modelCatalog = modelCatalog;
         this.config = config;
+        this.graphSageModelRepositoryDecorator = graphSageModelRepositoryDecorator;
     }
 
     GraphDataScienceProvider createGraphDataScienceProvider(
         TaskRegistryFactoryService taskRegistryFactoryService,
         boolean useMaxMemoryEstimation,
-        UserLogServices userLogServices
+        UserLogServices userLogServices,
+        Path modelStoreDirectory
     ) {
         var catalogProcedureFacadeFactory = new CatalogProcedureFacadeFactory(log);
 
@@ -116,7 +121,9 @@ final class GraphDataScienceProviderFactory {
             taskRegistryFactoryService,
             userLogServices,
             this.config,
-            modelCatalog
+            modelCatalog,
+            graphSageModelRepositoryDecorator,
+            modelStoreDirectory
         );
     }
 
@@ -128,7 +135,8 @@ final class GraphDataScienceProviderFactory {
         MemoryGauge memoryGauge,
         MetricsFacade metricsFacade,
         ModelCatalog modelCatalog,
-        Config config
+        Config config,
+        Optional<Function<GraphSageModelRepository, GraphSageModelRepository>> graphSageModelRepositoryDecorator
     ) {
         return new GraphDataScienceProviderFactory(
             log,
@@ -138,7 +146,8 @@ final class GraphDataScienceProviderFactory {
             memoryGauge,
             metricsFacade,
             modelCatalog,
-            config
+            config,
+            graphSageModelRepositoryDecorator
         );
     }
 
@@ -146,16 +155,13 @@ final class GraphDataScienceProviderFactory {
         GraphStoreCatalogService graphStoreCatalogService,
         boolean useMaxMemoryEstimation
     ) {
-        var modelCatalogServiceProvider = new ModelCatalogServiceProvider(modelCatalog);
-
         return new AlgorithmProcedureFacadeBuilderFactory(
             log,
             defaultsConfiguration,
             limitsConfiguration,
             graphStoreCatalogService,
             useMaxMemoryEstimation,
-            metricsFacade.algorithmMetrics(),
-            modelCatalogServiceProvider
+            metricsFacade.algorithmMetrics()
         );
     }
 }

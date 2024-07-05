@@ -20,6 +20,7 @@
 package org.neo4j.gds.applications;
 
 import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
+import org.neo4j.gds.applications.algorithms.embeddings.GraphSageModelRepository;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
@@ -39,6 +40,7 @@ import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -86,7 +88,9 @@ public final class ApplicationsFacade {
         ProjectionMetricsService projectionMetricsService,
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
-        ModelCatalog modelCatalog
+        ModelCatalog modelCatalog,
+        Optional<Function<GraphSageModelRepository, GraphSageModelRepository>> graphSageModelRepositoryDecorator,
+        Path modelStoreDirectory
     ) {
         var catalogBusinessFacade = createCatalogBusinessFacade(
             log,
@@ -148,7 +152,9 @@ public final class ApplicationsFacade {
             algorithmProcessingTemplateConvenience,
             progressTrackerCreator,
             mutateNodeProperty,
-            modelCatalog
+            modelCatalog,
+            graphSageModelRepositoryDecorator,
+            modelStoreDirectory
         );
 
         var pathFindingApplications = PathFindingApplications.create(

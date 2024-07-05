@@ -65,7 +65,9 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
             exporterBuildersProviderService,
             metricsFacade,
             modelCatalog,
-            dependencies.config()
+            dependencies.config(),
+            Optional.of(__ -> new DisableGraphSageModelRepository()),
+            null
         ).build();
     }
 

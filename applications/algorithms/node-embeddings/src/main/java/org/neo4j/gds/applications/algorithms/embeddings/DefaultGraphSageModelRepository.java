@@ -17,37 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.embeddings.graphsage;
+package org.neo4j.gds.applications.algorithms.embeddings;
 
 import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.nio.file.Path;
 
-import static org.neo4j.gds.model.ModelConfig.MODEL_NAME_KEY;
-import static org.neo4j.gds.model.ModelConfig.MODEL_TYPE_KEY;
+public class DefaultGraphSageModelRepository implements GraphSageModelRepository {
+    private final ModelCatalog modelCatalog;
+    private final Path directoryThatShouldBeInsideModelCatalog;
 
-public class GraphSageTrainResult {
+    public DefaultGraphSageModelRepository(ModelCatalog modelCatalog, Path directoryThatShouldBeInsideModelCatalog) {
+        this.modelCatalog = modelCatalog;
+        this.directoryThatShouldBeInsideModelCatalog = directoryThatShouldBeInsideModelCatalog;
+    }
 
-    public final Map<String, Object> modelInfo;
-    public final Map<String, Object> configuration;
-    public final long trainMillis;
-
-    public GraphSageTrainResult(
-        Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> trainedModel,
-        long trainMillis
-    ) {
-        var trainConfig = trainedModel.trainConfig();
-
-        this.modelInfo = new HashMap<>();
-        modelInfo.put(MODEL_NAME_KEY, trainedModel.name());
-        modelInfo.put(MODEL_TYPE_KEY, trainedModel.algoType());
-        modelInfo.putAll(trainedModel.customInfo().toMap());
-        configuration = trainConfig.toMap();
-
-        this.trainMillis = trainMillis;
+    @Override
+    public void store(Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model) {
+        modelCatalog.store(model.creator(), model.name(), directoryThatShouldBeInsideModelCatalog);
     }
 }

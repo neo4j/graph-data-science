@@ -22,6 +22,7 @@ package org.neo4j.gds.procedures;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
+import org.neo4j.gds.applications.algorithms.embeddings.GraphSageModelRepository;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -46,6 +47,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.api.KernelTransaction;
 
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -101,7 +103,9 @@ public class GraphDataScienceProcedures {
         Transaction transaction,
         AlgorithmProcedureFacadeBuilderFactory algorithmProcedureFacadeBuilderFactory,
         DeprecatedProceduresMetricService deprecatedProceduresMetricService,
-        ModelCatalog modelCatalog
+        ModelCatalog modelCatalog,
+        Optional<Function<GraphSageModelRepository, GraphSageModelRepository>> graphSageModelRepositoryDecorator,
+        Path modelStoreDirectory
     ) {
         var configurationParser = new ConfigurationParser(defaultsConfiguration, limitsConfiguration);
         var configurationCreator = new ConfigurationCreator(
@@ -120,7 +124,9 @@ public class GraphDataScienceProcedures {
             projectionMetricsService,
             requestScopedDependencies,
             writeContext,
-            modelCatalog
+            modelCatalog,
+            graphSageModelRepositoryDecorator,
+            modelStoreDirectory
         );
 
         var catalogProcedureFacade = catalogProcedureFacadeFactory.createCatalogProcedureFacade(
@@ -138,7 +144,6 @@ public class GraphDataScienceProcedures {
             configurationCreator,
             requestScopedDependencies,
             kernelTransaction,
-            graphDatabaseService,
             algorithmMetaDataSetter,
             applicationsFacade,
             writeContext,
