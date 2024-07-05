@@ -357,9 +357,9 @@ ORDER BY Community, Name
 [opts="header",cols="1,1"]
 |===
 | Name    | Community
-| "Alice"   | 1
-| "Bridget" | 1
-| "Michael" | 1
+| "Alice"   | 0
+| "Bridget" | 0
+| "Michael" | 0
 | "Charles" | 4
 | "Doug"    | 4
 | "Mark"    | 4
@@ -470,8 +470,8 @@ ORDER BY Community, Name
 [opts="header",cols="1,1"]
 |===
 | Name      | Community
-| "Bridget" | 2
-| "Michael" | 2
+| "Bridget" | 0
+| "Michael" | 0
 | "Alice"   | 4
 | "Charles" | 4
 | "Doug"    | 4
@@ -546,12 +546,13 @@ ORDER BY Community, Name
 | "Charles" | 19
 | "Doug"    | 19
 | "Mark"    | 19
-| "Alice"   | 21
-| "Bridget" | 21
-| "Michael" | 21
+| "Alice"   | 52
+| "Bridget" | 52
+| "Michael" | 52
 |===
 --
 
-As we can see, the communities are based on the `seed_label` property, concretely `19` is from the node `Mark` and `21` from `Doug`.
+// TODO check from which node its from. Before was also wrong
+As we can see, the communities are based on the `seed_label` property, concretely `19` is from the node `Mark` and `52` from `Alice`.
 
 NOTE: We have used the `stream` mode to demonstrate running the algorithm using `seedProperty`, this configuration parameter is available for all the modes of the algorithm.

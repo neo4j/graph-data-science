@@ -346,9 +346,9 @@ ORDER BY name ASC
 [opts="header"]
 |===
 | name      | communityId
-| "Alice"   | 2
-| "Bridget" | 2
-| "Charles" | 2
+| "Alice"   | 1
+| "Bridget" | 1
+| "Charles" | 1
 | "Doug"    | 5
 | "Mark"    | 5
 | "Michael" | 5
@@ -455,10 +455,10 @@ ORDER BY name ASC
 [opts="header"]
 |===
 | name      | communityId
-| "Alice"   | 3
-| "Bridget" | 2
-| "Charles" | 2
-| "Doug"    | 3
+| "Alice"   | 4
+| "Bridget" | 1
+| "Charles" | 1
+| "Doug"    | 4
 | "Mark"    | 5
 | "Michael" | 5
 |===
@@ -524,7 +524,8 @@ CREATE (m)-[:TYPE]->(n);
 .The following statement will project the graph and store it in the graph catalog.
 [source, cypher, role=noplay graph-project-query]
 ----
-MATCH (source:Node)-[r:TYPE]->(target:Node)
+MATCH (source:Node)
+OPTIONAL MATCH (source)-[r:TYPE]->(target:Node)
 WITH gds.graph.project(
   'myGraph2',
   source,
@@ -546,7 +547,7 @@ RETURN
 [source,cypher,role=noplay]
 ----
 CALL gds.leiden.stream('myGraph2', {
-  randomSeed: 19,
+  randomSeed: 23,
   includeIntermediateCommunities: true,
   concurrency: 1
 })
@@ -559,21 +560,21 @@ ORDER BY name ASC
 [opts="header"]
 |===
 | name  | communityId | intermediateCommunityIds
-| "a"   | 3           | [3, 3]
-| "b"   | 3           | [3, 3]
-| "c"   | 3           | [14, 3]
-| "d"   | 3           | [3, 3]
-| "e"   | 3           | [14, 3]
-| "f"   | 3           | [14, 3]
-| "g"   | 2           | [8, 2]
-| "h"   | 2           | [8, 2]
-| "i"   | 2           | [8, 2]
-| "j"   | 0           | [12, 0]
-| "k"   | 0           | [12, 0]
-| "l"   | 0           | [12, 0]
-| "m"   | 0           | [12, 0]
-| "n"   | 0           | [12, 0]
-| "x"   | 3           | [14, 3]
+| "a"   | 4           | [2, 4]
+| "b"   | 4           | [2, 4]
+| "c"   | 5           | [7, 5]
+| "d"   | 4           | [2, 4]
+| "e"   | 5           | [6, 5]
+| "f"   | 5           | [7, 5]
+| "g"   | 5           | [7, 5]
+| "h"   | 5           | [11, 5]
+| "i"   | 5           | [11, 5]
+| "j"   | 1           | [12, 1]
+| "k"   | 1           | [12, 1]
+| "l"   | 1           | [12, 1]
+| "m"   | 1           | [12, 1]
+| "n"   | 1           | [12, 1]
+| "x"   | 5           | [6, 5]
 |===
 --
 
@@ -623,7 +624,7 @@ Note that the `consecutiveIds` configuration option cannot be used in combinatio
 ----
 CALL gds.leiden.mutate('myGraph2', {
   mutateProperty: 'intermediateCommunities',
-  randomSeed: 19,
+  randomSeed: 23,
   includeIntermediateCommunities: true,
   concurrency: 1
 })
@@ -634,7 +635,7 @@ YIELD communityCount, modularity, modularities
 [opts="header"]
 |===
 | communityCount  | modularity | modularities
-| 3               | 0.3816     | [0.37599999999999995, 0.3816]
+| 3               | 0.3624     | [0.3296, 0.3624]
 |===
 --
 
@@ -655,21 +656,21 @@ ORDER BY name ASC
 [opts="header"]
 |===
 | name  | intermediateCommunities
-| "a"   | [3, 3]
-| "b"   | [3, 3]
-| "c"   | [14, 3]
-| "d"   | [3, 3]
-| "e"   | [14, 3]
-| "f"   | [14, 3]
-| "g"   | [8, 2]
-| "h"   | [8, 2]
-| "i"   | [8, 2]
-| "j"   | [12, 0]
-| "k"   | [12, 0]
-| "l"   | [12, 0]
-| "m"   | [12, 0]
-| "n"   | [12, 0]
-| "x"   | [14, 3]
+| "a"   | [2, 4]
+| "b"   | [2, 4]
+| "c"   | [7, 5]
+| "d"   | [2, 4]
+| "e"   | [6, 5]
+| "f"   | [7, 5]
+| "g"   | [7, 5]
+| "h"   | [11, 5]
+| "i"   | [11, 5]
+| "j"   | [12, 1]
+| "k"   | [12, 1]
+| "l"   | [12, 1]
+| "m"   | [12, 1]
+| "n"   | [12, 1]
+| "x"   | [6, 5]
 |===
 --
 
@@ -695,7 +696,7 @@ YIELD communityCount, modularity, modularities
 [opts="header"]
 |===
 | communityCount  | modularity | modularities
-| 3               | 0.3816     | [0.37599999999999995, 0.3816]
+| 3               | 0.3624     | [0.3296, 0.3624]
 |===
 --
 
@@ -712,20 +713,20 @@ ORDER BY name ASC
 [opts="header"]
 |===
 | name  | intermediateCommunities
-| "a"   | [3, 3]
-| "b"   | [3, 3]
-| "c"   | [14, 3]
-| "d"   | [3, 3]
-| "e"   | [14, 3]
-| "f"   | [14, 3]
-| "g"   | [8, 2]
-| "h"   | [8, 2]
-| "i"   | [8, 2]
-| "j"   | [12, 0]
-| "k"   | [12, 0]
-| "l"   | [12, 0]
-| "m"   | [12, 0]
-| "n"   | [12, 0]
-| "x"   | [14, 3]
+| "a"   | [2, 4]
+| "b"   | [2, 4]
+| "c"   | [7, 5]
+| "d"   | [2, 4]
+| "e"   | [6, 5]
+| "f"   | [7, 5]
+| "g"   | [7, 5]
+| "h"   | [11, 5]
+| "i"   | [11, 5]
+| "j"   | [12, 1]
+| "k"   | [12, 1]
+| "l"   | [12, 1]
+| "m"   | [12, 1]
+| "n"   | [12, 1]
+| "x"   | [6, 5]
 |===
 --

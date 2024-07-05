@@ -307,7 +307,7 @@ include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 CALL gds.localClusteringCoefficient.stream('myGraph')
 YIELD nodeId, localClusteringCoefficient
 RETURN gds.util.asNode(nodeId).name AS name, localClusteringCoefficient
-ORDER BY localClusteringCoefficient DESC
+ORDER BY localClusteringCoefficient DESC, name
 ----
 
 .Results
@@ -446,7 +446,7 @@ CALL gds.localClusteringCoefficient.stream('myGraph', {
 })
 YIELD nodeId, localClusteringCoefficient
 RETURN gds.util.asNode(nodeId).name AS name, localClusteringCoefficient
-ORDER BY localClusteringCoefficient DESC
+ORDER BY localClusteringCoefficient DESC, name
 ----
 
 .Results
