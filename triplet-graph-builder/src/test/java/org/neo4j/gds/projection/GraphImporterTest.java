@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
@@ -308,5 +309,65 @@ class GraphImporterTest {
             fromGdl("()-[:REL0 {prop0: 0}]->()-[:REL1 {prop1: 1}]->()"),
             graphStore.getUnion()
         );
+    }
+
+    @Test
+    void shouldFailImportWithUnusedUndirectedRelationshipType() {
+        var importer = new GraphImporter(GraphProjectConfig.emptyWithName("", "g"),
+            List.of("UNUSED_REL"),
+            List.of(),
+            new LazyIdMapBuilderBuilder().concurrency(new Concurrency(4))
+                .hasLabelInformation(true)
+                .hasProperties(true)
+                .propertyState(PropertyState.REMOTE)
+                .build(),
+            Capabilities.WriteMode.REMOTE,
+            ""
+        );
+
+        importer.update(0,
+            1,
+            null,
+            null,
+            NodeLabelTokens.empty(),
+            NodeLabelTokens.empty(),
+            RelationshipType.of("REL"),
+            null
+        );
+
+        assertThatThrownBy(() -> importer.result(DatabaseInfo.of(DatabaseId.EMPTY, DatabaseInfo.DatabaseLocation.LOCAL),
+            ProgressTimer.start(),
+            true
+        )).hasMessage("Specified undirectedRelationshipTypes `[UNUSED_REL]` were not projected in the graph. Projected types are: `['REL']`.");
+    }
+
+    @Test
+    void shouldFailImportWithUnusedInverseRelationshipType() {
+        var importer = new GraphImporter(GraphProjectConfig.emptyWithName("", "g"),
+            List.of(),
+            List.of("UNUSED_REL"),
+            new LazyIdMapBuilderBuilder().concurrency(new Concurrency(4))
+                .hasLabelInformation(true)
+                .hasProperties(true)
+                .propertyState(PropertyState.REMOTE)
+                .build(),
+            Capabilities.WriteMode.REMOTE,
+            ""
+        );
+
+        importer.update(0,
+            1,
+            null,
+            null,
+            NodeLabelTokens.empty(),
+            NodeLabelTokens.empty(),
+            RelationshipType.of("REL"),
+            null
+        );
+
+        assertThatThrownBy(() -> importer.result(DatabaseInfo.of(DatabaseId.EMPTY, DatabaseInfo.DatabaseLocation.LOCAL),
+            ProgressTimer.start(),
+            true
+        )).hasMessage("Specified inverseIndexedRelationshipTypes `[UNUSED_REL]` were not projected in the graph. Projected types are: `['REL']`.");
     }
 }

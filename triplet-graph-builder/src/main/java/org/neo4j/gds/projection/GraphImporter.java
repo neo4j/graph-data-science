@@ -20,6 +20,7 @@
 package org.neo4j.gds.projection;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.DefaultValue;
@@ -27,6 +28,7 @@ import org.neo4j.gds.api.compress.AdjacencyCompressor;
 import org.neo4j.gds.api.schema.ImmutableMutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
+import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
@@ -42,11 +44,14 @@ import org.neo4j.gds.core.loading.construction.NodeLabelToken;
 import org.neo4j.gds.core.loading.construction.PropertyValues;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.utils.StringJoining;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toMap;
 import static org.neo4j.gds.Orientation.NATURAL;
@@ -159,6 +164,7 @@ public final class GraphImporter {
         buildRelationshipsWithProperties(graphStoreBuilder, valueMapper);
 
         var graphStore = graphStoreBuilder.schema(this.graphSchemaBuilder.build()).build();
+        validateRelTypes(graphStore.schema().relationshipSchema());
 
         GraphStoreCatalog.set(this.config, graphStore);
 
@@ -180,101 +186,132 @@ public final class GraphImporter {
             .build();
     }
 
-    private RelationshipsBuilder newRelImporter(RelationshipType relType, @Nullable PropertyValues properties) {
-        var orientation = this.undirectedRelationshipTypes.contains(relType.name) || this.undirectedRelationshipTypes
-            .contains(
-                "*"
-            )
-                ? UNDIRECTED
-                : NATURAL;
+    private void validateRelTypes(RelationshipSchema relationshipSchema) {
+        var  unusedUndirectedTypes = notProjectedRelationshipTypes(relationshipSchema, undirectedRelationshipTypes);
+        if (!unusedUndirectedTypes.isEmpty()) {
+            throw new IllegalArgumentException(("Specified undirectedRelationshipTypes `%s` were not projected in the graph. " + "Projected types are: `%s`.").formatted(
+                unusedUndirectedTypes,
+                StringJoining.join(relationshipSchema.availableTypes().stream().map(RelationshipType::name))
+            ));
+        }
+        var unusedInverseTypes = notProjectedRelationshipTypes(relationshipSchema, inverseIndexedRelationshipTypes);
+        if (!unusedInverseTypes.isEmpty()) {
+            throw new IllegalArgumentException(("Specified inverseIndexedRelationshipTypes `%s` were not projected in the graph. " + "Projected types are: `%s`.").formatted(
+                unusedInverseTypes,
+                StringJoining.join(relationshipSchema.availableTypes().stream().map(RelationshipType::name))
+            ));
+        }
+    }
 
-        boolean indexInverse = inverseIndexedRelationshipTypes.contains(relType.name) || inverseIndexedRelationshipTypes
-            .contains("*");
-
-        var relationshipsBuilderBuilder = GraphFactory.initRelationshipsBuilder()
-            .nodes(this.idMapBuilder)
-            .relationshipType(relType)
-            .orientation(orientation)
-            .aggregation(Aggregation.NONE)
-            .indexInverse(indexInverse)
-            .concurrency(this.config.readConcurrency())
-            .usePooledBuilderProvider(true);
-
-        if (properties != null) {
-            for (String propertyKey : properties.propertyKeys()) {
-                relationshipsBuilderBuilder.addPropertyConfig(
-                    ImmutablePropertyConfig.builder().propertyKey(propertyKey).build()
-                );
-            }
+    private List<String> notProjectedRelationshipTypes(RelationshipSchema schema, List<String> givenRelationshipTypes) {
+        if (givenRelationshipTypes.contains(ElementProjection.PROJECT_ALL)) {
+            return List.of();
         }
 
-        return relationshipsBuilderBuilder.build();
+        Set<String> typesInSchema = schema.availableTypes().stream()
+            .map(RelationshipType::name)
+            .collect(Collectors.toSet());
+
+        return givenRelationshipTypes.stream()
+            .filter(type -> !typesInSchema.contains(type))
+            .toList();
     }
 
-    /**
-     * Adds the given node to the internal nodes builder and returns
-     * the intermediate node id which can be used for relationships.
-     *
-     * @return intermediate node id
-     */
-    private long loadNode(
-        long node,
-        NodeLabelToken nodeLabels,
-        @Nullable PropertyValues nodeProperties
-    ) {
-        return nodeProperties == null
-            ? this.idMapBuilder.addNode(node, nodeLabels)
-            : this.idMapBuilder.addNodeWithProperties(
-                node,
-                nodeProperties,
-                nodeLabels
+    private RelationshipsBuilder newRelImporter(RelationshipType relType, @Nullable PropertyValues properties) {
+    var orientation = this.undirectedRelationshipTypes.contains(relType.name) || this.undirectedRelationshipTypes
+        .contains(
+            "*"
+        )
+        ? UNDIRECTED
+        : NATURAL;
+
+    boolean indexInverse = inverseIndexedRelationshipTypes.contains(relType.name) || inverseIndexedRelationshipTypes
+        .contains("*");
+
+    var relationshipsBuilderBuilder = GraphFactory.initRelationshipsBuilder()
+        .nodes(this.idMapBuilder)
+        .relationshipType(relType)
+        .orientation(orientation)
+        .aggregation(Aggregation.NONE)
+        .indexInverse(indexInverse)
+        .concurrency(this.config.readConcurrency())
+        .usePooledBuilderProvider(true);
+
+    if (properties != null) {
+        for (String propertyKey : properties.propertyKeys()) {
+            relationshipsBuilderBuilder.addPropertyConfig(
+                ImmutablePropertyConfig.builder().propertyKey(propertyKey).build()
             );
+        }
     }
 
-    private AdjacencyCompressor.ValueMapper buildNodesWithProperties(GraphStoreBuilder graphStoreBuilder) {
-        var idMapAndProperties = this.idMapBuilder.build();
+    return relationshipsBuilderBuilder.build();
+}
 
-        var idMap = idMapAndProperties.idMap();
-        var nodeSchema = idMapAndProperties.schema();
+/**
+ * Adds the given node to the internal nodes builder and returns
+ * the intermediate node id which can be used for relationships.
+ *
+ * @return intermediate node id
+ */
+private long loadNode(
+    long node,
+    NodeLabelToken nodeLabels,
+    @Nullable PropertyValues nodeProperties
+) {
+    return nodeProperties == null
+        ? this.idMapBuilder.addNode(node, nodeLabels)
+        : this.idMapBuilder.addNodeWithProperties(
+            node,
+            nodeProperties,
+            nodeLabels
+        );
+}
 
-        this.graphSchemaBuilder.nodeSchema(nodeSchema);
+private AdjacencyCompressor.ValueMapper buildNodesWithProperties(GraphStoreBuilder graphStoreBuilder) {
+    var idMapAndProperties = this.idMapBuilder.build();
 
-        var nodes = ImmutableNodes
-            .builder()
-            .idMap(idMap)
-            .schema(nodeSchema)
-            .properties(idMapAndProperties.propertyStore())
-            .build();
+    var idMap = idMapAndProperties.idMap();
+    var nodeSchema = idMapAndProperties.schema();
 
-        graphStoreBuilder.nodes(nodes);
+    this.graphSchemaBuilder.nodeSchema(nodeSchema);
 
-        // Relationships are added using their intermediate node ids.
-        // In order to map to the final internal ids, we need to use
-        // the mapping function of the wrapped id map.
-        return idMap.rootIdMap()::toMappedNodeId;
-    }
+    var nodes = ImmutableNodes
+        .builder()
+        .idMap(idMap)
+        .schema(nodeSchema)
+        .properties(idMapAndProperties.propertyStore())
+        .build();
 
-    private void buildRelationshipsWithProperties(
-        GraphStoreBuilder graphStoreBuilder,
-        AdjacencyCompressor.ValueMapper valueMapper
-    ) {
-        var relationshipImportResultBuilder = RelationshipImportResult.builder();
+    graphStoreBuilder.nodes(nodes);
 
-        var relationshipSchema = MutableRelationshipSchema.empty();
-        this.relImporters.forEach((relationshipType, relImporter) -> {
-            var relationships = relImporter.build(
-                Optional.of(valueMapper),
-                Optional.empty()
-            );
-            relationshipSchema.set(relationships.relationshipSchemaEntry());
-            relationshipImportResultBuilder.putImportResult(relationshipType, relationships);
-        });
+    // Relationships are added using their intermediate node ids.
+    // In order to map to the final internal ids, we need to use
+    // the mapping function of the wrapped id map.
+    return idMap.rootIdMap()::toMappedNodeId;
+}
 
-        graphStoreBuilder.relationshipImportResult(relationshipImportResultBuilder.build());
-        this.graphSchemaBuilder.relationshipSchema(relationshipSchema);
+private void buildRelationshipsWithProperties(
+    GraphStoreBuilder graphStoreBuilder,
+    AdjacencyCompressor.ValueMapper valueMapper
+) {
+    var relationshipImportResultBuilder = RelationshipImportResult.builder();
 
-        // release all references to the builders
-        // we are only be called once and don't support double invocations of `result` building
-        this.relImporters.clear();
-    }
+    var relationshipSchema = MutableRelationshipSchema.empty();
+    this.relImporters.forEach((relationshipType, relImporter) -> {
+        var relationships = relImporter.build(
+            Optional.of(valueMapper),
+            Optional.empty()
+        );
+        relationshipSchema.set(relationships.relationshipSchemaEntry());
+        relationshipImportResultBuilder.putImportResult(relationshipType, relationships);
+    });
+
+    graphStoreBuilder.relationshipImportResult(relationshipImportResultBuilder.build());
+    this.graphSchemaBuilder.relationshipSchema(relationshipSchema);
+
+    // release all references to the builders
+    // we are only be called once and don't support double invocations of `result` building
+    this.relImporters.clear();
+}
 }

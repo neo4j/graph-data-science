@@ -1152,6 +1152,51 @@ class CypherAggregationTest extends BaseProcTest {
             .withMessageContaining("`graphName` can not be null or blank");
     }
 
+    @Test
+    void shouldFailOnInvalidUndirectedRelationshipTypes() {
+        var query =
+            """
+                 MATCH (s)-[r]->(t)
+                 RETURN gds.graph.project(
+                    'g',
+                    s,
+                    t,
+                    {relationshipType: type(r)},
+                    {undirectedRelationshipTypes: ['REL', 'invalidRel']}
+                )
+                """;
+
+        assertThatException()
+            .isThrownBy(() -> runQuery(query))
+            .withMessageContaining(
+                "Specified undirectedRelationshipTypes `[invalidRel]` were not projected in the graph." +
+                    " Projected types are: `['DISCONNECTED', 'REL']`."
+            );
+    }
+
+    @Test
+    void shouldFailOnInvalidInverseRelationshipTypes() {
+        var query =
+            """
+                 MATCH (s)-[r]->(t)
+                 RETURN gds.graph.project(
+                    'g',
+                    s,
+                    t,
+                    {relationshipType: type(r)},
+                    {inverseIndexedRelationshipTypes: ['REL', 'invalidRel']}
+                )
+                """;
+
+        assertThatException()
+            .isThrownBy(() -> runQuery(query))
+            .withMessageContaining(
+                "Specified inverseIndexedRelationshipTypes `[invalidRel]` were not projected in the graph." +
+                    " Projected types are: `['DISCONNECTED', 'REL']`."
+            );
+    }
+
+
     @Nested
     class LargerGraphTest extends RandomGraphTestCase {
 
