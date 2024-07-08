@@ -35,6 +35,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNStreamConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
+import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
 import org.neo4j.gds.procedures.algorithms.embeddings.stubs.FastRPMutateStub;
 import org.neo4j.gds.procedures.algorithms.embeddings.stubs.GraphSageMutateStub;
 import org.neo4j.gds.procedures.algorithms.embeddings.stubs.HashGnnMutateStub;
@@ -359,6 +360,34 @@ public final class NodeEmbeddingsProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             Node2VecStreamConfig::of,
+            configuration -> estimationMode().node2Vec(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<Node2VecWriteResult> node2VecWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new Node2VecResultBuilderForWriteMode();
+
+        return algorithmExecutionScaffolding.runAlgorithm(
+            graphName,
+            configuration,
+            Node2VecWriteConfig::of,
+            writeMode()::node2Vec,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> node2VecWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            Node2VecWriteConfig::of,
             configuration -> estimationMode().node2Vec(configuration, graphNameOrConfiguration)
         );
 

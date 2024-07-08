@@ -19,9 +19,6 @@
  */
 package org.neo4j.gds.procedures;
 
-import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsEstimateBusinessFacade;
-import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsFacade;
-import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmMutateBusinessFacade;
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmStatsBusinessFacade;
@@ -46,7 +43,6 @@ import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
-import org.neo4j.gds.procedures.embeddings.OldNodeEmbeddingsProcedureFacade;
 import org.neo4j.gds.procedures.misc.MiscAlgorithmsProcedureFacade;
 
 class AlgorithmProcedureFacadeBuilder {
@@ -157,28 +153,6 @@ class AlgorithmProcedureFacadeBuilder {
             estimationModeRunner,
             algorithmExecutionScaffolding,
             algorithmExecutionScaffoldingForStreamMode
-        );
-    }
-
-    OldNodeEmbeddingsProcedureFacade createOldNodeEmbeddingsProcedureFacade() {
-        // algorithms facade
-        var nodeEmbeddingsAlgorithmsFacade = new NodeEmbeddingsAlgorithmsFacade(algorithmRunner);
-
-        // mode-specific facades
-        var writeBusinessFacade = new NodeEmbeddingsAlgorithmsWriteBusinessFacade(
-            nodeEmbeddingsAlgorithmsFacade,
-            writeNodePropertyService
-        );
-
-        var estimateBusinessFacade = new NodeEmbeddingsAlgorithmsEstimateBusinessFacade(
-            algorithmEstimator
-        );
-
-        // procedure facade
-        return new OldNodeEmbeddingsProcedureFacade(
-            configurationCreator,
-            estimateBusinessFacade,
-            writeBusinessFacade
         );
     }
 

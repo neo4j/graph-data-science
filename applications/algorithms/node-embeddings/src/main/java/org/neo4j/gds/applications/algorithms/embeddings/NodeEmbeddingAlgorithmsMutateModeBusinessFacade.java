@@ -51,8 +51,8 @@ public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
         NodeEmbeddingAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         MutateNodeProperty mutateNodeProperty,
-        Node2VecAlgorithmProcessing node2VecAlgorithmProcessing,
-        GraphSageAlgorithmProcessing graphSageAlgorithmProcessing
+        GraphSageAlgorithmProcessing graphSageAlgorithmProcessing,
+        Node2VecAlgorithmProcessing node2VecAlgorithmProcessing
     ) {
         this.estimation = estimation;
         this.algorithms = algorithms;

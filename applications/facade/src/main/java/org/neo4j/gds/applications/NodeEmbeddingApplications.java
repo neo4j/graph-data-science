@@ -104,8 +104,8 @@ public final class NodeEmbeddingApplications {
             algorithms,
             algorithmProcessingTemplateConvenience,
             mutateNodeProperty,
-            node2VecAlgorithmProcessing,
-            graphSageAlgorithmProcessing
+            graphSageAlgorithmProcessing,
+            node2VecAlgorithmProcessing
         );
         var statsMode = new NodeEmbeddingAlgorithmsStatsModeBusinessFacade(
             estimationMode,
@@ -133,7 +133,8 @@ public final class NodeEmbeddingApplications {
             estimationMode,
             algorithms,
             algorithmProcessingTemplateConvenience,
-            graphSageAlgorithmProcessing
+            graphSageAlgorithmProcessing,
+            node2VecAlgorithmProcessing
         );
 
         return new NodeEmbeddingApplications(estimationMode, mutateMode, statsMode, streamMode, trainMode, writeMode);

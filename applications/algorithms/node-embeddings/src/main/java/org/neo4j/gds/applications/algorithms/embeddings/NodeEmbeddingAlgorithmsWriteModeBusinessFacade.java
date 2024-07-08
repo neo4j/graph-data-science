@@ -31,6 +31,8 @@ import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 import org.neo4j.gds.embeddings.fastrp.FastRPWriteConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
+import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
+import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
 import org.neo4j.gds.logging.Log;
 
 import java.util.Optional;
@@ -43,18 +45,21 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final WriteToDatabase writeToDatabase;
     private final GraphSageAlgorithmProcessing graphSageAlgorithmProcessing;
+    private final Node2VecAlgorithmProcessing node2VecAlgorithmProcessing;
 
     private NodeEmbeddingAlgorithmsWriteModeBusinessFacade(
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         NodeEmbeddingAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        WriteToDatabase writeToDatabase, GraphSageAlgorithmProcessing graphSageAlgorithmProcessing
+        WriteToDatabase writeToDatabase, GraphSageAlgorithmProcessing graphSageAlgorithmProcessing,
+        Node2VecAlgorithmProcessing node2VecAlgorithmProcessing
     ) {
         this.estimationFacade = estimationFacade;
         this.algorithms = algorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.writeToDatabase = writeToDatabase;
         this.graphSageAlgorithmProcessing = graphSageAlgorithmProcessing;
+        this.node2VecAlgorithmProcessing = node2VecAlgorithmProcessing;
     }
 
     public static NodeEmbeddingAlgorithmsWriteModeBusinessFacade create(
@@ -64,7 +69,8 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         NodeEmbeddingAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        GraphSageAlgorithmProcessing graphSageAlgorithmProcessing
+        GraphSageAlgorithmProcessing graphSageAlgorithmProcessing,
+        Node2VecAlgorithmProcessing node2VecAlgorithmProcessing
     ) {
         var writeNodePropertyService = new WriteNodePropertyService(log, requestScopedDependencies, writeContext);
         var writeToDatabase = new WriteToDatabase(writeNodePropertyService);
@@ -74,7 +80,8 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
             algorithms,
             algorithmProcessingTemplateConvenience,
             writeToDatabase,
-            graphSageAlgorithmProcessing
+            graphSageAlgorithmProcessing,
+            node2VecAlgorithmProcessing
         );
     }
 
@@ -110,5 +117,15 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
             resultBuilder,
             false
         );
+    }
+
+    public <RESULT> RESULT node2Vec(
+        GraphName graphName,
+        Node2VecWriteConfig configuration,
+        ResultBuilder<Node2VecWriteConfig, Node2VecResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var writeStep = new Node2VecWriteStep(writeToDatabase, configuration);
+
+        return node2VecAlgorithmProcessing.process(graphName, configuration, Optional.of(writeStep), resultBuilder);
     }
 }
