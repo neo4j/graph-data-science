@@ -25,6 +25,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.graph.GraphProperty;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.compat.InputEntityIdVisitor;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -42,10 +43,13 @@ import org.neo4j.internal.batchimport.input.InputEntityVisitor;
 import org.neo4j.internal.batchimport.input.PropertySizeCalculator;
 import org.neo4j.internal.batchimport.input.ReadableGroups;
 import org.neo4j.internal.id.IdValidator;
+import org.neo4j.values.storable.Values;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
@@ -53,9 +57,9 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.Spliterator;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.function.LongFunction;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class GraphStoreInput implements Input {
 
@@ -453,6 +457,7 @@ public final class GraphStoreInput implements Input {
         private final boolean hasLabels;
         private final boolean hasProperties;
         private final IdMapFunction idMapFunction;
+        private final Map<String, Map<String, NodePropertyValues>> labelToNodeProperties;
 
         NodeChunk(
             NodeStore nodeStore,
@@ -464,6 +469,7 @@ public final class GraphStoreInput implements Input {
             this.hasLabels = nodeStore.hasLabels();
             this.hasProperties = nodeStore.hasProperties();
             this.idMapFunction = idMapFunction;
+            this.labelToNodeProperties = nodeStore.labelToNodeProperties();
         }
 
         @Override
@@ -476,26 +482,20 @@ public final class GraphStoreInput implements Input {
                     visitor.labels(labels);
 
                     if (hasProperties) {
-                        for (var label : labels) {
-                            nodeStore.labelToNodeProperties()
-                                .getOrDefault(label, Map.of())
-                                .forEach((propertyKey, properties) -> exportProperty(
-                                    visitor,
-                                    propertyKey,
-                                    properties::getObject
-                                ));
-                        }
+                        exportProperties(
+                            visitor,
+                            Arrays.stream(labels).map(label -> this.labelToNodeProperties.getOrDefault(label, Map.of()))
+                        );
                     }
                 } else if (hasProperties) { // no label information, but node properties
-                    nodeStore.labelToNodeProperties().forEach((label, nodeProperties) -> nodeProperties.forEach((propertyKey, properties) -> exportProperty(
-                        visitor,
-                        propertyKey,
-                        properties::getObject
-                    )));
+                    exportProperties(visitor, this.labelToNodeProperties.values().stream());
                 }
 
                 nodeStore.additionalProperties.forEach((propertyKey, propertyFn) -> {
-                    exportProperty(visitor, propertyKey, propertyFn);
+                    var value = propertyFn.apply(id);
+                    if (value != null) {
+                        visitor.property(propertyKey, value);
+                    }
                 });
 
                 visitor.endOfEntity();
@@ -505,11 +505,29 @@ public final class GraphStoreInput implements Input {
             return false;
         }
 
-        private void exportProperty(InputEntityVisitor visitor, String propertyKey, LongFunction<Object> propertyFn) {
-            var value = propertyFn.apply(id);
-            if (value != null) {
-                visitor.property(propertyKey, value);
-            }
+        private void exportProperties(
+            InputEntityVisitor visitor,
+            Stream<Map<String, NodePropertyValues>> propertyStores
+        ) {
+            var propertyProducers = new HashMap<String, NodePropertyValues>();
+            propertyStores.forEach(map -> map.forEach((propertyKey, properties) -> {
+                var previousProducer = propertyProducers.get(propertyKey);
+                if (previousProducer != null) {
+                    if (previousProducer != properties) {
+                        throw new IllegalStateException(
+                            "Different producers for the same property, property keys must be unique per node, not per label."
+                        );
+                    }
+
+                    return;
+                }
+
+                var property = properties.value(id);
+                if (property != null && property != Values.NO_VALUE) {
+                    propertyProducers.put(propertyKey, properties);
+                    visitor.property(propertyKey, property);
+                }
+            }));
         }
 
         @Override
