@@ -19,8 +19,10 @@
  */
 package org.neo4j.gds.applications;
 
+import org.neo4j.gds.applications.algorithms.embeddings.GraphSageAlgorithmProcessing;
 import org.neo4j.gds.applications.algorithms.embeddings.GraphSageModelCatalog;
 import org.neo4j.gds.applications.algorithms.embeddings.GraphSageModelRepository;
+import org.neo4j.gds.applications.algorithms.embeddings.Node2VecAlgorithmProcessing;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithms;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsMutateModeBusinessFacade;
@@ -84,12 +86,26 @@ public final class NodeEmbeddingApplications {
             graphSageModelCatalog,
             algorithmEstimationTemplate
         );
-        var mutateMode = new NodeEmbeddingAlgorithmsMutateModeBusinessFacade(
-            graphSageModelCatalog,
+
+        var graphSageAlgorithmProcessing = new GraphSageAlgorithmProcessing(
             estimationMode,
             algorithms,
             algorithmProcessingTemplateConvenience,
-            mutateNodeProperty
+            graphSageModelCatalog
+        );
+        var node2VecAlgorithmProcessing = new Node2VecAlgorithmProcessing(
+            estimationMode,
+            algorithms,
+            algorithmProcessingTemplateConvenience
+        );
+
+        var mutateMode = new NodeEmbeddingAlgorithmsMutateModeBusinessFacade(
+            estimationMode,
+            algorithms,
+            algorithmProcessingTemplateConvenience,
+            mutateNodeProperty,
+            node2VecAlgorithmProcessing,
+            graphSageAlgorithmProcessing
         );
         var statsMode = new NodeEmbeddingAlgorithmsStatsModeBusinessFacade(
             estimationMode,
@@ -97,10 +113,11 @@ public final class NodeEmbeddingApplications {
             algorithmProcessingTemplateConvenience
         );
         var streamMode = new NodeEmbeddingAlgorithmsStreamModeBusinessFacade(
-            graphSageModelCatalog,
             estimationMode,
             algorithms,
-            algorithmProcessingTemplateConvenience
+            algorithmProcessingTemplateConvenience,
+            graphSageAlgorithmProcessing,
+            node2VecAlgorithmProcessing
         );
         var trainMode = new NodeEmbeddingAlgorithmsTrainModeBusinessFacade(
             graphSageModelCatalog,
@@ -111,12 +128,12 @@ public final class NodeEmbeddingApplications {
         );
         var writeMode = NodeEmbeddingAlgorithmsWriteModeBusinessFacade.create(
             log,
-            graphSageModelCatalog,
             requestScopedDependencies,
             writeContext,
             estimationMode,
             algorithms,
-            algorithmProcessingTemplateConvenience
+            algorithmProcessingTemplateConvenience,
+            graphSageAlgorithmProcessing
         );
 
         return new NodeEmbeddingApplications(estimationMode, mutateMode, statsMode, streamMode, trainMode, writeMode);

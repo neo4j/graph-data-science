@@ -33,51 +33,48 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
 import org.neo4j.gds.logging.Log;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FastRP;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.GraphSage;
 
 public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
-    private final GraphSageModelCatalog graphSageModelCatalog;
     private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final NodeEmbeddingAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final WriteToDatabase writeToDatabase;
+    private final GraphSageAlgorithmProcessing graphSageAlgorithmProcessing;
 
     private NodeEmbeddingAlgorithmsWriteModeBusinessFacade(
-        GraphSageModelCatalog graphSageModelCatalog,
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         NodeEmbeddingAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        WriteToDatabase writeToDatabase
+        WriteToDatabase writeToDatabase, GraphSageAlgorithmProcessing graphSageAlgorithmProcessing
     ) {
-        this.graphSageModelCatalog = graphSageModelCatalog;
         this.estimationFacade = estimationFacade;
         this.algorithms = algorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.writeToDatabase = writeToDatabase;
+        this.graphSageAlgorithmProcessing = graphSageAlgorithmProcessing;
     }
 
     public static NodeEmbeddingAlgorithmsWriteModeBusinessFacade create(
         Log log,
-        GraphSageModelCatalog graphSageModelCatalog,
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         NodeEmbeddingAlgorithms algorithms,
-        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience
+        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
+        GraphSageAlgorithmProcessing graphSageAlgorithmProcessing
     ) {
         var writeNodePropertyService = new WriteNodePropertyService(log, requestScopedDependencies, writeContext);
         var writeToDatabase = new WriteToDatabase(writeNodePropertyService);
 
         return new NodeEmbeddingAlgorithmsWriteModeBusinessFacade(
-            graphSageModelCatalog,
             estimationFacade,
             algorithms,
             algorithmProcessingTemplateConvenience,
-            writeToDatabase
+            writeToDatabase,
+            graphSageAlgorithmProcessing
         );
     }
 
@@ -104,23 +101,14 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
         GraphSageWriteConfig configuration,
         ResultBuilder<GraphSageWriteConfig, GraphSageResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var model = graphSageModelCatalog.get(configuration);
-        var relationshipWeightPropertyFromTrainConfiguration = model.trainConfig().relationshipWeightProperty();
-
-        var validationHook = new GraphSageValidationHook(configuration, model);
-
         var writeStep = new GraphSageWriteStep(writeToDatabase, configuration);
 
-        return algorithmProcessingTemplateConvenience.processAlgorithm(
-            relationshipWeightPropertyFromTrainConfiguration,
+        return graphSageAlgorithmProcessing.process(
             graphName,
             configuration,
-            Optional.of(List.of(validationHook)),
-            GraphSage,
-            () -> estimationFacade.graphSage(configuration, false),
-            graph -> algorithms.graphSage(graph, configuration),
             Optional.of(writeStep),
-            resultBuilder
+            resultBuilder,
+            false
         );
     }
 }
