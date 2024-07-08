@@ -82,6 +82,7 @@ import org.neo4j.kernel.impl.query.TransactionalContext;
 import org.neo4j.kernel.impl.query.TransactionalContextFactory;
 import org.neo4j.kernel.impl.transaction.log.EmptyLogTailMetadata;
 import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
+import org.neo4j.logging.InternalLog;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.memory.EmptyMemoryTracker;
@@ -97,9 +98,12 @@ import org.neo4j.values.virtual.VirtualValues;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import static java.lang.String.format;
 import static org.neo4j.gds.compat.InternalReadOps.countByIdGenerator;
@@ -597,7 +601,20 @@ public final class Neo4jProxy {
     }
 
     public static String defaultDatabaseFormatSetting() {
-        return GraphDatabaseSettings.db_format.defaultValue();
+        return migratedDefaultDatabaseFormatSetting().orElseGet(GraphDatabaseSettings.db_format::defaultValue);
+    }
+
+    private static Optional<String> migratedDefaultDatabaseFormatSetting() {
+        try {
+            Class<?> cls = Class.forName("com.neo4j.configuration.DefaultDbFormatSettingMigrator");
+            Object migrator = cls.getDeclaredConstructor().newInstance();
+            var migrateMethod = cls.getDeclaredMethod("migrate", Map.class, Map.class, InternalLog.class);
+            var defaultValues = new HashMap<String, String>();
+            migrateMethod.invoke(migrator, Map.<String, String>of(), defaultValues, null);
+            return Optional.ofNullable(defaultValues.get(GraphDatabaseSettings.db_format.name()));
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
     public static void configureRecordFormat(Config.Builder configBuilder, String recordFormat) {
