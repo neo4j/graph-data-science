@@ -307,6 +307,16 @@ class GraphSamplingApplicationTest {
         }
 
         @Override
+        public void error(String errorMessage, Throwable throwable) {
+            throw new UnsupportedOperationException("TODO");
+        }
+
+        @Override
+        public void error(String messageFormat, Throwable exception, Object... arguments) {
+            throw new UnsupportedOperationException("TODO");
+        }
+
+        @Override
         public Object getNeo4jLog() {
             return neo4jLog;
         }

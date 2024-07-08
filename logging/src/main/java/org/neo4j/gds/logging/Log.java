@@ -40,6 +40,10 @@ public interface Log {
 
     void debug(String format, Object... arguments);
 
+    void error(String errorMessage, Throwable throwable);
+
+    void error(String messageFormat, Throwable exception, Object... arguments);
+
     /**
      * This is terrible, but necessary in the short term.
      * We want to eventually only have our own GDS log everywhere.
@@ -86,6 +90,15 @@ public interface Log {
 
             @Override
             public void debug(String format, Object... arguments) {
+
+            }
+
+            @Override
+            public void error(String errorMessage, Throwable throwable) {
+            }
+
+            @Override
+            public void error(String messageFormat, Throwable exception, Object... arguments) {
 
             }
 

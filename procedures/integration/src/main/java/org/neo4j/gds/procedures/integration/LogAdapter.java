@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.utils.StringFormatting;
 
 /**
  * We wrap Neo4j's log so that we isolate our code from theirs.
@@ -60,6 +61,16 @@ public class LogAdapter implements Log {
     @Override
     public void debug(String format, Object... arguments) {
         neo4jUserLog.debug(format, arguments);
+    }
+
+    @Override
+    public void error(String errorMessage, Throwable throwable) {
+        neo4jUserLog.error(errorMessage, throwable);
+    }
+
+    @Override
+    public void error(String messageFormat, Throwable exception, Object... arguments) {
+        neo4jUserLog.error(StringFormatting.formatWithLocale(messageFormat, arguments), exception);
     }
 
     @Override
