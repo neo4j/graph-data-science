@@ -54,7 +54,8 @@ public class Node2Vec extends Algorithm<Node2VecResult> {
         Optional<Long> maybeRandomSeed,
         int walkBufferSize,
         Node2VecParameters node2VecParameters,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -64,6 +65,8 @@ public class Node2Vec extends Algorithm<Node2VecResult> {
         this.sourceNodes = sourceNodes;
         this.maybeRandomSeed = maybeRandomSeed;
         this.trainParameters = node2VecParameters.trainParameters();
+
+        this.terminationFlag = terminationFlag;
     }
 
     @Override

@@ -17,16 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.embeddings.node2vec;
+package org.neo4j.gds.procedures.algorithms.embeddings;
 
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 public final class Node2VecMutateResult extends StandardMutateResult {
-
     public final long nodeCount;
     public final long nodePropertiesWritten;
     public final List<Double> lossPerIteration;
@@ -46,8 +47,19 @@ public final class Node2VecMutateResult extends StandardMutateResult {
         this.lossPerIteration = lossPerIteration;
     }
 
-    public static class Builder extends AbstractResultBuilder<Node2VecMutateResult> {
+    public static Node2VecMutateResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+        return new Node2VecMutateResult(
+            0,
+            0,
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.mutateOrWriteMillis,
+            configurationMap,
+            Collections.emptyList()
+        );
+    }
 
+    public static class Builder extends AbstractResultBuilder<Node2VecMutateResult> {
         private List<Double> lossPerIteration;
 
         @Override

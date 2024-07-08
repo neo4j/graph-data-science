@@ -63,6 +63,7 @@ public enum Algorithm {
     Modularity,
     ModularityOptimization,
     NodeSimilarity,
+    Node2Vec,
     PageRank,
     RandomWalk,
     SCC,

@@ -30,6 +30,8 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMutateConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNMutateConfig;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
+import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
+import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,6 +39,7 @@ import java.util.Optional;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FastRP;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.GraphSage;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.HashGNN;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Node2Vec;
 
 public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
     private final GraphSageModelCatalog graphSageModelCatalog;
@@ -116,6 +119,28 @@ public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
             () -> estimation.hashGnn(configuration),
             graph -> algorithms.hashGnn(graph, configuration),
             mutateStep,
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT node2Vec(
+        GraphName graphName,
+        Node2VecMutateConfig configuration,
+        ResultBuilder<Node2VecMutateConfig, Node2VecResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var mutateStep = new Node2VecMutateStep(mutateNodeProperty, configuration);
+
+        var validationHook = new Node2VecValidationHook(configuration);
+
+        return algorithmProcessingTemplateConvenience.processAlgorithm(
+            Optional.empty(),
+            graphName,
+            configuration,
+            Optional.of(List.of(validationHook)),
+            Node2Vec,
+            () -> estimation.node2Vec(configuration),
+            graph -> algorithms.node2Vec(graph, configuration),
+            Optional.of(mutateStep),
             resultBuilder
         );
     }

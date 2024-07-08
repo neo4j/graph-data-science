@@ -56,6 +56,7 @@ public enum LabelForProgressTracking {
     Modularity("Modularity"),
     ModularityOptimization("ModularityOptimization"),
     NodeSimilarity("Node Similarity"),
+    Node2Vec("Node2Vec"),
     PageRank("PageRank"),
     RandomWalk("RandomWalk"),
     SCC("SCC"),
@@ -110,6 +111,7 @@ public enum LabelForProgressTracking {
             case Modularity -> Modularity;
             case ModularityOptimization -> ModularityOptimization;
             case NodeSimilarity -> NodeSimilarity;
+            case Node2Vec -> Node2Vec;
             case PageRank -> PageRank;
             case RandomWalk -> RandomWalk;
             case SCC -> SCC;

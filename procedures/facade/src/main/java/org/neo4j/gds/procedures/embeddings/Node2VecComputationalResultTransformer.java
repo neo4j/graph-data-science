@@ -19,14 +19,12 @@
  */
 package org.neo4j.gds.procedures.embeddings;
 
-import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.embeddings.FloatEmbeddingNodePropertyValues;
 import org.neo4j.gds.algorithms.embeddings.specificfields.Node2VecSpecificFields;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
-import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecMutateResult;
 import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecStreamResult;
 import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecWriteResult;
 
@@ -49,19 +47,6 @@ public class Node2VecComputationalResultTransformer {
                     nodePropertyValues.floatArrayValue(nodeId)));
 
         }).orElseGet(Stream::empty);
-    }
-
-    public static Node2VecMutateResult toMutateResult(NodePropertyMutateResult<Node2VecSpecificFields> mutateResult) {
-
-        return new Node2VecMutateResult(
-            mutateResult.algorithmSpecificFields().nodeCount(),
-            mutateResult.nodePropertiesWritten(),
-            mutateResult.preProcessingMillis(),
-            mutateResult.computeMillis(),
-            mutateResult.mutateMillis(),
-            mutateResult.configuration().toMap(),
-            mutateResult.algorithmSpecificFields().lossPerIteration()
-        );
     }
 
     public static Node2VecWriteResult toWriteResult(NodePropertyWriteResult<Node2VecSpecificFields> writeResult) {

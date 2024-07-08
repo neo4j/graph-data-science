@@ -29,6 +29,7 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.degree.DegreeCentralityFactory;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.gds.embeddings.fastrp.FastRPBaseConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
@@ -44,6 +45,9 @@ import org.neo4j.gds.embeddings.graphsage.algo.SingleLabelGraphSageTrain;
 import org.neo4j.gds.embeddings.hashgnn.HashGNN;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNConfig;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
+import org.neo4j.gds.embeddings.node2vec.Node2Vec;
+import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
+import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -171,6 +175,24 @@ public class NodeEmbeddingAlgorithms {
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
+    Node2VecResult node2Vec(Graph graph, Node2VecMutateConfig configuration) {
+        var task = createNode2VecTask(graph, configuration);
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var algorithm = new Node2Vec(
+            graph,
+            configuration.concurrency(),
+            configuration.sourceNodes(),
+            configuration.randomSeed(),
+            configuration.walkBufferSize(),
+            configuration.node2VecParameters(),
+            progressTracker,
+            terminationFlag
+        );
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+    }
+
     private Task createFastRPTask(Graph graph, Number nodeSelfInfluence, int iterationWeightsSize) {
         var tasks = new ArrayList<Task>();
         tasks.add(Tasks.leaf("Initialize random vectors", graph.nodeCount()));
@@ -218,5 +240,23 @@ public class NodeEmbeddingAlgorithms {
         }
 
         return Tasks.task(LabelForProgressTracking.HashGNN.value, tasks);
+    }
+
+    private Task createNode2VecTask(Graph graph, Node2VecMutateConfig configuration) {
+        var randomWalkTasks = new ArrayList<Task>();
+        if (graph.hasRelationshipProperty()) {
+            randomWalkTasks.add(DegreeCentralityFactory.degreeCentralityProgressTask(graph));
+        }
+        randomWalkTasks.add(Tasks.leaf("create walks", graph.nodeCount()));
+
+        return Tasks.task(
+            LabelForProgressTracking.Node2Vec.value,
+            Tasks.task("RandomWalk", randomWalkTasks),
+            Tasks.iterativeFixed(
+                "train",
+                () -> List.of(Tasks.leaf("iteration")),
+                configuration.iterations()
+            )
+        );
     }
 }

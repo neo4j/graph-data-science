@@ -30,6 +30,7 @@ import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPMutateConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMutateConfig;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNMutateConfig;
+import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityMutateConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationMutateConfig;
 import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
@@ -106,6 +107,7 @@ public class ConfigurationParsersForMutateMode {
             case Modularity -> null;
             case ModularityOptimization -> ModularityOptimizationMutateConfig::of;
             case NodeSimilarity -> NodeSimilarityMutateConfig::of;
+            case Node2Vec -> Node2VecMutateConfig::of;
             case PageRank -> PageRankMutateConfig::of;
             case RandomWalk -> null;
             case SCC -> SccMutateConfig::of;

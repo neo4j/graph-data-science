@@ -21,7 +21,6 @@ package org.neo4j.gds.procedures.embeddings;
 
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmStreamBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsEstimateBusinessFacade;
-import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsMutateBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecProcedure;
@@ -33,14 +32,12 @@ public class OldNodeEmbeddingsProcedureFacade {
     public OldNodeEmbeddingsProcedureFacade(
         ConfigurationCreator configurationCreator,
         NodeEmbeddingsAlgorithmsEstimateBusinessFacade estimateBusinessFacade,
-        NodeEmbeddingsAlgorithmsMutateBusinessFacade mutateBusinessFacade,
         NodeEmbeddingsAlgorithmStreamBusinessFacade streamBusinessFacade,
         NodeEmbeddingsAlgorithmsWriteBusinessFacade writeBusinessFacade
     ) {
         this.node2Vec = new Node2VecProcedure(
             configurationCreator,
             estimateBusinessFacade,
-            mutateBusinessFacade,
             streamBusinessFacade,
             writeBusinessFacade
         );

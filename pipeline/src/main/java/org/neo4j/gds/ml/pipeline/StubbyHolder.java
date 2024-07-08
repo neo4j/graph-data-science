@@ -46,6 +46,7 @@ import org.neo4j.gds.ml.pipeline.stubs.LccStub;
 import org.neo4j.gds.ml.pipeline.stubs.LeidenStub;
 import org.neo4j.gds.ml.pipeline.stubs.LouvainStub;
 import org.neo4j.gds.ml.pipeline.stubs.ModularityOptimizationStub;
+import org.neo4j.gds.ml.pipeline.stubs.Node2VecStub;
 import org.neo4j.gds.ml.pipeline.stubs.NodeSimilarityStub;
 import org.neo4j.gds.ml.pipeline.stubs.PageRankStub;
 import org.neo4j.gds.ml.pipeline.stubs.SccStub;
@@ -106,6 +107,7 @@ class StubbyHolder {
             case Modularity -> null;
             case ModularityOptimization -> new ModularityOptimizationStub();
             case NodeSimilarity -> new NodeSimilarityStub();
+            case Node2Vec -> new Node2VecStub();
             case PageRank -> new PageRankStub();
             case RandomWalk -> null;
             case SCC -> new SccStub();

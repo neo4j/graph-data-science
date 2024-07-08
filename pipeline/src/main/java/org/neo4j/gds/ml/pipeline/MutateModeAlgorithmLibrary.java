@@ -94,6 +94,7 @@ final class MutateModeAlgorithmLibrary {
             case Modularity -> null;
             case ModularityOptimization -> CanonicalProcedureName.parse("gds.modularityOptimization");
             case NodeSimilarity -> CanonicalProcedureName.parse("gds.nodeSimilarity");
+            case Node2Vec -> CanonicalProcedureName.parse("gds.node2vec");
             case PageRank -> CanonicalProcedureName.parse("gds.pageRank");
             case RandomWalk -> null;
             case SCC -> CanonicalProcedureName.parse("gds.scc");
