@@ -42,7 +42,6 @@ public class OldNodeEmbeddingsProcedureFacade {
         this.hashGNN = new HashGNNProcedure(
             configurationCreator,
             estimateBusinessFacade,
-            mutateBusinessFacade,
             streamBusinessFacade
         );
 

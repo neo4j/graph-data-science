@@ -27,6 +27,8 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMemoryEstimateDefinition;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainEstimateDefinition;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNConfig;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNMemoryEstimateDefinition;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.model.ModelConfig;
 
@@ -86,5 +88,9 @@ public class NodeEmbeddingAlgorithmsEstimationModeBusinessFacade {
             graphNameOrConfiguration,
             memoryEstimation
         );
+    }
+
+    public MemoryEstimation hashGnn(HashGNNConfig configuration) {
+        return new HashGNNMemoryEstimateDefinition(configuration.toParameters()).memoryEstimation();
     }
 }

@@ -17,24 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.embeddings;
+package org.neo4j.gds.ml.pipeline.stubs;
 
-import org.neo4j.gds.algorithms.NodePropertyMutateResult;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNMutateConfig;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.embeddings.DefaultNodeEmbeddingMutateResult;
+import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
-public class DefaultNodeEmbeddingsComputationalResultTransformer {
-
-
-    public static DefaultNodeEmbeddingMutateResult toMutateResult(NodePropertyMutateResult<Long> mutateResult) {
-
-        return new DefaultNodeEmbeddingMutateResult(
-            mutateResult.algorithmSpecificFields().longValue(),
-            mutateResult.nodePropertiesWritten(),
-            mutateResult.preProcessingMillis(),
-            mutateResult.computeMillis(),
-            mutateResult.mutateMillis(),
-            mutateResult.configuration().toMap()
-        );
-
+public class HashGnnStub extends AbstractStub<HashGNNMutateConfig, DefaultNodeEmbeddingMutateResult> {
+    protected MutateStub<HashGNNMutateConfig, DefaultNodeEmbeddingMutateResult> stub(AlgorithmsProcedureFacade facade) {
+        return facade.nodeEmbeddings().hashGnnMutateStub();
     }
 }

@@ -49,6 +49,7 @@ public enum Algorithm {
     GraphSage,
     GraphSageTrain,
     HarmonicCentrality,
+    HashGNN,
     K1Coloring,
     KCore,
     KMeans,

@@ -35,6 +35,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
 import org.neo4j.gds.procedures.algorithms.embeddings.stubs.FastRPMutateStub;
 import org.neo4j.gds.procedures.algorithms.embeddings.stubs.GraphSageMutateStub;
+import org.neo4j.gds.procedures.algorithms.embeddings.stubs.HashGnnMutateStub;
 import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
@@ -46,6 +47,7 @@ public final class NodeEmbeddingsProcedureFacade {
     private final RequestScopedDependencies requestScopedDependencies;
     private final FastRPMutateStub fastRPMutateStub;
     private final GraphSageMutateStub graphSageMutateStub;
+    private HashGnnMutateStub hashGnnMutateStub;
 
     private final ApplicationsFacade applicationsFacade;
 
@@ -57,6 +59,7 @@ public final class NodeEmbeddingsProcedureFacade {
         RequestScopedDependencies requestScopedDependencies,
         FastRPMutateStub fastRPMutateStub,
         GraphSageMutateStub graphSageMutateStub,
+        HashGnnMutateStub hashGnnMutateStub,
         ApplicationsFacade applicationsFacade,
         EstimationModeRunner estimationMode,
         AlgorithmExecutionScaffolding algorithmExecutionScaffolding,
@@ -65,6 +68,7 @@ public final class NodeEmbeddingsProcedureFacade {
         this.requestScopedDependencies = requestScopedDependencies;
         this.fastRPMutateStub = fastRPMutateStub;
         this.graphSageMutateStub = graphSageMutateStub;
+        this.hashGnnMutateStub = hashGnnMutateStub;
         this.applicationsFacade = applicationsFacade;
         this.estimationMode = estimationMode;
         this.algorithmExecutionScaffolding = algorithmExecutionScaffolding;
@@ -81,11 +85,13 @@ public final class NodeEmbeddingsProcedureFacade {
     ) {
         var fastRPMutateStub = new FastRPMutateStub(genericStub, applicationsFacade);
         var graphSageMutateStub = new GraphSageMutateStub(requestScopedDependencies, genericStub, applicationsFacade);
+        var hashGnnMutateStub = new HashGnnMutateStub(genericStub, applicationsFacade);
 
         return new NodeEmbeddingsProcedureFacade(
             requestScopedDependencies,
             fastRPMutateStub,
             graphSageMutateStub,
+            hashGnnMutateStub,
             applicationsFacade,
             estimationModeRunner,
             algorithmExecutionScaffolding,
@@ -285,6 +291,10 @@ public final class NodeEmbeddingsProcedureFacade {
         );
 
         return Stream.of(result);
+    }
+
+    public HashGnnMutateStub hashGnnMutateStub() {
+        return hashGnnMutateStub;
     }
 
     private NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationMode() {

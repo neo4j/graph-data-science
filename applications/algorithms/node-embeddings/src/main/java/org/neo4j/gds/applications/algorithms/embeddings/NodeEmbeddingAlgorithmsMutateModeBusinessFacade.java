@@ -28,12 +28,15 @@ import org.neo4j.gds.embeddings.fastrp.FastRPMutateConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMutateConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNMutateConfig;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FastRP;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.GraphSage;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.HashGNN;
 
 public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
     private final GraphSageModelCatalog graphSageModelCatalog;
@@ -95,6 +98,24 @@ public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
             () -> estimation.graphSage(configuration, true),
             graph -> algorithms.graphSage(graph, configuration),
             Optional.of(mutateStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT hashGnn(
+        GraphName graphName,
+        HashGNNMutateConfig configuration,
+        ResultBuilder<HashGNNMutateConfig, HashGNNResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var mutateStep = new HashGnnMutateStep(mutateNodeProperty, configuration);
+
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+            graphName,
+            configuration,
+            HashGNN,
+            () -> estimation.hashGnn(configuration),
+            graph -> algorithms.hashGnn(graph, configuration),
+            mutateStep,
             resultBuilder
         );
     }

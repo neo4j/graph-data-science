@@ -41,6 +41,9 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrain;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.MultiLabelGraphSageTrain;
 import org.neo4j.gds.embeddings.graphsage.algo.SingleLabelGraphSageTrain;
+import org.neo4j.gds.embeddings.hashgnn.HashGNN;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNConfig;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -66,7 +69,7 @@ public class NodeEmbeddingAlgorithms {
     }
 
     FastRPResult fastRP(Graph graph, FastRPBaseConfig configuration) {
-        var task = progressTask(graph, configuration.nodeSelfInfluence(), configuration.iterationWeights().size());
+        var task = createFastRPTask(graph, configuration.nodeSelfInfluence(), configuration.iterationWeights().size());
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
         var parameters = configuration.toParameters();
@@ -159,7 +162,16 @@ public class NodeEmbeddingAlgorithms {
         );
     }
 
-    private Task progressTask(Graph graph, Number nodeSelfInfluence, int iterationWeightsSize) {
+    HashGNNResult hashGnn(Graph graph, HashGNNConfig configuration) {
+        var task = createHashGnnTask(graph, configuration);
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var algorithm = new HashGNN(graph, configuration.toParameters(), progressTracker, terminationFlag);
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+    }
+
+    private Task createFastRPTask(Graph graph, Number nodeSelfInfluence, int iterationWeightsSize) {
         var tasks = new ArrayList<Task>();
         tasks.add(Tasks.leaf("Initialize random vectors", graph.nodeCount()));
         if (Float.compare(nodeSelfInfluence.floatValue(), 0.0f) != 0) {
@@ -171,5 +183,40 @@ public class NodeEmbeddingAlgorithms {
             iterationWeightsSize
         ));
         return Tasks.task(LabelForProgressTracking.FastRP.value, tasks);
+    }
+
+    private static Task createHashGnnTask(Graph graph, HashGNNConfig configuration) {
+        var tasks = new ArrayList<Task>();
+
+        if (configuration.generateFeatures().isPresent()) {
+            tasks.add(Tasks.leaf("Generate base node property features", graph.nodeCount()));
+        } else if (configuration.binarizeFeatures().isPresent()) {
+            tasks.add(Tasks.leaf("Binarize node property features", graph.nodeCount()));
+        } else {
+            tasks.add(Tasks.leaf("Extract raw node property features", graph.nodeCount()));
+        }
+
+        int numRelTypes = configuration.heterogeneous() ? configuration.relationshipTypes().size() : 1;
+
+        tasks.add(Tasks.iterativeFixed(
+            "Propagate embeddings",
+            () -> List.of(
+                Tasks.leaf(
+                    "Precompute hashes",
+                    configuration.embeddingDensity() * (1L + 1 + numRelTypes)
+                ),
+                Tasks.leaf(
+                    "Perform min-hashing",
+                    (2 * graph.nodeCount() + graph.relationshipCount()) * configuration.embeddingDensity()
+                )
+            ),
+            configuration.iterations()
+        ));
+
+        if (configuration.outputDimension().isPresent()) {
+            tasks.add(Tasks.leaf("Densify output embeddings", graph.nodeCount()));
+        }
+
+        return Tasks.task(LabelForProgressTracking.HashGNN.value, tasks);
     }
 }

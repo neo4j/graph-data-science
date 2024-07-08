@@ -21,14 +21,10 @@ package org.neo4j.gds.procedures.embeddings.hashgnn;
 
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmStreamBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsEstimateBusinessFacade;
-import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsMutateBusinessFacade;
-import org.neo4j.gds.embeddings.hashgnn.HashGNNMutateConfig;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNStreamConfig;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.embeddings.DefaultNodeEmbeddingsComputationalResultTransformer;
 import org.neo4j.gds.procedures.embeddings.HashGNNComputationalResultTransformer;
-import org.neo4j.gds.procedures.algorithms.embeddings.DefaultNodeEmbeddingMutateResult;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -36,18 +32,15 @@ import java.util.stream.Stream;
 public class HashGNNProcedure {
     private final ConfigurationCreator configurationCreator;
     private final NodeEmbeddingsAlgorithmsEstimateBusinessFacade estimateBusinessFacade;
-    private final NodeEmbeddingsAlgorithmsMutateBusinessFacade mutateBusinessFacade;
     private final NodeEmbeddingsAlgorithmStreamBusinessFacade streamBusinessFacade;
 
     public HashGNNProcedure(
         ConfigurationCreator configurationCreator,
         NodeEmbeddingsAlgorithmsEstimateBusinessFacade estimateBusinessFacade,
-        NodeEmbeddingsAlgorithmsMutateBusinessFacade mutateBusinessFacade,
         NodeEmbeddingsAlgorithmStreamBusinessFacade streamBusinessFacade
     ) {
         this.configurationCreator = configurationCreator;
         this.estimateBusinessFacade = estimateBusinessFacade;
-        this.mutateBusinessFacade = mutateBusinessFacade;
         this.streamBusinessFacade = streamBusinessFacade;
     }
 
@@ -65,34 +58,11 @@ public class HashGNNProcedure {
         return HashGNNComputationalResultTransformer.toStreamResult(computationResult);
     }
 
-    public Stream<DefaultNodeEmbeddingMutateResult> mutate(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var mutateConfig = configurationCreator.createConfiguration(configuration, HashGNNMutateConfig::of);
-
-        var computationResult = mutateBusinessFacade.hashGNN(
-            graphName,
-            mutateConfig
-        );
-
-        return Stream.of(DefaultNodeEmbeddingsComputationalResultTransformer.toMutateResult(computationResult));
-    }
-
     public Stream<MemoryEstimateResult> streamEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> configuration
     ) {
         var config = configurationCreator.createConfiguration(configuration, HashGNNStreamConfig::of);
-
-        return Stream.of(estimateBusinessFacade.hashGNN(graphNameOrConfiguration, config));
-    }
-
-    public Stream<MemoryEstimateResult> mutateEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, HashGNNMutateConfig::of);
 
         return Stream.of(estimateBusinessFacade.hashGNN(graphNameOrConfiguration, config));
     }

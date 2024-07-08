@@ -30,6 +30,7 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Optional;
@@ -52,7 +53,7 @@ public class HashGNN extends Algorithm<HashGNNResult> {
     private final Concurrency concurrency;
     private final MutableLong currentTotalFeatureCount = new MutableLong();
 
-    public HashGNN(Graph graph, HashGNNParameters parameters, ProgressTracker progressTracker) {
+    public HashGNN(Graph graph, HashGNNParameters parameters, ProgressTracker progressTracker, TerminationFlag terminationFlag) {
         super(progressTracker);
         this.graph = graph;
         this.parameters = parameters;
@@ -61,6 +62,8 @@ public class HashGNN extends Algorithm<HashGNNResult> {
         long tempRandomSeed = this.parameters.randomSeed().orElse((new SplittableRandom().nextLong()));
         this.randomSeed = new SplittableRandom(tempRandomSeed).nextLong();
         this.rng = new SplittableRandom(randomSeed);
+
+        this.terminationFlag = terminationFlag;
     }
 
     @Override

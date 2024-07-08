@@ -26,8 +26,6 @@ import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
-import org.neo4j.gds.embeddings.hashgnn.HashGNNMutateConfig;
-import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
 import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
 
 import java.util.function.Function;
@@ -59,26 +57,6 @@ public class NodeEmbeddingsAlgorithmsMutateBusinessFacade {
             ),
             intermediateResult.computeMilliseconds,
             () -> Node2VecSpecificFields.EMPTY
-        );
-    }
-
-    public NodePropertyMutateResult<Long> hashGNN(
-        String graphName,
-        HashGNNMutateConfig configuration
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> nodeEmbeddingsAlgorithmsFacade.hashGNN(graphName, configuration)
-        );
-
-        return mutateNodeProperty(
-            intermediateResult.algorithmResult,
-            configuration,
-            HashGNNResult::embeddings,
-            (result) -> intermediateResult.algorithmResult.graph().nodeCount(),
-            intermediateResult.computeMilliseconds,
-            () -> 0L
-
         );
     }
 

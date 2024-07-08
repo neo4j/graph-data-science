@@ -80,6 +80,7 @@ final class MutateModeAlgorithmLibrary {
             case GraphSage -> CanonicalProcedureName.parse("gds.beta.graphSage");
             case GraphSageTrain -> null;
             case HarmonicCentrality -> CanonicalProcedureName.parse("gds.closeness.harmonic");
+            case HashGNN -> CanonicalProcedureName.parse("gds.hashgnn");
             case K1Coloring -> CanonicalProcedureName.parse("gds.k1coloring");
             case KCore -> CanonicalProcedureName.parse("gds.kcore");
             case KMeans -> CanonicalProcedureName.parse("gds.kmeans");
