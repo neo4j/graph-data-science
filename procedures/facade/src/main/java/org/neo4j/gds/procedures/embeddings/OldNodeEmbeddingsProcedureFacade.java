@@ -24,12 +24,10 @@ import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsEstimateBusin
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsMutateBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.embeddings.hashgnn.HashGNNProcedure;
 import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecProcedure;
 
 public class OldNodeEmbeddingsProcedureFacade {
 
-    private final HashGNNProcedure hashGNN;
     private final Node2VecProcedure node2Vec;
 
     public OldNodeEmbeddingsProcedureFacade(
@@ -39,12 +37,6 @@ public class OldNodeEmbeddingsProcedureFacade {
         NodeEmbeddingsAlgorithmStreamBusinessFacade streamBusinessFacade,
         NodeEmbeddingsAlgorithmsWriteBusinessFacade writeBusinessFacade
     ) {
-        this.hashGNN = new HashGNNProcedure(
-            configurationCreator,
-            estimateBusinessFacade,
-            streamBusinessFacade
-        );
-
         this.node2Vec = new Node2VecProcedure(
             configurationCreator,
             estimateBusinessFacade,
@@ -52,10 +44,6 @@ public class OldNodeEmbeddingsProcedureFacade {
             streamBusinessFacade,
             writeBusinessFacade
         );
-    }
-
-    public HashGNNProcedure hashGNN() {
-        return hashGNN;
     }
 
     public Node2VecProcedure node2Vec() {

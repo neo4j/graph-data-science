@@ -33,6 +33,7 @@ import org.neo4j.gds.embeddings.fastrp.FastRPWriteConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageStreamConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNStreamConfig;
 import org.neo4j.gds.procedures.algorithms.embeddings.stubs.FastRPMutateStub;
 import org.neo4j.gds.procedures.algorithms.embeddings.stubs.GraphSageMutateStub;
 import org.neo4j.gds.procedures.algorithms.embeddings.stubs.HashGnnMutateStub;
@@ -47,7 +48,7 @@ public final class NodeEmbeddingsProcedureFacade {
     private final RequestScopedDependencies requestScopedDependencies;
     private final FastRPMutateStub fastRPMutateStub;
     private final GraphSageMutateStub graphSageMutateStub;
-    private HashGnnMutateStub hashGnnMutateStub;
+    private final HashGnnMutateStub hashGnnMutateStub;
 
     private final ApplicationsFacade applicationsFacade;
 
@@ -295,6 +296,34 @@ public final class NodeEmbeddingsProcedureFacade {
 
     public HashGnnMutateStub hashGnnMutateStub() {
         return hashGnnMutateStub;
+    }
+
+    public Stream<HashGNNStreamResult> hashGnnStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new HashGnnResultBuilderForStreamMode();
+
+        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+            graphName,
+            configuration,
+            HashGNNStreamConfig::of,
+            streamMode()::hashGnn,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> hashGnnStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            HashGNNStreamConfig::of,
+            configuration -> estimationMode().hashGnn(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
     }
 
     private NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationMode() {

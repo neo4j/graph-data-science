@@ -26,12 +26,15 @@ import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageStreamConfig;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNStreamConfig;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FastRP;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.GraphSage;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.HashGNN;
 
 public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
     private final GraphSageModelCatalog graphSageModelCatalog;
@@ -85,6 +88,21 @@ public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
             () -> estimationFacade.graphSage(configuration, false),
             graph -> algorithms.graphSage(graph, configuration),
             Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT hashGnn(
+        GraphName graphName,
+        HashGNNStreamConfig configuration,
+        ResultBuilder<HashGNNStreamConfig, HashGNNResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+            graphName,
+            configuration,
+            HashGNN,
+            () -> estimationFacade.hashGnn(configuration),
+            graph -> algorithms.hashGnn(graph, configuration),
             resultBuilder
         );
     }

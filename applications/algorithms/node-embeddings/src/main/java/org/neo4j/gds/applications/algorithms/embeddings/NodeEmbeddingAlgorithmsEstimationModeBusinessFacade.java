@@ -93,4 +93,14 @@ public class NodeEmbeddingAlgorithmsEstimationModeBusinessFacade {
     public MemoryEstimation hashGnn(HashGNNConfig configuration) {
         return new HashGNNMemoryEstimateDefinition(configuration.toParameters()).memoryEstimation();
     }
+
+    public MemoryEstimateResult hashGnn(HashGNNConfig configuration, Object graphNameOrConfiguration) {
+        var memoryEstimation = hashGnn(configuration);
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
+        );
+    }
 }

@@ -21,14 +21,9 @@ package org.neo4j.gds.algorithms.embeddings;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
-import org.neo4j.gds.embeddings.hashgnn.HashGNNConfig;
-import org.neo4j.gds.embeddings.hashgnn.HashGNNFactory;
-import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
 import org.neo4j.gds.embeddings.node2vec.Node2VecAlgorithmFactory;
 import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
-
-import java.util.Optional;
 
 public class NodeEmbeddingsAlgorithmsFacade {
 
@@ -51,17 +46,4 @@ public class NodeEmbeddingsAlgorithmsFacade {
             new Node2VecAlgorithmFactory<>()
         );
     }
-
-    AlgorithmComputationResult<HashGNNResult> hashGNN(
-        String graphName,
-        HashGNNConfig config
-    ) {
-        return algorithmRunner.run(
-            graphName,
-            config,
-            Optional.empty(),
-            new HashGNNFactory<>()
-        );
-    }
-
 }
