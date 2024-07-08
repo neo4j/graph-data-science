@@ -28,8 +28,7 @@ public final class RelationshipsBatchBuffer<PROPERTY_REF> extends RecordsBatchBu
     // For relationships, the buffer is divided into 2-long blocks
     // for each relationship: source, target. Relationship and
     // property references are stored individually.
-    static final int ENTRIES_PER_RELATIONSHIP = 2;
-
+    private static final int ENTRIES_PER_RELATIONSHIP = 2;
 
     private final long[] relationshipReferences;
     private final PROPERTY_REF[] propertyReferences;
@@ -44,7 +43,7 @@ public final class RelationshipsBatchBuffer<PROPERTY_REF> extends RecordsBatchBu
         int capacity,
         Class<PROPERTY_REF> propertyReferenceClass
     ) {
-        return new RelationshipsBatchBuffer(capacity, propertyReferenceClass);
+        return new RelationshipsBatchBuffer<>(capacity, propertyReferenceClass);
     }
 
     private RelationshipsBatchBuffer(int capacity, Class<PROPERTY_REF> propertyReferenceClass) {
@@ -76,7 +75,31 @@ public final class RelationshipsBatchBuffer<PROPERTY_REF> extends RecordsBatchBu
         this.length = 2 + position;
     }
 
-    public long[] sortBySource() {
+    View<PROPERTY_REF> changeToSourceOrder() {
+        sortBySource();
+        return new View<>(
+            this.buffer,
+            this.length,
+            this.relationshipReferences,
+            this.propertyReferences,
+            this.bufferCopy,
+            this.histogram
+        );
+    }
+
+    View<PROPERTY_REF> changeToTargetOrder() {
+        sortByTarget();
+        return new View<>(
+            this.buffer,
+            this.length,
+            this.relationshipReferences,
+            this.propertyReferences,
+            this.bufferCopy,
+            this.histogram
+        );
+    }
+
+    private void sortBySource() {
         RadixSort.radixSort(
             buffer,
             bufferCopy,
@@ -87,10 +110,9 @@ public final class RelationshipsBatchBuffer<PROPERTY_REF> extends RecordsBatchBu
             histogram,
             length
         );
-        return buffer;
     }
 
-    public long[] sortByTarget() {
+    private void sortByTarget() {
         RadixSort.radixSort2(
             buffer,
             bufferCopy,
@@ -101,22 +123,68 @@ public final class RelationshipsBatchBuffer<PROPERTY_REF> extends RecordsBatchBu
             histogram,
             length
         );
-        return buffer;
     }
 
-    long[] relationshipReferences() {
-        return this.relationshipReferences;
-    }
+    public static final class View<PROPERTY_REF> implements PropertyReader.Producer<PROPERTY_REF> {
+        private final long[] nodePairs;
+        private final int nodePairsLength;
 
-    PROPERTY_REF[] propertyReferences() {
-        return this.propertyReferences;
-    }
+        private final long[] relationshipReferences;
+        private final PROPERTY_REF[] propertyReferences;
 
-    public long[] spareLongs() {
-        return bufferCopy;
-    }
+        private final long[] spareLongs;
+        private final int[] spareInts;
 
-    public int[] spareInts() {
-        return histogram;
+
+        private View(
+            long[] nodePairs,
+            int nodePairsLength,
+            long[] relationshipReferences,
+            PROPERTY_REF[] propertyReferences,
+            long[] spareLongs,
+            int[] spareInts
+        ) {
+            this.nodePairs = nodePairs;
+            this.nodePairsLength = nodePairsLength;
+            this.relationshipReferences = relationshipReferences;
+            this.propertyReferences = propertyReferences;
+            this.spareLongs = spareLongs;
+            this.spareInts = spareInts;
+        }
+
+        @Override
+        public int numberOfElements() {
+            return this.nodePairsLength / ENTRIES_PER_RELATIONSHIP;
+        }
+
+        @Override
+        public void forEach(PropertyReader.Consumer<PROPERTY_REF> consumer) {
+            int length = this.numberOfElements();
+            for (int i = 0; i < length; i++) {
+                consumer.accept(
+                    i,
+                    this.nodePairs[i << 1],
+                    this.nodePairs[(i << 1) + 1],
+                    this.relationshipReferences[i],
+                    this.propertyReferences[i]
+                );
+            }
+        }
+
+        int[] spareInts() {
+            return this.spareInts;
+        }
+
+        long[] spareLongs() {
+            return this.spareLongs;
+        }
+
+        long[] batch() {
+            return this.nodePairs;
+        }
+
+        int batchLength() {
+            return this.nodePairsLength;
+        }
     }
 }
