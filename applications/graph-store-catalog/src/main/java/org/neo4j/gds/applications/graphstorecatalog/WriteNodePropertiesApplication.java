@@ -76,7 +76,7 @@ public class WriteNodePropertiesApplication {
         );
         var progressTracker = new TaskProgressTracker(
             task,
-            (org.neo4j.logging.Log) log.getNeo4jLog(),
+            log,
             configuration.writeConcurrency(),
             new JobId(),
             taskRegistryFactory,

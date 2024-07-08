@@ -19,6 +19,8 @@ dependencies {
         }
     }
 
+    compileOnly project(':logging')
+
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')

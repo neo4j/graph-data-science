@@ -54,7 +54,6 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
@@ -67,6 +66,7 @@ import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
@@ -96,7 +96,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
 import static org.neo4j.gds.GdsCypher.ExecutionModes.MUTATE;
 import static org.neo4j.gds.NodeLabel.ALL_NODES;
@@ -475,7 +474,7 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
                 .transactionContext(TestSupport.fullAccessTransaction(db))
                 .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
                 .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
-                .log(Neo4jProxy.testLog())
+                .log(Log.noOpLog())
                 .build())
             .username("")
             .projectConfig(graphProjectConfig)
@@ -498,7 +497,6 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
 
     private GraphDataScienceProcedures createFacade() {
         var logMock = mock(org.neo4j.gds.logging.Log.class);
-        when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
 
         final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
         var configurationParser = new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance);

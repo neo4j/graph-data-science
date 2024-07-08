@@ -36,8 +36,6 @@ import org.neo4j.gds.core.model.InjectModelCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.ModelCatalogExtension;
-import org.neo4j.gds.mem.MemoryRange;
-import org.neo4j.gds.mem.MemoryTree;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
@@ -46,7 +44,9 @@ import org.neo4j.gds.embeddings.graphsage.LayerConfig;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.gds.gdl.GdlGraphs;
-import org.neo4j.logging.NullLog;
+import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryTree;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -63,13 +63,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples.pair;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.gds.mem.MemoryEstimations.RESIDENT_MEMORY;
-import static org.neo4j.gds.mem.MemoryEstimations.TEMPORARY_MEMORY;
 import static org.neo4j.gds.mem.Estimate.sizeOfDoubleArray;
 import static org.neo4j.gds.mem.Estimate.sizeOfIntArray;
 import static org.neo4j.gds.mem.Estimate.sizeOfLongArray;
 import static org.neo4j.gds.mem.Estimate.sizeOfObjectArray;
 import static org.neo4j.gds.mem.Estimate.sizeOfOpenHashContainer;
+import static org.neo4j.gds.mem.MemoryEstimations.RESIDENT_MEMORY;
+import static org.neo4j.gds.mem.MemoryEstimations.TEMPORARY_MEMORY;
 
 @ModelCatalogExtension
 class GraphSageAlgorithmFactoryTest {
@@ -383,7 +383,7 @@ class GraphSageAlgorithmFactoryTest {
             .build(
                 GdlGraphs.EMPTY,
                 multiLabelConfig,
-                NullLog.getInstance(),
+                Log.noOpLog(),
                 EmptyTaskRegistryFactory.INSTANCE
             );
         assertThat(multiLabelAlgo).isExactlyInstanceOf(MultiLabelGraphSageTrain.class);
@@ -399,7 +399,7 @@ class GraphSageAlgorithmFactoryTest {
             .build(
                 GdlGraphs.EMPTY,
                 singleLabelConfig,
-                NullLog.getInstance(),
+                Log.noOpLog(),
                 EmptyTaskRegistryFactory.INSTANCE
             );
         assertThat(singleLabelAlgo).isExactlyInstanceOf(SingleLabelGraphSageTrain.class);

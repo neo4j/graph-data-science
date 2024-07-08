@@ -26,7 +26,7 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.logging.Log;
+import org.neo4j.gds.logging.Log;
 
 import java.util.Arrays;
 import java.util.HashSet;

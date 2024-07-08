@@ -25,6 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.StoreLoaderBuilder;
+import org.neo4j.gds.TestLogAdapter;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
@@ -165,7 +166,7 @@ class NativeNodePropertyExporterTest extends BaseTest {
         var writeConcurrency = new Concurrency(4);
         var progressTracker = new TaskProgressTracker(
             NodePropertyExporter.baseTask("AlgoNameGoesHere", graph.nodeCount()),
-            log,
+            new TestLogAdapter(log),
             writeConcurrency,
             EmptyTaskRegistryFactory.INSTANCE
         );

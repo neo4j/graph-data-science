@@ -24,6 +24,7 @@ dependencies {
     implementation project(':annotations')
     implementation project(':concurrency')
     implementation project(':core-utils')
+    implementation project(':logging')
     implementation project(':memory-usage')
     implementation project(':neo4j-kernel-adapter')
     implementation project(':string-formatting')

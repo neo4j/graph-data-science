@@ -22,6 +22,7 @@ package org.neo4j.gds.graphsampling;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.neo4j.gds.TestLogAdapter;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
@@ -301,7 +302,7 @@ class GraphSampleConstructorTest {
         var log = Neo4jProxy.testLog();
         var progressTracker = new TaskProgressTracker(
             GraphSampleConstructor.progressTask(naturalGraphStore, rwr),
-            log,
+            new TestLogAdapter(log),
             new Concurrency(1),
             EmptyTaskRegistryFactory.INSTANCE
         );

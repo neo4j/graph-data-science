@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.logging.Log;
+import org.neo4j.gds.logging.Log;
 
 import java.util.function.Supplier;
 

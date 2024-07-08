@@ -126,7 +126,7 @@ public class SubGraphProjectApplication {
 
         var progressTracker = new TaskProgressTracker(
             task,
-            (org.neo4j.logging.Log) log.getNeo4jLog(),
+            log,
             configuration.typedConcurrency(),
             configuration.jobId(),
             taskRegistryFactory,

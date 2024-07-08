@@ -40,7 +40,7 @@ import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.Input;
-import org.neo4j.logging.Log;
+import org.neo4j.gds.logging.Log;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

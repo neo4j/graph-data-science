@@ -42,7 +42,7 @@ public class ProgressTrackerCreator {
         if (configuration.logProgress()) {
             return new TaskProgressTracker(
                 task,
-                (org.neo4j.logging.Log) log.getNeo4jLog(),
+                log,
                 configuration.concurrency(),
                 configuration.jobId(),
                 requestScopedDependencies.getTaskRegistryFactory(),
@@ -52,7 +52,7 @@ public class ProgressTrackerCreator {
 
         return new TaskTreeProgressTracker(
             task,
-            (org.neo4j.logging.Log) log.getNeo4jLog(),
+            log,
             configuration.concurrency(),
             configuration.jobId(),
             requestScopedDependencies.getTaskRegistryFactory(),

@@ -53,7 +53,7 @@ public class InspectableTestProgressTracker extends TaskProgressTracker {
     private InspectableTestProgressTracker(Task baseTask, String userName, JobId jobId, TaskStore taskStore, TestLog log) {
         super(
             baseTask,
-            log,
+            new TestLogAdapter(log),
             new Concurrency(1),
             jobId,
             TaskRegistryFactory.local(userName, taskStore),
@@ -109,4 +109,5 @@ public class InspectableTestProgressTracker extends TaskProgressTracker {
         }
         assertThat(previousProgress.progress()).isEqualTo(previousProgress.volume());
     }
+
 }

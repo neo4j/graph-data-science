@@ -25,6 +25,7 @@ import org.neo4j.gds.CommunityHelper;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.TestLogAdapter;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
@@ -345,7 +346,7 @@ class LouvainTest {
         var maxLevels = 10;
         var progressTask = new LouvainAlgorithmFactory<>().progressTask(graph, maxIterations, maxLevels);
         var log = Neo4jProxy.testLog();
-        var progressTracker = new TaskProgressTracker(progressTask, log, concurrency, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TaskProgressTracker(progressTask, new TestLogAdapter(log), concurrency, EmptyTaskRegistryFactory.INSTANCE);
 
         var louvain = new Louvain(
             graph,

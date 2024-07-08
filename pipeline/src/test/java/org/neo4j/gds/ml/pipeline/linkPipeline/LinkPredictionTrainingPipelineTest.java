@@ -36,12 +36,13 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.model.TestCustomInfo;
-import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallableFinder;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
+import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
@@ -59,7 +60,6 @@ import org.neo4j.gds.model.catalog.TestTrainConfigImpl;
 import org.neo4j.gds.model.catalog.TestWeightedTrainConfigImpl;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.termination.TerminationMonitor;
-import org.neo4j.logging.NullLog;
 
 import java.util.Collection;
 import java.util.List;
@@ -195,7 +195,7 @@ class LinkPredictionTrainingPipelineTest {
             .returnColumns(ProcedureReturnColumns.EMPTY)
             .modelCatalog(ModelCatalog.EMPTY)
             .isGdsAdmin(false)
-            .log(NullLog.getInstance())
+            .log(Log.noOpLog())
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .isGdsAdmin(false)
@@ -240,7 +240,7 @@ class LinkPredictionTrainingPipelineTest {
             .nodeLookup(NodeLookup.EMPTY)
             .returnColumns(ProcedureReturnColumns.EMPTY)
             .isGdsAdmin(false)
-            .log(NullLog.getInstance())
+            .log(Log.noOpLog())
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .isGdsAdmin(false)
@@ -285,7 +285,7 @@ class LinkPredictionTrainingPipelineTest {
             .nodeLookup(NodeLookup.EMPTY)
             .returnColumns(ProcedureReturnColumns.EMPTY)
             .isGdsAdmin(false)
-            .log(NullLog.getInstance())
+            .log(Log.noOpLog())
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .isGdsAdmin(false)

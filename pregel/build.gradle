@@ -31,5 +31,6 @@ dependencies {
     testCompileOnly project(':annotations')
 
     testImplementation project(':graph-schema-api')
+    testImplementation project(':logging')
     testImplementation project(':test-utils')
 }

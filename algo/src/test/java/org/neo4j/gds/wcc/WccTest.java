@@ -31,6 +31,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.CommunityHelper;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.TestLogAdapter;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
@@ -177,7 +178,7 @@ class WccTest {
         new WccAlgorithmFactory<>().build(
             createTestGraph(Orientation.NATURAL),
             WccStreamConfigImpl.builder().relationshipWeightProperty("weights").build(),
-            log,
+            new TestLogAdapter(log),
             EmptyTaskRegistryFactory.INSTANCE
         );
 

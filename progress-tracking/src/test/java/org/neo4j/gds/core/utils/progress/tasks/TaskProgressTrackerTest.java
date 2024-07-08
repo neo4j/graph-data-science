@@ -21,6 +21,7 @@ package org.neo4j.gds.core.utils.progress.tasks;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.TestLogAdapter;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -95,7 +96,7 @@ class TaskProgressTrackerTest {
         GdsFeatureToggles.FAIL_ON_PROGRESS_TRACKER_ERRORS.disableAndRun(() -> {
             var task = Tasks.leaf("leaf");
             var log = Neo4jProxy.testLog();
-            var progressTracker = new TaskProgressTracker(task, log, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+            var progressTracker = new TaskProgressTracker(task, new TestLogAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
             progressTracker.beginSubTask();
             progressTracker.endSubTask();
             assertThatNoException()
@@ -179,7 +180,7 @@ class TaskProgressTrackerTest {
         try (var ignored = RenamesCurrentThread.renameThread("test")) {
             var task = Tasks.leaf("leaf", 4);
             var log = Neo4jProxy.testLog();
-            var progressTracker = new TaskProgressTracker(task, log, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+            var progressTracker = new TaskProgressTracker(task, new TestLogAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
             progressTracker.beginSubTask();
             progressTracker.logProgress(1);
 
@@ -202,7 +203,7 @@ class TaskProgressTrackerTest {
         try (var ignored = RenamesCurrentThread.renameThread("test")) {
             var task = Tasks.task("root", Tasks.leaf("leaf", 4));
             var log = Neo4jProxy.testLog();
-            var progressTracker = new TaskProgressTracker(task, log, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+            var progressTracker = new TaskProgressTracker(task, new TestLogAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
 
             progressTracker.beginSubTask("root");
             progressTracker.beginSubTask("leaf");
@@ -227,7 +228,7 @@ class TaskProgressTrackerTest {
 
         var taskStore = new PerDatabaseTaskStore();
         var taskRegistry = new TaskRegistry("", taskStore);
-        var progressTracker = new TaskProgressTracker(task, Neo4jProxy.testLog(), new Concurrency(1), jobId -> taskRegistry);
+        var progressTracker = new TaskProgressTracker(task, org.neo4j.gds.logging.Log.noOpLog(), new Concurrency(1), jobId -> taskRegistry);
 
         assertThat(taskStore.query("")).isEmpty();
 
@@ -279,7 +280,7 @@ class TaskProgressTrackerTest {
     }
 
     private TaskProgressTracker progressTracker(Task task, Log log) {
-        return new TaskProgressTracker(task, log, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+        return new TaskProgressTracker(task, new TestLogAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
     }
 
     private TaskProgressTracker progressTracker(Task task) {

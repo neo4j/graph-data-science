@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.TestLogAdapter;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -102,7 +103,7 @@ class KCoreDecompositionTest {
 
             var progressTask = factory.progressTask(graph, config);
             var log = Neo4jProxy.testLog();
-            var progressTracker = new TaskProgressTracker(progressTask, log, new Concurrency(4), EmptyTaskRegistryFactory.INSTANCE);
+            var progressTracker = new TaskProgressTracker(progressTask, new TestLogAdapter(log), new Concurrency(4), EmptyTaskRegistryFactory.INSTANCE);
 
             factory
                 .build(graph, config, progressTracker)

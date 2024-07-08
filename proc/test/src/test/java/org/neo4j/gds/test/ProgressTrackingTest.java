@@ -20,6 +20,7 @@
 package org.neo4j.gds.test;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.TestLogAdapter;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
@@ -58,7 +59,7 @@ class ProgressTrackingTest {
         var testConfig = TestConfigImpl.builder().logProgress(true).build();
         var log = Neo4jProxy.testLog();
 
-        factory.build(graph, testConfig, log, TaskRegistryFactory.empty()).compute();
+        factory.build(graph, testConfig, new TestLogAdapter(log), TaskRegistryFactory.empty()).compute();
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
@@ -82,7 +83,7 @@ class ProgressTrackingTest {
         TaskRegistry taskRegistryMock = mock(TaskRegistry.class);
         doReturn(taskRegistryMock).when(taskRegistryFactoryMock).newInstance(any(JobId.class));
 
-        factory.build(graph, testConfig, log, taskRegistryFactoryMock).compute();
+        factory.build(graph, testConfig, new TestLogAdapter(log), taskRegistryFactoryMock).compute();
 
         assertThat(log.getMessages(TestLog.INFO))
             .as("When `logProgress` is set to `false` there should only be `start` and `finished` log messages")

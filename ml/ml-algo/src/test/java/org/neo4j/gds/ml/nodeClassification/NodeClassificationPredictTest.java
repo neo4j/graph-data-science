@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.nodeClassification;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.TestLogAdapter;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -214,7 +215,7 @@ class NodeClassificationPredictTest {
         var concurrency = new Concurrency(1);
         var progressTracker = new TaskProgressTracker(
             NodeClassificationPredict.progressTask(graph.nodeCount()),
-            log,
+            new TestLogAdapter(log),
             concurrency,
             new JobId(),
             EmptyTaskRegistryFactory.INSTANCE,

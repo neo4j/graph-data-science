@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
+import org.neo4j.gds.TestLogAdapter;
 import org.neo4j.gds.compat.OutputStreamLog;
 import org.neo4j.gds.graphbuilder.GraphBuilder;
 import org.neo4j.logging.Level;
@@ -60,7 +61,7 @@ class ProgressLoggingTest extends BaseTest {
 
         new StoreLoaderBuilder()
             .databaseService(db)
-            .log(testLogger(buffer))
+            .log(new TestLogAdapter(testLogger(buffer)))
             .addNodeLabel(LABEL)
             .addRelationshipType(RELATIONSHIP)
             .addRelationshipProperty(PropertyMapping.of(PROPERTY, 1.0))

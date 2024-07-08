@@ -36,11 +36,10 @@ import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.termination.TerminationMonitor;
-import org.neo4j.logging.Log;
-import org.neo4j.logging.NullLog;
 
 @ValueClass
 public interface ExecutionContext {
@@ -137,7 +136,7 @@ public interface ExecutionContext {
 
         @Override
         public Log log() {
-            return NullLog.getInstance();
+            return Log.noOpLog();
         }
 
         @Override

@@ -39,7 +39,7 @@ public class TestProgressTracker extends TaskProgressTracker {
         Concurrency concurrency,
         TaskRegistryFactory taskRegistryFactory
     ) {
-        super(baseTask, log, concurrency, taskRegistryFactory);
+        super(baseTask, new TestLogAdapter(log), concurrency, taskRegistryFactory);
         progresses = new ArrayList<>();
     }
 

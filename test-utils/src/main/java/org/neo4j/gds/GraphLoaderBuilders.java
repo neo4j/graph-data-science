@@ -31,16 +31,15 @@ import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.logging.Log;
-import org.neo4j.logging.NullLog;
 
 import java.util.List;
 import java.util.Map;
@@ -199,7 +198,7 @@ public final class GraphLoaderBuilders {
                 .terminationFlag(terminationFlag.orElse(TerminationFlag.RUNNING_TRUE))
                 .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
                 .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
-                .log(log.orElse(NullLog.getInstance()))
+                .log(log.orElseGet(org.neo4j.gds.logging.Log::noOpLog))
                 .build())
             .username(userName
                 .or(() -> transactionContext.map(TransactionContext::username))

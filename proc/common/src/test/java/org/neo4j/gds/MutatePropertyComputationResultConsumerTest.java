@@ -49,6 +49,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.nodeproperties.IdentityPropertyValues;
 import org.neo4j.gds.termination.TerminationMonitor;
@@ -80,7 +81,7 @@ class MutatePropertyComputationResultConsumerTest {
         .databaseId(DatabaseId.of(""))
         .dependencyResolver(Neo4jProxy.emptyDependencyResolver())
         .returnColumns(ProcedureReturnColumns.EMPTY)
-        .log(Neo4jProxy.testLog())
+        .log(Log.noOpLog())
         .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
         .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
         .username("")

@@ -28,8 +28,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -109,7 +107,7 @@ class GraphSamplingApplicationTest {
     @MethodSource("samplingParameters")
     void shouldSampleRWR(Map<String, Object> mapConfiguration, long expectedNodeCount) {
         var graphSamplingApplication = new GraphSamplingApplication(
-            new Neo4jBackedLogForTesting(),
+            Log.noOpLog(),
             new GraphStoreCatalogService()
         );
 
@@ -148,7 +146,7 @@ class GraphSamplingApplicationTest {
     @MethodSource("samplingParameters")
     void shouldSampleCNARW(Map<String, Object> mapConfiguration, long expectedNodeCount) {
         var graphSamplingApplication = new GraphSamplingApplication(
-            new Neo4jBackedLogForTesting(),
+            Log.noOpLog(),
             new GraphStoreCatalogService()
         );
 
@@ -186,7 +184,7 @@ class GraphSamplingApplicationTest {
     @CsvSource(value = {"0.28,1", "0.35,2"})
     void shouldUseSingleStartNodeRWR(double samplingRatio, long expectedStartNodeCount) {
         var graphSamplingApplication = new GraphSamplingApplication(
-            new Neo4jBackedLogForTesting(),
+            Log.noOpLog(),
             new GraphStoreCatalogService()
         );
 
@@ -229,7 +227,7 @@ class GraphSamplingApplicationTest {
     @CsvSource(value = {"0.28,1", "0.35,2"})
     void shouldUseSingleStartNodeCNARW(double samplingRatio, long expectedStartNodeCount) {
         var graphSamplingApplication = new GraphSamplingApplication(
-            new Neo4jBackedLogForTesting(),
+            Log.noOpLog(),
             new GraphStoreCatalogService()
         );
 
@@ -268,57 +266,4 @@ class GraphSamplingApplicationTest {
 
     }
 
-    /**
-     * @deprecated We need this just long enough that we can drive out usages of Neo4j's log.
-     *             Therefore, I do not want to build general support for this
-     */
-    @Deprecated
-    private static class Neo4jBackedLogForTesting implements Log {
-        private final TestLog neo4jLog = Neo4jProxy.testLog();
-
-        @Override
-        public void info(String message) {
-            throw new UnsupportedOperationException("TODO");
-        }
-
-        @Override
-        public void info(String format, Object... arguments) {
-            throw new UnsupportedOperationException("TODO");
-        }
-
-        @Override
-        public void warn(String message, Exception e) {
-            throw new UnsupportedOperationException("TODO");
-        }
-
-        @Override
-        public void warn(String format, Object... arguments) {
-            throw new UnsupportedOperationException("TODO");
-        }
-
-        @Override
-        public boolean isDebugEnabled() {
-            throw new UnsupportedOperationException("TODO");
-        }
-
-        @Override
-        public void debug(String format, Object... arguments) {
-            throw new UnsupportedOperationException("TODO");
-        }
-
-        @Override
-        public void error(String errorMessage, Throwable throwable) {
-            throw new UnsupportedOperationException("TODO");
-        }
-
-        @Override
-        public void error(String messageFormat, Throwable exception, Object... arguments) {
-            throw new UnsupportedOperationException("TODO");
-        }
-
-        @Override
-        public Object getNeo4jLog() {
-            return neo4jLog;
-        }
-    }
 }

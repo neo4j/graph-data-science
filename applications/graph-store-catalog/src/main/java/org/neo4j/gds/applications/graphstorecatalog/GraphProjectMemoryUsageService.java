@@ -95,7 +95,7 @@ public class GraphProjectMemoryUsageService {
 
     private MemoryUsageValidator memoryUsageValidator() {
         return new MemoryUsageValidator(
-            (org.neo4j.logging.Log) log.getNeo4jLog(),
+            log,
             GraphDatabaseApiProxy.dependencyResolver(graphDatabaseService)
         );
     }
@@ -110,7 +110,7 @@ public class GraphProjectMemoryUsageService {
         return ImmutableGraphLoaderContext.builder()
             .databaseId(databaseId)
             .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(graphDatabaseService))
-            .log((org.neo4j.logging.Log) log.getNeo4jLog())
+            .log(log)
             .taskRegistryFactory(taskRegistryFactory)
             .terminationFlag(terminationFlag)
             .transactionContext(transactionContext)

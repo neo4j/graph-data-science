@@ -36,9 +36,11 @@ import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.ProcedureCallContextReturnColumns;
 import org.neo4j.gds.procedures.TransactionCloseableResourceRegistry;
 import org.neo4j.gds.procedures.TransactionNodeLookup;
+import org.neo4j.gds.procedures.integration.LogAdapter;
 import org.neo4j.gds.procedures.integration.TransactionTerminationMonitor;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.gds.transaction.EmptyTransactionContext;
+import org.neo4j.gds.transaction.TransactionAlgorithmMetaDataSetter;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -144,7 +146,7 @@ public abstract class BaseProc {
                 .builder()
                 .databaseId(databaseId())
                 .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(databaseService))
-                .log(log)
+                .log(new LogAdapter(log))
                 .returnColumns(new ProcedureCallContextReturnColumns(callContext))
                 .userLogRegistryFactory(userLogRegistryFactory)
                 .taskRegistryFactory(taskRegistryFactory)

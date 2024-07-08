@@ -33,7 +33,6 @@ import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -41,6 +40,7 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.gdl.GdlGraphs;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.termination.TerminationMonitor;
@@ -76,7 +76,7 @@ class MemoryEstimationExecutorTest extends BaseTest {
             .databaseId(DatabaseId.of(db.databaseName()))
             .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
             .returnColumns(ProcedureReturnColumns.EMPTY)
-            .log(Neo4jProxy.testLog())
+            .log(Log.noOpLog())
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .username("")

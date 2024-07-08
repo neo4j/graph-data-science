@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.TestLogAdapter;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -568,7 +569,7 @@ class FastRPTest {
 
         var progressTask = factory.progressTask(graph, parameters.nodeSelfInfluence(), parameters.iterationWeights().size());
         var log = Neo4jProxy.testLog();
-        var progressTracker = new TaskProgressTracker(progressTask, log, concurrency, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TaskProgressTracker(progressTask, new TestLogAdapter(log), concurrency, EmptyTaskRegistryFactory.INSTANCE);
 
         new FastRP(
             graph,

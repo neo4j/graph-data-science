@@ -25,6 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.StoreLoaderBuilder;
+import org.neo4j.gds.TestLogAdapter;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.ExportedRelationship;
@@ -246,7 +247,7 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
         var log = Neo4jProxy.testLog();
         var progressTracker = new TaskProgressTracker(
             RelationshipStreamExporter.baseTask("OpName"),
-            log,
+            new TestLogAdapter(log),
             new Concurrency(1),
             EmptyTaskRegistryFactory.INSTANCE
         );

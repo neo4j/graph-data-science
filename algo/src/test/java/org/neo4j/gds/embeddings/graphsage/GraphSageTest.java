@@ -25,6 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.TestLogAdapter;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -245,7 +246,7 @@ class GraphSageTest {
         var graphSage = new GraphSageAlgorithmFactory<>(modelCatalog).build(
             graph,
             streamConfig,
-            log,
+            new TestLogAdapter(log),
             EmptyTaskRegistryFactory.INSTANCE
         );
         graphSage.compute();

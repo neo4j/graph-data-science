@@ -22,15 +22,15 @@ package org.neo4j.gds.core.utils.progress.tasks;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.utils.GdsFeatureToggles;
-import org.neo4j.logging.Log;
+import org.neo4j.gds.logging.Log;
 
 import java.util.Locale;
 import java.util.Optional;

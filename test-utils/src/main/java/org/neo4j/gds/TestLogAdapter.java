@@ -17,20 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.integration;
+package org.neo4j.gds;
 
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.utils.StringFormatting;
 
-/**
- * We wrap Neo4j's log so that we isolate our code from theirs.
- * This enables us to not have dependencies on Neo4j everywhere.
- * This class can live at the edge of our software and our domain code will be Neo4j (logging) agnostic.
- */
-public class LogAdapter implements Log {
+// VN: copy of `org.neo4j.gds.procedures.integration.LogAdapter` - we don't want or can bring `:procedure-integration` module here
+public final class TestLogAdapter implements Log {
     private final org.neo4j.logging.Log neo4jUserLog;
 
-    public LogAdapter(org.neo4j.logging.Log neo4jUserLog) {this.neo4jUserLog = neo4jUserLog;}
+    public TestLogAdapter(org.neo4j.logging.Log neo4jUserLog) {this.neo4jUserLog = neo4jUserLog;}
 
     @Override
     public void info(String message) {
@@ -77,5 +73,4 @@ public class LogAdapter implements Log {
     public void error(String messageFormat, Throwable exception, Object... arguments) {
         neo4jUserLog.error(StringFormatting.formatWithLocale(messageFormat, arguments), exception);
     }
-
 }
