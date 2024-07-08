@@ -25,7 +25,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.TestLogAdapter;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
@@ -38,6 +37,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.logging.LogAdapter;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -151,7 +151,7 @@ final class ConductanceTest {
         var log = Neo4jProxy.testLog();
         var progressTracker = new TaskProgressTracker(
             progressTask,
-            new TestLogAdapter(log),
+            new LogAdapter(log),
             parameters.concurrency(),
             EmptyTaskRegistryFactory.INSTANCE
         );

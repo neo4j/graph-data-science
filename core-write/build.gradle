@@ -26,6 +26,7 @@ dependencies {
     implementation project(':core-utils')
     implementation project(':progress-tracking')
     implementation project(':graph-schema-api')
+    implementation project(':neo4j-log-adapter')
     implementation project(':transaction')
     implementation project(':termination')
 

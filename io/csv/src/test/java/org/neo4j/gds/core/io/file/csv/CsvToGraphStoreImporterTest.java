@@ -22,13 +22,13 @@ package org.neo4j.gds.core.io.file.csv;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.TestLogAdapter;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.logging.LogAdapter;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -89,7 +89,7 @@ class CsvToGraphStoreImporterTest {
     @Test
     void shouldLogProgress() throws URISyntaxException {
         var log = Neo4jProxy.testLog();
-        var exporter = new CsvToGraphStoreImporter(new Concurrency(1), importPath(), new TestLogAdapter(log), EmptyTaskRegistryFactory.INSTANCE);
+        var exporter = new CsvToGraphStoreImporter(new Concurrency(1), importPath(), new LogAdapter(log), EmptyTaskRegistryFactory.INSTANCE);
         exporter.run();
 
         log.assertContainsMessage(TestLog.INFO, "Csv import :: Start");

@@ -23,7 +23,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.TestLogAdapter;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfigImpl;
 import org.neo4j.gds.compat.Neo4jProxy;
@@ -37,6 +36,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Collections;
@@ -245,7 +245,7 @@ final class ApproxMaxKCutTest {
         var approxMaxKCut = new ApproxMaxKCutAlgorithmFactory<>().build(
             maxGraph,
             config,
-            new TestLogAdapter(log),
+            new LogAdapter(log),
             EmptyTaskRegistryFactory.INSTANCE
         );
         approxMaxKCut.compute();

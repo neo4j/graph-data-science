@@ -25,7 +25,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.TestLogAdapter;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -57,6 +56,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.SingleLabelGraphSageTrain;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.logging.LogAdapter;
 
 import java.util.Arrays;
 import java.util.List;
@@ -246,7 +246,7 @@ class GraphSageTest {
         var graphSage = new GraphSageAlgorithmFactory<>(modelCatalog).build(
             graph,
             streamConfig,
-            new TestLogAdapter(log),
+            new LogAdapter(log),
             EmptyTaskRegistryFactory.INSTANCE
         );
         graphSage.compute();

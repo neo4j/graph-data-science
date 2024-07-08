@@ -32,6 +32,7 @@ dependencies {
     implementation project(':memory-estimation')
     implementation project(':memory-usage')
     implementation project(':neo4j-api')
+    implementation project(':neo4j-log-adapter')
     implementation project(':node-embedding-algorithms')
     implementation project(':opengds-procedure-facade')
     implementation project(':open-licensing')

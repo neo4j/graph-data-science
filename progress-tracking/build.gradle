@@ -40,5 +40,6 @@ dependencies {
     testAnnotationProcessor project(':config-generator')
     testAnnotationProcessor openGds.immutables.value
 
+    testImplementation project(':neo4j-log-adapter')
     testImplementation project(':test-utils')
 }

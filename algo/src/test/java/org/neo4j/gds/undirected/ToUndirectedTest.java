@@ -24,7 +24,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.TestLogAdapter;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.Neo4jProxy;
@@ -37,6 +36,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.logging.LogAdapter;
 
 import java.util.Map;
 import java.util.Optional;
@@ -317,7 +317,7 @@ class ToUndirectedTest {
         ToUndirected toUndirected = new ToUndirectedAlgorithmFactory().build(
             directedGraphStore,
             config,
-            new TestLogAdapter(log),
+            new LogAdapter(log),
             EmptyTaskRegistryFactory.INSTANCE
         );
 

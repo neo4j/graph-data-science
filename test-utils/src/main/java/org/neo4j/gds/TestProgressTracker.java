@@ -23,6 +23,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.logging.Log;
 
 import java.util.ArrayList;
@@ -39,7 +40,7 @@ public class TestProgressTracker extends TaskProgressTracker {
         Concurrency concurrency,
         TaskRegistryFactory taskRegistryFactory
     ) {
-        super(baseTask, new TestLogAdapter(log), concurrency, taskRegistryFactory);
+        super(baseTask, new LogAdapter(log), concurrency, taskRegistryFactory);
         progresses = new ArrayList<>();
     }
 

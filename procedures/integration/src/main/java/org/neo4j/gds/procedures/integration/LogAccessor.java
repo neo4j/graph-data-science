@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.logging.internal.LogService;
 
 /**

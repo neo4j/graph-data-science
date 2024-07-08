@@ -22,7 +22,6 @@ package org.neo4j.gds.graphsampling;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.neo4j.gds.TestLogAdapter;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
@@ -42,6 +41,7 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfigImpl;
 import org.neo4j.gds.graphsampling.samplers.rw.rwr.RandomWalkWithRestarts;
+import org.neo4j.gds.logging.LogAdapter;
 
 import java.util.List;
 import java.util.Set;
@@ -302,7 +302,7 @@ class GraphSampleConstructorTest {
         var log = Neo4jProxy.testLog();
         var progressTracker = new TaskProgressTracker(
             GraphSampleConstructor.progressTask(naturalGraphStore, rwr),
-            new TestLogAdapter(log),
+            new LogAdapter(log),
             new Concurrency(1),
             EmptyTaskRegistryFactory.INSTANCE
         );
