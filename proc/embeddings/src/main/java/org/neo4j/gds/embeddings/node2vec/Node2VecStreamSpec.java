@@ -25,7 +25,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
-import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecStreamResult;
+import org.neo4j.gds.procedures.algorithms.embeddings.Node2VecStreamResult;
 
 import java.util.stream.Stream;
 

@@ -109,4 +109,14 @@ public class NodeEmbeddingAlgorithmsEstimationModeBusinessFacade {
     public MemoryEstimation node2Vec(Node2VecBaseConfig configuration) {
         return new Node2VecMemoryEstimateDefinition(configuration.node2VecParameters()).memoryEstimation();
     }
+
+    public MemoryEstimateResult node2Vec(Node2VecBaseConfig configuration, Object graphNameOrConfiguration) {
+        var memoryEstimation = node2Vec(configuration);
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
+        );
+    }
 }

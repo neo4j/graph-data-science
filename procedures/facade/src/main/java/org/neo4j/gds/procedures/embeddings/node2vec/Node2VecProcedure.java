@@ -19,11 +19,9 @@
  */
 package org.neo4j.gds.procedures.embeddings.node2vec;
 
-import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmStreamBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.embeddings.Node2VecComputationalResultTransformer;
@@ -36,32 +34,14 @@ public class Node2VecProcedure {
     private final NodeEmbeddingsAlgorithmsEstimateBusinessFacade estimateBusinessFacade;
     private final NodeEmbeddingsAlgorithmsWriteBusinessFacade writeBusinessFacade;
 
-    private final NodeEmbeddingsAlgorithmStreamBusinessFacade streamBusinessFacade;
-
     public Node2VecProcedure(
         ConfigurationCreator configurationCreator,
         NodeEmbeddingsAlgorithmsEstimateBusinessFacade estimateBusinessFacade,
-        NodeEmbeddingsAlgorithmStreamBusinessFacade streamBusinessFacade,
         NodeEmbeddingsAlgorithmsWriteBusinessFacade writeBusinessFacade
     ) {
         this.configurationCreator = configurationCreator;
         this.estimateBusinessFacade = estimateBusinessFacade;
-        this.streamBusinessFacade = streamBusinessFacade;
         this.writeBusinessFacade= writeBusinessFacade;
-    }
-
-    public Stream<Node2VecStreamResult> stream(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var streamConfig = configurationCreator.createConfigurationForStream(configuration, Node2VecStreamConfig::of);
-
-        var computationResult = streamBusinessFacade.node2Vec(
-            graphName,
-            streamConfig
-        );
-
-        return Node2VecComputationalResultTransformer.toStreamResult(computationResult);
     }
 
     public Stream<Node2VecWriteResult> write(
@@ -76,15 +56,6 @@ public class Node2VecProcedure {
         );
 
         return Stream.of(Node2VecComputationalResultTransformer.toWriteResult(computationResult));
-    }
-
-    public Stream<MemoryEstimateResult> streamEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, Node2VecStreamConfig::of);
-
-        return Stream.of(estimateBusinessFacade.node2Vec(graphNameOrConfiguration, config));
     }
 
     public Stream<MemoryEstimateResult> writeEstimate(

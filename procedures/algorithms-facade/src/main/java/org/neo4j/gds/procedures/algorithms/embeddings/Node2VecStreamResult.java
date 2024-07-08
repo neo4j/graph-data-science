@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.embeddings.node2vec;
+package org.neo4j.gds.procedures.algorithms.embeddings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +26,7 @@ public class Node2VecStreamResult {
     public long nodeId;
     public List<Double> embedding;
 
-    public Node2VecStreamResult(long nodeId, float[] embedding) {
+    Node2VecStreamResult(long nodeId, float[] embedding) {
         this.nodeId = nodeId;
         this.embedding = new ArrayList<>(embedding.length);
         for (var f : embedding) {

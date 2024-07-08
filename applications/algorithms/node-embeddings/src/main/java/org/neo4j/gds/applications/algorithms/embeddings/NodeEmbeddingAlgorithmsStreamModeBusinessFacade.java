@@ -28,6 +28,8 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageStreamConfig;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNStreamConfig;
+import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
+import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
 
 import java.util.List;
 import java.util.Optional;
@@ -35,6 +37,7 @@ import java.util.Optional;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FastRP;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.GraphSage;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.HashGNN;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Node2Vec;
 
 public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
     private final GraphSageModelCatalog graphSageModelCatalog;
@@ -103,6 +106,26 @@ public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
             HashGNN,
             () -> estimationFacade.hashGnn(configuration),
             graph -> algorithms.hashGnn(graph, configuration),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT node2Vec(
+        GraphName graphName,
+        Node2VecStreamConfig configuration,
+        ResultBuilder<Node2VecStreamConfig, Node2VecResult, RESULT, Void> resultBuilder
+    ) {
+        var validationHook = new Node2VecValidationHook(configuration);
+
+        return algorithmProcessingTemplateConvenience.processAlgorithm(
+            Optional.empty(),
+            graphName,
+            configuration,
+            Optional.of(List.of(validationHook)),
+            Node2Vec,
+            () -> estimationFacade.node2Vec(configuration),
+            graph -> algorithms.node2Vec(graph, configuration),
+            Optional.empty(),
             resultBuilder
         );
     }

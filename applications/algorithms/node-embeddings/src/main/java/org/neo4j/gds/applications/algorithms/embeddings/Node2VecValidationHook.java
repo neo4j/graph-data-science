@@ -22,15 +22,15 @@ package org.neo4j.gds.applications.algorithms.embeddings;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.loading.PostLoadValidationHook;
-import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
+import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
 import org.neo4j.gds.utils.StringFormatting;
 
 import static java.lang.Math.multiplyExact;
 
 class Node2VecValidationHook implements PostLoadValidationHook {
-    private final Node2VecMutateConfig configuration;
+    private final Node2VecBaseConfig configuration;
 
-    Node2VecValidationHook(Node2VecMutateConfig configuration) {
+    Node2VecValidationHook(Node2VecBaseConfig configuration) {
         this.configuration = configuration;
     }
 

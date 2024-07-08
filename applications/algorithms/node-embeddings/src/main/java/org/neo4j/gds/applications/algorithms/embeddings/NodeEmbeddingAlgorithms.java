@@ -46,7 +46,7 @@ import org.neo4j.gds.embeddings.hashgnn.HashGNN;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNConfig;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
-import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
+import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -175,7 +175,7 @@ public class NodeEmbeddingAlgorithms {
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
-    Node2VecResult node2Vec(Graph graph, Node2VecMutateConfig configuration) {
+    Node2VecResult node2Vec(Graph graph, Node2VecBaseConfig configuration) {
         var task = createNode2VecTask(graph, configuration);
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
@@ -242,7 +242,7 @@ public class NodeEmbeddingAlgorithms {
         return Tasks.task(LabelForProgressTracking.HashGNN.value, tasks);
     }
 
-    private Task createNode2VecTask(Graph graph, Node2VecMutateConfig configuration) {
+    private Task createNode2VecTask(Graph graph, Node2VecBaseConfig configuration) {
         var randomWalkTasks = new ArrayList<Task>();
         if (graph.hasRelationshipProperty()) {
             randomWalkTasks.add(DegreeCentralityFactory.degreeCentralityProgressTask(graph));

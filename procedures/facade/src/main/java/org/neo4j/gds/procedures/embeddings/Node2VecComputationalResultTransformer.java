@@ -20,34 +20,10 @@
 package org.neo4j.gds.procedures.embeddings;
 
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
-import org.neo4j.gds.algorithms.StreamComputationResult;
-import org.neo4j.gds.algorithms.embeddings.FloatEmbeddingNodePropertyValues;
 import org.neo4j.gds.algorithms.embeddings.specificfields.Node2VecSpecificFields;
-import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
-import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecStreamResult;
 import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecWriteResult;
 
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
-
 public class Node2VecComputationalResultTransformer {
-
-    public static Stream<Node2VecStreamResult> toStreamResult(
-        StreamComputationResult<Node2VecResult> computationResult
-    ) {
-        return computationResult.result().map(node2VecResult -> {
-            var graph = computationResult.graph();
-            var nodePropertyValues = new FloatEmbeddingNodePropertyValues(node2VecResult.embeddings());
-            return LongStream
-                .range(IdMap.START_NODE_ID, graph.nodeCount())
-                .filter(nodePropertyValues::hasValue)
-                .mapToObj(nodeId -> new Node2VecStreamResult(
-                    graph.toOriginalNodeId(nodeId),
-                    nodePropertyValues.floatArrayValue(nodeId)));
-
-        }).orElseGet(Stream::empty);
-    }
 
     public static Node2VecWriteResult toWriteResult(NodePropertyWriteResult<Node2VecSpecificFields> writeResult) {
 
