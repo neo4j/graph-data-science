@@ -104,6 +104,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static org.neo4j.gds.compat.InternalReadOps.countByIdGenerator;
@@ -617,16 +618,23 @@ public final class Neo4jProxy {
         }
     }
 
-    public static void configureRecordFormat(Config.Builder configBuilder, String recordFormat) {
+    public static void configureDatabaseFormat(Config.Builder configBuilder, String recordFormat) {
         var databaseRecordFormat = recordFormat.toLowerCase(Locale.ENGLISH);
         configBuilder.set(GraphDatabaseSettings.db_format, databaseRecordFormat);
     }
 
     public static GdsDatabaseLayout databaseLayout(Config config, String databaseName) {
+        var neo4jLayout = neo4jLayout(config);
         var storageEngineFactory = StorageEngineFactory.selectStorageEngine(config);
-        var dbLayout = neo4jLayout(config).databaseLayout(databaseName);
-        var databaseLayout = storageEngineFactory.formatSpecificDatabaseLayout(dbLayout);
+        var databaseLayout = storageEngineFactory.databaseLayout(neo4jLayout, databaseName);
         return new GdsDatabaseLayoutImpl(databaseLayout);
+    }
+
+    public static Stream<GdsDatabaseLayout> allAvailableDatabaseLayouts(Config config, String databaseName) {
+        var neo4jLayout = neo4jLayout(config);
+        return StorageEngineFactory.allAvailableStorageEngines().stream()
+            .map(engine -> engine.databaseLayout(neo4jLayout, databaseName))
+            .map(GdsDatabaseLayoutImpl::new);
     }
 
     @SuppressForbidden(reason = "This is the compat specific use")
