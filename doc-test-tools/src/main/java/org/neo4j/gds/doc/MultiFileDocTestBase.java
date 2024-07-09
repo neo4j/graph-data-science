@@ -25,9 +25,12 @@ import org.asciidoctor.SafeMode;
 import org.assertj.core.api.Assertions;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.gds.QueryRunner;
@@ -44,9 +47,12 @@ import org.neo4j.test.extension.Inject;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Consumer;
@@ -65,6 +71,8 @@ public abstract class MultiFileDocTestBase {
     private List<DocQuery> beforeAllQueries;
 
     private List<QueryExampleGroup> queryExampleGroups;
+
+    private NumberFormat floatFormat = getFloatFormat();
 
     @Inject
     protected DatabaseManagementService dbms;
@@ -260,7 +268,7 @@ public abstract class MultiFileDocTestBase {
                         return formatListOfNumbers(string);
                     }
                     if (string.contains(".")) {
-                        return DocumentationTestToolsConstants.FLOAT_FORMAT.format(Double.parseDouble(string));
+                        return floatFormat.format(Double.parseDouble(string));
                     } else {
                         return string;
                     }
@@ -273,7 +281,7 @@ public abstract class MultiFileDocTestBase {
     }
 
     @NotNull
-    private static String formatListOfNumbers(String string) {
+    private String formatListOfNumbers(String string) {
         var withoutBrackets = string.substring(1, string.length() - 1);
         var commaSeparator = ", ";
         var parts = withoutBrackets.split(commaSeparator);
@@ -282,7 +290,7 @@ public abstract class MultiFileDocTestBase {
         for (var part : parts) {
             builder.append(separator);
             String formattedPart = part.contains(".")
-                ? DocumentationTestToolsConstants.FLOAT_FORMAT.format(Double.parseDouble(part))
+                ? floatFormat.format(Double.parseDouble(part))
                 : part;
 
             builder.append(formattedPart);
@@ -299,7 +307,7 @@ public abstract class MultiFileDocTestBase {
         } else if (value instanceof String) {
             return "\"" + value + "\"";
         } else if (value instanceof Double || value instanceof Float) {
-            return DocumentationTestToolsConstants.FLOAT_FORMAT.format(value);
+            return floatFormat.format(value);
         } else if (value instanceof List<?>) {
             return ((List<?>) value).stream()
                 .map(v -> valueToString(v))
@@ -318,5 +326,22 @@ public abstract class MultiFileDocTestBase {
         } else {
             return value.toString();
         }
+    }
+
+    protected int getMaxFloatPrecision() {
+        return DocumentationTestToolsConstants.FLOAT_MAXIMUM_PRECISION;
+    }
+
+    protected int getMinFloatPrecision() {
+        return DocumentationTestToolsConstants.FLOAT_MINIMUM_PRECISION;
+    }
+
+    private NumberFormat getFloatFormat() {
+        var decimalFormat = DecimalFormat.getInstance(Locale.ENGLISH);
+        decimalFormat.setMaximumFractionDigits(getMaxFloatPrecision());
+        decimalFormat.setMinimumFractionDigits(getMinFloatPrecision());
+        decimalFormat.setGroupingUsed(false);
+        
+        return decimalFormat;
     }
 }

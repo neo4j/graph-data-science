@@ -21,23 +21,13 @@ package org.neo4j.gds.doc;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.util.Locale;
 
 final class DocumentationTestToolsConstants {
     // so this traces via Gradle, where we copy contents from the :doc project into the build directory for this project
     static final Path ASCIIDOC_PATH = Paths.get("build/doc-sources/modules/ROOT");
 
-    static final NumberFormat FLOAT_FORMAT;
-
-    static {
-        var decimalFormat = DecimalFormat.getInstance(Locale.ENGLISH);
-        decimalFormat.setMaximumFractionDigits(10);
-        decimalFormat.setMinimumFractionDigits(1);
-        decimalFormat.setGroupingUsed(false);
-        FLOAT_FORMAT = decimalFormat;
-    }
+    static final int FLOAT_MAXIMUM_PRECISION = 10;
+    static final int FLOAT_MINIMUM_PRECISION = 1;
 
     // ***
     // Grammar bits below here

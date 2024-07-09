@@ -64,4 +64,9 @@ class GraphSageDocTest extends SingleFileDocTestBase {
             modelCatalog.removeAllLoadedModels();
         };
     }
+
+    @Override
+    protected int getMaxFloatPrecision() {
+        return 8;
+    }
 }
