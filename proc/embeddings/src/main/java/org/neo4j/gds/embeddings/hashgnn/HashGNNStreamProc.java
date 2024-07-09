@@ -21,7 +21,7 @@ package org.neo4j.gds.embeddings.hashgnn;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.embeddings.hashgnn.HashGNNStreamResult;
+import org.neo4j.gds.procedures.algorithms.embeddings.HashGNNStreamResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -45,7 +45,7 @@ public class HashGNNStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.oldNodeEmbeddings().hashGNN().stream(graphName, configuration);
+        return facade.algorithms().nodeEmbeddings().hashGnnStream(graphName, configuration);
     }
 
     @Internal
@@ -70,7 +70,7 @@ public class HashGNNStreamProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.oldNodeEmbeddings().hashGNN().streamEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().nodeEmbeddings().hashGnnStreamEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Internal

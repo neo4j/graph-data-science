@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.procedures.integration;
 
-import org.neo4j.gds.TransactionAlgorithmMetaDataSetter;
+import org.neo4j.gds.transaction.TransactionAlgorithmMetaDataSetter;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.kernel.api.KernelTransaction;
 

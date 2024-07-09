@@ -30,7 +30,7 @@ import org.neo4j.gds.spanningtree.SpanningTreeMutateConfig;
 
 import java.util.Optional;
 
-class SpanningTreeResultBuilderForMutateMode implements ResultBuilder<SpanningTreeMutateConfig, SpanningTree, SpanningTreeMutateResult, RelationshipsWritten> {
+public class SpanningTreeResultBuilderForMutateMode implements ResultBuilder<SpanningTreeMutateConfig, SpanningTree, SpanningTreeMutateResult, RelationshipsWritten> {
     @Override
     public SpanningTreeMutateResult build(
         Graph graph,

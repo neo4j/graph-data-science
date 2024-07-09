@@ -29,7 +29,6 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -108,7 +107,6 @@ class AlgorithmRunnerTest {
         when(algorithmMetricsServiceMock.create(anyString())).thenReturn(algorithmMetricMock);
 
         var logMock = mock(Log.class);
-        when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
 
         var runner = new AlgorithmRunner(
             logMock,

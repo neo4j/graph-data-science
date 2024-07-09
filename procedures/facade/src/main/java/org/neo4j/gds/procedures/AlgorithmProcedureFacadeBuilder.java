@@ -19,12 +19,6 @@
  */
 package org.neo4j.gds.procedures;
 
-import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmStreamBusinessFacade;
-import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsEstimateBusinessFacade;
-import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsFacade;
-import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsMutateBusinessFacade;
-import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsTrainBusinessFacade;
-import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmMutateBusinessFacade;
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmStatsBusinessFacade;
@@ -40,7 +34,6 @@ import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
-import org.neo4j.gds.modelcatalogservices.ModelCatalogService;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
@@ -50,7 +43,6 @@ import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
-import org.neo4j.gds.procedures.embeddings.OldNodeEmbeddingsProcedureFacade;
 import org.neo4j.gds.procedures.misc.MiscAlgorithmsProcedureFacade;
 
 class AlgorithmProcedureFacadeBuilder {
@@ -63,7 +55,6 @@ class AlgorithmProcedureFacadeBuilder {
     private final WriteNodePropertyService writeNodePropertyService;
     private final AlgorithmEstimator algorithmEstimator;
     private final AlgorithmRunner algorithmRunner;
-    private final ModelCatalogService modelCatalogService;
     private final ApplicationsFacade applicationsFacade;
     private final GenericStub genericStub;
     private final EstimationModeRunner estimationModeRunner;
@@ -80,7 +71,6 @@ class AlgorithmProcedureFacadeBuilder {
         WriteNodePropertyService writeNodePropertyService,
         AlgorithmRunner algorithmRunner,
         AlgorithmEstimator algorithmEstimator,
-        ModelCatalogService modelCatalogService,
         ApplicationsFacade applicationsFacade,
         GenericStub genericStub,
         EstimationModeRunner estimationModeRunner,
@@ -96,7 +86,6 @@ class AlgorithmProcedureFacadeBuilder {
         this.writeNodePropertyService = writeNodePropertyService;
         this.algorithmRunner = algorithmRunner;
         this.algorithmEstimator = algorithmEstimator;
-        this.modelCatalogService = modelCatalogService;
         this.applicationsFacade = applicationsFacade;
         this.genericStub = genericStub;
         this.estimationModeRunner = estimationModeRunner;
@@ -164,43 +153,6 @@ class AlgorithmProcedureFacadeBuilder {
             estimationModeRunner,
             algorithmExecutionScaffolding,
             algorithmExecutionScaffoldingForStreamMode
-        );
-    }
-
-    OldNodeEmbeddingsProcedureFacade createOldNodeEmbeddingsProcedureFacade() {
-        // algorithms facade
-        var nodeEmbeddingsAlgorithmsFacade = new NodeEmbeddingsAlgorithmsFacade(algorithmRunner, modelCatalogService);
-
-        // mode-specific facades
-        var mutateBusinessFacade = new NodeEmbeddingsAlgorithmsMutateBusinessFacade(
-            nodeEmbeddingsAlgorithmsFacade,
-            mutateNodePropertyService
-        );
-
-        var streamBusinessFacade = new NodeEmbeddingsAlgorithmStreamBusinessFacade(nodeEmbeddingsAlgorithmsFacade);
-
-        var trainBusinessFacade = new NodeEmbeddingsAlgorithmsTrainBusinessFacade(
-            nodeEmbeddingsAlgorithmsFacade,
-            modelCatalogService
-        );
-
-        var writeBusinessFacade = new NodeEmbeddingsAlgorithmsWriteBusinessFacade(
-            nodeEmbeddingsAlgorithmsFacade,
-            writeNodePropertyService
-        );
-
-        var estimateBusinessFacade = new NodeEmbeddingsAlgorithmsEstimateBusinessFacade(
-            algorithmEstimator
-        );
-
-        // procedure facade
-        return new OldNodeEmbeddingsProcedureFacade(
-            configurationCreator,
-            estimateBusinessFacade,
-            mutateBusinessFacade,
-            streamBusinessFacade,
-            trainBusinessFacade,
-            writeBusinessFacade
         );
     }
 

@@ -27,6 +27,7 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.compat.OutputStreamLog;
 import org.neo4j.gds.graphbuilder.GraphBuilder;
+import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.logging.Level;
 import org.neo4j.logging.Log;
 
@@ -60,7 +61,7 @@ class ProgressLoggingTest extends BaseTest {
 
         new StoreLoaderBuilder()
             .databaseService(db)
-            .log(testLogger(buffer))
+            .log(new LogAdapter(testLogger(buffer)))
             .addNodeLabel(LABEL)
             .addRelationshipType(RELATIONSHIP)
             .addRelationshipProperty(PropertyMapping.of(PROPERTY, 1.0))

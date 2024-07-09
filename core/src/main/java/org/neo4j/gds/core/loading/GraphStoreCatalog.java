@@ -188,7 +188,6 @@ public final class GraphStoreCatalog {
 
         listeners.forEach(
             listener -> ExceptionUtil.safeRunWithLogException(
-                log.orElseGet(Neo4jProxy::testLog),
                 () -> String.format(
                     Locale.US,
                     "Could not call listener %s on setting the graph %s",
@@ -199,7 +198,8 @@ public final class GraphStoreCatalog {
                     config.username(),
                     graphStore.databaseInfo().databaseId().databaseName(),
                     config.graphName()
-                )
+                ),
+                log.orElseGet(Neo4jProxy::testLog)::warn
             )
         );
     }

@@ -26,6 +26,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.degree.DegreeCentralityFactory;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +55,8 @@ public class Node2VecAlgorithmFactory<CONFIG extends Node2VecBaseConfig> extends
             configuration.randomSeed(),
             configuration.walkBufferSize(),
             configuration.node2VecParameters(),
-            progressTracker
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         );
     }
 

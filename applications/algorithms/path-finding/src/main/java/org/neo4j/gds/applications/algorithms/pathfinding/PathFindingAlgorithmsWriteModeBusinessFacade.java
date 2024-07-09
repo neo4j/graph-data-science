@@ -36,8 +36,8 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.paths.WritePathOptionsConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarWriteConfig;
+import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordWriteConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
-import org.neo4j.gds.paths.bellmanford.BellmanFordWriteConfig;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaWriteConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraWriteConfig;
@@ -90,8 +90,8 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
 
     public <RESULT> RESULT bellmanFord(
         GraphName graphName,
-        BellmanFordWriteConfig configuration,
-        ResultBuilder<BellmanFordWriteConfig, BellmanFordResult, RESULT, RelationshipsWritten> resultBuilder
+        AllShortestPathsBellmanFordWriteConfig configuration,
+        ResultBuilder<AllShortestPathsBellmanFordWriteConfig, BellmanFordResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
         var writeStep = new BellmanFordWriteStep(
             log,

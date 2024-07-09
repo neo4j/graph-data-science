@@ -21,7 +21,7 @@ package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecMutateResult;
+import org.neo4j.gds.procedures.algorithms.embeddings.Node2VecMutateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -45,7 +45,7 @@ public class Node2VecMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.oldNodeEmbeddings().node2Vec().mutate(graphName, configuration);
+        return facade.algorithms().nodeEmbeddings().node2VecMutateStub().execute(graphName, configuration);
     }
 
     @Procedure(value = "gds.node2vec.mutate.estimate", mode = READ)
@@ -54,7 +54,7 @@ public class Node2VecMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.oldNodeEmbeddings().node2Vec().mutateEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().nodeEmbeddings().node2VecMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Procedure(value = "gds.beta.node2vec.mutate", mode = READ, deprecatedBy = "gds.node2vec.mutate")

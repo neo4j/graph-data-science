@@ -30,6 +30,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.logging.LogAdapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -58,7 +59,7 @@ class ProgressTrackingTest {
         var testConfig = TestConfigImpl.builder().logProgress(true).build();
         var log = Neo4jProxy.testLog();
 
-        factory.build(graph, testConfig, log, TaskRegistryFactory.empty()).compute();
+        factory.build(graph, testConfig, new LogAdapter(log), TaskRegistryFactory.empty()).compute();
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
@@ -82,7 +83,7 @@ class ProgressTrackingTest {
         TaskRegistry taskRegistryMock = mock(TaskRegistry.class);
         doReturn(taskRegistryMock).when(taskRegistryFactoryMock).newInstance(any(JobId.class));
 
-        factory.build(graph, testConfig, log, taskRegistryFactoryMock).compute();
+        factory.build(graph, testConfig, new LogAdapter(log), taskRegistryFactoryMock).compute();
 
         assertThat(log.getMessages(TestLog.INFO))
             .as("When `logProgress` is set to `false` there should only be `start` and `finished` log messages")

@@ -26,7 +26,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.gds.utils.StringFormatting;
 import org.neo4j.graphdb.NotFoundException;
-import org.neo4j.logging.Log;
+import org.neo4j.gds.logging.Log;
 
 import java.util.Map;
 import java.util.Optional;

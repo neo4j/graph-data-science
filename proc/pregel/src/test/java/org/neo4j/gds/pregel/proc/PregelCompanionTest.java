@@ -31,7 +31,7 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.logging.NullLog;
+import org.neo4j.gds.logging.Log;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -71,7 +71,7 @@ class PregelCompanionTest {
             graphStore,
             relTypes,
             new Concurrency(4),
-            NullLog.getInstance(),
+            Log.noOpLog(),
             TaskRegistryFactory.empty()
         );
         assertThat(graphStore.inverseIndexedRelationshipTypes()).containsExactlyElementsOf(relTypes);

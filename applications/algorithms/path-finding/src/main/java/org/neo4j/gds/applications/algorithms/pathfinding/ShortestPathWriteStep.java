@@ -105,7 +105,7 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
         ) {
             var progressTracker = new TaskProgressTracker(
                 RelationshipStreamExporter.baseTask("Write shortest Paths"),
-                (org.neo4j.logging.Log) log.getNeo4jLog(),
+                log,
                 new Concurrency(1),
                 requestScopedDependencies.getTaskRegistryFactory()
             );

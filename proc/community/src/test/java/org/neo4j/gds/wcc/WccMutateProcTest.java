@@ -54,7 +54,6 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
@@ -104,7 +103,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
 import static org.neo4j.gds.NodeLabel.ALL_NODES;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
@@ -564,7 +562,7 @@ class WccMutateProcTest extends BaseProcTest {
                 .transactionContext(TestSupport.fullAccessTransaction(db))
                 .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
                 .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
-                .log(Neo4jProxy.testLog())
+                .log(Log.noOpLog())
                 .build())
             .username("")
             .projectConfig(graphProjectConfig)
@@ -576,7 +574,6 @@ class WccMutateProcTest extends BaseProcTest {
      */
     private GraphDataScienceProcedures constructGraphDataScienceProcedures() {
         var logMock = mock(Log.class);
-        when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
 
         var graphStoreCatalogService = new GraphStoreCatalogService();
         var requestScopedDependencies = RequestScopedDependencies.builder()
@@ -587,7 +584,19 @@ class WccMutateProcTest extends BaseProcTest {
             .with(new User(getUsername(), false))
             .with(EmptyUserLogRegistryFactory.INSTANCE)
             .build();
-        var applicationsFacade = ApplicationsFacade.create(logMock, Optional.empty(), Optional.empty(), graphStoreCatalogService, MemoryGuard.DISABLED, new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()), new ProjectionMetricsService(new PassthroughExecutionMetricRegistrar()), requestScopedDependencies, WriteContext.builder().build(), null);
+        var applicationsFacade = ApplicationsFacade.create(
+            logMock,
+            Optional.empty(),
+            Optional.empty(),
+            graphStoreCatalogService,
+            MemoryGuard.DISABLED,
+            new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
+            new ProjectionMetricsService(new PassthroughExecutionMetricRegistrar()),
+            requestScopedDependencies,
+            WriteContext.builder().build(),
+            null,
+            null
+        );
         var configurationParser = new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance);
         var configurationCreator = new ConfigurationCreator(configurationParser, null, requestScopedDependencies.getUser());
         var genericStub = GenericStub.create(

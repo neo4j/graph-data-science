@@ -56,6 +56,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Optional;
@@ -122,7 +123,8 @@ class Node2VecTest {
                 new SamplingWalkParameters(10, 80, 1.0, 1.0, 0.001, 0.75),
                 trainParameters
             ),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).compute().embeddings();
 
         currentGraph.forEachNode(node -> {
@@ -172,7 +174,8 @@ class Node2VecTest {
             NO_RANDOM_SEED,
             1000,
             new Node2VecParameters(walkParameters, trainParameters),
-            progressTracker
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
 
         assertThat(log.getMessages(TestLog.INFO))
@@ -216,7 +219,8 @@ class Node2VecTest {
             NO_RANDOM_SEED,
             1000,
             new Node2VecParameters(walkParameters, trainParameters),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         assertThatThrownBy(node2Vec::compute)
@@ -243,8 +247,9 @@ class Node2VecTest {
             Optional.of(1337L),
             1000,
             new Node2VecParameters(walkParameters, trainParameters),
-            ProgressTracker.NULL_TRACKER
-            ).compute().embeddings();
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        ).compute().embeddings();
 
         var otherEmbeddings = new Node2Vec(
             graph,
@@ -253,8 +258,9 @@ class Node2VecTest {
             Optional.of(1337L),
             1000,
             new Node2VecParameters(walkParameters, trainParameters),
-            ProgressTracker.NULL_TRACKER
-            ).compute().embeddings();
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        ).compute().embeddings();
 
         for (long node = 0; node < graph.nodeCount(); node++) {
             softly.assertThat(otherEmbeddings.get(node)).isEqualTo(embeddings.get(node));
@@ -345,7 +351,8 @@ class Node2VecTest {
             Optional.of(1337L),
             1000,
             new Node2VecParameters(walkParameters, trainParameters),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).compute().embeddings();
 
         var secondEmbeddings = new Node2Vec(
@@ -355,7 +362,8 @@ class Node2VecTest {
             Optional.of(1337L),
             1000,
             new Node2VecParameters(walkParameters, trainParameters),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).compute().embeddings();
 
         double cosineSum = 0;

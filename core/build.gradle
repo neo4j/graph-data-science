@@ -64,8 +64,9 @@ dependencies {
     testAnnotationProcessor project(':config-generator')
     testAnnotationProcessor openGds.immutables.value
 
-    testImplementation project(':legacy-cypher-projection')
     testImplementation project(':edition-api')
+    testImplementation project(':legacy-cypher-projection')
+    testImplementation project(':neo4j-log-adapter')
     testImplementation project(':progress-tracking')
     testImplementation project(':test-graph-loaders')
     testImplementation project(':test-utils')

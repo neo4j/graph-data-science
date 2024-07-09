@@ -36,6 +36,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.logging.LogAdapter;
 
 import java.util.Map;
 import java.util.Optional;
@@ -316,7 +317,7 @@ class ToUndirectedTest {
         ToUndirected toUndirected = new ToUndirectedAlgorithmFactory().build(
             directedGraphStore,
             config,
-            log,
+            new LogAdapter(log),
             EmptyTaskRegistryFactory.INSTANCE
         );
 

@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.configuration.Config;
+import org.neo4j.gds.applications.algorithms.embeddings.GraphSageModelRepository;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.DefaultMemoryGuard;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
@@ -30,7 +31,6 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryGauge;
 import org.neo4j.gds.metrics.MetricsFacade;
-import org.neo4j.gds.modelcatalogservices.ModelCatalogServiceProvider;
 import org.neo4j.gds.procedures.AlgorithmProcedureFacadeBuilderFactory;
 import org.neo4j.gds.procedures.CatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
@@ -64,6 +64,7 @@ final class GraphDataScienceProviderFactory {
     private final MetricsFacade metricsFacade;
     private final ModelCatalog modelCatalog;
     private final Config config;
+    private final GraphSageModelRepository graphSageModelRepository;
 
     private GraphDataScienceProviderFactory(
         Log log,
@@ -73,7 +74,8 @@ final class GraphDataScienceProviderFactory {
         MemoryGauge memoryGauge,
         MetricsFacade metricsFacade,
         ModelCatalog modelCatalog,
-        Config config
+        Config config,
+        GraphSageModelRepository graphSageModelRepository
     ) {
         this.log = log;
         this.algorithmProcessingTemplateDecorator = algorithmProcessingTemplateDecorator;
@@ -83,6 +85,7 @@ final class GraphDataScienceProviderFactory {
         this.metricsFacade = metricsFacade;
         this.modelCatalog = modelCatalog;
         this.config = config;
+        this.graphSageModelRepository = graphSageModelRepository;
     }
 
     GraphDataScienceProvider createGraphDataScienceProvider(
@@ -116,7 +119,8 @@ final class GraphDataScienceProviderFactory {
             taskRegistryFactoryService,
             userLogServices,
             this.config,
-            modelCatalog
+            modelCatalog,
+            graphSageModelRepository
         );
     }
 
@@ -128,7 +132,8 @@ final class GraphDataScienceProviderFactory {
         MemoryGauge memoryGauge,
         MetricsFacade metricsFacade,
         ModelCatalog modelCatalog,
-        Config config
+        Config config,
+        GraphSageModelRepository graphSageModelRepository
     ) {
         return new GraphDataScienceProviderFactory(
             log,
@@ -138,7 +143,8 @@ final class GraphDataScienceProviderFactory {
             memoryGauge,
             metricsFacade,
             modelCatalog,
-            config
+            config,
+            graphSageModelRepository
         );
     }
 
@@ -146,16 +152,13 @@ final class GraphDataScienceProviderFactory {
         GraphStoreCatalogService graphStoreCatalogService,
         boolean useMaxMemoryEstimation
     ) {
-        var modelCatalogServiceProvider = new ModelCatalogServiceProvider(modelCatalog);
-
         return new AlgorithmProcedureFacadeBuilderFactory(
             log,
             defaultsConfiguration,
             limitsConfiguration,
             graphStoreCatalogService,
             useMaxMemoryEstimation,
-            metricsFacade.algorithmMetrics(),
-            modelCatalogServiceProvider
+            metricsFacade.algorithmMetrics()
         );
     }
 }

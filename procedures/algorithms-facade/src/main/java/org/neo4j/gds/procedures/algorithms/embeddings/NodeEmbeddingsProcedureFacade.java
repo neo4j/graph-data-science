@@ -23,6 +23,7 @@ import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsStatsModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsStreamModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsTrainModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsWriteModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -30,9 +31,15 @@ import org.neo4j.gds.embeddings.fastrp.FastRPStatsConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPWriteConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageStreamConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNStreamConfig;
+import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
+import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
 import org.neo4j.gds.procedures.algorithms.embeddings.stubs.FastRPMutateStub;
 import org.neo4j.gds.procedures.algorithms.embeddings.stubs.GraphSageMutateStub;
+import org.neo4j.gds.procedures.algorithms.embeddings.stubs.HashGnnMutateStub;
+import org.neo4j.gds.procedures.algorithms.embeddings.stubs.Node2VecMutateStub;
 import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
@@ -44,6 +51,8 @@ public final class NodeEmbeddingsProcedureFacade {
     private final RequestScopedDependencies requestScopedDependencies;
     private final FastRPMutateStub fastRPMutateStub;
     private final GraphSageMutateStub graphSageMutateStub;
+    private final HashGnnMutateStub hashGnnMutateStub;
+    private final Node2VecMutateStub node2VecMutateStub;
 
     private final ApplicationsFacade applicationsFacade;
 
@@ -55,6 +64,8 @@ public final class NodeEmbeddingsProcedureFacade {
         RequestScopedDependencies requestScopedDependencies,
         FastRPMutateStub fastRPMutateStub,
         GraphSageMutateStub graphSageMutateStub,
+        HashGnnMutateStub hashGnnMutateStub,
+        Node2VecMutateStub node2VecMutateStub,
         ApplicationsFacade applicationsFacade,
         EstimationModeRunner estimationMode,
         AlgorithmExecutionScaffolding algorithmExecutionScaffolding,
@@ -63,6 +74,8 @@ public final class NodeEmbeddingsProcedureFacade {
         this.requestScopedDependencies = requestScopedDependencies;
         this.fastRPMutateStub = fastRPMutateStub;
         this.graphSageMutateStub = graphSageMutateStub;
+        this.hashGnnMutateStub = hashGnnMutateStub;
+        this.node2VecMutateStub = node2VecMutateStub;
         this.applicationsFacade = applicationsFacade;
         this.estimationMode = estimationMode;
         this.algorithmExecutionScaffolding = algorithmExecutionScaffolding;
@@ -79,11 +92,15 @@ public final class NodeEmbeddingsProcedureFacade {
     ) {
         var fastRPMutateStub = new FastRPMutateStub(genericStub, applicationsFacade);
         var graphSageMutateStub = new GraphSageMutateStub(requestScopedDependencies, genericStub, applicationsFacade);
+        var hashGnnMutateStub = new HashGnnMutateStub(genericStub, applicationsFacade);
+        var node2VecMutateStub = new Node2VecMutateStub(genericStub, applicationsFacade);
 
         return new NodeEmbeddingsProcedureFacade(
             requestScopedDependencies,
             fastRPMutateStub,
             graphSageMutateStub,
+            hashGnnMutateStub,
+            node2VecMutateStub,
             applicationsFacade,
             estimationModeRunner,
             algorithmExecutionScaffolding,
@@ -217,6 +234,40 @@ public final class NodeEmbeddingsProcedureFacade {
         return Stream.of(result);
     }
 
+    public Stream<GraphSageTrainResult> graphSageTrain(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new GraphSageResultBuilderForTrainMode();
+
+        return algorithmExecutionScaffolding.runAlgorithm(
+            graphName,
+            configuration,
+            cypherMapWrapper -> GraphSageTrainConfig.of(
+                requestScopedDependencies.getUser().getUsername(),
+                cypherMapWrapper
+            ),
+            trainMode()::graphSage,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> graphSageTrainEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            cypherMapWrapper -> GraphSageTrainConfig.of(
+                requestScopedDependencies.getUser().getUsername(),
+                cypherMapWrapper
+            ),
+            configuration -> estimationMode().graphSageTrain(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
     public Stream<DefaultNodeEmbeddingsWriteResult> graphSageWrite(
         String graphName,
         Map<String, Object> configuration
@@ -251,6 +302,98 @@ public final class NodeEmbeddingsProcedureFacade {
         return Stream.of(result);
     }
 
+    public HashGnnMutateStub hashGnnMutateStub() {
+        return hashGnnMutateStub;
+    }
+
+    public Stream<HashGNNStreamResult> hashGnnStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new HashGnnResultBuilderForStreamMode();
+
+        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+            graphName,
+            configuration,
+            HashGNNStreamConfig::of,
+            streamMode()::hashGnn,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> hashGnnStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            HashGNNStreamConfig::of,
+            configuration -> estimationMode().hashGnn(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
+    public Node2VecMutateStub node2VecMutateStub() {
+        return node2VecMutateStub;
+    }
+
+    public Stream<Node2VecStreamResult> node2VecStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new Node2VecResultBuilderForStreamMode();
+
+        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+            graphName,
+            configuration,
+            Node2VecStreamConfig::of,
+            streamMode()::node2Vec,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> node2VecStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            Node2VecStreamConfig::of,
+            configuration -> estimationMode().node2Vec(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<Node2VecWriteResult> node2VecWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new Node2VecResultBuilderForWriteMode();
+
+        return algorithmExecutionScaffolding.runAlgorithm(
+            graphName,
+            configuration,
+            Node2VecWriteConfig::of,
+            writeMode()::node2Vec,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> node2VecWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            Node2VecWriteConfig::of,
+            configuration -> estimationMode().node2Vec(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
     private NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationMode() {
         return applicationsFacade.nodeEmbeddings().estimate();
     }
@@ -261,6 +404,10 @@ public final class NodeEmbeddingsProcedureFacade {
 
     private NodeEmbeddingAlgorithmsStreamModeBusinessFacade streamMode() {
         return applicationsFacade.nodeEmbeddings().stream();
+    }
+
+    private NodeEmbeddingAlgorithmsTrainModeBusinessFacade trainMode() {
+        return applicationsFacade.nodeEmbeddings().train();
     }
 
     private NodeEmbeddingAlgorithmsWriteModeBusinessFacade writeMode() {

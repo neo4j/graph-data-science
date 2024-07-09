@@ -26,8 +26,8 @@ import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordMutateConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFord;
-import org.neo4j.gds.paths.bellmanford.BellmanFordMutateConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.BellmanFordMutateResult;
@@ -35,7 +35,7 @@ import org.neo4j.gds.result.AbstractResultBuilder;
 
 import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.TOTAL_COST_KEY;
 
-public class BellmanFordMutateResultConsumer extends MutateComputationResultConsumer<BellmanFord, BellmanFordResult, BellmanFordMutateConfig, BellmanFordMutateResult> {
+public class BellmanFordMutateResultConsumer extends MutateComputationResultConsumer<BellmanFord, BellmanFordResult, AllShortestPathsBellmanFordMutateConfig, BellmanFordMutateResult> {
 
     BellmanFordMutateResultConsumer() {
         super((computationResult, executionContext) -> new BellmanFordMutateResult.Builder()
@@ -49,7 +49,7 @@ public class BellmanFordMutateResultConsumer extends MutateComputationResultCons
     @Override
     protected void updateGraphStore(
         AbstractResultBuilder<?> resultBuilder,
-        ComputationResult<BellmanFord, BellmanFordResult, BellmanFordMutateConfig> computationResult,
+        ComputationResult<BellmanFord, BellmanFordResult, AllShortestPathsBellmanFordMutateConfig> computationResult,
         ExecutionContext executionContext
     ) {
         computationResult.result().ifPresent(result -> {

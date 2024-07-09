@@ -230,7 +230,7 @@ class BellmanFordTest {
 
     @Test
     void shouldLogProgress() {
-        var config = BellmanFordStatsConfigImpl.builder()
+        var config = AllShortestPathsBellmanFordStatsConfigImpl.builder()
             .concurrency(4)
             .sourceNode(graph.toOriginalNodeId("a0"))
             .build();

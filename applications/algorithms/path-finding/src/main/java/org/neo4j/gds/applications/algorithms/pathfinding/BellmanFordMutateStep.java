@@ -28,15 +28,15 @@ import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.paths.bellmanford.BellmanFordMutateConfig;
+import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordMutateConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 
 import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.TOTAL_COST_KEY;
 
 class BellmanFordMutateStep implements MutateOrWriteStep<BellmanFordResult, RelationshipsWritten> {
-    private final BellmanFordMutateConfig configuration;
+    private final AllShortestPathsBellmanFordMutateConfig configuration;
 
-    BellmanFordMutateStep(BellmanFordMutateConfig configuration) {
+    BellmanFordMutateStep(AllShortestPathsBellmanFordMutateConfig configuration) {
         this.configuration = configuration;
     }
 

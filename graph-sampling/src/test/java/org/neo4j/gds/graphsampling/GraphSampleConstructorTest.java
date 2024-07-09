@@ -41,6 +41,7 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfigImpl;
 import org.neo4j.gds.graphsampling.samplers.rw.rwr.RandomWalkWithRestarts;
+import org.neo4j.gds.logging.LogAdapter;
 
 import java.util.List;
 import java.util.Set;
@@ -301,7 +302,7 @@ class GraphSampleConstructorTest {
         var log = Neo4jProxy.testLog();
         var progressTracker = new TaskProgressTracker(
             GraphSampleConstructor.progressTask(naturalGraphStore, rwr),
-            log,
+            new LogAdapter(log),
             new Concurrency(1),
             EmptyTaskRegistryFactory.INSTANCE
         );

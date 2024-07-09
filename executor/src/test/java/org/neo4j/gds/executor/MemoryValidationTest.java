@@ -26,11 +26,11 @@ import org.neo4j.gds.applications.graphstorecatalog.MemoryUsageValidator;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.mem.MemoryTreeWithDimensions;
-import org.neo4j.logging.NullLog;
 
 import java.util.stream.Stream;
 
@@ -68,7 +68,7 @@ class MemoryValidationTest {
             memoryTreeWithDimensions,
             10_000,
             useMaxMemoryUsage,
-            NullLog.getInstance()
+            Log.noOpLog()
         ));
     }
 
@@ -82,7 +82,7 @@ class MemoryValidationTest {
             memoryTreeWithDimensions,
             1,
             false,
-            NullLog.getInstance()
+            Log.noOpLog()
         ))
             .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("Procedure was blocked since minimum estimated memory");
@@ -98,7 +98,7 @@ class MemoryValidationTest {
             memoryTreeWithDimensions,
             1,
             true,
-            NullLog.getInstance()
+            Log.noOpLog()
         ))
             .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("Procedure was blocked since maximum estimated memory")

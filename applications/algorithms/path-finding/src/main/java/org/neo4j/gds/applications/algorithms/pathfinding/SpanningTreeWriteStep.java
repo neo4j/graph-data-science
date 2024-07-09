@@ -66,7 +66,7 @@ class SpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree, Relations
 
         var progressTracker = new TaskProgressTracker(
             NodePropertyExporter.baseTask(LabelForProgressTracking.SpanningTree.value, graph.nodeCount()),
-            (org.neo4j.logging.Log) log.getNeo4jLog(),
+            log,
             configuration.writeConcurrency(),
             requestScopedDependencies.getTaskRegistryFactory()
         );

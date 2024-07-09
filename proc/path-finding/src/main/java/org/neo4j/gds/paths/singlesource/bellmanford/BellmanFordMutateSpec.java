@@ -23,11 +23,11 @@ import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
+import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordMutateConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFord;
 import org.neo4j.gds.paths.bellmanford.BellmanFordAlgorithmFactory;
-import org.neo4j.gds.paths.bellmanford.BellmanFordMutateConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.algorithms.pathfinding.BellmanFordMutateResult;
 
 import java.util.stream.Stream;
@@ -36,7 +36,7 @@ import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
 import static org.neo4j.gds.paths.singlesource.SingleSourceShortestPathConstants.BELLMAN_FORD_DESCRIPTION;
 
 @GdsCallable(name = "gds.bellmanFord.mutate", description = BELLMAN_FORD_DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
-public class BellmanFordMutateSpec implements AlgorithmSpec<BellmanFord, BellmanFordResult, BellmanFordMutateConfig, Stream<BellmanFordMutateResult>, BellmanFordAlgorithmFactory<BellmanFordMutateConfig>> {
+public class BellmanFordMutateSpec implements AlgorithmSpec<BellmanFord, BellmanFordResult, AllShortestPathsBellmanFordMutateConfig, Stream<BellmanFordMutateResult>, BellmanFordAlgorithmFactory<AllShortestPathsBellmanFordMutateConfig>> {
 
     @Override
     public String name() {
@@ -44,17 +44,17 @@ public class BellmanFordMutateSpec implements AlgorithmSpec<BellmanFord, Bellman
     }
 
     @Override
-    public BellmanFordAlgorithmFactory<BellmanFordMutateConfig> algorithmFactory(ExecutionContext executionContext) {
+    public BellmanFordAlgorithmFactory<AllShortestPathsBellmanFordMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new BellmanFordAlgorithmFactory<>();
     }
 
     @Override
-    public NewConfigFunction<BellmanFordMutateConfig> newConfigFunction() {
-        return (username, configuration) -> BellmanFordMutateConfig.of(configuration);
+    public NewConfigFunction<AllShortestPathsBellmanFordMutateConfig> newConfigFunction() {
+        return (username, configuration) -> AllShortestPathsBellmanFordMutateConfig.of(configuration);
     }
 
     @Override
-    public ComputationResultConsumer<BellmanFord, BellmanFordResult, BellmanFordMutateConfig, Stream<BellmanFordMutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<BellmanFord, BellmanFordResult, AllShortestPathsBellmanFordMutateConfig, Stream<BellmanFordMutateResult>> computationResultConsumer() {
         return new BellmanFordMutateResultConsumer();
     }
 }

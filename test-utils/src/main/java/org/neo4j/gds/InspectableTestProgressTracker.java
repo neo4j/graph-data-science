@@ -22,14 +22,15 @@ package org.neo4j.gds;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.Progress;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
+import org.neo4j.gds.logging.LogAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +54,7 @@ public class InspectableTestProgressTracker extends TaskProgressTracker {
     private InspectableTestProgressTracker(Task baseTask, String userName, JobId jobId, TaskStore taskStore, TestLog log) {
         super(
             baseTask,
-            log,
+            new LogAdapter(log),
             new Concurrency(1),
             jobId,
             TaskRegistryFactory.local(userName, taskStore),
@@ -109,4 +110,5 @@ public class InspectableTestProgressTracker extends TaskProgressTracker {
         }
         assertThat(previousProgress.progress()).isEqualTo(previousProgress.volume());
     }
+
 }

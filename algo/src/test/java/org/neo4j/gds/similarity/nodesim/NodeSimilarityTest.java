@@ -37,6 +37,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 
@@ -861,7 +862,7 @@ final class NodeSimilarityTest {
         var nodeSimilarity = new NodeSimilarityFactory<>().build(
             graph,
             config,
-            progressLog,
+            new LogAdapter(progressLog),
             EmptyTaskRegistryFactory.INSTANCE
         );
 

@@ -78,7 +78,9 @@ final class MutateModeAlgorithmLibrary {
             case FilteredKNN -> CanonicalProcedureName.parse("gds.knn.filtered");
             case FilteredNodeSimilarity -> CanonicalProcedureName.parse("gds.nodeSimilarity.filtered");
             case GraphSage -> CanonicalProcedureName.parse("gds.beta.graphSage");
+            case GraphSageTrain -> null;
             case HarmonicCentrality -> CanonicalProcedureName.parse("gds.closeness.harmonic");
+            case HashGNN -> CanonicalProcedureName.parse("gds.hashgnn");
             case K1Coloring -> CanonicalProcedureName.parse("gds.k1coloring");
             case KCore -> CanonicalProcedureName.parse("gds.kcore");
             case KMeans -> CanonicalProcedureName.parse("gds.kmeans");
@@ -92,6 +94,7 @@ final class MutateModeAlgorithmLibrary {
             case Modularity -> null;
             case ModularityOptimization -> CanonicalProcedureName.parse("gds.modularityOptimization");
             case NodeSimilarity -> CanonicalProcedureName.parse("gds.nodeSimilarity");
+            case Node2Vec -> CanonicalProcedureName.parse("gds.node2vec");
             case PageRank -> CanonicalProcedureName.parse("gds.pageRank");
             case RandomWalk -> null;
             case SCC -> CanonicalProcedureName.parse("gds.scc");

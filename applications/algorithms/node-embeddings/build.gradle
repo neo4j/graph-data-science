@@ -17,5 +17,6 @@ dependencies {
     implementation project(":ml-core")
     implementation project(":model-catalog-api")
     implementation project(":progress-tracking")
+    implementation project(":string-formatting")
     implementation project(":termination")
 }

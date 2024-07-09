@@ -30,7 +30,7 @@ import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
 
 import java.util.Optional;
 
-class DepthFirstSearchResultBuilderForMutateMode implements ResultBuilder<DfsMutateConfig, HugeLongArray, PathFindingMutateResult, RelationshipsWritten> {
+public class DepthFirstSearchResultBuilderForMutateMode implements ResultBuilder<DfsMutateConfig, HugeLongArray, PathFindingMutateResult, RelationshipsWritten> {
     @Override
     public PathFindingMutateResult build(
         Graph graph,

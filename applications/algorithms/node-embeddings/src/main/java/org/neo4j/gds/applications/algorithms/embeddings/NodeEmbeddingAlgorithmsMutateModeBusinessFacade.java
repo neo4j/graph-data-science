@@ -28,32 +28,38 @@ import org.neo4j.gds.embeddings.fastrp.FastRPMutateConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMutateConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNMutateConfig;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
+import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
+import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FastRP;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.GraphSage;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.HashGNN;
 
 public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
-    private final GraphSageModelCatalog graphSageModelCatalog;
     private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimation;
     private final NodeEmbeddingAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final MutateNodeProperty mutateNodeProperty;
+    private final Node2VecAlgorithmProcessing node2VecAlgorithmProcessing;
+    private final GraphSageAlgorithmProcessing graphSageAlgorithmProcessing;
 
     public NodeEmbeddingAlgorithmsMutateModeBusinessFacade(
-        GraphSageModelCatalog graphSageModelCatalog,
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimation,
         NodeEmbeddingAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        MutateNodeProperty mutateNodeProperty
+        MutateNodeProperty mutateNodeProperty,
+        GraphSageAlgorithmProcessing graphSageAlgorithmProcessing,
+        Node2VecAlgorithmProcessing node2VecAlgorithmProcessing
     ) {
-        this.graphSageModelCatalog = graphSageModelCatalog;
         this.estimation = estimation;
         this.algorithms = algorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.mutateNodeProperty = mutateNodeProperty;
+        this.node2VecAlgorithmProcessing = node2VecAlgorithmProcessing;
+        this.graphSageAlgorithmProcessing = graphSageAlgorithmProcessing;
     }
 
     public <RESULT> RESULT fastRP(
@@ -79,23 +85,42 @@ public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
         GraphSageMutateConfig configuration,
         ResultBuilder<GraphSageMutateConfig, GraphSageResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var model = graphSageModelCatalog.get(configuration);
-        var relationshipWeightPropertyFromTrainConfiguration = model.trainConfig().relationshipWeightProperty();
-
-        var validationHook = new GraphSageValidationHook(configuration, model);
-
         var mutateStep = new GraphSageMutateStep(mutateNodeProperty, configuration);
 
-        return algorithmProcessingTemplateConvenience.processAlgorithm(
-            relationshipWeightPropertyFromTrainConfiguration,
+        return graphSageAlgorithmProcessing.process(
             graphName,
             configuration,
-            Optional.of(List.of(validationHook)),
-            GraphSage,
-            () -> estimation.graphSage(configuration, true),
-            graph -> algorithms.graphSage(graph, configuration),
             Optional.of(mutateStep),
+            resultBuilder,
+            true
+        );
+    }
+
+    public <RESULT> RESULT hashGnn(
+        GraphName graphName,
+        HashGNNMutateConfig configuration,
+        ResultBuilder<HashGNNMutateConfig, HashGNNResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var mutateStep = new HashGnnMutateStep(mutateNodeProperty, configuration);
+
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+            graphName,
+            configuration,
+            HashGNN,
+            () -> estimation.hashGnn(configuration),
+            graph -> algorithms.hashGnn(graph, configuration),
+            mutateStep,
             resultBuilder
         );
+    }
+
+    public <RESULT> RESULT node2Vec(
+        GraphName graphName,
+        Node2VecMutateConfig configuration,
+        ResultBuilder<Node2VecMutateConfig, Node2VecResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var mutateStep = new Node2VecMutateStep(mutateNodeProperty, configuration);
+
+        return node2VecAlgorithmProcessing.process(graphName, configuration, Optional.of(mutateStep), resultBuilder);
     }
 }

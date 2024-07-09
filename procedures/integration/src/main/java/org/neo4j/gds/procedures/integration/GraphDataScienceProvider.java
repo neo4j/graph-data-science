@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.configuration.Config;
 import org.neo4j.function.ThrowingFunction;
+import org.neo4j.gds.applications.algorithms.embeddings.GraphSageModelRepository;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -81,6 +82,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
     private final UserLogServices userLogServices;
     private final Config config;
     private final ModelCatalog modelCatalog;
+    private final GraphSageModelRepository graphSageModelRepository;
 
     GraphDataScienceProvider(
         Log log,
@@ -99,7 +101,8 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         TaskRegistryFactoryService taskRegistryFactoryService,
         UserLogServices userLogServices,
         Config config,
-        ModelCatalog modelCatalog
+        ModelCatalog modelCatalog,
+        GraphSageModelRepository graphSageModelRepository
     ) {
         this.log = log;
         this.defaultsConfiguration = defaultsConfiguration;
@@ -118,6 +121,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         this.userLogServices = userLogServices;
         this.config = config;
         this.modelCatalog = modelCatalog;
+        this.graphSageModelRepository = graphSageModelRepository;
     }
 
     @Override
@@ -129,12 +133,16 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         var graphDatabaseService = context.graphDatabaseAPI();
         var databaseId = databaseIdAccessor.getDatabaseId(graphDatabaseService);
 
-        var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(graphDatabaseService, config);
+        var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(
+            graphDatabaseService,
+            config
+        );
         var exporterContext = new ExporterContext.ProcedureContextWrapper(context);
         var nodeLabelExporterBuilder = exportBuildersProvider.nodeLabelExporterBuilder(exporterContext);
         var nodePropertyExporterBuilder = exportBuildersProvider.nodePropertyExporterBuilder(exporterContext);
         var relationshipExporterBuilder = exportBuildersProvider.relationshipExporterBuilder(exporterContext);
-        var relationshipPropertiesExporterBuilder = exportBuildersProvider.relationshipPropertiesExporterBuilder(exporterContext);
+        var relationshipPropertiesExporterBuilder = exportBuildersProvider.relationshipPropertiesExporterBuilder(
+            exporterContext);
         var relationshipStreamExporterBuilder = exportBuildersProvider.relationshipStreamExporterBuilder(exporterContext);
 
         var procedureReturnColumns = new ProcedureCallContextReturnColumns(procedureCallContext);
@@ -191,7 +199,8 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             procedureTransactionAccessor.getProcedureTransaction(context),
             algorithmProcedureFacadeBuilderFactory,
             deprecatedProceduresMetricService,
-            modelCatalog
+            modelCatalog,
+            graphSageModelRepository
         );
     }
 }

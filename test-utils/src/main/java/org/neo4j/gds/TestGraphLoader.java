@@ -23,7 +23,7 @@ import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.logging.Log;
+import org.neo4j.gds.logging.Log;
 
 public interface TestGraphLoader {
 

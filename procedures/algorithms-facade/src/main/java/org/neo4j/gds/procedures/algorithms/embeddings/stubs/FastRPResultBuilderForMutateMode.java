@@ -30,7 +30,7 @@ import org.neo4j.gds.procedures.algorithms.embeddings.DefaultNodeEmbeddingMutate
 
 import java.util.Optional;
 
-class FastRPResultBuilderForMutateMode implements ResultBuilder<FastRPMutateConfig, FastRPResult, DefaultNodeEmbeddingMutateResult, NodePropertiesWritten> {
+public class FastRPResultBuilderForMutateMode implements ResultBuilder<FastRPMutateConfig, FastRPResult, DefaultNodeEmbeddingMutateResult, NodePropertiesWritten> {
     @Override
     public DefaultNodeEmbeddingMutateResult build(
         Graph graph,

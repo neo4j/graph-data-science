@@ -28,7 +28,7 @@ import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.logging.Log;
+import org.neo4j.gds.logging.Log;
 
 import java.util.Collection;
 import java.util.HashSet;

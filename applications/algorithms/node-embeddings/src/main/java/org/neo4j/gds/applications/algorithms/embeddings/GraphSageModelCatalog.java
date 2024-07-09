@@ -47,4 +47,8 @@ public class GraphSageModelCatalog {
             GraphSageModelTrainer.GraphSageTrainMetrics.class
         );
     }
+
+    void store(Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model) {
+        modelCatalog.set(model);
+    }
 }

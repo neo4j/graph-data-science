@@ -25,6 +25,12 @@ import org.neo4j.gds.embeddings.fastrp.FastRPBaseConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPMemoryEstimateDefinition;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMemoryEstimateDefinition;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainEstimateDefinition;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNConfig;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNMemoryEstimateDefinition;
+import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
+import org.neo4j.gds.embeddings.node2vec.Node2VecMemoryEstimateDefinition;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.model.ModelConfig;
 
@@ -64,6 +70,48 @@ public class NodeEmbeddingAlgorithmsEstimationModeBusinessFacade {
 
     public MemoryEstimateResult graphSage(GraphSageBaseConfig configuration, Object graphNameOrConfiguration) {
         var memoryEstimation = graphSage(configuration, false);
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
+        );
+    }
+
+    MemoryEstimation graphSageTrain(GraphSageTrainConfig configuration) {
+        return new GraphSageTrainEstimateDefinition(configuration.toMemoryEstimateParameters()).memoryEstimation();
+    }
+
+    public MemoryEstimateResult graphSageTrain(GraphSageTrainConfig configuration, Object graphNameOrConfiguration) {
+        var memoryEstimation = graphSageTrain(configuration);
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
+        );
+    }
+
+    public MemoryEstimation hashGnn(HashGNNConfig configuration) {
+        return new HashGNNMemoryEstimateDefinition(configuration.toParameters()).memoryEstimation();
+    }
+
+    public MemoryEstimateResult hashGnn(HashGNNConfig configuration, Object graphNameOrConfiguration) {
+        var memoryEstimation = hashGnn(configuration);
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
+        );
+    }
+
+    public MemoryEstimation node2Vec(Node2VecBaseConfig configuration) {
+        return new Node2VecMemoryEstimateDefinition(configuration.node2VecParameters()).memoryEstimation();
+    }
+
+    public MemoryEstimateResult node2Vec(Node2VecBaseConfig configuration, Object graphNameOrConfiguration) {
+        var memoryEstimation = node2Vec(configuration);
 
         return algorithmEstimationTemplate.estimate(
             configuration,

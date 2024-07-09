@@ -21,14 +21,14 @@ package org.neo4j.gds.paths.bellmanford;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.mem.MemoryEstimation;
 
 import java.util.List;
 
-public class BellmanFordAlgorithmFactory<CONFIG extends BellmanFordBaseConfig> extends GraphAlgorithmFactory<BellmanFord, CONFIG> {
+public class BellmanFordAlgorithmFactory<CONFIG extends AllShortestPathsBellmanFordBaseConfig> extends GraphAlgorithmFactory<BellmanFord, CONFIG> {
 
     @Override
     public BellmanFord build(Graph graphOrGraphStore, CONFIG configuration, ProgressTracker progressTracker) {
@@ -48,7 +48,7 @@ public class BellmanFordAlgorithmFactory<CONFIG extends BellmanFordBaseConfig> e
     }
 
     @Override
-    public Task progressTask(Graph graphOrGraphStore, BellmanFordBaseConfig config) {
+    public Task progressTask(Graph graphOrGraphStore, AllShortestPathsBellmanFordBaseConfig config) {
         return Tasks.iterativeOpen(
             taskName(),
             () -> List.of(

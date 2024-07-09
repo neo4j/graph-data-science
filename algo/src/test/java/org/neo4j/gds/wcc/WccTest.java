@@ -43,6 +43,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.logging.LogAdapter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -177,7 +178,7 @@ class WccTest {
         new WccAlgorithmFactory<>().build(
             createTestGraph(Orientation.NATURAL),
             WccStreamConfigImpl.builder().relationshipWeightProperty("weights").build(),
-            log,
+            new LogAdapter(log),
             EmptyTaskRegistryFactory.INSTANCE
         );
 

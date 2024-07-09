@@ -46,6 +46,7 @@ dependencies {
     implementation project(':defaults-and-limits-configuration')
     implementation project(':executor')
     implementation project(':graph-schema-api')
+    implementation project(':logging')
     implementation project(':memory-usage')
     implementation project(':ml-algo')
     implementation project(':ml-api')

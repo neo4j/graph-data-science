@@ -30,8 +30,8 @@ import org.neo4j.gds.dag.longestPath.DagLongestPathStreamConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
+import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStreamConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
-import org.neo4j.gds.paths.bellmanford.BellmanFordStreamConfig;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStreamConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
@@ -98,8 +98,8 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
 
     public <RESULT> RESULT bellmanFord(
         GraphName graphName,
-        BellmanFordStreamConfig configuration,
-        ResultBuilder<BellmanFordStreamConfig, BellmanFordResult, RESULT, Void> resultBuilder
+        AllShortestPathsBellmanFordStreamConfig configuration,
+        ResultBuilder<AllShortestPathsBellmanFordStreamConfig, BellmanFordResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,

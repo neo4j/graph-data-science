@@ -12,6 +12,7 @@ dependencies {
     compileOnly group: 'org.neo4j', name: 'neo4j-configuration',    version: ver.'neo4j'
     compileOnly group: 'org.neo4j', name: 'neo4j-logging',          version: ver.'neo4j'
 
+    implementation project(':logging')
     implementation project(':neo4j-settings')
 
     implementation openGds.commons.text

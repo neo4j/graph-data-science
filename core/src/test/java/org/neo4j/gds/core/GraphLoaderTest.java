@@ -41,6 +41,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
@@ -123,7 +124,7 @@ class GraphLoaderTest extends BaseTest {
             .nodeProjectionsWithIdentifier(Map.of("AllNodes", NodeProjection.all()))
             .relationshipProjectionsWithIdentifier(Map.of("AllRels", RelationshipProjection.ALL))
             .nodeProperties(List.of(PropertyMapping.of("prop1", 42L)))
-            .log(log)
+            .log(new LogAdapter(log))
             .build()
             .graph();
 
@@ -141,7 +142,7 @@ class GraphLoaderTest extends BaseTest {
             .nodeProjectionsWithIdentifier(Map.of("AllNodes", NodeProjection.all()))
             .relationshipProjectionsWithIdentifier(Map.of("AllRels", RelationshipProjection.ALL))
             .nodeProperties(List.of(PropertyMapping.of("prop1", 42L)))
-            .log(log)
+            .log(new LogAdapter(log))
             .build()
             .graph();
 
@@ -181,7 +182,7 @@ class GraphLoaderTest extends BaseTest {
             .graphName("graph")
             .nodeQuery("MATCH (n) RETURN id(n) AS id, coalesce(n.prop1, 42) AS prop1")
             .relationshipQuery("MATCH (n)-[:REL1|REL2]-(m) RETURN id(n) AS source, id(m) AS target")
-            .log(log)
+            .log(new LogAdapter(log))
             .build()
             .graph();
         assertThat(log.getMessages(TestLog.INFO))
@@ -334,7 +335,7 @@ class GraphLoaderTest extends BaseTest {
         var log = Neo4jProxy.testLog();
         Graph graph = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withDefaultAggregation(Aggregation.SINGLE)
-            .withLog(log)
+            .withLog(new LogAdapter(log))
             .graph();
         assertGraphEquals(fromGdl("(a)-->(b), (a)-->(c), (b)-->(c)"), graph);
         log.containsMessage(TestLog.INFO, "Loading :: Actual memory usage of the loaded graph:");

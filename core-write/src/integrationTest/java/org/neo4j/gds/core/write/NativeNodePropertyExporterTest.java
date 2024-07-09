@@ -34,11 +34,12 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.DirectIdMap;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
 import org.neo4j.gds.nodeproperties.LongTestPropertyValues;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Arrays;
 import java.util.List;
@@ -165,7 +166,7 @@ class NativeNodePropertyExporterTest extends BaseTest {
         var writeConcurrency = new Concurrency(4);
         var progressTracker = new TaskProgressTracker(
             NodePropertyExporter.baseTask("AlgoNameGoesHere", graph.nodeCount()),
-            log,
+            new LogAdapter(log),
             writeConcurrency,
             EmptyTaskRegistryFactory.INSTANCE
         );

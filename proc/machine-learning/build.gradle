@@ -21,6 +21,8 @@ dependencies {
         }
     }
 
+    compileOnly project(':logging')
+
     implementation project(':algorithms-machinery')
     implementation project(':algorithms-procedure-facade')
     implementation project(':algo-common')
@@ -41,6 +43,7 @@ dependencies {
     implementation project(':ml-core')
     implementation project(':model-catalog-api')
     implementation project(':neo4j-api')
+    implementation project(':node-embedding-algorithms')
     implementation project(':opengds-procedure-facade')
     implementation project(':pipeline')
     implementation project(':proc-common')

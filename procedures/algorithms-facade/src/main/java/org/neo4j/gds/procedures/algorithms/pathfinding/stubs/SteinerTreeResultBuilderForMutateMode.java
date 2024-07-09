@@ -30,7 +30,7 @@ import org.neo4j.gds.steiner.SteinerTreeResult;
 
 import java.util.Optional;
 
-class SteinerTreeResultBuilderForMutateMode implements ResultBuilder<SteinerTreeMutateConfig, SteinerTreeResult, SteinerMutateResult, RelationshipsWritten> {
+public class SteinerTreeResultBuilderForMutateMode implements ResultBuilder<SteinerTreeMutateConfig, SteinerTreeResult, SteinerMutateResult, RelationshipsWritten> {
     @Override
     public SteinerMutateResult build(
         Graph graph,

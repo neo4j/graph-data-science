@@ -133,7 +133,7 @@ final class Neo4jDatabaseNodePropertyWriter {
     ) {
         return new TaskProgressTracker(
             NodePropertyExporter.baseTask(name, taskVolume),
-            (org.neo4j.logging.Log) log.getNeo4jLog(),
+            log,
             writeConcurrency,
             taskRegistryFactory
         );

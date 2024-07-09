@@ -51,6 +51,8 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.logging.LogAdapter;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Map;
@@ -110,7 +112,7 @@ class HashGNNTest {
             Optional.empty(),
             Optional.of(42L)
         );
-        var result = new HashGNN(binaryGraph, parameters, ProgressTracker.NULL_TRACKER).compute().embeddings();
+        var result = new HashGNN(binaryGraph, parameters, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE).compute().embeddings();
         //dimension should be equal to dimension of feature input which is 3
         assertThat(result.doubleArrayValue(binaryGraph.toMappedNodeId(binaryIdFunction.of("a")))).containsExactly(1.0, 0.0, 0.0);
         assertThat(result.doubleArrayValue(binaryGraph.toMappedNodeId(binaryIdFunction.of("b")))).containsExactly(0.0, 1.0, 1.0);
@@ -131,7 +133,7 @@ class HashGNNTest {
             Optional.empty(),
             Optional.of(42L)
         );
-        var result = new HashGNN(binaryGraph, parameters, ProgressTracker.NULL_TRACKER).compute().embeddings();
+        var result = new HashGNN(binaryGraph, parameters, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE).compute().embeddings();
         //dimension should be equal to dimension of feature input which is 3
         assertThat(result.doubleArrayValue(binaryGraph.toMappedNodeId(binaryIdFunction.of("a")))).containsExactly(1.0, 0.0, 0.0);
         assertThat(result.doubleArrayValue(binaryGraph.toMappedNodeId(binaryIdFunction.of("b")))).containsExactly(1.0, 0.0, 1.0);
@@ -165,8 +167,8 @@ class HashGNNTest {
             Optional.of(43L)
         );
 
-        var result1 = new HashGNN(binaryGraph, parameters, ProgressTracker.NULL_TRACKER).compute().embeddings();
-        var result2 = new HashGNN(binaryGraph, parameters, ProgressTracker.NULL_TRACKER).compute().embeddings();
+        var result1 = new HashGNN(binaryGraph, parameters, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE).compute().embeddings();
+        var result2 = new HashGNN(binaryGraph, parameters, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE).compute().embeddings();
 
         for (int i = 0; i < result1.nodeCount(); i++) {
             assertThat(result1.doubleArrayValue(i)).containsExactly(result2.doubleArrayValue(i));
@@ -194,10 +196,10 @@ class HashGNNTest {
             Optional.of(42L)
         );
         var parametersBefore = parametersMaker.apply(0.0);
-        var resultBefore = new HashGNN(doubleGraph, parametersBefore, ProgressTracker.NULL_TRACKER).compute().embeddings();
+        var resultBefore = new HashGNN(doubleGraph, parametersBefore, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE).compute().embeddings();
 
         var parameters = parametersMaker.apply(1.0);
-        var result = new HashGNN(doubleGraph, parameters, ProgressTracker.NULL_TRACKER).compute().embeddings();
+        var result = new HashGNN(doubleGraph, parameters, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE).compute().embeddings();
         // because of equal neighbor and self influence and high embeddingDensity, we expect the node `b` to have the union of features of its neighbors plus some of its own features
         // the neighbors are expected to have the same features as their initial projection
 
@@ -238,10 +240,10 @@ class HashGNNTest {
             Optional.of(42L)
         );
         var parametersBefore = parametersMaker.apply(0.0);
-        var resultBefore = new HashGNN(doubleGraph, parametersBefore, ProgressTracker.NULL_TRACKER).compute().embeddings();
+        var resultBefore = new HashGNN(doubleGraph, parametersBefore, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE).compute().embeddings();
 
         var parameters = parametersMaker.apply(1000.0);
-        var result = new HashGNN(doubleGraph, parameters, ProgressTracker.NULL_TRACKER).compute().embeddings();
+        var result = new HashGNN(doubleGraph, parameters, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE).compute().embeddings();
         // because of high neighbor influence and high embeddingDensity, we expect the node `b` to have the union of features of its neighbors
         // the neighbors are expected to have the same features as their initial projection
 
@@ -271,7 +273,7 @@ class HashGNNTest {
             .randomSeed(42L)
             .outputDimension(42)
             .build();
-        var result = new HashGNN(binaryGraph, config.toParameters(), ProgressTracker.NULL_TRACKER).compute().embeddings();
+        var result = new HashGNN(binaryGraph, config.toParameters(), ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE).compute().embeddings();
         //dimension should be equal to dimension of feature input which is 3
         assertThat(result.doubleArrayValue(0).length).isEqualTo(42);
         assertThat(result.doubleArrayValue(1).length).isEqualTo(42);
@@ -303,7 +305,7 @@ class HashGNNTest {
         var factory = new HashGNNFactory<>();
         var progressTask = factory.progressTask(g, config);
         var log = Neo4jProxy.testLog();
-        var progressTracker = new TaskProgressTracker(progressTask, log, new Concurrency(4), EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TaskProgressTracker(progressTask, new LogAdapter(log), new Concurrency(4), EmptyTaskRegistryFactory.INSTANCE);
 
         factory.build(g, config, progressTracker).compute();
 
@@ -392,8 +394,8 @@ class HashGNNTest {
             .randomSeed(42L)
             .build();
 
-        var firstEmbeddings = new HashGNN(firstGraph, config.toParameters(), ProgressTracker.NULL_TRACKER).compute().embeddings();
-        var secondEmbeddings = new HashGNN(secondGraph, config.toParameters(), ProgressTracker.NULL_TRACKER).compute().embeddings();
+        var firstEmbeddings = new HashGNN(firstGraph, config.toParameters(), ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE).compute().embeddings();
+        var secondEmbeddings = new HashGNN(secondGraph, config.toParameters(), ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE).compute().embeddings();
 
         double cosineSum = 0;
         for (long originalNodeId = 0; originalNodeId < nodeCount; originalNodeId++) {

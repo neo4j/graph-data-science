@@ -61,7 +61,7 @@ public final class Neo4jDatabaseRelationshipWriter {
         try (ProgressTimer ignored = ProgressTimer.start(writeMillis::set)) {
             var progressTracker = new TaskProgressTracker(
                 RelationshipExporter.baseTask(taskName, graph.relationshipCount()),
-                (org.neo4j.logging.Log) log.getNeo4jLog(),
+                log,
                 RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY,
                 taskRegistryFactory
             );

@@ -35,17 +35,16 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogStore;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
-import org.neo4j.gds.modelcatalogservices.ModelCatalogServiceProvider;
 import org.neo4j.gds.procedures.AlgorithmProcedureFacadeBuilderFactory;
 import org.neo4j.gds.procedures.CatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.DatabaseIdAccessor;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.ProcedureCallContextReturnColumns;
-import org.neo4j.gds.procedures.integration.LogAdapter;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -179,8 +178,7 @@ public final class ProcedureRunner {
             LimitsConfiguration.Instance,
             graphStoreCatalogService,
             false,
-            new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
-            new ModelCatalogServiceProvider(modelCatalog)
+            new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar())
         );
 
         return GraphDataScienceProcedures.create(
@@ -203,7 +201,8 @@ public final class ProcedureRunner {
             procedureTransaction,
             algorithmFacadeBuilderFactory,
             DeprecatedProceduresMetricService.PASSTHROUGH,
-            modelCatalog
+            modelCatalog,
+            null
         );
     }
 }

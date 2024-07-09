@@ -40,7 +40,9 @@ public enum LabelForProgressTracking {
     FilteredKNN("Filtered K-Nearest Neighbours"),
     FilteredNodeSimilarity("Filtered Node Similarity"),
     GraphSage("GraphSage"),
+    GraphSageTrain("GraphSageTrain"),
     HarmonicCentrality("HarmonicCentrality"),
+    HashGNN("HashGNN"),
     K1Coloring("K1Coloring"),
     KCore("KCoreDecomposition"),
     KMeans("K-Means"),
@@ -54,6 +56,7 @@ public enum LabelForProgressTracking {
     Modularity("Modularity"),
     ModularityOptimization("ModularityOptimization"),
     NodeSimilarity("Node Similarity"),
+    Node2Vec("Node2Vec"),
     PageRank("PageRank"),
     RandomWalk("RandomWalk"),
     SCC("SCC"),
@@ -92,7 +95,9 @@ public enum LabelForProgressTracking {
             case FilteredKNN -> FilteredKNN;
             case FilteredNodeSimilarity -> FilteredNodeSimilarity;
             case GraphSage -> GraphSage;
+            case GraphSageTrain -> GraphSageTrain;
             case HarmonicCentrality -> HarmonicCentrality;
+            case HashGNN -> HashGNN;
             case K1Coloring -> K1Coloring;
             case KCore -> KCore;
             case KMeans -> KMeans;
@@ -106,6 +111,7 @@ public enum LabelForProgressTracking {
             case Modularity -> Modularity;
             case ModularityOptimization -> ModularityOptimization;
             case NodeSimilarity -> NodeSimilarity;
+            case Node2Vec -> Node2Vec;
             case PageRank -> PageRank;
             case RandomWalk -> RandomWalk;
             case SCC -> SCC;

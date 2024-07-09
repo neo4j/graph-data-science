@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -34,6 +33,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.models.ClassifierFactory;
@@ -41,6 +41,7 @@ import org.neo4j.gds.ml.models.FeaturesFactory;
 import org.neo4j.gds.ml.models.logisticregression.ImmutableLogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 
@@ -214,7 +215,7 @@ class NodeClassificationPredictTest {
         var concurrency = new Concurrency(1);
         var progressTracker = new TaskProgressTracker(
             NodeClassificationPredict.progressTask(graph.nodeCount()),
-            log,
+            new LogAdapter(log),
             concurrency,
             new JobId(),
             EmptyTaskRegistryFactory.INSTANCE,
