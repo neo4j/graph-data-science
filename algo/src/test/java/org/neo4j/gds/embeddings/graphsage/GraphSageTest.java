@@ -56,6 +56,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.SingleLabelGraphSageTrain;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.logging.LogAdapter;
 
 import java.util.Arrays;
 import java.util.List;
@@ -245,7 +246,7 @@ class GraphSageTest {
         var graphSage = new GraphSageAlgorithmFactory<>(modelCatalog).build(
             graph,
             streamConfig,
-            log,
+            new LogAdapter(log),
             EmptyTaskRegistryFactory.INSTANCE
         );
         graphSage.compute();

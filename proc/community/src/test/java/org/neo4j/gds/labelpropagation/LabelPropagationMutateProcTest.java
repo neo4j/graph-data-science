@@ -54,7 +54,6 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
@@ -97,7 +96,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
 import static org.neo4j.gds.NodeLabel.ALL_NODES;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
@@ -432,7 +430,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                 .transactionContext(TestSupport.fullAccessTransaction(db))
                 .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
                 .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
-                .log(Neo4jProxy.testLog())
+                .log(Log.noOpLog())
                 .build())
             .username("")
             .projectConfig(graphProjectConfig)
@@ -490,7 +488,6 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
 
     private GraphDataScienceProcedures constructFacade() {
         var logMock = mock(org.neo4j.gds.logging.Log.class);
-        when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
 
         final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
 

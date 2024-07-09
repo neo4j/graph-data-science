@@ -42,6 +42,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.time.Instant;
@@ -613,7 +614,7 @@ class RandomWalkTest {
                     graph,
                     config
                 ),
-                Neo4jProxy.testLog(),
+                Log.noOpLog(),
                 new Concurrency(4),
                 TaskRegistryFactory.local("rw", taskStore)
             );

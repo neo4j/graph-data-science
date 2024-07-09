@@ -23,7 +23,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
-import org.neo4j.logging.Log;
+import org.neo4j.gds.logging.Log;
 
 public final class TaskTreeProgressTracker extends TaskProgressTracker {
 

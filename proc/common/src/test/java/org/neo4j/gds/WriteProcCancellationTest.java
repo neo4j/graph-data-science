@@ -28,7 +28,6 @@ import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
@@ -41,6 +40,7 @@ import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.gdl.GdlGraphs;
 import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.termination.TerminationMonitor;
 import org.neo4j.gds.test.TestAlgoResultBuilder;
@@ -118,7 +118,7 @@ class WriteProcCancellationTest extends BaseTest {
                 .taskRegistryFactory(jobId -> new TaskRegistry("", taskStore, jobId))
                 .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
                 .username("")
-                .log(Neo4jProxy.testLog())
+                .log(Log.noOpLog())
                 .terminationMonitor(TerminationMonitor.EMPTY)
                 .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
                 .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)

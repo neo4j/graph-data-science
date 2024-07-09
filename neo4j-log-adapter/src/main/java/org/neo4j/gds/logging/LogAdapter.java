@@ -17,9 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.integration;
+package org.neo4j.gds.logging;
 
-import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.utils.StringFormatting;
 
 /**
@@ -69,12 +68,13 @@ public class LogAdapter implements Log {
     }
 
     @Override
+    public void error(String messageFormat, Object... arguments) {
+        neo4jUserLog.error(messageFormat, arguments);
+    }
+
+    @Override
     public void error(String messageFormat, Throwable exception, Object... arguments) {
         neo4jUserLog.error(StringFormatting.formatWithLocale(messageFormat, arguments), exception);
     }
 
-    @Override
-    public Object getNeo4jLog() {
-        return neo4jUserLog;
-    }
 }

@@ -26,6 +26,7 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jGraphExtension;
+import org.neo4j.gds.logging.LogAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +66,7 @@ public class NodeLabelIndexTest extends BaseTest {
         var log = Neo4jProxy.testLog();
         var graph = new StoreLoaderBuilder()
             .databaseService(db)
-            .log(log)
+            .log(new LogAdapter(log))
             .addNodeLabel("Foo")
             .addNodeLabel("Bar")
             .build()

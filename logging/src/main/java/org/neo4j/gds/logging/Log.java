@@ -42,21 +42,9 @@ public interface Log {
 
     void error(String errorMessage, Throwable throwable);
 
-    void error(String messageFormat, Throwable exception, Object... arguments);
+    void error(String messageFormat, Object... arguments);
 
-    /**
-     * This is terrible, but necessary in the short term.
-     * We want to eventually only have our own GDS log everywhere.
-     * When working as a Neo4j plugin, we then want to wrap the Neo4j log using an adapter.
-     * Until we have migrated all our internal usages of Neo4j's log, this is a handy little workaround.
-     * Do not use this back door except at boundaries of non-ported code please.
-     *
-     * @return Object type that you can cast, to avoid silly versioning problems
-     *
-     * @deprecated We promise to rid of this very soon!
-     */
-    @Deprecated
-    Object getNeo4jLog();
+    void error(String messageFormat, Throwable exception, Object... arguments);
 
     /**
      * Here is some convenience for daily engineering toil, do not use for realz.
@@ -98,13 +86,13 @@ public interface Log {
             }
 
             @Override
-            public void error(String messageFormat, Throwable exception, Object... arguments) {
+            public void error(String messageFormat, Object... arguments) {
 
             }
 
             @Override
-            public Object getNeo4jLog() {
-                throw new UnsupportedOperationException("Not supported for this shunt.");
+            public void error(String messageFormat, Throwable exception, Object... arguments) {
+
             }
         };
     }

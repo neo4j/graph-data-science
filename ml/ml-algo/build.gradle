@@ -37,7 +37,9 @@ dependencies {
     testAnnotationProcessor project(':annotations')
     testAnnotationProcessor openGds.immutables.value
 
-    testImplementation project(':test-utils')
     testImplementation project(':algo-common')
+    testImplementation project(':logging')
     testImplementation project(':ml-test-utils')
+    testImplementation project(':neo4j-log-adapter')
+    testImplementation project(':test-utils')
 }

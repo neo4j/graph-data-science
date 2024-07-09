@@ -28,6 +28,7 @@ dependencies {
     implementation project(':memory-usage')
     implementation project(':model-catalog-api')
     implementation project(':neo4j-api')
+    implementation project(':neo4j-log-adapter')
     implementation project(':neo4j-settings')
     implementation project(':opengds-procedure-facade')
     implementation project(':open-model-catalog')

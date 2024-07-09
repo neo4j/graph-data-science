@@ -180,7 +180,7 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
         return ImmutableGraphLoaderContext.builder()
             .databaseId(databaseId)
             .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(graphDatabaseService))
-            .log((org.neo4j.logging.Log) log.getNeo4jLog())
+            .log(log)
             .taskRegistryFactory(taskRegistryFactory)
             .terminationFlag(terminationFlag)
             .transactionContext(transactionContext)

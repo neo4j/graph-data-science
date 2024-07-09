@@ -47,6 +47,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -568,7 +569,7 @@ class FastRPTest {
 
         var progressTask = factory.progressTask(graph, parameters.nodeSelfInfluence(), parameters.iterationWeights().size());
         var log = Neo4jProxy.testLog();
-        var progressTracker = new TaskProgressTracker(progressTask, log, concurrency, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TaskProgressTracker(progressTask, new LogAdapter(log), concurrency, EmptyTaskRegistryFactory.INSTANCE);
 
         new FastRP(
             graph,

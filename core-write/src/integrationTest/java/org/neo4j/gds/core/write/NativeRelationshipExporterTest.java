@@ -42,6 +42,7 @@ import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.graphdb.security.AuthorizationViolationException;
 import org.neo4j.internal.kernel.api.security.AccessMode;
@@ -197,7 +198,7 @@ class NativeRelationshipExporterTest extends BaseTest {
         // with a rel exporter
         var log = Neo4jProxy.testLog();
         var task = Tasks.leaf("WriteRelationships", graph.relationshipCount());
-        var progressTracker = new TaskProgressTracker(task, log, RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TaskProgressTracker(task, new LogAdapter(log), RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY, EmptyTaskRegistryFactory.INSTANCE);
 
         var exporter = NativeRelationshipExporter
             .builder(TestSupport.fullAccessTransaction(db), graph, TerminationFlag.RUNNING_TRUE)

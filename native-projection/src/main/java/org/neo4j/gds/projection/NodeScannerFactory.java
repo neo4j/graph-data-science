@@ -21,7 +21,7 @@ package org.neo4j.gds.projection;
 
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.transaction.TransactionContext;
-import org.neo4j.logging.Log;
+import org.neo4j.gds.logging.Log;
 
 import java.util.Arrays;
 

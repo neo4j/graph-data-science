@@ -51,6 +51,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
@@ -304,7 +305,7 @@ class HashGNNTest {
         var factory = new HashGNNFactory<>();
         var progressTask = factory.progressTask(g, config);
         var log = Neo4jProxy.testLog();
-        var progressTracker = new TaskProgressTracker(progressTask, log, new Concurrency(4), EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TaskProgressTracker(progressTask, new LogAdapter(log), new Concurrency(4), EmptyTaskRegistryFactory.INSTANCE);
 
         factory.build(g, config, progressTracker).compute();
 

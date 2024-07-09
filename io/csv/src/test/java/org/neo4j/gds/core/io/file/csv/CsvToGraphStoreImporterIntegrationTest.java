@@ -32,7 +32,6 @@ import org.neo4j.gds.api.GraphStoreAdapter;
 import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.api.properties.graph.DoubleArrayGraphPropertyValues;
 import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterParameters;
@@ -43,7 +42,7 @@ import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.gdl.GdlFactory;
-import org.neo4j.logging.NullLog;
+import org.neo4j.gds.logging.Log;
 
 import java.nio.file.Path;
 import java.util.Optional;
@@ -99,11 +98,11 @@ class CsvToGraphStoreImporterIntegrationTest {
             graphLocation,
             Optional.empty(),
             TaskRegistryFactory.empty(),
-            NullLog.getInstance(),
+            Log.noOpLog(),
             DefaultPool.INSTANCE
         ).run();
 
-        var importer = new CsvToGraphStoreImporter(new Concurrency(concurrency), graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var importer = new CsvToGraphStoreImporter(new Concurrency(concurrency), graphLocation, Log.noOpLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run();
 
         var importedGraphStore = userGraphStore.graphStore();
@@ -126,10 +125,10 @@ class CsvToGraphStoreImporterIntegrationTest {
             graphLocation,
             Optional.empty(),
             TaskRegistryFactory.empty(),
-            NullLog.getInstance(),
+            Log.noOpLog(),
             DefaultPool.INSTANCE
         ).run();
-        var importer = new CsvToGraphStoreImporter(new Concurrency(concurrency), graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var importer = new CsvToGraphStoreImporter(new Concurrency(concurrency), graphLocation, Log.noOpLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run().graphStore();
 
         assertThat(userGraphStore.graphPropertyKeys()).containsExactlyInAnyOrder(
@@ -162,11 +161,11 @@ class CsvToGraphStoreImporterIntegrationTest {
             graphLocation,
             Optional.empty(),
             TaskRegistryFactory.empty(),
-            NullLog.getInstance(),
+            Log.noOpLog(),
             DefaultPool.INSTANCE
         ).run();
 
-        var importer = new CsvToGraphStoreImporter(new Concurrency(concurrency), graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var importer = new CsvToGraphStoreImporter(new Concurrency(concurrency), graphLocation, Log.noOpLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run();
 
         var importedGraphStore = userGraphStore.graphStore();
@@ -184,11 +183,11 @@ class CsvToGraphStoreImporterIntegrationTest {
             graphLocation,
             Optional.empty(),
             TaskRegistryFactory.empty(),
-            NullLog.getInstance(),
+            Log.noOpLog(),
             DefaultPool.INSTANCE
         ).run();
 
-        var importer = new CsvToGraphStoreImporter(new Concurrency(4), graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var importer = new CsvToGraphStoreImporter(new Concurrency(4), graphLocation, Log.noOpLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run();
 
         var importedGraphStore = userGraphStore.graphStore();
@@ -211,11 +210,11 @@ class CsvToGraphStoreImporterIntegrationTest {
             graphLocation,
             Optional.empty(),
             TaskRegistryFactory.empty(),
-            NullLog.getInstance(),
+            Log.noOpLog(),
             DefaultPool.INSTANCE
         ).run();
 
-        var importer = new CsvToGraphStoreImporter(new Concurrency(1), graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var importer = new CsvToGraphStoreImporter(new Concurrency(1), graphLocation, Log.noOpLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run();
 
         var importedGraphStore = userGraphStore.graphStore();
@@ -240,11 +239,11 @@ class CsvToGraphStoreImporterIntegrationTest {
             graphLocation,
             Optional.empty(),
             TaskRegistryFactory.empty(),
-            NullLog.getInstance(),
+            Log.noOpLog(),
             DefaultPool.INSTANCE
         ).run();
 
-        var importer = new CsvToGraphStoreImporter(new Concurrency(1), graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var importer = new CsvToGraphStoreImporter(new Concurrency(1), graphLocation, Log.noOpLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run();
 
         assertThat(userGraphStore.graphStore().nodes().typeId()).startsWith(idMapBuilderType);
@@ -263,11 +262,11 @@ class CsvToGraphStoreImporterIntegrationTest {
             graphLocation,
             Optional.empty(),
             TaskRegistryFactory.empty(),
-            NullLog.getInstance(),
+            Log.noOpLog(),
             DefaultPool.INSTANCE
         ).run();
 
-        var importer = new CsvToGraphStoreImporter(new Concurrency(1), graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var importer = new CsvToGraphStoreImporter(new Concurrency(1), graphLocation, Log.noOpLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run();
 
         assertThat(userGraphStore.graphStore().databaseInfo()).isEqualTo(graphStore.databaseInfo());

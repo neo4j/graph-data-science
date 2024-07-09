@@ -44,6 +44,7 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.gds.nodeproperties.DoubleArrayTestPropertyValues;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
 import org.neo4j.gds.nodeproperties.FloatArrayTestPropertyValues;
@@ -505,7 +506,7 @@ class KnnTest {
 
         var progressTask = KnnFactory.knnTaskTree(graph.nodeCount(), maxIterations);
         var log = Neo4jProxy.testLog();
-        var progressTracker = new TaskProgressTracker(progressTask, log, new Concurrency(4), EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TaskProgressTracker(progressTask, new LogAdapter(log), new Concurrency(4), EmptyTaskRegistryFactory.INSTANCE);
 
         var similarityFunction = new SimilarityFunction(SimilarityComputer.ofProperty(graph, new KnnNodePropertySpec("knn")));
         var k = K.create(1, graph.nodeCount(), 0.5, 0.001);

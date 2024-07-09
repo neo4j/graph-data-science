@@ -23,18 +23,18 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.mem.MemoryTree;
 import org.neo4j.gds.mem.MemoryTreeWithDimensions;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 class MemoryUsageValidatorTest extends BaseTest {
 
@@ -43,7 +43,7 @@ class MemoryUsageValidatorTest extends BaseTest {
         var dimensions = GraphDimensions.builder().nodeCount(1000).build();
         var memoryTree = MemoryTree.empty();
 
-        assertThatNoException().isThrownBy(() -> new MemoryUsageValidator(Neo4jProxy.testLog(), GraphDatabaseApiProxy.dependencyResolver(db))
+        assertThatNoException().isThrownBy(() -> new MemoryUsageValidator(Log.noOpLog(), GraphDatabaseApiProxy.dependencyResolver(db))
             .tryValidateMemoryUsage(
                 TestConfig.empty(),
                 (config) -> new MemoryTreeWithDimensions(memoryTree, dimensions),
@@ -56,7 +56,7 @@ class MemoryUsageValidatorTest extends BaseTest {
         var dimensions = GraphDimensions.builder().nodeCount(1000).build();
         var memoryTree = new TestTree("test", MemoryRange.of(42));
 
-        assertThatThrownBy(() -> new MemoryUsageValidator(Neo4jProxy.testLog(), GraphDatabaseApiProxy.dependencyResolver(db))
+        assertThatThrownBy(() -> new MemoryUsageValidator(Log.noOpLog(), GraphDatabaseApiProxy.dependencyResolver(db))
             .tryValidateMemoryUsage(
                 TestConfig.empty(),
                 (config) -> new MemoryTreeWithDimensions(memoryTree, dimensions),
@@ -71,7 +71,7 @@ class MemoryUsageValidatorTest extends BaseTest {
         var dimensions = GraphDimensions.builder().nodeCount(1000).build();
         var memoryTree = new TestTree("test", MemoryRange.of(42));
 
-        assertThatNoException().isThrownBy(() -> new MemoryUsageValidator(Neo4jProxy.testLog(), GraphDatabaseApiProxy.dependencyResolver(db))
+        assertThatNoException().isThrownBy(() -> new MemoryUsageValidator(Log.noOpLog(), GraphDatabaseApiProxy.dependencyResolver(db))
             .tryValidateMemoryUsage(
                 TestConfig.of(CypherMapWrapper.empty().withBoolean("sudo", true)),
                 (config) -> new MemoryTreeWithDimensions(memoryTree, dimensions),
@@ -81,7 +81,7 @@ class MemoryUsageValidatorTest extends BaseTest {
 
     @Test
     void shouldLogWhenFailing() {
-        var log = Neo4jProxy.testLog();
+        var log = mock(Log.class);
         var dimensions = GraphDimensions.builder().nodeCount(1000).build();
         var memoryTree = new TestTree("test", MemoryRange.of(42));
         var memoryUsageValidator = new MemoryUsageValidator(log, GraphDatabaseApiProxy.dependencyResolver(db));
@@ -94,8 +94,8 @@ class MemoryUsageValidatorTest extends BaseTest {
         } catch (IllegalStateException ex) {
             // do nothing
         }
-        assertThat(log.getMessages(TestLog.INFO))
-            .contains("Procedure was blocked since minimum estimated memory (42 Bytes) exceeds current free memory (21 Bytes).");
+
+        verify(log).info("Procedure was blocked since minimum estimated memory (42 Bytes) exceeds current free memory (21 Bytes).");
     }
 
     @Configuration

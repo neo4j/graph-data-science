@@ -40,6 +40,7 @@ import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.graphdb.security.AuthorizationViolationException;
 import org.neo4j.internal.kernel.api.security.AccessMode;
@@ -246,7 +247,7 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
         var log = Neo4jProxy.testLog();
         var progressTracker = new TaskProgressTracker(
             RelationshipStreamExporter.baseTask("OpName"),
-            log,
+            new LogAdapter(log),
             new Concurrency(1),
             EmptyTaskRegistryFactory.INSTANCE
         );

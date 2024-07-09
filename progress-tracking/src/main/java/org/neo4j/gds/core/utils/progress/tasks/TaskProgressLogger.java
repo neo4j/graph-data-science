@@ -23,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.progress.ProgressLogger;
-import org.neo4j.logging.Log;
+import org.neo4j.gds.logging.Log;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 

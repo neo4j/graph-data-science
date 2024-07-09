@@ -36,6 +36,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Collections;
@@ -244,7 +245,7 @@ final class ApproxMaxKCutTest {
         var approxMaxKCut = new ApproxMaxKCutAlgorithmFactory<>().build(
             maxGraph,
             config,
-            log,
+            new LogAdapter(log),
             EmptyTaskRegistryFactory.INSTANCE
         );
         approxMaxKCut.compute();

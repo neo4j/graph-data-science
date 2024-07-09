@@ -21,13 +21,13 @@ package org.neo4j.gds.utils;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.logging.Log;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -168,11 +168,11 @@ public final class ExceptionUtil {
         runnable.run();
     }
 
-    public static void safeRunWithLogException(Log log, Supplier<String> message, Runnable runnable) {
+    public static void safeRunWithLogException(Supplier<String> message, Runnable runnable, BiConsumer<String, Exception> exceptionConsumer) {
         try {
             runnable.run();
         } catch (Exception e) {
-            log.warn(message.get(), e);
+            exceptionConsumer.accept(message.get(), e);
         }
     }
 

@@ -20,19 +20,19 @@
 package org.neo4j.gds.core.io.db;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.logging.Log;
 
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 class LoggingOutputStreamTest {
 
     @Test
     void shouldLog() {
-        var log = Neo4jProxy.testLog();
+        var log = mock(Log.class);
         var loggingOutputStream = new LoggingOutputStream(log);
 
         var testString = "hello world" + System.lineSeparator() + "with new line";
@@ -40,7 +40,8 @@ class LoggingOutputStreamTest {
             writer.println(testString);
         }
 
-        assertThat(log.getMessages(TestLog.DEBUG)).contains(testString.split(System.lineSeparator()));
+        verify(log).debug("hello world");
+        verify(log).debug("with new line");
     }
 
 }

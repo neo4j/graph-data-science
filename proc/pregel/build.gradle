@@ -20,6 +20,7 @@ dependencies {
     implementation project(':core')
     implementation project(':core-write')
     implementation project(':executor')
+    implementation project(':logging')
     implementation project(':proc-common')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')

@@ -40,6 +40,7 @@ import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.termination.TerminationMonitor;
 import org.neo4j.gds.utils.StringJoining;
@@ -132,7 +133,7 @@ class ProcedureExecutorTest {
         return ImmutableExecutionContext
             .builder()
             .databaseId(graphStore.databaseInfo().databaseId())
-            .log(Neo4jProxy.testLog())
+            .log(Log.noOpLog())
             .returnColumns(ProcedureReturnColumns.EMPTY)
             .taskRegistryFactory(jobId -> new TaskRegistry("", taskStore, jobId))
             .username("")

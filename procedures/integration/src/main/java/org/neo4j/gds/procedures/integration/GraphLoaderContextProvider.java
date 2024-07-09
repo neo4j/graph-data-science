@@ -46,7 +46,7 @@ final class GraphLoaderContextProvider {
             .builder()
             .databaseId(databaseId)
             .dependencyResolver(context.dependencyResolver())
-            .log((org.neo4j.logging.Log) log.getNeo4jLog())
+            .log(log)
             .taskRegistryFactory(taskRegistryFactory)
             .userLogRegistryFactory(userLogRegistryFactory)
             .terminationFlag(terminationFlag)

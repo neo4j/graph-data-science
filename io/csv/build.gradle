@@ -19,6 +19,7 @@ dependencies {
     implementation project(':core')
     implementation project(':graph-schema-api')
     implementation project(':io-core')
+    implementation project(':logging')
     implementation project(':memory-usage')
     implementation project(':neo4j-kernel-adapter')
     implementation project(':neo4j-settings')
@@ -40,5 +41,6 @@ dependencies {
         }
     }
 
+    testImplementation project(':neo4j-log-adapter')
     testImplementation project(':test-utils')
 }

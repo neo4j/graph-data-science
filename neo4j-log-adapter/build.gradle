@@ -1,0 +1,14 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Neo4j Log Adapter'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    implementation project(':logging')
+    implementation project(':string-formatting')
+
+    compileOnly(group: 'org.neo4j', name: 'neo4j-logging', version: ver.'neo4j') {
+        transitive = false
+    }
+}

@@ -43,6 +43,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.gds.modularity.ModularityCalculator;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -345,7 +346,7 @@ class LouvainTest {
         var maxLevels = 10;
         var progressTask = new LouvainAlgorithmFactory<>().progressTask(graph, maxIterations, maxLevels);
         var log = Neo4jProxy.testLog();
-        var progressTracker = new TaskProgressTracker(progressTask, log, concurrency, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TaskProgressTracker(progressTask, new LogAdapter(log), concurrency, EmptyTaskRegistryFactory.INSTANCE);
 
         var louvain = new Louvain(
             graph,

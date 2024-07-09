@@ -37,6 +37,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.logging.LogAdapter;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -150,7 +151,7 @@ final class ConductanceTest {
         var log = Neo4jProxy.testLog();
         var progressTracker = new TaskProgressTracker(
             progressTask,
-            log,
+            new LogAdapter(log),
             parameters.concurrency(),
             EmptyTaskRegistryFactory.INSTANCE
         );

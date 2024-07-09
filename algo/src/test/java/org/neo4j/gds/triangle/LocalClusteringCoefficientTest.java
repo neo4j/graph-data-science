@@ -33,6 +33,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.ArrayList;
@@ -278,7 +279,7 @@ class LocalClusteringCoefficientTest {
 
         var progressTask = factory.progressTask(graph, seedProperty);
         var log = Neo4jProxy.testLog();
-        var progressTracker = new TaskProgressTracker(progressTask, log, new Concurrency(4), EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TaskProgressTracker(progressTask, new LogAdapter(log), new Concurrency(4), EmptyTaskRegistryFactory.INSTANCE);
 
         new LocalClusteringCoefficient(graph, new Concurrency(4), Long.MAX_VALUE, seedProperty, progressTracker, TerminationFlag.RUNNING_TRUE).compute();
 

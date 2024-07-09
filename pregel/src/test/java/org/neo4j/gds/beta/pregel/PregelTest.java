@@ -217,7 +217,7 @@ class PregelTest {
         var task = Pregel.progressTask(graph, config, computation.getClass().getSimpleName());
         var progressTracker = new TaskProgressTracker(
             task,
-            Neo4jProxy.testLog(),
+            org.neo4j.gds.logging.Log.noOpLog(),
             config.concurrency(),
             jobId -> new TaskRegistry("", taskStore, jobId)
         );

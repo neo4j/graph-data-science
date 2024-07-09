@@ -39,7 +39,7 @@ import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.kernel.impl.scheduler.JobSchedulerFactory;
 import org.neo4j.kernel.lifecycle.LifeSupport;
-import org.neo4j.logging.Log;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.logging.internal.NullLogService;
 import org.neo4j.scheduler.JobScheduler;

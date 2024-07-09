@@ -58,6 +58,7 @@ dependencies {
     testImplementation project(':test-utils')
     testImplementation project(':ml-test-utils')
     testImplementation project(':ml-algo')
+    testImplementation project(':neo4j-log-adapter')
     testImplementation openGds.jqwik
     testImplementation openGds.gdl
     testImplementation openGds.mockito.junit.jupiter

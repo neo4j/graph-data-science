@@ -21,6 +21,7 @@ dependencies {
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':collections')
+    implementation project(':logging')
     implementation project(':memory-usage')
     implementation project(':neo4j-api')
     implementation project(':progress-tracking')

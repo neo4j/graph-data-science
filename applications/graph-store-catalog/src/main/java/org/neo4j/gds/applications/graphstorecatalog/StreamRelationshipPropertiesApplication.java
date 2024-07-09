@@ -78,7 +78,7 @@ public class StreamRelationshipPropertiesApplication {
 
         var taskProgressTracker = new TaskProgressTracker(
             task,
-            (org.neo4j.logging.Log) log.getNeo4jLog(),
+            log,
             configuration.concurrency(),
             new JobId(),
             taskRegistryFactory,

@@ -9,12 +9,16 @@ dependencies {
 
     compileOnly project(':annotations')
 
+    compileOnly openGds.jetbrains.annotations
+
     neodeps().each {
         compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
             transitive = false
         }
     }
 
+    implementation project(':config-api')
+    implementation project(':neo4j-api')
     implementation project(':neo4j-kernel-adapter')
     implementation project(':licensing')
 

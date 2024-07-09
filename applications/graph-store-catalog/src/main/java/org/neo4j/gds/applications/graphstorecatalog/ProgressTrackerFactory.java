@@ -50,7 +50,7 @@ class ProgressTrackerFactory {
     ProgressTracker create(Task task) {
         return new TaskProgressTracker(
             task,
-            (org.neo4j.logging.Log) log.getNeo4jLog(),
+            log,
             new Concurrency(1),
             new JobId(),
             taskRegistryFactory,

@@ -33,8 +33,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -113,7 +111,7 @@ class WriteNodePropertiesApplicationTest {
     @ParameterizedTest(name = "{1}")
     @MethodSource("nodeLabels")
     void writeNodeProperties(Object nodeLabels, String displayName) {
-        var nodePropertiesWriter = new WriteNodePropertiesApplication(new Neo4jBackedLogForTesting());
+        var nodePropertiesWriter = new WriteNodePropertiesApplication(Log.noOpLog());
 
         var exporterBuilderMock = mock(NodePropertyExporterBuilder.class, Answers.RETURNS_SELF);
         var nodePropertyExporterMock = mock(NodePropertyExporter.class);
@@ -159,7 +157,7 @@ class WriteNodePropertiesApplicationTest {
 
     @Test
     void writeNodePropertiesForLabel() {
-        var nodePropertiesWriter = new WriteNodePropertiesApplication(new Neo4jBackedLogForTesting());
+        var nodePropertiesWriter = new WriteNodePropertiesApplication(Log.noOpLog());
 
         var exporterBuilderMock = mock(NodePropertyExporterBuilder.class, Answers.RETURNS_SELF);
         var nodePropertyExporterMock = mock(NodePropertyExporter.class);
@@ -199,7 +197,7 @@ class WriteNodePropertiesApplicationTest {
 
     @Test
     void writeNodePropertiesForLabelSubset() {
-        var nodePropertiesWriter = new WriteNodePropertiesApplication(new Neo4jBackedLogForTesting());
+        var nodePropertiesWriter = new WriteNodePropertiesApplication(Log.noOpLog());
 
         var exporterBuilderMock = mock(NodePropertyExporterBuilder.class, Answers.RETURNS_SELF);
         var nodePropertyExporterMock = mock(NodePropertyExporter.class);
@@ -237,7 +235,7 @@ class WriteNodePropertiesApplicationTest {
 
     @Test
     void shouldRenameSingleProperly() {
-        var nodePropertiesWriter = new WriteNodePropertiesApplication(new Neo4jBackedLogForTesting());
+        var nodePropertiesWriter = new WriteNodePropertiesApplication(Log.noOpLog());
 
         var exporterBuilderMock = mock(NodePropertyExporterBuilder.class, Answers.RETURNS_SELF);
         var nodePropertyExporterMock = mock(NodePropertyExporter.class);
@@ -272,7 +270,7 @@ class WriteNodePropertiesApplicationTest {
 
     @Test
     void shouldRenameMultipleProperties() {
-        var nodePropertiesWriter = new WriteNodePropertiesApplication(new Neo4jBackedLogForTesting());
+        var nodePropertiesWriter = new WriteNodePropertiesApplication(Log.noOpLog());
 
         var exporterBuilderMock = mock(NodePropertyExporterBuilder.class, Answers.RETURNS_SELF);
         var nodePropertyExporterMock = mock(NodePropertyExporter.class);
@@ -309,59 +307,5 @@ class WriteNodePropertiesApplicationTest {
                 nodeProperty -> assertThat(nodeProperty.propertyKey()).isEqualTo("bar"),
                 nodeProperty -> assertThat(nodeProperty.propertyKey()).isEqualTo("nodeProp1")
             );
-    }
-
-    /**
-     * @deprecated We need this just long enough that we can drive out usages of Neo4j's log.
-     *     Therefore, I do not want to build general support for this
-     */
-    @Deprecated
-    private static class Neo4jBackedLogForTesting implements Log {
-        private final TestLog neo4jLog = Neo4jProxy.testLog();
-
-        @Override
-        public void info(String message) {
-            throw new UnsupportedOperationException("TODO");
-        }
-
-        @Override
-        public void info(String format, Object... arguments) {
-            throw new UnsupportedOperationException("TODO");
-        }
-
-        @Override
-        public void warn(String message, Exception e) {
-            throw new UnsupportedOperationException("TODO");
-        }
-
-        @Override
-        public void warn(String format, Object... arguments) {
-            throw new UnsupportedOperationException("TODO");
-        }
-
-        @Override
-        public boolean isDebugEnabled() {
-            throw new UnsupportedOperationException("TODO");
-        }
-
-        @Override
-        public void debug(String format, Object... arguments) {
-            throw new UnsupportedOperationException("TODO");
-        }
-
-        @Override
-        public void error(String format, Throwable throwable) {
-            throw new UnsupportedOperationException("TODO");
-        }
-
-        @Override
-        public void error(String messageFormat, Throwable exception, Object... arguments) {
-            throw new UnsupportedOperationException("TODO");
-        }
-
-        @Override
-        public Object getNeo4jLog() {
-            return neo4jLog;
-        }
     }
 }

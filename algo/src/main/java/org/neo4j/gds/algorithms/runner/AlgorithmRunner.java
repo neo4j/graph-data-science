@@ -118,7 +118,7 @@ public final class AlgorithmRunner {
         var algorithm = algorithmFactory.build(
             graph,
             config,
-            (org.neo4j.logging.Log) log.getNeo4jLog(),
+            log,
             requestScopedDependencies.getTaskRegistryFactory(),
             requestScopedDependencies.getUserLogRegistryFactory()
         );
