@@ -116,7 +116,7 @@ public final class GdsParallelBatchImporter {
             .set(Neo4jSettings.neo4jHome(), databaseConfig.get(Neo4jSettings.neo4jHome()))
             .set(GraphDatabaseSettings.data_directory, databaseConfig.get(GraphDatabaseSettings.data_directory));
 
-        Neo4jProxy.configureRecordFormat(configBuilder, config.databaseFormat());
+        Neo4jProxy.configureDatabaseFormat(configBuilder, config.databaseFormat());
 
         this.databaseConfig = configBuilder.build();
     }
@@ -126,10 +126,13 @@ public final class GdsParallelBatchImporter {
 
         var importTimer = ProgressTimer.start();
 
-        var databaseLayout = Neo4jProxy.databaseLayout(databaseConfig, config.databaseName());
+        Neo4jProxy.allAvailableDatabaseLayouts(databaseConfig, config.databaseName())
+            .forEach(databaseLayout -> {
+                validateWritableDirectories(databaseLayout);
+                validateDatabaseDoesNotExist(databaseLayout);
+            });
 
-        validateWritableDirectories(databaseLayout);
-        validateDatabaseDoesNotExist(databaseLayout);
+        var databaseLayout = Neo4jProxy.databaseLayout(databaseConfig, config.databaseName());
 
         var lifeSupport = new LifeSupport();
 

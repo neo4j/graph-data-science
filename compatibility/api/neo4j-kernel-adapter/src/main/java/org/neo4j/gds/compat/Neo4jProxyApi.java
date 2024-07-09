@@ -25,6 +25,8 @@ import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.input.Collector;
+import org.neo4j.internal.kernel.api.PropertyCursor;
+import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.exceptions.InvalidTransactionTypeKernelException;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
 import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
@@ -39,6 +41,8 @@ import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.procedure.Mode;
 import org.neo4j.scheduler.JobScheduler;
+import org.neo4j.storageengine.api.PropertySelection;
+import org.neo4j.storageengine.api.Reference;
 
 import java.util.List;
 import java.util.Optional;
@@ -94,5 +98,15 @@ public interface Neo4jProxyApi {
         Optional<String> deprecatedBy,
         boolean internal,
         boolean threadSafe
+    );
+
+    @CompatSince(minor = 22)
+    void relationshipProperties(
+        Read read,
+        long relationshipReference,
+        long startNodeReference,
+        Reference reference,
+        PropertySelection selection,
+        PropertyCursor cursor
     );
 }

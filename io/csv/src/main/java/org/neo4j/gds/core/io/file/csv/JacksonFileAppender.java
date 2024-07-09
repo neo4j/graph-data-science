@@ -135,20 +135,22 @@ final class JacksonFileAppender implements Flushable, AutoCloseable {
     }
 
     void appendAny(@Nullable Object value) throws IOException {
-        if (value instanceof Double) {
-            append((double) value);
-        } else if (value instanceof Long) {
-            append((long) value);
-        } else if (value instanceof double[]) {
-            append((double[]) value);
-        } else if (value instanceof long[]) {
-            append((long[]) value);
-        } else if (value instanceof float[]) {
-            append((float[]) value);
-        } else if (value instanceof String) {
-            append((String) value);
+        if (value instanceof Double v) {
+            append(v);
+        } else if (value instanceof Long v) {
+            append(v);
+        } else if (value instanceof double[] v) {
+            append(v);
+        } else if (value instanceof long[] v) {
+            append(v);
+        } else if (value instanceof float[] v) {
+            append(v);
+        } else if (value instanceof String v) {
+            append(v);
         } else if (value == null) {
             appendEmptyField();
+        } else {
+            throw new IllegalArgumentException("Cannot write " + value.getClass().getSimpleName());
         }
     }
 

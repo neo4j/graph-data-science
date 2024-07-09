@@ -220,6 +220,7 @@ final class RelationshipsScannerTask extends StatementAction implements RecordSc
                         Neo4jProxy.relationshipProperties(
                             kernelTransaction,
                             relationshipReference,
+                            source,
                             propertyReference,
                             pc
                         );
