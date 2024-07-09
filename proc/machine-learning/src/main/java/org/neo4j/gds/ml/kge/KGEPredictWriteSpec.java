@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.kge;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.AlgorithmSpecProgressTrackerProvider;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -80,7 +81,7 @@ public class KGEPredictWriteSpec implements
                         AlgorithmSpecProgressTrackerProvider.createProgressTracker(
                             name(),
                             graph.nodeCount(),
-                            config.writeConcurrency(),
+                            RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY,
                             executionContext
                         )
                     )
