@@ -43,7 +43,6 @@ import org.neo4j.internal.batchimport.input.InputEntityVisitor;
 import org.neo4j.internal.batchimport.input.PropertySizeCalculator;
 import org.neo4j.internal.batchimport.input.ReadableGroups;
 import org.neo4j.internal.id.IdValidator;
-import org.neo4j.values.storable.Values;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -522,8 +521,8 @@ public final class GraphStoreInput implements Input {
                     return;
                 }
 
-                var property = properties.value(id);
-                if (property != null && property != Values.NO_VALUE) {
+                var property = properties.getObject(id);
+                if (property != null) {
                     propertyProducers.put(propertyKey, properties);
                     visitor.property(propertyKey, property);
                 }
