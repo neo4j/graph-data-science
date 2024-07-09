@@ -218,15 +218,13 @@ It should therefore not be possible for any other node to be assigned the same c
 [source, cypher, role=noplay graph-project-query]
 ----
 MATCH (source:User)-[r:LINK]->(target:User)
-WITH gds.graph.project(
+RETURN gds.graph.project(
   'myGraph',
   source,
   target,
   {},
   { undirectedRelationshipTypes: ['*'] }
-) AS g
-RETURN
-  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+)
 ----
 We can now go ahead and project a graph with all the `User` nodes and the `LINK` relationships with `UNDIRECTED` orientation.
 
@@ -234,13 +232,11 @@ We can now go ahead and project a graph with all the `User` nodes and the `LINK`
 [source, cypher, role=noplay]
 ----
 MATCH (source:Person)-[r:LIKES]->(target:Person)
-WITH gds.graph.project(
+RETURN gds.graph.project(
   'myGraph',
   source,
   target
-) AS g
-RETURN
-  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+)
 ----
 
 In the following examples we will demonstrate using the K-1 Coloring algorithm on this graph.

@@ -398,7 +398,7 @@ CREATE
 ----
 MATCH (source:Person)
 OPTIONAL MATCH (source:Person)-[r:KNOWS]->(target:Person)
-WITH gds.graph.project(
+RETURN gds.graph.project(
   'persons',
   source,
   target,
@@ -411,9 +411,7 @@ WITH gds.graph.project(
     relationshipProperties: r { .relWeight }
   },
   { undirectedRelationshipTypes: ['KNOWS'] }
-) AS g
-RETURN
-  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+)
 ----
 
 NOTE: The algorithm is defined for UNDIRECTED graphs.
@@ -527,7 +525,7 @@ CREATE
 [source, cypher, role=noplay graph-project-query]
 ----
 MATCH (source:Person)-[r:LIKES]->(target:Instrument)
-WITH gds.graph.project(
+RETURN gds.graph.project(
   'persons_with_instruments',
   source,
   target,
@@ -539,9 +537,7 @@ WITH gds.graph.project(
     relationshipProperties: r { .relWeight }
   },
   { undirectedRelationshipTypes: ['KNOWS', 'LIKES'] }
-) AS g
-RETURN
-  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+)
 ----
 
 We can now run GraphSAGE in multi-label mode on that graph by specifying the `projectedFeatureDimension` parameter.
@@ -600,15 +596,13 @@ For the purpose of this example we are going to use the `Persons` graph, but we 
 [source, cypher, role=noplay graph-project-query]
 ----
 MATCH (source:Person)-[r:KNOWS]->(target:Person)
-WITH gds.graph.project(
+RETURN gds.graph.project(
   'noPropertiesGraph',
   source,
   target,
   {},
   { undirectedRelationshipTypes: ['*'] }
-) AS g
-RETURN
-  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+)
 ----
 
 .Run DegreeCentrality mutate to create a new property for each node

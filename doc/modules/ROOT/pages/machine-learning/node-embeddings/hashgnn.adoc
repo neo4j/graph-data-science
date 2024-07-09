@@ -403,7 +403,7 @@ For the relationships we will use the `UNDIRECTED` orientation.
 ----
 MATCH (source)
 OPTIONAL MATCH (source)-[r]->(target)
-WITH gds.graph.project(
+RETURN gds.graph.project(
   'persons',
   source,
   target,
@@ -429,9 +429,7 @@ WITH gds.graph.project(
     relationshipType: type(r)
   },
   { undirectedRelationshipTypes: ['KNOWS', 'LIKES'] }
-) AS g
-RETURN
-  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+)
 ----
 
 Since we will use binarization and the properties have different scales in some examples, we will create a scaled version of the `experience` property.

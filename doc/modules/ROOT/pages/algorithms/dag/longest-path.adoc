@@ -128,8 +128,7 @@ This is the bottleneck path, and total time that takes to manufacture the table.
 ----
 MATCH (n)
 OPTIONAL MATCH (n)-[r:Processing|Shipment]->(target)
-WITH gds.graph.project("g", n, target, {relationshipProperties: r {.time}}) AS g
-RETURN g
+RETURN gds.graph.project("g", n, target, {relationshipProperties: r {.time}})
 ----
 
 

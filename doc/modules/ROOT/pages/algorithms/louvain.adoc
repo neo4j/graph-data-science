@@ -274,7 +274,7 @@ We load the `LINK` relationships with orientation set to `UNDIRECTED` as this wo
 ----
 MATCH (source:User)
 OPTIONAL MATCH (source)-[r:LINK]->(target:User)
-WITH gds.graph.project(
+RETURN gds.graph.project(
   'myGraph',
   source,
   target,
@@ -284,9 +284,7 @@ WITH gds.graph.project(
     relationshipProperties: r { .weight }
   },
   { undirectedRelationshipTypes: ['*'] }
-) AS g
-RETURN
-  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+)
 ----
 
 In the following examples we will demonstrate using the Louvain algorithm on this graph.
@@ -555,15 +553,13 @@ CREATE (m)-[:TYPE]->(n);
 ----
 MATCH (source:Node)
 OPTIONAL MATCH (source)-[r:TYPE]->(target:Node)
-WITH gds.graph.project(
+RETURN gds.graph.project(
   'myGraph2',
   source,
   target,
   {},
   { undirectedRelationshipTypes: ['*'] }
-) AS g
-RETURN
-  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+)
 ----
 
 

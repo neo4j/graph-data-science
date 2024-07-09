@@ -214,15 +214,13 @@ CREATE (a:User {name: "Alice"}),
 [source, cypher, role=noplay graph-project-query]
 ----
 MATCH (source:User)-[r:LINK]->(target:User)
-WITH gds.graph.project(
+RETURN gds.graph.project(
   'graph',
   source,
   target,
   {},
   { undirectedRelationshipTypes: ['*'] }
-) AS g
-RETURN
-  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+)
 ----
 
 [role=query-example]

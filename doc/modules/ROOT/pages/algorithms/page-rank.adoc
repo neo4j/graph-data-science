@@ -293,14 +293,12 @@ Each relationship has a property called `weight`, which describes the importance
 [source, cypher, role=noplay graph-project-query]
 ----
 MATCH (source:Page)-[r:LINKS]->(target:Page)
-WITH gds.graph.project(
+RETURN gds.graph.project(
   'myGraph',
   source,
   target,
   { relationshipProperties: r { .weight } }
-) AS g
-RETURN
-  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+)
 ----
 
 

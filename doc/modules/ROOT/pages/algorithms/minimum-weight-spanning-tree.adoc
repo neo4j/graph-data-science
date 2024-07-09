@@ -242,7 +242,7 @@ CREATE (a:Place {id: 'A'}),
 [source, cypher, role=noplay graph-project-query]
 ----
 MATCH (source:Place)-[r:LINK]->(target:Place)
-WITH gds.graph.project(
+RETURN gds.graph.project(
   'graph',
   source,
   target,
@@ -251,10 +251,10 @@ WITH gds.graph.project(
     relationshipProperties: r { .cost }
   },
   { undirectedRelationshipTypes: ['LINK'] }
-) AS g
-RETURN
-  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+)
 ----
+
+
 [[algorithms-spanning-tree-examples-memory-estimation]]
 === Memory Estimation
 

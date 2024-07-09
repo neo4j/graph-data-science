@@ -151,7 +151,7 @@ We load the `LINK` relationships with orientation set to `UNDIRECTED`.
 [source, cypher, role=noplay graph-project-query]
 ----
 MATCH (source:User)-[r:LINK]->(target:User)
-WITH gds.graph.project(
+RETURN gds.graph.project(
   'myGraph',
   source,
   target,
@@ -161,10 +161,10 @@ WITH gds.graph.project(
     relationshipProperties: r { .weight }
   },
   { undirectedRelationshipTypes: ['*'] }
-) AS g
-RETURN
-  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+)
 ----
+
+
 === Memory Estimation
 
 :mode: stats

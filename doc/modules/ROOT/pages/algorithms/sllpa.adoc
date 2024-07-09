@@ -256,15 +256,13 @@ In the example, we will use the SLLPA algorithm to find the communities in the g
 [source, cypher, role=noplay graph-project-query]
 ----
 MATCH (source:Person)-[r:KNOWS]->(target:Person)
-WITH gds.graph.project(
+RETURN gds.graph.project(
   'myGraph',
   source,
   target,
   {},
   { undirectedRelationshipTypes: ['*'] }
-) AS g
-RETURN
-  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+)
 ----
 
 In the following examples we will demonstrate using the SLLPA algorithm on this graph.

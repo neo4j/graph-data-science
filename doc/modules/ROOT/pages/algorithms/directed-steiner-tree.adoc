@@ -248,14 +248,12 @@ CREATE (a:Place {id: 'A'}),
 [source, cypher, role=noplay graph-project-query]
 ----
 MATCH (source:Place)-[r:LINK]->(target:Place)
-WITH gds.graph.project(
+RETURN gds.graph.project(
   'graph',
   source,
   target,
   { relationshipProperties: r { .cost } }
-) AS g
-RETURN
-  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+)
 ----
 
 [[algorithm-steiner-tree-mem-est]]
@@ -504,7 +502,7 @@ For that, first we need to project the graph once more, this time creating an in
 [source, cypher, role=noplay]
 ----
 MATCH (source:Place)-[r:LINK]->(target:Place)
-WITH gds.graph.project(
+RETURN gds.graph.project(
   'inverseGraph',
   source,
   target,
@@ -513,11 +511,10 @@ WITH gds.graph.project(
     relationshipProperties: r { .cost }
   },
   { inverseIndexedRelationshipTypes: ['LINK'] }
-) AS g
-RETURN
-  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+)
 ----
 --
+
 We know repeat the algorithm; this time with the extended rerouting heuristic.
 
 [role=query-example, group=extended]

@@ -114,7 +114,7 @@ CREATE (a:Place {id: 'A'}),
 ----
 MATCH (source:Place)
 OPTIONAL MATCH (source)-[r:LINK]->(target:Place)
-WITH gds.graph.project(
+RETURN gds.graph.project(
   'graph',
   source,
   target,
@@ -123,10 +123,9 @@ WITH gds.graph.project(
     relationshipProperties: r { .cost }
   },
   { undirectedRelationshipTypes: ['LINK'] }
-) AS g
-RETURN
-  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+)
 ----
+
 
 [[algorithms-minimum-weight-spanning-tree-k]]
 == K-Spanning tree examples

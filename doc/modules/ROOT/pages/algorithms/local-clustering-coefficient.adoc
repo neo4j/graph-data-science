@@ -246,17 +246,13 @@ This is because the Local Clustering Coefficient algorithm is defined only for u
 [source, cypher, role=noplay graph-project-query]
 ----
 MATCH (source:Person)-[r:KNOWS]->(target:Person)
-WITH gds.graph.project(
+RETURN gds.graph.project(
   'myGraph',
   source,
   target,
   {},
   { undirectedRelationshipTypes: ['*'] }
-) AS g
-RETURN
-  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
-
-
+)
 ----
 
 include::partial$/algorithms/shared/undirected-req-note.adoc[]

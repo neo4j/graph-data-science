@@ -243,14 +243,12 @@ The relationships that connect the nodes in each component have a property `weig
 [source, cypher, role=noplay graph-project-query]
 ----
 MATCH (source:User)-[r:LINK]->(target:User)
-WITH gds.graph.project(
+RETURN gds.graph.project(
   'myGraph',
   source,
   target,
   { relationshipProperties: r { .weight } }
-) AS g
-RETURN
-  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+)
 ----
 
 In the following examples we will demonstrate using the Weakly Connected Components algorithm on this graph.
@@ -521,7 +519,7 @@ We will therefore project a second graph that contains the previously computed c
 [source, cypher, role=noplay]
 ----
 MATCH (source:User)-[r:LINK]->(target:User)
-WITH gds.graph.project(
+RETURN gds.graph.project(
   'myGraph-seeded',
   source,
   target,
@@ -530,9 +528,7 @@ WITH gds.graph.project(
     targetNodeProperties: target { .componentId },
     relationshipProperties: r { .weight }
   }
-) AS g
-RETURN
-  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+)
 ----
 --
 
@@ -641,15 +637,13 @@ If the graph is projected using a `NATURAL` orientation, the inverse index repre
 [source, cypher, role=noplay graph-project-query]
 ----
 MATCH (source:User)-[r:LINK]->(target:User)
-WITH gds.graph.project(
+RETURN gds.graph.project(
   'myIndexedGraph',
   source,
   target,
   {},
   { inverseIndexedRelationshipTypes: ['*'] }
-) AS g
-RETURN
-  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+)
 ----
 
 The following query is identical to the stream example in the xref:algorithms/wcc.adoc#algorithms-wcc-examples-seeding[previous section].

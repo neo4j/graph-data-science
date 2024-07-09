@@ -281,14 +281,12 @@ We do this using a Cypher projection targeting the `User` nodes and the `FOLLOWS
 [source, cypher, role=noplay graph-project-query]
 ----
 MATCH (source:User)-[r:FOLLOWS]->(target:User)
-WITH gds.graph.project(
+RETURN gds.graph.project(
   'myGraph',
   source,
   target,
   { relationshipProperties: r { .weight } }
-) AS g
-RETURN
-  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+)
 ----
 
 In the following examples we will demonstrate using the Betweenness Centrality algorithm on this graph.
@@ -522,15 +520,13 @@ To illustrate this, we will project our example graph using the `UNDIRECTED` ori
 [source, cypher, role=noplay graph-project-query]
 ----
 MATCH (source:User)-[r:FOLLOWS]->(target:User)
-WITH gds.graph.project(
+RETURN gds.graph.project(
   'myUndirectedGraph',
   source,
   target,
   { relationshipProperties: r { .cost } },
   { undirectedRelationshipTypes: ['*'] }
-) AS g
-RETURN
-  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+)
 ----
 
 Now we can run Betweenness Centrality on our undirected graph.

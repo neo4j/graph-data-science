@@ -117,7 +117,7 @@ We load the `LINK` relationships with orientation set to `UNDIRECTED` as this wo
 ----
 MATCH (source:User)
 OPTIONAL MATCH (source)-[r:LINK]->(target:User)
-WITH gds.graph.project(
+RETURN gds.graph.project(
   'myGraph',
   source,
   target,
@@ -128,9 +128,7 @@ WITH gds.graph.project(
     relationshipProperties: r { .weight }
   },
   { undirectedRelationshipTypes: ['LINK'] }
-) AS g
-RETURN
-  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+)
 ----
 
 We now run the xref:algorithms/louvain.adoc[Louvain algorithm] to create a division of the nodes into communities that we can then evalutate.

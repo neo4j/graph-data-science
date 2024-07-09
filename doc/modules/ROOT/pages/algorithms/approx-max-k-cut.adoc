@@ -221,14 +221,12 @@ We do this using a Cypher projection targeting the `Person` nodes and the `TRANS
 [source, cypher, role=noplay graph-project-query]
 ----
 MATCH (source:Person)-[r:TRANSACTION]->(target:Person)
-WITH gds.graph.project(
+RETURN gds.graph.project(
   'myGraph',
   source,
   target,
   { relationshipProperties: r { .value } }
-) AS g
-RETURN
-  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+)
 ----
 
 

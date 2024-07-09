@@ -248,13 +248,11 @@ CREATE
 ----
 MATCH (source:Person)
 OPTIONAL MATCH (source)-[r:FRIEND_OF]->(target:Person)
-WITH gds.graph.project(
+RETURN gds.graph.project(
   'myGraph',
   source,
   target
-) AS g
-RETURN
-  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+)
 ----
 
 In the following examples we will demonstrate using the CELF algorithm on this graph.

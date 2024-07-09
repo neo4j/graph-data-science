@@ -287,13 +287,11 @@ We do this using a Cypher projection targeting the `Node` nodes and the `LINK` r
 [source, cypher, role=noplay graph-project-query]
 ----
 MATCH (source:Node)-[r:LINK]->(target:Node)
-WITH gds.graph.project(
+RETURN gds.graph.project(
   'myGraph',
   source,
   target
-) AS g
-RETURN
-  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+)
 ----
 
 In the following examples we will demonstrate using the Closeness Centrality algorithm on this graph.

@@ -151,8 +151,7 @@ For example, we cannot build support before getting the steel, the skeleton is n
 ----
 MATCH (n)
 OPTIONAL MATCH (n)-[r:REQUIRED]->(target)
-WITH gds.graph.project("g", n, target, {}) AS g
-RETURN g
+RETURN gds.graph.project("g", n, target, {})
 ----
 
 

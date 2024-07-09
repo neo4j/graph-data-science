@@ -290,7 +290,7 @@ The Filtered Node Similarity algorithm will only compute similarity for nodes th
 ----
 MATCH (source)
 OPTIONAL MATCH (source:Person|Singer)-[r:LIKES]->(target:Instrument)
-WITH gds.graph.project(
+RETURN gds.graph.project(
   'myGraph',
   source,
   target,
@@ -299,9 +299,7 @@ WITH gds.graph.project(
     targetNodeLabels: labels(target),
     relationshipProperties: r { strength: coalesce(r.strength, 1.0) }
   }
-) AS g
-RETURN
-  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+)
 ----
 
 In the following examples we will demonstrate the usage of the Filtered Node Similarity algorithm on this graph. In particular, we will apply the  `sourceNodeFilter`  and `targetNodeFilter`  filters to limit our similarity search to strictly Person nodes that also have the Singer label.

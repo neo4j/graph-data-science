@@ -76,14 +76,12 @@ These lengths are represented by the `cost` relationship property.
 [source, cypher, role=noplay graph-project-query]
 ----
 MATCH (source:Location)-[r:ROAD]->(target:Location)
-WITH gds.graph.project(
+RETURN gds.graph.project(
   'myGraph',
   source,
   target,
   { relationshipProperties: r { .cost } }
-) AS g
-RETURN
-  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+)
 ----
 
 In the following example we will demonstrate the use of the {algorithm} Shortest Path algorithm using this graph.
