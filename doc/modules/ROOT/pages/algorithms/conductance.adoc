@@ -124,10 +124,9 @@ RETURN gds.graph.project(
   {
     sourceNodeProperties: source { .seed },
     targetNodeProperties: target { .seed },
-    relationshipType: 'LINK',
     relationshipProperties: r { .weight }
   },
-  { undirectedRelationshipTypes: ['LINK'] }
+  { undirectedRelationshipTypes: ['*'] }
 )
 ----
 

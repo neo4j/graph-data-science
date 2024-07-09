@@ -118,11 +118,8 @@ RETURN gds.graph.project(
   'graph',
   source,
   target,
-  { 
-    relationshipType: 'LINK',
-    relationshipProperties: r { .cost }
-  },
-  { undirectedRelationshipTypes: ['LINK'] }
+  { relationshipProperties: r { .cost } },
+  { undirectedRelationshipTypes: ['*'] }
 )
 ----
 
