@@ -49,6 +49,7 @@ import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraMutateConfig;
 import org.neo4j.gds.paths.traverse.BfsMutateConfig;
 import org.neo4j.gds.paths.traverse.DfsMutateConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensMutateConfig;
+import org.neo4j.gds.scaleproperties.ScalePropertiesMutateConfig;
 import org.neo4j.gds.scc.SccMutateConfig;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnMutateConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityMutateConfig;
@@ -110,6 +111,7 @@ public class ConfigurationParsersForMutateMode {
             case Node2Vec -> Node2VecMutateConfig::of;
             case PageRank -> PageRankMutateConfig::of;
             case RandomWalk -> null;
+            case ScaleProperties -> ScalePropertiesMutateConfig::of;
             case SCC -> SccMutateConfig::of;
             case SingleSourceDijkstra -> AllShortestPathsDijkstraMutateConfig::of;
             case SpanningTree -> SpanningTreeMutateConfig::of;

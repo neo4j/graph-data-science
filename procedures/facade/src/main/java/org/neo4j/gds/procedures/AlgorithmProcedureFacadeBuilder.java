@@ -38,6 +38,7 @@ import org.neo4j.gds.procedures.algorithms.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.embeddings.NodeEmbeddingsProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.miscellaneous.MiscellaneousProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
@@ -116,7 +117,11 @@ class AlgorithmProcedureFacadeBuilder {
         );
     }
 
-    MiscAlgorithmsProcedureFacade createMiscellaneousProcedureFacade() {
+    MiscellaneousProcedureFacade createMiscellaneousProcedureFacade() {
+        return MiscellaneousProcedureFacade.create(genericStub, applicationsFacade, procedureReturnColumns);
+    }
+
+    MiscAlgorithmsProcedureFacade createMiscellaneousAlgorithmsProcedureFacade() {
         // algorithm facade
         var miscAlgorithmsFacade = new MiscAlgorithmsFacade(algorithmRunner);
 

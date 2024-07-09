@@ -27,6 +27,7 @@ import org.neo4j.gds.procedures.algorithms.AlgorithmHandle;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 public class DefaultAlgorithmExecutionScaffolding implements AlgorithmExecutionScaffolding {
@@ -44,7 +45,11 @@ public class DefaultAlgorithmExecutionScaffolding implements AlgorithmExecutionS
         ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
     ) {
         var graphName = GraphName.parse(graphNameAsString);
-        var configuration = configurationCreator.createConfiguration(rawConfiguration, configurationSupplier);
+        var configuration = configurationCreator.createConfiguration(
+            rawConfiguration,
+            configurationSupplier,
+            Optional.empty()
+        );
 
         return algorithm.compute(graphName, configuration, resultBuilder);
     }

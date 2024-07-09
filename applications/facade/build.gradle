@@ -16,6 +16,7 @@ dependencies {
     implementation project(":memory-estimation")
     implementation project(":metrics-api")
     implementation project(":model-catalog-api")
+    implementation project(":miscellaneous-algorithms")
     implementation project(":node-embedding-algorithms")
     implementation project(":path-finding-algorithms")
     implementation project(":progress-tracking")

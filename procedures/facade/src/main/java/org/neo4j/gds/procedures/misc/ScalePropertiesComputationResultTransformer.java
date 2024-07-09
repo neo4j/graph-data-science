@@ -25,7 +25,7 @@ import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.misc.ScalePropertiesSpecificFields;
 import org.neo4j.gds.algorithms.misc.ScaledPropertiesNodePropertyValues;
-import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesMutateResult;
+import org.neo4j.gds.procedures.algorithms.miscellaneous.ScalePropertiesMutateResult;
 import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesStatsResult;
 import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesStreamResult;
 import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesWriteResult;

@@ -31,14 +31,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiFunction;
 
 public class ConfigurationParser {
-    public static final ConfigurationParser EMPTY = new ConfigurationParser(
-        DefaultsConfiguration.Empty,
-        LimitsConfiguration.Empty
-    );
-
     private final DefaultsConfiguration defaults;
     private final LimitsConfiguration limits;
 
@@ -50,19 +46,18 @@ public class ConfigurationParser {
     /**
      * Convenient configuration parsing using globally configured defaults and limits
      */
-    public <CONFIG extends AlgoBaseConfig> CONFIG produceConfig(
+    <CONFIG extends AlgoBaseConfig> CONFIG parseConfiguration(
         Map<String, Object> configuration,
-        BiFunction<String, CypherMapWrapper, CONFIG> configCreator,
-        String username
+        BiFunction<String, CypherMapWrapper, CONFIG> parser,
+        User user
     ) {
-        return parse(defaults, limits, username, configuration, configCreator);
+        return parseConfiguration(defaults, limits, user.getUsername(), configuration, parser);
     }
 
     /**
-     * This is effectively static, not using any state.
-     * But we do not do statics, because that can make testing difficult and gives no real advantage here.
+     * Configuration parsing using directly configured defaults and limits
      */
-    public <CONFIG extends AlgoBaseConfig> CONFIG parse(
+    public <CONFIG extends AlgoBaseConfig> CONFIG parseConfiguration(
         DefaultsConfiguration defaultsConfiguration,
         LimitsConfiguration limitsConfiguration,
         String username,
@@ -75,26 +70,11 @@ public class ConfigurationParser {
 
         var configuration = parser.apply(username, cypherMapWrapper);
 
-        validateOriginalConfig(rawConfiguration, configuration.configKeys());
+        validateOriginalConfiguration(rawConfiguration, configuration.configKeys());
 
         validateLimits(configuration, username, configurationWithDefaultsAdded, limitsConfiguration);
 
         return configuration;
-    }
-
-    /*
-     * Non-public things below
-     */
-
-    /**
-     * Overload handling User
-     */
-    <CONFIG extends AlgoBaseConfig> CONFIG produceConfig(
-        Map<String, Object> configuration,
-        BiFunction<String, CypherMapWrapper, CONFIG> configCreator,
-        User user
-    ) {
-        return produceConfig(configuration, configCreator, user.getUsername());
     }
 
     Map<String, Object> applyDefaults(
@@ -104,25 +84,19 @@ public class ConfigurationParser {
         return defaultsConfiguration.apply(configuration, username);
     }
 
-    void validateOriginalConfig(
-        Map<String, Object> configuration,
-        Collection<String> allowedConfigKeys
-    ) throws IllegalArgumentException {
-        Map<String, Object> newConfiguration = new HashMap<>(configuration);
-
-        CypherMapWrapper.create(newConfiguration)
-            .requireOnlyKeysFrom(allowedConfigKeys); //ensure user has not included any  incorrect params
-        //TODO: no reason creating CyperMapWrapper object for this, we should pull the logic here in a function here.
+    /**
+     * @throws java.lang.IllegalArgumentException if user has included any incorrect parameters
+     */
+    void validateOriginalConfiguration(Map<String, Object> configuration, Collection<String> allowedConfigKeys) {
+        CypherMapWrapper.create(configuration).requireOnlyKeysFrom(allowedConfigKeys);
     }
 
-    <CONFIG extends AlgoBaseConfig> void validateLimits(
-        CONFIG algorithmConfiguration,
+    <CONFIGURATION extends AlgoBaseConfig> void validateLimits(
+        CONFIGURATION algorithmConfiguration,
         String username,
         Map<String, Object> userInputWithDefaults,
         LimitsConfiguration limitsConfiguration
     ) throws IllegalArgumentException {
-
-        // handle limits
         var allowedKeys = new HashSet<>(algorithmConfiguration.configKeys());
         var irrelevantInputtedKeys = getIrrelevantInputtedKeys(userInputWithDefaults, allowedKeys);
         var configurationButWithIrrelevantInputtedKeysRemoved = getConfigurationForLimitValidation(
@@ -131,10 +105,9 @@ public class ConfigurationParser {
         ); //remove any useless configuration parameters e.g., sourceNode for Wcc
 
         validateLimits(configurationButWithIrrelevantInputtedKeysRemoved, username, limitsConfiguration);
-
     }
 
-    private HashSet<String> getIrrelevantInputtedKeys(
+    private Set<String> getIrrelevantInputtedKeys(
         Map<String, Object> configuration,
         Collection<String> allowedKeys
     ) {
@@ -143,7 +116,7 @@ public class ConfigurationParser {
         return irrelevantInputtedKeys;
     }
 
-    private HashMap<String, Object> getConfigurationForLimitValidation(
+    private Map<String, Object> getConfigurationForLimitValidation(
         Map<String, Object> configuration,
         Collection<String> irrelevantInputtedKeys
     ) {

@@ -35,8 +35,10 @@ import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.procedures.algorithms.AlgorithmHandle;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
+import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationValidationHook;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -99,7 +101,7 @@ public final class GenericStub {
         Function<CypherMapWrapper, CONFIGURATION> parser,
         Map<String, Object> configuration
     ) {
-        return configurationParser.parse(
+        return configurationParser.parseConfiguration(
             defaultsConfiguration,
             limitsConfiguration,
             user.getUsername(),
@@ -117,7 +119,7 @@ public final class GenericStub {
         Function<CypherMapWrapper, CONFIGURATION> parser,
         Function<CONFIGURATION, MemoryEstimation> estimator
     ) {
-        var configuration = configurationParser.parse(
+        var configuration = configurationParser.parseConfiguration(
             DefaultsConfiguration.Empty,
             LimitsConfiguration.Empty,
             username,
@@ -151,7 +153,7 @@ public final class GenericStub {
     }
 
     /**
-     * @see org.neo4j.gds.procedures.algorithms.stubs.MutateStub#execute(String, java.util.Map)
+     * NB: no configuration validation hook
      */
     public <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> Stream<RESULT_TO_CALLER> execute(
         String graphNameAsString,
@@ -160,8 +162,29 @@ public final class GenericStub {
         AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> executor,
         ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
     ) {
+        return executeWithValidation(
+            graphNameAsString,
+            rawConfiguration,
+            parser,
+            Optional.empty(), // no extra configuration validation
+            executor,
+            resultBuilder
+        );
+    }
+
+    /**
+     * @see org.neo4j.gds.procedures.algorithms.stubs.MutateStub#execute(String, java.util.Map)
+     */
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> Stream<RESULT_TO_CALLER> executeWithValidation(
+        String graphNameAsString,
+        Map<String, Object> rawConfiguration,
+        Function<CypherMapWrapper, CONFIGURATION> parser,
+        Optional<ConfigurationValidationHook<CONFIGURATION>> configurationValidation,
+        AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> executor,
+        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
+    ) {
         var graphName = GraphName.parse(graphNameAsString);
-        var configuration = configurationCreator.createConfiguration(rawConfiguration, parser);
+        var configuration = configurationCreator.createConfiguration(rawConfiguration, parser, configurationValidation);
 
         var result = executor.compute(graphName, configuration, resultBuilder);
 

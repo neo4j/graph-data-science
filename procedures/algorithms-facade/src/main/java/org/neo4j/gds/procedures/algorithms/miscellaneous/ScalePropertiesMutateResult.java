@@ -17,16 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.misc.scaleproperties;
+package org.neo4j.gds.procedures.algorithms.miscellaneous;
 
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 public final class ScalePropertiesMutateResult extends StandardMutateResult {
-
     public final Map<String, Map<String, List<Double>>> scalerStatistics;
     public final long nodePropertiesWritten;
 
@@ -49,8 +50,21 @@ public final class ScalePropertiesMutateResult extends StandardMutateResult {
         this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    public static class Builder extends AbstractResultBuilder<ScalePropertiesMutateResult> {
+    public static ScalePropertiesMutateResult emptyFrom(
+        AlgorithmProcessingTimings timings,
+        Map<String, Object> configurationMap
+    ) {
+        return new ScalePropertiesMutateResult(
+            Collections.emptyMap(),
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.mutateOrWriteMillis,
+            0,
+            configurationMap
+        );
+    }
 
+    public static class Builder extends AbstractResultBuilder<ScalePropertiesMutateResult> {
         private Map<String, Map<String, List<Double>>> scalerStatistics;
 
         public Builder withScalerStatistics(Map<String, Map<String, List<Double>>> stats) {

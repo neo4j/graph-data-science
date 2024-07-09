@@ -25,7 +25,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Map;
-import java.util.function.BiFunction;
+import java.util.Optional;
 import java.util.function.Function;
 
 public class ConfigurationCreator {
@@ -43,19 +43,20 @@ public class ConfigurationCreator {
         this.user = user;
     }
 
-
-    public <C extends AlgoBaseConfig> C createConfiguration(
+    public <CONFIGURATION extends AlgoBaseConfig> CONFIGURATION createConfiguration(
         Map<String, Object> rawConfiguration,
-        BiFunction<String, CypherMapWrapper, C> parser
+        Function<CypherMapWrapper, CONFIGURATION> parser,
+        Optional<ConfigurationValidationHook<CONFIGURATION>> configurationValidation
     ) {
-        return configurationParser.produceConfig(rawConfiguration, parser, user);
+        return parseAndValidate(rawConfiguration, parser, configurationValidation);
     }
 
-    public <C extends AlgoBaseConfig> C createConfigurationForStream(
+    public <CONFIGURATION extends AlgoBaseConfig> CONFIGURATION createConfigurationForStream(
         Map<String, Object> rawConfiguration,
-        BiFunction<String, CypherMapWrapper, C> parser
+        Function<CypherMapWrapper, CONFIGURATION> parser,
+        Optional<ConfigurationValidationHook<CONFIGURATION>> configurationValidation
     ) {
-        C configuration = createConfiguration(rawConfiguration, parser);
+        CONFIGURATION configuration = parseAndValidate(rawConfiguration, parser, configurationValidation);
 
         // yay, side effects
         algorithmMetaDataSetter.set(configuration);
@@ -63,19 +64,19 @@ public class ConfigurationCreator {
         return configuration;
     }
 
-
-    public <C extends AlgoBaseConfig> C createConfiguration(
+    private <CONFIGURATION extends AlgoBaseConfig> CONFIGURATION parseAndValidate(
         Map<String, Object> rawConfiguration,
-        Function<CypherMapWrapper, C> parser
+        Function<CypherMapWrapper, CONFIGURATION> parser,
+        Optional<ConfigurationValidationHook<CONFIGURATION>> configurationValidation
     ) {
-        return createConfiguration(rawConfiguration, (__, cypherMapWrapper) -> parser.apply(cypherMapWrapper));
-    }
+        CONFIGURATION configuration = configurationParser.parseConfiguration(
+            rawConfiguration,
+            (__, cypherMapWrapper) -> parser.apply(cypherMapWrapper),
+            user
+        );
 
-    public <C extends AlgoBaseConfig> C createConfigurationForStream(
-        Map<String, Object> rawConfiguration,
-        Function<CypherMapWrapper, C> parser
-    ) {
-        return createConfigurationForStream(rawConfiguration, (__, cypherMapWrapper) -> parser.apply(cypherMapWrapper));
+        configurationValidation.ifPresent(hook -> hook.onConfigurationParsed(configuration));
 
+        return configuration;
     }
 }

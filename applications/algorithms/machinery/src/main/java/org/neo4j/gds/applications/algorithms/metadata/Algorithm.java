@@ -66,6 +66,7 @@ public enum Algorithm {
     Node2Vec,
     PageRank,
     RandomWalk,
+    ScaleProperties,
     SCC,
     SingleSourceDijkstra,
     SpanningTree,

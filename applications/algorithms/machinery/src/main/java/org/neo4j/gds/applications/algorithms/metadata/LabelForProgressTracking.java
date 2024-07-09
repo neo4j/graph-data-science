@@ -59,6 +59,7 @@ public enum LabelForProgressTracking {
     Node2Vec("Node2Vec"),
     PageRank("PageRank"),
     RandomWalk("RandomWalk"),
+    ScaleProperties("ScaleProperties"),
     SCC("SCC"),
     SingleSourceDijkstra("All Shortest Paths"),
     SpanningTree("SpanningTree"),
@@ -114,6 +115,7 @@ public enum LabelForProgressTracking {
             case Node2Vec -> Node2Vec;
             case PageRank -> PageRank;
             case RandomWalk -> RandomWalk;
+            case ScaleProperties -> ScaleProperties;
             case SCC -> SCC;
             case SingleSourceDijkstra -> SingleSourceDijkstra;
             case SpanningTree -> SpanningTree;
