@@ -31,7 +31,7 @@ import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import java.util.Map;
 import java.util.Optional;
 
-class NodeSimilarityResultBuilderForMutateMode implements ResultBuilder<NodeSimilarityMutateConfig, NodeSimilarityResult, SimilarityMutateResult, Pair<RelationshipsWritten, Map<String, Object>>> {
+public class NodeSimilarityResultBuilderForMutateMode implements ResultBuilder<NodeSimilarityMutateConfig, NodeSimilarityResult, SimilarityMutateResult, Pair<RelationshipsWritten, Map<String, Object>>> {
     @Override
     public SimilarityMutateResult build(
         Graph graph,
