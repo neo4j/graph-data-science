@@ -28,7 +28,6 @@ import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.Write;
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
@@ -136,7 +135,7 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
         try {
             RunWithConcurrency
                 .builder()
-                .concurrency(new Concurrency(1))
+                .concurrency(RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY)
                 .tasks(tasks)
                 .maxWaitRetries(Integer.MAX_VALUE)
                 .waitTime(10L, TimeUnit.MICROSECONDS)
