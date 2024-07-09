@@ -49,6 +49,7 @@ import org.neo4j.gds.ml.pipeline.stubs.ModularityOptimizationStub;
 import org.neo4j.gds.ml.pipeline.stubs.Node2VecStub;
 import org.neo4j.gds.ml.pipeline.stubs.NodeSimilarityStub;
 import org.neo4j.gds.ml.pipeline.stubs.PageRankStub;
+import org.neo4j.gds.ml.pipeline.stubs.ScalePropertiesStub;
 import org.neo4j.gds.ml.pipeline.stubs.SccStub;
 import org.neo4j.gds.ml.pipeline.stubs.SinglePairShortestPathAStarStub;
 import org.neo4j.gds.ml.pipeline.stubs.SinglePairShortestPathDijkstraStub;
@@ -110,6 +111,7 @@ class StubbyHolder {
             case Node2Vec -> new Node2VecStub();
             case PageRank -> new PageRankStub();
             case RandomWalk -> null;
+            case ScaleProperties -> new ScalePropertiesStub();
             case SCC -> new SccStub();
             case SingleSourceDijkstra -> new SingleSourceShortestPathDijkstraStub();
             case SpanningTree -> new SpanningTreeStub();

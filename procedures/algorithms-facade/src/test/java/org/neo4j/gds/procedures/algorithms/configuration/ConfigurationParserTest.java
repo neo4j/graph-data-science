@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.configuration;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.configuration.Default;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
@@ -114,7 +115,7 @@ class ConfigurationParserTest {
 
         Map<String, Object> userInput = Map.of("concurrency", 8L, "sudo", false);
 
-        assertThatException().isThrownBy(() -> configurationParser.validateOriginalConfig(
+        assertThatException().isThrownBy(() -> configurationParser.validateOriginalConfiguration(
             userInput,
             algorithmConfigurationMock.configKeys()
         )).withMessageContaining("Unexpected configuration key: sudo");
@@ -123,7 +124,6 @@ class ConfigurationParserTest {
 
     @Test
     void shouldParseConfigSuccessfully() {
-
         var configurationParser = new ConfigurationParser(
             new DefaultsConfiguration(
                 Map.of("concurrency", new Default(3L), "bar", new Default(false)),
@@ -131,9 +131,9 @@ class ConfigurationParserTest {
             ),
             new LimitsConfiguration(Map.of("concurrency", LimitFactory.create(4L)), Collections.emptyMap())
         );
-        BiFunction<String, CypherMapWrapper, WccStreamConfig> configCreator = (__, cypherMapWrapper) -> WccStreamConfig.of(
+        BiFunction<String, CypherMapWrapper, WccStreamConfig> parser = (__, cypherMapWrapper) -> WccStreamConfig.of(
             cypherMapWrapper);
-        assertThat(configurationParser.produceConfig(Map.of(), configCreator, "foo").concurrency()).isEqualTo(new Concurrency(3));
+        assertThat(configurationParser.parseConfiguration(Map.of(), parser, new User("foo", false)).concurrency()).isEqualTo(new Concurrency(3));
 
     }
 
@@ -147,13 +147,13 @@ class ConfigurationParserTest {
             ),
             new LimitsConfiguration(Map.of("concurrency", LimitFactory.create(4L)), Collections.emptyMap())
         );
-        BiFunction<String, CypherMapWrapper, WccStreamConfig> configCreator = (__, cypherMapWrapper) -> WccStreamConfig.of(
+        BiFunction<String, CypherMapWrapper, WccStreamConfig> parser = (__, cypherMapWrapper) -> WccStreamConfig.of(
             cypherMapWrapper);
 
-        assertThatException().isThrownBy(() -> configurationParser.produceConfig(
+        assertThatException().isThrownBy(() -> configurationParser.parseConfiguration(
             Map.of("conurrency", 20),
-            configCreator,
-            "bogus"
+            parser,
+            new User("bogus", false)
         )).withMessageContaining("Unexpected configuration key: conurrency (Did you mean [concurrency]?)");
 
     }
@@ -171,9 +171,9 @@ class ConfigurationParserTest {
                 Map.of("bogus", Map.of("concurrency", LimitFactory.create(1L)))
             )
         );
-        BiFunction<String, CypherMapWrapper, WccStreamConfig> configCreator = (__, cypherMapWrapper) -> WccStreamConfig.of(
+        BiFunction<String, CypherMapWrapper, WccStreamConfig> parser = (__, cypherMapWrapper) -> WccStreamConfig.of(
             cypherMapWrapper);
-        assertThat(configurationParser.produceConfig(Map.of(), configCreator, "bogus").concurrency()).isEqualTo(new Concurrency(1));
+        assertThat(configurationParser.parseConfiguration(Map.of(), parser, new User("bogus", false)).concurrency()).isEqualTo(new Concurrency(1));
 
     }
 
@@ -190,9 +190,9 @@ class ConfigurationParserTest {
                 Map.of("bogus", Map.of("concurrency", LimitFactory.create(1L)))
             )
         );
-        BiFunction<String, CypherMapWrapper, WccStreamConfig> configCreator = (__, cypherMapWrapper) -> WccStreamConfig.of(
+        BiFunction<String, CypherMapWrapper, WccStreamConfig> parser = (__, cypherMapWrapper) -> WccStreamConfig.of(
             cypherMapWrapper);
-        assertThatException().isThrownBy(() -> configurationParser.produceConfig(Map.of(), configCreator, "bogus"))
+        assertThatException().isThrownBy(() -> configurationParser.parseConfiguration(Map.of(), parser, new User("bogus", false)))
             .withMessage("Configuration parameter 'concurrency' with value '3' exceeds it's limit of '1'");
 
     }

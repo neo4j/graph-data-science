@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.scaling;
 
-import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesMutateResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.algorithms.miscellaneous.ScalePropertiesMutateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -45,7 +45,7 @@ public class ScalePropertiesMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.miscellaneousAlgorithms().scalePropertiesMutate(graphName, configuration);
+        return facade.algorithms().miscellaneous().scalePropertiesMutateStub().execute(graphName, configuration);
     }
 
     @Procedure(value = "gds.scaleProperties.mutate.estimate", mode = READ)
@@ -54,7 +54,7 @@ public class ScalePropertiesMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        return facade.miscellaneousAlgorithms().scalePropertiesMutateEstimate(graphName, configuration);
+        return facade.algorithms().miscellaneous().scalePropertiesMutateStub().estimate(graphName, configuration);
     }
 
     @Internal

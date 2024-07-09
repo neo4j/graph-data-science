@@ -26,7 +26,7 @@ import org.neo4j.gds.algorithms.misc.MiscAlgorithmWriteBusinessFacade;
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesMutateResult;
+import org.neo4j.gds.procedures.algorithms.miscellaneous.ScalePropertiesMutateResult;
 import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesStatsResult;
 import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesStreamResult;
 import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesWriteResult;
@@ -37,6 +37,7 @@ import org.neo4j.gds.scaleproperties.ScalePropertiesStreamConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesWriteConfig;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class MiscAlgorithmsProcedureFacade {
@@ -74,7 +75,7 @@ public class MiscAlgorithmsProcedureFacade {
         Map<String, Object> configuration
        ){
 
-        var config = configurationCreator.createConfigurationForStream(configuration, ScalePropertiesStreamConfig::of);
+        var config = configurationCreator.createConfigurationForStream(configuration, ScalePropertiesStreamConfig::of, Optional.empty());
 
         var streamResult = streamBusinessFacade.scaleProperties(graphName, config);
         return ScalePropertiesComputationResultTransformer.toStreamResult(streamResult);
@@ -85,7 +86,7 @@ public class MiscAlgorithmsProcedureFacade {
         Map<String, Object> configuration
     ){
 
-        var config = configurationCreator.createConfigurationForStream(configuration, ScalePropertiesStreamConfig::of);
+        var config = configurationCreator.createConfigurationForStream(configuration, ScalePropertiesStreamConfig::of, Optional.empty());
 
         var streamResult = streamBusinessFacade.alphaScaleProperties(graphName, config);
         return ScalePropertiesComputationResultTransformer.toStreamResult(streamResult);
@@ -95,7 +96,7 @@ public class MiscAlgorithmsProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, ScalePropertiesStreamConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, ScalePropertiesStreamConfig::of, Optional.empty());
         return Stream.of(estimateBusinessFacade.scaleProperties(graphNameOrConfiguration, config));
     }
 
@@ -104,7 +105,7 @@ public class MiscAlgorithmsProcedureFacade {
         Map<String, Object> configuration
     ) {
 
-        var config = configurationCreator.createConfiguration(configuration, ScalePropertiesStatsConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, ScalePropertiesStatsConfig::of, Optional.empty());
         var returnStatistics = procedureReturnColumns.contains("scalerStatistics");
         var statsResult = statsBusinessFacade.scaleProperties(graphName, config);
         return Stream.of(ScalePropertiesComputationResultTransformer.toStatsResult(
@@ -118,22 +119,8 @@ public class MiscAlgorithmsProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, ScalePropertiesStatsConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, ScalePropertiesStatsConfig::of, Optional.empty());
         return Stream.of(estimateBusinessFacade.scaleProperties(graphNameOrConfiguration, config));
-    }
-
-    public Stream<ScalePropertiesMutateResult> scalePropertiesMutate(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-
-        var config = configurationCreator.createConfiguration(configuration, ScalePropertiesMutateConfig::of);
-        var returnStatistics = procedureReturnColumns.contains("scalerStatistics");
-        var mutateResult = mutateBusinessFacade.scaleProperties(graphName, config);
-        return Stream.of(ScalePropertiesComputationResultTransformer.toMutateResult(
-            mutateResult,
-            returnStatistics
-        ));
     }
 
     public Stream<ScalePropertiesMutateResult> alphaScalePropertiesMutate(
@@ -141,7 +128,7 @@ public class MiscAlgorithmsProcedureFacade {
         Map<String, Object> configuration
     ) {
 
-        var config = configurationCreator.createConfiguration(configuration, ScalePropertiesMutateConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, ScalePropertiesMutateConfig::of, Optional.empty());
         var returnStatistics = procedureReturnColumns.contains("scalerStatistics");
         var mutateResult = mutateBusinessFacade.alphaScaleProperties(graphName, config);
         return Stream.of(ScalePropertiesComputationResultTransformer.toMutateResult(
@@ -150,21 +137,12 @@ public class MiscAlgorithmsProcedureFacade {
         ));
     }
 
-    public Stream<MemoryEstimateResult> scalePropertiesMutateEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, ScalePropertiesMutateConfig::of);
-        return Stream.of(estimateBusinessFacade.scaleProperties(graphNameOrConfiguration, config));
-    }
-
-
     public Stream<ScalePropertiesWriteResult> scalePropertiesWrite(
         String graphName,
         Map<String, Object> configuration
     ) {
 
-        var config = configurationCreator.createConfiguration(configuration, ScalePropertiesWriteConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, ScalePropertiesWriteConfig::of, Optional.empty());
         var returnStatistics = procedureReturnColumns.contains("scalerStatistics");
         var writeResult = writeBusinessFacade.scaleProperties(graphName, config);
         return Stream.of(ScalePropertiesComputationResultTransformer.toWriteResult(
@@ -177,7 +155,7 @@ public class MiscAlgorithmsProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, ScalePropertiesWriteConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, ScalePropertiesWriteConfig::of, Optional.empty());
         return Stream.of(estimateBusinessFacade.scaleProperties(graphNameOrConfiguration, config));
     }
 

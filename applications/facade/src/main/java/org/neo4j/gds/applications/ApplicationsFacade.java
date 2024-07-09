@@ -31,6 +31,7 @@ import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
+import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplications;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.applications.graphstorecatalog.DefaultCatalogBusinessFacade;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -54,6 +55,7 @@ public final class ApplicationsFacade {
     private final CatalogBusinessFacade catalogBusinessFacade;
     private final CentralityApplications centralityApplications;
     private final CommunityApplications communityApplications;
+    private final MiscellaneousApplications miscellaneousApplications;
     private final NodeEmbeddingApplications nodeEmbeddingApplications;
     private final PathFindingApplications pathFindingApplications;
     private final SimilarityApplications similarityApplications;
@@ -62,6 +64,7 @@ public final class ApplicationsFacade {
         CatalogBusinessFacade catalogBusinessFacade,
         CentralityApplications centralityApplications,
         CommunityApplications communityApplications,
+        MiscellaneousApplications miscellaneousApplications,
         NodeEmbeddingApplications nodeEmbeddingApplications,
         PathFindingApplications pathFindingApplications,
         SimilarityApplications similarityApplications
@@ -69,6 +72,7 @@ public final class ApplicationsFacade {
         this.catalogBusinessFacade = catalogBusinessFacade;
         this.centralityApplications = centralityApplications;
         this.communityApplications = communityApplications;
+        this.miscellaneousApplications = miscellaneousApplications;
         this.nodeEmbeddingApplications = nodeEmbeddingApplications;
         this.pathFindingApplications = pathFindingApplications;
         this.similarityApplications = similarityApplications;
@@ -142,6 +146,12 @@ public final class ApplicationsFacade {
             mutateNodeProperty
         );
 
+        var miscellaneousApplications = MiscellaneousApplications.create(
+            algorithmProcessingTemplateConvenience,
+            progressTrackerCreator,
+            mutateNodeProperty
+        );
+
         var nodeEmbeddingApplications = NodeEmbeddingApplications.create(
             log,
             requestScopedDependencies,
@@ -178,6 +188,7 @@ public final class ApplicationsFacade {
             .with(catalogBusinessFacade)
             .with(centralityApplications)
             .with(communityApplications)
+            .with(miscellaneousApplications)
             .with(nodeEmbeddingApplications)
             .with(pathFindingApplications)
             .with(similarityApplications)
@@ -232,6 +243,10 @@ public final class ApplicationsFacade {
 
     public CommunityApplications community() {
         return communityApplications;
+    }
+
+    public MiscellaneousApplications miscellaneous() {
+        return miscellaneousApplications;
     }
 
     public NodeEmbeddingApplications nodeEmbeddings() {

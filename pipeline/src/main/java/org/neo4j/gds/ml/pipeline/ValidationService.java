@@ -66,7 +66,7 @@ class ValidationService {
         Function<CypherMapWrapper, CONFIGURATION> parser,
         Map<String, Object> configuration
     ) {
-        configurationParser.parse(
+        configurationParser.parseConfiguration(
             defaultsConfiguration,
             limitsConfiguration,
             Username.EMPTY_USERNAME.username(),

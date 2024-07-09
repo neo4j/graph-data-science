@@ -33,13 +33,6 @@ public class MiscAlgorithmMutateBusinessFacade {
         this.mutateNodePropertyService = mutateNodePropertyService;
     }
 
-    public NodePropertyMutateResult<ScalePropertiesSpecificFields> scaleProperties(
-        String graphName,
-        ScalePropertiesMutateConfig configuration
-    ) {
-        return  scaleProperties(graphName,configuration,false);
-    }
-
     public NodePropertyMutateResult<ScalePropertiesSpecificFields> alphaScaleProperties(
         String graphName,
         ScalePropertiesMutateConfig configuration

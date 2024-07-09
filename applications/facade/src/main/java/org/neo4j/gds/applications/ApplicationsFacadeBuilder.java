@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications;
 
+import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplications;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 
 /**
@@ -28,6 +29,7 @@ public class ApplicationsFacadeBuilder {
     private CatalogBusinessFacade catalogBusinessFacade;
     private CentralityApplications centralityApplications;
     private CommunityApplications communityApplications;
+    private MiscellaneousApplications miscellaneousApplications;
     private NodeEmbeddingApplications nodeEmbeddingApplications;
     private PathFindingApplications pathFindingApplications;
     private SimilarityApplications similarityApplications;
@@ -44,6 +46,11 @@ public class ApplicationsFacadeBuilder {
 
     public ApplicationsFacadeBuilder with(CommunityApplications communityApplications) {
         this.communityApplications = communityApplications;
+        return this;
+    }
+
+    public ApplicationsFacadeBuilder with(MiscellaneousApplications miscellaneousApplications) {
+        this.miscellaneousApplications = miscellaneousApplications;
         return this;
     }
 
@@ -67,6 +74,7 @@ public class ApplicationsFacadeBuilder {
             catalogBusinessFacade,
             centralityApplications,
             communityApplications,
+            miscellaneousApplications,
             nodeEmbeddingApplications,
             pathFindingApplications,
             similarityApplications

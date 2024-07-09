@@ -25,6 +25,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 public class EstimationModeRunner {
@@ -41,7 +42,8 @@ public class EstimationModeRunner {
     ) {
         var configuration = configurationCreator.createConfiguration(
             algorithmConfiguration,
-            configurationParser
+            configurationParser,
+            Optional.empty()
         );
 
         return supplier.apply(configuration);

@@ -25,6 +25,7 @@ import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.embeddings.NodeEmbeddingsProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.miscellaneous.MiscellaneousProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade;
 import org.neo4j.gds.procedures.catalog.CatalogProcedureFacade;
@@ -42,6 +43,7 @@ public class GraphDataScienceProceduresBuilder {
     private CentralityProcedureFacade centralityProcedureFacade;
     private CatalogProcedureFacade catalogProcedureFacade;
     private CommunityProcedureFacade communityProcedureFacade;
+    private MiscellaneousProcedureFacade miscellaneousProcedureFacade;
     private MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade;
     private NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade;
     private PathFindingProcedureFacade pathFindingProcedureFacade;
@@ -65,6 +67,11 @@ public class GraphDataScienceProceduresBuilder {
 
     public GraphDataScienceProceduresBuilder with(CommunityProcedureFacade communityProcedureFacade) {
         this.communityProcedureFacade = communityProcedureFacade;
+        return this;
+    }
+
+    public GraphDataScienceProceduresBuilder with(MiscellaneousProcedureFacade miscellaneousProcedureFacade) {
+        this.miscellaneousProcedureFacade = miscellaneousProcedureFacade;
         return this;
     }
 
@@ -102,6 +109,7 @@ public class GraphDataScienceProceduresBuilder {
         var algorithmsProcedureFacade = new AlgorithmsProcedureFacade(
             centralityProcedureFacade,
             communityProcedureFacade,
+            miscellaneousProcedureFacade,
             nodeEmbeddingsProcedureFacade,
             pathFindingProcedureFacade,
             similarityProcedureFacade
