@@ -49,7 +49,6 @@ public class NativeRelationshipPropertiesExporter extends StatementApi implement
     private final RelationshipPropertyTranslator propertyTranslator;
     private final ProgressTracker progressTracker;
 
-    private final Concurrency concurrency;
     private final long batchSize;
 
     private final TerminationFlag terminationFlag;
@@ -58,7 +57,6 @@ public class NativeRelationshipPropertiesExporter extends StatementApi implement
         TransactionContext tx,
         GraphStore graphStore,
         RelationshipPropertyTranslator propertyTranslator,
-        Concurrency concurrency,
         long batchSize,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
@@ -66,7 +64,6 @@ public class NativeRelationshipPropertiesExporter extends StatementApi implement
         super(tx);
         this.graphStore = graphStore;
         this.propertyTranslator = propertyTranslator;
-        this.concurrency = concurrency;
         this.batchSize = batchSize;
         this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
@@ -106,7 +103,7 @@ public class NativeRelationshipPropertiesExporter extends StatementApi implement
         try {
             RunWithConcurrency
                 .builder()
-                .concurrency(concurrency)
+                .concurrency(new Concurrency(1))
                 .tasks(tasks)
                 .maxWaitRetries(Integer.MAX_VALUE)
                 .waitTime(10L, TimeUnit.MICROSECONDS)

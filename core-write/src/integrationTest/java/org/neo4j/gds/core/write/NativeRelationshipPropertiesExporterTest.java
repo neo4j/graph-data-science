@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.write;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseTest;
@@ -63,9 +64,8 @@ class NativeRelationshipPropertiesExporterTest  extends BaseTest {
         runQuery(DB_CYPHER);
     }
 
-    @ParameterizedTest
-    @ValueSource(ints = {1, 2, 3, 4})
-    void shouldWriteRelationshipsWithMultipleProperties(int concurrency) {
+    @Test
+    void shouldWriteRelationshipsWithMultipleProperties() {
         GraphStore graphStore = new StoreLoaderBuilder().databaseService(db)
             .putRelationshipProjectionsWithIdentifier(
                 "PAID",
@@ -80,7 +80,6 @@ class NativeRelationshipPropertiesExporterTest  extends BaseTest {
             TestSupport.fullAccessTransaction(db),
             graphStore,
             Values::doubleValue,
-            new Concurrency(concurrency),
             1,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE

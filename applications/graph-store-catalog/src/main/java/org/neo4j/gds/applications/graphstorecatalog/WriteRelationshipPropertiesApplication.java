@@ -57,7 +57,6 @@ public class WriteRelationshipPropertiesApplication {
             .withRelationPropertyTranslator(Values::doubleValue)
             .withTerminationFlag(terminationFlag)
             .withProgressTracker(ProgressTracker.NULL_TRACKER)
-            .withConcurrency(configuration.concurrency())
             .withArrowConnectionInfo(
                 configuration.arrowConnectionInfo(),
                 graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)

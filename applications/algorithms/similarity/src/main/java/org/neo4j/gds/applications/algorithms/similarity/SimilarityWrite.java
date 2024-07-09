@@ -106,7 +106,6 @@ class SimilarityWrite {
             graphStore,
             rootIdMap,
             label.value,
-            writeConfiguration.writeConcurrency(),
             writeConfiguration.arrowConnectionInfo(),
             resultStore,
             similarityDistributionBuilder.similarityConsumer(),

@@ -83,7 +83,6 @@ public class WriteRelationshipsApplication {
                     relationshipExporterBuilder,
                     terminationFlag,
                     progressTracker,
-                    configuration.writeConcurrency(),
                     configuration.arrowConnectionInfo(),
                     configuration.resolveResultStore(resultStore),
                     graphStore,
@@ -109,7 +108,6 @@ public class WriteRelationshipsApplication {
         RelationshipExporterBuilder relationshipExporterBuilder,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker,
-        Concurrency concurrency,
         Optional<ArrowConnectionInfo> arrowConnectionInfo,
         Optional<ResultStore> resultStore,
         GraphStore graphStore,
@@ -123,7 +121,6 @@ public class WriteRelationshipsApplication {
             .withIdMappingOperator(graph::toOriginalNodeId)
             .withGraph(graph)
             .withTerminationFlag(terminationFlag)
-            .withConcurrency(concurrency)
             .withArrowConnectionInfo(arrowConnectionInfo, graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName))
             .withResultStore(resultStore)
             .withJobId(jobId)

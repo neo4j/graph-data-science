@@ -89,11 +89,6 @@ public abstract class RelationshipExporterBuilder {
         return this;
     }
 
-    public RelationshipExporterBuilder withConcurrency(Concurrency concurrency) {
-        this.concurrency = concurrency;
-        return this;
-    }
-
     public RelationshipExporterBuilder withBatchSize(long batchSize) {
         this.batchSize = batchSize;
         return this;

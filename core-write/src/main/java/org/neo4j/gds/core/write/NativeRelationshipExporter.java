@@ -49,7 +49,6 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
     private final Graph graph;
     private final LongUnaryOperator toOriginalId;
     private final RelationshipPropertyTranslator propertyTranslator;
-    private final Concurrency concurrency;
     private final long batchSize;
     private final TerminationFlag terminationFlag;
     private final ProgressTracker progressTracker;
@@ -84,7 +83,6 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
         Graph graph,
         LongUnaryOperator toOriginalId,
         RelationshipPropertyTranslator propertyTranslator,
-        Concurrency concurrency,
         long batchSize,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker
@@ -93,7 +91,6 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
         this.graph = graph;
         this.toOriginalId = toOriginalId;
         this.propertyTranslator = propertyTranslator;
-        this.concurrency = concurrency;
         this.batchSize = batchSize;
         this.terminationFlag = terminationFlag;
         this.progressTracker = progressTracker;
@@ -139,7 +136,7 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
         try {
             RunWithConcurrency
                 .builder()
-                .concurrency(concurrency)
+                .concurrency(new Concurrency(1))
                 .tasks(tasks)
                 .maxWaitRetries(Integer.MAX_VALUE)
                 .waitTime(10L, TimeUnit.MICROSECONDS)
