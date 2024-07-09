@@ -28,8 +28,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.GdlBuilder;
-import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.TestTaskStore;
@@ -43,11 +41,10 @@ import org.neo4j.gds.beta.pregel.context.ComputeContext.BidirectionalComputeCont
 import org.neo4j.gds.beta.pregel.context.InitContext;
 import org.neo4j.gds.beta.pregel.context.MasterComputeContext;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -56,6 +53,10 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.mem.MemoryEstimateDefinition;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Arrays;
@@ -157,7 +158,7 @@ class PregelTest {
         var computation = new TestPregelComputation();
 
         var task = Pregel.progressTask(graph, config, computation.getClass().getSimpleName());
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         var progressTracker = new TestProgressTracker(task, log, config.concurrency(), EmptyTaskRegistryFactory.INSTANCE);
 
         Pregel.create(
@@ -217,7 +218,7 @@ class PregelTest {
         var task = Pregel.progressTask(graph, config, computation.getClass().getSimpleName());
         var progressTracker = new TaskProgressTracker(
             task,
-            org.neo4j.gds.logging.Log.noOpLog(),
+            Log.noOpLog(),
             config.concurrency(),
             jobId -> new TaskRegistry("", taskStore, jobId)
         );

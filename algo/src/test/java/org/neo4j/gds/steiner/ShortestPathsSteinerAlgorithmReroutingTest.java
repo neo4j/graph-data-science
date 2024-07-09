@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProgressTracker;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -35,6 +34,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
@@ -342,7 +342,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
         var targetNodes = List.of(target1, target2);
 
         var steinerTreeAlgorithmFactory = new SteinerTreeAlgorithmFactory<>();
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         var baseTask = steinerTreeAlgorithmFactory.progressTask(graph, targetNodes.size(), false);
         var concurrency = new Concurrency(4);
         var progressTracker = new TestProgressTracker(
@@ -388,7 +388,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
         var applyRerouting = true;
 
         var steinerTreeAlgorithmFactory = new SteinerTreeAlgorithmFactory<>();
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         Task baseTask = steinerTreeAlgorithmFactory.progressTask(graph, targetNodes.size(), applyRerouting);
         var concurrency = new Concurrency(4);
         var progressTracker = new TestProgressTracker(
@@ -440,7 +440,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
         var applyRerouting = true;
 
         var steinerTreeAlgorithmFactory = new SteinerTreeAlgorithmFactory<>();
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         var concurrency = new Concurrency(4);
         Task baseTask = steinerTreeAlgorithmFactory.progressTask(invGraph, targetNodes.size(), applyRerouting);
         var progressTracker = new TestProgressTracker(

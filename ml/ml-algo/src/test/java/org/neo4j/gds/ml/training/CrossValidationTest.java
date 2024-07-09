@@ -22,17 +22,17 @@ package org.neo4j.gds.ml.training;
 import org.eclipse.collections.api.block.function.primitive.LongToLongFunction;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestProgressTracker;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.classification.F1Macro;
 import org.neo4j.gds.ml.models.TrainerConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Optional;
@@ -47,7 +47,7 @@ class CrossValidationTest {
 
     @Test
     void shouldLogProgress() {
-        TestLog log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
 
         TestProgressTracker progressTracker = new TestProgressTracker(
             Tasks.task("test", CrossValidation.progressTasks(3, 2, 4)),

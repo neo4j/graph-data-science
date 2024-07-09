@@ -23,7 +23,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProgressTracker;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -32,6 +31,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.paths.traverse.ExitPredicate.Result;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -185,7 +185,7 @@ class BFSTest {
     @ValueSource(ints = {1, 4})
     void shouldLogProgress(int concurrency) {
         var progressTask = Tasks.leaf("BFS", naturalGraph.relationshipCount());
-        var testLog = Neo4jProxy.testLog();
+        var testLog = new GdsTestLog();
         var progressTracker = new TestProgressTracker(progressTask, testLog, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
         BFS.create(
             naturalGraph,

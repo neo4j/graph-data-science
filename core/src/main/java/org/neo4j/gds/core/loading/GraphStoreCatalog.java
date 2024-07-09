@@ -25,11 +25,10 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.EphemeralResultStore;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.gds.utils.StringJoining;
-import org.neo4j.logging.Log;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -199,7 +198,7 @@ public final class GraphStoreCatalog {
                     graphStore.databaseInfo().databaseId().databaseName(),
                     config.graphName()
                 ),
-                log.orElseGet(Neo4jProxy::testLog)::warn
+                log.orElseGet(Log::noOpLog)::warn
             )
         );
     }

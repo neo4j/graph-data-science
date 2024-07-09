@@ -47,19 +47,6 @@ public final class Yens extends Algorithm<PathFindingResult> {
     private final boolean trackRelationships;
 
     /**
-     * @deprecated Use the one with termination flag directly
-     */
-    @Deprecated
-    public static Yens sourceTarget(
-        Graph graph,
-        ShortestPathYensBaseConfig config,
-        Concurrency concurrency,
-        ProgressTracker progressTracker
-    ) {
-        return sourceTarget(graph, config, concurrency, progressTracker, TerminationFlag.RUNNING_TRUE);
-    }
-
-    /**
      * Configure Yens to compute at most one source-target shortest path.
      */
     public static Yens sourceTarget(

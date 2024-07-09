@@ -27,7 +27,6 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestProgressTracker;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -38,9 +37,11 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.paths.ImmutablePathResult;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfigImpl;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.s1ck.gdl.GDLHandler;
 import org.s1ck.gdl.model.Edge;
 import org.s1ck.gdl.model.Vertex;
@@ -157,10 +158,10 @@ class YensTest {
             .build();
 
         var progressTask = new YensFactory<>().progressTask(graph, config);
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         var progressTracker = new TestProgressTracker(progressTask, log, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
 
-        Yens.sourceTarget(graph, config, config.concurrency(), progressTracker)
+        Yens.sourceTarget(graph, config, config.concurrency(), progressTracker, TerminationFlag.RUNNING_TRUE)
             .compute()
             .pathSet();
 
@@ -195,10 +196,10 @@ class YensTest {
             .build();
 
         var progressTask = new YensFactory<>().progressTask(graph, config);
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         var progressTracker = new TestProgressTracker(progressTask, log, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
 
-        Yens.sourceTarget(graph, config, config.concurrency(), progressTracker)
+        Yens.sourceTarget(graph, config, config.concurrency(), progressTracker, TerminationFlag.RUNNING_TRUE)
             .compute()
             .pathSet();
 
@@ -241,7 +242,7 @@ class YensTest {
             .build();
 
         var actualPathResults = Yens
-            .sourceTarget(graph, config, config.concurrency(), ProgressTracker.NULL_TRACKER)
+            .sourceTarget(graph, config, config.concurrency(), ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE)
             .compute()
             .pathSet();
 

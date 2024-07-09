@@ -31,7 +31,6 @@ import org.neo4j.gds.InspectableTestProgressTracker;
 import org.neo4j.gds.ResourceUtil;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -39,6 +38,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.metrics.classification.F1Weighted;
@@ -587,7 +587,7 @@ class NodeClassificationTrainTest {
         var config = createConfig("bananasModel", GRAPH_NAME, metrics, 42L);
 
         var progressTask = NodeClassificationTrain.progressTask(pipeline, nodeGraphStore.nodeCount());
-        var testLog = Neo4jProxy.testLog();
+        var testLog = new GdsTestLog();
         var progressTracker = new TestProgressTracker(progressTask, testLog, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
 
         createWithExecutionContext(

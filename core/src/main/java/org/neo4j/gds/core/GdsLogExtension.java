@@ -22,6 +22,7 @@ package org.neo4j.gds.core;
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.kernel.extension.ExtensionFactory;
 import org.neo4j.kernel.extension.ExtensionType;
 import org.neo4j.kernel.extension.context.ExtensionContext;
@@ -40,7 +41,7 @@ public class GdsLogExtension extends ExtensionFactory<GdsLogExtension.Dependenci
     public Lifecycle newInstance(ExtensionContext context, Dependencies dependencies) {
         return LifecycleAdapter.onInit(() -> {
             var log = Neo4jProxy.getUserLog(dependencies.logService(), GdsLogExtension.class);
-            GraphStoreCatalog.setLog(log);
+            GraphStoreCatalog.setLog(new LogAdapter(log));
         });
     }
 

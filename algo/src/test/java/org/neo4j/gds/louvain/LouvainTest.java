@@ -30,7 +30,6 @@ import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -43,7 +42,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.logging.LogAdapter;
+import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.modularity.ModularityCalculator;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -345,8 +344,8 @@ class LouvainTest {
         var maxIterations = 10;
         var maxLevels = 10;
         var progressTask = new LouvainAlgorithmFactory<>().progressTask(graph, maxIterations, maxLevels);
-        var log = Neo4jProxy.testLog();
-        var progressTracker = new TaskProgressTracker(progressTask, new LogAdapter(log), concurrency, EmptyTaskRegistryFactory.INSTANCE);
+        var log = new GdsTestLog();
+        var progressTracker = new TaskProgressTracker(progressTask, log, concurrency, EmptyTaskRegistryFactory.INSTANCE);
 
         var louvain = new Louvain(
             graph,

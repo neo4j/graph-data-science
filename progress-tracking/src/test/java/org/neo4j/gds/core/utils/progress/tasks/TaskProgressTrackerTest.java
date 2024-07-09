@@ -21,7 +21,6 @@ package org.neo4j.gds.core.utils.progress.tasks;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RenamesCurrentThread;
@@ -29,9 +28,9 @@ import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskStore;
-import org.neo4j.gds.logging.LogAdapter;
+import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.utils.GdsFeatureToggles;
-import org.neo4j.logging.Log;
+import org.neo4j.gds.logging.Log;
 
 import java.util.List;
 
@@ -95,8 +94,8 @@ class TaskProgressTrackerTest {
     void shouldNotThrowIfEndMoreTasksThanStarted() {
         GdsFeatureToggles.FAIL_ON_PROGRESS_TRACKER_ERRORS.disableAndRun(() -> {
             var task = Tasks.leaf("leaf");
-            var log = Neo4jProxy.testLog();
-            var progressTracker = new TaskProgressTracker(task, new LogAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+            var log = new GdsTestLog();
+            var progressTracker = new TaskProgressTracker(task, log, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
             progressTracker.beginSubTask();
             progressTracker.endSubTask();
             assertThatNoException()
@@ -179,8 +178,8 @@ class TaskProgressTrackerTest {
     void shouldLog100WhenTaskFinishedEarly() {
         try (var ignored = RenamesCurrentThread.renameThread("test")) {
             var task = Tasks.leaf("leaf", 4);
-            var log = Neo4jProxy.testLog();
-            var progressTracker = new TaskProgressTracker(task, new LogAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+            var log = new GdsTestLog();
+            var progressTracker = new TaskProgressTracker(task, log, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
             progressTracker.beginSubTask();
             progressTracker.logProgress(1);
 
@@ -202,8 +201,8 @@ class TaskProgressTrackerTest {
     void shouldLog100OnlyOnLeafTasks() {
         try (var ignored = RenamesCurrentThread.renameThread("test")) {
             var task = Tasks.task("root", Tasks.leaf("leaf", 4));
-            var log = Neo4jProxy.testLog();
-            var progressTracker = new TaskProgressTracker(task, new LogAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+            var log = new GdsTestLog();
+            var progressTracker = new TaskProgressTracker(task, log, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
 
             progressTracker.beginSubTask("root");
             progressTracker.beginSubTask("leaf");
@@ -257,7 +256,7 @@ class TaskProgressTrackerTest {
 
     @Test
     void shouldLogRightLevel() {
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         var leafTask = Tasks.leaf("leaf", 100);
         var progressTracker = progressTracker(leafTask, log);
 
@@ -280,10 +279,10 @@ class TaskProgressTrackerTest {
     }
 
     private TaskProgressTracker progressTracker(Task task, Log log) {
-        return new TaskProgressTracker(task, new LogAdapter(log), new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+        return new TaskProgressTracker(task, log, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
     }
 
     private TaskProgressTracker progressTracker(Task task) {
-        return progressTracker(task, Neo4jProxy.testLog());
+        return progressTracker(task, new GdsTestLog());
     }
 }

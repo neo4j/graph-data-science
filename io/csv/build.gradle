@@ -41,6 +41,5 @@ dependencies {
         }
     }
 
-    testImplementation project(':neo4j-log-adapter')
     testImplementation project(':test-utils')
 }

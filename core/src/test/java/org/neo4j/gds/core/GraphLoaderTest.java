@@ -38,10 +38,9 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.TestGraphLoaderFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.logging.LogAdapter;
+import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
@@ -117,14 +116,14 @@ class GraphLoaderTest extends BaseTest {
 
     @Test
     void shouldLogProgressWithNativeLoading() {
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         new StoreLoaderBuilder()
             .databaseService(db)
             .graphName("graph")
             .nodeProjectionsWithIdentifier(Map.of("AllNodes", NodeProjection.all()))
             .relationshipProjectionsWithIdentifier(Map.of("AllRels", RelationshipProjection.ALL))
             .nodeProperties(List.of(PropertyMapping.of("prop1", 42L)))
-            .log(new LogAdapter(log))
+            .log(log)
             .build()
             .graph();
 
@@ -133,8 +132,8 @@ class GraphLoaderTest extends BaseTest {
     }
 
     @Test
-    public void shouldTrackProgressWithNativeLoading() {
-        TestLog log = Neo4jProxy.testLog();
+    void shouldTrackProgressWithNativeLoading() {
+        var log = new GdsTestLog();
 
         new StoreLoaderBuilder()
             .databaseService(db)
@@ -142,7 +141,7 @@ class GraphLoaderTest extends BaseTest {
             .nodeProjectionsWithIdentifier(Map.of("AllNodes", NodeProjection.all()))
             .relationshipProjectionsWithIdentifier(Map.of("AllRels", RelationshipProjection.ALL))
             .nodeProperties(List.of(PropertyMapping.of("prop1", 42L)))
-            .log(new LogAdapter(log))
+            .log(log)
             .build()
             .graph();
 
@@ -176,13 +175,13 @@ class GraphLoaderTest extends BaseTest {
     @Test
     void shouldLogProgressWithCypherLoading() {
         var progressRegex = Pattern.compile("(\\d+)%$");
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         new CypherLoaderBuilder()
             .databaseService(db)
             .graphName("graph")
             .nodeQuery("MATCH (n) RETURN id(n) AS id, coalesce(n.prop1, 42) AS prop1")
             .relationshipQuery("MATCH (n)-[:REL1|REL2]-(m) RETURN id(n) AS source, id(m) AS target")
-            .log(new LogAdapter(log))
+            .log(log)
             .build()
             .graph();
         assertThat(log.getMessages(TestLog.INFO))
@@ -307,7 +306,7 @@ class GraphLoaderTest extends BaseTest {
     }
 
     @Test
-    void testDontSkipOrphanNodesByDefault() {
+    void shouldNotSkipOrphanNodesByDefault() {
         runQuery("CREATE (:X),(:Y),(:X),(:Y)-[:Q]->(:Z)");
         Graph graph = TestGraphLoaderFactory
             .graphLoader(db, NATIVE)
@@ -332,10 +331,10 @@ class GraphLoaderTest extends BaseTest {
 
     @AllGraphStoreFactoryTypesTest
     void testLoggingActualGraphSize(GraphFactoryTestSupport.FactoryType factoryType) {
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         Graph graph = TestGraphLoaderFactory.graphLoader(db, factoryType)
             .withDefaultAggregation(Aggregation.SINGLE)
-            .withLog(new LogAdapter(log))
+            .withLog(log)
             .graph();
         assertGraphEquals(fromGdl("(a)-->(b), (a)-->(c), (b)-->(c)"), graph);
         log.containsMessage(TestLog.INFO, "Loading :: Actual memory usage of the loaded graph:");

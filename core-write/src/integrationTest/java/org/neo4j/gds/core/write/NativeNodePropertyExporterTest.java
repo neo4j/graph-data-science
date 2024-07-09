@@ -28,15 +28,13 @@ import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.logging.LogAdapter;
+import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
 import org.neo4j.gds.nodeproperties.LongTestPropertyValues;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -162,11 +160,11 @@ class NativeNodePropertyExporterTest extends BaseTest {
         Graph graph = new StoreLoaderBuilder().databaseService(db).addNodeLabel("A").build().graph();
 
         // with a node exporter
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         var writeConcurrency = new Concurrency(4);
         var progressTracker = new TaskProgressTracker(
             NodePropertyExporter.baseTask("AlgoNameGoesHere", graph.nodeCount()),
-            new LogAdapter(log),
+            log,
             writeConcurrency,
             EmptyTaskRegistryFactory.INSTANCE
         );
@@ -182,7 +180,7 @@ class NativeNodePropertyExporterTest extends BaseTest {
         exporter.write("newProp1", new LongTestPropertyValues(nodeId -> 1L));
 
         // then assert messages
-        assertThat(log.getMessages(TestLog.INFO))
+        assertThat(log.getMessages(GdsTestLog.INFO))
             .extracting(removingThreadId())
             .containsExactly(
                 "AlgoNameGoesHere :: WriteNodeProperties :: Start",

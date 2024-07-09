@@ -22,7 +22,6 @@ package org.neo4j.gds.scc;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -32,6 +31,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.HashMap;
@@ -148,7 +148,7 @@ class SccTest {
     void shouldLogProgress() {
         var config = SccStreamConfigImpl.builder().build();
         var factory = new SccAlgorithmFactory<>();
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         var progressTracker = new TestProgressTracker(
             factory.progressTask(graph, config),
             log,

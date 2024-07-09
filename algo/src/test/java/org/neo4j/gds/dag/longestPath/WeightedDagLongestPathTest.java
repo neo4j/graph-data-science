@@ -22,7 +22,6 @@ package org.neo4j.gds.dag.longestPath;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestProgressTracker;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -31,6 +30,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -104,7 +104,7 @@ class WeightedDagLongestPathTest {
         void shouldLogProgress() {
             var lpFactory = new DagLongestPathFactory<>();
             var progressTask = lpFactory.progressTask(graph, CONFIG);
-            var log = Neo4jProxy.testLog();
+            var log = new GdsTestLog();
             var testTracker = new TestProgressTracker(
                 progressTask,
                 log,
@@ -264,7 +264,7 @@ class WeightedDagLongestPathTest {
         void shouldLogProgress() {
             var lpFactory = new DagLongestPathFactory<>();
             var progressTask = lpFactory.progressTask(graph, CONFIG);
-            var log = Neo4jProxy.testLog();
+            var log = new GdsTestLog();
             var testTracker = new TestProgressTracker(
                 progressTask,
                 log,

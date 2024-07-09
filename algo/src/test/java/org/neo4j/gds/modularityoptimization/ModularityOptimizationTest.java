@@ -30,7 +30,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.assertj.Extractors;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -39,8 +38,9 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.logging.Log;
 
 import java.util.Optional;
 
@@ -164,7 +164,7 @@ class ModularityOptimizationTest {
 
     @Test
     void testLogging() {
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
 
         compute(graph, K1COLORING_MAX_ITERATIONS, null, new Concurrency(3), 2, log);
 
@@ -191,7 +191,7 @@ class ModularityOptimizationTest {
         Concurrency concurrency,
         int minBatchSize
     ) {
-        return compute(graph, maxIterations, properties, concurrency, minBatchSize, Neo4jProxy.testLog());
+        return compute(graph, maxIterations, properties, concurrency, minBatchSize, new GdsTestLog());
     }
 
     @NotNull

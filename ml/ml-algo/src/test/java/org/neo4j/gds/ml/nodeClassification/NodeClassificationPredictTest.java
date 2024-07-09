@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.nodeClassification;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -33,7 +32,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.logging.LogAdapter;
+import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.models.ClassifierFactory;
@@ -211,11 +210,11 @@ class NodeClassificationPredictTest {
             .numberOfClasses(1)
             .build();
 
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         var concurrency = new Concurrency(1);
         var progressTracker = new TaskProgressTracker(
             NodeClassificationPredict.progressTask(graph.nodeCount()),
-            new LogAdapter(log),
+            log,
             concurrency,
             new JobId(),
             EmptyTaskRegistryFactory.INSTANCE,

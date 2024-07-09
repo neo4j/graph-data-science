@@ -31,8 +31,6 @@ import org.neo4j.gds.api.ExportedRelationship;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.ImmutableExportedRelationship;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -40,7 +38,7 @@ import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.logging.LogAdapter;
+import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.graphdb.security.AuthorizationViolationException;
 import org.neo4j.internal.kernel.api.security.AccessMode;
@@ -244,10 +242,10 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
 
         var rand = new Random();
 
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         var progressTracker = new TaskProgressTracker(
             RelationshipStreamExporter.baseTask("OpName"),
-            new LogAdapter(log),
+            log,
             new Concurrency(1),
             EmptyTaskRegistryFactory.INSTANCE
         );
@@ -266,7 +264,7 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
 
         assertEquals(relationshipCount, relationshipsWritten);
 
-        assertThat(log.getMessages(TestLog.INFO))
+        assertThat(log.getMessages(GdsTestLog.INFO))
             .extracting(removingThreadId())
             .contains(
                 "OpName :: WriteRelationshipStream :: Start",

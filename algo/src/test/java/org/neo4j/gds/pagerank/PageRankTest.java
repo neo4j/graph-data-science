@@ -34,7 +34,6 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -43,6 +42,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.pagerank.PageRankAlgorithmFactory.Mode;
 import org.neo4j.gds.scaling.ScalerFactory;
 
@@ -177,7 +177,7 @@ class PageRankTest {
             var factory = new PageRankAlgorithmFactory<>(mode);
 
             var progressTask = factory.progressTask(graph, config);
-            var log = Neo4jProxy.testLog();
+            var log = new GdsTestLog();
 
             var progressTracker = new TestProgressTracker(
                 progressTask,

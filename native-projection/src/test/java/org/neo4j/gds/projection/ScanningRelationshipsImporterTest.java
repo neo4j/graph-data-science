@@ -44,6 +44,7 @@ import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 
@@ -144,7 +145,7 @@ class ScanningRelationshipsImporterTest extends BaseTest {
     private GraphLoaderContext graphLoaderContext() {
         return ImmutableGraphLoaderContext.builder()
             .executor(DefaultPool.INSTANCE)
-            .log(org.neo4j.gds.logging.Log.noOpLog())
+            .log(Log.noOpLog())
             .terminationFlag(TerminationFlag.RUNNING_TRUE)
             .transactionContext(DatabaseTransactionContext.of(db, db.beginTx()))
             .taskRegistryFactory(TaskRegistryFactory.empty())

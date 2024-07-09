@@ -26,7 +26,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -37,7 +36,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.logging.LogAdapter;
+import org.neo4j.gds.logging.GdsTestLog;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -148,10 +147,10 @@ final class ConductanceTest {
         var parameters = new ConductanceParameters(new Concurrency(1), 10_000, false, "community");
         var factory = new ConductanceAlgorithmFactory<>();
         var progressTask = factory.progressTask(naturalGraph.nodeCount());
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         var progressTracker = new TaskProgressTracker(
             progressTask,
-            new LogAdapter(log),
+            log,
             parameters.concurrency(),
             EmptyTaskRegistryFactory.INSTANCE
         );

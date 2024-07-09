@@ -27,7 +27,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -37,6 +36,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.spanningtree.Prim;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -270,7 +270,7 @@ class KSpanningTreeTest {
     void shouldLogProgress() {
         var config = KSpanningTreeBaseConfigImpl.builder().sourceNode(idFunction.of("a")).k(2).build();
         var factory = new KSpanningTreeAlgorithmFactory<>();
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         var progressTracker = new TestProgressTracker(
             factory.progressTask(graph, config),
             log,

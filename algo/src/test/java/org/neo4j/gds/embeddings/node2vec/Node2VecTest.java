@@ -39,7 +39,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -55,6 +54,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -165,7 +165,7 @@ class Node2VecTest {
             EmbeddingInitializer.NORMALIZED
         );
         var concurrency = new Concurrency(4);
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         var progressTracker = new TestProgressTracker(progressTask, log, concurrency, EmptyTaskRegistryFactory.INSTANCE);
         new Node2Vec(
             currentGraph,
