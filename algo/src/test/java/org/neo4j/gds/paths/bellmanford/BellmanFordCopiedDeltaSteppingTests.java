@@ -22,8 +22,8 @@ package org.neo4j.gds.paths.bellmanford;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.junitpioneer.jupiter.cartesian.CartesianTest;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -34,23 +34,11 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
 import java.util.Set;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.paths.PathTestUtil.expected;
 
 final class BellmanFordCopiedDeltaSteppingTests {
-
-    // concurrency X id-supplier
-    private static Stream<Arguments> testParameters() {
-        return TestSupport.crossArguments(
-            () -> TestSupport.crossArguments(
-                () -> IntStream.of(1, 4).mapToObj(Arguments::of)
-            ),
-            () -> Stream.of(0L, 42L).map(Arguments::of)
-        );
-    }
 
     @GdlExtension
     @Nested
@@ -76,9 +64,11 @@ final class BellmanFordCopiedDeltaSteppingTests {
             ", (d)-[:TYPE {cost: 11}]->(f)" +
             ", (e)-[:TYPE {cost:  4}]->(d)";
 
-        @ParameterizedTest
-        @MethodSource("org.neo4j.gds.paths.bellmanford.BellmanFordCopiedDeltaSteppingTests#testParameters")
-        void singleSource(int concurrency, long idOffset) {
+        @CartesianTest
+        void singleSource(
+            @CartesianTest.Values(ints = {1, 4}) int concurrency,
+            @CartesianTest.Values(longs = {0L, 42L}) long idOffset
+        ) {
             var graph = TestSupport.fromGdl(DB_CYPHER, idOffset);
 
             IdFunction idFunction = (String variable) -> graph.toMappedNodeId(graph.toOriginalNodeId(variable));
@@ -107,9 +97,11 @@ final class BellmanFordCopiedDeltaSteppingTests {
             assertEquals(expected, paths);
         }
 
-        @ParameterizedTest
-        @MethodSource("org.neo4j.gds.paths.bellmanford.BellmanFordCopiedDeltaSteppingTests#testParameters")
-        void singleSourceFromDisconnectedNode(int concurrency, long idOffset) {
+        @CartesianTest
+        void singleSourceFromDisconnectedNode(
+            @CartesianTest.Values(ints = {1, 4}) int concurrency,
+            @CartesianTest.Values(longs = {0L, 42L}) long idOffset
+        ) {
             var graph = TestSupport.fromGdl(DB_CYPHER, idOffset);
 
             IdFunction idFunction = (String variable) -> graph.toMappedNodeId(graph.toOriginalNodeId(variable));
@@ -164,9 +156,11 @@ final class BellmanFordCopiedDeltaSteppingTests {
             ", (n5)-[:TYPE {cost: 10}]->(n7)" +
             ", (n6)-[:TYPE {cost: 1}]->(n7)";
 
-        @ParameterizedTest
-        @MethodSource("org.neo4j.gds.paths.bellmanford.BellmanFordCopiedDeltaSteppingTests#testParameters")
-        void singleSource(int concurrency, long idOffset) {
+        @CartesianTest
+        void singleSource(
+            @CartesianTest.Values(ints = {1, 4}) int concurrency,
+            @CartesianTest.Values(longs = {0L, 42L}) long idOffset
+        ) {
             var graph = TestSupport.fromGdl(DB_CYPHER2, idOffset);
 
             IdFunction idFunction = (String variable) -> graph.toMappedNodeId(graph.toOriginalNodeId(variable));
@@ -225,7 +219,7 @@ final class BellmanFordCopiedDeltaSteppingTests {
         IdFunction idFunction = (name) -> graph.toMappedNodeId(name);
 
         @ParameterizedTest
-        @MethodSource("org.neo4j.gds.paths.bellmanford.BellmanFordCopiedDeltaSteppingTests#testParameters")
+        @ValueSource(ints = {1, 4})
         void singleSource(int concurrency) {
             var expected = Set.of(
                 expected(idFunction, 0, new double[]{0.0}, "a"),
