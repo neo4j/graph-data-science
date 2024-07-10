@@ -26,7 +26,7 @@ import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.scaleproperties.ScaleProperties;
-import org.neo4j.gds.scaleproperties.ScalePropertiesMutateConfig;
+import org.neo4j.gds.scaleproperties.ScalePropertiesBaseConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 
 public class MiscellaneousAlgorithms {
@@ -38,7 +38,7 @@ public class MiscellaneousAlgorithms {
         this.progressTrackerCreator = progressTrackerCreator;
     }
 
-    ScalePropertiesResult scaleProperties(Graph graph, ScalePropertiesMutateConfig configuration) {
+    ScalePropertiesResult scaleProperties(Graph graph, ScalePropertiesBaseConfig configuration) {
         int totalPropertyDimension = configuration
             .nodeProperties()
             .stream()

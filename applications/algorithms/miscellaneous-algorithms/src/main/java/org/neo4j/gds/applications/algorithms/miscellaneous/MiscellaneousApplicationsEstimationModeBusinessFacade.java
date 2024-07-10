@@ -19,12 +19,34 @@
  */
 package org.neo4j.gds.applications.algorithms.miscellaneous;
 
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.scaleproperties.ScalePropertiesBaseConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesMemoryEstimateDefinition;
+import org.neo4j.gds.scaleproperties.ScalePropertiesStatsConfig;
 
-public class MiscellaneousEstimationModeBusinessFacade {
+public class MiscellaneousApplicationsEstimationModeBusinessFacade {
+    private final AlgorithmEstimationTemplate algorithmEstimationTemplate;
+
+    MiscellaneousApplicationsEstimationModeBusinessFacade(AlgorithmEstimationTemplate algorithmEstimationTemplate) {
+        this.algorithmEstimationTemplate = algorithmEstimationTemplate;
+    }
+
     public MemoryEstimation scaleProperties(ScalePropertiesBaseConfig configuration) {
         return new ScalePropertiesMemoryEstimateDefinition(configuration.nodeProperties()).memoryEstimation();
+    }
+
+    public MemoryEstimateResult scaleProperties(
+        ScalePropertiesStatsConfig configuration,
+        Object graphNameOrConfiguration
+    ) {
+        var memoryEstimation = scaleProperties(configuration);
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
+        );
     }
 }

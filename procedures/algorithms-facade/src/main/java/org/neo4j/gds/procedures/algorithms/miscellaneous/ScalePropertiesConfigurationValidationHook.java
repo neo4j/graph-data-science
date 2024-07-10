@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.miscellaneous.stubs;
+package org.neo4j.gds.procedures.algorithms.miscellaneous;
 
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationValidationHook;
 import org.neo4j.gds.scaleproperties.ScalePropertiesBaseConfig;
@@ -25,10 +25,10 @@ import org.neo4j.gds.scaling.L1Norm;
 import org.neo4j.gds.scaling.L2Norm;
 import org.neo4j.gds.scaling.ScalerFactory;
 
-class ScalePropertiesConfigurationValidationHook<CONFIGURATION extends ScalePropertiesBaseConfig> implements ConfigurationValidationHook<CONFIGURATION> {
+public class ScalePropertiesConfigurationValidationHook<CONFIGURATION extends ScalePropertiesBaseConfig> implements ConfigurationValidationHook<CONFIGURATION> {
     private final boolean allowL1L2;
 
-    ScalePropertiesConfigurationValidationHook(boolean allowL1L2) {
+    public ScalePropertiesConfigurationValidationHook(boolean allowL1L2) {
         this.allowL1L2 = allowL1L2;
     }
 

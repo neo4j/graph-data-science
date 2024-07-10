@@ -25,6 +25,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.procedures.algorithms.AlgorithmHandle;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
+import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationValidationHook;
 
 import java.util.Map;
 import java.util.Optional;
@@ -40,15 +41,33 @@ public class DefaultAlgorithmExecutionScaffolding implements AlgorithmExecutionS
     public <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER runAlgorithm(
         String graphNameAsString,
         Map<String, Object> rawConfiguration,
-        Function<CypherMapWrapper, CONFIGURATION> configurationSupplier,
+        Function<CypherMapWrapper, CONFIGURATION> configurationParser,
+        AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> algorithm,
+        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
+    ) {
+        return runAlgorithmWithValidation(
+            graphNameAsString,
+            rawConfiguration,
+            configurationParser,
+            Optional.empty(),
+            algorithm,
+            resultBuilder
+        );
+    }
+
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER runAlgorithmWithValidation(
+        String graphNameAsString,
+        Map<String, Object> rawConfiguration,
+        Function<CypherMapWrapper, CONFIGURATION> configurationParser,
+        Optional<ConfigurationValidationHook<CONFIGURATION>> configurationValidation,
         AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> algorithm,
         ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
     ) {
         var graphName = GraphName.parse(graphNameAsString);
         var configuration = configurationCreator.createConfiguration(
             rawConfiguration,
-            configurationSupplier,
-            Optional.empty()
+            configurationParser,
+            configurationValidation
         );
 
         return algorithm.compute(graphName, configuration, resultBuilder);

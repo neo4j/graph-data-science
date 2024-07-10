@@ -21,20 +21,49 @@ package org.neo4j.gds.procedures.algorithms.miscellaneous;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsStatsModeBusinessFacade;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.stubs.ScalePropertiesMutateStub;
+import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
+import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
+import org.neo4j.gds.scaleproperties.ScalePropertiesStatsConfig;
+
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 public final class MiscellaneousProcedureFacade {
+    private final ProcedureReturnColumns procedureReturnColumns;
+
     private final ScalePropertiesMutateStub scalePropertiesMutateStub;
 
-    private MiscellaneousProcedureFacade(ScalePropertiesMutateStub scalePropertiesMutateStub) {
+    private final ApplicationsFacade applicationsFacade;
+
+    private final EstimationModeRunner estimationMode;
+    private final AlgorithmExecutionScaffolding algorithmExecutionScaffolding;
+
+    private MiscellaneousProcedureFacade(
+        ProcedureReturnColumns procedureReturnColumns,
+        ScalePropertiesMutateStub scalePropertiesMutateStub,
+        ApplicationsFacade applicationsFacade,
+        EstimationModeRunner estimationMode,
+        AlgorithmExecutionScaffolding algorithmExecutionScaffolding
+    ) {
+        this.procedureReturnColumns = procedureReturnColumns;
         this.scalePropertiesMutateStub = scalePropertiesMutateStub;
+        this.applicationsFacade = applicationsFacade;
+        this.estimationMode = estimationMode;
+        this.algorithmExecutionScaffolding = algorithmExecutionScaffolding;
     }
 
     public static MiscellaneousProcedureFacade create(
         GenericStub genericStub,
         ApplicationsFacade applicationsFacade,
-        ProcedureReturnColumns procedureReturnColumns
+        ProcedureReturnColumns procedureReturnColumns,
+        EstimationModeRunner estimationModeRunner,
+        AlgorithmExecutionScaffolding algorithmExecutionScaffolding
     ) {
         var scalePropertiesMutateStub = new ScalePropertiesMutateStub(
             genericStub,
@@ -42,10 +71,56 @@ public final class MiscellaneousProcedureFacade {
             procedureReturnColumns
         );
 
-        return new MiscellaneousProcedureFacade(scalePropertiesMutateStub);
+        return new MiscellaneousProcedureFacade(
+            procedureReturnColumns,
+            scalePropertiesMutateStub,
+            applicationsFacade,
+            estimationModeRunner,
+            algorithmExecutionScaffolding
+        );
     }
 
     public ScalePropertiesMutateStub scalePropertiesMutateStub() {
         return scalePropertiesMutateStub;
+    }
+
+    public Stream<ScalePropertiesStatsResult> scalePropertiesStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var validationHook = new ScalePropertiesConfigurationValidationHook<ScalePropertiesStatsConfig>(false);
+
+        var shouldDisplayScalerStatistics = procedureReturnColumns.contains("scalerStatistics");
+        var resultBuilder = new ScalePropertiesResultBuilderForStatsMode(shouldDisplayScalerStatistics);
+
+        return algorithmExecutionScaffolding.runAlgorithmWithValidation(
+            graphName,
+            configuration,
+            ScalePropertiesStatsConfig::of,
+            Optional.of(validationHook),
+            statsMode()::scaleProperties,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> scalePropertiesStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            ScalePropertiesStatsConfig::of,
+            configuration -> estimationMode().scaleProperties(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
+    private MiscellaneousApplicationsEstimationModeBusinessFacade estimationMode() {
+        return applicationsFacade.miscellaneous().estimate();
+    }
+
+    private MiscellaneousApplicationsStatsModeBusinessFacade statsMode() {
+        return applicationsFacade.miscellaneous().stats();
     }
 }

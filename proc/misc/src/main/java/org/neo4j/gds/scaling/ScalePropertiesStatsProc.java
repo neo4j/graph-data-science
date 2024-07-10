@@ -20,7 +20,7 @@
 package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesStatsResult;
+import org.neo4j.gds.procedures.algorithms.miscellaneous.ScalePropertiesStatsResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -44,7 +44,7 @@ public class ScalePropertiesStatsProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.miscellaneousAlgorithms().scalePropertiesStats(graphName, configuration);
+        return facade.algorithms().miscellaneous().scalePropertiesStats(graphName, configuration);
     }
 
     @Procedure(value = "gds.scaleProperties.stats.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class ScalePropertiesStatsProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        return facade.miscellaneousAlgorithms().scalePropertiesStatsEstimate(graphName, configuration);
+        return facade.algorithms().miscellaneous().scalePropertiesStatsEstimate(graphName, configuration);
     }
 }

@@ -17,19 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.misc.scaleproperties;
+package org.neo4j.gds.procedures.algorithms.miscellaneous;
 
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
+import org.neo4j.gds.result.AbstractResultBuilder;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 public final class ScalePropertiesStatsResult extends StandardStatsResult {
-
     public final Map<String, Map<String, List<Double>>> scalerStatistics;
 
-    public ScalePropertiesStatsResult(
+    ScalePropertiesStatsResult(
         Map<String, Map<String, List<Double>>> scalerStatistics,
         long preProcessingMillis,
         long computeMillis,
@@ -44,11 +45,22 @@ public final class ScalePropertiesStatsResult extends StandardStatsResult {
         this.scalerStatistics = scalerStatistics;
     }
 
-   public static class Builder extends AbstractResultBuilder<ScalePropertiesStatsResult> {
+    static ScalePropertiesStatsResult emptyFrom(
+        AlgorithmProcessingTimings timings,
+        Map<String, Object> configurationMap
+    ) {
+        return new ScalePropertiesStatsResult(
+            Collections.emptyMap(),
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            configurationMap
+        );
+    }
 
+    public static class Builder extends AbstractResultBuilder<ScalePropertiesStatsResult> {
         private Map<String, Map<String, List<Double>>> scalerStatistics;
 
-       public   Builder withScalerStatistics(Map<String, Map<String, List<Double>>> stats) {
+        public Builder withScalerStatistics(Map<String, Map<String, List<Double>>> stats) {
             this.scalerStatistics = stats;
             return this;
         }

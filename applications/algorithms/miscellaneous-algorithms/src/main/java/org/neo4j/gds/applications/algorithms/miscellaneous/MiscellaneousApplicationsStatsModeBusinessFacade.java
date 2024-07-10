@@ -21,46 +21,38 @@ package org.neo4j.gds.applications.algorithms.miscellaneous;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
-import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.scaleproperties.ScalePropertiesMutateConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
+import org.neo4j.gds.scaleproperties.ScalePropertiesStatsConfig;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ScaleProperties;
 
-public class MiscellaneousMutateModeBusinessFacade {
-    private final MiscellaneousEstimationModeBusinessFacade estimation;
-    private final MiscellaneousAlgorithms algorithms;
+public class MiscellaneousApplicationsStatsModeBusinessFacade {
+    private final MiscellaneousApplicationsEstimationModeBusinessFacade estimationFacade;
+    private final MiscellaneousAlgorithms miscellaneousAlgorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
-    private final MutateNodeProperty mutateNodeProperty;
 
-    MiscellaneousMutateModeBusinessFacade(
-        MiscellaneousEstimationModeBusinessFacade estimation,
-        MiscellaneousAlgorithms algorithms,
-        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        MutateNodeProperty mutateNodeProperty
+    MiscellaneousApplicationsStatsModeBusinessFacade(
+        MiscellaneousApplicationsEstimationModeBusinessFacade estimationFacade,
+        MiscellaneousAlgorithms miscellaneousAlgorithms,
+        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience
     ) {
-        this.estimation = estimation;
-        this.algorithms = algorithms;
+        this.estimationFacade = estimationFacade;
+        this.miscellaneousAlgorithms = miscellaneousAlgorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
-        this.mutateNodeProperty = mutateNodeProperty;
     }
 
     public <RESULT> RESULT scaleProperties(
         GraphName graphName,
-        ScalePropertiesMutateConfig configuration,
-        ResultBuilder<ScalePropertiesMutateConfig, ScalePropertiesResult, RESULT, NodePropertiesWritten> resultBuilder
+        ScalePropertiesStatsConfig configuration,
+        ResultBuilder<ScalePropertiesStatsConfig, ScalePropertiesResult, RESULT, Void> resultBuilder
     ) {
-        var mutateStep = new ScalePropertiesMutateStep(mutateNodeProperty, configuration);
-
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
             graphName,
             configuration,
             ScaleProperties,
-            () -> estimation.scaleProperties(configuration),
-            graph -> algorithms.scaleProperties(graph, configuration),
-            mutateStep,
+            () -> estimationFacade.scaleProperties(configuration),
+            graph -> miscellaneousAlgorithms.scaleProperties(graph, configuration),
             resultBuilder
         );
     }

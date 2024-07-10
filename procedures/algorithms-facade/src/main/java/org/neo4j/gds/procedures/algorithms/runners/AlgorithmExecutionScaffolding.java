@@ -23,18 +23,32 @@ import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.procedures.algorithms.AlgorithmHandle;
+import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationValidationHook;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 public interface AlgorithmExecutionScaffolding {
     /**
-     * Just some scaffolding: parsing graph name, parsing configuration, then delegating
+     * A convenient overload for the 99% of cases where we do not do extra configuration validation
      */
     <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER runAlgorithm(
         String graphNameAsString,
         Map<String, Object> rawConfiguration,
-        Function<CypherMapWrapper, CONFIGURATION> configurationSupplier,
+        Function<CypherMapWrapper, CONFIGURATION> configurationParser,
+        AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> algorithm,
+        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
+    );
+
+    /**
+     * Just some scaffolding: parsing graph name, parsing configuration, then delegating
+     */
+    <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER runAlgorithmWithValidation(
+        String graphNameAsString,
+        Map<String, Object> rawConfiguration,
+        Function<CypherMapWrapper, CONFIGURATION> configurationParser,
+        Optional<ConfigurationValidationHook<CONFIGURATION>> configurationValidation,
         AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> algorithm,
         ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
     );
