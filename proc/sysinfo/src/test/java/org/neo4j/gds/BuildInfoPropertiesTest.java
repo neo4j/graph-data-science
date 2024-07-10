@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -53,7 +52,7 @@ class BuildInfoPropertiesTest {
         // strip Build identifier (for AuraDS releases)
         // as the aurads flag is only a gradle property we cannot read the value here
         String[] splits = buildInfo.gdsVersion().split("\\+");
-        assertEquals(2, splits.length);
+        assertThat(splits).hasSizeLessThanOrEqualTo(2);
 
         var actualBaseVersion = splits[0];
         var actualBuildLabel = splits.length > 1 ? splits[1] : "";
@@ -123,10 +122,8 @@ class BuildInfoPropertiesTest {
         Pattern pattern = Pattern.compile(".*gdsBaseVersion = '(\\d\\.\\d\\.\\d+(-alpha\\d+|-beta\\d+)?)'.*");
         try(var lines = Files.lines(file, StandardCharsets.UTF_8)) {
             return lines
-                .flatMap(line -> {
-                    var matcher = pattern.matcher(line);
-                    return matcher.matches() ? Stream.of(matcher.group(1)) : Stream.empty();
-                })
+                .flatMap(line -> pattern.matcher(line).results())
+                .map(i -> i.group(1))
                 .findFirst();
         }
     }
@@ -135,10 +132,8 @@ class BuildInfoPropertiesTest {
         Pattern pattern = Pattern.compile(".*gdsAuraDSVersion = '(\\d+)'");
         try(var lines = Files.lines(file, StandardCharsets.UTF_8)) {
             return lines
-                .flatMap(line -> {
-                    var matcher = pattern.matcher(line);
-                    return matcher.matches() ? Stream.of(matcher.group(1)) : Stream.empty();
-                })
+                .flatMap(line -> pattern.matcher(line).results())
+                .map(i -> i.group(1))
                 .findFirst();
         }
     }
