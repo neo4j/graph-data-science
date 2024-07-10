@@ -19,7 +19,12 @@
  */
 package org.neo4j.gds.applications;
 
+import org.neo4j.gds.applications.algorithms.centrality.CentralityApplications;
+import org.neo4j.gds.applications.algorithms.community.CommunityApplications;
+import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingApplications;
 import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplications;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingApplications;
+import org.neo4j.gds.applications.algorithms.similarity.SimilarityApplications;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 
 /**
