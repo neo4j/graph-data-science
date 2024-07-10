@@ -45,12 +45,26 @@ class BuildInfoPropertiesTest {
         // we find the current version in the gradle file
         var file = Paths.get("../../gradle/version.gradle");
         var maybeVersion = findVersion(file);
-
-        var version = maybeVersion.orElseGet(() ->
+        var expectedVersion = maybeVersion.orElseGet(() ->
             fail("Could not find version in file: " + file.toAbsolutePath()));
 
         var buildInfo = BuildInfoProperties.get();
-        assertEquals(version, buildInfo.gdsVersion());
+
+        // strip Build identifier (for AuraDS releases)
+        // as the aurads flag is only a gradle property we cannot read the value here
+        String[] splits = buildInfo.gdsVersion().split("\\+");
+        assertEquals(2, splits.length);
+
+        var actualBaseVersion = splits[0];
+        var actualBuildLabel = splits.length > 1 ? splits[1] : "";
+
+        if (!actualBuildLabel.isEmpty()) {
+            var expectedQualifier = findAuraDSBuildLabel(file).orElseGet(() ->
+                fail("Could not find AuraDS qualifier in file: " + file.toAbsolutePath()));
+            assertEquals(expectedQualifier, actualBuildLabel);
+        }
+
+        assertEquals(expectedVersion, actualBaseVersion);
     }
 
     @Test
@@ -107,6 +121,18 @@ class BuildInfoPropertiesTest {
 
     private Optional<String> findVersion(Path file) throws IOException {
         Pattern pattern = Pattern.compile(".*gdsBaseVersion = '(\\d\\.\\d\\.\\d+(-alpha\\d+|-beta\\d+)?)'.*");
+        try(var lines = Files.lines(file, StandardCharsets.UTF_8)) {
+            return lines
+                .flatMap(line -> {
+                    var matcher = pattern.matcher(line);
+                    return matcher.matches() ? Stream.of(matcher.group(1)) : Stream.empty();
+                })
+                .findFirst();
+        }
+    }
+
+    private Optional<String> findAuraDSBuildLabel(Path file) throws IOException {
+        Pattern pattern = Pattern.compile(".*gdsAuraDSVersion = '(\\d+)'");
         try(var lines = Files.lines(file, StandardCharsets.UTF_8)) {
             return lines
                 .flatMap(line -> {
