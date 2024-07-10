@@ -35,7 +35,6 @@ public class NativeRelationshipPropertiesExporterBuilder extends RelationshipPro
             transactionContext,
             graphStore,
             propertyTranslator,
-            concurrency,
             batchSize,
             progressTracker,
             terminationFlag

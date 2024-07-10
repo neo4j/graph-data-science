@@ -27,7 +27,6 @@ import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.config.ArrowConnectionInfo;
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.logging.Log;
 
@@ -51,7 +50,6 @@ public class WriteRelationshipService {
         GraphStore graphStore,
         IdMap rootIdMap,
         String taskName,
-        Concurrency concurrency,
         Optional<ArrowConnectionInfo> arrowConnectionInfo,
         Optional<ResultStore> resultStore,
         RelationshipWithPropertyConsumer relationshipWithPropertyConsumer,
@@ -68,7 +66,6 @@ public class WriteRelationshipService {
             log,
             taskName,
             requestScopedDependencies.getTerminationFlag(),
-            concurrency,
             arrowConnectionInfo,
             resultStore,
             relationshipWithPropertyConsumer,

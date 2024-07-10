@@ -209,7 +209,6 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
 
         var exporter = NativeRelationshipStreamExporter
             .builder(TestSupport.fullAccessTransaction(db), graph, relationshipStream, TerminationFlag.RUNNING_TRUE)
-            .withConcurrency(concurrency)
             .withBatchSize(batchSize)
             .build();
 

@@ -74,7 +74,7 @@ public class WriteNodeLabelApplication {
                 )
                 .withResultStore(configuration.resolveResultStore(resultStore))
                 .withJobId(configuration.jobId())
-                .parallel(DefaultPool.INSTANCE, configuration.concurrency())
+                .parallel(DefaultPool.INSTANCE, configuration.writeConcurrency())
                 .build();
 
             try {

@@ -26,7 +26,6 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.ArrowConnectionInfo;
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -51,7 +50,6 @@ public final class Neo4jDatabaseRelationshipWriter {
         Log log,
         String taskName,
         TerminationFlag algorithmTerminationFlag,
-        Concurrency concurrency,
         Optional<ArrowConnectionInfo> arrowConnectionInfo,
         Optional<ResultStore> resultStore,
         RelationshipWithPropertyConsumer relationshipConsumer,
@@ -71,7 +69,6 @@ public final class Neo4jDatabaseRelationshipWriter {
                 .withGraph(graph)
                 .withTerminationFlag(algorithmTerminationFlag)
                 .withProgressTracker(progressTracker)
-                .withConcurrency(concurrency)
                 .withArrowConnectionInfo(
                     arrowConnectionInfo,
                     graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)

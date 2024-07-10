@@ -20,8 +20,7 @@
 package org.neo4j.gds.core.write;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
@@ -30,7 +29,6 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.values.storable.Values;
@@ -63,9 +61,8 @@ class NativeRelationshipPropertiesExporterTest  extends BaseTest {
         runQuery(DB_CYPHER);
     }
 
-    @ParameterizedTest
-    @ValueSource(ints = {1, 2, 3, 4})
-    void shouldWriteRelationshipsWithMultipleProperties(int concurrency) {
+    @Test
+    void shouldWriteRelationshipsWithMultipleProperties() {
         GraphStore graphStore = new StoreLoaderBuilder().databaseService(db)
             .putRelationshipProjectionsWithIdentifier(
                 "PAID",
@@ -80,7 +77,6 @@ class NativeRelationshipPropertiesExporterTest  extends BaseTest {
             TestSupport.fullAccessTransaction(db),
             graphStore,
             Values::doubleValue,
-            new Concurrency(concurrency),
             1,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE

@@ -22,7 +22,6 @@ package org.neo4j.gds.core.write;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.ArrowConnectionInfo;
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -37,9 +36,8 @@ public abstract class RelationshipPropertiesExporterBuilder {
     protected ProgressTracker progressTracker = ProgressTracker.NULL_TRACKER;
     protected RelationshipPropertyTranslator propertyTranslator = Values::doubleValue;
 
-    // FIXME: These four are only used by the Arrow builder; keeping this aligned with the existing builders but has to be changed.
+    // FIXME: These are only used by the Arrow builder; keeping this aligned with the existing builders but has to be changed.
     protected long relationshipCount = -1L;
-    protected Concurrency concurrency = new Concurrency(Runtime.getRuntime().availableProcessors());
     protected long batchSize = NativeNodePropertyExporter.MIN_BATCH_SIZE;
     protected Optional<ArrowConnectionInfo> arrowConnectionInfo;
     protected Optional<String> remoteDatabaseName; // coupled with arrowConnectionInfo, but should not appear in external API
@@ -89,11 +87,6 @@ public abstract class RelationshipPropertiesExporterBuilder {
     public RelationshipPropertiesExporterBuilder withArrowConnectionInfo(Optional<ArrowConnectionInfo> arrowConnectionInfo, Optional<String> remoteDatabaseName) {
         this.arrowConnectionInfo = arrowConnectionInfo;
         this.remoteDatabaseName = remoteDatabaseName;
-        return this;
-    }
-
-    public RelationshipPropertiesExporterBuilder withConcurrency(Concurrency concurrency) {
-        this.concurrency = concurrency;
         return this;
     }
 

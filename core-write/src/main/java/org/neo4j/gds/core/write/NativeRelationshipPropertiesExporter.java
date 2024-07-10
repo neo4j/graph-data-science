@@ -26,9 +26,6 @@ import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.Write;
-import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -38,7 +35,6 @@ import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.gds.utils.StatementApi;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 
@@ -49,7 +45,6 @@ public class NativeRelationshipPropertiesExporter extends StatementApi implement
     private final RelationshipPropertyTranslator propertyTranslator;
     private final ProgressTracker progressTracker;
 
-    private final Concurrency concurrency;
     private final long batchSize;
 
     private final TerminationFlag terminationFlag;
@@ -58,7 +53,6 @@ public class NativeRelationshipPropertiesExporter extends StatementApi implement
         TransactionContext tx,
         GraphStore graphStore,
         RelationshipPropertyTranslator propertyTranslator,
-        Concurrency concurrency,
         long batchSize,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
@@ -66,7 +60,6 @@ public class NativeRelationshipPropertiesExporter extends StatementApi implement
         super(tx);
         this.graphStore = graphStore;
         this.propertyTranslator = propertyTranslator;
-        this.concurrency = concurrency;
         this.batchSize = batchSize;
         this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
@@ -104,16 +97,9 @@ public class NativeRelationshipPropertiesExporter extends StatementApi implement
 
         progressTracker.beginSubTask();
         try {
-            RunWithConcurrency
-                .builder()
-                .concurrency(concurrency)
-                .tasks(tasks)
-                .maxWaitRetries(Integer.MAX_VALUE)
-                .waitTime(10L, TimeUnit.MICROSECONDS)
-                .terminationFlag(terminationFlag)
-                .executor(DefaultPool.INSTANCE)
-                .mayInterruptIfRunning(false)
-                .run();
+            for (Runnable task : tasks) {
+                task.run();
+            }
         } finally {
             progressTracker.endSubTask();
         }
@@ -136,7 +122,6 @@ public class NativeRelationshipPropertiesExporter extends StatementApi implement
             partition.consume(nodeId -> {
                 relationshipIterator.forEachRelationship(nodeId, writeConsumer);
             });
-
         });
     }
 

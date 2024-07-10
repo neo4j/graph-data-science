@@ -26,7 +26,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.config.ArrowConnectionInfo;
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -83,7 +82,6 @@ public class WriteRelationshipsApplication {
                     relationshipExporterBuilder,
                     terminationFlag,
                     progressTracker,
-                    configuration.concurrency(),
                     configuration.arrowConnectionInfo(),
                     configuration.resolveResultStore(resultStore),
                     graphStore,
@@ -109,7 +107,6 @@ public class WriteRelationshipsApplication {
         RelationshipExporterBuilder relationshipExporterBuilder,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker,
-        Concurrency concurrency,
         Optional<ArrowConnectionInfo> arrowConnectionInfo,
         Optional<ResultStore> resultStore,
         GraphStore graphStore,
@@ -123,7 +120,6 @@ public class WriteRelationshipsApplication {
             .withIdMappingOperator(graph::toOriginalNodeId)
             .withGraph(graph)
             .withTerminationFlag(terminationFlag)
-            .withConcurrency(concurrency)
             .withArrowConnectionInfo(arrowConnectionInfo, graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName))
             .withResultStore(resultStore)
             .withJobId(jobId)

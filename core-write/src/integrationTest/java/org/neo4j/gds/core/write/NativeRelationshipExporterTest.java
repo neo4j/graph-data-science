@@ -22,8 +22,6 @@ package org.neo4j.gds.core.write;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
@@ -35,7 +33,6 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -96,17 +93,15 @@ class NativeRelationshipExporterTest extends BaseTest {
         assertThatExceptionOfType(AuthorizationViolationException.class)
             .isThrownBy(() -> exporter.write("OUT_TYPE"));
     }
-    @ParameterizedTest
-    @ValueSource(ints = {1,2,4})
-    void exportRelationships(int concurrency) {
-        var exporter = setupExportTest(concurrency, /* includeProperties */ true);
+    @Test
+    void exportRelationships() {
+        var exporter = setupExportTest( /* includeProperties */ true);
         exporter.write("FOOBAR", "weight");
         validateWrittenGraph();
     }
 
-    @ParameterizedTest
-    @ValueSource(ints = {1,2,4})
-    void exportRelationshipsWithLongProperties(int concurrency) {
+    @Test
+    void exportRelationshipsWithLongProperties() {
         clearDb();
         runQuery(NODE_QUERY_PART + RELS_QUERY_PART);
 
@@ -125,7 +120,6 @@ class NativeRelationshipExporterTest extends BaseTest {
                 graphStore.getGraph(RelationshipType.of("NEW_REL"), Optional.of("newWeight")),
                 RUNNING_TRUE
             )
-            .withConcurrency(new Concurrency(concurrency))
             .withRelationPropertyTranslator(relProperty -> Values.longValue((long) relProperty))
             .build()
             .write("NEW_REL", "newWeight");
@@ -137,7 +131,7 @@ class NativeRelationshipExporterTest extends BaseTest {
 
     @Test
     void exportRelationshipsWithoutProperties() {
-        var exporter = setupExportTest(/* includeProperties */ false);
+        var exporter = setupExportTest(/* includeProperties */  false);
         exporter.write("FOOBAR");
         validateWrittenGraphWithoutProperties();
 
@@ -177,7 +171,7 @@ class NativeRelationshipExporterTest extends BaseTest {
 
     @Test
     void exportRelationshipsWithAfterWriteConsumerAndNoProperties() {
-        var exporter = setupExportTest(/* includeProperties */ false);
+        var exporter = setupExportTest(true);
         MutableInt count = new MutableInt();
         exporter.write("FOOBAR", "weight", (sourceNodeId, targetNodeId, property) -> {
             count.increment();
@@ -241,10 +235,6 @@ class NativeRelationshipExporterTest extends BaseTest {
     }
 
     private RelationshipExporter setupExportTest(boolean includeProperties) {
-        return setupExportTest(1, includeProperties);
-    }
-
-    private RelationshipExporter setupExportTest(int concurrency, boolean includeProperties) {
         // create graph to export
         clearDb();
         runQuery(NODE_QUERY_PART + RELS_QUERY_PART);
@@ -265,7 +255,6 @@ class NativeRelationshipExporterTest extends BaseTest {
         return NativeRelationshipExporter
             .builder(TestSupport.fullAccessTransaction(db), fromGraph, RUNNING_TRUE)
             .withBatchSize(1)
-            .withConcurrency(new Concurrency(concurrency))
             .build();
     }
 

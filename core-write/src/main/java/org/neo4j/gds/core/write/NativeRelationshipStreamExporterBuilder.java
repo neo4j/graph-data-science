@@ -35,7 +35,6 @@ public final class NativeRelationshipStreamExporterBuilder extends RelationshipS
             toOriginalId,
             relationships,
             batchSize,
-            concurrency,
             terminationFlag,
             progressTracker
         );
