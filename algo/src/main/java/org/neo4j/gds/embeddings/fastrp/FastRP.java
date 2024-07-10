@@ -49,7 +49,6 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.addInPlace;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.addWeightedInPlace;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.l2Norm;
-import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.l2Normalize;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.scale;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -444,10 +443,11 @@ public class FastRP extends Algorithm<FastRPResult> {
                 int adjustedDegree = degree == 0 ? 1 : degree;
                 float degreeScale = 1.0f / adjustedDegree;
                 scale(currentEmbedding, degreeScale);
-                l2Normalize(currentEmbedding);
+                var invL2Norm = 1.0f / l2Norm(currentEmbedding);
+                var safeInvL2Norm = Float.isFinite(invL2Norm) ? invL2Norm : 1.0f;
 
                 // Update the result embedding
-                addWeightedInPlace(embedding, currentEmbedding, iterationWeight);
+                addWeightedInPlace(embedding, currentEmbedding, safeInvL2Norm * iterationWeight);
             });
             progressTracker.logProgress(partition.relationshipCount());
         }
