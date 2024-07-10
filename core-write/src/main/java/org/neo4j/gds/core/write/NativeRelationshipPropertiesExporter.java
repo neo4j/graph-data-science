@@ -26,8 +26,6 @@ import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.Write;
-import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -37,7 +35,6 @@ import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.gds.utils.StatementApi;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 
@@ -100,16 +97,9 @@ public class NativeRelationshipPropertiesExporter extends StatementApi implement
 
         progressTracker.beginSubTask();
         try {
-            RunWithConcurrency
-                .builder()
-                .concurrency(RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY)
-                .tasks(tasks)
-                .maxWaitRetries(Integer.MAX_VALUE)
-                .waitTime(10L, TimeUnit.MICROSECONDS)
-                .terminationFlag(terminationFlag)
-                .executor(DefaultPool.INSTANCE)
-                .mayInterruptIfRunning(false)
-                .run();
+            for (Runnable task : tasks) {
+                task.run();
+            }
         } finally {
             progressTracker.endSubTask();
         }
@@ -132,7 +122,6 @@ public class NativeRelationshipPropertiesExporter extends StatementApi implement
             partition.consume(nodeId -> {
                 relationshipIterator.forEachRelationship(nodeId, writeConsumer);
             });
-
         });
     }
 
