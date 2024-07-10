@@ -17,19 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications;
+package org.neo4j.gds.applications.algorithms.embeddings;
 
-import org.neo4j.gds.applications.algorithms.embeddings.GraphSageAlgorithmProcessing;
-import org.neo4j.gds.applications.algorithms.embeddings.GraphSageModelCatalog;
-import org.neo4j.gds.applications.algorithms.embeddings.GraphSageModelRepository;
-import org.neo4j.gds.applications.algorithms.embeddings.Node2VecAlgorithmProcessing;
-import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithms;
-import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsMutateModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsStatsModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsStreamModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsTrainModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsWriteModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
@@ -63,7 +52,7 @@ public final class NodeEmbeddingApplications {
         this.writeMode = writeMode;
     }
 
-    static NodeEmbeddingApplications create(
+    public static NodeEmbeddingApplications create(
         Log log,
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,

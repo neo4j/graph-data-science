@@ -20,7 +20,10 @@
 package org.neo4j.gds.applications;
 
 import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
+import org.neo4j.gds.applications.algorithms.centrality.CentralityApplications;
+import org.neo4j.gds.applications.algorithms.community.CommunityApplications;
 import org.neo4j.gds.applications.algorithms.embeddings.GraphSageModelRepository;
+import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingApplications;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
@@ -32,6 +35,8 @@ import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplications;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingApplications;
+import org.neo4j.gds.applications.algorithms.similarity.SimilarityApplications;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.applications.graphstorecatalog.DefaultCatalogBusinessFacade;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
