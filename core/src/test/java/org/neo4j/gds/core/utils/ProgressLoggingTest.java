@@ -19,20 +19,13 @@
  */
 package org.neo4j.gds.core.utils;
 
-import org.apache.commons.io.output.WriterOutputStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
-import org.neo4j.gds.compat.OutputStreamLog;
 import org.neo4j.gds.graphbuilder.GraphBuilder;
-import org.neo4j.gds.logging.LogAdapter;
-import org.neo4j.logging.Level;
-import org.neo4j.logging.Log;
-
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
+import org.neo4j.gds.logging.GdsTestLog;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -57,26 +50,18 @@ class ProgressLoggingTest extends BaseTest {
 
     @Test
     void testLoad() {
-        final StringWriter buffer = new StringWriter();
+        var log = new GdsTestLog();
 
         new StoreLoaderBuilder()
             .databaseService(db)
-            .log(new LogAdapter(testLogger(buffer)))
+            .log(log)
             .addNodeLabel(LABEL)
             .addRelationshipType(RELATIONSHIP)
             .addRelationshipProperty(PropertyMapping.of(PROPERTY, 1.0))
             .build()
             .graph();
 
-        final String output = buffer.toString();
-
-        assertThat(output)
-            .isNotEmpty()
-            .contains("Loading");
-    }
-
-    private static Log testLogger(StringWriter writer) {
-        var outStream = new WriterOutputStream(writer, StandardCharsets.UTF_8);
-        return OutputStreamLog.builder(outStream).level(Level.DEBUG).category("Test").build().log();
+        assertThat(log.getMessages(GdsTestLog.INFO)).allSatisfy(msg -> assertThat(msg).contains("Loading"));
+        assertThat(log.getMessages(GdsTestLog.DEBUG)).allSatisfy(msg -> assertThat(msg).contains("Loading"));
     }
 }

@@ -28,7 +28,6 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -37,7 +36,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.logging.LogAdapter;
+import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 
@@ -813,7 +812,7 @@ final class NodeSimilarityTest {
         var graph = naturalGraph;
         var concurrency = new Concurrency(concurrencyValue);
         var factory = new NodeSimilarityFactory<>();
-        var progressLog = Neo4jProxy.testLog();
+        var progressLog = new GdsTestLog();
         var progressTracker = new TestProgressTracker(
             factory.progressTask(graph, false),
             progressLog,
@@ -858,11 +857,11 @@ final class NodeSimilarityTest {
         var config = NodeSimilarityStreamConfigImpl.builder()
             .similarityCutoff(0.0).topN(100).topK(topK).concurrency(concurrency).logProgress(false).build();
 
-        var progressLog = Neo4jProxy.testLog();
+        var progressLog = new GdsTestLog();
         var nodeSimilarity = new NodeSimilarityFactory<>().build(
             graph,
             config,
-            new LogAdapter(progressLog),
+            progressLog,
             EmptyTaskRegistryFactory.INSTANCE
         );
 
@@ -886,7 +885,7 @@ final class NodeSimilarityTest {
     void shouldLogProgress(int concurrencyValue) {
         var graph = naturalGraph;
         var progressTask = new NodeSimilarityFactory<>().progressTask(graph, false);
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         var concurrency = new Concurrency(concurrencyValue);
         var progressTracker = new TestProgressTracker(
             progressTask,
@@ -946,7 +945,7 @@ final class NodeSimilarityTest {
         );
         var progressTask = new NodeSimilarityFactory<>().progressTask(graph, true);
         var concurrency = new Concurrency(4);
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         var progressTracker = new TestProgressTracker(
             progressTask,
             log,

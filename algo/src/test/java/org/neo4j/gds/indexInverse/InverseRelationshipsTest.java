@@ -27,7 +27,6 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -36,6 +35,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.logging.GdsTestLog;
 
 import java.util.List;
 import java.util.Optional;
@@ -127,7 +127,7 @@ class InverseRelationshipsTest {
 
     @Test
     void logProgress() {
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
 
         var parameters = new InverseRelationshipsParameters(new Concurrency(4), List.of("T1", "T2"));
 

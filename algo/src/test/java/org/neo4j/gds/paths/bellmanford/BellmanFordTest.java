@@ -26,7 +26,6 @@ import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -35,6 +34,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStreamConfigImpl;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 
@@ -236,7 +236,7 @@ class BellmanFordTest {
             .build();
 
         var progressTask = new BellmanFordAlgorithmFactory<>().progressTask(graph, config);
-        var testLog = Neo4jProxy.testLog();
+        var testLog = new GdsTestLog();
         var progressTracker = new TestProgressTracker(progressTask, testLog, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
 
         new BellmanFordAlgorithmFactory<>().build(graph, config, progressTracker)

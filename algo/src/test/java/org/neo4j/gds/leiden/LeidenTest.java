@@ -26,15 +26,13 @@ import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
-import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ExecutorServiceUtil;
-import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.collections.ha.HugeDoubleArray;
-import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -42,6 +40,8 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
@@ -296,7 +296,7 @@ class LeidenTest {
     void shouldLogProgress() {
         var config = LeidenStatsConfigImpl.builder().maxLevels(3).randomSeed(19L).build();
         var factory = new LeidenAlgorithmFactory<>();
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         var progressTracker = new TestProgressTracker(
             factory.progressTask(graph, config),
             log,

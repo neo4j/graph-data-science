@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphNameConfig;
@@ -37,6 +36,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
 
@@ -90,7 +90,7 @@ class PredictPipelineExecutorTest {
 
     @Test
     void shouldHaveCorrectProgressLoggingOnSuccessfulComputation() {
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         var pipeline = new BogusNodePropertyPipeline();
         var pipelineExecutor = new SucceedingPipelineExecutor<>(
             pipeline,
@@ -129,7 +129,7 @@ class PredictPipelineExecutorTest {
 
     @Test
     void shouldHaveCorrectProgressLoggingOnFailure() {
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         var pipeline = new BogusNodePropertyPipeline();
         var pipelineExecutor = new FailingPipelineExecutor<>(
             pipeline,

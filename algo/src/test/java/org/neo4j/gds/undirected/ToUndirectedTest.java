@@ -26,7 +26,6 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
@@ -36,7 +35,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
-import org.neo4j.gds.logging.LogAdapter;
+import org.neo4j.gds.logging.GdsTestLog;
 
 import java.util.Map;
 import java.util.Optional;
@@ -305,7 +304,7 @@ class ToUndirectedTest {
 
     @Test
     void shouldLogProgress() {
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
 
         var config = ToUndirectedConfigImpl
             .builder()
@@ -317,7 +316,7 @@ class ToUndirectedTest {
         ToUndirected toUndirected = new ToUndirectedAlgorithmFactory().build(
             directedGraphStore,
             config,
-            new LogAdapter(log),
+            log,
             EmptyTaskRegistryFactory.INSTANCE
         );
 

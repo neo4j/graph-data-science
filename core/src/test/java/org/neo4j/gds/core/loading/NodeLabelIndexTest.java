@@ -22,11 +22,10 @@ package org.neo4j.gds.core.loading;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.StoreLoaderBuilder;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jGraphExtension;
-import org.neo4j.gds.logging.LogAdapter;
+import org.neo4j.gds.logging.GdsTestLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,10 +62,10 @@ public class NodeLabelIndexTest extends BaseTest {
         ));
 
 
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         var graph = new StoreLoaderBuilder()
             .databaseService(db)
-            .log(new LogAdapter(log))
+            .log(log)
             .addNodeLabel("Foo")
             .addNodeLabel("Bar")
             .build()

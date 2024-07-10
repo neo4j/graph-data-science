@@ -24,7 +24,6 @@ import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -33,6 +32,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
@@ -407,7 +407,7 @@ class TopologicalSortTest {
     void shouldLogProgress() {
         var tsFactory = new TopologicalSortFactory<>();
         var progressTask = tsFactory.progressTask(lastGraph, null);
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         var testTracker = new TestProgressTracker(
             progressTask,
             log,

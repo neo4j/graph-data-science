@@ -27,7 +27,6 @@ import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -38,6 +37,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.scaling.MinMax;
 import org.neo4j.gds.scaling.ScalerFactory;
 
@@ -249,7 +249,7 @@ class ScalePropertiesTest {
             .build();
 
         var factory = new ScalePropertiesFactory<>();
-        var testLog = Neo4jProxy.testLog();
+        var testLog = new GdsTestLog();
         var progressTracker = new TestProgressTracker(
             factory.progressTask(graph, config),
             testLog,

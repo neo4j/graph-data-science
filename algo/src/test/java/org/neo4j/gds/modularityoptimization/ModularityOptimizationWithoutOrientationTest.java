@@ -35,23 +35,23 @@ import org.neo4j.gds.assertj.Extractors;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.mem.MemoryEstimations;
-import org.neo4j.gds.mem.MemoryRange;
-import org.neo4j.gds.mem.MemoryTree;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.Estimate;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryTree;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.logging.Log;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -193,7 +193,7 @@ class ModularityOptimizationWithoutOrientationTest {
 
     @Test
     void testLogging() {
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
 
         compute(graph, K1COLORING_MAX_ITERATIONS, null, new Concurrency(3), 2, log);
 
@@ -261,7 +261,7 @@ class ModularityOptimizationWithoutOrientationTest {
         Concurrency concurrency,
         int minBatchSize
     ) {
-        return compute(graph, maxIterations, properties, concurrency, minBatchSize, Neo4jProxy.testLog());
+        return compute(graph, maxIterations, properties, concurrency, minBatchSize, new GdsTestLog());
     }
 
     @NotNull

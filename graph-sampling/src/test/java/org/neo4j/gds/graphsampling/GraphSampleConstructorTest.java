@@ -26,7 +26,6 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
@@ -41,7 +40,7 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfigImpl;
 import org.neo4j.gds.graphsampling.samplers.rw.rwr.RandomWalkWithRestarts;
-import org.neo4j.gds.logging.LogAdapter;
+import org.neo4j.gds.logging.GdsTestLog;
 
 import java.util.List;
 import java.util.Set;
@@ -299,10 +298,10 @@ class GraphSampleConstructorTest {
             .build();
         var rwr = new RandomWalkWithRestarts(config);
 
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         var progressTracker = new TaskProgressTracker(
             GraphSampleConstructor.progressTask(naturalGraphStore, rwr),
-            new LogAdapter(log),
+            log,
             new Concurrency(1),
             EmptyTaskRegistryFactory.INSTANCE
         );

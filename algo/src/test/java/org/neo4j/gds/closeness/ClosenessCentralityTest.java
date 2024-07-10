@@ -22,7 +22,6 @@ package org.neo4j.gds.closeness;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestProgressTracker;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -32,6 +31,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.logging.GdsTestLog;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -111,7 +111,7 @@ class ClosenessCentralityTest {
     @Test
     void shouldLogProgress() {
         var progressTask = new ClosenessCentralityAlgorithmFactory<>().progressTask(graph.nodeCount());
-        var testLog = Neo4jProxy.testLog();
+        var testLog = new GdsTestLog();
         var progressTracker = new TestProgressTracker(progressTask, testLog, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
 
         var algo = new ClosenessCentrality(

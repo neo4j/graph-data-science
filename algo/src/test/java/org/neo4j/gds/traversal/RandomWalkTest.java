@@ -30,7 +30,6 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -42,6 +41,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -513,7 +513,7 @@ class RandomWalkTest {
                 .build();
 
             var fact = new RandomWalkAlgorithmFactory<RandomWalkStreamConfig>();
-            var log = Neo4jProxy.testLog();
+            var log = new GdsTestLog();
             var taskStore = new PerDatabaseTaskStore();
 
             var pt = new TestProgressTracker(
@@ -564,7 +564,7 @@ class RandomWalkTest {
                 .build();
 
             var fact = new RandomWalkAlgorithmFactory<RandomWalkStreamConfig>();
-            var log = Neo4jProxy.testLog();
+            var log = new GdsTestLog();
             var taskStore = new PerDatabaseTaskStore();
 
             var pt = new TestProgressTracker(

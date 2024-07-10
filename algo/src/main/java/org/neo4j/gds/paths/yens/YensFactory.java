@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 
 public class YensFactory<CONFIG extends ShortestPathYensBaseConfig> extends GraphAlgorithmFactory<Yens, CONFIG> {
 
@@ -52,6 +53,12 @@ public class YensFactory<CONFIG extends ShortestPathYensBaseConfig> extends Grap
         CONFIG configuration,
         ProgressTracker progressTracker
     ) {
-        return Yens.sourceTarget(graph, configuration, configuration.concurrency(), progressTracker);
+        return Yens.sourceTarget(
+            graph,
+            configuration,
+            configuration.concurrency(),
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
+        );
     }
 }

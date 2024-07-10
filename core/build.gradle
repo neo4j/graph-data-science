@@ -52,8 +52,9 @@ dependencies {
     )
 
     implementation (
-            openGds.caffeine,
-            openGds.stormpot,
+        openGds.caffeine,
+        openGds.stormpot,
+        project(':neo4j-log-adapter'),
     )
 
     // TEST DEPENDENCIES
@@ -66,7 +67,6 @@ dependencies {
 
     testImplementation project(':edition-api')
     testImplementation project(':legacy-cypher-projection')
-    testImplementation project(':neo4j-log-adapter')
     testImplementation project(':progress-tracking')
     testImplementation project(':test-graph-loaders')
     testImplementation project(':test-utils')

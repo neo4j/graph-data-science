@@ -28,13 +28,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.mem.MemoryRange;
-import org.neo4j.gds.mem.MemoryTree;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -42,6 +38,9 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryTree;
 import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.Metric;
@@ -58,6 +57,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfigImpl;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Map;
@@ -474,7 +474,7 @@ class LinkPredictionTrainTest {
 
         pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));
 
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         var progressTracker = new TestProgressTracker(
             progressTask(
                 trainGraph.relationshipCount(),
@@ -572,7 +572,7 @@ class LinkPredictionTrainTest {
 
         pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));
 
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         var progressTracker = new TestProgressTracker(
             progressTask(
                 trainGraph.relationshipCount(),
@@ -638,7 +638,7 @@ class LinkPredictionTrainTest {
 
         pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));
 
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         var progressTracker = new TestProgressTracker(
             progressTask(
                 2 * trainGraph.relationshipCount(),

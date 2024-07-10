@@ -27,7 +27,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProgressTracker;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -37,6 +36,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.stream.Stream;
@@ -152,7 +152,7 @@ class PrimTest {
     void shouldLogProgress() {
         var parameters = new SpanningTreeParameters(Prim.MIN_OPERATOR, graph.toOriginalNodeId("a"));
         var factory = new SpanningTreeAlgorithmFactory<>();
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         var progressTracker = new TestProgressTracker(
             factory.progressTask(graph),
             log,

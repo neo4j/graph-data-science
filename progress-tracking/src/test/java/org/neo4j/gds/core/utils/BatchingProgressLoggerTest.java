@@ -24,14 +24,13 @@ import org.eclipse.collections.impl.utility.ListIterate;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.neo4j.gds.assertj.Extractors;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.progress.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 
@@ -55,12 +54,12 @@ class BatchingProgressLoggerTest {
 
     @Test
     void mustLogProgressOnlyAfterBatchSizeInvocations() {
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         var taskVolume = 42;
         var batchSize = 8;
         var concurrency = new Concurrency(1);
         var logger = new BatchingProgressLogger(
-            new LogAdapter(log),
+            log,
             Tasks.leaf("foo", taskVolume),
             batchSize,
             concurrency
@@ -87,13 +86,13 @@ class BatchingProgressLoggerTest {
 
     @Test
     void mustLogProgressOnlyAfterHittingOrExceedingBatchSize() {
-        var log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         var taskVolume = 1337;
         var progressStep = 5;
         var batchSize = 16;
         var concurrency = new Concurrency(1);
         var logger = new BatchingProgressLogger(
-            new LogAdapter(log),
+            log,
             Tasks.leaf("foo", taskVolume),
             batchSize,
             concurrency
@@ -150,8 +149,8 @@ class BatchingProgressLoggerTest {
         var concurrency = new Concurrency(1);
         var taskVolume = 1337;
 
-        TestLog log = Neo4jProxy.testLog();
-        var logger = new BatchingProgressLogger(new LogAdapter(log), Tasks.leaf("Test", taskVolume), concurrency); // batchSize is 13
+        var log = new GdsTestLog();
+        var logger = new BatchingProgressLogger(log, Tasks.leaf("Test", taskVolume), concurrency); // batchSize is 13
         logger.reset(taskVolume);
         logger.logProgress(20); // callCount is 20, call count after logging == 20 - 13 = 7
         assertThat(log.getMessages(TestLog.INFO))
@@ -166,9 +165,9 @@ class BatchingProgressLoggerTest {
 
     @Test
     void log100Percent() {
-        TestLog log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         var concurrency = new Concurrency(1);
-        var testProgressLogger = new BatchingProgressLogger(new LogAdapter(log), Tasks.leaf("Test"), concurrency);
+        var testProgressLogger = new BatchingProgressLogger(log, Tasks.leaf("Test"), concurrency);
         testProgressLogger.reset(1337);
         testProgressLogger.logFinishPercentage();
         assertThat(log.getMessages(TestLog.INFO))
@@ -178,9 +177,9 @@ class BatchingProgressLoggerTest {
 
     @Test
     void shouldLog100OnlyOnce() {
-        TestLog log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         var concurrency = new Concurrency(1);
-        var testProgressLogger = new BatchingProgressLogger(new LogAdapter(log), Tasks.leaf("Test"), concurrency);
+        var testProgressLogger = new BatchingProgressLogger(log, Tasks.leaf("Test"), concurrency);
         testProgressLogger.reset(1);
         testProgressLogger.logProgress(1);
         testProgressLogger.logFinishPercentage();
@@ -191,9 +190,9 @@ class BatchingProgressLoggerTest {
 
     @Test
     void shouldNotExceed100Percent() {
-        TestLog log = Neo4jProxy.testLog();
+        var log = new GdsTestLog();
         var concurrency = new Concurrency(1);
-        var testProgressLogger = new BatchingProgressLogger(new LogAdapter(log), Tasks.leaf("Test"), concurrency);
+        var testProgressLogger = new BatchingProgressLogger(log, Tasks.leaf("Test"), concurrency);
         testProgressLogger.reset(1);
         testProgressLogger.logProgress(1); // reaches 100 %
         testProgressLogger.logProgress(1); // exceeds 100 %
@@ -226,8 +225,8 @@ class BatchingProgressLoggerTest {
     }
 
     private static List<Integer> performLogging(long taskVolume, Concurrency concurrency) {
-        TestLog log = Neo4jProxy.testLog();
-        var logger = new BatchingProgressLogger(new LogAdapter(log), Tasks.leaf("Test", taskVolume), concurrency);
+        var log = new GdsTestLog();
+        var logger = new BatchingProgressLogger(log, Tasks.leaf("Test", taskVolume), concurrency);
         logger.reset(taskVolume);
 
         var batchSize = (int) BitUtil.ceilDiv(taskVolume, concurrency.value());
