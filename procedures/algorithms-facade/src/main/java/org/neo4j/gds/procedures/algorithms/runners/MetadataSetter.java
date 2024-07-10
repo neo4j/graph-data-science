@@ -24,10 +24,15 @@ import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.procedures.algorithms.AlgorithmHandle;
+import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationValidationHook;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
+/**
+ * We need to shoehorn in a call to the algorithm metadata setter, which is something we do for stream mode
+ */
 public class MetadataSetter implements AlgorithmExecutionScaffolding {
     public final AlgorithmMetaDataSetter algorithmMetaDataSetter;
     public final AlgorithmExecutionScaffolding delegate;
@@ -37,21 +42,38 @@ public class MetadataSetter implements AlgorithmExecutionScaffolding {
         this.delegate = delegate;
     }
 
-    /**
-     * We need to shoehorn in a call to the algorithm metadata setter, which is something we do for stream mode
-     */
     @Override
     public <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER runAlgorithm(
         String graphNameAsString,
         Map<String, Object> rawConfiguration,
-        Function<CypherMapWrapper, CONFIGURATION> configurationSupplier,
+        Function<CypherMapWrapper, CONFIGURATION> configurationParser,
         AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> algorithm,
         ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
     ) {
-        return delegate.runAlgorithm(
+        return runAlgorithmWithValidation(
             graphNameAsString,
             rawConfiguration,
-            configurationSupplier,
+            configurationParser,
+            Optional.empty(),
+            algorithm,
+            resultBuilder
+        );
+    }
+
+    @Override
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER runAlgorithmWithValidation(
+        String graphNameAsString,
+        Map<String, Object> rawConfiguration,
+        Function<CypherMapWrapper, CONFIGURATION> configurationParser,
+        Optional<ConfigurationValidationHook<CONFIGURATION>> configurationValidation,
+        AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> algorithm,
+        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
+    ) {
+        return delegate.runAlgorithmWithValidation(
+            graphNameAsString,
+            rawConfiguration,
+            configurationParser,
+            configurationValidation,
             (graphName, configuration, __) -> {
                 // the shoehorning
                 algorithmMetaDataSetter.set(configuration);

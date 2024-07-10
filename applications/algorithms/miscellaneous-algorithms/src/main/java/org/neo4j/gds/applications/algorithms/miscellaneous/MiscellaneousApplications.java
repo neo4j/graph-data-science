@@ -19,48 +19,59 @@
  */
 package org.neo4j.gds.applications.algorithms.miscellaneous;
 
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 
 public final class MiscellaneousApplications {
-    private final MiscellaneousEstimationModeBusinessFacade estimation;
-    private final MiscellaneousMutateModeBusinessFacade mutation;
+    private final MiscellaneousApplicationsEstimationModeBusinessFacade estimation;
+    private final MiscellaneousApplicationsMutateModeBusinessFacade mutation;
+    private final MiscellaneousApplicationsStatsModeBusinessFacade stats;
 
     private MiscellaneousApplications(
-        MiscellaneousEstimationModeBusinessFacade estimation,
-        MiscellaneousMutateModeBusinessFacade mutation
+        MiscellaneousApplicationsEstimationModeBusinessFacade estimation,
+        MiscellaneousApplicationsMutateModeBusinessFacade mutation,
+        MiscellaneousApplicationsStatsModeBusinessFacade stats
     ) {
         this.estimation = estimation;
         this.mutation = mutation;
+        this.stats = stats;
     }
 
     public static MiscellaneousApplications create(
+        AlgorithmEstimationTemplate algorithmEstimationTemplate,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         ProgressTrackerCreator progressTrackerCreator,
         MutateNodeProperty mutateNodeProperty
     ) {
         var algorithms = new MiscellaneousAlgorithms(progressTrackerCreator);
 
-        var estimation = new MiscellaneousEstimationModeBusinessFacade();
-        var mutation = new MiscellaneousMutateModeBusinessFacade(
+        var estimation = new MiscellaneousApplicationsEstimationModeBusinessFacade(algorithmEstimationTemplate);
+        var mutation = new MiscellaneousApplicationsMutateModeBusinessFacade(
             estimation,
             algorithms,
             algorithmProcessingTemplateConvenience,
             mutateNodeProperty
         );
-
-        return new MiscellaneousApplications(
+        var stats = new MiscellaneousApplicationsStatsModeBusinessFacade(
             estimation,
-            mutation
+            algorithms,
+            algorithmProcessingTemplateConvenience
         );
+
+        return new MiscellaneousApplications(estimation, mutation, stats);
     }
 
-    public MiscellaneousEstimationModeBusinessFacade estimate() {
+    public MiscellaneousApplicationsEstimationModeBusinessFacade estimate() {
         return estimation;
     }
 
-    public MiscellaneousMutateModeBusinessFacade mutate() {
+    public MiscellaneousApplicationsMutateModeBusinessFacade mutate() {
         return mutation;
+    }
+
+    public MiscellaneousApplicationsStatsModeBusinessFacade stats() {
+        return stats;
     }
 }

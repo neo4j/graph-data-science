@@ -22,8 +22,9 @@ package org.neo4j.gds.procedures.algorithms.miscellaneous.stubs;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsEstimationModeBusinessFacade;
 import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.procedures.algorithms.miscellaneous.ScalePropertiesConfigurationValidationHook;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.ScalePropertiesMutateResult;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
@@ -92,7 +93,7 @@ public class ScalePropertiesMutateStub implements MutateStub<ScalePropertiesMuta
         );
     }
 
-    private MiscellaneousEstimationModeBusinessFacade estimationMode() {
+    private MiscellaneousApplicationsEstimationModeBusinessFacade estimationMode() {
         return applicationsFacade.miscellaneous().estimate();
     }
 }

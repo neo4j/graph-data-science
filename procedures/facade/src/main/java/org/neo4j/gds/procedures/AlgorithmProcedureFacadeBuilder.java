@@ -21,7 +21,6 @@ package org.neo4j.gds.procedures;
 
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmMutateBusinessFacade;
-import org.neo4j.gds.algorithms.misc.MiscAlgorithmStatsBusinessFacade;
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmStreamBusinessFacade;
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmWriteBusinessFacade;
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmsEstimateBusinessFacade;
@@ -118,7 +117,13 @@ class AlgorithmProcedureFacadeBuilder {
     }
 
     MiscellaneousProcedureFacade createMiscellaneousProcedureFacade() {
-        return MiscellaneousProcedureFacade.create(genericStub, applicationsFacade, procedureReturnColumns);
+        return MiscellaneousProcedureFacade.create(
+            genericStub,
+            applicationsFacade,
+            procedureReturnColumns,
+            estimationModeRunner,
+            algorithmExecutionScaffolding
+        );
     }
 
     MiscAlgorithmsProcedureFacade createMiscellaneousAlgorithmsProcedureFacade() {
@@ -128,8 +133,6 @@ class AlgorithmProcedureFacadeBuilder {
         var estimateBusinessFacade = new MiscAlgorithmsEstimateBusinessFacade(algorithmEstimator);
 
         var streamBusinessFacade = new MiscAlgorithmStreamBusinessFacade(miscAlgorithmsFacade);
-
-        var statsBusinessFacade = new MiscAlgorithmStatsBusinessFacade(miscAlgorithmsFacade);
 
         var writeBusinessFacade = new MiscAlgorithmWriteBusinessFacade(miscAlgorithmsFacade, writeNodePropertyService);
 
@@ -144,7 +147,6 @@ class AlgorithmProcedureFacadeBuilder {
             procedureReturnColumns,
             estimateBusinessFacade,
             mutateBusinessFacade,
-            statsBusinessFacade,
             streamBusinessFacade,
             writeBusinessFacade
         );
