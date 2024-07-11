@@ -22,7 +22,8 @@ package org.neo4j.gds.compat;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.configuration.Config;
 import org.neo4j.gds.compat.batchimport.BatchImporter;
-import org.neo4j.gds.compat.batchimport.Configuration;
+import org.neo4j.gds.compat.batchimport.ExecutionMonitor;
+import org.neo4j.gds.compat.batchimport.Monitor;
 import org.neo4j.gds.compat.batchimport.input.Collector;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
@@ -34,7 +35,6 @@ import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
-import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.logging.internal.LogService;
@@ -95,11 +95,10 @@ public interface Neo4jProxyApi {
 
     @CompatSince(minor = 22)
     BatchImporter instantiateBlockBatchImporter(
-        DatabaseLayout directoryStructure,
+        DatabaseLayout dbLayout,
         FileSystemAbstraction fileSystem,
-        PageCacheTracer pageCacheTracer,
-        Configuration configuration,
-        CompatMonitor compatMonitor,
+        org.neo4j.gds.compat.batchimport.Config config,
+        Monitor monitor,
         LogService logService,
         Config dbConfig,
         JobScheduler jobScheduler,
@@ -110,9 +109,8 @@ public interface Neo4jProxyApi {
     BatchImporter instantiateRecordBatchImporter(
         DatabaseLayout directoryStructure,
         FileSystemAbstraction fileSystem,
-        PageCacheTracer aNull,
-        Configuration configuration,
-        CompatExecutionMonitor compatExecutionMonitor,
+        org.neo4j.gds.compat.batchimport.Config config,
+        ExecutionMonitor executionMonitor,
         LogService logService,
         Config dbConfig,
         JobScheduler jobScheduler,

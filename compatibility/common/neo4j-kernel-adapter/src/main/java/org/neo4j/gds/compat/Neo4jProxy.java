@@ -30,8 +30,7 @@ import org.neo4j.configuration.connectors.ConnectorType;
 import org.neo4j.configuration.helpers.DatabaseNameValidator;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.compat.batchimport.BatchImporter;
-import org.neo4j.gds.compat.batchimport.Configuration;
-import org.neo4j.gds.compat.batchimport.IndexConfig;
+import org.neo4j.gds.compat.batchimport.ExecutionMonitor;
 import org.neo4j.gds.compat.batchimport.input.Collector;
 import org.neo4j.gds.compat.batchimport.input.IdType;
 import org.neo4j.gds.compat.batchimport.input.InputEntityVisitor;
@@ -63,7 +62,6 @@ import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.layout.Neo4jLayout;
 import org.neo4j.io.pagecache.context.CursorContext;
-import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.KernelTransactionHandle;
 import org.neo4j.kernel.api.procedure.CallableProcedure;
@@ -328,63 +326,29 @@ public final class Neo4jProxy {
         return new CompositeNodeCursorImpl(cursors, labelIds);
     }
 
-    public static Configuration batchImporterConfig(
-        int batchSize,
-        int writeConcurrency,
-        boolean highIO,
-        IndexConfig indexConfig
-    ) {
-        return new org.neo4j.gds.compat.batchimport.Configuration() {
-
-            @Override
-            public int batchSize() {
-                return batchSize;
-            }
-
-            @Override
-            public int maxNumberOfWorkerThreads() {
-                return writeConcurrency;
-            }
-
-            @Override
-            public boolean highIO() {
-                return highIO;
-            }
-
-            @Override
-            public IndexConfig indexConfig() {
-                return indexConfig;
-            }
-        };
-    }
-
-    public static int writeConcurrency(Configuration batchImportConfiguration) {
-        return batchImportConfiguration.maxNumberOfWorkerThreads();
-    }
-
     public static BatchImporter instantiateBatchImporter(
         DatabaseLayout directoryStructure,
         FileSystemAbstraction fileSystem,
-        Configuration configuration,
+        org.neo4j.gds.compat.batchimport.Config configuration,
         LogService logService,
-        CompatExecutionMonitor executionMonitor,
+        ExecutionMonitor executionMonitor,
         Config dbConfig,
         JobScheduler jobScheduler,
         Collector badCollector
     ) {
         if (dbConfig.get(GraphDatabaseSettings.db_format).equals("block")) {
-            return instantiateBlockBatchImporter(
+            return IMPL.instantiateBlockBatchImporter(
                 directoryStructure,
                 fileSystem,
                 configuration,
-                executionMonitor.toCompatMonitor(),
+                executionMonitor.toMonitor(),
                 logService,
                 dbConfig,
                 jobScheduler,
                 badCollector
             );
         } else {
-            return instantiateRecordBatchImporter(
+            return IMPL.instantiateRecordBatchImporter(
                 directoryStructure,
                 fileSystem,
                 configuration,
@@ -414,52 +378,6 @@ public final class Neo4jProxy {
 //                EmptyMemoryTracker.INSTANCE,
 //                CursorContextFactory.NULL_CONTEXT_FACTORY
 //            );
-    }
-
-    private static BatchImporter instantiateBlockBatchImporter(
-        DatabaseLayout directoryStructure,
-        FileSystemAbstraction fileSystem,
-        Configuration configuration,
-        CompatMonitor compatMonitor,
-        LogService logService,
-        Config dbConfig,
-        JobScheduler jobScheduler,
-        Collector badCollector
-    ) {
-        return IMPL.instantiateBlockBatchImporter(
-            directoryStructure,
-            fileSystem,
-            PageCacheTracer.NULL,
-            configuration,
-            compatMonitor,
-            logService,
-            dbConfig,
-            jobScheduler,
-            badCollector
-        );
-    }
-
-    private static BatchImporter instantiateRecordBatchImporter(
-        DatabaseLayout directoryStructure,
-        FileSystemAbstraction fileSystem,
-        Configuration configuration,
-        CompatExecutionMonitor compatExecutionMonitor,
-        LogService logService,
-        Config dbConfig,
-        JobScheduler jobScheduler,
-        Collector badCollector
-    ) {
-        return IMPL.instantiateRecordBatchImporter(
-            directoryStructure,
-            fileSystem,
-            PageCacheTracer.NULL,
-            configuration,
-            compatExecutionMonitor,
-            logService,
-            dbConfig,
-            jobScheduler,
-            badCollector
-        );
     }
 
     public static InputEntityIdVisitor.Long inputEntityLongIdVisitor(IdType idType, ReadableGroups groups) {

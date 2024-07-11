@@ -21,41 +21,46 @@ package org.neo4j.gds.core.io.db;
 
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.compat.CompatExecutionMonitor;
-import org.neo4j.gds.compat.CompatMonitor;
-import org.neo4j.gds.compat.batchimport.Configuration;
+import org.neo4j.gds.compat.batchimport.ExecutionMonitor;
+import org.neo4j.gds.compat.batchimport.Monitor;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.internal.batchimport.staging.CoarseBoundedProgressExecutionMonitor;
 import org.neo4j.internal.batchimport.staging.StageExecution;
+import org.neo4j.internal.batchimport.staging.Step;
+import org.neo4j.internal.batchimport.stats.Keys;
+
+import java.util.concurrent.TimeUnit;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
+public final class ProgressTrackerExecutionMonitor implements ExecutionMonitor {
 
-// TODO: use delegates instead of inheritance for compat reasons
-public final class ProgressTrackerExecutionMonitor
-    extends CoarseBoundedProgressExecutionMonitor
-    implements CompatExecutionMonitor {
-
+    private final long intervalMillis;
+    private final long totalNumberOfBatches;
+    private long prevDoneBatches;
+    private long totalReportedBatches;
     private final long total;
     private final ProgressTracker progressTracker;
+
+    ProgressTrackerExecutionMonitor(
+        GraphStore graphStore,
+        ProgressTracker progressTracker,
+        long batchSize
+    ) {
+        long highNodeId = graphStore.nodeCount();
+        long highRelationshipId = graphStore.relationshipCount();
+        this.intervalMillis = TimeUnit.SECONDS.toMillis(1);
+        this.totalNumberOfBatches = highNodeId / batchSize * 3L + highRelationshipId / batchSize * 4L;
+        this.total = getTotal(graphStore);
+        this.progressTracker = progressTracker;
+    }
 
     public static Task progressTask(GraphStore graphStore) {
         return Tasks.leaf(
             GraphStoreToDatabaseExporter.class.getSimpleName(),
             graphStore.nodes().nodeCount() + graphStore.relationshipCount()
         );
-    }
-
-    ProgressTrackerExecutionMonitor(
-        GraphStore graphStore,
-        ProgressTracker progressTracker,
-        Configuration config
-    ) {
-        super(graphStore.nodeCount(), graphStore.relationshipCount(), null /* TODO: config */);
-        this.total = getTotal(graphStore);
-        this.progressTracker = progressTracker;
     }
 
     private static long getTotal(GraphStore graphStore) {
@@ -69,44 +74,71 @@ public final class ProgressTrackerExecutionMonitor
     @Override
     public void initialize(DependencyResolver dependencyResolver) {
         this.progressTracker.beginSubTask();
-        this.progressTracker.setVolume(this.total());
+        this.progressTracker.setVolume(this.totalNumberOfBatches);
     }
 
     @Override
     public void start(StageExecution execution) {
-        super.start(execution);
+        this.prevDoneBatches = 0L;
         progressTracker.logInfo(formatWithLocale("%s :: Start", execution.getStageName()));
     }
 
     @Override
     public void end(StageExecution execution, long totalTimeMillis) {
-        super.end(execution, totalTimeMillis);
         progressTracker.logInfo(formatWithLocale("%s :: Finished", execution.getStageName()));
     }
 
     @Override
-    protected void progress(long progress) {
-        this.progressTracker.logProgress(progress);
-    }
-
-    @Override
     public void done(boolean successful, long totalTimeMillis, String additionalInformation) {
-        super.done(successful, totalTimeMillis, additionalInformation);
+        this.progress(this.totalNumberOfBatches - this.totalReportedBatches);
         this.progressTracker.endSubTask();
         this.progressTracker.logInfo(additionalInformation);
     }
 
     @Override
-    public CompatMonitor toCompatMonitor() {
-        return new Monitor(this.total, progressTracker);
+    public long checkIntervalMillis() {
+        return this.intervalMillis;
     }
 
-    private static final class Monitor implements CompatMonitor {
+    @Override
+    public void check(StageExecution execution) {
+        long doneBatches = doneBatches(execution);
+        long diff = doneBatches - this.prevDoneBatches;
+        this.prevDoneBatches = doneBatches;
+        if (diff > 0L) {
+            this.totalReportedBatches += diff;
+            this.progress(diff);
+        }
+
+    }
+
+    private static long doneBatches(StageExecution execution) {
+        Step<?> lastStep = null;
+        for (Step<?> step : execution.steps()) {
+            lastStep = step;
+        }
+        if (lastStep == null) {
+            return 0;
+        }
+
+        return lastStep.stats().stat(Keys.done_batches).asLong();
+    }
+
+    private void progress(long progress) {
+        this.progressTracker.logProgress(progress);
+    }
+
+    @Override
+    public Monitor toMonitor() {
+        return new ProgressMonitor(this.total, progressTracker);
+    }
+
+    private static final class ProgressMonitor implements Monitor {
 
         private final long total;
         private final ProgressTracker progressTracker;
 
-        private Monitor(long total, ProgressTracker progressTracker) {
+        private ProgressMonitor(long total, ProgressTracker progressTracker) {
             this.total = total;
             this.progressTracker = progressTracker;
         }

@@ -23,11 +23,10 @@ import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.compat.CompatExecutionMonitor;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.batchimport.BatchImporter;
-import org.neo4j.gds.compat.batchimport.Configuration;
+import org.neo4j.gds.compat.batchimport.ExecutionMonitor;
 import org.neo4j.gds.compat.batchimport.IndexConfig;
 import org.neo4j.gds.compat.batchimport.input.Collector;
 import org.neo4j.gds.compat.batchimport.input.Input;
@@ -55,7 +54,7 @@ public final class GdsParallelBatchImporter {
 
     private final Config config;
     private final Log log;
-    private final CompatExecutionMonitor executionMonitor;
+    private final ExecutionMonitor executionMonitor;
 
     private final FileSystemAbstraction fileSystem;
     private final LogService logService;
@@ -66,7 +65,7 @@ public final class GdsParallelBatchImporter {
         GraphDatabaseService databaseService,
         Config config,
         Log log,
-        CompatExecutionMonitor executionMonitor
+        ExecutionMonitor executionMonitor
     ) {
         var dbms = GraphDatabaseApiProxy.resolveDependency(databaseService, DatabaseManagementService.class);
         return fromDbms(dbms, config, log, executionMonitor);
@@ -76,7 +75,7 @@ public final class GdsParallelBatchImporter {
         DatabaseManagementService dbms,
         Config config,
         Log log,
-        CompatExecutionMonitor executionMonitor
+        ExecutionMonitor executionMonitor
     ) {
         var databaseService = dbms.database(SYSTEM_DATABASE_NAME);
         var fs = GraphDatabaseApiProxy.resolveDependency(databaseService, FileSystemAbstraction.class);
@@ -96,7 +95,7 @@ public final class GdsParallelBatchImporter {
     private GdsParallelBatchImporter(
         Config config,
         Log log,
-        CompatExecutionMonitor executionMonitor,
+        ExecutionMonitor executionMonitor,
         DatabaseManagementService dbms,
         FileSystemAbstraction fileSystem,
         LogService logService,
@@ -264,8 +263,8 @@ public final class GdsParallelBatchImporter {
             return ImmutableConfig.builder();
         }
 
-        static Configuration toBatchImporterConfig(Config config) {
-            return Neo4jProxy.batchImporterConfig(
+        static org.neo4j.gds.compat.batchimport.Config toBatchImporterConfig(Config config) {
+            return new org.neo4j.gds.compat.batchimport.Config(
                 config.batchSize(),
                 config.writeConcurrency(),
                 config.highIO(),

@@ -21,13 +21,11 @@ package org.neo4j.gds.compat._518;
 
 import org.neo4j.configuration.Config;
 import org.neo4j.exceptions.KernelException;
-import org.neo4j.gds.compat.CompatExecutionMonitor;
-import org.neo4j.gds.compat.CompatMonitor;
 import org.neo4j.gds.compat.GlobalProcedureRegistry;
 import org.neo4j.gds.compat.Neo4jProxyApi;
 import org.neo4j.gds.compat.Write;
 import org.neo4j.gds.compat.batchimport.BatchImporter;
-import org.neo4j.gds.compat.batchimport.Configuration;
+import org.neo4j.gds.compat.batchimport.ExecutionMonitor;
 import org.neo4j.gds.compat.batchimport.Monitor;
 import org.neo4j.gds.compat.batchimport.input.Collector;
 import org.neo4j.internal.kernel.api.PropertyCursor;
@@ -40,7 +38,6 @@ import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
-import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.logging.internal.LogService;
@@ -65,9 +62,8 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     public BatchImporter instantiateBlockBatchImporter(
         DatabaseLayout databaseLayout,
         FileSystemAbstraction fileSystem,
-        PageCacheTracer pageCacheTracer,
-        Configuration configuration,
-        CompatMonitor compatMonitor,
+        org.neo4j.gds.compat.batchimport.Config config,
+        Monitor monitor,
         LogService logService,
         Config dbConfig,
         JobScheduler jobScheduler,
@@ -102,9 +98,8 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     public BatchImporter instantiateRecordBatchImporter(
         DatabaseLayout directoryStructure,
         FileSystemAbstraction fileSystem,
-        PageCacheTracer aNull,
-        Configuration configuration,
-        CompatExecutionMonitor compatExecutionMonitor,
+        org.neo4j.gds.compat.batchimport.Config config,
+        ExecutionMonitor executionMonitor,
         LogService logService,
         Config dbConfig,
         JobScheduler jobScheduler,
@@ -112,25 +107,6 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     ) {
         throw new UnsupportedOperationException(
             "`org.neo4j.gds.compat._521.Neo4jProxyImpl.instantiateRecordBatchImporter` is not yet implemented.");
-    }
-
-    private static Monitor toMonitor(CompatMonitor compatMonitor) {
-        return new Monitor() {
-            @Override
-            public void started() {
-                compatMonitor.started();
-            }
-
-            @Override
-            public void percentageCompleted(int percentage) {
-                compatMonitor.percentageCompleted(percentage);
-            }
-
-            @Override
-            public void completed(boolean success) {
-                compatMonitor.completed(success);
-            }
-        };
     }
 
     @Override

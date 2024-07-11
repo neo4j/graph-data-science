@@ -27,8 +27,8 @@ import org.neo4j.gds.core.io.GraphStoreInput;
 import org.neo4j.gds.core.io.IdentifierMapper;
 import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.Optional;
 
@@ -69,7 +69,7 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter {
         var executionMonitor = new ProgressTrackerExecutionMonitor(
             graphStore,
             progressTracker,
-            GdsParallelBatchImporter.Config.toBatchImporterConfig(pbiConfig)
+            pbiConfig.batchSize()
         );
 
         var parallelBatchImporter = GdsParallelBatchImporter.fromDb(databaseService, pbiConfig, log, executionMonitor);
