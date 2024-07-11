@@ -94,7 +94,7 @@ The xref:management-ops/utility-functions.adoc#utility-functions-node-path[`gds.
 In the case of path finding algorithms, the link:https://neo4j.com/docs/cypher-manual/current/functions/list/#functions-nodes[`nodes()`] Cypher function is useful to return a node path as a list of nodes.
 
 .Results
-[opts="header"]
+[opts="header", caption=, title="Query result"]
 |===
 | index | sourceNodeName | targetNodeName | totalCost | path
 | 0     | "Kings Cross"  | "Kentish Town" | 3.3       | [Node[0], Node[1], Node[2], Node[4]]
