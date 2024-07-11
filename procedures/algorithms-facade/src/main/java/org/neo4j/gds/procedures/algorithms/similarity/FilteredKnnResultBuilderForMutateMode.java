@@ -31,7 +31,7 @@ import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import java.util.Map;
 import java.util.Optional;
 
-class FilteredKnnResultBuilderForMutateMode implements ResultBuilder<FilteredKnnMutateConfig, FilteredKnnResult, KnnMutateResult, Pair<RelationshipsWritten, Map<String, Object>>> {
+public class FilteredKnnResultBuilderForMutateMode implements ResultBuilder<FilteredKnnMutateConfig, FilteredKnnResult, KnnMutateResult, Pair<RelationshipsWritten, Map<String, Object>>> {
     /**
      * @param metadata number of relationships written, and the similarity distribution
      */
