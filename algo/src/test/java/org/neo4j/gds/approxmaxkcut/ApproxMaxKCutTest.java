@@ -132,8 +132,7 @@ final class ApproxMaxKCutTest {
                 )
             )
             .argumentsForNextParameter(0, 4) // VNS max neighborhood order (0 means VNS not used)
-            .argumentsForNextParameter(1, 4) // concurrency
-            ;
+            .argumentsForNextParameter(1, 4); // concurrency
     }
 
     private record KCutTestParameters(
