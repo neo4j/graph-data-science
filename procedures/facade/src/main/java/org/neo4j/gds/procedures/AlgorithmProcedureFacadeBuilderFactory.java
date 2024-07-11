@@ -25,7 +25,6 @@ import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
@@ -92,7 +91,6 @@ public class AlgorithmProcedureFacadeBuilderFactory {
          * I have tried to mark those layers in comments below.
          */
         var algorithmMemoryValidationService = new AlgorithmMemoryValidationService(log, useMaxMemoryEstimation);
-        var mutateNodePropertyService = new MutateNodePropertyService(log);
         var nodeLookup = new TransactionNodeLookup(kernelTransaction);
 
         // Second layer
@@ -141,7 +139,6 @@ public class AlgorithmProcedureFacadeBuilderFactory {
             closeableResourceRegistry,
             nodeLookup,
             procedureReturnColumns,
-            mutateNodePropertyService,
             writeNodePropertyService,
             algorithmRunner,
             algorithmEstimator,

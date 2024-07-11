@@ -24,12 +24,16 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
+import org.neo4j.gds.core.huge.FilteredNodePropertyValues;
+import org.neo4j.gds.logging.Log;
+
+import java.util.HashSet;
 
 public class MutateNodeProperty {
-    private final MutateNodePropertyService mutateNodePropertyService;
+    private final Log log;
 
-    public MutateNodeProperty(MutateNodePropertyService mutateNodePropertyService) {
-        this.mutateNodePropertyService = mutateNodePropertyService;
+    public MutateNodeProperty(Log log) {
+        this.log = log;
     }
 
     public NodePropertiesWritten mutateNodeProperties(
@@ -38,14 +42,26 @@ public class MutateNodeProperty {
         MutateNodePropertyConfig configuration,
         NodePropertyValues nodePropertyValues
     ) {
-        var addNodePropertyResult = mutateNodePropertyService.mutate(
-            configuration.mutateProperty(),
-            nodePropertyValues,
-            configuration.nodeLabelIdentifiers(graphStore),
-            graph,
-            graphStore
+        var labelsToUpdate = configuration.nodeLabelIdentifiers(graphStore);
+        var mutateProperty = configuration.mutateProperty();
+
+        var maybeFilteredNodePropertyValues = graph
+            .asNodeFilteredGraph()
+            .map(filteredGraph ->
+                FilteredNodePropertyValues.OriginalToFilteredNodePropertyValues.create(
+                    nodePropertyValues,
+                    filteredGraph
+                ))
+            .orElse(nodePropertyValues);
+
+        log.info("Updating in-memory graph store");
+
+        graphStore.addNodeProperty(
+            new HashSet<>(labelsToUpdate),
+            mutateProperty,
+            maybeFilteredNodePropertyValues
         );
 
-        return new NodePropertiesWritten(addNodePropertyResult.nodePropertiesAdded());
+        return new NodePropertiesWritten(graph.nodeCount());
     }
 }

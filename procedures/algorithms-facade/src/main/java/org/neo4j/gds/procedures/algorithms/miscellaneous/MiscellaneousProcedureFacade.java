@@ -37,6 +37,7 @@ import java.util.stream.Stream;
 public final class MiscellaneousProcedureFacade {
     private final ProcedureReturnColumns procedureReturnColumns;
 
+    private final ScalePropertiesMutateStub alphaScalePropertiesMutateStub;
     private final ScalePropertiesMutateStub scalePropertiesMutateStub;
 
     private final ApplicationsFacade applicationsFacade;
@@ -46,12 +47,14 @@ public final class MiscellaneousProcedureFacade {
 
     private MiscellaneousProcedureFacade(
         ProcedureReturnColumns procedureReturnColumns,
+        ScalePropertiesMutateStub alphaScalePropertiesMutateStub,
         ScalePropertiesMutateStub scalePropertiesMutateStub,
         ApplicationsFacade applicationsFacade,
         EstimationModeRunner estimationMode,
         AlgorithmExecutionScaffolding algorithmExecutionScaffolding
     ) {
         this.procedureReturnColumns = procedureReturnColumns;
+        this.alphaScalePropertiesMutateStub = alphaScalePropertiesMutateStub;
         this.scalePropertiesMutateStub = scalePropertiesMutateStub;
         this.applicationsFacade = applicationsFacade;
         this.estimationMode = estimationMode;
@@ -65,19 +68,31 @@ public final class MiscellaneousProcedureFacade {
         EstimationModeRunner estimationModeRunner,
         AlgorithmExecutionScaffolding algorithmExecutionScaffolding
     ) {
+        var alphaScalePropertiesMutateStub = new ScalePropertiesMutateStub(
+            genericStub,
+            applicationsFacade,
+            procedureReturnColumns,
+            true
+        );
         var scalePropertiesMutateStub = new ScalePropertiesMutateStub(
             genericStub,
             applicationsFacade,
-            procedureReturnColumns
+            procedureReturnColumns,
+            false
         );
 
         return new MiscellaneousProcedureFacade(
             procedureReturnColumns,
+            alphaScalePropertiesMutateStub,
             scalePropertiesMutateStub,
             applicationsFacade,
             estimationModeRunner,
             algorithmExecutionScaffolding
         );
+    }
+
+    public ScalePropertiesMutateStub alphaScalePropertiesMutateStub() {
+        return alphaScalePropertiesMutateStub;
     }
 
     public ScalePropertiesMutateStub scalePropertiesMutateStub() {

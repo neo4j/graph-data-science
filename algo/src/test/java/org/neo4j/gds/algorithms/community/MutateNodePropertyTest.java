@@ -20,25 +20,25 @@
 package org.neo4j.gds.algorithms.community;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.Log;
 
-import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 @GdlExtension
-class MutateNodePropertyServiceTest {
-
+class MutateNodePropertyTest {
+    @SuppressWarnings("unused")
     @GdlGraph
     private static final String GRAPH =
         "CREATE " +
@@ -47,9 +47,11 @@ class MutateNodePropertyServiceTest {
             " (:Node), " +
             " (:Node), ";
 
+    @SuppressWarnings("unused")
     @Inject
     private Graph graph;
 
+    @SuppressWarnings("unused")
     @Inject
     private GraphStore graphStore;
 
@@ -63,22 +65,27 @@ class MutateNodePropertyServiceTest {
         values.setAll(graph::toOriginalNodeId);
         var nodePropertyValuesToMutate = NodePropertyValuesAdapter.adapt(values);
 
-        var nodePropertyService = new MutateNodePropertyService(mock(Log.class));
-        var result = nodePropertyService.mutate(
-            "bugger-off",
-            nodePropertyValuesToMutate,
-            List.of(NodeLabel.of("Node")),
+        var mutateNodeProperty = new MutateNodeProperty(mock(Log.class));
+        var result = mutateNodeProperty.mutateNodeProperties(
             graph,
-            graphStore
+            graphStore,
+            new MutateNodePropertyConfig() {
+                @Override
+                public String mutateProperty() {
+                    return "bugger-off";
+                }
+
+                @Override
+                public Optional<String> usernameOverride() {
+                    throw new UnsupportedOperationException("TODO");
+                }
+            },
+            nodePropertyValuesToMutate
         );
 
-        assertThat(result.nodePropertiesAdded())
+        assertThat(result.value)
             .as("NodeProperties added count don't match")
             .isEqualTo(4);
-
-        assertThat(result.mutateMilliseconds())
-            .as("Mutation milliseconds should be non-negative")
-            .isNotNegative();
 
         assertThat(graphStore.hasNodeProperty("bugger-off"))
             .as("The graph store should contain the node property we just added.")
