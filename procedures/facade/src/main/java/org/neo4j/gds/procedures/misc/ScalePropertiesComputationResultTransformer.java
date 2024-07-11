@@ -20,35 +20,12 @@
 package org.neo4j.gds.procedures.misc;
 
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
-import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.misc.ScalePropertiesSpecificFields;
-import org.neo4j.gds.algorithms.misc.ScaledPropertiesNodePropertyValues;
-import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesStreamResult;
 import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesWriteResult;
-import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
-
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 final class ScalePropertiesComputationResultTransformer {
 
     private ScalePropertiesComputationResultTransformer() {}
-
-    static Stream<ScalePropertiesStreamResult> toStreamResult(
-        StreamComputationResult<ScalePropertiesResult> computationResult) {
-        return computationResult.result()
-                    .map(result -> {
-                        var graph = computationResult.graph();
-                        var nodeProperties = new ScaledPropertiesNodePropertyValues(graph.nodeCount(), result.scaledProperties());
-                        return LongStream
-                            .range(0, graph.nodeCount())
-                            .mapToObj(nodeId -> new ScalePropertiesStreamResult(
-                                graph.toOriginalNodeId(nodeId),
-                                nodeProperties.doubleArrayValue(nodeId)
-                            ));
-
-        }).orElseGet(Stream::empty);
-    }
 
     static ScalePropertiesWriteResult toWriteResult(
         NodePropertyWriteResult<ScalePropertiesSpecificFields> writeResult,

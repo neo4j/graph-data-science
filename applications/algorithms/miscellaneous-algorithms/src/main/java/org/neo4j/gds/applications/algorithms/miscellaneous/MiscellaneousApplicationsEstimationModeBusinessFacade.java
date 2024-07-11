@@ -24,7 +24,6 @@ import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.scaleproperties.ScalePropertiesBaseConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesMemoryEstimateDefinition;
-import org.neo4j.gds.scaleproperties.ScalePropertiesStatsConfig;
 
 public class MiscellaneousApplicationsEstimationModeBusinessFacade {
     private final AlgorithmEstimationTemplate algorithmEstimationTemplate;
@@ -38,7 +37,7 @@ public class MiscellaneousApplicationsEstimationModeBusinessFacade {
     }
 
     public MemoryEstimateResult scaleProperties(
-        ScalePropertiesStatsConfig configuration,
+        ScalePropertiesBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
         var memoryEstimation = scaleProperties(configuration);

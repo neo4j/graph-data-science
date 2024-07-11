@@ -28,15 +28,18 @@ public final class MiscellaneousApplications {
     private final MiscellaneousApplicationsEstimationModeBusinessFacade estimation;
     private final MiscellaneousApplicationsMutateModeBusinessFacade mutation;
     private final MiscellaneousApplicationsStatsModeBusinessFacade stats;
+    private final MiscellaneousApplicationsStreamModeBusinessFacade stream;
 
     private MiscellaneousApplications(
         MiscellaneousApplicationsEstimationModeBusinessFacade estimation,
         MiscellaneousApplicationsMutateModeBusinessFacade mutation,
-        MiscellaneousApplicationsStatsModeBusinessFacade stats
+        MiscellaneousApplicationsStatsModeBusinessFacade stats,
+        MiscellaneousApplicationsStreamModeBusinessFacade stream
     ) {
         this.estimation = estimation;
         this.mutation = mutation;
         this.stats = stats;
+        this.stream = stream;
     }
 
     public static MiscellaneousApplications create(
@@ -59,8 +62,13 @@ public final class MiscellaneousApplications {
             algorithms,
             algorithmProcessingTemplateConvenience
         );
+        var stream = new MiscellaneousApplicationsStreamModeBusinessFacade(
+            estimation,
+            algorithms,
+            algorithmProcessingTemplateConvenience
+        );
 
-        return new MiscellaneousApplications(estimation, mutation, stats);
+        return new MiscellaneousApplications(estimation, mutation, stats, stream);
     }
 
     public MiscellaneousApplicationsEstimationModeBusinessFacade estimate() {
@@ -73,5 +81,9 @@ public final class MiscellaneousApplications {
 
     public MiscellaneousApplicationsStatsModeBusinessFacade stats() {
         return stats;
+    }
+
+    public MiscellaneousApplicationsStreamModeBusinessFacade stream() {
+        return stream;
     }
 }
