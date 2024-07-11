@@ -38,14 +38,18 @@ public class ScalePropertiesMutateStub implements MutateStub<ScalePropertiesMuta
     private final GenericStub genericStub;
     private final ApplicationsFacade applicationsFacade;
     private final ProcedureReturnColumns procedureReturnColumns;
+    private final boolean allowL1L2Scalers;
 
     public ScalePropertiesMutateStub(
         GenericStub genericStub,
-        ApplicationsFacade applicationsFacade, ProcedureReturnColumns procedureReturnColumns
+        ApplicationsFacade applicationsFacade,
+        ProcedureReturnColumns procedureReturnColumns,
+        boolean allowL1L2Scalers
     ) {
         this.genericStub = genericStub;
         this.applicationsFacade = applicationsFacade;
         this.procedureReturnColumns = procedureReturnColumns;
+        this.allowL1L2Scalers = allowL1L2Scalers;
     }
 
     @Override
@@ -78,7 +82,7 @@ public class ScalePropertiesMutateStub implements MutateStub<ScalePropertiesMuta
         String graphNameAsString,
         Map<String, Object> rawConfiguration
     ) {
-        var validationHook = new ScalePropertiesConfigurationValidationHook<ScalePropertiesMutateConfig>(false);
+        var validationHook = new ScalePropertiesConfigurationValidationHook<ScalePropertiesMutateConfig>(allowL1L2Scalers);
 
         var shouldDisplayScalerStatistics = procedureReturnColumns.contains("scalerStatistics");
         var resultBuilder = new ScalePropertiesResultBuilderForMutateMode(shouldDisplayScalerStatistics);

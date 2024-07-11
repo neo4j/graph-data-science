@@ -20,7 +20,6 @@
 package org.neo4j.gds.procedures;
 
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
-import org.neo4j.gds.algorithms.misc.MiscAlgorithmMutateBusinessFacade;
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmStreamBusinessFacade;
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmWriteBusinessFacade;
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmsEstimateBusinessFacade;
@@ -30,7 +29,6 @@ import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityProcedureFacade;
@@ -51,7 +49,6 @@ class AlgorithmProcedureFacadeBuilder {
     private final CloseableResourceRegistry closeableResourceRegistry;
     private final NodeLookup nodeLookup;
     private final ProcedureReturnColumns procedureReturnColumns;
-    private final MutateNodePropertyService mutateNodePropertyService;
     private final WriteNodePropertyService writeNodePropertyService;
     private final AlgorithmEstimator algorithmEstimator;
     private final AlgorithmRunner algorithmRunner;
@@ -67,7 +64,6 @@ class AlgorithmProcedureFacadeBuilder {
         CloseableResourceRegistry closeableResourceRegistry,
         NodeLookup nodeLookup,
         ProcedureReturnColumns procedureReturnColumns,
-        MutateNodePropertyService mutateNodePropertyService,
         WriteNodePropertyService writeNodePropertyService,
         AlgorithmRunner algorithmRunner,
         AlgorithmEstimator algorithmEstimator,
@@ -82,7 +78,6 @@ class AlgorithmProcedureFacadeBuilder {
         this.closeableResourceRegistry = closeableResourceRegistry;
         this.nodeLookup = nodeLookup;
         this.procedureReturnColumns = procedureReturnColumns;
-        this.mutateNodePropertyService = mutateNodePropertyService;
         this.writeNodePropertyService = writeNodePropertyService;
         this.algorithmRunner = algorithmRunner;
         this.algorithmEstimator = algorithmEstimator;
@@ -136,17 +131,11 @@ class AlgorithmProcedureFacadeBuilder {
 
         var writeBusinessFacade = new MiscAlgorithmWriteBusinessFacade(miscAlgorithmsFacade, writeNodePropertyService);
 
-        var mutateBusinessFacade = new MiscAlgorithmMutateBusinessFacade(
-            miscAlgorithmsFacade,
-            mutateNodePropertyService
-        );
-
         // procedure facade
         return new MiscAlgorithmsProcedureFacade(
             configurationCreator,
             procedureReturnColumns,
             estimateBusinessFacade,
-            mutateBusinessFacade,
             streamBusinessFacade,
             writeBusinessFacade
         );
