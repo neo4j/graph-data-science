@@ -94,7 +94,7 @@ The xref:management-ops/utility-functions.adoc#utility-functions-node-path[`gds.
 In the case of path finding algorithms, the link:https://neo4j.com/docs/cypher-manual/current/functions/list/#functions-nodes[`nodes()`] Cypher function is useful to return a node path as a list of nodes.
 
 .Results
-[opts="header", caption=, title="Query result"]
+[opts="header"]
 |===
 | index | sourceNodeName | targetNodeName | totalCost | path
 | 0     | "Kings Cross"  | "Kentish Town" | 3.3       | [Node[0], Node[1], Node[2], Node[4]]
@@ -152,14 +152,15 @@ To check that the results of the algorithm have been correctly written back to N
 [source, cypher, role=noplay]
 ----
 MATCH (source)-[r:PATH]->(target)
-RETURN source.name, r.nodeIds, r.costs, r.totalCost, target.name
+RETURN 
+  source.name, [nodeId IN r.nodeIds | gds.util.asNode(nodeId)] AS nodeIds, r.costs, r.totalCost, target.name
 ----
 
 .Results
 [opts="header", caption=, title="Query result"]
 |===
-| source.name  | r.nodeIds | r.costs | r.totalCost | target.name
-|"Kings Cross" | [Node[0], Node[1], Node[2], Node[4] | [0.0, 0.7, 2.0, 3.3] | 3.3 | "Kentish Town"
+| source.name  | nodeIds | r.costs | r.totalCost | target.name
+|"Kings Cross" | [Node[0], Node[1], Node[2], Node[4]] | [0.0, 0.7, 2.0, 3.3] | 3.3 | "Kentish Town"
 |===
 --
 
