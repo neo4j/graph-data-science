@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.configuration.Config;
 import org.neo4j.gds.compat.batchimport.BatchImporter;
 import org.neo4j.gds.compat.batchimport.ExecutionMonitor;
+import org.neo4j.gds.compat.batchimport.ImportConfig;
 import org.neo4j.gds.compat.batchimport.Monitor;
 import org.neo4j.gds.compat.batchimport.input.Collector;
 import org.neo4j.gds.compat.batchimport.input.ReadableGroups;
@@ -100,7 +101,7 @@ public interface Neo4jProxyApi {
     BatchImporter instantiateBlockBatchImporter(
         DatabaseLayout dbLayout,
         FileSystemAbstraction fileSystem,
-        org.neo4j.gds.compat.batchimport.Config config,
+        ImportConfig config,
         Monitor monitor,
         LogService logService,
         Config dbConfig,
@@ -112,7 +113,7 @@ public interface Neo4jProxyApi {
     BatchImporter instantiateRecordBatchImporter(
         DatabaseLayout directoryStructure,
         FileSystemAbstraction fileSystem,
-        org.neo4j.gds.compat.batchimport.Config config,
+        ImportConfig config,
         ExecutionMonitor executionMonitor,
         LogService logService,
         Config dbConfig,

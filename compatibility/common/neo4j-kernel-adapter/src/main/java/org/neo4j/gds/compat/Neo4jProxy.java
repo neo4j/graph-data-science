@@ -31,6 +31,7 @@ import org.neo4j.configuration.helpers.DatabaseNameValidator;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.compat.batchimport.BatchImporter;
 import org.neo4j.gds.compat.batchimport.ExecutionMonitor;
+import org.neo4j.gds.compat.batchimport.ImportConfig;
 import org.neo4j.gds.compat.batchimport.input.Collector;
 import org.neo4j.gds.compat.batchimport.input.IdType;
 import org.neo4j.gds.compat.batchimport.input.InputEntityVisitor;
@@ -330,7 +331,7 @@ public final class Neo4jProxy {
     public static BatchImporter instantiateBatchImporter(
         DatabaseLayout directoryStructure,
         FileSystemAbstraction fileSystem,
-        org.neo4j.gds.compat.batchimport.Config configuration,
+        ImportConfig configuration,
         LogService logService,
         ExecutionMonitor executionMonitor,
         Config dbConfig,

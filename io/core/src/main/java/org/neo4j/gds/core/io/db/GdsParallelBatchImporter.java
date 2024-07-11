@@ -27,6 +27,7 @@ import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.batchimport.BatchImporter;
 import org.neo4j.gds.compat.batchimport.ExecutionMonitor;
+import org.neo4j.gds.compat.batchimport.ImportConfig;
 import org.neo4j.gds.compat.batchimport.input.Collector;
 import org.neo4j.gds.compat.batchimport.input.Input;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -262,8 +263,8 @@ public final class GdsParallelBatchImporter {
             return ImmutableConfig.builder();
         }
 
-        static org.neo4j.gds.compat.batchimport.Config toBatchImporterConfig(Config config) {
-            return new org.neo4j.gds.compat.batchimport.Config(
+        static ImportConfig toBatchImporterConfig(Config config) {
+            return new ImportConfig(
                 config.batchSize(),
                 config.writeConcurrency(),
                 config.highIO(),

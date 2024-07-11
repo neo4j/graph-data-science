@@ -27,6 +27,7 @@ import org.neo4j.gds.compat.Neo4jProxyApi;
 import org.neo4j.gds.compat.Write;
 import org.neo4j.gds.compat.batchimport.BatchImporter;
 import org.neo4j.gds.compat.batchimport.ExecutionMonitor;
+import org.neo4j.gds.compat.batchimport.ImportConfig;
 import org.neo4j.gds.compat.batchimport.input.Collector;
 import org.neo4j.gds.compat.batchimport.input.Input;
 import org.neo4j.gds.compat.batchimport.input.ReadableGroups;
@@ -84,7 +85,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     public BatchImporter instantiateBlockBatchImporter(
         DatabaseLayout dbLayout,
         FileSystemAbstraction fileSystem,
-        org.neo4j.gds.compat.batchimport.Config config,
+        ImportConfig config,
         org.neo4j.gds.compat.batchimport.Monitor monitor,
         LogService logService,
         Config dbConfig,
@@ -99,7 +100,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     public BatchImporter instantiateRecordBatchImporter(
         DatabaseLayout directoryStructure,
         FileSystemAbstraction fileSystem,
-        org.neo4j.gds.compat.batchimport.Config config,
+        ImportConfig config,
         ExecutionMonitor executionMonitor,
         LogService logService,
         Config dbConfig,
@@ -128,10 +129,10 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         return new BatchImporterAdapter(importer);
     }
 
-    static final class ConfigurationAdapter implements org.neo4j.internal.batchimport.Configuration {
-        private final org.neo4j.gds.compat.batchimport.Config inner;
+    static final class ConfigurationAdapter implements Configuration {
+        private final ImportConfig inner;
 
-        ConfigurationAdapter(org.neo4j.gds.compat.batchimport.Config inner) {
+        ConfigurationAdapter(ImportConfig inner) {
             this.inner = inner;
         }
 

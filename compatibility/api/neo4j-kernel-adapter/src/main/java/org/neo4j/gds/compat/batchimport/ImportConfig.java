@@ -19,30 +19,11 @@
  */
 package org.neo4j.gds.compat.batchimport;
 
-public class IndexConfig {
-    public static final IndexConfig DEFAULT = new IndexConfig();
-    private boolean createLabelIndex;
-    private boolean createRelationTypeIndex;
-
-    public IndexConfig withLabelIndex() {
-        this.createLabelIndex = true;
-        return this;
-    }
-
-    public IndexConfig withRelationshipTypeIndex() {
-        this.createRelationTypeIndex = true;
-        return this;
-    }
-
-    public boolean createLabelIndex() {
-        return createLabelIndex;
-    }
-
-    public boolean createRelationshipIndex() {
-        return createRelationTypeIndex;
-    }
-
-    public static IndexConfig create() {
-        return new IndexConfig();
-    }
+public record ImportConfig(
+    int batchSize,
+    int writeConcurrency,
+    boolean highIO,
+    boolean createLabelIndex,
+    boolean createRelationshipTypeIndex
+) {
 }

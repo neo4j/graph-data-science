@@ -26,6 +26,7 @@ import org.neo4j.gds.compat.Neo4jProxyApi;
 import org.neo4j.gds.compat.Write;
 import org.neo4j.gds.compat.batchimport.BatchImporter;
 import org.neo4j.gds.compat.batchimport.ExecutionMonitor;
+import org.neo4j.gds.compat.batchimport.ImportConfig;
 import org.neo4j.gds.compat.batchimport.Monitor;
 import org.neo4j.gds.compat.batchimport.input.Collector;
 import org.neo4j.gds.compat.batchimport.input.ReadableGroups;
@@ -74,7 +75,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     public BatchImporter instantiateBlockBatchImporter(
         DatabaseLayout databaseLayout,
         FileSystemAbstraction fileSystem,
-        org.neo4j.gds.compat.batchimport.Config config,
+        ImportConfig config,
         Monitor monitor,
         LogService logService,
         Config dbConfig,
@@ -110,7 +111,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     public BatchImporter instantiateRecordBatchImporter(
         DatabaseLayout directoryStructure,
         FileSystemAbstraction fileSystem,
-        org.neo4j.gds.compat.batchimport.Config config,
+        ImportConfig config,
         ExecutionMonitor executionMonitor,
         LogService logService,
         Config dbConfig,
