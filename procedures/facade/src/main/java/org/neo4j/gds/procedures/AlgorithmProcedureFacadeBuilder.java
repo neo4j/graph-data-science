@@ -20,7 +20,6 @@
 package org.neo4j.gds.procedures;
 
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
-import org.neo4j.gds.algorithms.misc.MiscAlgorithmStreamBusinessFacade;
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmWriteBusinessFacade;
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmsFacade;
@@ -117,7 +116,8 @@ class AlgorithmProcedureFacadeBuilder {
             applicationsFacade,
             procedureReturnColumns,
             estimationModeRunner,
-            algorithmExecutionScaffolding
+            algorithmExecutionScaffolding,
+            algorithmExecutionScaffoldingForStreamMode
         );
     }
 
@@ -127,8 +127,6 @@ class AlgorithmProcedureFacadeBuilder {
 
         var estimateBusinessFacade = new MiscAlgorithmsEstimateBusinessFacade(algorithmEstimator);
 
-        var streamBusinessFacade = new MiscAlgorithmStreamBusinessFacade(miscAlgorithmsFacade);
-
         var writeBusinessFacade = new MiscAlgorithmWriteBusinessFacade(miscAlgorithmsFacade, writeNodePropertyService);
 
         // procedure facade
@@ -136,7 +134,6 @@ class AlgorithmProcedureFacadeBuilder {
             configurationCreator,
             procedureReturnColumns,
             estimateBusinessFacade,
-            streamBusinessFacade,
             writeBusinessFacade
         );
     }
