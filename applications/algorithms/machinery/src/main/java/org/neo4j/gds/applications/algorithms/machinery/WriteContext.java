@@ -20,14 +20,13 @@
 package org.neo4j.gds.applications.algorithms.machinery;
 
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.core.write.NodeLabelExporterBuilder;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipPropertiesExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 
-public class WriteContext {
+public final class WriteContext {
 
     private final NodeLabelExporterBuilder nodeLabelExporterBuilder;
     private final NodePropertyExporterBuilder nodePropertyExporterBuilder;
@@ -71,41 +70,40 @@ public class WriteContext {
     public RelationshipStreamExporterBuilder getRelationshipStreamExporterBuilder() {
         return relationshipStreamExporterBuilder;
     }
-    public static ProcedureContextBuilder builder(){
-        return  new ProcedureContextBuilder();
+    public static WriteContextBuilder builder(){
+        return  new WriteContextBuilder();
     }
 
-    public static class ProcedureContextBuilder {
+    public static class WriteContextBuilder {
 
         private NodeLabelExporterBuilder nodeLabelExporterBuilder;
         private NodePropertyExporterBuilder nodePropertyExporterBuilder;
-        private ProcedureReturnColumns procedureReturnColumns;
         private RelationshipExporterBuilder relationshipExporterBuilder;
         private RelationshipPropertiesExporterBuilder relationshipPropertiesExporterBuilder;
         private RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
 
 
-        public ProcedureContextBuilder with(NodeLabelExporterBuilder nodeLabelExporterBuilder) {
+        public WriteContextBuilder with(NodeLabelExporterBuilder nodeLabelExporterBuilder) {
             this.nodeLabelExporterBuilder = nodeLabelExporterBuilder;
             return this;
         }
 
-        public ProcedureContextBuilder with(NodePropertyExporterBuilder nodePropertyExporterBuilder) {
+        public WriteContextBuilder with(NodePropertyExporterBuilder nodePropertyExporterBuilder) {
             this.nodePropertyExporterBuilder = nodePropertyExporterBuilder;
             return this;
         }
 
-        public ProcedureContextBuilder with(RelationshipExporterBuilder relationshipExporterBuilder) {
+        public WriteContextBuilder with(RelationshipExporterBuilder relationshipExporterBuilder) {
             this.relationshipExporterBuilder = relationshipExporterBuilder;
             return this;
         }
 
-        public ProcedureContextBuilder with(RelationshipPropertiesExporterBuilder relationshipPropertiesExporterBuilder) {
+        public WriteContextBuilder with(RelationshipPropertiesExporterBuilder relationshipPropertiesExporterBuilder) {
             this.relationshipPropertiesExporterBuilder = relationshipPropertiesExporterBuilder;
             return this;
         }
 
-        public ProcedureContextBuilder with(RelationshipStreamExporterBuilder relationshipStreamExporterBuilder) {
+        public WriteContextBuilder with(RelationshipStreamExporterBuilder relationshipStreamExporterBuilder) {
             this.relationshipStreamExporterBuilder = relationshipStreamExporterBuilder;
             return this;
         }
