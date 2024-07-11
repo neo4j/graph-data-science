@@ -63,6 +63,7 @@ import org.neo4j.internal.kernel.api.security.AuthenticationResult;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.internal.recordstorage.RecordIdType;
 import org.neo4j.io.fs.FileSystemAbstraction;
+import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.layout.Neo4jLayout;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.io.pagecache.context.CursorContextFactory;
@@ -370,7 +371,7 @@ public final class Neo4jProxy {
     }
 
     public static BatchImporter instantiateBatchImporter(
-        GdsDatabaseLayout directoryStructure,
+        DatabaseLayout directoryStructure,
         FileSystemAbstraction fileSystem,
         Configuration configuration,
         LogService logService,
@@ -394,7 +395,7 @@ public final class Neo4jProxy {
 
         return BatchImporterFactory.withHighestPriority()
             .instantiate(
-                ((GdsDatabaseLayoutImpl) directoryStructure).databaseLayout(),
+                directoryStructure,
                 fileSystem,
                 PageCacheTracer.NULL,
                 configuration,
@@ -414,7 +415,7 @@ public final class Neo4jProxy {
     }
 
     private static BatchImporter instantiateBlockBatchImporter(
-        GdsDatabaseLayout directoryStructure,
+        DatabaseLayout directoryStructure,
         FileSystemAbstraction fileSystem,
         Configuration configuration,
         CompatMonitor compatMonitor,
@@ -424,7 +425,7 @@ public final class Neo4jProxy {
         Collector badCollector
     ) {
         return IMPL.instantiateBlockBatchImporter(
-            ((GdsDatabaseLayoutImpl) directoryStructure).databaseLayout(),
+            directoryStructure,
             fileSystem,
             PageCacheTracer.NULL,
             configuration,
@@ -623,18 +624,16 @@ public final class Neo4jProxy {
         configBuilder.set(GraphDatabaseSettings.db_format, databaseRecordFormat);
     }
 
-    public static GdsDatabaseLayout databaseLayout(Config config, String databaseName) {
+    public static DatabaseLayout databaseLayout(Config config, String databaseName) {
         var neo4jLayout = neo4jLayout(config);
         var storageEngineFactory = StorageEngineFactory.selectStorageEngine(config);
-        var databaseLayout = storageEngineFactory.databaseLayout(neo4jLayout, databaseName);
-        return new GdsDatabaseLayoutImpl(databaseLayout);
+        return storageEngineFactory.databaseLayout(neo4jLayout, databaseName);
     }
 
-    public static Stream<GdsDatabaseLayout> allAvailableDatabaseLayouts(Config config, String databaseName) {
+    public static Stream<DatabaseLayout> allAvailableDatabaseLayouts(Config config, String databaseName) {
         var neo4jLayout = neo4jLayout(config);
         return StorageEngineFactory.allAvailableStorageEngines().stream()
-            .map(engine -> engine.databaseLayout(neo4jLayout, databaseName))
-            .map(GdsDatabaseLayoutImpl::new);
+            .map(engine -> engine.databaseLayout(neo4jLayout, databaseName));
     }
 
     @SuppressForbidden(reason = "This is the compat specific use")
