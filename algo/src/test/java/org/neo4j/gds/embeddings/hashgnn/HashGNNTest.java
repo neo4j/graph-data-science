@@ -23,14 +23,12 @@ import org.assertj.core.api.Assertions;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junitpioneer.jupiter.cartesian.CartesianTest;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.ResourceUtil;
-import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
@@ -58,7 +56,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.SplittableRandom;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
@@ -139,20 +136,12 @@ class HashGNNTest {
         assertThat(result.doubleArrayValue(binaryGraph.toMappedNodeId(binaryIdFunction.of("c")))).containsExactly(0.0, 0.0, 1.0);
     }
 
-    static Stream<Arguments> determinismParams() {
-        return TestSupport.crossArguments(
-            // concurrency
-            () -> Stream.of(Arguments.of(1), Arguments.of(4)),
-            // binarize
-            () -> Stream.of(Arguments.of(true), Arguments.of(false)),
-            // dimension reduction
-            () -> Stream.of(Arguments.of(true), Arguments.of(false))
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("determinismParams")
-    void shouldBeDeterministic(int concurrency, boolean binarize, boolean dimReduce) {
+    @CartesianTest
+    void shouldBeDeterministic(
+        @CartesianTest.Values(ints = {1, 4}) int concurrency,
+        @CartesianTest.Values(booleans = {true, false}) boolean binarize,
+        @CartesianTest.Values(booleans = {true, false}) boolean dimReduce
+    ) {
         var parameters = new HashGNNParameters(
             new Concurrency(concurrency),
             1,

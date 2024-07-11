@@ -20,10 +20,9 @@
 package org.neo4j.gds.approxmaxkcut;
 
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.TestSupport;
+import org.junitpioneer.jupiter.cartesian.ArgumentSets;
+import org.junitpioneer.jupiter.cartesian.CartesianTest;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfigImpl;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -43,7 +42,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -105,46 +103,49 @@ final class ApproxMaxKCutTest {
     @Inject
     private TestGraph minGraph;
 
-    private static Stream<Arguments> kCutParameters() {
-        return TestSupport.crossArguments(
-            () -> Stream.of(
-                Arguments.of(
+    private static ArgumentSets kCutParameters() {
+        return ArgumentSets.argumentsForFirstParameter(
+                new KCutTestParameters(
                     false,
                     false,
                     Map.of("a", 0L, "b", 0L, "c", 0L, "d", 1L, "e", 1L, "f", 1L, "g", 1L),
                     10.0D // 13.0 is the optimal
                 ),
-                Arguments.of(
+                new KCutTestParameters(
                     false,
                     true,
                     Map.of("a", 0L, "b", 1L, "c", 0L, "d", 1L, "e", 1L, "f", 1L, "g", 1L),
                     100.0D // 146.0 is the optimal
                 ),
-                Arguments.of(
+                new KCutTestParameters(
                     true,
                     false,
                     Map.of("a", 0L, "b", 1L, "c", 1L, "d", 1L),
                     2.0D // 1.0 is the optimal
                 ),
-                Arguments.of(
+                new KCutTestParameters(
                     true,
                     true,
                     Map.of("a", 0L, "b", 0L, "c", 0L, "d", 1L),
                     48.0D // 5.0 is the optimal
                 )
-            ),
-            () -> Stream.of(Arguments.of(0), Arguments.of(4)), // VNS max neighborhood order (0 means VNS not used)
-            () -> Stream.of(Arguments.of(1), Arguments.of(4))  // concurrency
-        );
+            )
+            .argumentsForNextParameter(0, 4) // VNS max neighborhood order (0 means VNS not used)
+            .argumentsForNextParameter(1, 4); // concurrency
     }
 
-    @ParameterizedTest
-    @MethodSource("kCutParameters")
-    void computeCorrectResults(
+    private record KCutTestParameters(
         boolean minimize,
         boolean weighted,
         Map<String, Long> expectedMapping,
-        double expectedCost,
+        double expectedCost
+    ) {
+    }
+
+    @CartesianTest
+    @CartesianTest.MethodFactory("kCutParameters")
+    void computeCorrectResults(
+        KCutTestParameters testParameters,
         int vnsMaxNeighborhoodOrder,
         int concurrency
     ) {
@@ -153,8 +154,8 @@ final class ApproxMaxKCutTest {
         var iterations = vnsMaxNeighborhoodOrder > 0 ? 100 : 25;
         var minBatchSize = concurrency > 1 ? 1 : ParallelUtil.DEFAULT_BATCH_SIZE;
         var randomSeed = concurrency > 1 ? Optional.<Long>empty() : Optional.of(42L);
-        var minCommunitySizes = minimize ? Collections.nCopies(k, 1L) : Collections.nCopies(k, 0L);
-        var graph = minimize ? minGraph : maxGraph;
+        var minCommunitySizes = testParameters.minimize ? Collections.nCopies(k, 1L) : Collections.nCopies(k, 0L);
+        var graph = testParameters.minimize ? minGraph : maxGraph;
 
         var approxMaxKCut = ApproxMaxKCut.create(
             graph,
@@ -166,8 +167,8 @@ final class ApproxMaxKCutTest {
                 minBatchSize,
                 randomSeed,
                 minCommunitySizes,
-                weighted,
-                minimize
+                testParameters.weighted,
+                testParameters.minimize
             ),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
@@ -175,18 +176,18 @@ final class ApproxMaxKCutTest {
         );
 
         var result = approxMaxKCut.compute();
-        if (minimize) {
-            assertThat(result.cutCost()).isLessThanOrEqualTo(expectedCost);
+        if (testParameters.minimize) {
+            assertThat(result.cutCost()).isLessThanOrEqualTo(testParameters.expectedCost);
         } else {
-            assertThat(result.cutCost()).isGreaterThanOrEqualTo(expectedCost);
+            assertThat(result.cutCost()).isGreaterThanOrEqualTo(testParameters.expectedCost);
         }
 
         var setFunction = result.candidateSolution();
 
-        expectedMapping.forEach((outerVar, outerExpectedSet) -> {
+        testParameters.expectedMapping.forEach((outerVar, outerExpectedSet) -> {
             long outerNodeId = graph.toMappedNodeId(outerVar);
 
-            expectedMapping.forEach((innerVar, innerExpectedSet) -> {
+            testParameters.expectedMapping.forEach((innerVar, innerExpectedSet) -> {
                 long innerNodeId = graph.toMappedNodeId(innerVar);
 
                 if (outerExpectedSet.equals(innerExpectedSet)) {

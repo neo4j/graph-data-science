@@ -19,10 +19,8 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.TestSupport;
+import org.junitpioneer.jupiter.cartesian.ArgumentSets;
+import org.junitpioneer.jupiter.cartesian.CartesianTest;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
@@ -34,29 +32,27 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class HugeMergeSortTest {
 
-    static Stream<Arguments> sizeAndConcurrency() {
+    static ArgumentSets sizeAndConcurrency() {
         var random = new Random();
-        return TestSupport.crossArguments(
-            // array sizes
-            () -> Stream.concat(
+        return ArgumentSets
+            .argumentsForFirstParameter(
                 Stream.concat(
-                    random.longs(5, 1, 100).boxed(),
-                    random.longs(5, 100, 1_000).boxed()
-                ),
-                Stream.concat(
-                    random.longs(5, 1_000, 10_000).boxed(),
-                    random.longs(5, 10_000, 1_000_000).boxed()
+                    Stream.concat(
+                        random.longs(5, 1, 100).boxed(),
+                        random.longs(5, 100, 1_000).boxed()
+                    ),
+                    Stream.concat(
+                        random.longs(5, 1_000, 10_000).boxed(),
+                        random.longs(5, 10_000, 1_000_000).boxed()
+                    )
                 )
-            ).map(Arguments::of),
-            // concurrencies
-            () -> Stream.of(1, 4).map(Concurrency::new).map(Arguments::of),
-            // single vs paged array
-            () -> Stream.of(true, false).map(Arguments::of)
-        );
+            )
+            .argumentsForNextParameter(Stream.of(1, 4).map(Concurrency::new))
+            .argumentsForNextParameter(true, false);
     }
 
-    @ParameterizedTest
-    @MethodSource("sizeAndConcurrency")
+    @CartesianTest
+    @CartesianTest.MethodFactory("sizeAndConcurrency")
     void sortArray(long size, Concurrency concurrency, boolean useSingleArray) {
         var array = useSingleArray
             ? HugeLongArray.newSingleArray((int) size)

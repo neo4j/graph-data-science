@@ -46,7 +46,7 @@ dependencies {
 
     api(
         project(':core-test-utils'),
-        [openGds.jqwik],
+        [openGds.jqwik, openGds.junit.pioneer],
         [group: 'org.junit.jupiter',       name: 'junit-jupiter-engine',    version: ver.'junit'],
     )
 
