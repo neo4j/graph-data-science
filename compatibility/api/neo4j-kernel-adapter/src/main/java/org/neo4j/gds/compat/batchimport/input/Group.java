@@ -17,25 +17,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat;
+package org.neo4j.gds.compat.batchimport.input;
 
-import org.neo4j.gds.compat.batchimport.input.InputEntityVisitor;
-
-public final class InputEntityIdVisitor {
-
-    public interface Long {
-        void visitNodeId(InputEntityVisitor visitor, long id);
-
-        void visitSourceId(InputEntityVisitor visitor, long id);
-
-        void visitTargetId(InputEntityVisitor visitor, long id);
+/**
+ * Group of input ids. Used primarily in mapping otherwise equal ids into different groups.
+ */
+public record Group(int id, String name, String specificIdType) {
+    public String descriptiveName() {
+        return name != null ? name : "global id space";
     }
 
-    public interface String {
-        void visitNodeId(InputEntityVisitor visitor, java.lang.String id);
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + id;
+        return result;
+    }
 
-        void visitSourceId(InputEntityVisitor visitor, java.lang.String id);
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Group && ((Group) obj).id() == id;
+    }
 
-        void visitTargetId(InputEntityVisitor visitor, java.lang.String id);
+    @Override
+    public String toString() {
+        return descriptiveName();
     }
 }

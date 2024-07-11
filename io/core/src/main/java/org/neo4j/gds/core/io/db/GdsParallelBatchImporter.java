@@ -26,16 +26,15 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.compat.CompatExecutionMonitor;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.batchimport.BatchImporter;
+import org.neo4j.gds.compat.batchimport.Configuration;
+import org.neo4j.gds.compat.batchimport.IndexConfig;
+import org.neo4j.gds.compat.batchimport.input.Collector;
+import org.neo4j.gds.compat.batchimport.input.Input;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.settings.Neo4jSettings;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.internal.batchimport.BatchImporter;
-import org.neo4j.internal.batchimport.Configuration;
-import org.neo4j.internal.batchimport.IndexConfig;
-import org.neo4j.internal.batchimport.input.Collector;
-import org.neo4j.internal.batchimport.input.Collectors;
-import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.impl.scheduler.JobSchedulerFactory;
@@ -203,7 +202,7 @@ public final class GdsParallelBatchImporter {
 
     private Collector getCollector() {
         return config.useBadCollector()
-            ? Collectors.badCollector(new LoggingOutputStream(log), 0)
+            ? Neo4jProxy.badCollector(new LoggingOutputStream(log), 0)
             : Collector.EMPTY;
     }
 

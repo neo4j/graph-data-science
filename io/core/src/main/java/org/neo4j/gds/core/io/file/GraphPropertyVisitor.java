@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.io.file;
 
-import org.neo4j.internal.batchimport.input.InputEntityVisitor;
+import org.neo4j.gds.compat.batchimport.input.InputEntityVisitor;
 
 import java.io.Flushable;
 

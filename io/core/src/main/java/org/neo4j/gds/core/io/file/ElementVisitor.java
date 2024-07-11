@@ -24,7 +24,7 @@ import com.carrotsearch.hppc.ObjectIntScatterMap;
 import com.carrotsearch.hppc.ObjectObjectMap;
 import com.carrotsearch.hppc.ObjectObjectScatterMap;
 import org.neo4j.gds.api.schema.PropertySchema;
-import org.neo4j.internal.batchimport.input.InputEntityVisitor;
+import org.neo4j.gds.compat.batchimport.input.InputEntityVisitor;
 
 import java.io.Flushable;
 import java.io.IOException;

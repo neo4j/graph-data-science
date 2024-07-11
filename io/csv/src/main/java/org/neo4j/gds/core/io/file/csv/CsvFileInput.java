@@ -31,6 +31,15 @@ import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
+import org.neo4j.gds.compat.batchimport.InputIterable;
+import org.neo4j.gds.compat.batchimport.InputIterator;
+import org.neo4j.gds.compat.batchimport.input.Collector;
+import org.neo4j.gds.compat.batchimport.input.IdType;
+import org.neo4j.gds.compat.batchimport.input.Input;
+import org.neo4j.gds.compat.batchimport.input.InputChunk;
+import org.neo4j.gds.compat.batchimport.input.InputEntityVisitor;
+import org.neo4j.gds.compat.batchimport.input.PropertySizeCalculator;
+import org.neo4j.gds.compat.batchimport.input.ReadableGroups;
 import org.neo4j.gds.core.io.GraphStoreInput;
 import org.neo4j.gds.core.io.file.FileHeader;
 import org.neo4j.gds.core.io.file.FileInput;
@@ -41,16 +50,6 @@ import org.neo4j.gds.core.io.file.MappedListIterator;
 import org.neo4j.gds.core.io.file.NodeFileHeader;
 import org.neo4j.gds.core.io.file.RelationshipFileHeader;
 import org.neo4j.gds.core.loading.Capabilities;
-import org.neo4j.internal.batchimport.InputIterable;
-import org.neo4j.internal.batchimport.InputIterator;
-import org.neo4j.internal.batchimport.input.Collector;
-import org.neo4j.internal.batchimport.input.Groups;
-import org.neo4j.internal.batchimport.input.IdType;
-import org.neo4j.internal.batchimport.input.Input;
-import org.neo4j.internal.batchimport.input.InputChunk;
-import org.neo4j.internal.batchimport.input.InputEntityVisitor;
-import org.neo4j.internal.batchimport.input.PropertySizeCalculator;
-import org.neo4j.internal.batchimport.input.ReadableGroups;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -161,7 +160,7 @@ final class CsvFileInput implements FileInput {
 
     @Override
     public ReadableGroups groups() {
-        return Groups.EMPTY;
+        return ReadableGroups.EMPTY;
     }
 
     @Override

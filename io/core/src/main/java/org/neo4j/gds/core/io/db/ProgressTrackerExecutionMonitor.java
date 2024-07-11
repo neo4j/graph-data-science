@@ -23,16 +23,17 @@ import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.CompatExecutionMonitor;
 import org.neo4j.gds.compat.CompatMonitor;
+import org.neo4j.gds.compat.batchimport.Configuration;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.staging.CoarseBoundedProgressExecutionMonitor;
 import org.neo4j.internal.batchimport.staging.StageExecution;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 
+// TODO: use delegates instead of inheritance for compat reasons
 public final class ProgressTrackerExecutionMonitor
     extends CoarseBoundedProgressExecutionMonitor
     implements CompatExecutionMonitor {
@@ -52,7 +53,7 @@ public final class ProgressTrackerExecutionMonitor
         ProgressTracker progressTracker,
         Configuration config
     ) {
-        super(graphStore.nodeCount(), graphStore.relationshipCount(), config);
+        super(graphStore.nodeCount(), graphStore.relationshipCount(), null /* TODO: config */);
         this.total = getTotal(graphStore);
         this.progressTracker = progressTracker;
     }

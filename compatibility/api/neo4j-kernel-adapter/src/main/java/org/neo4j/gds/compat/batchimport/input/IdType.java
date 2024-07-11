@@ -17,25 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat;
+package org.neo4j.gds.compat.batchimport.input;
 
-import org.neo4j.gds.compat.batchimport.input.InputEntityVisitor;
+/**
+ * Defines different types that input ids can come in. Enum names in here are user facing.
+ */
+public enum IdType {
+    /**
+     * Used when node ids int input data are any string identifier.
+     */
+    STRING,
 
-public final class InputEntityIdVisitor {
+    /**
+     * Used when node ids int input data are any integer identifier. It uses 8b longs for storage,
+     * but as a user facing enum a better name is integer
+     */
+    INTEGER,
 
-    public interface Long {
-        void visitNodeId(InputEntityVisitor visitor, long id);
-
-        void visitSourceId(InputEntityVisitor visitor, long id);
-
-        void visitTargetId(InputEntityVisitor visitor, long id);
-    }
-
-    public interface String {
-        void visitNodeId(InputEntityVisitor visitor, java.lang.String id);
-
-        void visitSourceId(InputEntityVisitor visitor, java.lang.String id);
-
-        void visitTargetId(InputEntityVisitor visitor, java.lang.String id);
-    }
+    /**
+     * Used when node ids int input data are specified as long values and points to actual record ids.
+     * ADVANCED usage. Performance advantage, but requires carefully planned input data.
+     */
+    ACTUAL
 }

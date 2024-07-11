@@ -21,8 +21,8 @@ package org.neo4j.gds.core.io.file;
 
 import org.neo4j.gds.core.io.GraphStoreInput;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.internal.batchimport.InputIterator;
-import org.neo4j.internal.batchimport.input.InputEntityVisitor;
+import org.neo4j.gds.compat.batchimport.InputIterator;
+import org.neo4j.gds.compat.batchimport.input.InputEntityVisitor;
 
 import java.io.Flushable;
 import java.io.IOException;

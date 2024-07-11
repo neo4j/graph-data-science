@@ -17,25 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat;
+package org.neo4j.gds.compat.batchimport;
 
-import org.neo4j.gds.compat.batchimport.input.InputEntityVisitor;
-
-public final class InputEntityIdVisitor {
-
-    public interface Long {
-        void visitNodeId(InputEntityVisitor visitor, long id);
-
-        void visitSourceId(InputEntityVisitor visitor, long id);
-
-        void visitTargetId(InputEntityVisitor visitor, long id);
-    }
-
-    public interface String {
-        void visitNodeId(InputEntityVisitor visitor, java.lang.String id);
-
-        void visitSourceId(InputEntityVisitor visitor, java.lang.String id);
-
-        void visitTargetId(InputEntityVisitor visitor, java.lang.String id);
-    }
+/**
+ * {@link Iterable} that returns {@link InputIterator} instances.
+ */
+public interface InputIterable {
+    InputIterator iterator();
 }

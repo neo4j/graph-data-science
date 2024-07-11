@@ -23,8 +23,8 @@ import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.core.loading.Capabilities;
-import org.neo4j.internal.batchimport.InputIterable;
-import org.neo4j.internal.batchimport.input.Input;
+import org.neo4j.gds.compat.batchimport.InputIterable;
+import org.neo4j.gds.compat.batchimport.input.Input;
 
 import java.util.HashMap;
 import java.util.Map;

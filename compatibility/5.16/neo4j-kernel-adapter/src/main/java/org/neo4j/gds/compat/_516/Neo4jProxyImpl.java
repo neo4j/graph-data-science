@@ -19,10 +19,16 @@
  */
 package org.neo4j.gds.compat._516;
 
+import org.neo4j.configuration.Config;
 import org.neo4j.exceptions.KernelException;
+import org.neo4j.gds.compat.CompatExecutionMonitor;
+import org.neo4j.gds.compat.CompatMonitor;
 import org.neo4j.gds.compat.GlobalProcedureRegistry;
 import org.neo4j.gds.compat.Neo4jProxyApi;
 import org.neo4j.gds.compat.Write;
+import org.neo4j.gds.compat.batchimport.BatchImporter;
+import org.neo4j.gds.compat.batchimport.Configuration;
+import org.neo4j.gds.compat.batchimport.input.Collector;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.exceptions.InvalidTransactionTypeKernelException;
@@ -31,9 +37,14 @@ import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
 import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
+import org.neo4j.io.fs.FileSystemAbstraction;
+import org.neo4j.io.layout.DatabaseLayout;
+import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
+import org.neo4j.logging.internal.LogService;
 import org.neo4j.procedure.Mode;
+import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.storageengine.api.Reference;
 import org.neo4j.values.storable.Value;
@@ -45,6 +56,38 @@ import java.util.stream.Stream;
 import static java.util.function.Predicate.not;
 
 public final class Neo4jProxyImpl implements Neo4jProxyApi {
+
+    @Override
+    public BatchImporter instantiateBlockBatchImporter(
+        DatabaseLayout directoryStructure,
+        FileSystemAbstraction fileSystem,
+        PageCacheTracer pageCacheTracer,
+        Configuration configuration,
+        CompatMonitor compatMonitor,
+        LogService logService,
+        Config dbConfig,
+        JobScheduler jobScheduler,
+        Collector badCollector
+    ) {
+        throw new UnsupportedOperationException(
+            "GDS does not support block store format batch importer on this Neo4j version. Requires >= Neo4j 5.18.");
+    }
+
+    @Override
+    public BatchImporter instantiateRecordBatchImporter(
+        DatabaseLayout directoryStructure,
+        FileSystemAbstraction fileSystem,
+        PageCacheTracer aNull,
+        Configuration configuration,
+        CompatExecutionMonitor compatExecutionMonitor,
+        LogService logService,
+        Config dbConfig,
+        JobScheduler jobScheduler,
+        Collector badCollector
+    ) {
+        throw new UnsupportedOperationException(
+            "`org.neo4j.gds.compat._521.Neo4jProxyImpl.instantiateRecordBatchImporter` is not yet implemented.");
+    }
 
     @Override
     public GlobalProcedureRegistry globalProcedureRegistry(GlobalProcedures globalProcedures) {

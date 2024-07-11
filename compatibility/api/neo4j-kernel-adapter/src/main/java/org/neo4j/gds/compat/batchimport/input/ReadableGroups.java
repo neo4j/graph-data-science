@@ -17,25 +17,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat;
+package org.neo4j.gds.compat.batchimport.input;
 
-import org.neo4j.gds.compat.batchimport.input.InputEntityVisitor;
+public interface ReadableGroups {
+    Group get(int id);
 
-public final class InputEntityIdVisitor {
+    Group get(String name);
 
-    public interface Long {
-        void visitNodeId(InputEntityVisitor visitor, long id);
+    int size();
 
-        void visitSourceId(InputEntityVisitor visitor, long id);
+    ReadableGroups EMPTY = new ReadableGroups() {
+        @Override
+        public Group get(int id) {
+            throw new IllegalArgumentException("No group by id " + id);
+        }
 
-        void visitTargetId(InputEntityVisitor visitor, long id);
-    }
+        @Override
+        public Group get(String name) {
+            throw new IllegalArgumentException("No group by name '" + name + "'");
+        }
 
-    public interface String {
-        void visitNodeId(InputEntityVisitor visitor, java.lang.String id);
-
-        void visitSourceId(InputEntityVisitor visitor, java.lang.String id);
-
-        void visitTargetId(InputEntityVisitor visitor, java.lang.String id);
-    }
+        @Override
+        public int size() {
+            return 0;
+        }
+    };
 }

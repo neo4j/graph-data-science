@@ -21,10 +21,9 @@ package org.neo4j.gds.compat;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.configuration.Config;
-import org.neo4j.internal.batchimport.AdditionalInitialIds;
-import org.neo4j.internal.batchimport.BatchImporter;
-import org.neo4j.internal.batchimport.Configuration;
-import org.neo4j.internal.batchimport.input.Collector;
+import org.neo4j.gds.compat.batchimport.BatchImporter;
+import org.neo4j.gds.compat.batchimport.Configuration;
+import org.neo4j.gds.compat.batchimport.input.Collector;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.exceptions.InvalidTransactionTypeKernelException;
@@ -48,22 +47,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface Neo4jProxyApi {
-
-    @CompatSince(minor = 18)
-    default BatchImporter instantiateBlockBatchImporter(
-        DatabaseLayout directoryStructure,
-        FileSystemAbstraction fileSystem,
-        PageCacheTracer pageCacheTracer,
-        Configuration configuration,
-        CompatMonitor compatMonitor,
-        LogService logService,
-        AdditionalInitialIds additionalInitialIds,
-        Config dbConfig,
-        JobScheduler jobScheduler,
-        Collector badCollector
-    ) {
-        throw new UnsupportedOperationException("GDS does not support block store format batch importer on this Neo4j version. Requires >= Neo4j 5.18.");
-    }
 
     @CompatSince(minor = 21)
     GlobalProcedureRegistry globalProcedureRegistry(GlobalProcedures globalProcedures);
@@ -108,5 +91,31 @@ public interface Neo4jProxyApi {
         Reference reference,
         PropertySelection selection,
         PropertyCursor cursor
+    );
+
+    @CompatSince(minor = 22)
+    BatchImporter instantiateBlockBatchImporter(
+        DatabaseLayout directoryStructure,
+        FileSystemAbstraction fileSystem,
+        PageCacheTracer pageCacheTracer,
+        Configuration configuration,
+        CompatMonitor compatMonitor,
+        LogService logService,
+        Config dbConfig,
+        JobScheduler jobScheduler,
+        Collector badCollector
+    );
+
+    @CompatSince(minor = 22)
+    BatchImporter instantiateRecordBatchImporter(
+        DatabaseLayout directoryStructure,
+        FileSystemAbstraction fileSystem,
+        PageCacheTracer aNull,
+        Configuration configuration,
+        CompatExecutionMonitor compatExecutionMonitor,
+        LogService logService,
+        Config dbConfig,
+        JobScheduler jobScheduler,
+        Collector badCollector
     );
 }

@@ -17,25 +17,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat;
+package org.neo4j.gds.compat.batchimport;
 
-import org.neo4j.gds.compat.batchimport.input.InputEntityVisitor;
+public class IndexConfig {
+    public static final IndexConfig DEFAULT = new IndexConfig();
+    private boolean createLabelIndex;
+    private boolean createRelationTypeIndex;
 
-public final class InputEntityIdVisitor {
-
-    public interface Long {
-        void visitNodeId(InputEntityVisitor visitor, long id);
-
-        void visitSourceId(InputEntityVisitor visitor, long id);
-
-        void visitTargetId(InputEntityVisitor visitor, long id);
+    public IndexConfig withLabelIndex() {
+        this.createLabelIndex = true;
+        return this;
     }
 
-    public interface String {
-        void visitNodeId(InputEntityVisitor visitor, java.lang.String id);
+    public IndexConfig withRelationshipTypeIndex() {
+        this.createRelationTypeIndex = true;
+        return this;
+    }
 
-        void visitSourceId(InputEntityVisitor visitor, java.lang.String id);
+    public boolean createLabelIndex() {
+        return createLabelIndex;
+    }
 
-        void visitTargetId(InputEntityVisitor visitor, java.lang.String id);
+    public boolean createRelationshipIndex() {
+        return createRelationTypeIndex;
+    }
+
+    public static IndexConfig create() {
+        return new IndexConfig();
     }
 }

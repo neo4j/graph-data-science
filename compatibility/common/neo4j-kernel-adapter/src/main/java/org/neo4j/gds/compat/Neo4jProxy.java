@@ -29,21 +29,18 @@ import org.neo4j.configuration.connectors.ConnectorPortRegister;
 import org.neo4j.configuration.connectors.ConnectorType;
 import org.neo4j.configuration.helpers.DatabaseNameValidator;
 import org.neo4j.gds.annotation.SuppressForbidden;
+import org.neo4j.gds.compat.batchimport.BatchImporter;
+import org.neo4j.gds.compat.batchimport.Configuration;
+import org.neo4j.gds.compat.batchimport.IndexConfig;
+import org.neo4j.gds.compat.batchimport.input.Collector;
+import org.neo4j.gds.compat.batchimport.input.IdType;
+import org.neo4j.gds.compat.batchimport.input.InputEntityVisitor;
+import org.neo4j.gds.compat.batchimport.input.ReadableGroups;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.config.Setting;
-import org.neo4j.internal.batchimport.AdditionalInitialIds;
-import org.neo4j.internal.batchimport.BatchImporter;
-import org.neo4j.internal.batchimport.BatchImporterFactory;
-import org.neo4j.internal.batchimport.Configuration;
-import org.neo4j.internal.batchimport.IndexConfig;
-import org.neo4j.internal.batchimport.Monitor;
-import org.neo4j.internal.batchimport.input.Collector;
-import org.neo4j.internal.batchimport.input.IdType;
-import org.neo4j.internal.batchimport.input.InputEntityVisitor;
-import org.neo4j.internal.batchimport.input.ReadableGroups;
 import org.neo4j.internal.helpers.HostnamePort;
 import org.neo4j.internal.id.IdGenerator;
 import org.neo4j.internal.id.IdGeneratorFactory;
@@ -66,7 +63,6 @@ import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.layout.Neo4jLayout;
 import org.neo4j.io.pagecache.context.CursorContext;
-import org.neo4j.io.pagecache.context.CursorContextFactory;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.KernelTransactionHandle;
@@ -77,16 +73,12 @@ import org.neo4j.kernel.database.DatabaseReferenceImpl;
 import org.neo4j.kernel.database.DatabaseReferenceRepository;
 import org.neo4j.kernel.database.NormalizedDatabaseName;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
-import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
 import org.neo4j.kernel.impl.query.QueryExecutionConfiguration;
 import org.neo4j.kernel.impl.query.TransactionalContext;
 import org.neo4j.kernel.impl.query.TransactionalContextFactory;
-import org.neo4j.kernel.impl.transaction.log.EmptyLogTailMetadata;
-import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
 import org.neo4j.logging.InternalLog;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
-import org.neo4j.memory.EmptyMemoryTracker;
 import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.ssl.config.SslPolicyLoader;
 import org.neo4j.storageengine.api.PropertySelection;
@@ -96,6 +88,7 @@ import org.neo4j.values.virtual.MapValue;
 import org.neo4j.values.virtual.NodeValue;
 import org.neo4j.values.virtual.VirtualValues;
 
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Path;
@@ -341,7 +334,7 @@ public final class Neo4jProxy {
         boolean highIO,
         IndexConfig indexConfig
     ) {
-        return new org.neo4j.internal.batchimport.Configuration() {
+        return new org.neo4j.gds.compat.batchimport.Configuration() {
 
             @Override
             public int batchSize() {
@@ -390,27 +383,37 @@ public final class Neo4jProxy {
                 jobScheduler,
                 badCollector
             );
-        }
-
-        return BatchImporterFactory.withHighestPriority()
-            .instantiate(
+        } else {
+            return instantiateRecordBatchImporter(
                 directoryStructure,
                 fileSystem,
-                PageCacheTracer.NULL,
                 configuration,
-                logService,
                 executionMonitor,
-                AdditionalInitialIds.EMPTY,
-                new EmptyLogTailMetadata(dbConfig),
+                logService,
                 dbConfig,
-                Monitor.NO_MONITOR,
                 jobScheduler,
-                badCollector,
-                TransactionLogInitializer.getLogFilesInitializer(),
-                new IndexImporterFactoryImpl(),
-                EmptyMemoryTracker.INSTANCE,
-                CursorContextFactory.NULL_CONTEXT_FACTORY
+                badCollector
             );
+        }
+//        return BatchImporterFactory.withHighestPriority()
+//            .instantiate(
+//                directoryStructure,
+//                fileSystem,
+//                PageCacheTracer.NULL,
+//                configuration,
+//                logService,
+//                executionMonitor,
+//                AdditionalInitialIds.EMPTY,
+//                new EmptyLogTailMetadata(dbConfig),
+//                dbConfig,
+//                Monitor.NO_MONITOR,
+//                jobScheduler,
+//                badCollector,
+//                TransactionLogInitializer.getLogFilesInitializer(),
+//                new IndexImporterFactoryImpl(),
+//                EmptyMemoryTracker.INSTANCE,
+//                CursorContextFactory.NULL_CONTEXT_FACTORY
+//            );
     }
 
     private static BatchImporter instantiateBlockBatchImporter(
@@ -430,7 +433,29 @@ public final class Neo4jProxy {
             configuration,
             compatMonitor,
             logService,
-            AdditionalInitialIds.EMPTY,
+            dbConfig,
+            jobScheduler,
+            badCollector
+        );
+    }
+
+    private static BatchImporter instantiateRecordBatchImporter(
+        DatabaseLayout directoryStructure,
+        FileSystemAbstraction fileSystem,
+        Configuration configuration,
+        CompatExecutionMonitor compatExecutionMonitor,
+        LogService logService,
+        Config dbConfig,
+        JobScheduler jobScheduler,
+        Collector badCollector
+    ) {
+        return IMPL.instantiateRecordBatchImporter(
+            directoryStructure,
+            fileSystem,
+            PageCacheTracer.NULL,
+            configuration,
+            compatExecutionMonitor,
+            logService,
             dbConfig,
             jobScheduler,
             badCollector
@@ -531,6 +556,16 @@ public final class Neo4jProxy {
 
     public static long getHighestPossibleRelationshipCount(Read read) {
         return read.relationshipsGetCount();
+    }
+
+    public static ReadableGroups newGroups() {
+        // new Groups()
+        throw new UnsupportedOperationException("TODO");
+    }
+
+    public static Collector badCollector(OutputStream log, int batchSize) {
+        // Collectors.badCollector(new LoggingOutputStream(log), 0)
+        throw new UnsupportedOperationException("TODO");
     }
 
     private static final class BlockFormat {

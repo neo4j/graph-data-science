@@ -23,7 +23,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.io.IdentifierMapper;
-import org.neo4j.internal.batchimport.input.Group;
+import org.neo4j.gds.compat.batchimport.input.Group;
 
 import java.util.List;
 

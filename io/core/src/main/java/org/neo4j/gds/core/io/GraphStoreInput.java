@@ -28,20 +28,19 @@ import org.neo4j.gds.api.properties.graph.GraphProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.compat.InputEntityIdVisitor;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.batchimport.InputIterable;
+import org.neo4j.gds.compat.batchimport.InputIterator;
+import org.neo4j.gds.compat.batchimport.input.Collector;
+import org.neo4j.gds.compat.batchimport.input.IdType;
+import org.neo4j.gds.compat.batchimport.input.Input;
+import org.neo4j.gds.compat.batchimport.input.InputChunk;
+import org.neo4j.gds.compat.batchimport.input.InputEntityVisitor;
+import org.neo4j.gds.compat.batchimport.input.PropertySizeCalculator;
+import org.neo4j.gds.compat.batchimport.input.ReadableGroups;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.io.GraphStoreExporter.IdMapFunction;
 import org.neo4j.gds.core.loading.Capabilities;
-import org.neo4j.internal.batchimport.InputIterable;
-import org.neo4j.internal.batchimport.InputIterator;
 import org.neo4j.internal.batchimport.cache.idmapping.string.LongEncoder;
-import org.neo4j.internal.batchimport.input.Collector;
-import org.neo4j.internal.batchimport.input.Groups;
-import org.neo4j.internal.batchimport.input.IdType;
-import org.neo4j.internal.batchimport.input.Input;
-import org.neo4j.internal.batchimport.input.InputChunk;
-import org.neo4j.internal.batchimport.input.InputEntityVisitor;
-import org.neo4j.internal.batchimport.input.PropertySizeCalculator;
-import org.neo4j.internal.batchimport.input.ReadableGroups;
 import org.neo4j.internal.id.IdValidator;
 
 import java.io.IOException;
@@ -74,13 +73,13 @@ public final class GraphStoreInput implements Input {
     private final Capabilities capabilities;
 
     enum IdMode implements Supplier<InputEntityIdVisitor.Long> {
-        MAPPING(IdType.INTEGER, new Groups()) {
+        MAPPING(IdType.INTEGER, Neo4jProxy.newGroups()) {
             @Override
             public InputEntityIdVisitor.Long get() {
                 return Neo4jProxy.inputEntityLongIdVisitor(IdType.INTEGER, readableGroups);
             }
         },
-        ACTUAL(IdType.ACTUAL, Groups.EMPTY) {
+        ACTUAL(IdType.ACTUAL, ReadableGroups.EMPTY) {
             @Override
             public InputEntityIdVisitor.Long get() {
                 return Neo4jProxy.inputEntityLongIdVisitor(IdType.ACTUAL, readableGroups);

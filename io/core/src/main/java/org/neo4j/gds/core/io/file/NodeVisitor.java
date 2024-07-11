@@ -22,7 +22,7 @@ package org.neo4j.gds.core.io.file;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
-import org.neo4j.internal.batchimport.input.Group;
+import org.neo4j.gds.compat.batchimport.input.Group;
 import org.neo4j.internal.id.IdSequence;
 
 import java.util.ArrayList;
