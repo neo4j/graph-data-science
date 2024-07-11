@@ -30,6 +30,7 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTempla
 import org.neo4j.gds.applications.algorithms.machinery.DefaultAlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
@@ -127,7 +128,8 @@ public final class ApplicationsFacade {
 
         var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
 
-        var mutateNodeProperty = new MutateNodeProperty(log);
+        var mutateNodePropertyService = new MutateNodePropertyService(log);
+        var mutateNodeProperty = new MutateNodeProperty(mutateNodePropertyService);
 
         var centralityApplications = CentralityApplications.create(
             log,

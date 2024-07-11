@@ -19,33 +19,35 @@
  */
 package org.neo4j.gds.algorithms.similarity;
 
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.applications.algorithms.machinery.AddRelationshipResult;
+import org.neo4j.gds.applications.algorithms.machinery.GraphStoreUpdater;
 import org.neo4j.gds.applications.algorithms.machinery.SingleTypeRelationshipsProducer;
-import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.logging.Log;
 
 public class MutateRelationshipService {
+
     private final Log log;
 
-    public MutateRelationshipService(Log log) {
+    public MutateRelationshipService(
+        Log log
+    ) {
         this.log = log;
     }
 
-    public RelationshipsWritten mutate(
+    public AddRelationshipResult mutate(
         GraphStore graphStore,
         String mutateRelationshipType,
         String mutateProperty,
         SingleTypeRelationshipsProducer singleTypeRelationshipsProducer
-    ) {
-        var resultRelationships = singleTypeRelationshipsProducer.createRelationships(
+    ){
+        return GraphStoreUpdater.addRelationship(
+            graphStore,
             mutateRelationshipType,
-            mutateProperty
+            mutateProperty,
+            singleTypeRelationshipsProducer,
+            log
         );
-
-        log.info("Updating in-memory graph store");
-
-        graphStore.addRelationshipType(resultRelationships);
-
-        return new RelationshipsWritten(singleTypeRelationshipsProducer.relationshipsCount());
     }
+
 }

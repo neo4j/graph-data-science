@@ -19,33 +19,38 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.config.MutateNodePropertyConfig;
+import org.neo4j.gds.logging.Log;
 
-public class MutateNodeProperty {
-    private final MutateNodePropertyService mutateNodePropertyService;
+import java.util.Collection;
 
-    public MutateNodeProperty(MutateNodePropertyService mutateNodePropertyService) {
-        this.mutateNodePropertyService = mutateNodePropertyService;
+public class MutateNodePropertyService {
+
+    private final Log log;
+
+    public MutateNodePropertyService(Log log) {
+        this.log = log;
     }
 
-    public NodePropertiesWritten mutateNodeProperties(
+    public AddNodePropertyResult mutate(
+        String nodePropertyToMutate,
+        NodePropertyValues nodePropertyValues,
+        Collection<NodeLabel> nodeLabelsToUpdate,
         Graph graph,
-        GraphStore graphStore,
-        MutateNodePropertyConfig configuration,
-        NodePropertyValues nodePropertyValues
+        GraphStore graphStore
     ) {
-        var addNodePropertyResult = mutateNodePropertyService.mutate(
-            configuration.mutateProperty(),
-            nodePropertyValues,
-            configuration.nodeLabelIdentifiers(graphStore),
+        return GraphStoreUpdater.addNodeProperty(
             graph,
-            graphStore
+            graphStore,
+            nodeLabelsToUpdate,
+            nodePropertyToMutate,
+            nodePropertyValues,
+            this.log
         );
-
-        return new NodePropertiesWritten(addNodePropertyResult.nodePropertiesAdded());
     }
+
+
 }

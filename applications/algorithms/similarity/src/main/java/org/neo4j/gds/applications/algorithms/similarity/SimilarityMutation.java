@@ -83,13 +83,14 @@ class SimilarityMutation {
             shouldComputeSimilarityDistribution
         );
 
-        var relationshipsWritten = mutateRelationshipService.mutate(
+        var addRelationshipResult = mutateRelationshipService.mutate(
             graphStore,
             mutateRelationshipConfiguration.mutateRelationshipType(),
             mutateRelationshipPropertyConfiguration.mutateProperty(),
             similaritySingleTypeRelationshipsHandler
         );
 
+        var relationshipsWritten = new RelationshipsWritten(addRelationshipResult.relationshipsAdded());
         var similaritySummary = similaritySingleTypeRelationshipsHandler.similaritySummary();
 
         return Pair.of(relationshipsWritten, similaritySummary);
