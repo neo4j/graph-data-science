@@ -153,7 +153,11 @@ To check that the results of the algorithm have been correctly written back to N
 ----
 MATCH (source)-[r:PATH]->(target)
 RETURN 
-  source.name, [nodeId IN r.nodeIds | gds.util.asNode(nodeId)] AS nodeIds, r.costs, r.totalCost, target.name
+  source.name,
+  [nodeId IN r.nodeIds | gds.util.asNode(nodeId)] AS nodeIds,
+  r.costs,
+  r.totalCost,
+  target.name
 ----
 
 .Results
