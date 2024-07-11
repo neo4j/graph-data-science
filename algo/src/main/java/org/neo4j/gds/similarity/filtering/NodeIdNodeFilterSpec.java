@@ -34,7 +34,7 @@ public class NodeIdNodeFilterSpec implements NodeFilterSpec {
 
     private final Set<Long> nodeIds;
 
-    NodeIdNodeFilterSpec(Set<Long> nodeIds) {
+    public NodeIdNodeFilterSpec(Set<Long> nodeIds) {
         this.nodeIds = nodeIds;
     }
 

@@ -31,7 +31,7 @@ public class LabelNodeFilterSpec implements NodeFilterSpec {
 
     private final String labelString;
 
-    LabelNodeFilterSpec(String labelString) {
+    public LabelNodeFilterSpec(String labelString) {
         this.labelString = labelString;
     }
 
