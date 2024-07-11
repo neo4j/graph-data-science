@@ -22,6 +22,7 @@ package org.neo4j.gds.core.io.file;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.compat.batchimport.input.Input;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.io.GraphStoreExporter;
@@ -38,8 +39,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.compat.batchimport.input.Collector;
-import org.neo4j.gds.compat.batchimport.input.Input;
 import org.neo4j.gds.logging.Log;
 
 import java.io.IOException;
@@ -173,7 +172,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
         ProgressTracker progressTracker
     ) {
         progressTracker.beginSubTask();
-        var nodeInput = graphStoreInput.nodes(Collector.EMPTY);
+        var nodeInput = graphStoreInput.nodes();
         var nodeInputIterator = nodeInput.iterator();
 
         var tasks = ParallelUtil.tasks(
@@ -194,7 +193,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
         ProgressTracker progressTracker
     ) {
         progressTracker.beginSubTask();
-        var relationshipInput = graphStoreInput.relationships(Collector.EMPTY);
+        var relationshipInput = graphStoreInput.relationships();
         var relationshipInputIterator = relationshipInput.iterator();
 
         var tasks = ParallelUtil.tasks(

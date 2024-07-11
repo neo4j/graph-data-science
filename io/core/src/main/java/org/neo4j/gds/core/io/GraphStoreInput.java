@@ -30,7 +30,6 @@ import org.neo4j.gds.compat.InputEntityIdVisitor;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.batchimport.InputIterable;
 import org.neo4j.gds.compat.batchimport.InputIterator;
-import org.neo4j.gds.compat.batchimport.input.Collector;
 import org.neo4j.gds.compat.batchimport.input.IdType;
 import org.neo4j.gds.compat.batchimport.input.Input;
 import org.neo4j.gds.compat.batchimport.input.InputChunk;
@@ -175,12 +174,12 @@ public final class GraphStoreInput implements Input {
     }
 
     @Override
-    public InputIterable nodes(Collector badCollector) {
+    public InputIterable nodes() {
         return () -> new NodeImporter(nodeStore, batchSize, idMode.get(), idMapFunction);
     }
 
     @Override
-    public InputIterable relationships(Collector badCollector) {
+    public InputIterable relationships() {
         return () -> new RelationshipImporter(relationshipStore, batchSize, idMode.get(), idMapFunction);
     }
 

@@ -27,7 +27,6 @@ import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.batchimport.BatchImporter;
 import org.neo4j.gds.compat.batchimport.ExecutionMonitor;
-import org.neo4j.gds.compat.batchimport.IndexConfig;
 import org.neo4j.gds.compat.batchimport.input.Collector;
 import org.neo4j.gds.compat.batchimport.input.Input;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -202,7 +201,7 @@ public final class GdsParallelBatchImporter {
     private Collector getCollector() {
         return config.useBadCollector()
             ? Neo4jProxy.badCollector(new LoggingOutputStream(log), 0)
-            : Collector.EMPTY;
+            : Neo4jProxy.emptyCollector();
     }
 
     private BatchImporter instantiateBatchImporter(
@@ -268,7 +267,8 @@ public final class GdsParallelBatchImporter {
                 config.batchSize(),
                 config.writeConcurrency(),
                 config.highIO(),
-                IndexConfig.DEFAULT.withLabelIndex().withRelationshipTypeIndex()
+                true,
+                true
             );
         }
     }

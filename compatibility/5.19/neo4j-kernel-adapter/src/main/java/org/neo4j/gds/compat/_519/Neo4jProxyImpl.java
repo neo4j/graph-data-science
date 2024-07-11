@@ -28,6 +28,7 @@ import org.neo4j.gds.compat.batchimport.BatchImporter;
 import org.neo4j.gds.compat.batchimport.ExecutionMonitor;
 import org.neo4j.gds.compat.batchimport.Monitor;
 import org.neo4j.gds.compat.batchimport.input.Collector;
+import org.neo4j.gds.compat.batchimport.input.ReadableGroups;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.exceptions.InvalidTransactionTypeKernelException;
@@ -48,6 +49,7 @@ import org.neo4j.storageengine.api.Reference;
 import org.neo4j.storageengine.api.StorageEngineFactory;
 import org.neo4j.values.storable.Value;
 
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -107,6 +109,18 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     ) {
         throw new UnsupportedOperationException(
             "`org.neo4j.gds.compat._521.Neo4jProxyImpl.instantiateRecordBatchImporter` is not yet implemented.");
+    }
+
+    @Override
+    public ReadableGroups newGroups() {
+        throw new UnsupportedOperationException(
+            "`org.neo4j.gds.compat._519.Neo4jProxyImpl.newGroups` is not yet implemented.");
+    }
+
+    @Override
+    public Collector badCollector(OutputStream outputStream, int batchSize) {
+        throw new UnsupportedOperationException(
+            "`org.neo4j.gds.compat._519.Neo4jProxyImpl.badCollector` is not yet implemented.");
     }
 
     @Override

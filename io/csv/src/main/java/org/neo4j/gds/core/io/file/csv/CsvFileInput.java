@@ -33,7 +33,6 @@ import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.compat.batchimport.InputIterable;
 import org.neo4j.gds.compat.batchimport.InputIterator;
-import org.neo4j.gds.compat.batchimport.input.Collector;
 import org.neo4j.gds.compat.batchimport.input.IdType;
 import org.neo4j.gds.compat.batchimport.input.Input;
 import org.neo4j.gds.compat.batchimport.input.InputChunk;
@@ -104,7 +103,7 @@ final class CsvFileInput implements FileInput {
     }
 
     @Override
-    public InputIterable nodes(Collector badCollector) {
+    public InputIterable nodes() {
         Map<Path, List<Path>> pathMapping = CsvImportFileUtil.nodeHeaderToFileMapping(
             this.importPath
         );
@@ -128,7 +127,7 @@ final class CsvFileInput implements FileInput {
     }
 
     @Override
-    public InputIterable relationships(Collector badCollector) {
+    public InputIterable relationships() {
         Map<Path, List<Path>> pathMapping = CsvImportFileUtil.relationshipHeaderToFileMapping(importPath);
         Map<RelationshipFileHeader, List<Path>> headerToDataFilesMapping = pathMapping.entrySet().stream()
             .collect(Collectors.toMap(

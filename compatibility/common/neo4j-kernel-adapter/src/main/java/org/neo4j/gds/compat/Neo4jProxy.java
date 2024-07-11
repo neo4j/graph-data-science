@@ -96,6 +96,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.LongConsumer;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
@@ -476,14 +477,33 @@ public final class Neo4jProxy {
         return read.relationshipsGetCount();
     }
 
+    public static ExecutionMonitor newCoarseBoundedProgressExecutionMonitor(
+        long highNodeId,
+        long highRelationshipId,
+        int batchSize,
+        LongConsumer progress,
+        LongConsumer outNumberOfBatches
+    ) {
+        return IMPL.newCoarseBoundedProgressExecutionMonitor(
+            highNodeId,
+            highRelationshipId,
+            batchSize,
+            progress,
+            outNumberOfBatches
+        );
+    }
+
     public static ReadableGroups newGroups() {
         // new Groups()
         throw new UnsupportedOperationException("TODO");
     }
 
+    public static Collector emptyCollector() {
+        return IMPL.emptyCollector();
+    }
+
     public static Collector badCollector(OutputStream log, int batchSize) {
-        // Collectors.badCollector(new LoggingOutputStream(log), 0)
-        throw new UnsupportedOperationException("TODO");
+        return IMPL.badCollector(log, batchSize);
     }
 
     private static final class BlockFormat {

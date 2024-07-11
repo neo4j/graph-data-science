@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.compat._516;
 
+import org.neo4j.common.DependencyResolver;
 import org.neo4j.configuration.Config;
 import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.compat.GlobalProcedureRegistry;
@@ -27,9 +28,19 @@ import org.neo4j.gds.compat.Write;
 import org.neo4j.gds.compat.batchimport.BatchImporter;
 import org.neo4j.gds.compat.batchimport.ExecutionMonitor;
 import org.neo4j.gds.compat.batchimport.input.Collector;
+import org.neo4j.gds.compat.batchimport.input.Input;
+import org.neo4j.gds.compat.batchimport.input.ReadableGroups;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
+import org.neo4j.internal.batchimport.Configuration;
+import org.neo4j.internal.batchimport.IndexConfig;
+import org.neo4j.internal.batchimport.InputIterable;
 import org.neo4j.internal.batchimport.Monitor;
+import org.neo4j.internal.batchimport.input.Collectors;
+import org.neo4j.internal.batchimport.input.IdType;
+import org.neo4j.internal.batchimport.input.PropertySizeCalculator;
+import org.neo4j.internal.batchimport.staging.CoarseBoundedProgressExecutionMonitor;
+import org.neo4j.internal.batchimport.staging.StageExecution;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.exceptions.InvalidTransactionTypeKernelException;
@@ -38,6 +49,7 @@ import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
 import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
+import org.neo4j.internal.schema.SchemaDescriptor;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.context.CursorContextFactory;
@@ -53,10 +65,15 @@ import org.neo4j.procedure.Mode;
 import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.storageengine.api.Reference;
+import org.neo4j.token.TokenHolders;
 import org.neo4j.values.storable.Value;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.LongConsumer;
 import java.util.stream.Stream;
 
 import static java.util.function.Predicate.not;
@@ -94,21 +111,238 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
                 directoryStructure,
                 fileSystem,
                 PageCacheTracer.NULL,
-                null, // TODO: configuration,
+                new ConfigurationAdapter(config),
                 logService,
-                null, // TODO: compatMonitor,
+                new ExecutionMonitorAdapter(executionMonitor),
                 AdditionalInitialIds.EMPTY,
                 new EmptyLogTailMetadata(dbConfig),
                 dbConfig,
                 Monitor.NO_MONITOR,
                 jobScheduler,
-                null, // TODO: badCollector,
+                badCollector != null ? ((CollectorAdapter) badCollector).inner : null,
                 TransactionLogInitializer.getLogFilesInitializer(),
                 new IndexImporterFactoryImpl(),
                 EmptyMemoryTracker.INSTANCE,
                 CursorContextFactory.NULL_CONTEXT_FACTORY
             );
-        return null; // TODO: new BatchImporterAdapter(importer);
+        return new BatchImporterAdapter(importer);
+    }
+
+    static final class ConfigurationAdapter implements org.neo4j.internal.batchimport.Configuration {
+        private final org.neo4j.gds.compat.batchimport.Config inner;
+
+        ConfigurationAdapter(org.neo4j.gds.compat.batchimport.Config inner) {
+            this.inner = inner;
+        }
+
+        @Override
+        public int batchSize() {
+            return this.inner.batchSize();
+        }
+
+        @Override
+        public int maxNumberOfWorkerThreads() {
+            return this.inner.writeConcurrency();
+        }
+
+        @Override
+        public boolean highIO() {
+            return this.inner.highIO();
+        }
+
+        @Override
+        public IndexConfig indexConfig() {
+            var config = IndexConfig.DEFAULT;
+            if (this.inner.createLabelIndex()) {
+                config = config.withLabelIndex();
+            }
+            if (this.inner.createRelationshipTypeIndex()) {
+                config = config.withRelationshipTypeIndex();
+            }
+            return config;
+        }
+    }
+
+    @Override
+    public ExecutionMonitor newCoarseBoundedProgressExecutionMonitor(
+        long highNodeId,
+        long highRelationshipId,
+        int batchSize,
+        LongConsumer progress,
+        LongConsumer outNumberOfBatches
+    ) {
+        var delegate = new CoarseBoundedProgressExecutionMonitor(
+            highNodeId,
+            highRelationshipId,
+            Configuration.withBatchSize(Configuration.DEFAULT, batchSize)
+        ) {
+            @Override
+            protected void progress(long l) {
+                progress.accept(l);
+            }
+
+            long numberOfBatches() {
+                return this.total();
+            }
+        };
+        // Note: this only works because we declare the delegate with `var`
+        outNumberOfBatches.accept(delegate.numberOfBatches());
+
+        return new ExecutionMonitor() {
+
+            @Override
+            public org.neo4j.gds.compat.batchimport.Monitor toMonitor() {
+                throw new UnsupportedOperationException("Cannot call  `toMonitor` on this one");
+            }
+
+            @Override
+            public void start(StageExecution execution) {
+                delegate.start(execution);
+            }
+
+            @Override
+            public void end(StageExecution execution, long totalTimeMillis) {
+                delegate.end(execution, totalTimeMillis);
+            }
+
+            @Override
+            public void done(boolean successful, long totalTimeMillis, String additionalInformation) {
+                delegate.done(successful, totalTimeMillis, additionalInformation);
+            }
+
+            @Override
+            public long checkIntervalMillis() {
+                return delegate.checkIntervalMillis();
+            }
+
+            @Override
+            public void check(StageExecution execution) {
+                delegate.check(execution);
+            }
+        };
+    }
+
+    static final class ExecutionMonitorAdapter implements org.neo4j.internal.batchimport.staging.ExecutionMonitor {
+        private final ExecutionMonitor delegate;
+
+        ExecutionMonitorAdapter(ExecutionMonitor delegate) {this.delegate = delegate;}
+
+        @Override
+        public void initialize(DependencyResolver dependencyResolver) {
+            org.neo4j.internal.batchimport.staging.ExecutionMonitor.super.initialize(dependencyResolver);
+            this.delegate.initialize(dependencyResolver);
+        }
+
+        @Override
+        public void start(StageExecution stageExecution) {
+            this.delegate.start(stageExecution);
+        }
+
+        @Override
+        public void end(StageExecution stageExecution, long l) {
+            this.delegate.end(stageExecution, l);
+        }
+
+        @Override
+        public void done(boolean b, long l, String s) {
+            this.delegate.done(b, l, s);
+        }
+
+        @Override
+        public long checkIntervalMillis() {
+            return this.delegate.checkIntervalMillis();
+        }
+
+        @Override
+        public void check(StageExecution stageExecution) {
+            this.delegate.check(stageExecution);
+        }
+    }
+
+    static final class BatchImporterAdapter implements BatchImporter {
+        private final org.neo4j.internal.batchimport.BatchImporter delegate;
+
+        BatchImporterAdapter(org.neo4j.internal.batchimport.BatchImporter delegate) {this.delegate = delegate;}
+
+        @Override
+        public void doImport(Input input) throws IOException {
+            throw new UnsupportedOperationException(
+                "`org.neo4j.gds.compat._516.Neo4jProxyImpl.BatchImporterAdapter.doImport` is not yet implemented.");
+        }
+    }
+
+    static final class InputAdapter implements org.neo4j.internal.batchimport.input.Input {
+        private final Input delegate;
+
+        InputAdapter(Input delegate) {this.delegate = delegate;}
+
+        @Override
+        public InputIterable nodes(org.neo4j.internal.batchimport.input.Collector collector) {
+            delegate.nodes();
+            throw new UnsupportedOperationException(
+                "`org.neo4j.gds.compat._516.Neo4jProxyImpl.InputAdapter.nodes` is not yet implemented.");
+        }
+
+        @Override
+        public InputIterable relationships(org.neo4j.internal.batchimport.input.Collector collector) {
+            throw new UnsupportedOperationException(
+                "`org.neo4j.gds.compat._516.Neo4jProxyImpl.InputAdapter.relationships` is not yet implemented.");
+        }
+
+        @Override
+        public IdType idType() {
+            throw new UnsupportedOperationException(
+                "`org.neo4j.gds.compat._516.Neo4jProxyImpl.InputAdapter.idType` is not yet implemented.");
+        }
+
+        @Override
+        public org.neo4j.internal.batchimport.input.ReadableGroups groups() {
+            throw new UnsupportedOperationException(
+                "`org.neo4j.gds.compat._516.Neo4jProxyImpl.InputAdapter.groups` is not yet implemented.");
+        }
+
+        @Override
+        public Estimates calculateEstimates(PropertySizeCalculator propertySizeCalculator) throws IOException {
+            throw new UnsupportedOperationException(
+                "`org.neo4j.gds.compat._516.Neo4jProxyImpl.InputAdapter.calculateEstimates` is not yet implemented.");
+        }
+
+        @Override
+        public Map<String, SchemaDescriptor> referencedNodeSchema(TokenHolders tokenHolders) {
+            return org.neo4j.internal.batchimport.input.Input.super.referencedNodeSchema(tokenHolders);
+        }
+
+        @Override
+        public void close() {
+            org.neo4j.internal.batchimport.input.Input.super.close();
+        }
+    }
+
+    @Override
+    public ReadableGroups newGroups() {
+        // TODO: new Groups()
+        throw new UnsupportedOperationException(
+            "`org.neo4j.gds.compat._516.Neo4jProxyImpl.newGroups` is not yet implemented.");
+    }
+
+    @Override
+    public Collector emptyCollector() {
+        return CollectorAdapter.EMPTY;
+    }
+
+    @Override
+    public Collector badCollector(OutputStream outputStream, int batchSize) {
+        return new CollectorAdapter(Collectors.badCollector(outputStream, 0));
+    }
+
+    private static final class CollectorAdapter implements Collector {
+        private static final Collector EMPTY = new CollectorAdapter(org.neo4j.internal.batchimport.input.Collector.EMPTY);
+
+        private final org.neo4j.internal.batchimport.input.Collector inner;
+
+        CollectorAdapter(org.neo4j.internal.batchimport.input.Collector inner) {
+            this.inner = inner;
+        }
     }
 
     @Override

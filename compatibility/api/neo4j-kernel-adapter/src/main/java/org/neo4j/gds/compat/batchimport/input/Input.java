@@ -60,18 +60,16 @@ public interface Input extends AutoCloseable {
     /**
      * Provides all node data for an import.
      *
-     * @param badCollector for collecting bad entries.
      * @return an {@link InputIterator} which will provide all node data for the whole import.
      */
-    InputIterable nodes(Collector badCollector);
+    InputIterable nodes();
 
     /**
      * Provides all relationship data for an import.
      *
-     * @param badCollector for collecting bad entries.
      * @return an {@link InputIterator} which will provide all relationship data for the whole import.
      */
-    InputIterable relationships(Collector badCollector);
+    InputIterable relationships();
 
     /**
      * @return {@link IdType} which matches the type of ids this {@link Input} generates.
@@ -102,40 +100,6 @@ public interface Input extends AutoCloseable {
 
     @Override
     default void close() {}
-
-    static Input input(
-            InputIterable nodes,
-            InputIterable relationships,
-            IdType idType,
-            Estimates estimates,
-            ReadableGroups groups) {
-        return new Input() {
-            @Override
-            public InputIterable relationships(Collector badCollector) {
-                return relationships;
-            }
-
-            @Override
-            public InputIterable nodes(Collector badCollector) {
-                return nodes;
-            }
-
-            @Override
-            public IdType idType() {
-                return idType;
-            }
-
-            @Override
-            public ReadableGroups groups() {
-                return groups;
-            }
-
-            @Override
-            public Estimates calculateEstimates(PropertySizeCalculator valueSizeCalculator) {
-                return estimates;
-            }
-        };
-    }
 
     public static Estimates knownEstimates(
             long numberOfNodes,

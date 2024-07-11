@@ -25,6 +25,7 @@ import org.neo4j.gds.compat.batchimport.BatchImporter;
 import org.neo4j.gds.compat.batchimport.ExecutionMonitor;
 import org.neo4j.gds.compat.batchimport.Monitor;
 import org.neo4j.gds.compat.batchimport.input.Collector;
+import org.neo4j.gds.compat.batchimport.input.ReadableGroups;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.exceptions.InvalidTransactionTypeKernelException;
@@ -43,8 +44,10 @@ import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.storageengine.api.Reference;
 
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.LongConsumer;
 
 public interface Neo4jProxyApi {
 
@@ -116,4 +119,28 @@ public interface Neo4jProxyApi {
         JobScheduler jobScheduler,
         Collector badCollector
     );
+
+    @CompatSince(minor = 22)
+    default ExecutionMonitor newCoarseBoundedProgressExecutionMonitor(
+        long highNodeId,
+        long highRelationshipId,
+        int batchSize,
+        LongConsumer progress,
+        LongConsumer outNumberOfBatches
+    ) {
+        throw new UnsupportedOperationException(
+            "`org.neo4j.gds.compat._519.Neo4jProxyApi.newCoarseBoundedProgressExecutionMonitor` is not yet implemented.");
+    }
+
+    @CompatSince(minor = 22)
+    ReadableGroups newGroups();
+
+    @CompatSince(minor = 22)
+    default Collector emptyCollector() {
+        throw new UnsupportedOperationException(
+            "`org.neo4j.gds.compat._519.Neo4jProxyApi.emptyCollector` is not yet implemented.");
+    }
+
+    @CompatSince(minor = 22)
+    Collector badCollector(OutputStream outputStream, int batchSize);
 }

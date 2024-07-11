@@ -23,6 +23,7 @@ public record Config(
     int batchSize,
     int writeConcurrency,
     boolean highIO,
-    IndexConfig indexConfig
+    boolean createLabelIndex,
+    boolean createRelationshipTypeIndex
 ) {
 }
