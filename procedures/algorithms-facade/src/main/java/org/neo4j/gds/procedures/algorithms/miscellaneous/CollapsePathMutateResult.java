@@ -17,14 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.walking;
+package org.neo4j.gds.procedures.algorithms.miscellaneous;
 
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
-@SuppressWarnings("unused")
-public class MutateResult {
+public class CollapsePathMutateResult {
     public final long preProcessingMillis;
     public final long computeMillis;
     public final long mutateMillis;
@@ -32,7 +32,7 @@ public class MutateResult {
 
     public final Map<String, Object> configuration;
 
-    MutateResult(
+    public CollapsePathMutateResult(
         long preProcessingMillis,
         long computeMillis,
         long mutateMillis,
@@ -46,11 +46,23 @@ public class MutateResult {
         this.configuration = configuration;
     }
 
-    static final class Builder extends AbstractResultBuilder<MutateResult> {
+    public static CollapsePathMutateResult emptyFrom(
+        AlgorithmProcessingTimings timings,
+        Map<String, Object> configurationMap
+    ) {
+        return new CollapsePathMutateResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.mutateOrWriteMillis,
+            0,
+            configurationMap
+        );
+    }
 
+    public static final class Builder extends AbstractResultBuilder<CollapsePathMutateResult> {
         @Override
-        public MutateResult build() {
-            return new MutateResult(
+        public CollapsePathMutateResult build() {
+            return new CollapsePathMutateResult(
                 preProcessingMillis,
                 computeMillis,
                 mutateMillis,

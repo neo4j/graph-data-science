@@ -72,7 +72,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final PathFindingAlgorithms pathFindingAlgorithms;
 
-    public PathFindingAlgorithmsWriteModeBusinessFacade(
+    PathFindingAlgorithmsWriteModeBusinessFacade(
         Log log,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         RequestScopedDependencies requestScopedDependencies,
@@ -105,7 +105,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             configuration,
             BellmanFord,
             () -> estimationFacade.bellmanFord(configuration),
-            graph -> pathFindingAlgorithms.bellmanFord(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.bellmanFord(graph, configuration),
             writeStep,
             resultBuilder
         );
@@ -121,7 +121,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             configuration,
             DeltaStepping,
             estimationFacade::deltaStepping,
-            graph -> pathFindingAlgorithms.deltaStepping(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.deltaStepping(graph, configuration),
             resultBuilder
         );
     }
@@ -143,7 +143,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             configuration,
             KSpanningTree,
             estimationFacade::kSpanningTree,
-            graph -> pathFindingAlgorithms.kSpanningTree(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.kSpanningTree(graph, configuration),
             writeStep,
             resultBuilder
         );
@@ -159,7 +159,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             configuration,
             AStar,
             estimationFacade::singlePairShortestPathAStar,
-            graph -> pathFindingAlgorithms.singlePairShortestPathAStar(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.singlePairShortestPathAStar(graph, configuration),
             resultBuilder
         );
     }
@@ -174,7 +174,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             configuration,
             Dijkstra,
             () -> estimationFacade.singlePairShortestPathDijkstra(configuration),
-            graph -> pathFindingAlgorithms.singlePairShortestPathDijkstra(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.singlePairShortestPathDijkstra(graph, configuration),
             resultBuilder
         );
     }
@@ -189,7 +189,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             configuration,
             Yens,
             () -> estimationFacade.singlePairShortestPathYens(configuration),
-            graph -> pathFindingAlgorithms.singlePairShortestPathYens(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.singlePairShortestPathYens(graph, configuration),
             resultBuilder
         );
     }
@@ -204,7 +204,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             configuration,
             SingleSourceDijkstra,
             () -> estimationFacade.singleSourceShortestPathDijkstra(configuration),
-            graph -> pathFindingAlgorithms.singleSourceShortestPathDijkstra(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.singleSourceShortestPathDijkstra(graph, configuration),
             resultBuilder
         );
     }
@@ -226,7 +226,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             configuration,
             LabelForProgressTracking.SpanningTree,
             estimationFacade::spanningTree,
-            graph -> pathFindingAlgorithms.spanningTree(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.spanningTree(graph, configuration),
             writeStep,
             resultBuilder
         );
@@ -244,7 +244,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             configuration,
             SteinerTree,
             () -> estimationFacade.steinerTree(configuration),
-            graph -> pathFindingAlgorithms.steinerTree(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.steinerTree(graph, configuration),
             writeStep,
             resultBuilder
         );

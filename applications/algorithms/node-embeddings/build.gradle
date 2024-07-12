@@ -1,6 +1,6 @@
 apply plugin: 'java-library'
 
-description = 'Neo4j Graph Data Science :: Node Embeddings'
+description = 'Neo4j Graph Data Science :: Node Embedding Algorithms'
 
 group = 'org.neo4j.gds'
 

@@ -94,7 +94,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
             configuration,
             ApproximateMaximumKCut,
             () -> estimation.approximateMaximumKCut(configuration),
-            graph -> algorithms.approximateMaximumKCut(graph, configuration),
+            (graph, __) -> algorithms.approximateMaximumKCut(graph, configuration),
             mutateStep,
             resultBuilder
         );
@@ -112,7 +112,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
             configuration,
             K1Coloring,
             estimation::k1Coloring,
-            graph -> algorithms.k1Coloring(graph, configuration),
+            (graph, __) -> algorithms.k1Coloring(graph, configuration),
             mutateStep,
             resultBuilder
         );
@@ -130,7 +130,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
             configuration,
             KCore,
             estimation::kCore,
-            graph -> algorithms.kCore(graph, configuration),
+            (graph, __) -> algorithms.kCore(graph, configuration),
             mutateStep,
             resultBuilder
         );
@@ -148,7 +148,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
             configuration,
             KMeans,
             () -> estimation.kMeans(configuration),
-            graph -> algorithms.kMeans(graph, configuration),
+            (graph, __) -> algorithms.kMeans(graph, configuration),
             mutateStep,
             resultBuilder
         );
@@ -166,7 +166,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
             configuration,
             LabelPropagation,
             estimation::labelPropagation,
-            graph -> algorithms.labelPropagation(graph, configuration),
+            (graph, __) -> algorithms.labelPropagation(graph, configuration),
             mutateStep,
             resultBuilder
         );
@@ -184,7 +184,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
             configuration,
             LCC,
             () -> estimation.lcc(configuration),
-            graph -> algorithms.lcc(graph, configuration),
+            (graph, __) -> algorithms.lcc(graph, configuration),
             mutateStep,
             resultBuilder
         );
@@ -202,7 +202,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
             configuration,
             Leiden,
             () -> estimation.leiden(configuration),
-            graph -> algorithms.leiden(graph, configuration),
+            (graph, __) -> algorithms.leiden(graph, configuration),
             mutateStep,
             resultBuilder
         );
@@ -220,7 +220,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
             configuration,
             Louvain,
             () -> estimation.louvain(configuration),
-            graph -> algorithms.louvain(graph, configuration),
+            (graph, __) -> algorithms.louvain(graph, configuration),
             mutateStep,
             resultBuilder
         );
@@ -238,7 +238,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
             configuration,
             ModularityOptimization,
             estimation::modularityOptimization,
-            graph -> algorithms.modularityOptimization(graph, configuration),
+            (graph, __) -> algorithms.modularityOptimization(graph, configuration),
             mutateStep,
             resultBuilder
         );
@@ -256,7 +256,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
             configuration,
             SCC,
             estimation::scc,
-            graph -> algorithms.scc(graph, configuration),
+            (graph, __) -> algorithms.scc(graph, configuration),
             mutateStep,
             resultBuilder
         );
@@ -274,7 +274,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
             configuration,
             TriangleCount,
             estimation::triangleCount,
-            graph -> algorithms.triangleCount(graph, configuration),
+            (graph, __) -> algorithms.triangleCount(graph, configuration),
             mutateStep,
             resultBuilder
         );
@@ -292,7 +292,7 @@ public class CommunityAlgorithmsMutateModeBusinessFacade {
             configuration,
             WCC,
             () -> estimation.wcc(configuration),
-            graph -> algorithms.wcc(graph, configuration),
+            (graph, __) -> algorithms.wcc(graph, configuration),
             mutateStep,
             resultBuilder
         );

@@ -95,7 +95,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             configuration,
             ArticleRank,
             estimationFacade::pageRank,
-            graph -> centralityAlgorithms.articleRank(graph, configuration),
+            (graph, __) -> centralityAlgorithms.articleRank(graph, configuration),
             writeStep,
             resultBuilder
         );
@@ -113,7 +113,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             configuration,
             BetweennessCentrality,
             () -> estimationFacade.betweennessCentrality(configuration),
-            graph -> centralityAlgorithms.betweennessCentrality(graph, configuration),
+            (graph, __) -> centralityAlgorithms.betweennessCentrality(graph, configuration),
             writeStep,
             resultBuilder
         );
@@ -131,7 +131,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             configuration,
             CELF,
             () -> estimationFacade.celf(configuration),
-            graph -> centralityAlgorithms.celf(graph, configuration),
+            (graph, __) -> centralityAlgorithms.celf(graph, configuration),
             writeStep,
             resultBuilder
         );
@@ -149,7 +149,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             configuration,
             ClosenessCentrality,
             () -> estimationFacade.closenessCentrality(configuration),
-            graph -> centralityAlgorithms.closenessCentrality(graph, configuration),
+            (graph, __) -> centralityAlgorithms.closenessCentrality(graph, configuration),
             writeStep,
             resultBuilder
         );
@@ -167,7 +167,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             configuration,
             DegreeCentrality,
             () -> estimationFacade.degreeCentrality(configuration),
-            graph -> centralityAlgorithms.degreeCentrality(graph, configuration),
+            (graph, __) -> centralityAlgorithms.degreeCentrality(graph, configuration),
             writeStep,
             resultBuilder
         );
@@ -185,7 +185,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             configuration,
             EigenVector,
             estimationFacade::pageRank,
-            graph -> centralityAlgorithms.eigenVector(graph, configuration),
+            (graph, __) -> centralityAlgorithms.eigenVector(graph, configuration),
             writeStep,
             resultBuilder
         );
@@ -203,7 +203,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             configuration,
             HarmonicCentrality,
             estimationFacade::harmonicCentrality,
-            graph -> centralityAlgorithms.harmonicCentrality(graph, configuration),
+            (graph, __) -> centralityAlgorithms.harmonicCentrality(graph, configuration),
             writeStep,
             resultBuilder
         );
@@ -221,7 +221,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             configuration,
             PageRank,
             estimationFacade::pageRank,
-            graph -> centralityAlgorithms.pageRank(graph, configuration),
+            (graph, __) -> centralityAlgorithms.pageRank(graph, configuration),
             writeStep,
             resultBuilder
         );

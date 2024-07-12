@@ -19,23 +19,68 @@
  */
 package org.neo4j.gds.applications.algorithms.miscellaneous;
 
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.scaleproperties.ScaleProperties;
 import org.neo4j.gds.scaleproperties.ScalePropertiesBaseConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
+import org.neo4j.gds.walking.CollapsePath;
+import org.neo4j.gds.walking.CollapsePathConfig;
 
-public class MiscellaneousAlgorithms {
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+class MiscellaneousAlgorithms {
     private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
 
     private final ProgressTrackerCreator progressTrackerCreator;
 
     MiscellaneousAlgorithms(ProgressTrackerCreator progressTrackerCreator) {
         this.progressTrackerCreator = progressTrackerCreator;
+    }
+
+    SingleTypeRelationships collapsePath(GraphStore graphStore, CollapsePathConfig configuration) {
+        Collection<NodeLabel> nodeLabels = configuration.nodeLabelIdentifiers(graphStore);
+
+        /*
+         * here we build a graph-per-relationship type. you can think of them as layers.
+         * the algorithm will take a step in a layer, then a next step in another layer.
+         * that obviously stops of a node in a layer is not connected to anything.
+         */
+        List<Graph[]> pathTemplatesEncodedAsListsOfSingleRelationshipTypeGraphs = configuration.pathTemplates().stream()
+            .map(
+                path -> path.stream()
+                    .map(
+                        relationshipTypeAsString -> graphStore.getGraph(
+                            nodeLabels,
+                            Set.of(RelationshipType.of(relationshipTypeAsString)),
+                            Optional.empty()
+                        )
+                    )
+                    .toArray(Graph[]::new)
+            )
+            .collect(Collectors.toList());
+
+        var algorithm = new CollapsePath(
+            pathTemplatesEncodedAsListsOfSingleRelationshipTypeGraphs,
+            configuration.allowSelfLoops(),
+            RelationshipType.of(configuration.mutateRelationshipType()),
+            configuration.concurrency(),
+            DefaultPool.INSTANCE
+        );
+
+        return algorithm.compute();
     }
 
     ScalePropertiesResult scaleProperties(Graph graph, ScalePropertiesBaseConfig configuration) {

@@ -39,7 +39,7 @@ public class NodeEmbeddingAlgorithmsTrainModeBusinessFacade {
     private final NodeEmbeddingAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
 
-    public NodeEmbeddingAlgorithmsTrainModeBusinessFacade(
+    NodeEmbeddingAlgorithmsTrainModeBusinessFacade(
         GraphSageModelCatalog graphSageModelCatalog,
         GraphSageModelRepository graphSageModelRepository,
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimation,
@@ -73,7 +73,7 @@ public class NodeEmbeddingAlgorithmsTrainModeBusinessFacade {
             Optional.of(List.of(validationHook)),
             GraphSageTrain,
             () -> estimation.graphSageTrain(configuration),
-            graph -> algorithms.graphSageTrain(graph, configuration),
+            (graph, __) -> algorithms.graphSageTrain(graph, configuration),
             Optional.of(writeToDiskStep),
             resultBuilder
         );

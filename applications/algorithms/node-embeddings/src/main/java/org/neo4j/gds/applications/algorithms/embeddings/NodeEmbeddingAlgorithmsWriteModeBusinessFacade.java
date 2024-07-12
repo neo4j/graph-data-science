@@ -95,7 +95,7 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
             configuration,
             FastRP,
             () -> estimationFacade.fastRP(configuration),
-            graph -> algorithms.fastRP(graph, configuration),
+            (graph, __) -> algorithms.fastRP(graph, configuration),
             writeStep,
             resultBuilder
         );

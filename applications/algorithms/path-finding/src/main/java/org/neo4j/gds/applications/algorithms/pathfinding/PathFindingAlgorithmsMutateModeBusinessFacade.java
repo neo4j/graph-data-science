@@ -82,7 +82,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             configuration,
             BellmanFord,
             () -> estimationFacade.bellmanFord(configuration),
-            graph -> pathFindingAlgorithms.bellmanFord(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.bellmanFord(graph, configuration),
             mutateStep,
             resultBuilder
         );
@@ -101,7 +101,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             configuration,
             BFS,
             estimationFacade::breadthFirstSearch,
-            graph -> pathFindingAlgorithms.breadthFirstSearch(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.breadthFirstSearch(graph, configuration),
             mutateStep,
             resultBuilder
         );
@@ -119,7 +119,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             configuration,
             DeltaStepping,
             estimationFacade::deltaStepping,
-            graph -> pathFindingAlgorithms.deltaStepping(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.deltaStepping(graph, configuration),
             mutateStep,
             resultBuilder
         );
@@ -138,7 +138,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             configuration,
             DFS,
             estimationFacade::depthFirstSearch,
-            graph -> pathFindingAlgorithms.depthFirstSearch(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.depthFirstSearch(graph, configuration),
             mutateStep,
             resultBuilder
         );
@@ -156,7 +156,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             configuration,
             AStar,
             estimationFacade::singlePairShortestPathAStar,
-            graph -> pathFindingAlgorithms.singlePairShortestPathAStar(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.singlePairShortestPathAStar(graph, configuration),
             mutateStep,
             resultBuilder
         );
@@ -174,7 +174,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             configuration,
             Dijkstra,
             () -> estimationFacade.singlePairShortestPathDijkstra(configuration),
-            graph -> pathFindingAlgorithms.singlePairShortestPathDijkstra(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.singlePairShortestPathDijkstra(graph, configuration),
             mutateStep,
             resultBuilder
         );
@@ -192,7 +192,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             configuration,
             Yens,
             () -> estimationFacade.singlePairShortestPathYens(configuration),
-            graph -> pathFindingAlgorithms.singlePairShortestPathYens(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.singlePairShortestPathYens(graph, configuration),
             mutateStep,
             resultBuilder
         );
@@ -210,7 +210,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             configuration,
             SingleSourceDijkstra,
             () -> estimationFacade.singleSourceShortestPathDijkstra(configuration),
-            graph -> pathFindingAlgorithms.singleSourceShortestPathDijkstra(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.singleSourceShortestPathDijkstra(graph, configuration),
             mutateStep,
             resultBuilder
         );
@@ -228,7 +228,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             configuration,
             LabelForProgressTracking.SpanningTree,
             estimationFacade::spanningTree,
-            graph -> pathFindingAlgorithms.spanningTree(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.spanningTree(graph, configuration),
             mutateStep,
             resultBuilder
         );
@@ -246,7 +246,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             configuration,
             SteinerTree,
             () -> estimationFacade.steinerTree(configuration),
-            graph -> pathFindingAlgorithms.steinerTree(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.steinerTree(graph, configuration),
             mutateStep,
             resultBuilder
         );

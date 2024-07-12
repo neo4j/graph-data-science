@@ -49,7 +49,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
     private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final PathFindingAlgorithms pathFindingAlgorithms;
 
-    public PathFindingAlgorithmsStatsModeBusinessFacade(
+    PathFindingAlgorithmsStatsModeBusinessFacade(
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         PathFindingAlgorithms pathFindingAlgorithms
@@ -69,7 +69,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
             configuration,
             BellmanFord,
             () -> estimationFacade.bellmanFord(configuration),
-            graph -> pathFindingAlgorithms.bellmanFord(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.bellmanFord(graph, configuration),
             resultBuilder
         );
     }
@@ -84,7 +84,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
             configuration,
             BFS,
             estimationFacade::breadthFirstSearch,
-            graph -> pathFindingAlgorithms.breadthFirstSearch(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.breadthFirstSearch(graph, configuration),
             resultBuilder
         );
     }
@@ -99,7 +99,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
             configuration,
             DeltaStepping,
             estimationFacade::deltaStepping,
-            graph -> pathFindingAlgorithms.deltaStepping(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.deltaStepping(graph, configuration),
             resultBuilder
         );
     }
@@ -114,7 +114,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
             configuration,
             RandomWalk,
             () -> estimationFacade.randomWalk(configuration),
-            graph -> pathFindingAlgorithms.randomWalk(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.randomWalk(graph, configuration),
             resultBuilder
         );
     }
@@ -129,7 +129,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
             configuration,
             LabelForProgressTracking.SpanningTree,
             estimationFacade::spanningTree,
-            graph -> pathFindingAlgorithms.spanningTree(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.spanningTree(graph, configuration),
             resultBuilder
         );
     }
@@ -144,7 +144,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
             configuration,
             SteinerTree,
             () -> estimationFacade.steinerTree(configuration),
-            graph -> pathFindingAlgorithms.steinerTree(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.steinerTree(graph, configuration),
             resultBuilder
         );
     }

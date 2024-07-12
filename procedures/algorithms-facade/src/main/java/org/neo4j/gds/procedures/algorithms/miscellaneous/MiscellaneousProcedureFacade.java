@@ -26,6 +26,7 @@ import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicat
 import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsStatsModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsWriteModeBusinessFacade;
+import org.neo4j.gds.procedures.algorithms.miscellaneous.stubs.CollapsePathMutateStub;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.stubs.ScalePropertiesMutateStub;
 import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
@@ -42,6 +43,7 @@ public final class MiscellaneousProcedureFacade {
     private final ProcedureReturnColumns procedureReturnColumns;
 
     private final ScalePropertiesMutateStub alphaScalePropertiesMutateStub;
+    private final CollapsePathMutateStub collapsePathMutateStub;
     private final ScalePropertiesMutateStub scalePropertiesMutateStub;
 
     private final ApplicationsFacade applicationsFacade;
@@ -53,6 +55,7 @@ public final class MiscellaneousProcedureFacade {
     private MiscellaneousProcedureFacade(
         ProcedureReturnColumns procedureReturnColumns,
         ScalePropertiesMutateStub alphaScalePropertiesMutateStub,
+        CollapsePathMutateStub collapsePathMutateStub,
         ScalePropertiesMutateStub scalePropertiesMutateStub,
         ApplicationsFacade applicationsFacade,
         EstimationModeRunner estimationMode,
@@ -61,6 +64,7 @@ public final class MiscellaneousProcedureFacade {
     ) {
         this.procedureReturnColumns = procedureReturnColumns;
         this.alphaScalePropertiesMutateStub = alphaScalePropertiesMutateStub;
+        this.collapsePathMutateStub = collapsePathMutateStub;
         this.scalePropertiesMutateStub = scalePropertiesMutateStub;
         this.applicationsFacade = applicationsFacade;
         this.estimationMode = estimationMode;
@@ -82,6 +86,7 @@ public final class MiscellaneousProcedureFacade {
             procedureReturnColumns,
             true
         );
+        var collapsePathMutateStub = new CollapsePathMutateStub(genericStub, applicationsFacade);
         var scalePropertiesMutateStub = new ScalePropertiesMutateStub(
             genericStub,
             applicationsFacade,
@@ -92,6 +97,7 @@ public final class MiscellaneousProcedureFacade {
         return new MiscellaneousProcedureFacade(
             procedureReturnColumns,
             alphaScalePropertiesMutateStub,
+            collapsePathMutateStub,
             scalePropertiesMutateStub,
             applicationsFacade,
             estimationModeRunner,
@@ -118,6 +124,10 @@ public final class MiscellaneousProcedureFacade {
             streamMode()::scaleProperties,
             resultBuilder
         );
+    }
+
+    public CollapsePathMutateStub collapsePathMutateStub() {
+        return collapsePathMutateStub;
     }
 
     public ScalePropertiesMutateStub scalePropertiesMutateStub() {

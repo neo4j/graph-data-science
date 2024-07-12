@@ -17,21 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.machinery;
+package org.neo4j.gds.applications.algorithms.miscellaneous;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.core.loading.SingleTypeRelationships;
+import org.neo4j.gds.core.utils.progress.JobId;
 
-/**
- * The framework hook for all the algorithms computations.
- * (Other things you can inject in constructor of course)
- */
-public interface AlgorithmComputation<RESULT> {
-    /**
-     * The lowest common denominator of things algorithm computations need
-     *
-     * @param graph      all except CollapsePath need this
-     * @param graphStore only CollapsePath needs this
-     */
-    RESULT compute(Graph graph, GraphStore graphStore);
+class CollapsePathMutateStep implements MutateOrWriteStep<SingleTypeRelationships, Void> {
+    @Override
+    public Void execute(
+        Graph graph,
+        GraphStore graphStore,
+        ResultStore resultStore,
+        SingleTypeRelationships result,
+        JobId jobId
+    ) {
+        graphStore.addRelationshipType(result);
+
+        return null;
+    }
 }

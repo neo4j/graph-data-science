@@ -68,7 +68,7 @@ public class GraphSageAlgorithmProcessing {
             Optional.of(List.of(validationHook)),
             GraphSage,
             () -> estimationFacade.graphSage(configuration, mutating),
-            graph -> algorithms.graphSage(graph, configuration),
+            (graph, __) -> algorithms.graphSage(graph, configuration),
             mutateOrWriteStep,
             resultBuilder
         );

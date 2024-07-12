@@ -19,8 +19,9 @@
  */
 package org.neo4j.gds.walking;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.algorithms.miscellaneous.CollapsePathMutateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -31,40 +32,35 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class CollapsePathMutateProc extends BaseProc {
+public class CollapsePathMutateProc {
 
     static final String DESCRIPTION = "Collapse Path algorithm is a traversal algorithm capable of creating relationships between the start and end nodes of a traversal";
 
+    @Context
+    public GraphDataScienceProcedures facade;
+
     @Procedure(name = "gds.collapsePath.mutate", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<MutateResult> mutate(
+    public Stream<CollapsePathMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new CollapsePathMutateSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.algorithms().miscellaneous().collapsePathMutateStub().execute(graphName, configuration);
     }
 
     @Procedure(name = "gds.beta.collapsePath.mutate", mode = READ, deprecatedBy = "gds.collapsePath.mutate")
     @Description(DESCRIPTION)
     @Deprecated(forRemoval = true)
     @Internal
-    public Stream<MutateResult> betaMutate(
+    public Stream<CollapsePathMutateResult> betaMutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.beta.collapsePath.mutate");
-
-        executionContext()
+        facade.deprecatedProcedures().called("gds.beta.collapsePath.mutate");
+        facade
             .log()
             .warn("Procedure `gds.beta.collapsePath.mutate` has been deprecated, please use `gds.collapsePath.mutate`.");
 
         return mutate(graphName, configuration);
     }
-
-
 }

@@ -76,7 +76,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
             configuration,
             ArticleRank,
             estimation::pageRank,
-            graph -> algorithms.articleRank(graph, configuration),
+            (graph, __) -> algorithms.articleRank(graph, configuration),
             mutateStep,
             resultBuilder
         );
@@ -94,7 +94,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
             configuration,
             BetweennessCentrality,
             () -> estimation.betweennessCentrality(configuration),
-            graph -> algorithms.betweennessCentrality(graph, configuration),
+            (graph, __) -> algorithms.betweennessCentrality(graph, configuration),
             mutateStep,
             resultBuilder
         );
@@ -112,7 +112,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
             configuration,
             CELF,
             () -> estimation.celf(configuration),
-            graph -> algorithms.celf(graph, configuration),
+            (graph, __) -> algorithms.celf(graph, configuration),
             mutateStep,
             resultBuilder
         );
@@ -130,7 +130,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
             configuration,
             ClosenessCentrality,
             () -> estimation.closenessCentrality(configuration),
-            graph -> algorithms.closenessCentrality(graph, configuration),
+            (graph, __) -> algorithms.closenessCentrality(graph, configuration),
             mutateStep,
             resultBuilder
         );
@@ -148,7 +148,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
             configuration,
             DegreeCentrality,
             () -> estimation.degreeCentrality(configuration),
-            graph -> algorithms.degreeCentrality(graph, configuration),
+            (graph, __) -> algorithms.degreeCentrality(graph, configuration),
             mutateStep,
             resultBuilder
         );
@@ -166,7 +166,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
             configuration,
             EigenVector,
             estimation::pageRank,
-            graph -> algorithms.eigenVector(graph, configuration),
+            (graph, __) -> algorithms.eigenVector(graph, configuration),
             mutateStep,
             resultBuilder
         );
@@ -184,7 +184,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
             configuration,
             HarmonicCentrality,
             estimation::harmonicCentrality,
-            graph -> algorithms.harmonicCentrality(graph, configuration),
+            (graph, __) -> algorithms.harmonicCentrality(graph, configuration),
             mutateStep,
             resultBuilder
         );
@@ -202,7 +202,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
             configuration,
             PageRank,
             estimation::pageRank,
-            graph -> algorithms.pageRank(graph, configuration),
+            (graph, __) -> algorithms.pageRank(graph, configuration),
             mutateStep,
             resultBuilder
         );

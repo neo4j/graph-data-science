@@ -101,7 +101,8 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             timingsBuilder,
             label,
             algorithmComputation,
-            graph
+            graph,
+            graphStore
         );
 
         var resultStore = graphResources.resultStore();
@@ -172,24 +173,26 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         AlgorithmProcessingTimingsBuilder timingsBuilder,
         LabelForProgressTracking label,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
-        Graph graph
+        Graph graph,
+        GraphStore graphStore
     ) {
         try (ProgressTimer ignored = ProgressTimer.start(timingsBuilder::withComputeMillis)) {
-            return computeWithMetric(label, algorithmComputation, graph);
+            return computeWithMetric(label, algorithmComputation, graph, graphStore);
         }
     }
 
     private <RESULT_FROM_ALGORITHM> RESULT_FROM_ALGORITHM computeWithMetric(
         LabelForProgressTracking label,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
-        Graph graph
+        Graph graph,
+        GraphStore graphStore
     ) {
         var executionMetric = algorithmMetricsService.create(label.value);
 
         try (executionMetric) {
             executionMetric.start();
 
-            return algorithmComputation.compute(graph);
+            return algorithmComputation.compute(graph, graphStore);
         } catch (RuntimeException e) {
             log.warn("computation failed, halting metrics gathering", e);
             executionMetric.failed(e);

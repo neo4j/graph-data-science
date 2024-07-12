@@ -74,7 +74,7 @@ public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
             configuration,
             FastRP,
             () -> estimation.fastRP(configuration),
-            graph -> algorithms.fastRP(graph, configuration),
+            (graph, __) -> algorithms.fastRP(graph, configuration),
             mutateStep,
             resultBuilder
         );
@@ -108,7 +108,7 @@ public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
             configuration,
             HashGNN,
             () -> estimation.hashGnn(configuration),
-            graph -> algorithms.hashGnn(graph, configuration),
+            (graph, __) -> algorithms.hashGnn(graph, configuration),
             mutateStep,
             resultBuilder
         );

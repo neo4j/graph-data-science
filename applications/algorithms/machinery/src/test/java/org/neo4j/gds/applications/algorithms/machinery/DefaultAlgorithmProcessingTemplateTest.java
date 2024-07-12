@@ -85,7 +85,7 @@ class DefaultAlgorithmProcessingTemplateTest {
         //noinspection unchecked
         AlgorithmComputation<ExampleResult> computation = mock(AlgorithmComputation.class);
         var pathFindingResult = mock(ExampleResult.class);
-        when(computation.compute(graph)).thenReturn(pathFindingResult);
+        when(computation.compute(graph, graphStore)).thenReturn(pathFindingResult);
 
         var resultBuilder = new ResultBuilder<ExampleConfiguration, ExampleResult, Stream<String>, Void>() {
             @Override
@@ -184,7 +184,7 @@ class DefaultAlgorithmProcessingTemplateTest {
 
         //noinspection unchecked
         AlgorithmComputation<ExampleResult> computation = mock(AlgorithmComputation.class);
-        when(computation.compute(graph)).thenReturn(pathFindingResult);
+        when(computation.compute(graph, graphStore)).thenReturn(pathFindingResult);
 
         var mutateOrWriteStep = new MutateOrWriteStep<ExampleResult, Long>() {
             @Override
@@ -240,7 +240,8 @@ class DefaultAlgorithmProcessingTemplateTest {
                 AlgorithmProcessingTimingsBuilder timingsBuilder,
                 LabelForProgressTracking label,
                 AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
-                Graph graph
+                Graph graph,
+                GraphStore graphStore
             ) {
                 timingsBuilder.withComputeMillis(117);
                 return null;

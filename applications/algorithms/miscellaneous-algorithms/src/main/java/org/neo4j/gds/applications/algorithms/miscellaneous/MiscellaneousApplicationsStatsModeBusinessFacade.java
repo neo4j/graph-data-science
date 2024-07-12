@@ -52,7 +52,7 @@ public class MiscellaneousApplicationsStatsModeBusinessFacade {
             configuration,
             ScaleProperties,
             () -> estimationFacade.scaleProperties(configuration),
-            graph -> miscellaneousAlgorithms.scaleProperties(graph, configuration),
+            (graph, __) -> miscellaneousAlgorithms.scaleProperties(graph, configuration),
             resultBuilder
         );
     }

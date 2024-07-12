@@ -28,6 +28,7 @@ import org.neo4j.gds.ml.pipeline.stubs.BetweennessCentralityStub;
 import org.neo4j.gds.ml.pipeline.stubs.BreadthFirstSearchStub;
 import org.neo4j.gds.ml.pipeline.stubs.CelfStub;
 import org.neo4j.gds.ml.pipeline.stubs.ClosenessCentralityStub;
+import org.neo4j.gds.ml.pipeline.stubs.CollapsePathStub;
 import org.neo4j.gds.ml.pipeline.stubs.DegreeCentralityStub;
 import org.neo4j.gds.ml.pipeline.stubs.DepthFirstSearchStub;
 import org.neo4j.gds.ml.pipeline.stubs.EigenVectorStub;
@@ -82,6 +83,7 @@ class StubbyHolder {
             case BFS -> new BreadthFirstSearchStub();
             case CELF -> new CelfStub();
             case ClosenessCentrality -> new ClosenessCentralityStub();
+            case CollapsePath -> new CollapsePathStub();
             case Conductance -> null;
             case DegreeCentrality -> new DegreeCentralityStub();
             case DeltaStepping -> new SingleSourceShortestPathDeltaStub();

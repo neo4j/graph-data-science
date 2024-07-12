@@ -24,9 +24,12 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTempla
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
+import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.scaleproperties.ScalePropertiesMutateConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
+import org.neo4j.gds.walking.CollapsePathConfig;
 
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.CollapsePath;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ScaleProperties;
 
 public class MiscellaneousApplicationsMutateModeBusinessFacade {
@@ -47,6 +50,24 @@ public class MiscellaneousApplicationsMutateModeBusinessFacade {
         this.mutateNodeProperty = mutateNodeProperty;
     }
 
+    public <RESULT> RESULT collapsePath(
+        GraphName graphName,
+        CollapsePathConfig configuration,
+        ResultBuilder<CollapsePathConfig, SingleTypeRelationships, RESULT, Void> resultBuilder
+    ) {
+        var mutateStep = new CollapsePathMutateStep();
+
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+            graphName,
+            configuration,
+            CollapsePath,
+            estimation::collapsePath,
+            (__, graphStore) -> algorithms.collapsePath(graphStore, configuration),
+            mutateStep,
+            resultBuilder
+        );
+    }
+
     public <RESULT> RESULT scaleProperties(
         GraphName graphName,
         ScalePropertiesMutateConfig configuration,
@@ -59,7 +80,7 @@ public class MiscellaneousApplicationsMutateModeBusinessFacade {
             configuration,
             ScaleProperties,
             () -> estimation.scaleProperties(configuration),
-            graph -> algorithms.scaleProperties(graph, configuration),
+            (graph, __) -> algorithms.scaleProperties(graph, configuration),
             mutateStep,
             resultBuilder
         );

@@ -113,7 +113,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
             configuration,
             K1Coloring,
             estimationFacade::k1Coloring,
-            graph -> algorithms.k1Coloring(graph, configuration),
+            (graph, __) -> algorithms.k1Coloring(graph, configuration),
             writeStep,
             resultBuilder
         );
@@ -131,7 +131,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
             configuration,
             KCore,
             estimationFacade::kCore,
-            graph -> algorithms.kCore(graph, configuration),
+            (graph, __) -> algorithms.kCore(graph, configuration),
             writeStep,
             resultBuilder
         );
@@ -149,7 +149,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
             configuration,
             KMeans,
             () -> estimationFacade.kMeans(configuration),
-            graph -> algorithms.kMeans(graph, configuration),
+            (graph, __) -> algorithms.kMeans(graph, configuration),
             writeStep,
             resultBuilder
         );
@@ -167,7 +167,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
             configuration,
             LabelPropagation,
             estimationFacade::labelPropagation,
-            graph -> algorithms.labelPropagation(graph, configuration),
+            (graph, __) -> algorithms.labelPropagation(graph, configuration),
             writeStep,
             resultBuilder
         );
@@ -185,7 +185,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
             configuration,
             LCC,
             () -> estimationFacade.lcc(configuration),
-            graph -> algorithms.lcc(graph, configuration),
+            (graph, __) -> algorithms.lcc(graph, configuration),
             writeStep,
             resultBuilder
         );
@@ -203,7 +203,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
             configuration,
             Leiden,
             () -> estimationFacade.leiden(configuration),
-            graph -> algorithms.leiden(graph, configuration),
+            (graph, __) -> algorithms.leiden(graph, configuration),
             writeStep,
             resultBuilder
         );
@@ -221,7 +221,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
             configuration,
             Louvain,
             () -> estimationFacade.louvain(configuration),
-            graph -> algorithms.louvain(graph, configuration),
+            (graph, __) -> algorithms.louvain(graph, configuration),
             writeStep,
             resultBuilder
         );
@@ -239,7 +239,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
             configuration,
             ModularityOptimization,
             estimationFacade::modularityOptimization,
-            graph -> algorithms.modularityOptimization(graph, configuration),
+            (graph, __) -> algorithms.modularityOptimization(graph, configuration),
             writeStep,
             resultBuilder
         );
@@ -257,7 +257,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
             configuration,
             SCC,
             estimationFacade::scc,
-            graph -> algorithms.scc(graph, configuration),
+            (graph, __) -> algorithms.scc(graph, configuration),
             writeStep,
             resultBuilder
         );
@@ -275,7 +275,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
             configuration,
             SCC,
             estimationFacade::scc,
-            graph -> algorithms.scc(graph, configuration),
+            (graph, __) -> algorithms.scc(graph, configuration),
             writeStep,
             resultBuilder
         );
@@ -293,7 +293,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
             configuration,
             TriangleCount,
             estimationFacade::triangleCount,
-            graph -> algorithms.triangleCount(graph, configuration),
+            (graph, __) -> algorithms.triangleCount(graph, configuration),
             writeStep,
             resultBuilder
         );
@@ -311,7 +311,7 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
             configuration,
             WCC,
             () -> estimationFacade.wcc(configuration),
-            graph -> algorithms.wcc(graph, configuration),
+            (graph, __) -> algorithms.wcc(graph, configuration),
             writeStep,
             resultBuilder
         );

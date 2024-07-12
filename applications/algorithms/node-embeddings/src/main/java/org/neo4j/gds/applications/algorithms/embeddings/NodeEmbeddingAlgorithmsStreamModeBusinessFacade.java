@@ -43,7 +43,7 @@ public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
     private final GraphSageAlgorithmProcessing graphSageAlgorithmProcessing;
     private final Node2VecAlgorithmProcessing node2VecAlgorithmProcessing;
 
-    public NodeEmbeddingAlgorithmsStreamModeBusinessFacade(
+    NodeEmbeddingAlgorithmsStreamModeBusinessFacade(
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         NodeEmbeddingAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
@@ -67,7 +67,7 @@ public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
             configuration,
             FastRP,
             () -> estimationFacade.fastRP(configuration),
-            graph -> algorithms.fastRP(graph, configuration),
+            (graph, __) -> algorithms.fastRP(graph, configuration),
             resultBuilder
         );
     }
@@ -90,7 +90,7 @@ public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
             configuration,
             HashGNN,
             () -> estimationFacade.hashGnn(configuration),
-            graph -> algorithms.hashGnn(graph, configuration),
+            (graph, __) -> algorithms.hashGnn(graph, configuration),
             resultBuilder
         );
     }

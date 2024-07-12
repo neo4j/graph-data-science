@@ -59,6 +59,7 @@ import org.neo4j.gds.spanningtree.SpanningTreeMutateConfig;
 import org.neo4j.gds.steiner.SteinerTreeMutateConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateConfig;
 import org.neo4j.gds.triangle.TriangleCountMutateConfig;
+import org.neo4j.gds.walking.CollapsePathConfig;
 import org.neo4j.gds.wcc.WccMutateConfig;
 
 import java.util.function.Function;
@@ -82,6 +83,7 @@ public class ConfigurationParsersForMutateMode {
             case BFS -> BfsMutateConfig::of;
             case CELF -> InfluenceMaximizationMutateConfig::of;
             case ClosenessCentrality -> ClosenessCentralityMutateConfig::of;
+            case CollapsePath -> CollapsePathConfig::of;
             case Conductance -> null;
             case DegreeCentrality -> DegreeCentralityMutateConfig::of;
             case DeltaStepping -> AllShortestPathsDeltaMutateConfig::of;

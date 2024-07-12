@@ -65,7 +65,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
     private final CommunityAlgorithms communityAlgorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
 
-    public CommunityAlgorithmsStatsModeBusinessFacade(
+    CommunityAlgorithmsStatsModeBusinessFacade(
         CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         CommunityAlgorithms communityAlgorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience
@@ -85,7 +85,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
             configuration,
             K1Coloring,
             estimationFacade::k1Coloring,
-            graph -> communityAlgorithms.k1Coloring(graph, configuration),
+            (graph, __) -> communityAlgorithms.k1Coloring(graph, configuration),
             resultBuilder
         );
     }
@@ -100,7 +100,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
             configuration,
             KCore,
             estimationFacade::kCore,
-            graph -> communityAlgorithms.kCore(graph, configuration),
+            (graph, __) -> communityAlgorithms.kCore(graph, configuration),
             resultBuilder
         );
     }
@@ -115,7 +115,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
             configuration,
             KMeans,
             () -> estimationFacade.kMeans(configuration),
-            graph -> communityAlgorithms.kMeans(graph, configuration),
+            (graph, __) -> communityAlgorithms.kMeans(graph, configuration),
             resultBuilder
         );
     }
@@ -130,7 +130,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
             configuration,
             LabelPropagation,
             estimationFacade::labelPropagation,
-            graph -> communityAlgorithms.labelPropagation(graph, configuration),
+            (graph, __) -> communityAlgorithms.labelPropagation(graph, configuration),
             resultBuilder
         );
     }
@@ -145,7 +145,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
             configuration,
             LCC,
             () -> estimationFacade.lcc(configuration),
-            graph -> communityAlgorithms.lcc(graph, configuration),
+            (graph, __) -> communityAlgorithms.lcc(graph, configuration),
             resultBuilder
         );
     }
@@ -160,7 +160,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
             configuration,
             Leiden,
             () -> estimationFacade.leiden(configuration),
-            graph -> communityAlgorithms.leiden(graph, configuration),
+            (graph, __) -> communityAlgorithms.leiden(graph, configuration),
             resultBuilder
         );
     }
@@ -175,7 +175,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
             configuration,
             Louvain,
             () -> estimationFacade.louvain(configuration),
-            graph -> communityAlgorithms.louvain(graph, configuration),
+            (graph, __) -> communityAlgorithms.louvain(graph, configuration),
             resultBuilder
         );
     }
@@ -190,7 +190,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
             configuration,
             Modularity,
             estimationFacade::modularity,
-            graph -> communityAlgorithms.modularity(graph, configuration),
+            (graph, __) -> communityAlgorithms.modularity(graph, configuration),
             resultBuilder
         );
     }
@@ -205,7 +205,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
             configuration,
             ModularityOptimization,
             estimationFacade::modularityOptimization,
-            graph -> communityAlgorithms.modularityOptimization(graph, configuration),
+            (graph, __) -> communityAlgorithms.modularityOptimization(graph, configuration),
             resultBuilder
         );
     }
@@ -220,7 +220,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
             configuration,
             SCC,
             estimationFacade::scc,
-            graph -> communityAlgorithms.scc(graph, configuration),
+            (graph, __) -> communityAlgorithms.scc(graph, configuration),
             resultBuilder
         );
     }
@@ -235,7 +235,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
             configuration,
             TriangleCount,
             estimationFacade::triangleCount,
-            graph -> communityAlgorithms.triangleCount(graph, configuration),
+            (graph, __) -> communityAlgorithms.triangleCount(graph, configuration),
             resultBuilder
         );
     }
@@ -250,7 +250,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
             configuration,
             WCC,
             () -> estimationFacade.wcc(configuration),
-            graph -> communityAlgorithms.wcc(graph, configuration),
+            (graph, __) -> communityAlgorithms.wcc(graph, configuration),
             resultBuilder
         );
     }

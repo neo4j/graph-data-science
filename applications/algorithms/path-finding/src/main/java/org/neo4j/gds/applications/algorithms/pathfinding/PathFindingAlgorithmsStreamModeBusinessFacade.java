@@ -71,7 +71,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final PathFindingAlgorithms pathFindingAlgorithms;
 
-    public PathFindingAlgorithmsStreamModeBusinessFacade(
+    PathFindingAlgorithmsStreamModeBusinessFacade(
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         PathFindingAlgorithms pathFindingAlgorithms
@@ -91,7 +91,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             configuration,
             AllShortestPaths,
             estimationFacade::allShortestPaths,
-            graph -> pathFindingAlgorithms.allShortestPaths(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.allShortestPaths(graph, configuration),
             resultBuilder
         );
     }
@@ -106,7 +106,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             configuration,
             BellmanFord,
             () -> estimationFacade.bellmanFord(configuration),
-            graph -> pathFindingAlgorithms.bellmanFord(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.bellmanFord(graph, configuration),
             resultBuilder
         );
     }
@@ -121,7 +121,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             configuration,
             BFS,
             estimationFacade::breadthFirstSearch,
-            graph -> pathFindingAlgorithms.breadthFirstSearch(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.breadthFirstSearch(graph, configuration),
             resultBuilder
         );
     }
@@ -136,7 +136,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             configuration,
             DeltaStepping,
             estimationFacade::deltaStepping,
-            graph -> pathFindingAlgorithms.deltaStepping(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.deltaStepping(graph, configuration),
             resultBuilder
         );
     }
@@ -151,7 +151,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             configuration,
             DFS,
             estimationFacade::depthFirstSearch,
-            graph -> pathFindingAlgorithms.depthFirstSearch(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.depthFirstSearch(graph, configuration),
             resultBuilder
         );
     }
@@ -166,7 +166,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             configuration,
             LongestPath,
             estimationFacade::longestPath,
-            graph -> pathFindingAlgorithms.longestPath(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.longestPath(graph, configuration),
             resultBuilder
         );
     }
@@ -181,7 +181,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             configuration,
             RandomWalk,
             () -> estimationFacade.randomWalk(configuration),
-            graph -> pathFindingAlgorithms.randomWalk(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.randomWalk(graph, configuration),
             resultBuilder
         );
     }
@@ -196,7 +196,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             configuration,
             AStar,
             estimationFacade::singlePairShortestPathAStar,
-            graph -> pathFindingAlgorithms.singlePairShortestPathAStar(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.singlePairShortestPathAStar(graph, configuration),
             resultBuilder
         );
     }
@@ -211,7 +211,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             configuration,
             Dijkstra,
             () -> estimationFacade.singlePairShortestPathDijkstra(configuration),
-            graph -> pathFindingAlgorithms.singlePairShortestPathDijkstra(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.singlePairShortestPathDijkstra(graph, configuration),
             resultBuilder
         );
     }
@@ -226,7 +226,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             configuration,
             Yens,
             () -> estimationFacade.singlePairShortestPathYens(configuration),
-            graph -> pathFindingAlgorithms.singlePairShortestPathYens(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.singlePairShortestPathYens(graph, configuration),
             resultBuilder
         );
     }
@@ -241,7 +241,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             configuration,
             SingleSourceDijkstra,
             () -> estimationFacade.singleSourceShortestPathDijkstra(configuration),
-            graph -> pathFindingAlgorithms.singleSourceShortestPathDijkstra(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.singleSourceShortestPathDijkstra(graph, configuration),
             resultBuilder
         );
     }
@@ -256,7 +256,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             configuration,
             LabelForProgressTracking.SpanningTree,
             estimationFacade::spanningTree,
-            graph -> pathFindingAlgorithms.spanningTree(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.spanningTree(graph, configuration),
             resultBuilder
         );
     }
@@ -271,7 +271,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             configuration,
             SteinerTree,
             () -> estimationFacade.steinerTree(configuration),
-            graph -> pathFindingAlgorithms.steinerTree(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.steinerTree(graph, configuration),
             resultBuilder
         );
     }
@@ -286,7 +286,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             configuration,
             TopologicalSort,
             estimationFacade::topologicalSort,
-            graph -> pathFindingAlgorithms.topologicalSort(graph, configuration),
+            (graph, __) -> pathFindingAlgorithms.topologicalSort(graph, configuration),
             resultBuilder
         );
     }

@@ -76,7 +76,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
     private final CommunityAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
 
-    public CommunityAlgorithmsStreamModeBusinessFacade(
+    CommunityAlgorithmsStreamModeBusinessFacade(
         CommunityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         CommunityAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience
@@ -96,7 +96,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
             configuration,
             ApproximateMaximumKCut,
             () -> estimationFacade.approximateMaximumKCut(configuration),
-            graph -> algorithms.approximateMaximumKCut(graph, configuration),
+            (graph, __) -> algorithms.approximateMaximumKCut(graph, configuration),
             resultBuilder
         );
     }
@@ -111,7 +111,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
             configuration,
             Conductance,
             estimationFacade::conductance,
-            graph -> algorithms.conductance(graph, configuration),
+            (graph, __) -> algorithms.conductance(graph, configuration),
             resultBuilder
         );
     }
@@ -126,7 +126,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
             configuration,
             K1Coloring,
             estimationFacade::k1Coloring,
-            graph -> algorithms.k1Coloring(graph, configuration),
+            (graph, __) -> algorithms.k1Coloring(graph, configuration),
             resultBuilder
         );
     }
@@ -141,7 +141,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
             configuration,
             KCore,
             estimationFacade::kCore,
-            graph -> algorithms.kCore(graph, configuration),
+            (graph, __) -> algorithms.kCore(graph, configuration),
             resultBuilder
         );
     }
@@ -156,7 +156,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
             configuration,
             KMeans,
             () -> estimationFacade.kMeans(configuration),
-            graph -> algorithms.kMeans(graph, configuration),
+            (graph, __) -> algorithms.kMeans(graph, configuration),
             resultBuilder
         );
     }
@@ -171,7 +171,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
             configuration,
             LabelPropagation,
             estimationFacade::labelPropagation,
-            graph -> algorithms.labelPropagation(graph, configuration),
+            (graph, __) -> algorithms.labelPropagation(graph, configuration),
             resultBuilder
         );
     }
@@ -186,7 +186,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
             configuration,
             LCC,
             () -> estimationFacade.lcc(configuration),
-            graph -> algorithms.lcc(graph, configuration),
+            (graph, __) -> algorithms.lcc(graph, configuration),
             resultBuilder
         );
     }
@@ -201,7 +201,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
             configuration,
             Leiden,
             () -> estimationFacade.leiden(configuration),
-            graph -> algorithms.leiden(graph, configuration),
+            (graph, __) -> algorithms.leiden(graph, configuration),
             resultBuilder
         );
     }
@@ -216,7 +216,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
             configuration,
             Louvain,
             () -> estimationFacade.louvain(configuration),
-            graph -> algorithms.louvain(graph, configuration),
+            (graph, __) -> algorithms.louvain(graph, configuration),
             resultBuilder
         );
     }
@@ -231,7 +231,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
             configuration,
             Modularity,
             estimationFacade::modularity,
-            graph -> algorithms.modularity(graph, configuration),
+            (graph, __) -> algorithms.modularity(graph, configuration),
             resultBuilder
         );
     }
@@ -246,7 +246,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
             configuration,
             ModularityOptimization,
             estimationFacade::modularityOptimization,
-            graph -> algorithms.modularityOptimization(graph, configuration),
+            (graph, __) -> algorithms.modularityOptimization(graph, configuration),
             resultBuilder
         );
     }
@@ -261,7 +261,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
             configuration,
             SCC,
             estimationFacade::scc,
-            graph -> algorithms.scc(graph, configuration),
+            (graph, __) -> algorithms.scc(graph, configuration),
             resultBuilder
         );
     }
@@ -276,7 +276,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
             configuration,
             TriangleCount,
             estimationFacade::triangleCount,
-            graph -> algorithms.triangleCount(graph, configuration),
+            (graph, __) -> algorithms.triangleCount(graph, configuration),
             resultBuilder
         );
     }
@@ -291,7 +291,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
             configuration,
             Triangles,
             estimationFacade::triangles,
-            graph -> algorithms.triangles(graph, configuration),
+            (graph, __) -> algorithms.triangles(graph, configuration),
             resultBuilder
         );
     }
@@ -306,7 +306,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
             configuration,
             WCC,
             () -> estimationFacade.wcc(configuration),
-            graph -> algorithms.wcc(graph, configuration),
+            (graph, __) -> algorithms.wcc(graph, configuration),
             resultBuilder
         );
     }

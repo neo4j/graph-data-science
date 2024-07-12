@@ -40,7 +40,7 @@ public class SimilarityAlgorithmsStatsModeBusinessFacade {
     private final SimilarityAlgorithms similarityAlgorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
 
-    public SimilarityAlgorithmsStatsModeBusinessFacade(
+    SimilarityAlgorithmsStatsModeBusinessFacade(
         SimilarityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         SimilarityAlgorithms similarityAlgorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience
@@ -60,7 +60,7 @@ public class SimilarityAlgorithmsStatsModeBusinessFacade {
             configuration,
             FilteredKNN,
             () -> estimationFacade.filteredKnn(configuration),
-            graph -> similarityAlgorithms.filteredKnn(graph, configuration),
+            (graph, __) -> similarityAlgorithms.filteredKnn(graph, configuration),
             resultBuilder
         );
     }
@@ -75,7 +75,7 @@ public class SimilarityAlgorithmsStatsModeBusinessFacade {
             configuration,
             FilteredNodeSimilarity,
             () -> estimationFacade.filteredNodeSimilarity(configuration),
-            graph -> similarityAlgorithms.filteredNodeSimilarity(graph, configuration),
+            (graph, __) -> similarityAlgorithms.filteredNodeSimilarity(graph, configuration),
             resultBuilder
         );
     }
@@ -90,7 +90,7 @@ public class SimilarityAlgorithmsStatsModeBusinessFacade {
             configuration,
             KNN,
             () -> estimationFacade.knn(configuration),
-            graph -> similarityAlgorithms.knn(graph, configuration),
+            (graph, __) -> similarityAlgorithms.knn(graph, configuration),
             resultBuilder
         );
     }
@@ -105,7 +105,7 @@ public class SimilarityAlgorithmsStatsModeBusinessFacade {
             configuration,
             NodeSimilarity,
             () -> estimationFacade.nodeSimilarity(configuration),
-            graph -> similarityAlgorithms.nodeSimilarity(graph, configuration),
+            (graph, __) -> similarityAlgorithms.nodeSimilarity(graph, configuration),
             resultBuilder
         );
     }

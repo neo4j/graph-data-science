@@ -70,7 +70,7 @@ public class SimilarityAlgorithmsMutateModeBusinessFacade {
             configuration,
             FilteredKNN,
             () -> estimationFacade.filteredKnn(configuration),
-            graph -> similarityAlgorithms.filteredKnn(graph, configuration),
+            (graph, __) -> similarityAlgorithms.filteredKnn(graph, configuration),
             mutateStep,
             resultBuilder
         );
@@ -93,7 +93,7 @@ public class SimilarityAlgorithmsMutateModeBusinessFacade {
             configuration,
             FilteredNodeSimilarity,
             () -> estimationFacade.filteredNodeSimilarity(configuration),
-            graph -> similarityAlgorithms.filteredNodeSimilarity(graph, configuration),
+            (graph, __) -> similarityAlgorithms.filteredNodeSimilarity(graph, configuration),
             mutateStep,
             resultBuilder
         );
@@ -112,7 +112,7 @@ public class SimilarityAlgorithmsMutateModeBusinessFacade {
             configuration,
             KNN,
             () -> estimationFacade.knn(configuration),
-            graph -> similarityAlgorithms.knn(graph, configuration),
+            (graph, __) -> similarityAlgorithms.knn(graph, configuration),
             mutateStep,
             resultBuilder
         );
@@ -131,7 +131,7 @@ public class SimilarityAlgorithmsMutateModeBusinessFacade {
             configuration,
             NodeSimilarity,
             () -> estimationFacade.nodeSimilarity(configuration),
-            graph -> similarityAlgorithms.nodeSimilarity(graph, configuration),
+            (graph, __) -> similarityAlgorithms.nodeSimilarity(graph, configuration),
             mutateStep,
             resultBuilder
         );

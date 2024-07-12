@@ -64,7 +64,7 @@ public class Node2VecAlgorithmProcessing {
             Optional.of(List.of(validationHook)),
             Node2Vec,
             () -> estimationFacade.node2Vec(configuration),
-            graph -> algorithms.node2Vec(graph, configuration),
+            (graph, __) -> algorithms.node2Vec(graph, configuration),
             mutateOrWriteStep,
             resultBuilder
         );

@@ -32,7 +32,7 @@ public class NodeEmbeddingAlgorithmsStatsModeBusinessFacade {
     private final NodeEmbeddingAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
 
-    public NodeEmbeddingAlgorithmsStatsModeBusinessFacade(
+    NodeEmbeddingAlgorithmsStatsModeBusinessFacade(
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         NodeEmbeddingAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience
@@ -52,7 +52,7 @@ public class NodeEmbeddingAlgorithmsStatsModeBusinessFacade {
             configuration,
             FastRP,
             () -> estimationFacade.fastRP(configuration),
-            graph -> algorithms.fastRP(graph, configuration),
+            (graph, __) -> algorithms.fastRP(graph, configuration),
             resultBuilder
         );
     }

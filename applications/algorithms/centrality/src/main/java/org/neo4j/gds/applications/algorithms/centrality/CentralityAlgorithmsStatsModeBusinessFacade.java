@@ -46,7 +46,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
     private final CentralityAlgorithms centralityAlgorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
 
-    public CentralityAlgorithmsStatsModeBusinessFacade(
+    CentralityAlgorithmsStatsModeBusinessFacade(
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         CentralityAlgorithms centralityAlgorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience
@@ -66,7 +66,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
             configuration,
             ArticleRank,
             estimationFacade::pageRank,
-            graph -> centralityAlgorithms.articleRank(graph, configuration),
+            (graph, __) -> centralityAlgorithms.articleRank(graph, configuration),
             resultBuilder
         );
     }
@@ -81,7 +81,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
             configuration,
             BetweennessCentrality,
             () -> estimationFacade.betweennessCentrality(configuration),
-            graph -> centralityAlgorithms.betweennessCentrality(graph, configuration),
+            (graph, __) -> centralityAlgorithms.betweennessCentrality(graph, configuration),
             resultBuilder
         );
     }
@@ -96,7 +96,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
             configuration,
             CELF,
             () -> estimationFacade.celf(configuration),
-            graph -> centralityAlgorithms.celf(graph, configuration),
+            (graph, __) -> centralityAlgorithms.celf(graph, configuration),
             resultBuilder
         );
     }
@@ -111,7 +111,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
             configuration,
             ClosenessCentrality,
             () -> estimationFacade.closenessCentrality(configuration),
-            graph -> centralityAlgorithms.closenessCentrality(graph, configuration),
+            (graph, __) -> centralityAlgorithms.closenessCentrality(graph, configuration),
             resultBuilder
         );
     }
@@ -126,7 +126,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
             configuration,
             DegreeCentrality,
             () -> estimationFacade.degreeCentrality(configuration),
-            graph -> centralityAlgorithms.degreeCentrality(graph, configuration),
+            (graph, __) -> centralityAlgorithms.degreeCentrality(graph, configuration),
             resultBuilder
         );
     }
@@ -141,7 +141,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
             configuration,
             EigenVector,
             estimationFacade::pageRank,
-            graph -> centralityAlgorithms.eigenVector(graph, configuration),
+            (graph, __) -> centralityAlgorithms.eigenVector(graph, configuration),
             resultBuilder
         );
     }
@@ -156,7 +156,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
             configuration,
             HarmonicCentrality,
             estimationFacade::harmonicCentrality,
-            graph -> centralityAlgorithms.harmonicCentrality(graph, configuration),
+            (graph, __) -> centralityAlgorithms.harmonicCentrality(graph, configuration),
             resultBuilder
         );
     }
@@ -171,7 +171,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
             configuration,
             PageRank,
             estimationFacade::pageRank,
-            graph -> centralityAlgorithms.pageRank(graph, configuration),
+            (graph, __) -> centralityAlgorithms.pageRank(graph, configuration),
             resultBuilder
         );
     }

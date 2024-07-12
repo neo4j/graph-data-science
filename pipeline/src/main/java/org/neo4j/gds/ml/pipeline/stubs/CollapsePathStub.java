@@ -17,21 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.machinery;
+package org.neo4j.gds.ml.pipeline.stubs;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.miscellaneous.CollapsePathMutateResult;
+import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
+import org.neo4j.gds.walking.CollapsePathConfig;
 
-/**
- * The framework hook for all the algorithms computations.
- * (Other things you can inject in constructor of course)
- */
-public interface AlgorithmComputation<RESULT> {
-    /**
-     * The lowest common denominator of things algorithm computations need
-     *
-     * @param graph      all except CollapsePath need this
-     * @param graphStore only CollapsePath needs this
-     */
-    RESULT compute(Graph graph, GraphStore graphStore);
+public class CollapsePathStub extends AbstractStub<CollapsePathConfig, CollapsePathMutateResult> {
+    protected MutateStub<CollapsePathConfig, CollapsePathMutateResult> stub(AlgorithmsProcedureFacade facade) {
+        return facade.miscellaneous().collapsePathMutateStub();
+    }
 }
