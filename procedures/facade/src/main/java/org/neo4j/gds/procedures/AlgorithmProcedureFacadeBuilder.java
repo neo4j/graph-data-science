@@ -19,20 +19,13 @@
  */
 package org.neo4j.gds.procedures;
 
-import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
-import org.neo4j.gds.algorithms.misc.MiscAlgorithmWriteBusinessFacade;
-import org.neo4j.gds.algorithms.misc.MiscAlgorithmsEstimateBusinessFacade;
-import org.neo4j.gds.algorithms.misc.MiscAlgorithmsFacade;
-import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
-import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.community.CommunityProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.embeddings.NodeEmbeddingsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.MiscellaneousProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
@@ -40,17 +33,12 @@ import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
-import org.neo4j.gds.procedures.misc.MiscAlgorithmsProcedureFacade;
 
 class AlgorithmProcedureFacadeBuilder {
     private final RequestScopedDependencies requestScopedDependencies;
-    private final ConfigurationCreator configurationCreator;
     private final CloseableResourceRegistry closeableResourceRegistry;
     private final NodeLookup nodeLookup;
     private final ProcedureReturnColumns procedureReturnColumns;
-    private final WriteNodePropertyService writeNodePropertyService;
-    private final AlgorithmEstimator algorithmEstimator;
-    private final AlgorithmRunner algorithmRunner;
     private final ApplicationsFacade applicationsFacade;
     private final GenericStub genericStub;
     private final EstimationModeRunner estimationModeRunner;
@@ -59,13 +47,9 @@ class AlgorithmProcedureFacadeBuilder {
 
     AlgorithmProcedureFacadeBuilder(
         RequestScopedDependencies requestScopedDependencies,
-        ConfigurationCreator configurationCreator,
         CloseableResourceRegistry closeableResourceRegistry,
         NodeLookup nodeLookup,
         ProcedureReturnColumns procedureReturnColumns,
-        WriteNodePropertyService writeNodePropertyService,
-        AlgorithmRunner algorithmRunner,
-        AlgorithmEstimator algorithmEstimator,
         ApplicationsFacade applicationsFacade,
         GenericStub genericStub,
         EstimationModeRunner estimationModeRunner,
@@ -73,13 +57,9 @@ class AlgorithmProcedureFacadeBuilder {
         AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode
     ) {
         this.requestScopedDependencies = requestScopedDependencies;
-        this.configurationCreator = configurationCreator;
         this.closeableResourceRegistry = closeableResourceRegistry;
         this.nodeLookup = nodeLookup;
         this.procedureReturnColumns = procedureReturnColumns;
-        this.writeNodePropertyService = writeNodePropertyService;
-        this.algorithmRunner = algorithmRunner;
-        this.algorithmEstimator = algorithmEstimator;
         this.applicationsFacade = applicationsFacade;
         this.genericStub = genericStub;
         this.estimationModeRunner = estimationModeRunner;
@@ -118,23 +98,6 @@ class AlgorithmProcedureFacadeBuilder {
             estimationModeRunner,
             algorithmExecutionScaffolding,
             algorithmExecutionScaffoldingForStreamMode
-        );
-    }
-
-    MiscAlgorithmsProcedureFacade createMiscellaneousAlgorithmsProcedureFacade() {
-        // algorithm facade
-        var miscAlgorithmsFacade = new MiscAlgorithmsFacade(algorithmRunner);
-
-        var estimateBusinessFacade = new MiscAlgorithmsEstimateBusinessFacade(algorithmEstimator);
-
-        var writeBusinessFacade = new MiscAlgorithmWriteBusinessFacade(miscAlgorithmsFacade, writeNodePropertyService);
-
-        // procedure facade
-        return new MiscAlgorithmsProcedureFacade(
-            configurationCreator,
-            procedureReturnColumns,
-            estimateBusinessFacade,
-            writeBusinessFacade
         );
     }
 

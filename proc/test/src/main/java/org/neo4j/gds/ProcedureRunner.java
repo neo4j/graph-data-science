@@ -37,8 +37,6 @@ import org.neo4j.gds.core.utils.warnings.EmptyUserLogStore;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.gds.metrics.MetricsFacade;
-import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
-import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.AlgorithmProcedureFacadeBuilderFactory;
 import org.neo4j.gds.procedures.CatalogProcedureFacadeFactory;
@@ -94,7 +92,7 @@ public final class ProcedureRunner {
         return proc;
     }
 
-    public static <P extends BaseProc> P applyOnProcedure(
+    public static <P extends BaseProc> void applyOnProcedure(
         GraphDatabaseService databaseService,
         Class<P> procClass,
         ProcedureCallContext procedureCallContext,
@@ -130,7 +128,6 @@ public final class ProcedureRunner {
             graphDataScienceProcedures
         );
         func.accept(proc);
-        return proc;
     }
 
     /**
@@ -173,12 +170,9 @@ public final class ProcedureRunner {
         var modelCatalog = new OpenModelCatalog();
 
         var algorithmFacadeBuilderFactory = new AlgorithmProcedureFacadeBuilderFactory(
-            gdsLog,
             DefaultsConfiguration.Instance,
             LimitsConfiguration.Instance,
-            graphStoreCatalogService,
-            false,
-            new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar())
+            graphStoreCatalogService
         );
 
         return GraphDataScienceProcedures.create(

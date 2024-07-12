@@ -28,12 +28,17 @@ import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.config.WriteConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.logging.Log;
 
 public class WriteToDatabase {
-    private final WriteNodePropertyService writeNodePropertyService;
+    private final Log log;
+    private final RequestScopedDependencies requestScopedDependencies;
+    private final WriteContext writeContext;
 
-    public WriteToDatabase(WriteNodePropertyService writeNodePropertyService) {
-        this.writeNodePropertyService = writeNodePropertyService;
+    public WriteToDatabase(Log log, RequestScopedDependencies requestScopedDependencies, WriteContext writeContext) {
+        this.log = log;
+        this.requestScopedDependencies = requestScopedDependencies;
+        this.writeContext = writeContext;
     }
 
     public NodePropertiesWritten perform(
@@ -46,7 +51,9 @@ public class WriteToDatabase {
         JobId jobId,
         NodePropertyValues nodePropertyValues
     ) {
-        var writeNodePropertyResult = writeNodePropertyService.write(
+        return Neo4jDatabaseNodePropertyWriter.writeNodeProperty(
+            writeContext.getNodePropertyExporterBuilder(),
+            requestScopedDependencies.getTaskRegistryFactory(),
             graph,
             graphStore,
             nodePropertyValues,
@@ -55,9 +62,9 @@ public class WriteToDatabase {
             label.value,
             writeConfiguration.arrowConnectionInfo(),
             writeConfiguration.resolveResultStore(resultStore),
-            jobId
+            jobId,
+            requestScopedDependencies.getTerminationFlag(),
+            log
         );
-
-        return new NodePropertiesWritten(writeNodePropertyResult.nodePropertiesWritten());
     }
 }

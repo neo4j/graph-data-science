@@ -29,7 +29,6 @@ import org.neo4j.gds.procedures.algorithms.miscellaneous.MiscellaneousProcedureF
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade;
 import org.neo4j.gds.procedures.catalog.CatalogProcedureFacade;
-import org.neo4j.gds.procedures.misc.MiscAlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.pipelines.PipelinesProcedureFacade;
 
 /**
@@ -44,7 +43,6 @@ public class GraphDataScienceProceduresBuilder {
     private CatalogProcedureFacade catalogProcedureFacade;
     private CommunityProcedureFacade communityProcedureFacade;
     private MiscellaneousProcedureFacade miscellaneousProcedureFacade;
-    private MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade;
     private NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade;
     private PathFindingProcedureFacade pathFindingProcedureFacade;
     private PipelinesProcedureFacade pipelinesProcedureFacade;
@@ -72,11 +70,6 @@ public class GraphDataScienceProceduresBuilder {
 
     public GraphDataScienceProceduresBuilder with(MiscellaneousProcedureFacade miscellaneousProcedureFacade) {
         this.miscellaneousProcedureFacade = miscellaneousProcedureFacade;
-        return this;
-    }
-
-    public GraphDataScienceProceduresBuilder with(MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade) {
-        this.miscAlgorithmsProcedureFacade = miscAlgorithmsProcedureFacade;
         return this;
     }
 
@@ -119,7 +112,6 @@ public class GraphDataScienceProceduresBuilder {
             log,
             algorithmsProcedureFacade,
             catalogProcedureFacade,
-            miscAlgorithmsProcedureFacade,
             pipelinesProcedureFacade,
             deprecatedProceduresMetricService
         );

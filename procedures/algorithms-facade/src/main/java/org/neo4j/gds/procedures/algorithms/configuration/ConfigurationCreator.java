@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.procedures.algorithms.configuration;
 
-import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -30,41 +29,17 @@ import java.util.function.Function;
 
 public class ConfigurationCreator {
     private final ConfigurationParser configurationParser;
-    private final AlgorithmMetaDataSetter algorithmMetaDataSetter;
     private final User user;
 
     public ConfigurationCreator(
         ConfigurationParser configurationParser,
-        AlgorithmMetaDataSetter algorithmMetaDataSetter,
         User user
     ) {
         this.configurationParser = configurationParser;
-        this.algorithmMetaDataSetter = algorithmMetaDataSetter;
         this.user = user;
     }
 
-    public <CONFIGURATION extends AlgoBaseConfig> CONFIGURATION createConfiguration(
-        Map<String, Object> rawConfiguration,
-        Function<CypherMapWrapper, CONFIGURATION> parser,
-        Optional<ConfigurationValidationHook<CONFIGURATION>> configurationValidation
-    ) {
-        return parseAndValidate(rawConfiguration, parser, configurationValidation);
-    }
-
-    public <CONFIGURATION extends AlgoBaseConfig> CONFIGURATION createConfigurationForStream(
-        Map<String, Object> rawConfiguration,
-        Function<CypherMapWrapper, CONFIGURATION> parser,
-        Optional<ConfigurationValidationHook<CONFIGURATION>> configurationValidation
-    ) {
-        CONFIGURATION configuration = parseAndValidate(rawConfiguration, parser, configurationValidation);
-
-        // yay, side effects
-        algorithmMetaDataSetter.set(configuration);
-
-        return configuration;
-    }
-
-    private <CONFIGURATION extends AlgoBaseConfig> CONFIGURATION parseAndValidate(
+    public <CONFIGURATION extends AlgoBaseConfig> CONFIGURATION parseAndValidate(
         Map<String, Object> rawConfiguration,
         Function<CypherMapWrapper, CONFIGURATION> parser,
         Optional<ConfigurationValidationHook<CONFIGURATION>> configurationValidation

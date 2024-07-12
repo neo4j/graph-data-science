@@ -25,12 +25,14 @@ import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsStatsModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsStreamModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsWriteModeBusinessFacade;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.stubs.ScalePropertiesMutateStub;
 import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.scaleproperties.ScalePropertiesStatsConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesStreamConfig;
+import org.neo4j.gds.scaleproperties.ScalePropertiesWriteConfig;
 
 import java.util.Map;
 import java.util.Optional;
@@ -183,6 +185,38 @@ public final class MiscellaneousProcedureFacade {
         return Stream.of(result);
     }
 
+    public Stream<ScalePropertiesWriteResult> scalePropertiesWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var validationHook = new ScalePropertiesConfigurationValidationHook<ScalePropertiesWriteConfig>(false);
+
+        var shouldDisplayScalerStatistics = procedureReturnColumns.contains("scalerStatistics");
+        var resultBuilder = new ScalePropertiesResultBuilderForWriteMode(shouldDisplayScalerStatistics);
+
+        return algorithmExecutionScaffolding.runAlgorithmWithValidation(
+            graphName,
+            configuration,
+            ScalePropertiesWriteConfig::of,
+            Optional.of(validationHook),
+            writeMode()::scaleProperties,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> scalePropertiesWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            ScalePropertiesWriteConfig::of,
+            configuration -> estimationMode().scaleProperties(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
     private MiscellaneousApplicationsEstimationModeBusinessFacade estimationMode() {
         return applicationsFacade.miscellaneous().estimate();
     }
@@ -193,5 +227,9 @@ public final class MiscellaneousProcedureFacade {
 
     private MiscellaneousApplicationsStreamModeBusinessFacade streamMode() {
         return applicationsFacade.miscellaneous().stream();
+    }
+
+    private MiscellaneousApplicationsWriteModeBusinessFacade writeMode() {
+        return applicationsFacade.miscellaneous().write();
     }
 }

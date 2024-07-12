@@ -17,21 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.misc.scaleproperties;
+package org.neo4j.gds.procedures.algorithms.miscellaneous;
 
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.procedures.algorithms.results.StandardWriteResult;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-@SuppressWarnings("unused")
 public final class ScalePropertiesWriteResult extends StandardWriteResult {
-
     public final long nodePropertiesWritten;
     public final Map<String, Map<String, List<Double>>> scalerStatistics;
 
-    public ScalePropertiesWriteResult(
+    ScalePropertiesWriteResult(
         Map<String, Map<String, List<Double>>> scalerStatistics,
         long preProcessingMillis,
         long computeMillis,
@@ -50,8 +50,21 @@ public final class ScalePropertiesWriteResult extends StandardWriteResult {
         this.scalerStatistics = scalerStatistics;
     }
 
-    public static class Builder extends AbstractResultBuilder<ScalePropertiesWriteResult> {
+    static ScalePropertiesWriteResult emptyFrom(
+        AlgorithmProcessingTimings timings,
+        Map<String, Object> configurationMap
+    ) {
+        return new ScalePropertiesWriteResult(
+            Collections.emptyMap(),
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.mutateOrWriteMillis,
+            0,
+            configurationMap
+        );
+    }
 
+    public static class Builder extends AbstractResultBuilder<ScalePropertiesWriteResult> {
         private Map<String, Map<String, List<Double>>> scalerStatistics;
 
         public Builder withScalerStatistics(Map<String, Map<String, List<Double>>> stats) {

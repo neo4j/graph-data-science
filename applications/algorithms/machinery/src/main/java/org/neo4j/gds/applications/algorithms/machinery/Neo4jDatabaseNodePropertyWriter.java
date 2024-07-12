@@ -27,11 +27,11 @@ import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.PropertySchema;
+import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.Capabilities;
-import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -47,7 +47,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -61,7 +60,7 @@ final class Neo4jDatabaseNodePropertyWriter {
     private Neo4jDatabaseNodePropertyWriter() {
     }
 
-    static WriteNodePropertyResult writeNodeProperty(
+    static NodePropertiesWritten writeNodeProperty(
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
         Graph graph,
@@ -78,50 +77,48 @@ final class Neo4jDatabaseNodePropertyWriter {
     ) {
         var nodeProperties = List.of(ImmutableNodeProperty.of(writeProperty, nodePropertyValues));
 
-        var writeMillis = new AtomicLong();
         var propertiesWritten = new MutableLong();
-        try (ProgressTimer ignored = ProgressTimer.start(writeMillis::set)) {
-            var progressTracker = createProgressTracker(
-                taskRegistryFactory,
-                graph.nodeCount(),
-                writeConcurrency,
-                procedureName,
-                log
-            );
-            var writeMode = graphStore.capabilities().writeMode();
-            var nodePropertySchema = graph.schema().nodeSchema().unionProperties();
+
+        var progressTracker = createProgressTracker(
+            taskRegistryFactory,
+            graph.nodeCount(),
+            writeConcurrency,
+            procedureName,
+            log
+        );
+        var writeMode = graphStore.capabilities().writeMode();
+        var nodePropertySchema = graph.schema().nodeSchema().unionProperties();
 
 
-            validatePropertiesCanBeWritten(
-                writeMode,
-                nodePropertySchema,
-                nodeProperties,
-                arrowConnectionInfo.isPresent(),
-                resultStore.isPresent()
-            );
+        validatePropertiesCanBeWritten(
+            writeMode,
+            nodePropertySchema,
+            nodeProperties,
+            arrowConnectionInfo.isPresent(),
+            resultStore.isPresent()
+        );
 
-            var exporter = nodePropertyExporterBuilder
-                .withIdMap(graph)
-                .withTerminationFlag(terminationFlag)
-                .withProgressTracker(progressTracker)
-                .withArrowConnectionInfo(
-                    arrowConnectionInfo,
-                    graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
-                )
-                .withResultStore(resultStore)
-                .withJobId(jobId)
-                .parallel(DefaultPool.INSTANCE, writeConcurrency)
-                .build();
+        var exporter = nodePropertyExporterBuilder
+            .withIdMap(graph)
+            .withTerminationFlag(terminationFlag)
+            .withProgressTracker(progressTracker)
+            .withArrowConnectionInfo(
+                arrowConnectionInfo,
+                graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
+            )
+            .withResultStore(resultStore)
+            .withJobId(jobId)
+            .parallel(DefaultPool.INSTANCE, writeConcurrency)
+            .build();
 
-            try {
-                exporter.write(nodeProperties);
-                propertiesWritten.setValue(exporter.propertiesWritten());
-            } finally {
-                progressTracker.release();
-            }
-
+        try {
+            exporter.write(nodeProperties);
+            propertiesWritten.setValue(exporter.propertiesWritten());
+        } finally {
+            progressTracker.release();
         }
-        return new WriteNodePropertyResult(propertiesWritten.getValue(), writeMillis.get());
+
+        return new NodePropertiesWritten(propertiesWritten.getValue());
     }
 
     private static ProgressTracker createProgressTracker(

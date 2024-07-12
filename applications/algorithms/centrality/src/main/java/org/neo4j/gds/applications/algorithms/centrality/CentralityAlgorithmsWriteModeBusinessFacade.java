@@ -25,7 +25,6 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTempla
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
-import org.neo4j.gds.applications.algorithms.machinery.WriteNodePropertyService;
 import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
@@ -74,8 +73,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         CentralityAlgorithms centralityAlgorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience
     ) {
-        var writeNodePropertyService = new WriteNodePropertyService(log, requestScopedDependencies, writeContext);
-        var writeToDatabase = new WriteToDatabase(writeNodePropertyService);
+        var writeToDatabase = new WriteToDatabase(log, requestScopedDependencies, writeContext);
 
         return new CentralityAlgorithmsWriteModeBusinessFacade(
             estimationFacade,

@@ -503,7 +503,6 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
         var configurationParser = new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance);
         var configurationCreator = new ConfigurationCreator(
             configurationParser,
-            null,
             requestScopedDependencies.getUser()
         );
 

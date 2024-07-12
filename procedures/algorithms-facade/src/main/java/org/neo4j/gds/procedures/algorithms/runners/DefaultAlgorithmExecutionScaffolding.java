@@ -64,7 +64,7 @@ public class DefaultAlgorithmExecutionScaffolding implements AlgorithmExecutionS
         ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
     ) {
         var graphName = GraphName.parse(graphNameAsString);
-        var configuration = configurationCreator.createConfiguration(
+        var configuration = configurationCreator.parseAndValidate(
             rawConfiguration,
             configurationParser,
             configurationValidation
