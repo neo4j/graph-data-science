@@ -24,11 +24,15 @@ import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsStatsModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsStreamModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsWriteModeBusinessFacade;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.stubs.ScalePropertiesMutateStub;
 import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.scaleproperties.ScalePropertiesStatsConfig;
+import org.neo4j.gds.scaleproperties.ScalePropertiesStreamConfig;
+import org.neo4j.gds.scaleproperties.ScalePropertiesWriteConfig;
 
 import java.util.Map;
 import java.util.Optional;
@@ -44,6 +48,7 @@ public final class MiscellaneousProcedureFacade {
 
     private final EstimationModeRunner estimationMode;
     private final AlgorithmExecutionScaffolding algorithmExecutionScaffolding;
+    private final AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode;
 
     private MiscellaneousProcedureFacade(
         ProcedureReturnColumns procedureReturnColumns,
@@ -51,7 +56,8 @@ public final class MiscellaneousProcedureFacade {
         ScalePropertiesMutateStub scalePropertiesMutateStub,
         ApplicationsFacade applicationsFacade,
         EstimationModeRunner estimationMode,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffolding
+        AlgorithmExecutionScaffolding algorithmExecutionScaffolding,
+        AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode
     ) {
         this.procedureReturnColumns = procedureReturnColumns;
         this.alphaScalePropertiesMutateStub = alphaScalePropertiesMutateStub;
@@ -59,6 +65,7 @@ public final class MiscellaneousProcedureFacade {
         this.applicationsFacade = applicationsFacade;
         this.estimationMode = estimationMode;
         this.algorithmExecutionScaffolding = algorithmExecutionScaffolding;
+        this.algorithmExecutionScaffoldingForStreamMode = algorithmExecutionScaffoldingForStreamMode;
     }
 
     public static MiscellaneousProcedureFacade create(
@@ -66,7 +73,8 @@ public final class MiscellaneousProcedureFacade {
         ApplicationsFacade applicationsFacade,
         ProcedureReturnColumns procedureReturnColumns,
         EstimationModeRunner estimationModeRunner,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffolding
+        AlgorithmExecutionScaffolding algorithmExecutionScaffolding,
+        AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode
     ) {
         var alphaScalePropertiesMutateStub = new ScalePropertiesMutateStub(
             genericStub,
@@ -87,12 +95,29 @@ public final class MiscellaneousProcedureFacade {
             scalePropertiesMutateStub,
             applicationsFacade,
             estimationModeRunner,
-            algorithmExecutionScaffolding
+            algorithmExecutionScaffolding,
+            algorithmExecutionScaffoldingForStreamMode
         );
     }
 
     public ScalePropertiesMutateStub alphaScalePropertiesMutateStub() {
         return alphaScalePropertiesMutateStub;
+    }
+
+    public Stream<ScalePropertiesStreamResult> alphaScalePropertiesStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new ScalePropertiesResultBuilderForStreamMode();
+
+        return algorithmExecutionScaffoldingForStreamMode.runAlgorithmWithValidation(
+            graphName,
+            configuration,
+            ScalePropertiesStreamConfig::of,
+            Optional.of(new ScalePropertiesConfigurationValidationHook<>(true)),
+            streamMode()::scaleProperties,
+            resultBuilder
+        );
     }
 
     public ScalePropertiesMutateStub scalePropertiesMutateStub() {
@@ -131,11 +156,80 @@ public final class MiscellaneousProcedureFacade {
         return Stream.of(result);
     }
 
+    public Stream<ScalePropertiesStreamResult> scalePropertiesStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new ScalePropertiesResultBuilderForStreamMode();
+
+        return algorithmExecutionScaffoldingForStreamMode.runAlgorithmWithValidation(
+            graphName,
+            configuration,
+            ScalePropertiesStreamConfig::of,
+            Optional.of(new ScalePropertiesConfigurationValidationHook<>(false)),
+            streamMode()::scaleProperties,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> scalePropertiesStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            ScalePropertiesStreamConfig::of,
+            configuration -> estimationMode().scaleProperties(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<ScalePropertiesWriteResult> scalePropertiesWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var validationHook = new ScalePropertiesConfigurationValidationHook<ScalePropertiesWriteConfig>(false);
+
+        var shouldDisplayScalerStatistics = procedureReturnColumns.contains("scalerStatistics");
+        var resultBuilder = new ScalePropertiesResultBuilderForWriteMode(shouldDisplayScalerStatistics);
+
+        return algorithmExecutionScaffolding.runAlgorithmWithValidation(
+            graphName,
+            configuration,
+            ScalePropertiesWriteConfig::of,
+            Optional.of(validationHook),
+            writeMode()::scaleProperties,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> scalePropertiesWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            ScalePropertiesWriteConfig::of,
+            configuration -> estimationMode().scaleProperties(configuration, graphNameOrConfiguration)
+        );
+
+        return Stream.of(result);
+    }
+
     private MiscellaneousApplicationsEstimationModeBusinessFacade estimationMode() {
         return applicationsFacade.miscellaneous().estimate();
     }
 
     private MiscellaneousApplicationsStatsModeBusinessFacade statsMode() {
         return applicationsFacade.miscellaneous().stats();
+    }
+
+    private MiscellaneousApplicationsStreamModeBusinessFacade streamMode() {
+        return applicationsFacade.miscellaneous().stream();
+    }
+
+    private MiscellaneousApplicationsWriteModeBusinessFacade writeMode() {
+        return applicationsFacade.miscellaneous().write();
     }
 }

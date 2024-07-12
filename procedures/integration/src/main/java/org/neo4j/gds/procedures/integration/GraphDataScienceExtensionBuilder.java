@@ -40,6 +40,7 @@ import org.neo4j.gds.procedures.UserLogServices;
 import org.neo4j.gds.settings.GdsSettings;
 import org.neo4j.graphdb.config.Configuration;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
+import org.neo4j.kernel.lifecycle.LifeSupport;
 import org.neo4j.kernel.lifecycle.Lifecycle;
 
 import java.lang.management.ManagementFactory;
@@ -187,7 +188,10 @@ public final class GraphDataScienceExtensionBuilder {
         registerUserLogRegistryFactoryComponent(userLogServices);
         log.info("Graph Data Science extension built.");
 
-        return gcListener;
+        var lifeSupport = new LifeSupport();
+        lifeSupport.add(gcListener);
+        lifeSupport.add(new GraphStoreCatalogLogInitializer(log));
+        return lifeSupport;
     }
 
     private void registerGraphDataScienceComponent() {

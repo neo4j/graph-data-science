@@ -23,19 +23,21 @@ import org.neo4j.gds.algorithms.misc.ScaledPropertiesNodePropertyValues;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.scaleproperties.ScalePropertiesMutateConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
+import org.neo4j.gds.scaleproperties.ScalePropertiesWriteConfig;
 
-class ScalePropertiesMutateStep implements MutateOrWriteStep<ScalePropertiesResult, NodePropertiesWritten> {
-    private final MutateNodeProperty mutateNodeProperty;
-    private final ScalePropertiesMutateConfig configuration;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ScaleProperties;
 
-    ScalePropertiesMutateStep(MutateNodeProperty mutateNodeProperty, ScalePropertiesMutateConfig configuration) {
-        this.mutateNodeProperty = mutateNodeProperty;
+class ScalePropertiesWriteStep implements MutateOrWriteStep<ScalePropertiesResult, NodePropertiesWritten> {
+    private final WriteToDatabase writeToDatabase;
+    private final ScalePropertiesWriteConfig configuration;
+
+    ScalePropertiesWriteStep(WriteToDatabase writeToDatabase, ScalePropertiesWriteConfig configuration) {
+        this.writeToDatabase = writeToDatabase;
         this.configuration = configuration;
     }
 
@@ -49,10 +51,14 @@ class ScalePropertiesMutateStep implements MutateOrWriteStep<ScalePropertiesResu
     ) {
         var nodePropertyValues = new ScaledPropertiesNodePropertyValues(graph.nodeCount(), result.scaledProperties());
 
-        return mutateNodeProperty.mutateNodeProperties(
+        return writeToDatabase.perform(
             graph,
             graphStore,
+            resultStore,
             configuration,
+            configuration,
+            ScaleProperties,
+            jobId,
             nodePropertyValues
         );
     }

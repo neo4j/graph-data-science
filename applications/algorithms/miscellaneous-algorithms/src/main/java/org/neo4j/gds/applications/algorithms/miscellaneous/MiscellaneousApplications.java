@@ -23,23 +23,36 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTempla
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
+import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
+import org.neo4j.gds.logging.Log;
 
 public final class MiscellaneousApplications {
     private final MiscellaneousApplicationsEstimationModeBusinessFacade estimation;
     private final MiscellaneousApplicationsMutateModeBusinessFacade mutation;
     private final MiscellaneousApplicationsStatsModeBusinessFacade stats;
+    private final MiscellaneousApplicationsStreamModeBusinessFacade stream;
+    private final MiscellaneousApplicationsWriteModeBusinessFacade write;
 
     private MiscellaneousApplications(
         MiscellaneousApplicationsEstimationModeBusinessFacade estimation,
         MiscellaneousApplicationsMutateModeBusinessFacade mutation,
-        MiscellaneousApplicationsStatsModeBusinessFacade stats
+        MiscellaneousApplicationsStatsModeBusinessFacade stats,
+        MiscellaneousApplicationsStreamModeBusinessFacade stream,
+        MiscellaneousApplicationsWriteModeBusinessFacade write
     ) {
         this.estimation = estimation;
         this.mutation = mutation;
         this.stats = stats;
+        this.stream = stream;
+        this.write = write;
     }
 
     public static MiscellaneousApplications create(
+        Log log,
+        RequestScopedDependencies requestScopedDependencies,
+        WriteContext writeContext,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         ProgressTrackerCreator progressTrackerCreator,
@@ -59,8 +72,20 @@ public final class MiscellaneousApplications {
             algorithms,
             algorithmProcessingTemplateConvenience
         );
+        var stream = new MiscellaneousApplicationsStreamModeBusinessFacade(
+            estimation,
+            algorithms,
+            algorithmProcessingTemplateConvenience
+        );
+        var writeToDatabase = new WriteToDatabase(log, requestScopedDependencies, writeContext);
+        var write = new MiscellaneousApplicationsWriteModeBusinessFacade(
+            estimation,
+            algorithms,
+            algorithmProcessingTemplateConvenience,
+            writeToDatabase
+        );
 
-        return new MiscellaneousApplications(estimation, mutation, stats);
+        return new MiscellaneousApplications(estimation, mutation, stats, stream, write);
     }
 
     public MiscellaneousApplicationsEstimationModeBusinessFacade estimate() {
@@ -73,5 +98,13 @@ public final class MiscellaneousApplications {
 
     public MiscellaneousApplicationsStatsModeBusinessFacade stats() {
         return stats;
+    }
+
+    public MiscellaneousApplicationsStreamModeBusinessFacade stream() {
+        return stream;
+    }
+
+    public MiscellaneousApplicationsWriteModeBusinessFacade write() {
+        return write;
     }
 }

@@ -598,7 +598,7 @@ class WccMutateProcTest extends BaseProcTest {
             null
         );
         var configurationParser = new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance);
-        var configurationCreator = new ConfigurationCreator(configurationParser, null, requestScopedDependencies.getUser());
+        var configurationCreator = new ConfigurationCreator(configurationParser, requestScopedDependencies.getUser());
         var genericStub = GenericStub.create(
             DefaultsConfiguration.Instance,
             LimitsConfiguration.Instance,

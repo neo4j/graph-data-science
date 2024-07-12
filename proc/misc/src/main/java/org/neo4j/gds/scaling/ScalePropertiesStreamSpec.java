@@ -25,7 +25,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
-import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesStreamResult;
+import org.neo4j.gds.procedures.algorithms.miscellaneous.ScalePropertiesStreamResult;
 import org.neo4j.gds.scaleproperties.ScaleProperties;
 import org.neo4j.gds.scaleproperties.ScalePropertiesFactory;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;

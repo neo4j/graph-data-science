@@ -17,31 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms;
+package org.neo4j.gds.procedures.integration;
 
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.logging.Log;
+import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 
-import java.util.Optional;
+/**
+ * On plugin init, we need to initialize the log on {@link org.neo4j.gds.core.loading.GraphStoreCatalog}.
+ */
+class GraphStoreCatalogLogInitializer extends LifecycleAdapter {
+    private final Log log;
 
-@ValueClass
-public interface StreamComputationResult<RESULT> {
+    GraphStoreCatalogLogInitializer(Log log) {this.log = log;}
 
-    /**
-     * Result is empty if no computation happened, which basically means the graph was empty.
-     *
-     * @return Optional.empty() if no computation happened, for example, when the graph was empty,
-     *     otherwise Optional containing the result of the algorithm execution.
-     */
-    Optional<RESULT> result();
-
-    Graph graph();
-
-
-    static <R> StreamComputationResult<R> of(
-        Optional<R> result,
-        Graph graph
-    ) {
-        return ImmutableStreamComputationResult.of(result, graph);
+    @Override
+    public void init() {
+        GraphStoreCatalog.setLog(log);
     }
 }

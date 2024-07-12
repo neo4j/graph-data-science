@@ -150,7 +150,7 @@ public final class ApplicationsFacade {
         );
 
         var miscellaneousApplications = MiscellaneousApplications.create(
-            algorithmEstimationTemplate,
+            log, requestScopedDependencies, writeContext, algorithmEstimationTemplate,
             algorithmProcessingTemplateConvenience,
             progressTrackerCreator,
             mutateNodeProperty

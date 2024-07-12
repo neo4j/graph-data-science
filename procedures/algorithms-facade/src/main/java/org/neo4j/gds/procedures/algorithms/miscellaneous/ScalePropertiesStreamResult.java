@@ -17,27 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms;
+package org.neo4j.gds.procedures.algorithms.miscellaneous;
 
-import org.neo4j.gds.annotation.ValueClass;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
-@ValueClass
-public interface TrainResult<ALGORITHM_SPECIFIC_FIELDS>  {
+public class ScalePropertiesStreamResult {
+    public final long nodeId;
+    public final List<Double> scaledProperty;
 
-
-    long trainMillis();
-
-    ALGORITHM_SPECIFIC_FIELDS algorithmSpecificFields();
-
-    static <ASF> ImmutableTrainResult.Builder<ASF> builder() {
-        return ImmutableTrainResult.builder();
+    public ScalePropertiesStreamResult(long nodeId, double[] scaledProperty) {
+        this.nodeId = nodeId;
+        this.scaledProperty = Arrays.stream(scaledProperty).boxed().collect(Collectors.toList());
     }
-
-    static <ASF> TrainResult<ASF> empty(ASF algorithmSpecificFields) {
-        return TrainResult.<ASF>builder()
-            .trainMillis(0)
-            .algorithmSpecificFields(algorithmSpecificFields)
-            .build();
-    }
-
 }

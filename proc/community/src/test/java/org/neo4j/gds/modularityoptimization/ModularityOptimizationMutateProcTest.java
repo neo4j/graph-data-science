@@ -509,7 +509,6 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
             .build();
         var configurationCreator = new ConfigurationCreator(
             configurationParser,
-            null,
             requestScopedDependencies.getUser()
         );
         var genericStub = GenericStub.create(

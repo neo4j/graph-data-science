@@ -40,7 +40,7 @@ public class EstimationModeRunner {
         Function<CypherMapWrapper, CONFIGURATION> configurationParser,
         Function<CONFIGURATION, MemoryEstimateResult> supplier
     ) {
-        var configuration = configurationCreator.createConfiguration(
+        var configuration = configurationCreator.parseAndValidate(
             algorithmConfiguration,
             configurationParser,
             Optional.empty()

@@ -40,7 +40,6 @@ import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 import org.neo4j.gds.procedures.catalog.CatalogProcedureFacade;
-import org.neo4j.gds.procedures.misc.MiscAlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.pipelines.PipelinesProcedureFacade;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -54,7 +53,6 @@ public class GraphDataScienceProcedures {
 
     private final AlgorithmsProcedureFacade algorithmsProcedureFacade;
     private final CatalogProcedureFacade catalogProcedureFacade;
-    private final MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade;
     private final PipelinesProcedureFacade pipelinesProcedureFacade;
 
     private final DeprecatedProceduresMetricService deprecatedProceduresMetricService;
@@ -66,14 +64,12 @@ public class GraphDataScienceProcedures {
         Log log,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
         CatalogProcedureFacade catalogProcedureFacade,
-        MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade,
         PipelinesProcedureFacade pipelinesProcedureFacade,
         DeprecatedProceduresMetricService deprecatedProceduresMetricService
     ) {
         this.log = log;
         this.algorithmsProcedureFacade = algorithmsProcedureFacade;
         this.catalogProcedureFacade = catalogProcedureFacade;
-        this.miscAlgorithmsProcedureFacade = miscAlgorithmsProcedureFacade;
         this.pipelinesProcedureFacade = pipelinesProcedureFacade;
         this.deprecatedProceduresMetricService = deprecatedProceduresMetricService;
     }
@@ -101,13 +97,6 @@ public class GraphDataScienceProcedures {
         ModelCatalog modelCatalog,
         GraphSageModelRepository graphSageModelRepository
     ) {
-        var configurationParser = new ConfigurationParser(defaultsConfiguration, limitsConfiguration);
-        var configurationCreator = new ConfigurationCreator(
-            configurationParser,
-            algorithmMetaDataSetter,
-            requestScopedDependencies.getUser()
-        );
-
         var applicationsFacade = ApplicationsFacade.create(
             log,
             algorithmProcessingTemplateDecorator,
@@ -132,6 +121,9 @@ public class GraphDataScienceProcedures {
             procedureReturnColumns
         );
 
+        var configurationParser = new ConfigurationParser(defaultsConfiguration, limitsConfiguration);
+        var configurationCreator = new ConfigurationCreator(configurationParser, requestScopedDependencies.getUser());
+
         var algorithmProcedureFacadeBuilder = algorithmProcedureFacadeBuilderFactory.create(
             configurationParser,
             configurationCreator,
@@ -139,14 +131,12 @@ public class GraphDataScienceProcedures {
             kernelTransaction,
             algorithmMetaDataSetter,
             applicationsFacade,
-            writeContext,
             procedureReturnColumns
         );
 
         var centralityProcedureFacade = algorithmProcedureFacadeBuilder.createCentralityProcedureFacade();
         var communityProcedureFacade = algorithmProcedureFacadeBuilder.createCommunityProcedureFacade();
         var miscellaneousProcedureFacade = algorithmProcedureFacadeBuilder.createMiscellaneousProcedureFacade();
-        var miscAlgorithmsProcedureFacade = algorithmProcedureFacadeBuilder.createMiscellaneousAlgorithmsProcedureFacade();
         var nodeEmbeddingsProcedureFacade = algorithmProcedureFacadeBuilder.createNodeEmbeddingsProcedureFacade();
         var pathFindingProcedureFacade = algorithmProcedureFacadeBuilder.createPathFindingProcedureFacade();
         var similarityProcedureFacade = algorithmProcedureFacadeBuilder.createSimilarityProcedureFacade();
@@ -158,7 +148,6 @@ public class GraphDataScienceProcedures {
             .with(centralityProcedureFacade)
             .with(communityProcedureFacade)
             .with(miscellaneousProcedureFacade)
-            .with(miscAlgorithmsProcedureFacade)
             .with(nodeEmbeddingsProcedureFacade)
             .with(pathFindingProcedureFacade)
             .with(pipelinesProcedureFacade)
@@ -177,10 +166,6 @@ public class GraphDataScienceProcedures {
 
     public CatalogProcedureFacade catalog() {
         return catalogProcedureFacade;
-    }
-
-    public MiscAlgorithmsProcedureFacade miscellaneousAlgorithms() {
-        return miscAlgorithmsProcedureFacade;
     }
 
     public PipelinesProcedureFacade pipelines() {

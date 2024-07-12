@@ -96,8 +96,7 @@ final class GraphDataScienceProviderFactory {
         var catalogProcedureFacadeFactory = new CatalogProcedureFacadeFactory(log);
 
         var algorithmFacadeBuilderFactory = createAlgorithmFacadeBuilderFactory(
-            graphStoreCatalogService,
-            useMaxMemoryEstimation
+            graphStoreCatalogService
         );
 
         var memoryGuard = new DefaultMemoryGuard(log, useMaxMemoryEstimation, memoryGauge);
@@ -148,17 +147,11 @@ final class GraphDataScienceProviderFactory {
         );
     }
 
-    private AlgorithmProcedureFacadeBuilderFactory createAlgorithmFacadeBuilderFactory(
-        GraphStoreCatalogService graphStoreCatalogService,
-        boolean useMaxMemoryEstimation
-    ) {
+    private AlgorithmProcedureFacadeBuilderFactory createAlgorithmFacadeBuilderFactory(GraphStoreCatalogService graphStoreCatalogService) {
         return new AlgorithmProcedureFacadeBuilderFactory(
-            log,
             defaultsConfiguration,
             limitsConfiguration,
-            graphStoreCatalogService,
-            useMaxMemoryEstimation,
-            metricsFacade.algorithmMetrics()
+            graphStoreCatalogService
         );
     }
 }
