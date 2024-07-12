@@ -160,7 +160,7 @@ The two `write` properties are used to write a new `:SIMILAR` relationship with 
 [opts="header", caption=, title="Query result", cols="1"]
 |===
 | meanSimilarity
-| 0.917060998769907
+| 0.9292290027
 |===
 --
 
@@ -185,11 +185,11 @@ ORDER BY similarity DESCENDING, person1, person2
 [opts="header", caption=, title="Query result", cols="1,1,1"]
 |===
 | person1 | person2 | similarity
-| "Annie" | "Matt"  | 0.983087003231049
-| "Matt"  | "Annie" | 0.983087003231049
-| "Dan"   | "Elsa"  | 0.980300545692444
-| "Elsa"  | "Dan"   | 0.980300545692444
-| "Jeff"  | "Annie" | 0.815471172332764
+| "Dan"   | "Elsa"  | 0.9866832495
+| "Elsa"  | "Dan"   | 0.9866832495
+| "Matt"  | "Brie"  | 0.9740184546
+| "Annie" | "Matt"  | 0.9724045992
+| "Jeff"  | "Annie" | 0.8667784333
 |===
 --
 

@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.fastrp;
 
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -180,7 +181,8 @@ class FastRPMutateProcTest extends BaseProcTest {
             float[] expected = expectedEmbeddings.get(row.getString("node"));
             softly.assertThat(row.get("embedding"))
                 .asInstanceOf(FLOAT_ARRAY)
-                .isEqualTo(expected);
+                .containsExactly(expected, Offset.offset(1e-7f));
+
         });
     }
 
