@@ -314,3 +314,6 @@ project(':neo4j-kernel-adapter-5.20').projectDir = file('compatibility/5.20/neo4
 
 include('neo4j-kernel-adapter-5.21')
 project(':neo4j-kernel-adapter-5.21').projectDir = file('compatibility/5.21/neo4j-kernel-adapter')
+
+include('neo4j-kernel-adapter-5.22')
+project(':neo4j-kernel-adapter-5.22').projectDir = file('compatibility/5.22/neo4j-kernel-adapter')
