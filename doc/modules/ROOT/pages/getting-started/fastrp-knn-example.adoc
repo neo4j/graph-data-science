@@ -74,8 +74,11 @@ RETURN gds.graph.project(
   'purchases',
   source,
   target,
-  { relationshipProperties: r { .amount } },
-  { undirectedRelationshipTypes: ['*'] }
+  { 
+    relationshipType: 'BUYS',
+    relationshipProperties: r { .amount }
+  },
+  { undirectedRelationshipTypes: ['BUYS'] }
 )
 ----
 
