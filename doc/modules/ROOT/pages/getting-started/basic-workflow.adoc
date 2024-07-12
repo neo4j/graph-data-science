@@ -38,13 +38,12 @@ The next query creates an in-memory graph called `trainGraph` from the `:Station
 
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
+MATCH (source:Station)-[r:CONNECTION]->(target:Station)
+RETURN gds.graph.project(
   'trainGraph',
-  'Station',
-  'CONNECTION',
-  {
-    relationshipProperties: 'distance'
-  }
+  source,
+  target,
+  { relationshipProperties: r { .distance } }
 )
 ----
 
