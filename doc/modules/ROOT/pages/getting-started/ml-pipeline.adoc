@@ -10,6 +10,7 @@ This example is a simplified version of the Link Prediction pipeline described i
 
 The following Cypher query creates the graph of a small social network in the Neo4j database.
 
+[source, cypher, role=noplay setup-query]
 ----
 CREATE
   (alice:Person {name: 'Alice', age: 38}),
@@ -42,19 +43,19 @@ image::lp-graph.svg["LP example data."]
 The next query creates an in-memory graph called `friends` from the Neo4j graph.
 Since the Link Prediction model requires the graph to be undirected, the orientation of the `:KNOWS` relationship is discarded.
 
+[source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
+MATCH (source:Person)-[r:KNOWS]->(target:Person)
+RETURN gds.graph.project(
   'friends',
+  source,
+  target,
   {
-    Person: {
-      properties: ['age']
-    }
+    sourceNodeProperties: source { .age },
+    targetNodeProperties: target { .age },
+    relationshipType: 'KNOWS'
   },
-  {
-    KNOWS: {
-      orientation: 'UNDIRECTED'
-    }
-  }
+  { undirectedRelationshipTypes: ['KNOWS'] }
 )
 ----
 
@@ -63,48 +64,56 @@ CALL gds.graph.project(
 
 You can configure a machine learning pipeline with a sequence of Cypher queries.
 
-[NOTE]
-====
-The following configuration is simplified for convenience.
-As such, the model performance is not expected to be the best.
-====
-
-[role=query-example]
---
-[source, cypher, role=noplay]
+* Create the pipeline and add it to the pipeline catalog:
++
+[source, cypher, role=noplay setup-query]
 ----
-CALL gds.beta.pipeline.linkPrediction.create('pipe');  // <1>
+CALL gds.beta.pipeline.linkPrediction.create('pipe')
+----
 
-CALL gds.beta.pipeline.linkPrediction.addFeature(  // <2>
+* Add the xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-features[link features] (only `age` here) and a feature type (`l2` here):
++
+[source, cypher, role=noplay setup-query]
+----
+CALL gds.beta.pipeline.linkPrediction.addFeature(
   'pipe', 
-  'cosine',
-  {
-    nodeProperties: ['age']
-  }
-);
+  'l2',
+  { nodeProperties: ['age'] }
+)
+----
 
-CALL gds.beta.pipeline.linkPrediction.configureSplit(  // <3>
+* Configure the xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-configure-splits[train-test split] and the number of folds for cross-validation:
++
+[source, cypher, role=noplay setup-query]
+----
+CALL gds.beta.pipeline.linkPrediction.configureSplit(
   'pipe',
   {
     testFraction: 0.25,
     trainFraction: 0.6,
     validationFolds: 3
   }
-);
-
-CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe');  // <4>
+)
 ----
-<1> Create the pipeline and add it to the pipeline catalog.
-<2> Add the xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-features[link features] (only `age` here) and a feature type (`cosine` here).
-<3> Configure the xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-configure-splits[train-test split] and the number of folds for cross-validation.
-<4> Add a xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-model-candidates[model candidate] (a logistic regression with no further configuration here).
---
+
+* Add a xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-model-candidates[model candidate] (a logistic regression with no further configuration here):
++
+[source, cypher, role=noplay setup-query]
+----
+CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe')
+----
 
 
 == Train a model
 
 Once configured, the pipeline is ready to train a model.
 The training process returns the best performing model with the specified evaluation metrics.
+
+[NOTE]
+====
+The pipeline configuration shown in the previous section is simplified for convenience; as such, the model performance is not expected to be the best.
+See the xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[] page for a detailed walkthrough.
+====
 
 [role=query-example]
 --
@@ -117,12 +126,13 @@ CALL gds.beta.pipeline.linkPrediction.train(
     modelName: 'lp-pipeline-model',  // <3>
     targetRelationshipType: 'KNOWS',  // <4>
     metrics: ['AUCPR'],  // <5>
+    randomSeed: 42  // <6>
   }
 )
 YIELD modelInfo
 RETURN
-  modelInfo.bestParameters AS winningModel,  // <6>
-  modelInfo.metrics.AUCPR.train.avg AS avgTrainScore,  // <7>
+  modelInfo.bestParameters AS winningModel,  // <7>
+  modelInfo.metrics.AUCPR.train.avg AS avgTrainScore,  // <8>
   modelInfo.metrics.AUCPR.validation.avg AS avgValidationScore,
   modelInfo.metrics.AUCPR.outerTrain AS outerTrainScore,
   modelInfo.metrics.AUCPR.test AS testScore
@@ -132,8 +142,20 @@ RETURN
 <3> Name of the model to train.
 <4> Name of the relationship to train the model on.
 <5> Metrics used to evaluate the models (`AUCPR` here).
-<6> Parameters of the best performing model returned by the training process.
-<7> Evaluated metrics (here for `AUCPR`) of the best performing model returned by the training process.
+<6> The random seed is only needed to obtain the same results across runs.
+<7> Parameters of the best performing model returned by the training process.
+<8> Evaluated metrics (here for `AUCPR`) of the best performing model returned by the training process.
+
+.Results
+[opts="header", cols="4, 2, 2, 2, 2"]
+|===
+| winningModel | avgTrainScore | avgValidationScore | outerTrainScore | testScore
+| {batchSize=100, classWeights=[], focusWeight=0.0, learningRate=0.001, maxEpochs=100, methodName="LogisticRegression", minEpochs=1, patience=1, penalty=0.0, tolerance=0.001}
+| 0.5740740741
+| 0.3611111111
+| 0.3784126984
+| 0.3444444444
+|===
 --
 
 
@@ -163,6 +185,17 @@ ORDER BY probability DESC, person1
 <2> Name of the projected graph to run the prediction on.
 <3> Name of the model to use for prediction.
 <4> Maximum number of predicted relationships to output.
+
+.Results
+[opts="header"]
+|===
+| person1   | person2   | probability
+| "Karin"   | "Greg"    | 0.4991379664
+| "Mark"    | "Karin"   | 0.4989714183
+| "Mark"    | "Greg"    | 0.4986938388
+| "Will"    | "Veselin" | 0.4986938388
+| "Mark"    | "Alice"   | 0.4971949275
+|===
 --
 
 

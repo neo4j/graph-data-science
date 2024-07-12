@@ -69,15 +69,16 @@ The only difference from the original data is that the orientation of the `:BUYS
 
 [source, cypher, role=graph-project-query no-play]
 ----
-CALL gds.graph.project(
+MATCH (source:Person)-[r:BUYS]->(target:Product)
+RETURN gds.graph.project(
   'purchases',
-  ['Person', 'Product'],
-  {
-    BUYS: {
-      orientation: 'UNDIRECTED',
-      properties: 'amount'
-    }
-  }
+  source,
+  target,
+  { 
+    relationshipType: 'BUYS',
+    relationshipProperties: r { .amount }
+  },
+  { undirectedRelationshipTypes: ['BUYS'] }
 )
 ----
 

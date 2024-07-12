@@ -47,6 +47,7 @@ import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -305,6 +306,12 @@ public abstract class MultiFileDocTestBase {
             return "\"" + value + "\"";
         } else if (value instanceof Double || value instanceof Float) {
             return floatFormat.format(value);
+        } else if (value instanceof double[]) {
+            // Some values are read as arrays of primitives rather than lists
+            return valueToString(Arrays.stream((double[]) value)
+                .boxed()
+                .collect(Collectors.toList())
+            );
         } else if (value instanceof List<?>) {
             return ((List<?>) value).stream()
                 .map(v -> valueToString(v))
