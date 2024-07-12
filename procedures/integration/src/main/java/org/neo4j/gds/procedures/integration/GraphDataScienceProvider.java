@@ -48,6 +48,7 @@ import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.TerminationFlagAccessor;
 import org.neo4j.gds.procedures.UserAccessor;
 import org.neo4j.gds.procedures.UserLogServices;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
@@ -133,17 +134,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         var graphDatabaseService = context.graphDatabaseAPI();
         var databaseId = databaseIdAccessor.getDatabaseId(graphDatabaseService);
 
-        var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(
-            graphDatabaseService,
-            config
-        );
-        var exporterContext = new ExporterContext.ProcedureContextWrapper(context);
-        var nodeLabelExporterBuilder = exportBuildersProvider.nodeLabelExporterBuilder(exporterContext);
-        var nodePropertyExporterBuilder = exportBuildersProvider.nodePropertyExporterBuilder(exporterContext);
-        var relationshipExporterBuilder = exportBuildersProvider.relationshipExporterBuilder(exporterContext);
-        var relationshipPropertiesExporterBuilder = exportBuildersProvider.relationshipPropertiesExporterBuilder(
-            exporterContext);
-        var relationshipStreamExporterBuilder = exportBuildersProvider.relationshipStreamExporterBuilder(exporterContext);
+        var writeContext = constructWriteContext(context, graphDatabaseService);
 
         var procedureReturnColumns = new ProcedureCallContextReturnColumns(procedureCallContext);
         var terminationFlag = terminationFlagAccessor.createTerminationFlag(kernelTransaction);
@@ -161,14 +152,6 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             log
         );
 
-        var procedureContext = WriteContext.builder()
-            .with(nodeLabelExporterBuilder)
-            .with(nodePropertyExporterBuilder)
-            .with(relationshipExporterBuilder)
-            .with(relationshipPropertiesExporterBuilder)
-            .with(relationshipStreamExporterBuilder)
-            .build();
-
         var requestScopedDependencies = RequestScopedDependencies.builder()
             .with(databaseId)
             .with(graphLoaderContext)
@@ -178,6 +161,8 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             .with(userLogRegistryFactory)
             .with(userLogStore)
             .build();
+
+        var procedureTransaction = procedureTransactionAccessor.getProcedureTransaction(context);
 
         return GraphDataScienceProcedures.create(
             log,
@@ -192,15 +177,26 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             algorithmMetaDataSetter,
             kernelTransaction,
             requestScopedDependencies,
-            procedureContext,
+            writeContext,
             procedureReturnColumns,
             catalogProcedureFacadeFactory,
             graphDatabaseService,
-            procedureTransactionAccessor.getProcedureTransaction(context),
+            procedureTransaction,
             algorithmProcedureFacadeBuilderFactory,
             deprecatedProceduresMetricService,
             modelCatalog,
             graphSageModelRepository
         );
+    }
+
+    private WriteContext constructWriteContext(Context context, GraphDatabaseService graphDatabaseService) {
+        var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(
+            graphDatabaseService,
+            config
+        );
+
+        var exporterContext = new ExporterContext.ProcedureContextWrapper(context);
+
+        return WriteContext.create(exportBuildersProvider, exporterContext);
     }
 }

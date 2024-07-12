@@ -117,7 +117,7 @@ final class GraphDataScienceProviderFactory {
             metricsFacade.projectionMetrics(),
             taskRegistryFactoryService,
             userLogServices,
-            this.config,
+            config,
             modelCatalog,
             graphSageModelRepository
         );
