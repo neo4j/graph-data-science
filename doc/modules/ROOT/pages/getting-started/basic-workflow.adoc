@@ -153,7 +153,7 @@ To check that the results of the algorithm have been correctly written back to N
 MATCH (source)-[r:PATH]->(target)
 RETURN 
   source.name,
-  [nodeId IN r.nodeIds | gds.util.asNode(nodeId)] AS nodeIds,
+  [nodeId IN r.nodeIds | gds.util.asNode(nodeId).name] AS nodeNames,
   r.costs,
   r.totalCost,
   target.name
@@ -162,8 +162,8 @@ RETURN
 .Results
 [opts="header", caption=, title="Query result"]
 |===
-| source.name  | nodeIds | r.costs | r.totalCost | target.name
-|"Kings Cross" | [Node[0], Node[1], Node[2], Node[4]] | [0.0, 0.7, 2.0, 3.3] | 3.3 | "Kentish Town"
+| source.name  | nodeNames | r.costs | r.totalCost | target.name
+|"Kings Cross" | ["Kings Cross", "Euston", "Camden Town", "Kentish Town"] | [0.0, 0.7, 2.0, 3.3] | 3.3 | "Kentish Town"
 |===
 --
 
