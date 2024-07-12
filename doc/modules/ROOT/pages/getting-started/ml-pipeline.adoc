@@ -45,18 +45,17 @@ Since the Link Prediction model requires the graph to be undirected, the orienta
 
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
+MATCH (source:Person)-[r:KNOWS]->(target:Person)
+RETURN gds.graph.project(
   'friends',
+  source,
+  target,
   {
-    Person: {
-      properties: ['age']
-    }
+    sourceNodeProperties: source { .age },
+    targetNodeProperties: target { .age },
+    relationshipType: 'KNOWS'
   },
-  {
-    KNOWS: {
-      orientation: 'UNDIRECTED'
-    }
-  }
+  { undirectedRelationshipTypes: ['KNOWS'] }
 )
 ----
 
@@ -152,10 +151,10 @@ RETURN
 |===
 | winningModel | avgTrainScore | avgValidationScore | outerTrainScore | testScore
 | {batchSize=100, classWeights=[], focusWeight=0.0, learningRate=0.001, maxEpochs=100, methodName="LogisticRegression", minEpochs=1, patience=1, penalty=0.0, tolerance=0.001}
-| 0.4078703704
+| 0.5740740741
 | 0.3611111111
-| 0.4250793651
-| 1.0
+| 0.3784126984
+| 0.3444444444
 |===
 --
 
@@ -191,11 +190,11 @@ ORDER BY probability DESC, person1
 [opts="header"]
 |===
 | person1   | person2   | probability
-| "Michael" | "Veselin" | 0.713572974
-| "Alice"   | "Veselin" | 0.5683819851
-| "Alice"   | "Will"    | 0.5574002485
-| "Mark"    | "Veselin" | 0.5473526202
-| "Greg"    | "Veselin" | 0.5382598445
+| "Karin"   | "Greg"    | 0.4991379664
+| "Mark"    | "Karin"   | 0.4989714183
+| "Mark"    | "Greg"    | 0.4986938388
+| "Will"    | "Veselin" | 0.4986938388
+| "Mark"    | "Alice"   | 0.4971949275
 |===
 --
 
