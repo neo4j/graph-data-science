@@ -186,8 +186,8 @@ ORDER BY similarity DESCENDING, person1, person2
 [opts="header", caption=, title="Query result", cols="1,1,1"]
 |===
 | person1 | person2 | similarity
-| "Dan"   | "Elsa"  | 0.9866832495
-| "Elsa"  | "Dan"   | 0.9866832495
+| "Dan"   | "Elsa"  | 0.9866833091
+| "Elsa"  | "Dan"   | 0.9866833091
 | "Matt"  | "Brie"  | 0.9740184546
 | "Annie" | "Matt"  | 0.9724045992
 | "Jeff"  | "Annie" | 0.8667784333
