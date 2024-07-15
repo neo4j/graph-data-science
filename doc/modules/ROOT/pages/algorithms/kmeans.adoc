@@ -286,14 +286,15 @@ We load the `City` node label with `coordinates` node property.
 .The following statement will project the graph and store it in the graph catalog.
 [source,cypher,role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
-    'cities',
-    {
-      City: {
-        properties: 'coordinates'
-      }
-    },
-    '*'
+MATCH (c:City)
+RETURN gds.graph.project(
+  'cities',
+  c,
+  null,
+  {
+    sourceNodeProperties: c { .coordinates },
+    targetNodeProperties: {}
+  }
 )
 ----
 

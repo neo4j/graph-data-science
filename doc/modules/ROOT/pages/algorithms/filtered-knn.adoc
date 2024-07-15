@@ -335,22 +335,23 @@ In the example, we want to use the Filtered K-Nearest Neighbors algorithm to com
 .The following statement will project the graph and store it in the graph catalog.
 [source,cypher,role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
-    'myGraph',
-    {
-        Person: {
-            properties: ['age','lotteryNumbers','embedding']
-        },
-        Vegan: {
-            properties: ['age']
-        }
-    },
-    '*'
-);
+MATCH (p:Person|Vegan)
+RETURN gds.graph.project(
+  'myGraph',
+  p,
+  null,
+  {
+    sourceNodeLabels: labels(p),
+    targetNodeLabels: [],
+    sourceNodeProperties: p { .age, .lotteryNumbers, .embedding },
+    targetNodeProperties: {}
+  }
+)
 ----
+
+
 === Memory Estimation
 [[algorithms-filtered-knn-examples-mem]]
-=== Filtering source nodes
 :mode: stats
 include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 
