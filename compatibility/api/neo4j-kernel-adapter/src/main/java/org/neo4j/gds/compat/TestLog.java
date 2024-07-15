@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.compat;
 
+import org.intellij.lang.annotations.Language;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.logging.Log;
 
@@ -31,6 +32,8 @@ public interface TestLog extends Log {
     String ERROR = "error";
 
     void assertContainsMessage(String level, String fragment);
+
+    void assertMessageMatches(String level, @Language("RegExp") String pattern);
 
     boolean containsMessage(String level, String fragment);
 

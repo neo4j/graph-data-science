@@ -26,6 +26,7 @@ import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
+import java.util.regex.Pattern;
 
 public class TestLogImpl implements TestLog {
 
@@ -45,6 +46,23 @@ public class TestLogImpl implements TestLog {
                     fragment,
                     level,
                     String.join("\n", messages.get(level))
+                )
+            );
+        }
+    }
+
+    @Override
+    public void assertMessageMatches(String level, String pattern) {
+        var compiled = Pattern.compile(pattern);
+        var messageList = messages.getOrDefault(level, new ConcurrentLinkedQueue<>());
+        if (messageList.stream().noneMatch(compiled.asPredicate())) {
+            throw new RuntimeException(
+                String.format(
+                    Locale.US,
+                    "Expected log output to match `%s` for log level `%s`%nLog messages:%n%s",
+                    pattern,
+                    level,
+                    String.join("\n", messageList)
                 )
             );
         }
