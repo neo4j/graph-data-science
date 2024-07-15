@@ -36,16 +36,17 @@ import java.util.function.LongToDoubleFunction;
 
 public final class CentralityStatistics {
 
-    public static DoubleHistogram histogram(
+
+
+     static void fillHistogram(
         long nodeCount,
-        LongToDoubleFunction centralityFunction,
+         DoubleHistogram histogram,
+    LongToDoubleFunction centralityFunction,
         ExecutorService executorService,
         Concurrency concurrency
     ) {
-        DoubleHistogram histogram;
 
         if (concurrency.value() == 1) {
-            histogram = new DoubleHistogram(ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT);
             for (long id = 0; id < nodeCount; id++) {
                 histogram.recordValue(centralityFunction.applyAsDouble(id));
             }
@@ -59,12 +60,10 @@ public final class CentralityStatistics {
 
             ParallelUtil.run(tasks, executorService);
 
-            histogram = new DoubleHistogram(ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT);
             for (var task : tasks) {
                 histogram.add(task.histogram);
             }
         }
-        return histogram;
     }
 
     private CentralityStatistics() {}
@@ -96,29 +95,54 @@ public final class CentralityStatistics {
         Concurrency concurrency,
         boolean shouldCompute
     ) {
+         return computeCentralityStatistics(
+             nodeCount,
+             centralityProvider,
+             executorService,
+             concurrency,
+             (shouldCompute) ? new DoubleHistogram(ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT) :  null,
+             shouldCompute
+             );
+    }
+    public static CentralityStats computeCentralityStatistics(
+        long nodeCount,
+        LongToDoubleFunction centralityProvider,
+        ExecutorService executorService,
+        Concurrency concurrency,
+        DoubleHistogram histogram,
+        boolean shouldCompute
+    ) {
         Optional<DoubleHistogram> maybeHistogram = Optional.empty();
         var computeMilliseconds = new AtomicLong(0);
+
         try (var ignored = ProgressTimer.start(computeMilliseconds::set)) {
             if (shouldCompute) {
-                maybeHistogram = Optional.of(histogram(
+                fillHistogram(
                     nodeCount,
+                    histogram,
                     centralityProvider,
                     executorService,
                     concurrency
-                ));
+                );
+                maybeHistogram = Optional.of(histogram);
             }
+        } catch (Exception e) {
+            return new CentralityStats(Optional.empty(), computeMilliseconds.get(),false);
         }
 
-        return new CentralityStats(maybeHistogram, computeMilliseconds.get());
+        return new CentralityStats(maybeHistogram, computeMilliseconds.get(),true);
     }
 
-    public static Map<String, Object> centralitySummary(Optional<DoubleHistogram> histogram) {
+    public static Map<String, Object> centralitySummary(Optional<DoubleHistogram> histogram, boolean success) {
+        if (!success){
+            return HistogramUtils.failure();
+        }
         return histogram
             .map(HistogramUtils::centralitySummary)
             .orElseGet(Collections::emptyMap);
     }
 
-    public record CentralityStats(Optional<DoubleHistogram> histogram, long computeMilliseconds) {
+    public record CentralityStats(Optional<DoubleHistogram> histogram, long computeMilliseconds,boolean success) {
     }
 
 

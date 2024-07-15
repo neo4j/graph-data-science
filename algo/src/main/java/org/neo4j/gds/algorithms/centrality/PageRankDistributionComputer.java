@@ -59,7 +59,7 @@ public final class PageRankDistributionComputer {
                     true
                 );
 
-                centralitySummary = CentralityStatistics.centralitySummary(centralityStatistics.histogram());
+                centralitySummary = CentralityStatistics.centralitySummary(centralityStatistics.histogram(),centralityStatistics.success());
                 postProcessingMillis = centralityStatistics.computeMilliseconds();
             }
         }
