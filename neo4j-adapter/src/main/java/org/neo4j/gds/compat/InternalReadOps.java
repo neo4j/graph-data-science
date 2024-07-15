@@ -24,41 +24,33 @@ import org.neo4j.internal.id.IdGenerator;
 import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.id.IdType;
 
-import java.util.OptionalLong;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 public final class InternalReadOps {
 
-    public static long countByIdGenerator(
+    public static Stream<IdGenerator> findValidIdGeneratorsStream(
         @Nullable IdGeneratorFactory idGeneratorFactory,
         IdType... idTypes
     ) {
-        long highestId = Long.MIN_VALUE;
-        for (IdType idType : idTypes) {
-            final OptionalLong count = countByIdGenerator(idGeneratorFactory, idType);
-            if (count.isPresent()) {
-                highestId = Math.max(highestId, count.getAsLong());
-            }
+        if (idGeneratorFactory == null || idTypes.length == 0) {
+            return Stream.empty();
         }
-        if (highestId == Long.MIN_VALUE) {
-            throw new IllegalStateException(
-                "Unsupported store format for GDS; GDS cannot read data from this database. " +
-                    "Please try to use Cypher projection instead.");
-        }
-        return highestId;
-    }
-
-    private static OptionalLong countByIdGenerator(@Nullable IdGeneratorFactory idGeneratorFactory, @Nullable IdType idType) {
-        if (idGeneratorFactory != null && idType != null) {
+        return Arrays.stream(idTypes).mapMulti((idType, downstream) -> {
             try {
-                final IdGenerator idGenerator = idGeneratorFactory.get(idType);
+                var idGenerator = idGeneratorFactory.get(idType);
                 if (idGenerator != null) {
-                    // getHighId returns the highestId + 1, which is actually a count
-                    return OptionalLong.of(idGenerator.getHighId());
+                    downstream.accept(idGenerator);
                 }
             } catch (Exception ignored) {
             }
-        }
-        return OptionalLong.empty();
+        });
+    }
+
+    public static IllegalStateException unsupportedStoreFormatException() {
+        return new IllegalStateException(
+            "Unsupported store format for GDS; GDS cannot read data from this database. " +
+                "Please try to use Cypher projection instead.");
     }
 
     private InternalReadOps() {

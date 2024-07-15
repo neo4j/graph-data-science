@@ -108,7 +108,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
-import static org.neo4j.gds.compat.InternalReadOps.countByIdGenerator;
 
 public final class Neo4jProxy {
 
@@ -519,12 +518,15 @@ public final class Neo4jProxy {
     }
 
     public static long getHighestPossibleNodeCount(IdGeneratorFactory idGeneratorFactory) {
-        return countByIdGenerator(
-            idGeneratorFactory,
-            RecordIdType.NODE,
-            BlockFormat.INSTANCE.nodeType,
-            BlockFormat.INSTANCE.dynamicNodeType
-        );
+        return InternalReadOps.findValidIdGeneratorsStream(
+                idGeneratorFactory,
+                RecordIdType.NODE,
+                BlockFormat.INSTANCE.nodeType,
+                BlockFormat.INSTANCE.dynamicNodeType
+            )
+            .mapToLong(IdGenerator::getHighId)
+            .max()
+            .orElseThrow(InternalReadOps::unsupportedStoreFormatException);
     }
 
     public static long getHighestPossibleRelationshipCount(Read read) {
@@ -668,7 +670,13 @@ public final class Neo4jProxy {
     }
 
     public static void reserveNeo4jIds(IdGeneratorFactory generatorFactory, int size, CursorContext cursorContext) {
-        IdGenerator idGenerator = generatorFactory.get(RecordIdType.NODE);
+        var idGenerator = InternalReadOps.findValidIdGeneratorsStream(
+                generatorFactory,
+                RecordIdType.NODE,
+                BlockFormat.INSTANCE.nodeType,
+                BlockFormat.INSTANCE.dynamicNodeType
+            )
+            .findFirst().orElseThrow(InternalReadOps::unsupportedStoreFormatException);
 
         idGenerator.nextConsecutiveIdRange(size, false, cursorContext);
     }
