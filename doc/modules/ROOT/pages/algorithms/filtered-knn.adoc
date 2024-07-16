@@ -323,14 +323,14 @@ image::example-graphs/knn.svg[Visualization of the example graph,align="center"]
 
 [source, cypher, role=noplay setup-query]
 ----
-CREATE (alice:Person:Vegan {name: 'Alice', age: 24, lotteryNumbers: [1, 3], embedding: [1.0, 3.0]})
-CREATE (bob:Person:Vegan {name: 'Bob', age: 73, lotteryNumbers: [1, 2, 3], embedding: [2.1, 1.6]})
-CREATE (carol:Person {name: 'Carol', age: 24, lotteryNumbers: [3], embedding: [1.5, 3.1]})
-CREATE (dave:Person:Vegan {name: 'Dave', age: 48, lotteryNumbers: [2, 4], embedding: [0.6, 0.2]})
-CREATE (eve:Person:Vegan {name: 'Eve', age: 67, lotteryNumbers: [1, 5], embedding: [1.8, 2.7]});
+CREATE (alice:Person:Vegan {name: 'Alice', age: 24})
+CREATE (bob:Person:Vegan {name: 'Bob', age: 73})
+CREATE (carol:Person {name: 'Carol', age: 24})
+CREATE (dave:Person:Vegan {name: 'Dave', age: 48})
+CREATE (eve:Person:Vegan {name: 'Eve', age: 67});
 ----
 
-In the example, we want to use the Filtered K-Nearest Neighbors algorithm to compare people based on either their age or a combination on all provided properties.
+In the example, we want to use the Filtered K-Nearest Neighbors algorithm to compare people based on their age.
 
 .The following statement will project the graph and store it in the graph catalog.
 [source,cypher,role=noplay graph-project-query]
@@ -343,7 +343,7 @@ RETURN gds.graph.project(
   {
     sourceNodeLabels: labels(p),
     targetNodeLabels: [],
-    sourceNodeProperties: p { .age, .lotteryNumbers, .embedding },
+    sourceNodeProperties: p { .age },
     targetNodeProperties: {}
   }
 )
