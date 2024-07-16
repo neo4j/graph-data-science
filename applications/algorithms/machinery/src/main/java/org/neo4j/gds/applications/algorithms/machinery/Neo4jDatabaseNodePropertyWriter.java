@@ -137,11 +137,6 @@ final class Neo4jDatabaseNodePropertyWriter {
         if (writeMode == Capabilities.WriteMode.REMOTE && !useResultStore) {
             throw new IllegalArgumentException("Missing arrow connection information");
         }
-        if (writeMode == Capabilities.WriteMode.LOCAL) {
-            throw new IllegalArgumentException(
-                "Arrow connection info was given although the write operation is targeting a local database"
-            );
-        }
 
         var expectedPropertyState = expectedPropertyStateForWriteMode(writeMode);
 
