@@ -453,15 +453,16 @@ In the example, we want to use the K-Nearest Neighbors algorithm to compare peop
 .The following statement will project the graph and store it in the graph catalog.
 [source,cypher,role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
-    'myGraph',
-    {
-        Person: {
-            properties: ['age','lotteryNumbers','embedding']
-        }
-    },
-    '*'
-);
+MATCH (p:Person)
+RETURN gds.graph.project(
+  'myGraph',
+  p,
+  null,
+  {
+    sourceNodeProperties: p { .age, .lotteryNumbers, .embedding },
+    targetNodeProperties: {}
+  }
+)
 ----
 
 
