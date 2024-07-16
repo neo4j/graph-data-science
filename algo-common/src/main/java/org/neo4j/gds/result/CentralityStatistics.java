@@ -147,7 +147,12 @@ public final class CentralityStatistics {
                 maybeHistogram = Optional.of(histogram);
             }
         } catch (Exception e) {
-            return new CentralityStats(Optional.empty(), computeMilliseconds.get(), false);
+            if (e.getMessage().contains("is out of bounds for histogram, current covered range")) {
+                return new CentralityStats(Optional.empty(), computeMilliseconds.get(), false);
+            } else {
+                throw e;
+            }
+
         }
 
         return new CentralityStats(maybeHistogram, computeMilliseconds.get(), true);

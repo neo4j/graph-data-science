@@ -64,7 +64,9 @@ class CentralityStatisticsTest {
 
     DoubleHistogram histogram(){
         var mockHistogram = mock(DoubleHistogram.class);
-        Mockito.doThrow(ArrayIndexOutOfBoundsException.class).when(mockHistogram).recordValue(anyDouble());
+
+        var arrayIndexOutOfBoundsException= new ArrayIndexOutOfBoundsException("is out of bounds for histogram, current covered range");
+        Mockito.doThrow(arrayIndexOutOfBoundsException).when(mockHistogram).recordValue(anyDouble());
         return  mockHistogram;
     }
 }
