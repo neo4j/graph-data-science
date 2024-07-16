@@ -51,15 +51,15 @@ class SimilarityStatsProcessor {
         boolean shouldComputeSimilarityDistribution,
         SimilarityGraphResult similarityGraphResult
     ) {
-        var communityStatistics = computeCommunityStatistics(
+        var similarityStatistics = computeSimilarityStatistics(
             similarityGraphResult,
             shouldComputeSimilarityDistribution
         );
 
-        return SimilarityStatistics.similaritySummary(communityStatistics.histogram());
+        return SimilarityStatistics.similaritySummary(similarityStatistics.histogram(),similarityStatistics.success());
     }
 
-    SimilarityStatistics.SimilarityStats computeCommunityStatistics(
+    SimilarityStatistics.SimilarityStats computeSimilarityStatistics(
         SimilarityGraphResult graphResult,
         boolean shouldComputeSimilarityDistribution
     ) {

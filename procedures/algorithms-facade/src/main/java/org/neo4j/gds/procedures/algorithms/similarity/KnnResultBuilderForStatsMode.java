@@ -63,7 +63,7 @@ class KnnResultBuilderForStatsMode implements ResultBuilder<KnnStatsConfig, KnnR
             configuration.concurrency(),
             knnResult.streamSimilarityResult()
         );
-        var communityStatistics = similarityStatsProcessor.computeCommunityStatistics(
+        var communityStatistics = similarityStatsProcessor.computeSimilarityStatistics(
             similarityGraphResult,
             shouldComputeSimilarityDistribution
         );

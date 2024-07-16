@@ -20,8 +20,8 @@
 package org.neo4j.gds.result;
 
 import org.HdrHistogram.DoubleHistogram;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.ProcedureConstants;
 import org.neo4j.gds.core.utils.ProgressTimer;
 
 import java.util.Collections;
@@ -30,54 +30,75 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
-import static org.neo4j.gds.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
-
 public final class SimilarityStatistics {
 
-    @ValueClass
-    @SuppressWarnings("immutables:incompat")
-    public interface SimilarityStats {
-
-        Optional<DoubleHistogram> histogram();
-        long computeMilliseconds();
-    }
 
     public static SimilarityStats similarityStats(
         Supplier<Graph> maybeSimilarityGraph,
         boolean shouldComputeDistribution
-        ) {
-        if (!shouldComputeDistribution) {
-            return ImmutableSimilarityStats.of(Optional.empty(), 0);
-
-        }
-        Optional<DoubleHistogram> maybeHistogram;
-        var computeMilliseconds = new AtomicLong(0);
-        try(var ignored = ProgressTimer.start(computeMilliseconds::set)) {
-            maybeHistogram = computeHistogram(maybeSimilarityGraph.get());
-        }
-
-        return ImmutableSimilarityStats.of( maybeHistogram, computeMilliseconds.get());
+    ) {
+        return  similarityStats(
+            maybeSimilarityGraph,
+            shouldComputeDistribution,
+            () ->new DoubleHistogram(ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT)
+        );
     }
 
-    public static Map<String, Object> similaritySummary(Optional<DoubleHistogram> histogram) {
+
+    public static SimilarityStats similarityStats(
+        Supplier<Graph> maybeSimilarityGraph,
+        boolean shouldComputeDistribution,
+        Supplier<DoubleHistogram> histogramSupplier
+        ) {
+
+        if (!shouldComputeDistribution) {
+            return new SimilarityStats(Optional.empty(), 0,true);
+        }
+        Histogram histogram;
+        var computeMilliseconds = new AtomicLong(0);
+        try(var ignored = ProgressTimer.start(computeMilliseconds::set)) {
+             histogram = computeHistogram(maybeSimilarityGraph.get(),histogramSupplier);
+        }
+        return new SimilarityStats( histogram.histogram(), computeMilliseconds.get(), histogram.success());
+
+    }
+
+    public static Map<String, Object> similaritySummary(Optional<DoubleHistogram> histogram, boolean success) {
+       if (!success){
+           return HistogramUtils.failure();
+       }
         return histogram
             .map(HistogramUtils::similaritySummary)
             .orElseGet(Collections::emptyMap);
     }
 
-    public static Optional<DoubleHistogram> computeHistogram(Graph similarityGraph) {
+    public static Histogram computeHistogram(Graph similarityGraph, Supplier<DoubleHistogram> histogramSupplier) {
         
-        DoubleHistogram histogram = new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT);
-        similarityGraph.forEachNode(nodeId -> {
-            similarityGraph.forEachRelationship(nodeId, Double.NaN, (node1, node2, property) -> {
-                histogram.recordValue(property);
+        DoubleHistogram histogram = histogramSupplier.get();
+        try {
+            similarityGraph.forEachNode(nodeId -> {
+                similarityGraph.forEachRelationship(nodeId, Double.NaN, (node1, node2, property) -> {
+
+                    histogram.recordValue(property);
+                    return true;
+                });
                 return true;
             });
-            return true;
-        });
-        return Optional.of(histogram);
+        } catch (ArrayIndexOutOfBoundsException e) {
+
+            if (e.getMessage().contains("is out of bounds for histogram, current covered range")) {
+                return  new Histogram(Optional.of(histogram),false);
+            }else{
+                throw  e;
+            }
+        }
+
+        return new Histogram(Optional.of(histogram),true);
 
     }
 
     private SimilarityStatistics() {}
+    public record  Histogram(Optional<DoubleHistogram> histogram,  boolean success) {}
+
+    public record  SimilarityStats(Optional<DoubleHistogram> histogram, long computeMilliseconds, boolean success) {}
 }

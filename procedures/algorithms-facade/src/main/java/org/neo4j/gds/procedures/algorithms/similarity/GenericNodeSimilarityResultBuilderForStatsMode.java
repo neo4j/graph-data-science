@@ -43,7 +43,7 @@ class GenericNodeSimilarityResultBuilderForStatsMode {
         var nodeSimilarityResult = result.get();
         var graphResult = nodeSimilarityResult.graphResult();
 
-        var communityStatistics = similarityStatsProcessor.computeCommunityStatistics(
+        var communityStatistics = similarityStatsProcessor.computeSimilarityStatistics(
             graphResult,
             shouldComputeSimilarityDistribution
         );

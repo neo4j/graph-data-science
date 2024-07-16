@@ -19,13 +19,15 @@
  */
 package org.neo4j.gds.algorithms.similarity;
 
+import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.applications.algorithms.machinery.SingleTypeRelationshipsProducer;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
+import org.neo4j.gds.applications.algorithms.machinery.SingleTypeRelationshipsProducer;
+import org.neo4j.gds.core.ProcedureConstants;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.HugeGraph;
@@ -113,8 +115,8 @@ public class SimilaritySingleTypeRelationshipsHandler implements SingleTypeRelat
             );
 
             if (shouldComputeStatistics) {
-                var histogram = computeHistogram(similarityGraph);
-                similaritySummary = SimilarityStatistics.similaritySummary(histogram);
+                var histogram = computeHistogram(similarityGraph, () -> new DoubleHistogram(ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT));
+                similaritySummary = SimilarityStatistics.similaritySummary(histogram.histogram(),histogram.success());
             }else{
                 similaritySummary = Map.of();
             }
