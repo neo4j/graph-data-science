@@ -125,16 +125,10 @@ public final class CommunityStatistics {
         ExecutorService executorService,
         Concurrency concurrency
     ) {
-        var communitySizes = communitySizes(
-            nodeCount,
-            communityFunction,
-            executorService,
-            concurrency
-        );
-        return communityCountAndHistogram(communitySizes, HistogramProvider::new, executorService, concurrency);
+        return communityCountAndHistogram(nodeCount, communityFunction, HistogramProvider::new, executorService, concurrency);
     }
 
-    public static CommunityCountAndHistogram communityCountAndHistogram(
+    static CommunityCountAndHistogram communityCountAndHistogram(
         long nodeCount,
         LongUnaryOperator communityFunction,
         Supplier<HistogramProvider> histogramSupplier,
@@ -201,9 +195,7 @@ public final class CommunityStatistics {
                 throw e;
             }
 
-
         }
-
         return new CommunityStats(componentCount, maybeHistogram, computeMilliseconds.get(), true);
     }
 
@@ -225,7 +217,7 @@ public final class CommunityStatistics {
         return communityCountAndHistogram( communitySizes, HistogramProvider::new,executorService,concurrency );
     }
 
-    public static CommunityCountAndHistogram communityCountAndHistogram(
+    static CommunityCountAndHistogram communityCountAndHistogram(
         HugeSparseLongArray communitySizes,
         Supplier<HistogramProvider> histogramSupplier,
         ExecutorService executorService,
@@ -280,7 +272,6 @@ public final class CommunityStatistics {
     }
 
     private CommunityStatistics() {}
-
 
     public record CommunityCountAndHistogram( long componentCount, Histogram histogram){}
 
