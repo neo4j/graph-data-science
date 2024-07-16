@@ -24,7 +24,6 @@ import org.neo4j.gds.core.ProcedureConstants;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
 import java.util.Collections;
@@ -68,44 +67,20 @@ public final class CentralityStatistics {
             var tasks = PartitionUtils.rangePartition(
                 concurrency,
                 nodeCount,
-                partition -> new RecordTask(partition, centralityFunction, histogramSupplier),
+                partition -> new CentralityRecordTask(partition, centralityFunction, histogramSupplier),
                 Optional.empty()
             );
 
             ParallelUtil.run(tasks, executorService);
 
             for (var task : tasks) {
-                histogram.add(task.histogram);
+                histogram.add(task.histogram());
             }
         }
         return histogram;
     }
 
     private CentralityStatistics() {}
-
-    private static class RecordTask implements Runnable {
-
-        private final DoubleHistogram histogram;
-        private final Partition partition;
-        private final LongToDoubleFunction centralityFunction;
-
-        RecordTask(
-            Partition partition,
-            LongToDoubleFunction centralityFunction,
-            Supplier<DoubleHistogram> histogramSupplier
-        ) {
-            this.partition = partition;
-            this.centralityFunction = centralityFunction;
-            this.histogram = histogramSupplier.get();
-        }
-
-        @Override
-        public void run() {
-            partition.consume(id -> {
-                histogram.recordValue(centralityFunction.applyAsDouble(id));
-            });
-        }
-    }
 
     public static CentralityStats centralityStatistics(
         long nodeCount,
