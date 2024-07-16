@@ -20,7 +20,6 @@
 package org.neo4j.gds.result;
 
 import org.HdrHistogram.Histogram;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -197,7 +196,7 @@ public final class CommunityStatistics {
             }
         } catch (Exception e){
             if (e.getMessage().contains("is out of bounds for histogram, current covered range")) {
-                return ImmutableCommunityStats.of(0,Optional.empty(), computeMilliseconds.get(), false);
+                return  new CommunityStats(0,Optional.empty(), computeMilliseconds.get(), false);
             } else {
                 throw e;
             }
@@ -205,7 +204,7 @@ public final class CommunityStatistics {
 
         }
 
-        return ImmutableCommunityStats.of(componentCount, maybeHistogram, computeMilliseconds.get(), true);
+        return new CommunityStats(componentCount, maybeHistogram, computeMilliseconds.get(), true);
     }
 
     public static Map<String, Object> communitySummary(Optional<Histogram> histogram, boolean success) {
@@ -217,17 +216,7 @@ public final class CommunityStatistics {
             .orElseGet(Collections::emptyMap);
     }
 
-    @ValueClass
-    @SuppressWarnings("immutables:incompat")
-    public interface CommunityStats {
-        long componentCount();
 
-        Optional<Histogram> histogram();
-
-        long computeMilliseconds();
-
-        boolean success();
-    }
     public static CommunityCountAndHistogram communityCountAndHistogram(
         HugeSparseLongArray communitySizes,
         ExecutorService executorService,
@@ -287,21 +276,19 @@ public final class CommunityStatistics {
             }
         }
 
-        return ImmutableCommunityCountAndHistogram.builder()
-            .componentCount(communityCount)
-            .histogram(histogram)
-            .build();
+        return new CommunityCountAndHistogram(communityCount, histogram);
     }
 
     private CommunityStatistics() {}
 
-    @ValueClass
-    @SuppressWarnings("immutables:incompat")
-    public interface CommunityCountAndHistogram {
-        long componentCount();
 
-        Histogram histogram();
+    public record CommunityCountAndHistogram( long componentCount, Histogram histogram){}
 
-    }
+    public record CommunityStats(
+        long componentCount,
+        Optional<Histogram> histogram,
+        long computeMilliseconds,
+        boolean success
+    ){}
 
 }
