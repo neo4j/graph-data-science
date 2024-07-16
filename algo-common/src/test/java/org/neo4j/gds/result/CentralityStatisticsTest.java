@@ -20,7 +20,8 @@
 package org.neo4j.gds.result;
 
 import org.HdrHistogram.DoubleHistogram;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -33,17 +34,15 @@ import static org.mockito.Mockito.mock;
 
 class CentralityStatisticsTest {
 
-    @Test
-    void shouldReturnFailMap(){
-
-        var mockHistogram = mock(DoubleHistogram.class);
-        Mockito.doThrow(ArrayIndexOutOfBoundsException.class).when(mockHistogram).recordValue(anyDouble());
+    @ParameterizedTest
+    @ValueSource(ints = {1,4})
+    void shouldReturnFailMap(int concurrency){
 
        var intermediateResult= CentralityStatistics.computeCentralityStatistics(10,
             v->10.0,
             DefaultPool.INSTANCE,
-            new Concurrency(1),
-            mockHistogram,
+            new Concurrency(concurrency),
+           this::histogram,
             true
         );
 
@@ -61,5 +60,11 @@ class CentralityStatisticsTest {
            "p99", "p99 could not be computed",
            "p999", "p999 could not be computed"
        ));
+    }
+
+    DoubleHistogram histogram(){
+        var mockHistogram = mock(DoubleHistogram.class);
+        Mockito.doThrow(ArrayIndexOutOfBoundsException.class).when(mockHistogram).recordValue(anyDouble());
+        return  mockHistogram;
     }
 }

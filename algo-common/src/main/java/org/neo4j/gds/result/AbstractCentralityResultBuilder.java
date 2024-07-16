@@ -22,7 +22,6 @@ package org.neo4j.gds.result;
 import org.HdrHistogram.DoubleHistogram;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.core.ProcedureConstants;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -94,16 +93,12 @@ public abstract class AbstractCentralityResultBuilder<WRITE_RESULT> extends Abst
                 );
             } else {
                 try {
-
-                    var histogram = new DoubleHistogram(ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT);
-                    CentralityStatistics.fillHistogram(
+                    return Optional.of(CentralityStatistics.histogram(
                         nodeCount,
-                        histogram,
                         centralityFunction,
                         DefaultPool.INSTANCE,
                         concurrency
-                    );
-                    return Optional.of(histogram);
+                    ));
                 } catch (ArrayIndexOutOfBoundsException e) {
                     // waiting for: https://github.com/HdrHistogram/HdrHistogram/issues/190 to be resolved
                     if (e.getMessage().contains("is out of bounds for histogram, current covered range")) {
