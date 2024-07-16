@@ -65,7 +65,7 @@ class LabelPropagationResultBuilderForWriteMode implements ResultBuilder<LabelPr
             statisticsComputationInstructions
         );
 
-        var communitySummary = CommunityStatistics.communitySummary(communityStatistics.histogram());
+        var communitySummary = CommunityStatistics.communitySummary(communityStatistics.histogram(), communityStatistics.success());
 
         var wccWriteResult = new LabelPropagationWriteResult(
             labelPropagationResult.ranIterations(),

@@ -44,7 +44,7 @@ public class CommunityStatisticsWithTimingComputer {
         );
 
         var componentCount = communityStatistics.componentCount();
-        var communitySummary = CommunityStatistics.communitySummary(communityStatistics.histogram());
+        var communitySummary = CommunityStatistics.communitySummary(communityStatistics.histogram(), communityStatistics.success());
 
         return Triple.of(componentCount, communitySummary, communityStatistics.computeMilliseconds());
     }

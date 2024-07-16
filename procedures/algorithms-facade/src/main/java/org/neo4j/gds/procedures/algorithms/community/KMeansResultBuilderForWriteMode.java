@@ -69,7 +69,7 @@ class KMeansResultBuilderForWriteMode implements ResultBuilder<KmeansWriteConfig
             statisticsComputationInstructions
         );
 
-        var communitySummary = CommunityStatistics.communitySummary(communityStatistics.histogram());
+        var communitySummary = CommunityStatistics.communitySummary(communityStatistics.histogram(), communityStatistics.success());
 
         var centroids = new CentroidsComputer().compute(shouldComputeListOfCentroids, kmeansResult.centers());
 

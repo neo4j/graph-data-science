@@ -63,7 +63,7 @@ class ModularityOptimizationResultBuilderForStatsMode implements ResultBuilder<M
             statisticsComputationInstructions
         );
         var componentCount = communityStatistics.componentCount();
-        var communitySummary = CommunityStatistics.communitySummary(communityStatistics.histogram());
+        var communitySummary = CommunityStatistics.communitySummary(communityStatistics.histogram(), communityStatistics.success());
 
         var modularityOptimizationStatsResult = new ModularityOptimizationStatsResult(
             timings.preProcessingMillis,

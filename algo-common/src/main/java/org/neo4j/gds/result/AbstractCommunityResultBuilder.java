@@ -84,6 +84,7 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
                 var communityCountAndHistogram = communityCountAndHistogram(
                     nodeCount,
                     communityFunction,
+                    HistogramProvider::new,
                     executorService,
                     concurrency
                 );
