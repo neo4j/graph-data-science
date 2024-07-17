@@ -20,7 +20,6 @@
 package org.neo4j.gds.algorithms.similarity;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.api.ResultStore;
@@ -46,7 +45,6 @@ public class WriteRelationshipService {
         String writeRelationshipType,
         String writeProperty,
         Graph graph,
-        GraphStore graphStore,
         IdMap rootIdMap,
         String taskName,
         Optional<ResultStore> resultStore,
@@ -59,7 +57,6 @@ public class WriteRelationshipService {
             requestScopedDependencies.getTaskRegistryFactory(),
             writeContext.getRelationshipExporterBuilder(),
             graph,
-            graphStore,
             rootIdMap,
             log,
             taskName,

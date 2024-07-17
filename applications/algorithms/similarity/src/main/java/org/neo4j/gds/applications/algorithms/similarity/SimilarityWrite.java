@@ -103,7 +103,6 @@ class SimilarityWrite {
             writeRelationshipConfiguration.writeRelationshipType(),
             writePropertyConfiguration.writeProperty(),
             similarityGraph,
-            graphStore,
             rootIdMap,
             label.value,
             resultStore,

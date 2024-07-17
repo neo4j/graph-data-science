@@ -20,7 +20,6 @@
 package org.neo4j.gds.algorithms.similarity;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.api.ResultStore;
@@ -36,14 +35,13 @@ import org.neo4j.gds.termination.TerminationFlag;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
-public final class Neo4jDatabaseRelationshipWriter {
-    public static WriteRelationshipResult writeRelationship(
+final class Neo4jDatabaseRelationshipWriter {
+    static WriteRelationshipResult writeRelationship(
         String writeRelationshipType,
         String writeProperty,
         TaskRegistryFactory taskRegistryFactory,
         RelationshipExporterBuilder relationshipExporterBuilder,
         Graph graph,
-        GraphStore graphStore,
         IdMap rootIdMap,
         Log log,
         String taskName,
