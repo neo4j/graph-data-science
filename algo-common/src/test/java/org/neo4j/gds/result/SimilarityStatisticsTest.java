@@ -20,8 +20,7 @@
 package org.neo4j.gds.result;
 
 import org.HdrHistogram.DoubleHistogram;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.extension.GdlExtension;
@@ -46,23 +45,15 @@ class SimilarityStatisticsTest {
     Graph graph;
 
 
-    @ParameterizedTest
-    @ValueSource(ints = {1,4})
-    void shouldReturnFailMap(int concurrency){
+    @Test
+    void shouldReturnFailMap(){
 
         var intermediateResult  = SimilarityStatistics.similarityStats(()-> graph,true, this::histogram );
 
-        var map =SimilarityStatistics.similaritySummary(intermediateResult.histogram(),intermediateResult.success());
+        var map = SimilarityStatistics.similaritySummary(intermediateResult.histogram(),intermediateResult.success());
         assertThat(map).isEqualTo(Map.of(
-            "min", "min could not be computed",
-            "mean", "mean could not be computed",
-            "max", "max could not be computed",
-            "p50", "p50 could not be computed",
-            "p75", "p75 could not be computed",
-            "p90", "p90 could not be computed",
-            "p95", "p95 could not be computed",
-            "p99", "p99 could not be computed",
-            "p999", "p999 could not be computed"
+            "Error",
+            "Unable to create histogram due to range of scores exceeding implementation limits."
         ));
     }
 

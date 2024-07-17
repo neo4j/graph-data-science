@@ -50,22 +50,15 @@ class CentralityStatisticsTest {
 
        var map  = CentralityStatistics.centralitySummary(intermediateResult.histogram(),intermediateResult.success());
        assertThat(map).isEqualTo(Map.of(
-           "min", "min could not be computed",
-           "mean", "mean could not be computed",
-           "max", "max could not be computed",
-           "p50", "p50 could not be computed",
-           "p75", "p75 could not be computed",
-           "p90", "p90 could not be computed",
-           "p95", "p95 could not be computed",
-           "p99", "p99 could not be computed",
-           "p999", "p999 could not be computed"
+           "Error",
+           "Unable to create histogram due to range of scores exceeding implementation limits."
        ));
     }
 
     DoubleHistogram histogram(){
         var mockHistogram = mock(DoubleHistogram.class);
 
-        var arrayIndexOutOfBoundsException= new ArrayIndexOutOfBoundsException("is out of bounds for histogram, current covered range");
+        var arrayIndexOutOfBoundsException = new ArrayIndexOutOfBoundsException("is out of bounds for histogram, current covered range");
         Mockito.doThrow(arrayIndexOutOfBoundsException).when(mockHistogram).recordValue(anyDouble());
         return  mockHistogram;
     }
