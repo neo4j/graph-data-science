@@ -46,7 +46,7 @@ public class CentralityDistributionComputer {
             shouldComputeCentralityDistribution
         );
 
-        var centralityDistribution = CentralityStatistics.centralitySummary(centralityStatistics.histogram());
+        var centralityDistribution = CentralityStatistics.centralitySummary(centralityStatistics.histogram(), centralityStatistics.success());
 
         return Pair.of(
             centralityDistribution,

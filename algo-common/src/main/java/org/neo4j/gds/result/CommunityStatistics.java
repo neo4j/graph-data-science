@@ -19,18 +19,12 @@
  */
 package org.neo4j.gds.result;
 
-import com.carrotsearch.hppc.LongLongHashMap;
-import com.carrotsearch.hppc.LongLongMap;
-import com.carrotsearch.hppc.procedures.LongLongProcedure;
 import org.HdrHistogram.Histogram;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
-import org.neo4j.gds.core.ProcedureConstants;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
 import java.util.Collections;
@@ -39,10 +33,11 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.LongUnaryOperator;
+import java.util.function.Supplier;
 
 public final class CommunityStatistics {
 
-    private static final long EMPTY_COMMUNITY = 0L;
+     static final long EMPTY_COMMUNITY = 0L;
 
     public static HugeSparseLongArray communitySizes(
         long nodeCount,
@@ -77,7 +72,7 @@ public final class CommunityStatistics {
             var tasks = LazyBatchCollection.of(
                 nodeCount,
                 batchSize,
-                (start, length) -> new AddTask(componentSizeBuilder, communityFunction, start, length)
+                (start, length) -> new CommunityAddTask(componentSizeBuilder, communityFunction, start, length)
             );
 
             ParallelUtil.run(tasks, executorService);
@@ -111,23 +106,32 @@ public final class CommunityStatistics {
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             capacity,
-            partition -> new CountTask(communitySizes, partition),
+            partition -> new CommunityCountTask(communitySizes, partition),
             Optional.empty()
         );
 
         ParallelUtil.run(tasks, executorService);
 
         var communityCount = 0L;
-        for (CountTask task : tasks) {
+        for (CommunityCountTask task : tasks) {
             communityCount += task.count();
         }
 
         return communityCount;
     }
-
     public static CommunityCountAndHistogram communityCountAndHistogram(
         long nodeCount,
         LongUnaryOperator communityFunction,
+        ExecutorService executorService,
+        Concurrency concurrency
+    ) {
+        return communityCountAndHistogram(nodeCount, communityFunction, HistogramProvider::new, executorService, concurrency);
+    }
+
+    static CommunityCountAndHistogram communityCountAndHistogram(
+        long nodeCount,
+        LongUnaryOperator communityFunction,
+        Supplier<HistogramProvider> histogramSupplier,
         ExecutorService executorService,
         Concurrency concurrency
     ) {
@@ -137,12 +141,26 @@ public final class CommunityStatistics {
             executorService,
             concurrency
         );
-        return communityCountAndHistogram(communitySizes, executorService, concurrency);
+        return communityCountAndHistogram(communitySizes, histogramSupplier, executorService, concurrency);
     }
-
     public static CommunityStats communityStats(
         long nodeCount,
         LongUnaryOperator communityFunction,
+        ExecutorService executorService,
+        Concurrency concurrency,
+        StatisticsComputationInstructions statisticsComputationInstructions
+    ) {
+        return communityStats(nodeCount,communityFunction,
+            HistogramProvider::new,
+            executorService,
+            concurrency,
+            statisticsComputationInstructions
+        );
+    }
+    public static CommunityStats communityStats(
+        long nodeCount,
+        LongUnaryOperator communityFunction,
+        Supplier<HistogramProvider> histogramSupplier,
         ExecutorService executorService,
         Concurrency concurrency,
         StatisticsComputationInstructions statisticsComputationInstructions
@@ -155,6 +173,7 @@ public final class CommunityStatistics {
                 var communityStatistics = CommunityStatistics.communityCountAndHistogram(
                     nodeCount,
                     communityFunction,
+                    histogramSupplier,
                     executorService,
                     concurrency
                 );
@@ -169,29 +188,38 @@ public final class CommunityStatistics {
                     concurrency
                 );
             }
-        }
+        } catch (Exception e){
+            if (e.getMessage().contains("is out of bounds for histogram, current covered range")) {
+                return  new CommunityStats(0,Optional.empty(), computeMilliseconds.get(), false);
+            } else {
+                throw e;
+            }
 
-        return ImmutableCommunityStats.of(componentCount, maybeHistogram, computeMilliseconds.get());
+        }
+        return new CommunityStats(componentCount, maybeHistogram, computeMilliseconds.get(), true);
     }
 
-    public static Map<String, Object> communitySummary(Optional<Histogram> histogram) {
+    public static Map<String, Object> communitySummary(Optional<Histogram> histogram, boolean success) {
+        if (!success){
+            return  HistogramUtils.failure();
+        }
         return histogram
             .map(HistogramUtils::communitySummary)
             .orElseGet(Collections::emptyMap);
     }
 
-    @ValueClass
-    @SuppressWarnings("immutables:incompat")
-    public interface CommunityStats {
-        long componentCount();
-
-        Optional<Histogram> histogram();
-
-        long computeMilliseconds();
-    }
 
     public static CommunityCountAndHistogram communityCountAndHistogram(
         HugeSparseLongArray communitySizes,
+        ExecutorService executorService,
+        Concurrency concurrency
+    ) {
+        return communityCountAndHistogram( communitySizes, HistogramProvider::new,executorService,concurrency );
+    }
+
+    static CommunityCountAndHistogram communityCountAndHistogram(
+        HugeSparseLongArray communitySizes,
+        Supplier<HistogramProvider> histogramSupplier,
         ExecutorService executorService,
         Concurrency concurrency
     ) {
@@ -199,7 +227,9 @@ public final class CommunityStatistics {
         var communityCount = 0L;
 
         if (concurrency.value() == 1) {
-            histogram = new Histogram(ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT);
+           var histogramProvider = histogramSupplier.get();
+            histogram =  histogramProvider.get();
+
             var capacity = communitySizes.capacity();
 
             for (long communityId = 0; communityId < capacity; communityId++) {
@@ -215,7 +245,7 @@ public final class CommunityStatistics {
             var tasks = PartitionUtils.rangePartition(
                 concurrency,
                 capacity,
-                partition -> new CountAndRecordTask(communitySizes, partition),
+                partition -> new CommunityCountAndRecordTask(communitySizes, partition, histogramSupplier.get()),
                 Optional.empty()
             );
 
@@ -223,124 +253,33 @@ public final class CommunityStatistics {
 
             // highestTrackableValue must be >= 2 * lowestDiscernibleValue (1)
             var highestTrackableValue = 2L;
-            for (CountAndRecordTask task : tasks) {
-                communityCount += task.count;
-                if (task.histogram.getMaxValue() > highestTrackableValue) {
-                    highestTrackableValue = task.histogram.getMaxValue();
+            for (CommunityCountAndRecordTask task : tasks) {
+                communityCount += task.count();
+                if (task.histogram().getMaxValue() > highestTrackableValue) {
+                    highestTrackableValue = task.histogram().getMaxValue();
                 }
             }
-            histogram = new Histogram(highestTrackableValue, ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT);
-            for (CountAndRecordTask task : tasks) {
-                histogram.add(task.histogram);
+            var histogramProvider = histogramSupplier.get();
+            histogramProvider.withHighestTrackedValue(highestTrackableValue);
+            histogram =  histogramProvider.get();
+
+            for (CommunityCountAndRecordTask task : tasks) {
+                histogram.add(task.histogram());
             }
         }
-        return ImmutableCommunityCountAndHistogram.builder()
-            .componentCount(communityCount)
-            .histogram(histogram)
-            .build();
+
+        return new CommunityCountAndHistogram(communityCount, histogram);
     }
 
     private CommunityStatistics() {}
 
-    @ValueClass
-    @SuppressWarnings("immutables:incompat")
-    public interface CommunityCountAndHistogram {
-        long componentCount();
+    public record CommunityCountAndHistogram( long componentCount, Histogram histogram){}
 
-        Histogram histogram();
-    }
-
-    private static class AddTask implements Runnable {
-
-        private final HugeSparseLongArray.Builder builder;
-
-        private final LongUnaryOperator communityFunction;
-
-        private final long startId;
-        private final long length;
-
-        // Use local buffer to avoid contention on GrowingBuilder.add().
-        // This is especially useful, if the input has a skewed
-        // distribution, i.e. most nodes end up in the same community.
-        private final LongLongMap buffer;
-
-        AddTask(
-            HugeSparseLongArray.Builder builder,
-            LongUnaryOperator communityFunction,
-            long startId,
-            long length
-        ) {
-            this.builder = builder;
-            this.communityFunction = communityFunction;
-            this.startId = startId;
-            this.length = length;
-            // safe cast, since max batch size less than Integer.MAX_VALUE
-            this.buffer = new LongLongHashMap((int) length);
-        }
-
-        @Override
-        public void run() {
-            var endId = startId + length;
-            for (long id = startId; id < endId; id++) {
-                buffer.addTo(communityFunction.applyAsLong(id), 1L);
-            }
-            buffer.forEach((LongLongProcedure) builder::addTo);
-        }
-    }
-
-    private static class CountTask implements Runnable {
-
-        private final HugeSparseLongArray communitySizes;
-
-        private final Partition partition;
-
-        private long count;
-
-        CountTask(HugeSparseLongArray communitySizes, Partition partition) {
-            this.communitySizes = communitySizes;
-            this.partition = partition;
-        }
-
-        @Override
-        public void run() {
-            partition.consume(id -> {
-                if (communitySizes.get(id) != EMPTY_COMMUNITY) {
-                    count++;
-                }
-            });
-        }
-
-        long count() {
-            return count;
-        }
-    }
-
-    private static class CountAndRecordTask implements Runnable {
-
-        private final HugeSparseLongArray communitySizes;
-
-        private final Partition partition;
-
-        private final Histogram histogram;
-
-        private long count;
-
-        CountAndRecordTask(HugeSparseLongArray communitySizes, Partition partition) {
-            this.communitySizes = communitySizes;
-            this.partition = partition;
-            this.histogram = new Histogram(ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT);
-        }
-
-        @Override
-        public void run() {
-            partition.consume(id -> {
-                long communitySize = communitySizes.get(id);
-                if (communitySize != EMPTY_COMMUNITY) {
-                    count++;
-                    histogram.recordValue(communitySize);
-                }
-            });
-        }
-    }
+    public record CommunityStats(
+        long componentCount,
+        Optional<Histogram> histogram,
+        long computeMilliseconds,
+        boolean success
+    ){}
 
 }

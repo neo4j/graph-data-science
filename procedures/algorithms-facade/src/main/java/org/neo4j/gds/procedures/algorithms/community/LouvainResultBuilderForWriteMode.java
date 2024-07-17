@@ -72,7 +72,7 @@ class LouvainResultBuilderForWriteMode implements ResultBuilder<LouvainWriteConf
             statisticsComputationInstructions
         );
         var componentCount = communityStatistics.componentCount();
-        var communitySummary = CommunityStatistics.communitySummary(communityStatistics.histogram());
+        var communitySummary = CommunityStatistics.communitySummary(communityStatistics.histogram(), communityStatistics.success());
 
         var leidenWriteResult = new LouvainWriteResult(
             louvainResult.modularity(),

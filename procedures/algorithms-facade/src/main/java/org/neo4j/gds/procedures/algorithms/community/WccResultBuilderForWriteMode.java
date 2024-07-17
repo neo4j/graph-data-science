@@ -65,7 +65,7 @@ class WccResultBuilderForWriteMode implements ResultBuilder<WccWriteConfig, Disj
             statisticsComputationInstructions
         );
 
-        var communitySummary = CommunityStatistics.communitySummary(communityStatistics.histogram());
+        var communitySummary = CommunityStatistics.communitySummary(communityStatistics.histogram(), communityStatistics.success());
 
         var wccWriteResult = new WccWriteResult(
             communityStatistics.componentCount(),

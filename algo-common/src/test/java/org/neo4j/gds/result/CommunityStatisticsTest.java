@@ -23,6 +23,8 @@ import org.HdrHistogram.Histogram;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mockito;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -32,8 +34,13 @@ import java.util.Map;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.neo4j.gds.TestSupport.toArguments;
+import static org.neo4j.gds.result.CommunityStatistics.communityStats;
 
 class CommunityStatisticsTest {
 
@@ -149,5 +156,46 @@ class CommunityStatisticsTest {
         var histogram = new Histogram(5);
         communitySizes.forEach((communityId, communitySize) -> histogram.recordValue(communitySize));
         return histogram;
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1,4})
+    void shouldReturnFailMap(int concurrency){
+        var intermediateResult= communityStats(
+        10,
+        i -> i,
+        this::histogramProvider,
+        DefaultPool.INSTANCE,
+        new Concurrency(concurrency),
+        new StatisticsComputationInstructions(){
+            @Override
+            public boolean computeCountOnly() {
+                return false;
+            }
+
+            @Override
+            public boolean computeCountAndDistribution() {
+                return true;
+            }
+        });
+        assertThat(intermediateResult.success()).isFalse();
+
+        var map  = CommunityStatistics.communitySummary(intermediateResult.histogram(),intermediateResult.success());
+        assertThat(map).isEqualTo(
+            Map.of(
+                "Error",
+                "Unable to create histogram due to range of scores exceeding implementation limits."
+            ));
+    }
+
+    HistogramProvider histogramProvider(){
+        var mockHistogram = mock(Histogram.class);
+
+        var arrayIndexOutOfBoundsException= new ArrayIndexOutOfBoundsException("is out of bounds for histogram, current covered range");
+        Mockito.doThrow(arrayIndexOutOfBoundsException).when(mockHistogram).recordValue(anyLong());
+        var mockHistogramProvider  = mock(HistogramProvider.class);
+        when(mockHistogramProvider.get()).thenReturn(mockHistogram);
+
+        return mockHistogramProvider;
     }
 }

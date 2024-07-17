@@ -24,7 +24,6 @@ import org.neo4j.gds.core.ProcedureConstants;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
 import java.util.Collections;
@@ -33,19 +32,34 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.LongToDoubleFunction;
+import java.util.function.Supplier;
 
 public final class CentralityStatistics {
 
-    public static DoubleHistogram histogram(
+    static DoubleHistogram histogram(
         long nodeCount,
         LongToDoubleFunction centralityFunction,
         ExecutorService executorService,
         Concurrency concurrency
     ) {
-        DoubleHistogram histogram;
+        return histogram(
+            nodeCount,
+            () -> new DoubleHistogram(ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT),
+            centralityFunction,
+            executorService,
+            concurrency
+        );
+    }
 
+    static DoubleHistogram histogram(
+        long nodeCount,
+        Supplier<DoubleHistogram> histogramSupplier,
+        LongToDoubleFunction centralityFunction,
+        ExecutorService executorService,
+        Concurrency concurrency
+    ) {
+        var histogram = histogramSupplier.get();
         if (concurrency.value() == 1) {
-            histogram = new DoubleHistogram(ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT);
             for (long id = 0; id < nodeCount; id++) {
                 histogram.recordValue(centralityFunction.applyAsDouble(id));
             }
@@ -53,41 +67,20 @@ public final class CentralityStatistics {
             var tasks = PartitionUtils.rangePartition(
                 concurrency,
                 nodeCount,
-                partition -> new RecordTask(partition, centralityFunction),
+                partition -> new CentralityRecordTask(partition, centralityFunction, histogramSupplier),
                 Optional.empty()
             );
 
             ParallelUtil.run(tasks, executorService);
 
-            histogram = new DoubleHistogram(ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT);
             for (var task : tasks) {
-                histogram.add(task.histogram);
+                histogram.add(task.histogram());
             }
         }
         return histogram;
     }
 
     private CentralityStatistics() {}
-
-    private static class RecordTask implements Runnable {
-
-        private final DoubleHistogram histogram;
-        private final Partition partition;
-        private final LongToDoubleFunction centralityFunction;
-
-        RecordTask(Partition partition, LongToDoubleFunction centralityFunction) {
-            this.partition = partition;
-            this.centralityFunction = centralityFunction;
-            this.histogram = new DoubleHistogram(ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT);
-        }
-
-        @Override
-        public void run() {
-            partition.consume(id -> {
-                histogram.recordValue(centralityFunction.applyAsDouble(id));
-            });
-        }
-    }
 
     public static CentralityStats centralityStatistics(
         long nodeCount,
@@ -96,29 +89,60 @@ public final class CentralityStatistics {
         Concurrency concurrency,
         boolean shouldCompute
     ) {
+        return computeCentralityStatistics(
+            nodeCount,
+            centralityProvider,
+            executorService,
+            concurrency,
+            () -> new DoubleHistogram(ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT),
+            shouldCompute
+        );
+    }
+
+    public static CentralityStats computeCentralityStatistics(
+        long nodeCount,
+        LongToDoubleFunction centralityProvider,
+        ExecutorService executorService,
+        Concurrency concurrency,
+        Supplier<DoubleHistogram> histogramSupplier,
+        boolean shouldCompute
+    ) {
         Optional<DoubleHistogram> maybeHistogram = Optional.empty();
         var computeMilliseconds = new AtomicLong(0);
+
         try (var ignored = ProgressTimer.start(computeMilliseconds::set)) {
             if (shouldCompute) {
-                maybeHistogram = Optional.of(histogram(
+                var histogram = histogram(
                     nodeCount,
+                    histogramSupplier,
                     centralityProvider,
                     executorService,
                     concurrency
-                ));
+                );
+                maybeHistogram = Optional.of(histogram);
             }
+        } catch (Exception e) {
+            if (e.getMessage().contains("is out of bounds for histogram, current covered range")) {
+                return new CentralityStats(Optional.empty(), computeMilliseconds.get(), false);
+            } else {
+                throw e;
+            }
+
         }
 
-        return new CentralityStats(maybeHistogram, computeMilliseconds.get());
+        return new CentralityStats(maybeHistogram, computeMilliseconds.get(), true);
     }
 
-    public static Map<String, Object> centralitySummary(Optional<DoubleHistogram> histogram) {
+    public static Map<String, Object> centralitySummary(Optional<DoubleHistogram> histogram, boolean success) {
+        if (!success) {
+            return HistogramUtils.failure();
+        }
         return histogram
             .map(HistogramUtils::centralitySummary)
             .orElseGet(Collections::emptyMap);
     }
 
-    public record CentralityStats(Optional<DoubleHistogram> histogram, long computeMilliseconds) {
+    public record CentralityStats(Optional<DoubleHistogram> histogram, long computeMilliseconds, boolean success) {
     }
 
 

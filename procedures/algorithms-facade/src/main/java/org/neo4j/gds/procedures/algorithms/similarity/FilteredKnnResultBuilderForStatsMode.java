@@ -63,7 +63,7 @@ class FilteredKnnResultBuilderForStatsMode implements ResultBuilder<FilteredKnnS
             configuration.concurrency(),
             filteredKnnResult.similarityResultStream()
         );
-        var communityStatistics = similarityStatsProcessor.computeCommunityStatistics(
+        var communityStatistics = similarityStatsProcessor.computeSimilarityStatistics(
             similarityGraphResult,
             shouldComputeSimilarityDistribution
         );

@@ -25,28 +25,52 @@ import org.neo4j.gds.result.SimilarityStatistics;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.neo4j.gds.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
 
 public class ActualSimilaritySummaryBuilder implements SimilaritySummaryBuilder {
 
     private final DoubleHistogram histogram;
+    private final AtomicBoolean crashed = new AtomicBoolean(false);
 
-    public ActualSimilaritySummaryBuilder(){
-        this.histogram=new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT);
+    ActualSimilaritySummaryBuilder() {
+        this.histogram = new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT);
     }
+
+    ActualSimilaritySummaryBuilder(DoubleHistogram histogram ) {
+        this.histogram = histogram;
+    }
+
     @Override
     public RelationshipWithPropertyConsumer similarityConsumer() {
+            return  (node1,node2, similarity) -> {
+                similarityConsume(similarity);
+                return true;
+            };
 
-        return (node1, node2, similarity) -> {
-            histogram.recordValue(similarity);
-            return true;
-        };
-    }
+}
 
     @Override
     public Map<String,Object> similaritySummary(){
-     return  SimilarityStatistics.similaritySummary(Optional.of(histogram));
+
+     return  SimilarityStatistics.similaritySummary(Optional.of(histogram), !crashed.get());
+    }
+
+
+    private  void similarityConsume(double similarity){
+        try {
+            if (!crashed.get()) {
+                histogram.recordValue(similarity);
+            }
+        } catch (ArrayIndexOutOfBoundsException e) {
+
+            if (e.getMessage().contains("is out of bounds for histogram, current covered range")) {
+                this.crashed.set(true);
+            }else{
+                throw  e;
+            }
+        }
     }
 
 }
