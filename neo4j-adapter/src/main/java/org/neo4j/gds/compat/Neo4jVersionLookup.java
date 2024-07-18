@@ -37,7 +37,7 @@ final class Neo4jVersionLookup {
 
     @VisibleForTesting
     static Neo4jVersion findNeo4jVersion() {
-        var neo4jVersion = Objects.requireNonNullElse(Version.class.getPackage().getImplementationVersion(), "dev");
+        var neo4jVersion = Objects.requireNonNullElse(Version.class.getPackage().getImplementationVersion(), "Unknown");
         // some versions have a build thing attached at the end
         // e.g. 4.0.8,8e921029f7daebacc749034f0cb174f1f2c7a258
         // This regex follows the logic from org.neo4j.kernel.internal.Version.parseReleaseVersion
