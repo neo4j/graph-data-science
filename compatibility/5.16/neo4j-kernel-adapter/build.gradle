@@ -10,12 +10,12 @@ dependencies {
     annotationProcessor openGds.immutables.value
 
     compileOnly project(':annotations')
+    compileOnly openGds.immutables.value.annotations
     neodeps().each {
         compileOnly(group: 'org.neo4j', name: it, version: neos.'5.16') {
             transitive = false
         }
     }
-    compileOnly openGds.immutables.value.annotations
 
     implementation project(':neo4j-kernel-adapter-api')
 }
