@@ -67,6 +67,8 @@ import java.util.function.LongConsumer;
 
 public final class BatchImporterCompat {
 
+    private BatchImporterCompat() {}
+
     public static BatchImporter instantiateBlockBatchImporter(
         DatabaseLayout dbLayout,
         FileSystemAbstraction fileSystem,
@@ -298,6 +300,7 @@ public final class BatchImporterCompat {
         @Override
         public void close() {
             org.neo4j.internal.batchimport.input.Input.super.close();
+            delegate.close();
         }
     }
 
@@ -324,7 +327,8 @@ public final class BatchImporterCompat {
 
         @Override
         public boolean next(org.neo4j.internal.batchimport.input.InputChunk inputChunk) throws IOException {
-            return delegate.next(new InputChunkReverseAdapter(inputChunk));
+            return inputChunk instanceof InputChunkAdapter adapter
+                ? delegate.next(adapter.delegate)
                 : delegate.next(new InputChunkReverseAdapter(inputChunk));
         }
 
