@@ -45,6 +45,7 @@ import org.neo4j.internal.helpers.HostnamePort;
 import org.neo4j.internal.id.IdGenerator;
 import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.kernel.api.Cursor;
+import org.neo4j.internal.kernel.api.EntityCursor;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.internal.kernel.api.PartitionedScan;
@@ -80,7 +81,9 @@ import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.ssl.config.SslPolicyLoader;
+import org.neo4j.storageengine.api.LongReference;
 import org.neo4j.storageengine.api.PropertySelection;
+import org.neo4j.storageengine.api.Reference;
 import org.neo4j.storageengine.api.StorageEngineFactory;
 import org.neo4j.values.storable.TextArray;
 import org.neo4j.values.virtual.MapValue;
@@ -245,42 +248,37 @@ public final class Neo4jProxy {
             .allocatePropertyCursor(kernelTransaction.cursorContext(), kernelTransaction.memoryTracker());
     }
 
-    public static PropertyReference propertyReference(NodeCursor nodeCursor) {
-        return ReferencePropertyReference.of(nodeCursor.propertiesReference());
+    public static Reference propertyReference(EntityCursor nodeCursor) {
+        return nodeCursor.propertiesReference();
     }
 
-    public static PropertyReference propertyReference(RelationshipScanCursor relationshipScanCursor) {
-        return ReferencePropertyReference.of(relationshipScanCursor.propertiesReference());
-    }
-
-    public static PropertyReference noPropertyReference() {
-        return ReferencePropertyReference.empty();
+    public static Reference noPropertyReference() {
+        return LongReference.NULL_REFERENCE;
     }
 
     public static void nodeProperties(
         KernelTransaction kernelTransaction,
         long nodeReference,
-        PropertyReference reference,
+        Reference reference,
         PropertyCursor cursor
     ) {
-        var neoReference = ((ReferencePropertyReference) reference).reference;
         kernelTransaction
             .dataRead()
-            .nodeProperties(nodeReference, neoReference, PropertySelection.ALL_PROPERTIES, cursor);
+            .nodeProperties(nodeReference, reference, PropertySelection.ALL_PROPERTIES, cursor);
     }
 
     public static void relationshipProperties(
         KernelTransaction kernelTransaction,
         long relationshipReference,
         long sourceNodeReference,
-        PropertyReference reference,
+        Reference reference,
         PropertyCursor cursor
     ) {
         IMPL.relationshipProperties(
             kernelTransaction.dataRead(),
             relationshipReference,
             sourceNodeReference,
-            ((ReferencePropertyReference) reference).reference,
+            reference,
             PropertySelection.ALL_PROPERTIES,
             cursor
         );

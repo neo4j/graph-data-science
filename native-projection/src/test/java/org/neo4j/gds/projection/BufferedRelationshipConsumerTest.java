@@ -22,8 +22,8 @@ package org.neo4j.gds.projection;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.core.huge.DirectIdMap;
+import org.neo4j.storageengine.api.Reference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -67,7 +67,7 @@ class BufferedRelationshipConsumerTest {
     public interface TestRelationship extends RelationshipReference {
 
         @Override
-        default PropertyReference propertiesReference() {
+        default Reference propertiesReference() {
             return Neo4jProxy.noPropertyReference();
         }
     }

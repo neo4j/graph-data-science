@@ -23,17 +23,17 @@ import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
 import org.immutables.builder.Builder;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.core.loading.NodeLabelTokenSet;
 import org.neo4j.gds.core.loading.NodesBatchBuffer;
 import org.neo4j.gds.core.loading.NodesBatchBufferBuilder;
+import org.neo4j.storageengine.api.Reference;
 import org.neo4j.token.api.TokenConstants;
 
 import java.util.Optional;
 
 public final class BufferedNodeConsumer implements StoreScanner.RecordConsumer<NodeReference> {
 
-    private final NodesBatchBuffer<PropertyReference> buffer;
+    private final NodesBatchBuffer<Reference> buffer;
 
     private final long highestPossibleNodeCount;
     private final LongSet nodeLabelIds;
@@ -47,11 +47,11 @@ public final class BufferedNodeConsumer implements StoreScanner.RecordConsumer<N
         Optional<Boolean> hasLabelInformation,
         Optional<Boolean> readProperty
     ) {
-        var buffer = new NodesBatchBufferBuilder<PropertyReference>()
+        var buffer = new NodesBatchBufferBuilder<Reference>()
             .capacity(capacity)
             .hasLabelInformation(hasLabelInformation)
             .readProperty(readProperty)
-            .propertyReferenceClass(PropertyReference.class)
+            .propertyReferenceClass(Reference.class)
             .build();
 
         LongSet labelIds = nodeLabelIds.orElseGet(LongHashSet::new);
@@ -66,7 +66,7 @@ public final class BufferedNodeConsumer implements StoreScanner.RecordConsumer<N
     }
 
     private BufferedNodeConsumer(
-        NodesBatchBuffer<PropertyReference> buffer,
+        NodesBatchBuffer<Reference> buffer,
         long highestPossibleNodeCount,
         LongSet nodeLabelIds,
         boolean readProperty
@@ -77,7 +77,7 @@ public final class BufferedNodeConsumer implements StoreScanner.RecordConsumer<N
         this.readProperty = readProperty;
     }
 
-    NodesBatchBuffer<PropertyReference> nodesBatchBuffer() {
+    NodesBatchBuffer<Reference> nodesBatchBuffer() {
         return this.buffer;
     }
 

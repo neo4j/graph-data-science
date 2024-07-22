@@ -30,7 +30,6 @@ import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -38,6 +37,7 @@ import org.neo4j.gds.core.loading.NodeLabelTokenSet;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.storageengine.api.Reference;
 import org.neo4j.values.storable.Value;
 
 import java.util.ArrayList;
@@ -73,7 +73,7 @@ public final class NativeNodePropertyImporter {
     public int importProperties(
         long neoNodeId,
         NodeLabelTokenSet labelTokens,
-        PropertyReference propertiesReference,
+        Reference propertiesReference,
         KernelTransaction kernelTransaction
     ) {
         try (PropertyCursor pc = Neo4jProxy.allocatePropertyCursor(kernelTransaction)) {
