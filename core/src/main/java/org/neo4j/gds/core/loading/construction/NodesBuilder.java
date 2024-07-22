@@ -38,8 +38,10 @@ import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeAtomicGrowingBitSet;
 import org.neo4j.values.storable.Value;
+import org.neo4j.values.storable.Values;
 import org.neo4j.values.virtual.MapValue;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.atomic.LongAdder;
@@ -145,6 +147,12 @@ public final class NodesBuilder {
 
     public void addNode(long originalId, NodeLabel nodeLabel) {
         this.addNode(originalId, NodeLabelTokens.ofNodeLabel(nodeLabel));
+    }
+
+    public void addNodeWithPropertiesAsObjects(long originalId, Map<String, Object> propertiesAsObjects) {
+        var properties = new HashMap<String, Value>(propertiesAsObjects.size());
+        propertiesAsObjects.forEach((key, value) -> properties.put(key, Values.of(value)));
+        this.addNode(originalId, properties);
     }
 
     public void addNode(long originalId, Map<String, Value> properties) {
