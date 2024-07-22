@@ -97,7 +97,7 @@ public interface Neo4jProxyApi {
         PropertyCursor cursor
     );
 
-    @CompatSince(minor = 22)
+    @CompatSince(minor = 23)
     BatchImporter instantiateBlockBatchImporter(
         DatabaseLayout dbLayout,
         FileSystemAbstraction fileSystem,
@@ -109,7 +109,7 @@ public interface Neo4jProxyApi {
         Collector badCollector
     );
 
-    @CompatSince(minor = 22)
+    @CompatSince(minor = 23)
     BatchImporter instantiateRecordBatchImporter(
         DatabaseLayout directoryStructure,
         FileSystemAbstraction fileSystem,
@@ -121,7 +121,7 @@ public interface Neo4jProxyApi {
         Collector badCollector
     );
 
-    @CompatSince(minor = 22)
+    @CompatSince(minor = 23)
     default ExecutionMonitor newCoarseBoundedProgressExecutionMonitor(
         long highNodeId,
         long highRelationshipId,
@@ -133,15 +133,15 @@ public interface Neo4jProxyApi {
             "`org.neo4j.gds.compat._519.Neo4jProxyApi.newCoarseBoundedProgressExecutionMonitor` is not yet implemented.");
     }
 
-    @CompatSince(minor = 22)
+    @CompatSince(minor = 23)
     ReadableGroups newGroups();
 
-    @CompatSince(minor = 22)
+    @CompatSince(minor = 23)
     default Collector emptyCollector() {
         throw new UnsupportedOperationException(
             "`org.neo4j.gds.compat._519.Neo4jProxyApi.emptyCollector` is not yet implemented.");
     }
 
-    @CompatSince(minor = 22)
+    @CompatSince(minor = 23)
     Collector badCollector(OutputStream outputStream, int batchSize);
 }
