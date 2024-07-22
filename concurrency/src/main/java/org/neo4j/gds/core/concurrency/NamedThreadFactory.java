@@ -57,20 +57,8 @@ public class NamedThreadFactory implements ThreadFactory {
         this(threadNamePrefix, priority, NO_OP_MONITOR);
     }
 
-    public NamedThreadFactory(String threadNamePrefix, Monitor monitor) {
-        this(threadNamePrefix, DEFAULT_THREAD_PRIORITY, monitor);
-    }
-
     public NamedThreadFactory(String threadNamePrefix, int priority, Monitor monitor) {
         this(threadNamePrefix, priority, monitor, false);
-    }
-
-    public NamedThreadFactory(String threadNamePrefix, int priority, boolean daemon) {
-        this(threadNamePrefix, priority, NO_OP_MONITOR, daemon);
-    }
-
-    public NamedThreadFactory(String threadNamePrefix, boolean daemon) {
-        this(threadNamePrefix, DEFAULT_THREAD_PRIORITY, NO_OP_MONITOR, daemon);
     }
 
     public NamedThreadFactory(String threadNamePrefix, int priority, Monitor monitor, boolean daemon) {
