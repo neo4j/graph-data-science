@@ -19,9 +19,7 @@
  */
 package org.neo4j.gds.compat.batchimport.input;
 
-import org.neo4j.gds.compat.batchimport.BatchImporter;
 import org.neo4j.gds.compat.batchimport.InputIterable;
-import org.neo4j.gds.compat.batchimport.InputIterator;
 import org.neo4j.internal.schema.SchemaDescriptor;
 import org.neo4j.token.TokenHolders;
 
@@ -29,7 +27,7 @@ import java.io.IOException;
 import java.util.Map;
 
 /**
- * Unifies all data input given to a {@link BatchImporter} to allow for more coherent implementations.
+ * Unifies all data input given to a {@link org.neo4j.gds.compat.batchimport.BatchImporter} to allow for more coherent implementations.
  */
 public interface Input extends AutoCloseable {
     /**
@@ -60,14 +58,14 @@ public interface Input extends AutoCloseable {
     /**
      * Provides all node data for an import.
      *
-     * @return an {@link InputIterator} which will provide all node data for the whole import.
+     * @return an {@link org.neo4j.gds.compat.batchimport.InputIterator} which will provide all node data for the whole import.
      */
     InputIterable nodes();
 
     /**
      * Provides all relationship data for an import.
      *
-     * @return an {@link InputIterator} which will provide all relationship data for the whole import.
+     * @return an {@link org.neo4j.gds.compat.batchimport.InputIterator} which will provide all relationship data for the whole import.
      */
     InputIterable relationships();
 
