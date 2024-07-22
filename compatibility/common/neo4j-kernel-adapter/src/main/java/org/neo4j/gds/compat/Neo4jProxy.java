@@ -359,25 +359,6 @@ public final class Neo4jProxy {
                 badCollector
             );
         }
-//        return BatchImporterFactory.withHighestPriority()
-//            .instantiate(
-//                directoryStructure,
-//                fileSystem,
-//                PageCacheTracer.NULL,
-//                configuration,
-//                logService,
-//                executionMonitor,
-//                AdditionalInitialIds.EMPTY,
-//                new EmptyLogTailMetadata(dbConfig),
-//                dbConfig,
-//                Monitor.NO_MONITOR,
-//                jobScheduler,
-//                badCollector,
-//                TransactionLogInitializer.getLogFilesInitializer(),
-//                new IndexImporterFactoryImpl(),
-//                EmptyMemoryTracker.INSTANCE,
-//                CursorContextFactory.NULL_CONTEXT_FACTORY
-//            );
     }
 
     public static InputEntityIdVisitor.Long inputEntityLongIdVisitor(IdType idType, ReadableGroups groups) {
@@ -493,8 +474,11 @@ public final class Neo4jProxy {
     }
 
     public static ReadableGroups newGroups() {
-        // new Groups()
-        throw new UnsupportedOperationException("TODO");
+        return IMPL.newGroups();
+    }
+
+    public static ReadableGroups newInitializedGroups() {
+        return IMPL.newInitializedGroups();
     }
 
     public static Collector emptyCollector() {

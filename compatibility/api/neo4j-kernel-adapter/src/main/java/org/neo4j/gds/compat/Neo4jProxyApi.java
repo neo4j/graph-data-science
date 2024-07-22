@@ -137,6 +137,12 @@ public interface Neo4jProxyApi {
     ReadableGroups newGroups();
 
     @CompatSince(minor = 23)
+    default ReadableGroups newInitializedGroups() {
+        throw new UnsupportedOperationException(
+            "`org.neo4j.gds.compat._519.Neo4jProxyApi.newInitializedGroups` is not yet implemented.");
+    }
+
+    @CompatSince(minor = 23)
     default Collector emptyCollector() {
         throw new UnsupportedOperationException(
             "`org.neo4j.gds.compat._519.Neo4jProxyApi.emptyCollector` is not yet implemented.");

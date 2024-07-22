@@ -325,6 +325,7 @@ public final class BatchImporterCompat {
         @Override
         public boolean next(org.neo4j.internal.batchimport.input.InputChunk inputChunk) throws IOException {
             return delegate.next(new InputChunkReverseAdapter(inputChunk));
+                : delegate.next(new InputChunkReverseAdapter(inputChunk));
         }
 
         @Override
@@ -649,6 +650,12 @@ public final class BatchImporterCompat {
 
     public static ReadableGroups newGroups() {
         return adaptReadableGroups(new Groups());
+    }
+
+    public static ReadableGroups newInitializedGroups() {
+        var groups = new Groups();
+        groups.getOrCreate(null);
+        return adaptReadableGroups(groups);
     }
 
     public static Collector emptyCollector() {
