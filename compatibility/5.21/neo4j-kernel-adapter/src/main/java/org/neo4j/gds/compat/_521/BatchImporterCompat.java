@@ -364,8 +364,8 @@ public final class BatchImporterCompat {
         }
 
         @Override
-        public Estimates calculateEstimates(org.neo4j.internal.batchimport.input.PropertySizeCalculator propertySizeCalculator) throws
-            IOException {
+        public Estimates calculateEstimates(org.neo4j.internal.batchimport.input.PropertySizeCalculator propertySizeCalculator)
+        throws IOException {
             return adaptEstimates(delegate.calculateEstimates(
                 new PropertySizeCalculatorReverseAdapter(propertySizeCalculator)
             ));
@@ -406,19 +406,12 @@ public final class BatchImporterCompat {
 
         @Override
         public boolean next(org.neo4j.internal.batchimport.input.InputChunk inputChunk) throws IOException {
-            return inputChunk instanceof InputChunkAdapter adapter
-                ? delegate.next(adapter.delegate)
-                : delegate.next(reverseAdapt(inputChunk));
+            return delegate.next(((InputChunkAdapter) inputChunk).delegate);
         }
 
         @Override
         public void close() throws IOException {
             delegate.close();
-        }
-
-        private static InputChunk reverseAdapt(org.neo4j.internal.batchimport.input.InputChunk inputChunk) {
-            throw new UnsupportedOperationException("Do we actually need this?");
-//            return new InputChunkReverseAdapter(inputChunk);
         }
     }
 
@@ -428,128 +421,9 @@ public final class BatchImporterCompat {
         private InputChunkAdapter(InputChunk delegate) {this.delegate = delegate;}
 
         @Override
-        public boolean next(org.neo4j.internal.batchimport.input.InputEntityVisitor inputEntityVisitor) throws
-            IOException {
+        public boolean next(org.neo4j.internal.batchimport.input.InputEntityVisitor inputEntityVisitor)
+        throws IOException {
             return delegate.next(new InputEntityVisitorReverseAdapter(inputEntityVisitor));
-        }
-
-        @Override
-        public void close() throws IOException {
-            delegate.close();
-        }
-    }
-
-    private static final class InputChunkReverseAdapter implements InputChunk {
-        private final org.neo4j.internal.batchimport.input.InputChunk delegate;
-
-        InputChunkReverseAdapter(org.neo4j.internal.batchimport.input.InputChunk delegate) {this.delegate = delegate;}
-
-        @Override
-        public boolean next(InputEntityVisitor visitor) throws IOException {
-            return visitor instanceof InputEntityVisitorReverseAdapter visitorAdapter
-                ? delegate.next(visitorAdapter.delegate)
-                : delegate.next(adapt(visitor));
-        }
-
-        @Override
-        public void close() throws IOException {
-            delegate.close();
-        }
-
-        private static org.neo4j.internal.batchimport.input.InputEntityVisitor adapt(InputEntityVisitor visitor) {
-            throw new UnsupportedOperationException("Do we actually need this?");
-
-        }
-    }
-
-    private static final class InputEntityVisitorAdapter implements org.neo4j.internal.batchimport.input.InputEntityVisitor {
-        private final InputEntityVisitor delegate;
-
-        InputEntityVisitorAdapter(InputEntityVisitor delegate) {this.delegate = delegate;}
-
-        @Override
-        public boolean propertyId(long l) {
-            return delegate.propertyId(l);
-        }
-
-        @Override
-        public boolean properties(ByteBuffer byteBuffer, boolean b) {
-            return delegate.properties(byteBuffer, b);
-        }
-
-        @Override
-        public boolean property(String s, Object o) {
-            return delegate.property(s, o);
-        }
-
-        @Override
-        public boolean property(int i, Object o) {
-            return delegate.property(i, o);
-        }
-
-        @Override
-        public boolean id(long l) {
-            return delegate.id(l);
-        }
-
-        @Override
-        public boolean id(Object o, org.neo4j.internal.batchimport.input.Group group) {
-            return delegate.id(o, adaptGroup(group));
-        }
-
-        @Override
-        public boolean id(Object o, org.neo4j.internal.batchimport.input.Group group, IdSequence idSequence) {
-            return delegate.id(o, adaptGroup(group), idSequence);
-        }
-
-        @Override
-        public boolean labels(String[] strings) {
-            return delegate.labels(strings);
-        }
-
-        @Override
-        public boolean labelField(long l) {
-            return delegate.labelField(l);
-        }
-
-        @Override
-        public boolean startId(long l) {
-            return delegate.startId(l);
-        }
-
-        @Override
-        public boolean startId(Object o, org.neo4j.internal.batchimport.input.Group group) {
-            return delegate.startId(o, adaptGroup(group));
-        }
-
-        @Override
-        public boolean endId(long l) {
-            return delegate.endId(l);
-        }
-
-        @Override
-        public boolean endId(Object o, org.neo4j.internal.batchimport.input.Group group) {
-            return delegate.endId(o, adaptGroup(group));
-        }
-
-        @Override
-        public boolean type(int i) {
-            return delegate.type(i);
-        }
-
-        @Override
-        public boolean type(String s) {
-            return delegate.type(s);
-        }
-
-        @Override
-        public void endOfEntity() throws IOException {
-            delegate.endOfEntity();
-        }
-
-        @Override
-        public void reset() {
-            delegate.reset();
         }
 
         @Override
