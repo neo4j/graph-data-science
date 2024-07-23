@@ -643,11 +643,17 @@ public final class BatchImporterCompat {
     }
 
     private static org.neo4j.internal.batchimport.input.Group adaptGroup(Group group) {
-        return new org.neo4j.internal.batchimport.input.Group(group.id(), group.name(), group.specificIdType());
+        return ((GroupReverseAdapter) group).delegate;
     }
 
     private static Group adaptGroup(org.neo4j.internal.batchimport.input.Group group) {
-        return new Group(group.id(), group.name(), group.specificIdType());
+        return new GroupReverseAdapter(group);
+    }
+
+    private static final class GroupReverseAdapter implements Group {
+        private final org.neo4j.internal.batchimport.input.Group delegate;
+
+        private GroupReverseAdapter(org.neo4j.internal.batchimport.input.Group delegate) {this.delegate = delegate;}
     }
 
     private static org.neo4j.internal.batchimport.input.IdType adaptIdType(IdType idType) {
@@ -659,37 +665,15 @@ public final class BatchImporterCompat {
     }
 
     private static org.neo4j.internal.batchimport.input.ReadableGroups adaptReadableGroups(ReadableGroups groups) {
-        return groups == null || groups == ReadableGroups.EMPTY || groups.size() == 0
+        return groups == null || groups == ReadableGroups.EMPTY
             ? org.neo4j.internal.batchimport.input.ReadableGroups.EMPTY
-            : new ReadableGroupsAdapter(groups);
+            : ((ReadableGroupsReverseAdapter) groups).delegate;
     }
 
     private static ReadableGroups adaptReadableGroups(org.neo4j.internal.batchimport.input.ReadableGroups groups) {
-        return groups == null || groups == org.neo4j.internal.batchimport.input.ReadableGroups.EMPTY || groups.size() == 0
+        return groups == null || groups == org.neo4j.internal.batchimport.input.ReadableGroups.EMPTY
             ? ReadableGroups.EMPTY
             : new ReadableGroupsReverseAdapter(groups);
-    }
-
-    private static final class ReadableGroupsAdapter implements org.neo4j.internal.batchimport.input.ReadableGroups {
-
-        private final ReadableGroups groups;
-
-        private ReadableGroupsAdapter(ReadableGroups groups) {this.groups = groups;}
-
-        @Override
-        public org.neo4j.internal.batchimport.input.Group get(int i) {
-            return adaptGroup(groups.get(i));
-        }
-
-        @Override
-        public org.neo4j.internal.batchimport.input.Group get(String s) {
-            return adaptGroup(groups.get(s));
-        }
-
-        @Override
-        public int size() {
-            return groups.size();
-        }
     }
 
     private static class ReadableGroupsReverseAdapter implements ReadableGroups {
@@ -698,18 +682,8 @@ public final class BatchImporterCompat {
         ReadableGroupsReverseAdapter(org.neo4j.internal.batchimport.input.ReadableGroups delegate) {this.delegate = delegate;}
 
         @Override
-        public Group get(int id) {
-            return adaptGroup(delegate.get(id));
-        }
-
-        @Override
-        public Group get(String name) {
-            return adaptGroup(delegate.get(name));
-        }
-
-        @Override
-        public int size() {
-            return delegate.size();
+        public Group getGlobalGroup() {
+            return adaptGroup(delegate.get(null));
         }
     }
 

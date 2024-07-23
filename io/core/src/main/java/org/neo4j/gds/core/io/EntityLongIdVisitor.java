@@ -49,7 +49,7 @@ public interface EntityLongIdVisitor {
     };
 
     static EntityLongIdVisitor mapping(ReadableGroups readableGroups) {
-        return new Mapping(readableGroups.get(null));
+        return new Mapping(readableGroups.getGlobalGroup());
     }
 
     final class Mapping implements EntityLongIdVisitor {
