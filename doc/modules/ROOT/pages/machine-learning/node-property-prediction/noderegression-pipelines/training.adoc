@@ -199,11 +199,17 @@ We will also project the `sizeOfStory` property to use as a model feature, and t
 .The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-project-query, group=nr]
 ----
-CALL gds.graph.project('myGraph', {
-    House: { properties: ['sizePerStory', 'price'] },
-    UnknownHouse: { properties: 'sizePerStory' }
-  },
-  '*'
+MATCH (house:House|UnknownHouse)
+RETURN gds.graph.project(
+  'myGraph',
+  house,
+  null,
+  {
+    sourceNodeLabels: labels(house),
+    targetNodeLabels: [],
+    sourceNodeProperties: house { .sizePerStory, .price },
+    targetNodeProperties: {}
+  }
 )
 ----
 
@@ -268,15 +274,20 @@ We can do that by passing in contextNodeLabels and contextRelationshipTypes when
 The following statement will project a graph containing the information about houses and their painters using a native projection and store it in the graph catalog under the name 'paintingGraph'.
 [source, cypher, role=noplay graph-project-query, group=nr]
 ----
-CALL gds.graph.project(
+MATCH (house:House)
+OPTIONAL MATCH (painter:Painter)-[r:PAINTED]->(house:House)
+RETURN gds.graph.project(
   'paintingGraph',
+  painter,
+  house,
   {
-    House: { properties: ['sizePerStory', 'price'] },
-    Painter: {}
+    sourceNodeLabels: ['Painter'],
+    targetNodeLabels: ['House'],
+    sourceNodeProperties: {},
+    targetNodeProperties: house { .sizePerStory, .price },
+    relationshipType: 'PAINTED'
   },
-  {
-    PAINTED: {orientation: 'UNDIRECTED'}
-  }
+  { undirectedRelationshipTypes: ['PAINTED'] }
 )
 ----
 
