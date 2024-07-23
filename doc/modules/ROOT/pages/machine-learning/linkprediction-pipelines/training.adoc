@@ -199,28 +199,27 @@ CREATE
 ----
 
 With the graph in Neo4j we can now project it into the graph catalog.
-We do this using a native projection targeting the `Person` nodes and the `KNOWS` relationships.
+We do this using a Cypher projection targeting the `Person` nodes and the `KNOWS` relationships.
 We will also project the `age` property, so it can be used when creating link features.
 For the relationships we must use the `UNDIRECTED` orientation.
 This is because the Link Prediction pipelines are defined only for undirected graphs.
 We ignore the additional nodes and relationship types, in order for our projection to be homogeneous.
 We will illustrate how to make use of the larger graph in a <<linkprediction-pipeline-examples-train-filtering, subsequent example>>.
 
-.The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
+.The following statement will project a graph using a Cypher projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-project-query, group=lp]
 ----
-CALL gds.graph.project(
+MATCH (source:Person)-[r:KNOWS]->(target:Person)
+RETURN gds.graph.project(
   'myGraph',
+  source,
+  target,
   {
-    Person: {
-      properties: ['age']
-    }
+    sourceNodeProperties: source { .age },
+    targetNodeProperties: target { .age },
+    relationshipType: 'KNOWS'
   },
-  {
-    KNOWS: {
-      orientation: 'UNDIRECTED'
-    }
-  }
+  { undirectedRelationshipTypes: ['KNOWS'] }
 )
 ----
 
@@ -311,7 +310,7 @@ We might want to utilize more node and relationship types to generate node prope
 We can do that by passing in `contextNodeLabels` and `contextRelationshipTypes`.
 We explicitly pass in `sourceNodeLabel` and `targetNodeLabel` to specify a narrower set of nodes to be used for training and testing.
 
-The following statement will project the full graph using a native projection and store it in the graph catalog under the name 'fullGraph'.
+The following statement will project the full graph using a Cypher projection and store it in the graph catalog under the name 'fullGraph'.
 [source, cypher, role=noplay graph-project-query, group=lp]
 ----
 CALL gds.graph.project(
