@@ -408,12 +408,17 @@ public final class BatchImporterCompat {
         public boolean next(org.neo4j.internal.batchimport.input.InputChunk inputChunk) throws IOException {
             return inputChunk instanceof InputChunkAdapter adapter
                 ? delegate.next(adapter.delegate)
-                : delegate.next(new InputChunkReverseAdapter(inputChunk));
+                : delegate.next(reverseAdapt(inputChunk));
         }
 
         @Override
         public void close() throws IOException {
             delegate.close();
+        }
+
+        private static InputChunk reverseAdapt(org.neo4j.internal.batchimport.input.InputChunk inputChunk) {
+            throw new UnsupportedOperationException("Do we actually need this?");
+//            return new InputChunkReverseAdapter(inputChunk);
         }
     }
 
@@ -441,12 +446,19 @@ public final class BatchImporterCompat {
 
         @Override
         public boolean next(InputEntityVisitor visitor) throws IOException {
-            return delegate.next(new InputEntityVisitorAdapter(visitor));
+            return visitor instanceof InputEntityVisitorReverseAdapter visitorAdapter
+                ? delegate.next(visitorAdapter.delegate)
+                : delegate.next(adapt(visitor));
         }
 
         @Override
         public void close() throws IOException {
             delegate.close();
+        }
+
+        private static org.neo4j.internal.batchimport.input.InputEntityVisitor adapt(InputEntityVisitor visitor) {
+            throw new UnsupportedOperationException("Do we actually need this?");
+
         }
     }
 
