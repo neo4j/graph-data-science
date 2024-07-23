@@ -33,8 +33,6 @@ import org.neo4j.gds.compat.batchimport.BatchImporter;
 import org.neo4j.gds.compat.batchimport.ExecutionMonitor;
 import org.neo4j.gds.compat.batchimport.ImportConfig;
 import org.neo4j.gds.compat.batchimport.input.Collector;
-import org.neo4j.gds.compat.batchimport.input.IdType;
-import org.neo4j.gds.compat.batchimport.input.InputEntityVisitor;
 import org.neo4j.gds.compat.batchimport.input.ReadableGroups;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -359,74 +357,6 @@ public final class Neo4jProxy {
                 badCollector
             );
         }
-    }
-
-    public static InputEntityIdVisitor.Long inputEntityLongIdVisitor(IdType idType, ReadableGroups groups) {
-        switch (idType) {
-            case ACTUAL -> {
-                return new InputEntityIdVisitor.Long() {
-
-                    @Override
-                    public void visitNodeId(InputEntityVisitor visitor, long id) {
-                        visitor.id(id);
-                    }
-
-                    @Override
-                    public void visitSourceId(InputEntityVisitor visitor, long id) {
-                        visitor.startId(id);
-                    }
-
-                    @Override
-                    public void visitTargetId(InputEntityVisitor visitor, long id) {
-                        visitor.endId(id);
-                    }
-                };
-            }
-            case INTEGER -> {
-                var globalGroup = groups.get(null);
-
-                return new InputEntityIdVisitor.Long() {
-
-                    @Override
-                    public void visitNodeId(InputEntityVisitor visitor, long id) {
-                        visitor.id(id, globalGroup);
-                    }
-
-                    @Override
-                    public void visitSourceId(InputEntityVisitor visitor, long id) {
-                        visitor.startId(id, globalGroup);
-                    }
-
-                    @Override
-                    public void visitTargetId(InputEntityVisitor visitor, long id) {
-                        visitor.endId(id, globalGroup);
-                    }
-                };
-            }
-            default -> throw new IllegalStateException("Unexpected value: " + idType);
-        }
-    }
-
-    public static InputEntityIdVisitor.String inputEntityStringIdVisitor(ReadableGroups groups) {
-        var globalGroup = groups.get(null);
-
-        return new InputEntityIdVisitor.String() {
-
-            @Override
-            public void visitNodeId(InputEntityVisitor visitor, String id) {
-                visitor.id(id, globalGroup);
-            }
-
-            @Override
-            public void visitSourceId(InputEntityVisitor visitor, String id) {
-                visitor.startId(id, globalGroup);
-            }
-
-            @Override
-            public void visitTargetId(InputEntityVisitor visitor, String id) {
-                visitor.endId(id, globalGroup);
-            }
-        };
     }
 
     public static Setting<String> additionalJvm() {

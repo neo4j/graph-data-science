@@ -26,7 +26,6 @@ import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.graph.GraphProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.compat.InputEntityIdVisitor;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.batchimport.InputIterable;
 import org.neo4j.gds.compat.batchimport.InputIterator;
@@ -71,17 +70,17 @@ public final class GraphStoreInput implements Input {
     private final IdMode idMode;
     private final Capabilities capabilities;
 
-    enum IdMode implements Supplier<InputEntityIdVisitor.Long> {
+    enum IdMode implements Supplier<EntityLongIdVisitor> {
         MAPPING(IdType.INTEGER, Neo4jProxy.newGroups()) {
             @Override
-            public InputEntityIdVisitor.Long get() {
-                return Neo4jProxy.inputEntityLongIdVisitor(IdType.INTEGER, readableGroups);
+            public EntityLongIdVisitor get() {
+                return EntityLongIdVisitor.mapping(this.readableGroups);
             }
         },
         ACTUAL(IdType.ACTUAL, ReadableGroups.EMPTY) {
             @Override
-            public InputEntityIdVisitor.Long get() {
-                return Neo4jProxy.inputEntityLongIdVisitor(IdType.ACTUAL, readableGroups);
+            public EntityLongIdVisitor get() {
+                return EntityLongIdVisitor.ACTUAL;
             }
         };
 
@@ -347,7 +346,7 @@ public final class GraphStoreInput implements Input {
 
         private final long nodeCount;
         private final int batchSize;
-        final InputEntityIdVisitor.Long inputEntityIdVisitor;
+        final EntityLongIdVisitor inputEntityIdVisitor;
         final IdMapFunction idMapFunction;
 
         private long id;
@@ -355,7 +354,7 @@ public final class GraphStoreInput implements Input {
         GraphImporter(
             long nodeCount,
             int batchSize,
-            InputEntityIdVisitor.Long inputEntityIdVisitor,
+            EntityLongIdVisitor inputEntityIdVisitor,
             IdMapFunction idMapFunction
         ) {
             this.nodeCount = nodeCount;
@@ -389,7 +388,7 @@ public final class GraphStoreInput implements Input {
         NodeImporter(
             NodeStore nodeStore,
             int batchSize,
-            InputEntityIdVisitor.Long inputEntityIdVisitor,
+            EntityLongIdVisitor inputEntityIdVisitor,
             IdMapFunction idMapFunction
         ) {
             super(nodeStore.nodeCount, batchSize, inputEntityIdVisitor, idMapFunction);
@@ -409,7 +408,7 @@ public final class GraphStoreInput implements Input {
         RelationshipImporter(
             RelationshipStore relationshipStore,
             int batchSize,
-            InputEntityIdVisitor.Long inputEntityIdVisitor,
+            EntityLongIdVisitor inputEntityIdVisitor,
             IdMapFunction idMapFunction
         ) {
             super(relationshipStore.nodeCount, batchSize, inputEntityIdVisitor, idMapFunction);
@@ -428,12 +427,12 @@ public final class GraphStoreInput implements Input {
 
     public abstract static class EntityChunk implements InputChunk, LastProgress {
 
-        final InputEntityIdVisitor.Long inputEntityIdVisitor;
+        final EntityLongIdVisitor inputEntityIdVisitor;
 
         long id;
         long endId;
 
-        EntityChunk(InputEntityIdVisitor.Long inputEntityIdVisitor) {
+        EntityChunk(EntityLongIdVisitor inputEntityIdVisitor) {
             this.inputEntityIdVisitor = inputEntityIdVisitor;
         }
 
@@ -458,7 +457,7 @@ public final class GraphStoreInput implements Input {
 
         NodeChunk(
             NodeStore nodeStore,
-            InputEntityIdVisitor.Long inputEntityIdVisitor,
+            EntityLongIdVisitor inputEntityIdVisitor,
             IdMapFunction idMapFunction
         ) {
             super(inputEntityIdVisitor);
@@ -541,7 +540,7 @@ public final class GraphStoreInput implements Input {
 
         RelationshipChunk(
             RelationshipStore relationshipStore,
-            InputEntityIdVisitor.Long inputEntityIdVisitor,
+            EntityLongIdVisitor inputEntityIdVisitor,
             IdMapFunction idMapFunction
         ) {
             super(inputEntityIdVisitor);
@@ -593,7 +592,7 @@ public final class GraphStoreInput implements Input {
             private final IdMap idMap;
             private final String relationshipType;
             private final String[] propertyKeys;
-            private final InputEntityIdVisitor.Long inputEntityIdVisitor;
+            private final EntityLongIdVisitor inputEntityIdVisitor;
             private final IdMapFunction idMapFunction;
             private InputEntityVisitor visitor;
 
@@ -601,7 +600,7 @@ public final class GraphStoreInput implements Input {
                 IdMap idMap,
                 String relationshipType,
                 String[] propertyKeys,
-                InputEntityIdVisitor.Long inputEntityIdVisitor,
+                EntityLongIdVisitor inputEntityIdVisitor,
                 IdMapFunction idMapFunction
             ) {
                 this.idMap = idMap;
