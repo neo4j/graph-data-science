@@ -23,7 +23,6 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.compat.batchimport.input.Group;
-import org.neo4j.internal.id.IdSequence;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -67,13 +66,8 @@ public abstract class NodeVisitor extends ElementVisitor<PropertySchema> {
     }
 
     @Override
-    public boolean id(Object id, Group group) {
-        return id((long) id);
-    }
-
-    @Override
-    public boolean id(Object id, Group group, IdSequence idSequence) {
-        return id((long) id);
+    public boolean id(long id, Group group) {
+        return id(id);
     }
 
     @Override

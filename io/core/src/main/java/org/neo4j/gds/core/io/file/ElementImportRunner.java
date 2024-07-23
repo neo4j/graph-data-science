@@ -19,15 +19,15 @@
  */
 package org.neo4j.gds.core.io.file;
 
-import org.neo4j.gds.core.io.GraphStoreInput;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.compat.batchimport.InputIterator;
 import org.neo4j.gds.compat.batchimport.input.InputEntityVisitor;
+import org.neo4j.gds.core.io.GraphStoreInput;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.io.Flushable;
 import java.io.IOException;
 
-final class ElementImportRunner<T extends InputEntityVisitor.Adapter & Flushable> implements Runnable {
+final class ElementImportRunner<T extends Flushable & InputEntityVisitor> implements Runnable {
     private final T visitor;
     private final InputIterator inputIterator;
     private final ProgressTracker progressTracker;

@@ -19,139 +19,46 @@
  */
 package org.neo4j.gds.compat.batchimport.input;
 
-import org.neo4j.internal.id.IdSequence;
-
 import java.io.Closeable;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 
 /**
  * Receives calls for extracted data from {@link InputChunk}. This callback design allows for specific methods
  * using primitives and other optimizations, to avoid garbage.
  */
 public interface InputEntityVisitor extends Closeable {
-    boolean propertyId(long nextProp);
 
-    boolean properties(ByteBuffer properties, boolean offloaded);
-
-    boolean property(String key, Object value);
-
-    boolean property(int propertyKeyId, Object value);
+    default boolean property(String key, Object value) {return true;}
 
     // For nodes
-    boolean id(long id);
+    default boolean id(long id) {return true;}
 
-    boolean id(Object id, Group group);
+    default boolean id(long id, Group group) {return true;}
 
-    boolean id(Object id, Group group, IdSequence idSequence);
+    default boolean id(String id, Group group) {return true;}
 
-    boolean labels(String[] labels);
-
-    boolean labelField(long labelField);
+    default boolean labels(String[] labels) {return true;}
 
     // For relationships
-    boolean startId(long id);
+    default boolean startId(long id) {return true;}
 
-    boolean startId(Object id, Group group);
+    default boolean startId(long id, Group group) {return true;}
 
-    boolean endId(long id);
+    default boolean startId(String id, Group group) {return true;}
 
-    boolean endId(Object id, Group group);
+    default boolean endId(long id) {return true;}
 
-    boolean type(int type);
+    default boolean endId(long id, Group group) {return true;}
 
-    boolean type(String type);
+    default boolean endId(String id, Group group) {return true;}
 
-    void endOfEntity() throws IOException;
+    default boolean type(String type) {return true;}
 
-    void reset();
+    default void endOfEntity() throws IOException {}
 
-    class Adapter implements InputEntityVisitor {
-        @Override
-        public boolean property(String key, Object value) {
-            return true;
-        }
+    default void reset() {}
 
-        @Override
-        public boolean properties(ByteBuffer properties, boolean offloaded) {
-            return true;
-        }
+    @Override
+    default void close() throws IOException {}
 
-        @Override
-        public boolean property(int propertyKeyId, Object value) {
-            return true;
-        }
-
-        @Override
-        public boolean propertyId(long nextProp) {
-            return true;
-        }
-
-        @Override
-        public boolean id(long id) {
-            return true;
-        }
-
-        @Override
-        public boolean id(Object id, Group group) {
-            return true;
-        }
-
-        @Override
-        public boolean id(Object id, Group group, IdSequence idSequence) {
-            return true;
-        }
-
-        @Override
-        public boolean labels(String[] labels) {
-            return true;
-        }
-
-        @Override
-        public boolean startId(long id) {
-            return true;
-        }
-
-        @Override
-        public boolean startId(Object id, Group group) {
-            return true;
-        }
-
-        @Override
-        public boolean endId(long id) {
-            return true;
-        }
-
-        @Override
-        public boolean endId(Object id, Group group) {
-            return true;
-        }
-
-        @Override
-        public boolean type(int type) {
-            return true;
-        }
-
-        @Override
-        public boolean type(String type) {
-            return true;
-        }
-
-        @Override
-        public boolean labelField(long labelField) {
-            return true;
-        }
-
-        @Override
-        public void endOfEntity() {}
-
-        @Override
-        public void reset() {}
-
-        @Override
-        public void close() {}
-    }
-
-    InputEntityVisitor NULL = new Adapter() { // empty
-            };
 }

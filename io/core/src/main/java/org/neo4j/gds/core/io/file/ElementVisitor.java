@@ -32,7 +32,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-abstract class ElementVisitor<PROPERTY_SCHEMA extends PropertySchema> extends InputEntityVisitor.Adapter implements Flushable {
+abstract class ElementVisitor<PROPERTY_SCHEMA extends PropertySchema> implements Flushable, InputEntityVisitor {
 
     private final Object[] currentProperties;
     private final ObjectObjectMap<String, List<PROPERTY_SCHEMA>> propertySchemas;

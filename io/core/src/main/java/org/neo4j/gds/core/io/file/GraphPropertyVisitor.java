@@ -23,5 +23,5 @@ import org.neo4j.gds.compat.batchimport.input.InputEntityVisitor;
 
 import java.io.Flushable;
 
-public abstract class GraphPropertyVisitor extends InputEntityVisitor.Adapter implements Flushable {
+public interface GraphPropertyVisitor extends Flushable, InputEntityVisitor {
 }
