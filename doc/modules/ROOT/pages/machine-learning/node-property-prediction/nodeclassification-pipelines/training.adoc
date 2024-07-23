@@ -231,17 +231,23 @@ CREATE
 ----
 
 With the graph in Neo4j we can now project it into the graph catalog to prepare it for the pipeline execution.
-We do this using a native projection targeting the `House` and `UnknownHouse` labels.
+We do this using a Cypher projection targeting the `House` and `UnknownHouse` labels.
 We will also project the `sizeOfStory` property to use as a model feature, and the `class` property to use as a target feature.
 
-.The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
+.The following statement will project a graph using a Cypher projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-project-query, group=nc]
 ----
-CALL gds.graph.project('myGraph', {
-    House: { properties: ['sizePerStory', 'class'] },
-    UnknownHouse: { properties: 'sizePerStory' }
-  },
-  '*'
+MATCH (house:House|UnknownHouse)
+RETURN gds.graph.project(
+  'myGraph',
+  house,
+  null,
+  {
+    sourceNodeLabels: labels(house),
+    targetNodeLabels: [],
+    sourceNodeProperties: house { .sizePerStory, .class },
+    targetNodeProperties: {}
+  }
 )
 ----
 
@@ -327,18 +333,23 @@ Much information in the original graph is not used.
 We might want to utilize more node and relationship types to generate node properties (and link features) and investigate whether it improves node classification.
 We can do that by passing in `contextNodeLabels` and `contextRelationshipTypes` when adding a node property step.
 
-The following statement will project a graph containing the information about houses and their painters using a native projection and store it in the graph catalog under the name 'paintingGraph'.
+The following statement will project a graph containing the information about houses and their painters using a Cypher projection and store it in the graph catalog under the name 'paintingGraph'.
 [source, cypher, role=noplay graph-project-query, group=nc]
 ----
-CALL gds.graph.project(
+MATCH (house:House)
+OPTIONAL MATCH (painter:Painter)-[r:PAINTED]->(house:House)
+RETURN gds.graph.project(
   'paintingGraph',
+  painter,
+  house,
   {
-    House: { properties: ['class'] },
-    Painter: {}
+    sourceNodeLabels: ['Painter'],
+    targetNodeLabels: ['House'],
+    sourceNodeProperties: {},
+    targetNodeProperties: house { .class },
+    relationshipType: 'PAINTED'
   },
-  {
-    PAINTED: {orientation: 'UNDIRECTED'}
-  }
+  { undirectedRelationshipTypes: ['PAINTED'] }
 )
 ----
 
