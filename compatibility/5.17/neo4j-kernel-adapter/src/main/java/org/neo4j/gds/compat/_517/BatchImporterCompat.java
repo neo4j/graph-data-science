@@ -69,21 +69,7 @@ public final class BatchImporterCompat {
 
     private BatchImporterCompat() {}
 
-    public static BatchImporter instantiateBlockBatchImporter(
-        DatabaseLayout dbLayout,
-        FileSystemAbstraction fileSystem,
-        ImportConfig config,
-        Monitor monitor,
-        LogService logService,
-        Config dbConfig,
-        JobScheduler jobScheduler,
-        Collector badCollector
-    ) {
-        throw new UnsupportedOperationException(
-            "GDS does not support block store format batch importer on this Neo4j version. Requires >= Neo4j 5.18.");
-    }
-
-    public static BatchImporter instantiateRecordBatchImporter(
+    static BatchImporter instantiateRecordBatchImporter(
         DatabaseLayout directoryStructure,
         FileSystemAbstraction fileSystem,
         ImportConfig config,
@@ -150,7 +136,7 @@ public final class BatchImporterCompat {
         }
     }
 
-    public static ExecutionMonitor newCoarseBoundedProgressExecutionMonitor(
+    static ExecutionMonitor newCoarseBoundedProgressExecutionMonitor(
         long highNodeId,
         long highRelationshipId,
         int batchSize,
@@ -652,22 +638,22 @@ public final class BatchImporterCompat {
         }
     }
 
-    public static ReadableGroups newGroups() {
+    static ReadableGroups newGroups() {
         return adaptReadableGroups(new Groups());
     }
 
-    public static ReadableGroups newInitializedGroups() {
+    static ReadableGroups newInitializedGroups() {
         var groups = new Groups();
         groups.getOrCreate(null);
         return adaptReadableGroups(groups);
     }
 
-    public static Collector emptyCollector() {
+    static Collector emptyCollector() {
         return CollectorAdapter.EMPTY;
     }
 
-    public static Collector badCollector(OutputStream outputStream, int batchSize) {
-        return new CollectorAdapter(Collectors.badCollector(outputStream, 0));
+    static Collector badCollector(OutputStream outputStream, int batchSize) {
+        return new CollectorAdapter(Collectors.badCollector(outputStream, batchSize));
     }
 
     private static final class CollectorAdapter implements Collector {

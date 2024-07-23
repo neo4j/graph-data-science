@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._521;
+package org.neo4j.gds.compat._518;
 
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.configuration.Config;
@@ -259,7 +259,7 @@ public final class BatchImporterCompat {
         return new ExecutionMonitor() {
 
             @Override
-            public org.neo4j.gds.compat.batchimport.Monitor toMonitor() {
+            public Monitor toMonitor() {
                 throw new UnsupportedOperationException("Cannot call  `toMonitor` on this one");
             }
 
@@ -461,11 +461,6 @@ public final class BatchImporterCompat {
         }
 
         @Override
-        public boolean properties(ByteBuffer byteBuffer, boolean b) {
-            return delegate.properties(byteBuffer, b);
-        }
-
-        @Override
         public boolean property(String s, Object o) {
             return delegate.property(s, o);
         }
@@ -558,7 +553,7 @@ public final class BatchImporterCompat {
 
         @Override
         public boolean properties(ByteBuffer properties, boolean offloaded) {
-            return delegate.properties(properties, offloaded);
+            throw new UnsupportedOperationException("Method is not available on Neo4j 5.17");
         }
 
         @Override

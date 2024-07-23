@@ -70,16 +70,8 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         JobScheduler jobScheduler,
         Collector badCollector
     ) {
-        return BatchImporterCompat.instantiateBlockBatchImporter(
-            dbLayout,
-            fileSystem,
-            config,
-            monitor,
-            logService,
-            dbConfig,
-            jobScheduler,
-            badCollector
-        );
+        throw new UnsupportedOperationException(
+            "GDS does not support block store format batch importer on this Neo4j version. Requires >= Neo4j 5.18.");
     }
 
     @Override
@@ -125,6 +117,11 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     @Override
     public ReadableGroups newGroups() {
         return BatchImporterCompat.newGroups();
+    }
+
+    @Override
+    public ReadableGroups newInitializedGroups() {
+        return BatchImporterCompat.newInitializedGroups();
     }
 
     @Override
@@ -231,7 +228,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         boolean internal,
         boolean threadSafe
     ) {
-        String category = null;      // No predefined categpry (like temporal or math)
+        String category = null;      // No predefined category (like temporal or math)
         var caseInsensitive = false; // case sensitive name match
         var isBuiltIn = false;       // is built in; never true for GDS
         var deprecated = deprecatedBy.filter(not(String::isEmpty));

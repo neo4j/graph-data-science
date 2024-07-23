@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._521;
+package org.neo4j.gds.compat._522;
 
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.configuration.Config;
@@ -259,7 +259,7 @@ public final class BatchImporterCompat {
         return new ExecutionMonitor() {
 
             @Override
-            public org.neo4j.gds.compat.batchimport.Monitor toMonitor() {
+            public Monitor toMonitor() {
                 throw new UnsupportedOperationException("Cannot call  `toMonitor` on this one");
             }
 

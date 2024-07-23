@@ -239,7 +239,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         boolean internal,
         boolean threadSafe
     ) {
-        String category = null;      // No predefined categpry (like temporal or math)
+        String category = null;      // No predefined category (like temporal or math)
         var caseInsensitive = false; // case sensitive name match
         var isBuiltIn = false;       // is built in; never true for GDS
         var deprecated = deprecatedBy.filter(not(String::isEmpty));

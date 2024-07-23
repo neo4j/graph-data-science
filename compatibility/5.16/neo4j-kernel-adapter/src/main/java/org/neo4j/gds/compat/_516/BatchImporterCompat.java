@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._521;
+package org.neo4j.gds.compat._516;
 
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.configuration.Config;
@@ -56,111 +56,18 @@ import org.neo4j.logging.internal.LogService;
 import org.neo4j.memory.EmptyMemoryTracker;
 import org.neo4j.memory.MemoryTracker;
 import org.neo4j.scheduler.JobScheduler;
-import org.neo4j.storageengine.api.StorageEngineFactory;
 import org.neo4j.token.TokenHolders;
 import org.neo4j.values.storable.Value;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintStream;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.function.LongConsumer;
 
 public final class BatchImporterCompat {
 
     private BatchImporterCompat() {}
-
-    static BatchImporter instantiateBlockBatchImporter(
-        DatabaseLayout dbLayout,
-        FileSystemAbstraction fileSystem,
-        ImportConfig config,
-        Monitor monitor,
-        LogService logService,
-        Config dbConfig,
-        JobScheduler jobScheduler,
-        Collector badCollector
-    ) {
-        var storageEngineFactory = StorageEngineFactory.selectStorageEngine(dbConfig);
-        var progressOutput = new PrintStream(PrintStream.nullOutputStream(), true, StandardCharsets.UTF_8);
-        var verboseProgressOutput = false;
-
-        var importer = storageEngineFactory.batchImporter(
-            dbLayout,
-            fileSystem,
-            PageCacheTracer.NULL,
-            new ConfigurationAdapter(config),
-            logService,
-            progressOutput,
-            verboseProgressOutput,
-            AdditionalInitialIds.EMPTY,
-            dbConfig,
-            new MonitorAdapter(monitor),
-            jobScheduler,
-            badCollector != null ? ((CollectorAdapter) badCollector).inner : null,
-            TransactionLogInitializer.getLogFilesInitializer(),
-            new IndexImporterFactoryImpl(),
-            EmptyMemoryTracker.INSTANCE,
-            CursorContextFactory.NULL_CONTEXT_FACTORY
-        );
-        return new BatchImporterReverseAdapter(importer);
-    }
-
-    private static final class MonitorAdapter implements org.neo4j.internal.batchimport.Monitor {
-        private final Monitor delegate;
-
-        private MonitorAdapter(Monitor delegate) {this.delegate = delegate;}
-
-        @Override
-        public void doubleRelationshipRecordUnitsEnabled() {
-            delegate.doubleRelationshipRecordUnitsEnabled();
-        }
-
-        @Override
-        public void mayExceedNodeIdCapacity(long capacity, long estimatedCount) {
-            delegate.mayExceedNodeIdCapacity(capacity, estimatedCount);
-        }
-
-        @Override
-        public void mayExceedRelationshipIdCapacity(long capacity, long estimatedCount) {
-            delegate.mayExceedRelationshipIdCapacity(capacity, estimatedCount);
-        }
-
-        @Override
-        public void insufficientHeapSize(long optimalMinimalHeapSize, long heapSize) {
-            delegate.insufficientHeapSize(optimalMinimalHeapSize, heapSize);
-        }
-
-        @Override
-        public void abundantHeapSize(long optimalMinimalHeapSize, long heapSize) {
-            delegate.abundantHeapSize(optimalMinimalHeapSize, heapSize);
-        }
-
-        @Override
-        public void insufficientAvailableMemory(
-            long estimatedCacheSize,
-            long optimalMinimalHeapSize,
-            long availableMemory
-        ) {
-            delegate.insufficientAvailableMemory(estimatedCacheSize, optimalMinimalHeapSize, availableMemory);
-        }
-
-        @Override
-        public void started() {
-            delegate.started();
-        }
-
-        @Override
-        public void percentageCompleted(int percentage) {
-            delegate.percentageCompleted(percentage);
-        }
-
-        @Override
-        public void completed(boolean success) {
-            delegate.completed(success);
-        }
-    }
 
     static BatchImporter instantiateRecordBatchImporter(
         DatabaseLayout directoryStructure,
@@ -259,7 +166,7 @@ public final class BatchImporterCompat {
         return new ExecutionMonitor() {
 
             @Override
-            public org.neo4j.gds.compat.batchimport.Monitor toMonitor() {
+            public Monitor toMonitor() {
                 throw new UnsupportedOperationException("Cannot call  `toMonitor` on this one");
             }
 
@@ -461,11 +368,6 @@ public final class BatchImporterCompat {
         }
 
         @Override
-        public boolean properties(ByteBuffer byteBuffer, boolean b) {
-            return delegate.properties(byteBuffer, b);
-        }
-
-        @Override
         public boolean property(String s, Object o) {
             return delegate.property(s, o);
         }
@@ -558,7 +460,7 @@ public final class BatchImporterCompat {
 
         @Override
         public boolean properties(ByteBuffer properties, boolean offloaded) {
-            return delegate.properties(properties, offloaded);
+            throw new UnsupportedOperationException("Method is not available on Neo4j 5.17");
         }
 
         @Override
