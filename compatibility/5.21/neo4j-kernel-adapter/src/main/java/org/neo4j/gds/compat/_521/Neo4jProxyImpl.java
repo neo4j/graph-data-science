@@ -129,6 +129,11 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
+    public ReadableGroups newInitializedGroups() {
+        return BatchImporterCompat.newInitializedGroups();
+    }
+
+    @Override
     public Collector emptyCollector() {
         return BatchImporterCompat.emptyCollector();
     }
