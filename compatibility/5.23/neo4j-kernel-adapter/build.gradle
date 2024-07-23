@@ -17,6 +17,9 @@ dependencies {
             transitive = false
         }
     }
+    compileOnly(group: 'org.neo4j', name: 'neo4j-import-api', version: neos.'5.23') {
+        transitive = false
+    }
 
     implementation project(':neo4j-kernel-adapter-api')
 }
