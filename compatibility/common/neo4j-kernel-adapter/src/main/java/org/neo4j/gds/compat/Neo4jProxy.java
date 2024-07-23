@@ -33,6 +33,7 @@ import org.neo4j.gds.compat.batchimport.BatchImporter;
 import org.neo4j.gds.compat.batchimport.ExecutionMonitor;
 import org.neo4j.gds.compat.batchimport.ImportConfig;
 import org.neo4j.gds.compat.batchimport.input.Collector;
+import org.neo4j.gds.compat.batchimport.input.Estimates;
 import org.neo4j.gds.compat.batchimport.input.ReadableGroups;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -417,6 +418,26 @@ public final class Neo4jProxy {
 
     public static Collector badCollector(OutputStream log, int batchSize) {
         return IMPL.badCollector(log, batchSize);
+    }
+
+    public static Estimates knownEstimates(
+        long numberOfNodes,
+        long numberOfRelationships,
+        long numberOfNodeProperties,
+        long numberOfRelationshipProperties,
+        long sizeOfNodeProperties,
+        long sizeOfRelationshipProperties,
+        long numberOfNodeLabels
+    ) {
+        return IMPL.knownEstimates(
+            numberOfNodes,
+            numberOfRelationships,
+            numberOfNodeProperties,
+            numberOfRelationshipProperties,
+            sizeOfNodeProperties,
+            sizeOfRelationshipProperties,
+            numberOfNodeLabels
+        );
     }
 
     private static final class BlockFormat {

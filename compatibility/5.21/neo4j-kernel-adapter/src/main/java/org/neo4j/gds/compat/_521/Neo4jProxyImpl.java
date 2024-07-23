@@ -29,6 +29,7 @@ import org.neo4j.gds.compat.batchimport.ExecutionMonitor;
 import org.neo4j.gds.compat.batchimport.ImportConfig;
 import org.neo4j.gds.compat.batchimport.Monitor;
 import org.neo4j.gds.compat.batchimport.input.Collector;
+import org.neo4j.gds.compat.batchimport.input.Estimates;
 import org.neo4j.gds.compat.batchimport.input.ReadableGroups;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
@@ -141,6 +142,27 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     @Override
     public Collector badCollector(OutputStream outputStream, int batchSize) {
         return BatchImporterCompat.badCollector(outputStream, batchSize);
+    }
+
+    @Override
+    public Estimates knownEstimates(
+        long numberOfNodes,
+        long numberOfRelationships,
+        long numberOfNodeProperties,
+        long numberOfRelationshipProperties,
+        long sizeOfNodeProperties,
+        long sizeOfRelationshipProperties,
+        long numberOfNodeLabels
+    ) {
+        return BatchImporterCompat.knownEstimates(
+            numberOfNodes,
+            numberOfRelationships,
+            numberOfNodeProperties,
+            numberOfRelationshipProperties,
+            sizeOfNodeProperties,
+            sizeOfRelationshipProperties,
+            numberOfNodeLabels
+        );
     }
 
     @Override

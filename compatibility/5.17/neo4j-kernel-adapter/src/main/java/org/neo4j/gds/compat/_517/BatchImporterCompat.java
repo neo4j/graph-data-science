@@ -28,12 +28,12 @@ import org.neo4j.gds.compat.batchimport.InputIterable;
 import org.neo4j.gds.compat.batchimport.InputIterator;
 import org.neo4j.gds.compat.batchimport.Monitor;
 import org.neo4j.gds.compat.batchimport.input.Collector;
+import org.neo4j.gds.compat.batchimport.input.Estimates;
 import org.neo4j.gds.compat.batchimport.input.Group;
 import org.neo4j.gds.compat.batchimport.input.IdType;
 import org.neo4j.gds.compat.batchimport.input.Input;
 import org.neo4j.gds.compat.batchimport.input.InputChunk;
 import org.neo4j.gds.compat.batchimport.input.InputEntityVisitor;
-import org.neo4j.gds.compat.batchimport.input.PropertySizeCalculator;
 import org.neo4j.gds.compat.batchimport.input.ReadableGroups;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
@@ -42,10 +42,8 @@ import org.neo4j.internal.batchimport.input.Collectors;
 import org.neo4j.internal.batchimport.input.Groups;
 import org.neo4j.internal.batchimport.staging.CoarseBoundedProgressExecutionMonitor;
 import org.neo4j.internal.batchimport.staging.StageExecution;
-import org.neo4j.internal.schema.SchemaDescriptor;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
-import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.io.pagecache.context.CursorContextFactory;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
@@ -53,14 +51,10 @@ import org.neo4j.kernel.impl.transaction.log.EmptyLogTailMetadata;
 import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.memory.EmptyMemoryTracker;
-import org.neo4j.memory.MemoryTracker;
 import org.neo4j.scheduler.JobScheduler;
-import org.neo4j.token.TokenHolders;
-import org.neo4j.values.storable.Value;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Map;
 import java.util.function.LongConsumer;
 
 public final class BatchImporterCompat {
@@ -90,7 +84,7 @@ public final class BatchImporterCompat {
                 dbConfig,
                 org.neo4j.internal.batchimport.Monitor.NO_MONITOR,
                 jobScheduler,
-                badCollector != null ? ((CollectorAdapter) badCollector).inner : null,
+                badCollector != null ? ((CollectorAdapter) badCollector).delegate : null,
                 TransactionLogInitializer.getLogFilesInitializer(),
                 new IndexImporterFactoryImpl(),
                 EmptyMemoryTracker.INSTANCE,
@@ -271,14 +265,7 @@ public final class BatchImporterCompat {
         @Override
         public Estimates calculateEstimates(org.neo4j.internal.batchimport.input.PropertySizeCalculator propertySizeCalculator)
         throws IOException {
-            return adaptEstimates(delegate.calculateEstimates(
-                new PropertySizeCalculatorReverseAdapter(propertySizeCalculator)
-            ));
-        }
-
-        @Override
-        public Map<String, SchemaDescriptor> referencedNodeSchema(TokenHolders tokenHolders) {
-            return delegate.referencedNodeSchema(tokenHolders);
+            return adaptEstimates(delegate.calculateEstimates());
         }
 
         @Override
@@ -458,27 +445,10 @@ public final class BatchImporterCompat {
         }
     }
 
-    private static org.neo4j.internal.batchimport.input.Input.Estimates adaptEstimates(Input.Estimates estimates) {
-        return new org.neo4j.internal.batchimport.input.Input.Estimates(
-            estimates.numberOfNodes(),
-            estimates.numberOfRelationships(),
-            estimates.numberOfNodeProperties(),
-            estimates.numberOfRelationshipProperties(),
-            estimates.sizeOfNodeProperties(),
-            estimates.sizeOfRelationshipProperties(),
-            estimates.numberOfNodeLabels()
-        );
-    }
-
-    private static final class PropertySizeCalculatorReverseAdapter implements PropertySizeCalculator {
-        private final org.neo4j.internal.batchimport.input.PropertySizeCalculator delegate;
-
-        PropertySizeCalculatorReverseAdapter(org.neo4j.internal.batchimport.input.PropertySizeCalculator delegate) {this.delegate = delegate;}
-
-        @Override
-        public int calculateSize(Value[] values, CursorContext cursorContext, MemoryTracker memoryTracker) {
-            return delegate.calculateSize(values, cursorContext, memoryTracker);
-        }
+    private static org.neo4j.internal.batchimport.input.Input.Estimates adaptEstimates(Estimates estimates) {
+        return estimates == null || estimates == Estimates.NULL
+            ? NULL_ESTIMATES
+            : ((EstimatesAdapter) estimates).delegate;
     }
 
     static ReadableGroups newGroups() {
@@ -502,10 +472,46 @@ public final class BatchImporterCompat {
     private static final class CollectorAdapter implements Collector {
         private static final Collector EMPTY = new CollectorAdapter(org.neo4j.internal.batchimport.input.Collector.EMPTY);
 
-        private final org.neo4j.internal.batchimport.input.Collector inner;
+        private final org.neo4j.internal.batchimport.input.Collector delegate;
 
-        CollectorAdapter(org.neo4j.internal.batchimport.input.Collector inner) {
-            this.inner = inner;
+        CollectorAdapter(org.neo4j.internal.batchimport.input.Collector delegate) {
+            this.delegate = delegate;
+        }
+    }
+
+    private static final org.neo4j.internal.batchimport.input.Input.Estimates NULL_ESTIMATES =
+        org.neo4j.internal.batchimport.input.Input.knownEstimates(0, 0, 0, 0, 0, 0, 0);
+
+    static Estimates knownEstimates(
+        long numberOfNodes,
+        long numberOfRelationships,
+        long numberOfNodeProperties,
+        long numberOfRelationshipProperties,
+        long sizeOfNodeProperties,
+        long sizeOfRelationshipProperties,
+        long numberOfNodeLabels
+    ) {
+        if (numberOfNodes == 0 && numberOfRelationships == 0 && numberOfNodeProperties == 0
+            && numberOfRelationshipProperties == 0 && sizeOfNodeProperties == 0 && sizeOfRelationshipProperties == 0
+            && numberOfNodeLabels == 0) {
+            return Estimates.NULL;
+        }
+        return new EstimatesAdapter(org.neo4j.internal.batchimport.input.Input.knownEstimates(
+            numberOfNodes,
+            numberOfRelationships,
+            numberOfNodeProperties,
+            numberOfRelationshipProperties,
+            sizeOfNodeProperties,
+            sizeOfRelationshipProperties,
+            numberOfNodeLabels
+        ));
+    }
+
+    private static final class EstimatesAdapter implements Estimates {
+        private final org.neo4j.internal.batchimport.input.Input.Estimates delegate;
+
+        EstimatesAdapter(org.neo4j.internal.batchimport.input.Input.Estimates delegate) {
+            this.delegate = delegate;
         }
     }
 }

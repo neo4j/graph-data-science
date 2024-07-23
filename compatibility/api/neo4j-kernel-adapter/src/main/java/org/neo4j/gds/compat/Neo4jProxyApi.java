@@ -26,6 +26,7 @@ import org.neo4j.gds.compat.batchimport.ExecutionMonitor;
 import org.neo4j.gds.compat.batchimport.ImportConfig;
 import org.neo4j.gds.compat.batchimport.Monitor;
 import org.neo4j.gds.compat.batchimport.input.Collector;
+import org.neo4j.gds.compat.batchimport.input.Estimates;
 import org.neo4j.gds.compat.batchimport.input.ReadableGroups;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
@@ -137,17 +138,22 @@ public interface Neo4jProxyApi {
     ReadableGroups newGroups();
 
     @CompatSince(minor = 23)
-    default ReadableGroups newInitializedGroups() {
-        throw new UnsupportedOperationException(
-            "`org.neo4j.gds.compat._519.Neo4jProxyApi.newInitializedGroups` is not yet implemented.");
-    }
+    ReadableGroups newInitializedGroups();
 
     @CompatSince(minor = 23)
-    default Collector emptyCollector() {
-        throw new UnsupportedOperationException(
-            "`org.neo4j.gds.compat._519.Neo4jProxyApi.emptyCollector` is not yet implemented.");
-    }
+    Collector emptyCollector();
 
     @CompatSince(minor = 23)
     Collector badCollector(OutputStream outputStream, int batchSize);
+
+    @CompatSince(minor = 23)
+    Estimates knownEstimates(
+        long numberOfNodes,
+        long numberOfRelationships,
+        long numberOfNodeProperties,
+        long numberOfRelationshipProperties,
+        long sizeOfNodeProperties,
+        long sizeOfRelationshipProperties,
+        long numberOfNodeLabels
+    );
 }

@@ -29,11 +29,11 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.batchimport.InputIterable;
 import org.neo4j.gds.compat.batchimport.InputIterator;
+import org.neo4j.gds.compat.batchimport.input.Estimates;
 import org.neo4j.gds.compat.batchimport.input.IdType;
 import org.neo4j.gds.compat.batchimport.input.Input;
 import org.neo4j.gds.compat.batchimport.input.InputChunk;
 import org.neo4j.gds.compat.batchimport.input.InputEntityVisitor;
-import org.neo4j.gds.compat.batchimport.input.PropertySizeCalculator;
 import org.neo4j.gds.compat.batchimport.input.ReadableGroups;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.io.GraphStoreExporter.IdMapFunction;
@@ -193,11 +193,11 @@ public final class GraphStoreInput implements Input {
     }
 
     @Override
-    public Input.Estimates calculateEstimates(PropertySizeCalculator propertySizeCalculator) {
+    public Estimates calculateEstimates() {
         long numberOfNodeProperties = nodeStore.propertyCount();
         long numberOfRelationshipProperties = relationshipStore.propertyCount();
 
-        return Input.knownEstimates(
+        return Neo4jProxy.knownEstimates(
             nodeStore.nodeCount,
             relationshipStore.relationshipCount,
             numberOfNodeProperties,

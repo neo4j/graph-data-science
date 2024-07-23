@@ -20,40 +20,13 @@
 package org.neo4j.gds.compat.batchimport.input;
 
 import org.neo4j.gds.compat.batchimport.InputIterable;
-import org.neo4j.internal.schema.SchemaDescriptor;
-import org.neo4j.token.TokenHolders;
 
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * Unifies all data input given to a {@link org.neo4j.gds.compat.batchimport.BatchImporter} to allow for more coherent implementations.
  */
 public interface Input extends AutoCloseable {
-    /**
-     * @param numberOfNodes estimated number of nodes for the entire input.
-     * @param numberOfRelationships estimated number of relationships for the entire input.
-     * @param numberOfNodeProperties estimated number of node properties.
-     * @param numberOfRelationshipProperties estimated number of relationship properties.
-     * @param sizeOfNodeProperties estimated size that the estimated number of node properties will require on disk.
-     * This is a separate estimate since it depends on the type and size of the actual properties.
-     * @param sizeOfRelationshipProperties estimated size that the estimated number of relationship properties will require on disk.
-     * This is a separate estimate since it depends on the type and size of the actual properties.
-     * @param numberOfNodeLabels estimated number of node labels. Examples:
-     * <ul>
-     * <li>2 nodes, 1 label each ==> 2</li>
-     * <li>1 node, 2 labels each ==> 2</li>
-     * <li>2 nodes, 2 labels each ==> 4</li>
-     * </ul>
-     */
-    record Estimates(
-            long numberOfNodes,
-            long numberOfRelationships,
-            long numberOfNodeProperties,
-            long numberOfRelationshipProperties,
-            long sizeOfNodeProperties,
-            long sizeOfRelationshipProperties,
-            long numberOfNodeLabels) {}
 
     /**
      * Provides all node data for an import.
@@ -82,38 +55,11 @@ public interface Input extends AutoCloseable {
     ReadableGroups groups();
 
     /**
-     * @param valueSizeCalculator for calculating property sizes on disk.
      * @return {@link Estimates} for this input w/o reading through it entirely.
      * @throws IOException on I/O error.
      */
-    Estimates calculateEstimates(PropertySizeCalculator valueSizeCalculator) throws IOException;
-
-    /**
-     * @return a {@link Map} where key is group name and value which {@link SchemaDescriptor index} it refers to.
-     * @param tokenHolders available tokens.
-     */
-    default Map<String, SchemaDescriptor> referencedNodeSchema(TokenHolders tokenHolders) {
-        throw new UnsupportedOperationException();
-    }
+    Estimates calculateEstimates() throws IOException;
 
     @Override
     default void close() {}
-
-    public static Estimates knownEstimates(
-            long numberOfNodes,
-            long numberOfRelationships,
-            long numberOfNodeProperties,
-            long numberOfRelationshipProperties,
-            long sizeOfNodeProperties,
-            long sizeOfRelationshipProperties,
-            long numberOfNodeLabels) {
-        return new Estimates(
-                numberOfNodes,
-                numberOfRelationships,
-                numberOfNodeProperties,
-                numberOfRelationshipProperties,
-                sizeOfNodeProperties,
-                sizeOfRelationshipProperties,
-                numberOfNodeLabels);
-    }
 }
