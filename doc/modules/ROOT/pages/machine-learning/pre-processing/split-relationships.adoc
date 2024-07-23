@@ -123,10 +123,17 @@ Negative relationships will be randomly generated, i.e., they do not exist in th
 
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
-    'graph',
-    'Label',
-    { TYPE: { orientation: 'UNDIRECTED' } }
+MATCH (source:Label)-[r:TYPE]->(target:Label)
+RETURN gds.graph.project(
+  'graph',
+  source,
+  target,
+  {
+    sourceNodeLabels: ['Label'],
+    targetNodeLabels: ['Label'],
+    relationshipType: 'TYPE'
+  },
+  { undirectedRelationshipTypes: ['TYPE'] }
 )
 ----
 
