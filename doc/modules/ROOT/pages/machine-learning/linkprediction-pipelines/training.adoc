@@ -313,23 +313,19 @@ We explicitly pass in `sourceNodeLabel` and `targetNodeLabel` to specify a narro
 The following statement will project the full graph using a Cypher projection and store it in the graph catalog under the name 'fullGraph'.
 [source, cypher, role=noplay graph-project-query, group=lp]
 ----
-CALL gds.graph.project(
+MATCH (source:Person)-[r:KNOWS|LIVES|BORN]->(target:Person|City)
+RETURN gds.graph.project(
   'fullGraph',
+  source,
+  target,
   {
-    Person: {
-      properties: {age: {defaultValue: 1}}
-    },
-    City: {
-      properties: {age: {defaultValue: 1}}
-    }
+    sourceNodeLabels: labels(source),
+    targetNodeLabels: labels(target),
+    sourceNodeProperties: source { age: coalesce(source.age, 1) },
+    targetNodeProperties: target { age: coalesce(target.age, 1) },
+    relationshipType: type(r)
   },
-  {
-    KNOWS: {
-      orientation: 'UNDIRECTED'
-    },
-    LIVES: {},
-    BORN: {}
-  }
+  { undirectedRelationshipTypes: ['KNOWS'] }
 )
 ----
 
