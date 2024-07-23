@@ -317,11 +317,15 @@ Thus we use a star projection ('*') for relationships.
 .The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
+MATCH (hotel:Hotel)
+RETURN gds.graph.project(
   'myGraph',
-  'Hotel',
-  '*',
-  { nodeProperties: ['avgReview', 'buildYear', 'storyCapacity'] }
+  hotel,
+  null,
+  {
+    sourceNodeProperties: hotel { .avgReview, .buildYear, .storyCapacity },
+    targetNodeProperties: {}
+  }
 )
 ----
 
