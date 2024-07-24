@@ -42,8 +42,6 @@ import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.impl.factory.DbmsInfo;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -245,20 +243,6 @@ public final class GraphDatabaseApiProxy {
 
     private GraphDatabaseApiProxy() {
         throw new UnsupportedOperationException("No instances");
-    }
-
-    public static int arrowListenPort(GraphDatabaseService db) {
-        try {
-            // resolve listenPort through ArrowServer, as internal.arrow.status only returns the configured port
-            // using reflection as this class only exists for Neo4j >= 5.14
-            var arrowServerClass = Class.forName("com.neo4j.arrow.ArrowServer");
-            Method listenPortMethod = arrowServerClass.getMethod("listenPort");
-            Object arrowServer = GraphDatabaseApiProxy.resolveDependency(db, arrowServerClass);
-            return (int) listenPortMethod.invoke(arrowServer);
-        } catch (ClassNotFoundException | IllegalAccessException | InvocationTargetException |
-                 NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private static void rethrowUnlessDuplicateRegistration(ProcedureException e) throws KernelException {
