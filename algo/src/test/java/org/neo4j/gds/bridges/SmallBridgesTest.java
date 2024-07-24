@@ -19,15 +19,24 @@
  */
 package org.neo4j.gds.bridges;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.logging.GdsTestLog;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 @GdlExtension
 class SmallBridgesTest {
@@ -57,7 +66,7 @@ class SmallBridgesTest {
 
         @Test
         void shouldFindBridges() {
-            var bridges = new Bridges(graph);
+            var bridges = new Bridges(graph, ProgressTracker.NULL_TRACKER);
             var result = bridges.compute().bridges();
 
             assertThat(result)
@@ -67,6 +76,31 @@ class SmallBridgesTest {
                      Bridge.create(graph.toMappedNodeId("d"), graph.toMappedNodeId("e"))
                 );
         }
+
+        @Test
+        void shouldLogProgress(){
+
+            var progressTask = BridgeProgressTaskCreator.progressTask(graph);
+            var log = new GdsTestLog();
+            var progressTracker = new TaskProgressTracker(progressTask, log, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+
+            var bridges = new Bridges(graph, progressTracker);
+            bridges.compute();
+
+            Assertions.assertThat(log.getMessages(TestLog.INFO))
+                .extracting(removingThreadId())
+                .extracting(replaceTimings())
+                .containsExactly(
+                    "Bridges :: Start",
+                    "Bridges 20%",
+                    "Bridges 40%",
+                    "Bridges 60%",
+                    "Bridges 80%",
+                    "Bridges 100%",
+                    "Bridges :: Finished"
+                );
+        }
+
     }
 
     @GdlExtension
@@ -96,7 +130,7 @@ class SmallBridgesTest {
 
         @Test
         void shouldFindBridges() {
-            var bridges = new Bridges(graph);
+            var bridges = new Bridges(graph,ProgressTracker.NULL_TRACKER);
             var result = bridges.compute().bridges();
 
             assertThat(result)

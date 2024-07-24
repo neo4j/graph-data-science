@@ -21,6 +21,7 @@ package org.neo4j.gds.bridges;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -80,7 +81,7 @@ class BridgesLargestTest {
 
     @Test
     void shouldFindAllBridges() {
-        var bridges = new Bridges(graph);
+        var bridges = new Bridges(graph, ProgressTracker.NULL_TRACKER);
 
         var result = bridges.compute().bridges().stream()
             .map(b -> new Bridge(

@@ -38,10 +38,11 @@ public class Bridges extends Algorithm<BridgeResult> {
     private final HugeLongArray low;
     private long timer;
     private long stackIndex = -1;
+    private List<Bridge> result = new ArrayList<>();
 
-    List<Bridge> result = new ArrayList<>();
-    public Bridges(Graph graph){
-        super(ProgressTracker.NULL_TRACKER);
+    public Bridges(Graph graph, ProgressTracker progressTracker){
+        super(progressTracker);
+
         this.graph = graph;
         this.visited = new BitSet(graph.nodeCount());
         this.tin = HugeLongArray.newArray(graph.nodeCount());
@@ -54,28 +55,29 @@ public class Bridges extends Algorithm<BridgeResult> {
         visited.clear();
         tin.setAll(__ -> -1);
         low.setAll(__ -> -1);
-
+        progressTracker.beginSubTask("Bridges");
         //each edge may have at most one event to the stack at the same time
         var stack = HugeObjectArray.newArray(StackEvent.class, graph.relationshipCount());
 
         var n = graph.nodeCount();
         for (int i = 0; i < n; ++i) {
             if (!visited.get(i))
-                dfs(new StackEvent(i, -1, false), stack);
+                dfs(i, stack);
         }
-
+        progressTracker.endSubTask("Bridges");
         return new BridgeResult(result);
 
     }
 
 
 
-    private void dfs(StackEvent event, HugeObjectArray<StackEvent> stack) {
-        stack.set(++stackIndex, event);
+    private void dfs(long node, HugeObjectArray<StackEvent> stack) {
+        stack.set(++stackIndex, StackEvent.upcomingVisit(node,-1));
         while (stackIndex >= 0) {
             var stackEvent = stack.get(stackIndex--);
             visitEvent(stackEvent, stack);
         }
+        progressTracker.logProgress();
     }
 
     private void visitEvent(StackEvent event, HugeObjectArray<StackEvent> stack) {
@@ -89,7 +91,7 @@ public class Bridges extends Algorithm<BridgeResult> {
             if (lowTo > tinV) {
                 result.add(new Bridge(v, to));
             }
-
+            progressTracker.logProgress();
             return;
         }
 
@@ -113,6 +115,7 @@ public class Bridges extends Algorithm<BridgeResult> {
 
                 return true;
             });
+
         } else {
             long v = event.triggerNode();
             long to = event.eventNode();
