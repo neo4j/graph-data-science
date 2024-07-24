@@ -29,6 +29,8 @@ import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
+import org.neo4j.gds.bridges.Bridge;
+import org.neo4j.gds.bridges.BridgesStreamConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityStatsConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityStreamConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
@@ -387,6 +389,8 @@ public final class CentralityProcedureFacade {
         return Stream.of(result);
     }
 
+
+
     public Stream<CentralityWriteResult> betweennessCentralityWrite(
         String graphNameAsString,
         Map<String, Object> rawConfiguration
@@ -411,6 +415,37 @@ public final class CentralityProcedureFacade {
             algorithmConfiguration,
             BetweennessCentralityWriteConfig::of,
             configuration -> estimationMode().betweennessCentrality(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<Bridge> bridgesStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new BridgesResultBuilderForStreamMode();
+
+        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+            graphName,
+            configuration,
+            BridgesStreamConfig::of,
+            streamMode()::bridges,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> bridgesStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            BridgesStreamConfig::of,
+            configuration -> estimationMode().bridges(
                 configuration,
                 graphNameOrConfiguration
             )

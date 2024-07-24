@@ -23,6 +23,8 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTempla
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityMemoryEstimateDefinition;
+import org.neo4j.gds.bridges.BridgesBaseConfig;
+import org.neo4j.gds.bridges.BridgesMemoryEstimateDefinition;
 import org.neo4j.gds.closeness.ClosenessCentralityBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.degree.DegreeCentralityAlgorithmEstimateDefinition;
@@ -50,6 +52,19 @@ public class CentralityAlgorithmsEstimationModeBusinessFacade {
         Object graphNameOrConfiguration
     ) {
         var memoryEstimation = betweennessCentrality(configuration);
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
+        );
+    }
+     MemoryEstimation bridges() {
+        return new BridgesMemoryEstimateDefinition().memoryEstimation();
+    }
+
+    public MemoryEstimateResult bridges(BridgesBaseConfig configuration, Object graphNameOrConfiguration) {
+        var memoryEstimation = bridges();
 
         return algorithmEstimationTemplate.estimate(
             configuration,

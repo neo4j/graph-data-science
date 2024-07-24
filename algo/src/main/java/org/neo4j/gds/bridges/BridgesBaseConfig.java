@@ -19,7 +19,32 @@
  */
 package org.neo4j.gds.bridges;
 
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 
+import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 public interface BridgesBaseConfig extends AlgoBaseConfig {
+
+    @Configuration.GraphStoreValidationCheck
+    default void validateTargetRelIsUndirected(
+        GraphStore graphStore,
+        Collection<NodeLabel> ignored,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        if (!graphStore.schema().filterRelationshipTypes(Set.copyOf(selectedRelationshipTypes)).isUndirected()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Bridges requires relationship projections to be UNDIRECTED. " +
+                    "Selected relationships `%s` are not all undirected.",
+                selectedRelationshipTypes.stream().map(RelationshipType::name).collect(Collectors.toSet())
+            ));
+        }
+    }
 }
