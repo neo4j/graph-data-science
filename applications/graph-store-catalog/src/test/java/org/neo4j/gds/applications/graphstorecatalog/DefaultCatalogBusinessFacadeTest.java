@@ -37,31 +37,10 @@ class DefaultCatalogBusinessFacadeTest {
     @Test
     void shouldDetermineGraphExists() {
         var service = mock(GraphStoreCatalogService.class);
-        var facade = new DefaultCatalogBusinessFacade(
-            null,
-            service,
-            null,
-            new GraphNameValidationService(),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+        var facade = new DefaultCatalogBusinessFacadeBuilder()
+            .withGraphStoreCatalogService(service)
+            .withGraphNameValidationService(new GraphNameValidationService())
+            .build();
 
         when(service.graphExists(
             new User("someUser", false),
@@ -76,31 +55,10 @@ class DefaultCatalogBusinessFacadeTest {
     @Test
     void shouldDetermineGraphDoesNotExist() {
         var service = mock(GraphStoreCatalogService.class);
-        var facade = new DefaultCatalogBusinessFacade(
-            null,
-            service,
-            null,
-            new GraphNameValidationService(),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+        var facade = new DefaultCatalogBusinessFacadeBuilder()
+            .withGraphStoreCatalogService(service)
+            .withGraphNameValidationService(new GraphNameValidationService())
+            .build();
 
         when(service.graphExists(
             new User("someUser", false),
@@ -119,31 +77,10 @@ class DefaultCatalogBusinessFacadeTest {
     @Test
     void shouldValidateInputGraphName() {
         var service = mock(GraphStoreCatalogService.class);
-        var facade = new DefaultCatalogBusinessFacade(
-            null,
-            service,
-            null,
-            new GraphNameValidationService(),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+        var facade = new DefaultCatalogBusinessFacadeBuilder()
+            .withGraphStoreCatalogService(service)
+            .withGraphNameValidationService(new GraphNameValidationService())
+            .build();
 
         assertThatThrownBy(
             () -> facade.graphExists(new User("someUser", false), DatabaseId.of("someDatabase"), "   ")
@@ -153,31 +90,9 @@ class DefaultCatalogBusinessFacadeTest {
     @Test
     void shouldUseStrictValidationWhenProjecting() {
         var validationService = mock(GraphNameValidationService.class);
-        var facade = new DefaultCatalogBusinessFacade(
-            null,
-            null,
-            null,
-            validationService,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+        var facade = new DefaultCatalogBusinessFacadeBuilder()
+            .withGraphNameValidationService(validationService)
+            .build();
 
         when(validationService.validateStrictly("   some graph   "))
             .thenThrow(new IllegalArgumentException("whitespace!"));
@@ -222,31 +137,10 @@ class DefaultCatalogBusinessFacadeTest {
      */
     @Test
     void shouldHandleNullsInNativeProjectParameters() {
-        var facade = new DefaultCatalogBusinessFacade(
-            null,
-            mock(GraphStoreCatalogService.class),
-            null,
-            new GraphNameValidationService(),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+        var facade = new DefaultCatalogBusinessFacadeBuilder()
+            .withGraphStoreCatalogService(mock(GraphStoreCatalogService.class))
+            .withGraphNameValidationService(new GraphNameValidationService())
+            .build();
 
         assertThatIllegalArgumentException().isThrownBy(() -> facade.nativeProject(
             null,
@@ -316,31 +210,10 @@ class DefaultCatalogBusinessFacadeTest {
      */
     @Test
     void shouldHandleNullsInCypherProjectParameters() {
-        var facade = new DefaultCatalogBusinessFacade(
-            null,
-            mock(GraphStoreCatalogService.class),
-            null,
-            new GraphNameValidationService(),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+        var facade = new DefaultCatalogBusinessFacadeBuilder()
+            .withGraphStoreCatalogService(mock(GraphStoreCatalogService.class))
+            .withGraphNameValidationService(new GraphNameValidationService())
+            .build();
 
         assertThatIllegalArgumentException().isThrownBy(() -> facade.cypherProject(
             null,
@@ -408,31 +281,10 @@ class DefaultCatalogBusinessFacadeTest {
     @Test
     void shouldDoExistenceCheckWhenProjecting() {
         var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
-        var facade = new DefaultCatalogBusinessFacade(
-            null,
-            graphStoreCatalogService,
-            null,
-            new GraphNameValidationService(),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+        var facade = new DefaultCatalogBusinessFacadeBuilder()
+            .withGraphStoreCatalogService(graphStoreCatalogService)
+            .withGraphNameValidationService(new GraphNameValidationService())
+            .build();
 
         var user = new User("some user", false);
         var databaseId = DatabaseId.of("some database name");
@@ -488,31 +340,10 @@ class DefaultCatalogBusinessFacadeTest {
     @Test
     void shouldDoPositiveExistenceCheckWhenProjectingSubGraph() {
         var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
-        var facade = new DefaultCatalogBusinessFacade(
-            null,
-            graphStoreCatalogService,
-            null,
-            new GraphNameValidationService(),
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        );
+        var facade = new DefaultCatalogBusinessFacadeBuilder()
+            .withGraphStoreCatalogService(graphStoreCatalogService)
+            .withGraphNameValidationService(new GraphNameValidationService())
+            .build();
 
         var user = new User("some user", false);
         var databaseId = DatabaseId.of("some database name");
