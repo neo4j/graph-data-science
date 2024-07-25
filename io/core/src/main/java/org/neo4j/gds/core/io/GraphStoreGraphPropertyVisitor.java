@@ -43,7 +43,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class GraphStoreGraphPropertyVisitor extends GraphPropertyVisitor {
+public final class GraphStoreGraphPropertyVisitor implements GraphPropertyVisitor {
 
     private final Map<String, PropertySchema> graphPropertySchema;
     private final CloseableThreadLocal<Map<String, StreamBuilder<?>>> streamBuilders;

@@ -20,8 +20,8 @@
 package org.neo4j.gds.projection;
 
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
+import org.neo4j.storageengine.api.Reference;
 
 public class RelationshipScanCursorReference implements RelationshipReference {
 
@@ -52,7 +52,7 @@ public class RelationshipScanCursorReference implements RelationshipReference {
     }
 
     @Override
-    public PropertyReference propertiesReference() {
+    public Reference propertiesReference() {
         return Neo4jProxy.propertyReference(relationshipScanCursor);
     }
 }

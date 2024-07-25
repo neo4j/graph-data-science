@@ -21,15 +21,16 @@ package org.neo4j.gds.compat._519;
 
 import org.neo4j.configuration.Config;
 import org.neo4j.exceptions.KernelException;
-import org.neo4j.gds.compat.CompatMonitor;
 import org.neo4j.gds.compat.GlobalProcedureRegistry;
 import org.neo4j.gds.compat.Neo4jProxyApi;
 import org.neo4j.gds.compat.Write;
-import org.neo4j.internal.batchimport.AdditionalInitialIds;
-import org.neo4j.internal.batchimport.BatchImporter;
-import org.neo4j.internal.batchimport.Configuration;
-import org.neo4j.internal.batchimport.Monitor;
-import org.neo4j.internal.batchimport.input.Collector;
+import org.neo4j.gds.compat.batchimport.BatchImporter;
+import org.neo4j.gds.compat.batchimport.ExecutionMonitor;
+import org.neo4j.gds.compat.batchimport.ImportConfig;
+import org.neo4j.gds.compat.batchimport.Monitor;
+import org.neo4j.gds.compat.batchimport.input.Collector;
+import org.neo4j.gds.compat.batchimport.input.Estimates;
+import org.neo4j.gds.compat.batchimport.input.ReadableGroups;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.exceptions.InvalidTransactionTypeKernelException;
@@ -40,25 +41,19 @@ import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
-import org.neo4j.io.pagecache.context.CursorContextFactory;
-import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
-import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
-import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
 import org.neo4j.logging.internal.LogService;
-import org.neo4j.memory.EmptyMemoryTracker;
 import org.neo4j.procedure.Mode;
 import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.storageengine.api.Reference;
-import org.neo4j.storageengine.api.StorageEngineFactory;
 import org.neo4j.values.storable.Value;
 
-import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.LongConsumer;
 import java.util.stream.Stream;
 
 import static java.util.function.Predicate.not;
@@ -67,58 +62,106 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
 
     @Override
     public BatchImporter instantiateBlockBatchImporter(
-        DatabaseLayout databaseLayout,
+        DatabaseLayout dbLayout,
         FileSystemAbstraction fileSystem,
-        PageCacheTracer pageCacheTracer,
-        Configuration configuration,
-        CompatMonitor compatMonitor,
+        ImportConfig config,
+        Monitor monitor,
         LogService logService,
-        AdditionalInitialIds additionalInitialIds,
         Config dbConfig,
         JobScheduler jobScheduler,
         Collector badCollector
     ) {
-        var storageEngineFactory = StorageEngineFactory.selectStorageEngine(dbConfig);
-        var progressOutput = new PrintStream(PrintStream.nullOutputStream(), true, StandardCharsets.UTF_8);
-        var verboseProgressOutput = false;
-
-        return storageEngineFactory.batchImporter(
-            databaseLayout,
+        return BatchImporterCompat.instantiateBlockBatchImporter(
+            dbLayout,
             fileSystem,
-            pageCacheTracer,
-            configuration,
+            config,
+            monitor,
             logService,
-            progressOutput,
-            verboseProgressOutput,
-            additionalInitialIds,
             dbConfig,
-            toMonitor(compatMonitor),
             jobScheduler,
-            badCollector,
-            TransactionLogInitializer.getLogFilesInitializer(),
-            new IndexImporterFactoryImpl(),
-            EmptyMemoryTracker.INSTANCE,
-            CursorContextFactory.NULL_CONTEXT_FACTORY
+            badCollector
         );
     }
 
-    private static Monitor toMonitor(CompatMonitor compatMonitor) {
-        return new Monitor() {
-            @Override
-            public void started() {
-                compatMonitor.started();
-            }
+    @Override
+    public BatchImporter instantiateRecordBatchImporter(
+        DatabaseLayout directoryStructure,
+        FileSystemAbstraction fileSystem,
+        ImportConfig config,
+        ExecutionMonitor executionMonitor,
+        LogService logService,
+        Config dbConfig,
+        JobScheduler jobScheduler,
+        Collector badCollector
+    ) {
+        return BatchImporterCompat.instantiateRecordBatchImporter(
+            directoryStructure,
+            fileSystem,
+            config,
+            executionMonitor,
+            logService,
+            dbConfig,
+            jobScheduler,
+            badCollector
+        );
+    }
 
-            @Override
-            public void percentageCompleted(int percentage) {
-                compatMonitor.percentageCompleted(percentage);
-            }
+    @Override
+    public ExecutionMonitor newCoarseBoundedProgressExecutionMonitor(
+        long highNodeId,
+        long highRelationshipId,
+        int batchSize,
+        LongConsumer progress,
+        LongConsumer outNumberOfBatches
+    ) {
+        return BatchImporterCompat.newCoarseBoundedProgressExecutionMonitor(
+            highNodeId,
+            highRelationshipId,
+            batchSize,
+            progress,
+            outNumberOfBatches
+        );
+    }
 
-            @Override
-            public void completed(boolean success) {
-                compatMonitor.completed(success);
-            }
-        };
+    @Override
+    public ReadableGroups newGroups() {
+        return BatchImporterCompat.newGroups();
+    }
+
+    @Override
+    public ReadableGroups newInitializedGroups() {
+        return BatchImporterCompat.newInitializedGroups();
+    }
+
+    @Override
+    public Collector emptyCollector() {
+        return BatchImporterCompat.emptyCollector();
+    }
+
+    @Override
+    public Collector badCollector(OutputStream outputStream, int batchSize) {
+        return BatchImporterCompat.badCollector(outputStream, batchSize);
+    }
+
+    @Override
+    public Estimates knownEstimates(
+        long numberOfNodes,
+        long numberOfRelationships,
+        long numberOfNodeProperties,
+        long numberOfRelationshipProperties,
+        long sizeOfNodeProperties,
+        long sizeOfRelationshipProperties,
+        long numberOfNodeLabels
+    ) {
+        return BatchImporterCompat.knownEstimates(
+            numberOfNodes,
+            numberOfRelationships,
+            numberOfNodeProperties,
+            numberOfRelationshipProperties,
+            sizeOfNodeProperties,
+            sizeOfRelationshipProperties,
+            numberOfNodeLabels
+        );
     }
 
     @Override
@@ -215,7 +258,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         boolean internal,
         boolean threadSafe
     ) {
-        String category = null;      // No predefined categpry (like temporal or math)
+        String category = null;      // No predefined category (like temporal or math)
         var caseInsensitive = false; // case sensitive name match
         var isBuiltIn = false;       // is built in; never true for GDS
         var deprecated = deprecatedBy.filter(not(String::isEmpty));

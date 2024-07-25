@@ -21,10 +21,13 @@ package org.neo4j.gds.compat;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.configuration.Config;
-import org.neo4j.internal.batchimport.AdditionalInitialIds;
-import org.neo4j.internal.batchimport.BatchImporter;
-import org.neo4j.internal.batchimport.Configuration;
-import org.neo4j.internal.batchimport.input.Collector;
+import org.neo4j.gds.compat.batchimport.BatchImporter;
+import org.neo4j.gds.compat.batchimport.ExecutionMonitor;
+import org.neo4j.gds.compat.batchimport.ImportConfig;
+import org.neo4j.gds.compat.batchimport.Monitor;
+import org.neo4j.gds.compat.batchimport.input.Collector;
+import org.neo4j.gds.compat.batchimport.input.Estimates;
+import org.neo4j.gds.compat.batchimport.input.ReadableGroups;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.exceptions.InvalidTransactionTypeKernelException;
@@ -35,7 +38,6 @@ import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
-import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.logging.internal.LogService;
@@ -44,26 +46,12 @@ import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.storageengine.api.Reference;
 
+import java.io.OutputStream;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.LongConsumer;
 
 public interface Neo4jProxyApi {
-
-    @CompatSince(minor = 18)
-    default BatchImporter instantiateBlockBatchImporter(
-        DatabaseLayout directoryStructure,
-        FileSystemAbstraction fileSystem,
-        PageCacheTracer pageCacheTracer,
-        Configuration configuration,
-        CompatMonitor compatMonitor,
-        LogService logService,
-        AdditionalInitialIds additionalInitialIds,
-        Config dbConfig,
-        JobScheduler jobScheduler,
-        Collector badCollector
-    ) {
-        throw new UnsupportedOperationException("GDS does not support block store format batch importer on this Neo4j version. Requires >= Neo4j 5.18.");
-    }
 
     @CompatSince(minor = 21)
     GlobalProcedureRegistry globalProcedureRegistry(GlobalProcedures globalProcedures);
@@ -108,5 +96,64 @@ public interface Neo4jProxyApi {
         Reference reference,
         PropertySelection selection,
         PropertyCursor cursor
+    );
+
+    @CompatSince(minor = 23)
+    BatchImporter instantiateBlockBatchImporter(
+        DatabaseLayout dbLayout,
+        FileSystemAbstraction fileSystem,
+        ImportConfig config,
+        Monitor monitor,
+        LogService logService,
+        Config dbConfig,
+        JobScheduler jobScheduler,
+        Collector badCollector
+    );
+
+    @CompatSince(minor = 23)
+    BatchImporter instantiateRecordBatchImporter(
+        DatabaseLayout directoryStructure,
+        FileSystemAbstraction fileSystem,
+        ImportConfig config,
+        ExecutionMonitor executionMonitor,
+        LogService logService,
+        Config dbConfig,
+        JobScheduler jobScheduler,
+        Collector badCollector
+    );
+
+    @CompatSince(minor = 23)
+    default ExecutionMonitor newCoarseBoundedProgressExecutionMonitor(
+        long highNodeId,
+        long highRelationshipId,
+        int batchSize,
+        LongConsumer progress,
+        LongConsumer outNumberOfBatches
+    ) {
+        throw new UnsupportedOperationException(
+            "`org.neo4j.gds.compat._519.Neo4jProxyApi.newCoarseBoundedProgressExecutionMonitor` is not yet implemented.");
+    }
+
+    @CompatSince(minor = 23)
+    ReadableGroups newGroups();
+
+    @CompatSince(minor = 23)
+    ReadableGroups newInitializedGroups();
+
+    @CompatSince(minor = 23)
+    Collector emptyCollector();
+
+    @CompatSince(minor = 23)
+    Collector badCollector(OutputStream outputStream, int batchSize);
+
+    @CompatSince(minor = 23)
+    Estimates knownEstimates(
+        long numberOfNodes,
+        long numberOfRelationships,
+        long numberOfNodeProperties,
+        long numberOfRelationshipProperties,
+        long sizeOfNodeProperties,
+        long sizeOfRelationshipProperties,
+        long numberOfNodeLabels
     );
 }

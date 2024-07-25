@@ -22,8 +22,8 @@ package org.neo4j.gds.core.io.file;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
+import org.neo4j.gds.compat.batchimport.input.Group;
 import org.neo4j.gds.core.io.IdentifierMapper;
-import org.neo4j.internal.batchimport.input.Group;
 
 import java.util.List;
 
@@ -69,11 +69,9 @@ public abstract class RelationshipVisitor extends ElementVisitor<RelationshipPro
     }
 
     @Override
-    public boolean startId(Object id, Group group) {
-        return startId((long) id);
+    public boolean startId(long id, Group group) {
+        return startId(id);
     }
-
-
 
     @Override
     public boolean endId(long id) {
@@ -82,8 +80,8 @@ public abstract class RelationshipVisitor extends ElementVisitor<RelationshipPro
     }
 
     @Override
-    public boolean endId(Object id, Group group) {
-        return endId((long) id);
+    public boolean endId(long id, Group group) {
+        return endId(id);
     }
 
     @Override

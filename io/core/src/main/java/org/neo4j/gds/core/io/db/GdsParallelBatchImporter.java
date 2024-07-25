@@ -23,19 +23,17 @@ import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.compat.CompatExecutionMonitor;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.batchimport.BatchImporter;
+import org.neo4j.gds.compat.batchimport.ExecutionMonitor;
+import org.neo4j.gds.compat.batchimport.ImportConfig;
+import org.neo4j.gds.compat.batchimport.input.Collector;
+import org.neo4j.gds.compat.batchimport.input.Input;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.settings.Neo4jSettings;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.internal.batchimport.BatchImporter;
-import org.neo4j.internal.batchimport.Configuration;
-import org.neo4j.internal.batchimport.IndexConfig;
-import org.neo4j.internal.batchimport.input.Collector;
-import org.neo4j.internal.batchimport.input.Collectors;
-import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.impl.scheduler.JobSchedulerFactory;
@@ -56,7 +54,7 @@ public final class GdsParallelBatchImporter {
 
     private final Config config;
     private final Log log;
-    private final CompatExecutionMonitor executionMonitor;
+    private final ExecutionMonitor executionMonitor;
 
     private final FileSystemAbstraction fileSystem;
     private final LogService logService;
@@ -67,7 +65,7 @@ public final class GdsParallelBatchImporter {
         GraphDatabaseService databaseService,
         Config config,
         Log log,
-        CompatExecutionMonitor executionMonitor
+        ExecutionMonitor executionMonitor
     ) {
         var dbms = GraphDatabaseApiProxy.resolveDependency(databaseService, DatabaseManagementService.class);
         return fromDbms(dbms, config, log, executionMonitor);
@@ -77,7 +75,7 @@ public final class GdsParallelBatchImporter {
         DatabaseManagementService dbms,
         Config config,
         Log log,
-        CompatExecutionMonitor executionMonitor
+        ExecutionMonitor executionMonitor
     ) {
         var databaseService = dbms.database(SYSTEM_DATABASE_NAME);
         var fs = GraphDatabaseApiProxy.resolveDependency(databaseService, FileSystemAbstraction.class);
@@ -97,7 +95,7 @@ public final class GdsParallelBatchImporter {
     private GdsParallelBatchImporter(
         Config config,
         Log log,
-        CompatExecutionMonitor executionMonitor,
+        ExecutionMonitor executionMonitor,
         DatabaseManagementService dbms,
         FileSystemAbstraction fileSystem,
         LogService logService,
@@ -203,8 +201,8 @@ public final class GdsParallelBatchImporter {
 
     private Collector getCollector() {
         return config.useBadCollector()
-            ? Collectors.badCollector(new LoggingOutputStream(log), 0)
-            : Collector.EMPTY;
+            ? Neo4jProxy.badCollector(new LoggingOutputStream(log), 0)
+            : Neo4jProxy.emptyCollector();
     }
 
     private BatchImporter instantiateBatchImporter(
@@ -265,12 +263,13 @@ public final class GdsParallelBatchImporter {
             return ImmutableConfig.builder();
         }
 
-        static Configuration toBatchImporterConfig(Config config) {
-            return Neo4jProxy.batchImporterConfig(
+        static ImportConfig toBatchImporterConfig(Config config) {
+            return new ImportConfig(
                 config.batchSize(),
                 config.writeConcurrency(),
                 config.highIO(),
-                IndexConfig.DEFAULT.withLabelIndex().withRelationshipTypeIndex()
+                true,
+                true
             );
         }
     }

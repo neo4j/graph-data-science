@@ -17,11 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.io.file;
+package org.neo4j.gds.compat.batchimport.input;
 
-import org.neo4j.gds.compat.batchimport.input.InputEntityVisitor;
+public interface ReadableGroups {
+    Group getGlobalGroup();
 
-import java.io.Flushable;
-
-public interface GraphPropertyVisitor extends Flushable, InputEntityVisitor {
+    ReadableGroups EMPTY = () -> {
+        throw new IllegalArgumentException("No global group");
+    };
 }

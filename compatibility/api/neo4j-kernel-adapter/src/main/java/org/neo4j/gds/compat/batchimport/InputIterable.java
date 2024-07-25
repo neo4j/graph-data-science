@@ -17,11 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat;
+package org.neo4j.gds.compat.batchimport;
 
-import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
-
-public interface CompatExecutionMonitor extends ExecutionMonitor {
-
-    CompatMonitor toCompatMonitor();
+/**
+ * {@link Iterable} that returns {@link InputIterator} instances.
+ */
+public interface InputIterable {
+    InputIterator iterator();
 }

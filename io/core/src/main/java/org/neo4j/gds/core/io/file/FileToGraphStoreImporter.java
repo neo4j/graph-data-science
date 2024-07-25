@@ -45,7 +45,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.gds.logging.Log;
 
 import java.nio.file.Files;
@@ -186,7 +185,7 @@ public abstract class FileToGraphStoreImporter {
         nodeVisitorBuilder.withNodeSchema(nodeSchema);
         nodeVisitorBuilder.withNodesBuilder(nodesBuilder);
 
-        var nodesIterator = fileInput.nodes(Collector.EMPTY).iterator();
+        var nodesIterator = fileInput.nodes().iterator();
         Collection<Runnable> tasks = ParallelUtil.tasks(
             concurrency,
             (index) -> new ElementImportRunner<>(nodeVisitorBuilder.build(), nodesIterator, progressTracker)
@@ -217,7 +216,7 @@ public abstract class FileToGraphStoreImporter {
             .withRelationshipBuildersToTypeResultMap(relationshipBuildersByType)
             .withInverseIndexedRelationshipTypes(fileInput.graphInfo().inverseIndexedRelationshipTypes());
 
-        var relationshipsIterator = fileInput.relationships(Collector.EMPTY).iterator();
+        var relationshipsIterator = fileInput.relationships().iterator();
         Collection<Runnable> tasks = ParallelUtil.tasks(
             concurrency,
             (index) -> new ElementImportRunner<>(relationshipVisitorBuilder.build(), relationshipsIterator, progressTracker)

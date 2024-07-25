@@ -17,22 +17,38 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat;
+package org.neo4j.gds.compat.batchimport;
 
-public interface CompatMonitor {
+public interface Monitor {
+    Monitor NO_MONITOR = new Monitor() {};
+
+    default void doubleRelationshipRecordUnitsEnabled() {}
+
+    default void mayExceedNodeIdCapacity(long capacity, long estimatedCount) {}
+
+    default void mayExceedRelationshipIdCapacity(long capacity, long estimatedCount) {}
+
+    default void insufficientHeapSize(long optimalMinimalHeapSize, long heapSize) {}
+
+    default void abundantHeapSize(long optimalMinimalHeapSize, long heapSize) {}
+
+    default void insufficientAvailableMemory(
+            long estimatedCacheSize, long optimalMinimalHeapSize, long availableMemory) {}
+
     /**
      * Called right before import is starting.
      */
-    void started();
+    default void started() {}
 
     /**
      * Gets updated with a percentage of the overall import progress.
      * @param percentage overall import progress between 0..100.
      */
-    void percentageCompleted(int percentage);
+    default void percentageCompleted(int percentage) {}
 
     /**
      * Called after import have been completed.
      */
-    void completed(boolean success);
+    default void completed(boolean success) {}
+
 }

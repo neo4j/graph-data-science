@@ -29,25 +29,22 @@ import org.neo4j.configuration.connectors.ConnectorPortRegister;
 import org.neo4j.configuration.connectors.ConnectorType;
 import org.neo4j.configuration.helpers.DatabaseNameValidator;
 import org.neo4j.gds.annotation.SuppressForbidden;
+import org.neo4j.gds.compat.batchimport.BatchImporter;
+import org.neo4j.gds.compat.batchimport.ExecutionMonitor;
+import org.neo4j.gds.compat.batchimport.ImportConfig;
+import org.neo4j.gds.compat.batchimport.input.Collector;
+import org.neo4j.gds.compat.batchimport.input.Estimates;
+import org.neo4j.gds.compat.batchimport.input.ReadableGroups;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.config.Setting;
-import org.neo4j.internal.batchimport.AdditionalInitialIds;
-import org.neo4j.internal.batchimport.BatchImporter;
-import org.neo4j.internal.batchimport.BatchImporterFactory;
-import org.neo4j.internal.batchimport.Configuration;
-import org.neo4j.internal.batchimport.IndexConfig;
-import org.neo4j.internal.batchimport.Monitor;
-import org.neo4j.internal.batchimport.input.Collector;
-import org.neo4j.internal.batchimport.input.IdType;
-import org.neo4j.internal.batchimport.input.InputEntityVisitor;
-import org.neo4j.internal.batchimport.input.ReadableGroups;
 import org.neo4j.internal.helpers.HostnamePort;
 import org.neo4j.internal.id.IdGenerator;
 import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.kernel.api.Cursor;
+import org.neo4j.internal.kernel.api.EntityCursor;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.internal.kernel.api.PartitionedScan;
@@ -66,8 +63,6 @@ import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.layout.Neo4jLayout;
 import org.neo4j.io.pagecache.context.CursorContext;
-import org.neo4j.io.pagecache.context.CursorContextFactory;
-import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.KernelTransactionHandle;
 import org.neo4j.kernel.api.procedure.CallableProcedure;
@@ -77,25 +72,24 @@ import org.neo4j.kernel.database.DatabaseReferenceImpl;
 import org.neo4j.kernel.database.DatabaseReferenceRepository;
 import org.neo4j.kernel.database.NormalizedDatabaseName;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
-import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
 import org.neo4j.kernel.impl.query.QueryExecutionConfiguration;
 import org.neo4j.kernel.impl.query.TransactionalContext;
 import org.neo4j.kernel.impl.query.TransactionalContextFactory;
-import org.neo4j.kernel.impl.transaction.log.EmptyLogTailMetadata;
-import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
 import org.neo4j.logging.InternalLog;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
-import org.neo4j.memory.EmptyMemoryTracker;
 import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.ssl.config.SslPolicyLoader;
+import org.neo4j.storageengine.api.LongReference;
 import org.neo4j.storageengine.api.PropertySelection;
+import org.neo4j.storageengine.api.Reference;
 import org.neo4j.storageengine.api.StorageEngineFactory;
 import org.neo4j.values.storable.TextArray;
 import org.neo4j.values.virtual.MapValue;
 import org.neo4j.values.virtual.NodeValue;
 import org.neo4j.values.virtual.VirtualValues;
 
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Path;
@@ -105,6 +99,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.LongConsumer;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
@@ -252,42 +247,37 @@ public final class Neo4jProxy {
             .allocatePropertyCursor(kernelTransaction.cursorContext(), kernelTransaction.memoryTracker());
     }
 
-    public static PropertyReference propertyReference(NodeCursor nodeCursor) {
-        return ReferencePropertyReference.of(nodeCursor.propertiesReference());
+    public static Reference propertyReference(EntityCursor nodeCursor) {
+        return nodeCursor.propertiesReference();
     }
 
-    public static PropertyReference propertyReference(RelationshipScanCursor relationshipScanCursor) {
-        return ReferencePropertyReference.of(relationshipScanCursor.propertiesReference());
-    }
-
-    public static PropertyReference noPropertyReference() {
-        return ReferencePropertyReference.empty();
+    public static Reference noPropertyReference() {
+        return LongReference.NULL_REFERENCE;
     }
 
     public static void nodeProperties(
         KernelTransaction kernelTransaction,
         long nodeReference,
-        PropertyReference reference,
+        Reference reference,
         PropertyCursor cursor
     ) {
-        var neoReference = ((ReferencePropertyReference) reference).reference;
         kernelTransaction
             .dataRead()
-            .nodeProperties(nodeReference, neoReference, PropertySelection.ALL_PROPERTIES, cursor);
+            .nodeProperties(nodeReference, reference, PropertySelection.ALL_PROPERTIES, cursor);
     }
 
     public static void relationshipProperties(
         KernelTransaction kernelTransaction,
         long relationshipReference,
         long sourceNodeReference,
-        PropertyReference reference,
+        Reference reference,
         PropertyCursor cursor
     ) {
         IMPL.relationshipProperties(
             kernelTransaction.dataRead(),
             relationshipReference,
             sourceNodeReference,
-            ((ReferencePropertyReference) reference).reference,
+            reference,
             PropertySelection.ALL_PROPERTIES,
             cursor
         );
@@ -335,174 +325,39 @@ public final class Neo4jProxy {
         return new CompositeNodeCursorImpl(cursors, labelIds);
     }
 
-    public static Configuration batchImporterConfig(
-        int batchSize,
-        int writeConcurrency,
-        boolean highIO,
-        IndexConfig indexConfig
-    ) {
-        return new org.neo4j.internal.batchimport.Configuration() {
-
-            @Override
-            public int batchSize() {
-                return batchSize;
-            }
-
-            @Override
-            public int maxNumberOfWorkerThreads() {
-                return writeConcurrency;
-            }
-
-            @Override
-            public boolean highIO() {
-                return highIO;
-            }
-
-            @Override
-            public IndexConfig indexConfig() {
-                return indexConfig;
-            }
-        };
-    }
-
-    public static int writeConcurrency(Configuration batchImportConfiguration) {
-        return batchImportConfiguration.maxNumberOfWorkerThreads();
-    }
-
     public static BatchImporter instantiateBatchImporter(
         DatabaseLayout directoryStructure,
         FileSystemAbstraction fileSystem,
-        Configuration configuration,
+        ImportConfig configuration,
         LogService logService,
-        CompatExecutionMonitor executionMonitor,
+        ExecutionMonitor executionMonitor,
         Config dbConfig,
         JobScheduler jobScheduler,
         Collector badCollector
     ) {
         if (dbConfig.get(GraphDatabaseSettings.db_format).equals("block")) {
-            return instantiateBlockBatchImporter(
+            return IMPL.instantiateBlockBatchImporter(
                 directoryStructure,
                 fileSystem,
                 configuration,
-                executionMonitor.toCompatMonitor(),
+                executionMonitor.toMonitor(),
+                logService,
+                dbConfig,
+                jobScheduler,
+                badCollector
+            );
+        } else {
+            return IMPL.instantiateRecordBatchImporter(
+                directoryStructure,
+                fileSystem,
+                configuration,
+                executionMonitor,
                 logService,
                 dbConfig,
                 jobScheduler,
                 badCollector
             );
         }
-
-        return BatchImporterFactory.withHighestPriority()
-            .instantiate(
-                directoryStructure,
-                fileSystem,
-                PageCacheTracer.NULL,
-                configuration,
-                logService,
-                executionMonitor,
-                AdditionalInitialIds.EMPTY,
-                new EmptyLogTailMetadata(dbConfig),
-                dbConfig,
-                Monitor.NO_MONITOR,
-                jobScheduler,
-                badCollector,
-                TransactionLogInitializer.getLogFilesInitializer(),
-                new IndexImporterFactoryImpl(),
-                EmptyMemoryTracker.INSTANCE,
-                CursorContextFactory.NULL_CONTEXT_FACTORY
-            );
-    }
-
-    private static BatchImporter instantiateBlockBatchImporter(
-        DatabaseLayout directoryStructure,
-        FileSystemAbstraction fileSystem,
-        Configuration configuration,
-        CompatMonitor compatMonitor,
-        LogService logService,
-        Config dbConfig,
-        JobScheduler jobScheduler,
-        Collector badCollector
-    ) {
-        return IMPL.instantiateBlockBatchImporter(
-            directoryStructure,
-            fileSystem,
-            PageCacheTracer.NULL,
-            configuration,
-            compatMonitor,
-            logService,
-            AdditionalInitialIds.EMPTY,
-            dbConfig,
-            jobScheduler,
-            badCollector
-        );
-    }
-
-    public static InputEntityIdVisitor.Long inputEntityLongIdVisitor(IdType idType, ReadableGroups groups) {
-        switch (idType) {
-            case ACTUAL -> {
-                return new InputEntityIdVisitor.Long() {
-
-                    @Override
-                    public void visitNodeId(InputEntityVisitor visitor, long id) {
-                        visitor.id(id);
-                    }
-
-                    @Override
-                    public void visitSourceId(InputEntityVisitor visitor, long id) {
-                        visitor.startId(id);
-                    }
-
-                    @Override
-                    public void visitTargetId(InputEntityVisitor visitor, long id) {
-                        visitor.endId(id);
-                    }
-                };
-            }
-            case INTEGER -> {
-                var globalGroup = groups.get(null);
-
-                return new InputEntityIdVisitor.Long() {
-
-                    @Override
-                    public void visitNodeId(InputEntityVisitor visitor, long id) {
-                        visitor.id(id, globalGroup);
-                    }
-
-                    @Override
-                    public void visitSourceId(InputEntityVisitor visitor, long id) {
-                        visitor.startId(id, globalGroup);
-                    }
-
-                    @Override
-                    public void visitTargetId(InputEntityVisitor visitor, long id) {
-                        visitor.endId(id, globalGroup);
-                    }
-                };
-            }
-            default -> throw new IllegalStateException("Unexpected value: " + idType);
-        }
-    }
-
-    public static InputEntityIdVisitor.String inputEntityStringIdVisitor(ReadableGroups groups) {
-        var globalGroup = groups.get(null);
-
-        return new InputEntityIdVisitor.String() {
-
-            @Override
-            public void visitNodeId(InputEntityVisitor visitor, String id) {
-                visitor.id(id, globalGroup);
-            }
-
-            @Override
-            public void visitSourceId(InputEntityVisitor visitor, String id) {
-                visitor.startId(id, globalGroup);
-            }
-
-            @Override
-            public void visitTargetId(InputEntityVisitor visitor, String id) {
-                visitor.endId(id, globalGroup);
-            }
-        };
     }
 
     public static Setting<String> additionalJvm() {
@@ -531,6 +386,58 @@ public final class Neo4jProxy {
 
     public static long getHighestPossibleRelationshipCount(Read read) {
         return read.relationshipsGetCount();
+    }
+
+    public static ExecutionMonitor newCoarseBoundedProgressExecutionMonitor(
+        long highNodeId,
+        long highRelationshipId,
+        int batchSize,
+        LongConsumer progress,
+        LongConsumer outNumberOfBatches
+    ) {
+        return IMPL.newCoarseBoundedProgressExecutionMonitor(
+            highNodeId,
+            highRelationshipId,
+            batchSize,
+            progress,
+            outNumberOfBatches
+        );
+    }
+
+    public static ReadableGroups newGroups() {
+        return IMPL.newGroups();
+    }
+
+    public static ReadableGroups newInitializedGroups() {
+        return IMPL.newInitializedGroups();
+    }
+
+    public static Collector emptyCollector() {
+        return IMPL.emptyCollector();
+    }
+
+    public static Collector badCollector(OutputStream log, int batchSize) {
+        return IMPL.badCollector(log, batchSize);
+    }
+
+    public static Estimates knownEstimates(
+        long numberOfNodes,
+        long numberOfRelationships,
+        long numberOfNodeProperties,
+        long numberOfRelationshipProperties,
+        long sizeOfNodeProperties,
+        long sizeOfRelationshipProperties,
+        long numberOfNodeLabels
+    ) {
+        return IMPL.knownEstimates(
+            numberOfNodes,
+            numberOfRelationships,
+            numberOfNodeProperties,
+            numberOfRelationshipProperties,
+            sizeOfNodeProperties,
+            sizeOfRelationshipProperties,
+            numberOfNodeLabels
+        );
     }
 
     private static final class BlockFormat {

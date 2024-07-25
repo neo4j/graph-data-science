@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.projection;
 
-import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.core.loading.NodeLabelTokenSet;
+import org.neo4j.storageengine.api.Reference;
 
 public interface NodeReference extends RecordReference {
 
@@ -30,5 +30,5 @@ public interface NodeReference extends RecordReference {
 
     long relationshipReference();
 
-    PropertyReference propertiesReference();
+    Reference propertiesReference();
 }

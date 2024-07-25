@@ -17,9 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat;
+package org.neo4j.gds.compat.batchimport.input;
 
-public interface PropertyReference {
+import java.io.Closeable;
+import java.io.IOException;
 
-    boolean isEmpty();
+/**
+ * A chunk of data which an {@link InputEntityVisitor} can visit to extract data from. There may be zero or
+ * more entities in a chunk.
+ */
+public interface InputChunk extends Closeable {
+    boolean next(InputEntityVisitor visitor) throws IOException;
 }

@@ -17,32 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat;
+package org.neo4j.gds.compat.batchimport.input;
 
-import org.neo4j.storageengine.api.Reference;
-
-import java.util.Objects;
-
-public final class ReferencePropertyReference implements PropertyReference {
-
-    private static final PropertyReference EMPTY = new ReferencePropertyReference(null);
-
-    public final Reference reference;
-
-    private ReferencePropertyReference(Reference reference) {
-        this.reference = reference;
-    }
-
-    public static PropertyReference of(Reference reference) {
-        return new ReferencePropertyReference(Objects.requireNonNull(reference));
-    }
-
-    public static PropertyReference empty() {
-        return EMPTY;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return reference == null;
-    }
+/**
+ * Collects items and is closed after any and all items have been collected.
+ * The {@link Collector} is responsible for closing whatever closeable resource received from the importer.
+ */
+public interface Collector {
 }

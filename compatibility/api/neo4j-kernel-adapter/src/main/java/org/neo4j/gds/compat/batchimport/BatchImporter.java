@@ -17,11 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.io.file;
+package org.neo4j.gds.compat.batchimport;
 
-import org.neo4j.gds.compat.batchimport.input.InputEntityVisitor;
+import org.neo4j.gds.compat.batchimport.input.Input;
 
-import java.io.Flushable;
+import java.io.IOException;
 
-public interface GraphPropertyVisitor extends Flushable, InputEntityVisitor {
+/**
+ * Imports graph data given as {@link Input}.
+ */
+public interface BatchImporter {
+    void doImport(Input input) throws IOException;
 }

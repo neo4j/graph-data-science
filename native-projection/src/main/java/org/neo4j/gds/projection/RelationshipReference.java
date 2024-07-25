@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.projection;
 
-import org.neo4j.gds.compat.PropertyReference;
+import org.neo4j.storageengine.api.Reference;
 
 public interface RelationshipReference extends RecordReference {
 
@@ -31,5 +31,5 @@ public interface RelationshipReference extends RecordReference {
 
     long targetNodeReference();
 
-    PropertyReference propertiesReference();
+    Reference propertiesReference();
 }

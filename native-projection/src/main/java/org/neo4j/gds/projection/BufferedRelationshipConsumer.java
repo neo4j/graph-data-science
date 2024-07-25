@@ -21,9 +21,9 @@ package org.neo4j.gds.projection;
 
 import org.immutables.builder.Builder;
 import org.neo4j.gds.api.PartialIdMap;
-import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.core.loading.RelationshipsBatchBuffer;
 import org.neo4j.gds.core.loading.RelationshipsBatchBufferBuilder;
+import org.neo4j.storageengine.api.Reference;
 
 import java.util.Optional;
 
@@ -32,9 +32,9 @@ import static org.neo4j.gds.core.loading.LoadingExceptions.validateSourceNodeIsL
 import static org.neo4j.gds.core.loading.LoadingExceptions.validateTargetNodeIsLoaded;
 import static org.neo4j.token.api.TokenConstants.ANY_RELATIONSHIP_TYPE;
 
-public class BufferedRelationshipConsumer implements StoreScanner.RecordConsumer<RelationshipReference> {
+public final class BufferedRelationshipConsumer implements StoreScanner.RecordConsumer<RelationshipReference> {
 
-    private final RelationshipsBatchBuffer<PropertyReference> buffer;
+    private final RelationshipsBatchBuffer<Reference> buffer;
 
     private final PartialIdMap idMap;
     private final int type;
@@ -47,9 +47,9 @@ public class BufferedRelationshipConsumer implements StoreScanner.RecordConsumer
         int capacity,
         Optional<Boolean> skipDanglingRelationships
     ) {
-        var buffer = new RelationshipsBatchBufferBuilder<PropertyReference>()
+        var buffer = new RelationshipsBatchBufferBuilder<Reference>()
             .capacity(capacity)
-            .propertyReferenceClass(PropertyReference.class)
+            .propertyReferenceClass(Reference.class)
             .build();
 
         boolean skipDangling = skipDanglingRelationships.orElse(true);
@@ -58,7 +58,7 @@ public class BufferedRelationshipConsumer implements StoreScanner.RecordConsumer
     }
 
     private BufferedRelationshipConsumer(
-        RelationshipsBatchBuffer<PropertyReference> buffer,
+        RelationshipsBatchBuffer<Reference> buffer,
         PartialIdMap idMap,
         int type,
         boolean skipDanglingRelationships
@@ -69,7 +69,7 @@ public class BufferedRelationshipConsumer implements StoreScanner.RecordConsumer
         this.skipDanglingRelationships = skipDanglingRelationships;
     }
 
-    public RelationshipsBatchBuffer<PropertyReference> relationshipsBatchBuffer() {
+    public RelationshipsBatchBuffer<Reference> relationshipsBatchBuffer() {
         return this.buffer;
     }
 

@@ -24,13 +24,11 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.core.loading.AdjacencyBuffer;
 import org.neo4j.gds.core.loading.PropertyReader;
 import org.neo4j.gds.core.loading.ReadHelper;
 import org.neo4j.gds.core.loading.RecordScannerTask;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
-import org.neo4j.gds.core.loading.ThreadLocalSingleTypeRelationshipImporter;
 import org.neo4j.gds.core.utils.RawValues;
 import org.neo4j.gds.core.utils.StatementAction;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -38,6 +36,7 @@ import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.storageengine.api.Reference;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -157,7 +156,7 @@ final class RelationshipsScannerTask extends StatementAction implements RecordSc
 
                         buffers[idx.getAndIncrement()] = buffer;
 
-                        PropertyReader<PropertyReference> propertyReader = importer.loadProperties()
+                    PropertyReader<Reference> propertyReader = importer.loadProperties()
                             ? storeBackedPropertyReader(transaction)
                             : emptyPropertyReader();
 
@@ -179,7 +178,7 @@ final class RelationshipsScannerTask extends StatementAction implements RecordSc
             while (scanState.scan(cursor, compositeBuffer)) {
                 terminationFlag.assertRunning();
                 long imported = 0L;
-                for (ThreadLocalSingleTypeRelationshipImporter<PropertyReference> importer : importers) {
+                for (var importer : importers) {
                     imported += importer.importRelationships();
                 }
                 int importedRels = RawValues.getHead(imported);
@@ -205,12 +204,12 @@ final class RelationshipsScannerTask extends StatementAction implements RecordSc
     }
 
     @NotNull
-    private static PropertyReader<PropertyReference> emptyPropertyReader() {
+    private static PropertyReader<Reference> emptyPropertyReader() {
         return (producer, propertyKeyIds, defaultValues, aggregations, atLeastOnePropertyToLoad) -> new long[propertyKeyIds.length][0];
     }
 
     @NotNull
-    private static PropertyReader<PropertyReference> storeBackedPropertyReader(KernelTransaction kernelTransaction) {
+    private static PropertyReader<Reference> storeBackedPropertyReader(KernelTransaction kernelTransaction) {
         return (producer, propertyKeyIds, defaultPropertyValues, aggregations, atLeastOnePropertyToLoad) -> {
             long[][] properties = new long[propertyKeyIds.length][producer.numberOfElements()];
             if (atLeastOnePropertyToLoad) {
