@@ -223,7 +223,6 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
             .withWriteNodePropertiesApplication(writeNodePropertiesApplication)
             .withWriteRelationshipPropertiesApplication(writeRelationshipPropertiesApplication)
             .withWriteRelationshipsApplication(writeRelationshipsApplication)
-
             .build();
 
         return catalogFacade;
