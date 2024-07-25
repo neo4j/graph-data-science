@@ -90,7 +90,7 @@ import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
         return this;
     }
 
-    DefaultCatalogBusinessFacadeBuilder withNodeLabelMutatorApplication(EstimateCommonNeighbourAwareRandomWalkApplication estimateCommonNeighbourAwareRandomWalkApplication) {
+    DefaultCatalogBusinessFacadeBuilder withEstimateCommonNeighbourAwareRandomWalkApplication(EstimateCommonNeighbourAwareRandomWalkApplication estimateCommonNeighbourAwareRandomWalkApplication) {
         this.estimateCommonNeighbourAwareRandomWalkApplication = estimateCommonNeighbourAwareRandomWalkApplication;
         return this;
     }

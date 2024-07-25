@@ -199,31 +199,34 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         var writeRelationshipPropertiesApplication = new WriteRelationshipPropertiesApplication(log);
         var writeRelationshipsApplication = new WriteRelationshipsApplication(log);
 
-        return new DefaultCatalogBusinessFacade(
-            log,
-            graphStoreCatalogService,
-            projectionMetricsService,
-            graphNameValidationService,
-            cypherProjectApplication,
-            dropGraphApplication,
-            dropNodePropertiesApplication,
-            dropRelationshipsApplication,
-            estimateCommonNeighbourAwareRandomWalkApplication,
-            generateGraphApplication,
-            graphMemoryUsageApplication,
-            graphSamplingApplication,
-            listGraphApplication,
-            nativeProjectApplication,
-            nodeLabelMutatorApplication,
-            streamNodePropertiesApplication,
-            streamRelationshipPropertiesApplication,
-            streamRelationshipsApplication,
-            subGraphProjectApplication,
-            writeNodeLabelApplication,
-            writeNodePropertiesApplication,
-            writeRelationshipPropertiesApplication,
-            writeRelationshipsApplication
-        );
+        var catalogFacade = new DefaultCatalogBusinessFacadeBuilder()
+            .withLog(log)
+            .withGraphStoreCatalogService(graphStoreCatalogService)
+            .withProjectionMetricsService(projectionMetricsService)
+            .withGraphNameValidationService(graphNameValidationService)
+            .withCypherProjectApplication(cypherProjectApplication)
+            .withDropGraphApplication(dropGraphApplication)
+            .withDropNodePropertiesApplication(dropNodePropertiesApplication)
+            .withDropRelationshipsApplication(dropRelationshipsApplication)
+            .withEstimateCommonNeighbourAwareRandomWalkApplication(estimateCommonNeighbourAwareRandomWalkApplication)
+            .withGenerateGraphApplication(generateGraphApplication)
+            .withGraphMemoryUsageApplication(graphMemoryUsageApplication)
+            .withGraphSamplingApplication(graphSamplingApplication)
+            .withListGraphApplication(listGraphApplication)
+            .withNativeProjectApplication(nativeProjectApplication)
+            .withNodeLabelMutatorApplication(nodeLabelMutatorApplication)
+            .withStreamNodePropertiesApplication(streamNodePropertiesApplication)
+            .withStreamRelationshipPropertiesApplication(streamRelationshipPropertiesApplication)
+            .withStreamRelationshipsApplication(streamRelationshipsApplication)
+            .withSubGraphProjectApplication(subGraphProjectApplication)
+            .withWriteNodeLabelApplication(writeNodeLabelApplication)
+            .withWriteNodePropertiesApplication(writeNodePropertiesApplication)
+            .withWriteRelationshipPropertiesApplication(writeRelationshipPropertiesApplication)
+            .withWriteRelationshipsApplication(writeRelationshipsApplication)
+
+            .build();
+
+        return catalogFacade;
     }
 
     @Override
