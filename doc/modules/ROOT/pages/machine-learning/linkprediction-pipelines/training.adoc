@@ -275,7 +275,7 @@ CALL gds.beta.pipeline.linkPrediction.train('myGraph', {
   modelName: 'lp-pipeline-model',
   metrics: ['AUCPR', 'OUT_OF_BAG_ERROR'],
   targetRelationshipType: 'KNOWS',
-  randomSeed: 12
+  randomSeed: 18
 }) YIELD modelInfo, modelSelectionStats
 RETURN
   modelInfo.bestParameters AS winningModel,
@@ -289,11 +289,11 @@ RETURN
 [opts="header", cols="6, 2, 2, 2, 6"]
 |===
 | winningModel                                                                                                                                | avgTrainScore      | outerTrainScore     | testScore | validationScores
-| {batchSize=100, classWeights=[0.55, 0.45], focusWeight=0.0904839039, hiddenLayerSizes=[4, 2], learningRate=0.001, maxEpochs=100, methodName="MultilayerPerceptron", minEpochs=1, patience=2, penalty=0.5, tolerance=0.001}
-| 0.8584656085
-| 0.82
-| 0.6777777778
-| [0.5555555556, 0.5277777778, 0.4305555556, 0.875]
+| {batchSize=100, classWeights=[0.55, 0.45], focusWeight=0.070341817, hiddenLayerSizes=[4, 2], learningRate=0.001, maxEpochs=100, methodName="MultilayerPerceptron", minEpochs=1, patience=2, penalty=0.5, tolerance=0.001}
+| 0.7579365079
+| 0.7
+| 0.6666666667
+| [0.4305555556, 0.5833333333, 0.4305555556, 0.75]
 |===
 --
 We can see the MLP model configuration won, and has a score of `0.67` on the test set.
@@ -405,10 +405,10 @@ RETURN
 |===
 | winningModel | avgTrainScore | outerTrainScore | testScore | validationScores
 | {batchSize=100, classWeights=[], focusWeight=0.0, hiddenLayerSizes=[4, 2], learningRate=0.001, maxEpochs=100, methodName="MultilayerPerceptron", minEpochs=1, patience=2, penalty=1.0, tolerance=0.001}
-| 0.8584656085
-| 0.82
-| 0.6777777778
-| [0.875]
+| 0.832010582
+| 0.6666666667
+| 0.8611111111
+| [0.75]
 |===
 --
 
