@@ -74,7 +74,9 @@ RETURN gds.graph.project(
   'purchases',
   source,
   target,
-  { 
+  {
+    sourceNodeLabels: labels(source),
+    targetNodeLabels: labels(target),
     relationshipType: 'BUYS',
     relationshipProperties: r { .amount }
   },
@@ -136,6 +138,7 @@ CALL gds.knn.write(  // <1>
   'purchases',  // <2>
   {  // <3>
     nodeProperties: ['embedding'],
+    nodeLabels: ['Person'],
     topK: 2,
     sampleRate: 1.0,
     deltaThreshold: 0.0,
@@ -152,7 +155,8 @@ RETURN similarityDistribution.mean AS meanSimilarity  // <4>
 <2> Name of the projected graph to run the algorithm on.
 The `write` mode does not update the in-memory graph.
 <3> Configuration parameters listed in the xref:algorithms/knn.adoc#algorithms-knn-syntax[Syntax section] of the algorithm (`Write mode` panel).
-Here, `topK` is set to 2 to select only the two closest neighbours of a node, while the `sampleRate` and the `deltaThreshold` are set to 1 and 0 respectively because the graph is small.
+The `nodeLabels` option is set to ['Person'], because are interested only in `Person`-`Person` similarities and don't want to mix up such similarities with e.g. `Person`-`Product` similarities.
+Here, `topK` is set to 2 to select only the two closest targets of a source node, while the `sampleRate` and the `deltaThreshold` are set to 1 and 0 respectively because the graph is small.
 The `concurrency` and the `randomSeed` are set to obtain the same results for every run, but are not necessary for the actual computation.
 The two `write` properties are used to write a new `:SIMILAR` relationship with a `score` property containing the similarity score between two nodes.
 <4> `mean` is one of the fields of the returned `similarityDistribution` map.
@@ -161,12 +165,14 @@ The two `write` properties are used to write a new `:SIMILAR` relationship with 
 [opts="header", caption=, title="Query result", cols="1"]
 |===
 | meanSimilarity
-| 0.9292290027
+| 0.8800284068
 |===
 --
 
 The mean similarity between nodes is high.
-This is due to the fact that the graph is small and there are no long paths between nodes, which leads to many similar FastRP node embeddings.
+This is because the similarity distribution is computed after selecting the `topK`=2 most similar targets per source node. Moreover, the graph has two clusters of users with quite similar purchases: (Brie, Matt and Annie) and (Elsa, Dan and Jeff). Using a higher value for `topK` would yield a lower average similarity.
+
+If we were to examine Person-Product similariteies, this could be accomplished by using instead xref:alpha-algorithms/filtered-knn.adoc#algorithms-filtered-knn[Filtered K-Nearest Neighbors].
 
 
 == Find the most similar nodes
@@ -188,14 +194,21 @@ ORDER BY similarity DESCENDING, person1, person2
 | person1 | person2 | similarity
 | "Dan"   | "Elsa"  | 0.9866833091
 | "Elsa"  | "Dan"   | 0.9866833091
+| "Brie"  | "Matt"  | 0.9740184546
 | "Matt"  | "Brie"  | 0.9740184546
 | "Annie" | "Matt"  | 0.9724045992
+| "Matt"  | "Annie" | 0.9724045992
+| "Annie" | "Brie"  | 0.9154552221
+| "Brie"  | "Annie" | 0.9154552221
 | "Jeff"  | "Annie" | 0.8667784333
+| "Jeff"  | "Matt"  | 0.7591181397
+| "Dan"   | "Jeff"  | 0.6660436392
+| "Elsa"  | "Jeff"  | 0.5712890029
 |===
 --
 
-The query result shows that the nodes named "Annie" and "Matt" are very similar.
-In fact, they are both connected to three `:Product` nodes, two of which are the same (the nodes named "Cucumber" and "Tomatoes") and with similar amounts.
+The query result shows that the nodes named "Dan" and "Elsa" are very similar.
+In fact, they are both connected to three `:Product` nodes, two of which are the same (the nodes named "Milk" and "Chocolate") and with similar amounts. The "Cookies" Product is only purchased by Dan, but with a lower amount, and it also has a certain degree of similarity to the other products due to its proximity in the graph and partly due to randomness.
 
 
 == Make recommendations
