@@ -70,8 +70,9 @@ public class AllRelationshipsSpliterator implements Spliterator<RelationshipCurs
     private boolean advance(Consumer<? super RelationshipCursor> action) {
         if (this.cursorIterator.hasNext()) {
             action.accept(this.cursorIterator.next());
+            return true;
         }
-        return this.cursorIterator.hasNext();
+        return false;
     }
 
     private boolean hasRemaining() {

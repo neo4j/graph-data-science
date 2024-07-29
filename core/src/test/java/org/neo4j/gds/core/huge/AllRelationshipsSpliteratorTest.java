@@ -23,7 +23,9 @@ import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
 import net.jqwik.api.constraints.IntRange;
 import net.jqwik.api.constraints.LongRange;
+import org.junit.jupiter.api.Test;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
@@ -38,6 +40,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 class AllRelationshipsSpliteratorTest {
 
     private record Relationship(long target, double property) {
+    }
+
+    @Test
+    void tryAdvance() {
+        var graph = TestSupport.fromGdl("(a)-->(b), (b)-->(c), (c)-->(d)");
+
+        var iterator = new AllRelationshipsSpliterator(graph, 1.0);
+
+        assertThat(iterator.tryAdvance(relationshipCursor -> {})).isTrue();
+        assertThat(iterator.tryAdvance(relationshipCursor -> {})).isTrue();
+        assertThat(iterator.tryAdvance(relationshipCursor -> {})).isTrue();
+        assertThat(iterator.tryAdvance(relationshipCursor -> {})).isFalse();
     }
 
     @Property(tries = 50)
