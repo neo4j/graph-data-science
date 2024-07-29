@@ -23,9 +23,11 @@ import net.jqwik.api.ForAll;
 import net.jqwik.api.Property;
 import net.jqwik.api.constraints.IntRange;
 import net.jqwik.api.constraints.LongRange;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
@@ -46,12 +48,12 @@ class AllRelationshipsSpliteratorTest {
     void tryAdvance() {
         var graph = TestSupport.fromGdl("(a)-->(b), (b)-->(c), (c)-->(d)");
 
-        var iterator = new AllRelationshipsSpliterator(graph, 1.0);
+        var spliterator = new AllRelationshipsSpliterator(graph, 1.0);
 
-        assertThat(iterator.tryAdvance(relationshipCursor -> {})).isTrue();
-        assertThat(iterator.tryAdvance(relationshipCursor -> {})).isTrue();
-        assertThat(iterator.tryAdvance(relationshipCursor -> {})).isTrue();
-        assertThat(iterator.tryAdvance(relationshipCursor -> {})).isFalse();
+        assertThat(spliterator.tryAdvance(relationshipCursor -> {})).isTrue();
+        assertThat(spliterator.tryAdvance(relationshipCursor -> {})).isTrue();
+        assertThat(spliterator.tryAdvance(relationshipCursor -> {})).isTrue();
+        assertThat(spliterator.tryAdvance(relationshipCursor -> {})).isFalse();
     }
 
     @Property(tries = 50)
@@ -62,28 +64,10 @@ class AllRelationshipsSpliteratorTest {
         @ForAll long seed,
         @ForAll boolean parallel
     ) {
-        double fallback = 42.0;
-        var graph = new RandomGraphGeneratorBuilder()
-            .nodeCount(nodeCount)
-            .averageDegree(averageDegree)
-            .seed(seed)
-            .relationshipType(RelationshipType.ALL_RELATIONSHIPS)
-            .relationshipDistribution(relationshipDistribution)
-            .relationshipPropertyProducer(PropertyProducer.randomDouble("baz", 0, 100))
-            .build()
-            .generate();
+        var graph = generateGraph(nodeCount, averageDegree, relationshipDistribution, seed);
 
-        var expected = new ConcurrentHashMap<Long, List<Relationship>>();
-        graph.forEachNode(node -> {
-            graph.forEachRelationship(node, fallback, (source, target, property) -> {
-                expected.computeIfAbsent(source, __ -> new ArrayList<>()).add(new Relationship(
-                    target,
-                    property
-                ));
-                return true;
-            });
-            return true;
-        });
+        var fallback = 42.0;
+        var expected = expectedAdjacencyList(graph, fallback);
 
         var actual = new ConcurrentHashMap<Long, List<Relationship>>();
         var allRelationshipsIterator = new AllRelationshipsSpliterator(graph, fallback);
@@ -96,5 +80,68 @@ class AllRelationshipsSpliteratorTest {
             )));
 
         assertThat(actual).isEqualTo(expected);
+    }
+
+    @Property(tries = 50)
+    void iterator(
+        @ForAll @LongRange(min = 10L, max = 10_000L) long nodeCount,
+        @ForAll @IntRange(min = 10, max = 100) int averageDegree,
+        @ForAll RelationshipDistribution relationshipDistribution,
+        @ForAll long seed
+    ) {
+        var graph = generateGraph(nodeCount, averageDegree, relationshipDistribution, seed);
+        var fallback = 42.0;
+        var expected = expectedAdjacencyList(graph, fallback);
+
+        var actual = new ConcurrentHashMap<Long, List<Relationship>>();
+        var allRelationshipsIterator = new AllRelationshipsSpliterator(graph, fallback);
+
+        var iterator = StreamSupport.stream(allRelationshipsIterator, true).iterator();
+
+        while (iterator.hasNext()) {
+            var relationshipCursor = iterator.next();
+            actual.computeIfAbsent(relationshipCursor.sourceId(), __ -> new ArrayList<>())
+                .add(new Relationship(
+                    relationshipCursor.targetId(),
+                    relationshipCursor.property()
+                ));
+        }
+
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    private static @NotNull HugeGraph generateGraph(
+        long nodeCount,
+        int averageDegree,
+        RelationshipDistribution relationshipDistribution,
+        long seed
+    ) {
+        return new RandomGraphGeneratorBuilder()
+            .nodeCount(nodeCount)
+            .averageDegree(averageDegree)
+            .seed(seed)
+            .relationshipType(RelationshipType.ALL_RELATIONSHIPS)
+            .relationshipDistribution(relationshipDistribution)
+            .relationshipPropertyProducer(PropertyProducer.randomDouble("baz", 0, 100))
+            .build()
+            .generate();
+    }
+
+    private static @NotNull ConcurrentHashMap<Long, List<Relationship>> expectedAdjacencyList(
+        Graph graph,
+        double fallback
+    ) {
+        var expected = new ConcurrentHashMap<Long, List<Relationship>>();
+        graph.forEachNode(node -> {
+            graph.forEachRelationship(node, fallback, (source, target, property) -> {
+                expected.computeIfAbsent(source, __ -> new ArrayList<>()).add(new Relationship(
+                    target,
+                    property
+                ));
+                return true;
+            });
+            return true;
+        });
+        return expected;
     }
 }
