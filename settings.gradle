@@ -297,8 +297,6 @@ include('defaults-and-limits-configuration')
 project(':defaults-and-limits-configuration').projectDir = file('defaults-and-limits-configuration')
 
 
-include('neo4j-kernel-adapter-5.16')
-project(':neo4j-kernel-adapter-5.16').projectDir = file('compatibility/5.16/neo4j-kernel-adapter')
 
 include('neo4j-kernel-adapter-5.17')
 project(':neo4j-kernel-adapter-5.17').projectDir = file('compatibility/5.17/neo4j-kernel-adapter')
