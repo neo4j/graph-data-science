@@ -58,7 +58,7 @@ public class AllRelationshipsSpliterator implements Spliterator<RelationshipCurs
     public boolean tryAdvance(Consumer<? super RelationshipCursor> action) {
         boolean isAdvanced = advance(action);
 
-        if (!isAdvanced && hasRemaining()) {
+        while (!isAdvanced && hasRemaining()) {
             this.current++;
             this.cursorIterator = relationshipIterator.streamRelationships(current, this.fallbackValue).iterator();
             isAdvanced = advance(action);
