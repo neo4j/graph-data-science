@@ -6,7 +6,7 @@ nav:
 - modules/ROOT/content-nav.adoc
 asciidoc:
   attributes:
-    docs-version: '2.8'
+    docs-version: '2.9'
     ga-promos-uri: https://raw.githubusercontent.com/neo4j-graphacademy/courses/main/asciidoc/promos
     ga-promo: analytics
     page-ad-icon: mortarboard
