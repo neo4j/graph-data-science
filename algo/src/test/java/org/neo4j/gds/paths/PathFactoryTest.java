@@ -20,17 +20,17 @@
 package org.neo4j.gds.paths;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-class PathFactoryTest extends BaseProcTest {
+class PathFactoryTest {
 
     @AfterEach
     void resetIds() {
@@ -39,68 +39,54 @@ class PathFactoryTest extends BaseProcTest {
 
     @Nested
     class SingleNode {
-        static final String DB_CYPHER = "CREATE ()";
-
-        @BeforeEach
-        void setup() {
-            runQuery(DB_CYPHER);
-        }
 
         @Test
         void emptyPath() {
             var nodeIds = new long[]{0L};
             var costs = new double[]{0.0D};
 
-            GraphDatabaseApiProxy.runInFullAccessTransaction(db, tx -> {
-                var path = PathFactory.create(
-                    tx::getNodeById,
-                    nodeIds,
-                    costs,
-                    RelationshipType.withName("REL"),
-                    "prop"
-                );
-                assertEquals(0, path.length());
-            });
+            var path = PathFactory.create(
+                v-> mock(Node.class),
+                nodeIds,
+                costs,
+                RelationshipType.withName("REL"),
+                "prop"
+            );
+            assertEquals(0, path.length());
         }
     }
 
     @Nested
     class MultipleNodes {
-        static final String DB_CYPHER =
-            "CREATE" +
-            "  (a)" +
-            ", (b)" +
-            ", (c)" +
-            ", (a)-[:R]->(b)" +
-            ", (b)-[:R]->(c)";
-
-        @BeforeEach
-        void setup() {
-            runQuery(DB_CYPHER);
-        }
 
         @Test
         void pathWithCosts() {
             var nodeIds = new long[]{0L, 1L, 2L};
             var costs = new double[]{0.0D, 1.0D, 4.0D};
 
-            GraphDatabaseApiProxy.runInFullAccessTransaction(db, tx -> {
-                var path = PathFactory.create(
-                    tx::getNodeById,
-                    nodeIds,
-                    costs,
-                    RelationshipType.withName("REL"),
-                    "prop"
-                );
+            var  mockNode0 = mock(Node.class);
+            var mockNode1 = mock(Node.class);
+            var  mockNode2 = mock(Node.class);
 
-                assertEquals(2, path.length());
+            when(mockNode0.getId()).thenReturn(nodeIds[0]);
+            when(mockNode1.getId()).thenReturn(nodeIds[1]);
+            when(mockNode2.getId()).thenReturn(nodeIds[2]);
 
-                path.relationships().forEach(relationship -> {
-                    var actualCost = (double) relationship.getProperty("prop");
-                    var expectedCost = costs[(int) relationship.getEndNodeId()] - costs[(int) relationship.getStartNodeId()];
+            var path = PathFactory.create(
+                v -> new Node[]{mockNode0,mockNode1,mockNode2}[(int)v],
+                nodeIds,
+                costs,
+                RelationshipType.withName("REL"),
+                "prop"
+            );
 
-                    assertEquals(expectedCost, actualCost, 1E-4);
-                });
+            assertEquals(2, path.length());
+
+            path.relationships().forEach(relationship -> {
+                var actualCost = (double) relationship.getProperty("prop");
+                var expectedCost = costs[(int) relationship.getEndNodeId()] - costs[(int) relationship.getStartNodeId()];
+
+                assertEquals(expectedCost, actualCost, 1E-4);
             });
         }
     }
