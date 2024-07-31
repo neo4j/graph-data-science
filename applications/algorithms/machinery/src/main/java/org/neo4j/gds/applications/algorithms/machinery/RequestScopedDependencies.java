@@ -23,6 +23,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogStore;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -35,6 +36,7 @@ public final class RequestScopedDependencies {
     private final DatabaseId databaseId;
     private final GraphLoaderContext graphLoaderContext;
     private final TaskRegistryFactory taskRegistryFactory;
+    private final TaskStore taskStore;
     private final TerminationFlag terminationFlag;
     private final User user;
     private final UserLogRegistryFactory userLogRegistryFactory;
@@ -49,6 +51,7 @@ public final class RequestScopedDependencies {
         DatabaseId databaseId,
         GraphLoaderContext graphLoaderContext,
         TaskRegistryFactory taskRegistryFactory,
+        TaskStore taskStore,
         TerminationFlag terminationFlag,
         User user,
         UserLogRegistryFactory userLogRegistryFactory,
@@ -57,13 +60,15 @@ public final class RequestScopedDependencies {
         this.databaseId = databaseId;
         this.graphLoaderContext = graphLoaderContext;
         this.taskRegistryFactory = taskRegistryFactory;
+        this.taskStore = taskStore;
         this.terminationFlag = terminationFlag;
         this.user = user;
         this.userLogRegistryFactory = userLogRegistryFactory;
         this.userLogStore = userLogStore;
     }
-    public static RequestScopedDependenciesBuilder builder(){
-        return  new RequestScopedDependenciesBuilder();
+
+    public static RequestScopedDependenciesBuilder builder() {
+        return new RequestScopedDependenciesBuilder();
     }
 
     public DatabaseId getDatabaseId() {
@@ -77,6 +82,10 @@ public final class RequestScopedDependencies {
 
     public TaskRegistryFactory getTaskRegistryFactory() {
         return taskRegistryFactory;
+    }
+
+    public TaskStore getTaskStore() {
+        return taskStore;
     }
 
     public TerminationFlag getTerminationFlag() {
@@ -96,7 +105,6 @@ public final class RequestScopedDependencies {
     }
 
 
-
     /**
      * A handy builder where you can include as many or as few components as you are interested in.
      * We deliberately do not have defaults,
@@ -107,6 +115,7 @@ public final class RequestScopedDependencies {
         private GraphLoaderContext graphLoaderContext;
         private TerminationFlag terminationFlag;
         private TaskRegistryFactory taskRegistryFactory;
+        private TaskStore taskStore;
         private User user;
         private UserLogRegistryFactory userLogRegistryFactory;
         private UserLogStore userLogStore;
@@ -121,10 +130,13 @@ public final class RequestScopedDependencies {
             return this;
         }
 
-
-
         public RequestScopedDependenciesBuilder with(TaskRegistryFactory taskRegistryFactory) {
             this.taskRegistryFactory = taskRegistryFactory;
+            return this;
+        }
+
+        public RequestScopedDependenciesBuilder with(TaskStore taskStore) {
+            this.taskStore = taskStore;
             return this;
         }
 
@@ -148,13 +160,12 @@ public final class RequestScopedDependencies {
             return this;
         }
 
-
-
         public RequestScopedDependencies build() {
             return new RequestScopedDependencies(
                 databaseId,
                 graphLoaderContext,
                 taskRegistryFactory,
+                taskStore,
                 terminationFlag,
                 user,
                 userLogRegistryFactory,

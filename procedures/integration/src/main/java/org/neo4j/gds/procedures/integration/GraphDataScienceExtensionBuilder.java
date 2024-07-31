@@ -197,6 +197,7 @@ public final class GraphDataScienceExtensionBuilder {
     private void registerGraphDataScienceComponent() {
         var graphDataScienceProvider = graphDataScienceProviderFactory.createGraphDataScienceProvider(
             taskRegistryFactoryService,
+            taskStoreService,
             useMaxMemoryEstimation,
             userLogServices
         );

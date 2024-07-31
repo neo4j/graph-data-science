@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.procedures.operations;
 
 import org.neo4j.gds.core.utils.progress.tasks.Progress;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -40,7 +40,7 @@ public final class StructuredOutputHelper {
     /**
      * Produce a progress bar string in the format of: [######~~~~]
      */
-    static String progressBar(Progress progress, int progressBarLength) {
+    public static String progressBar(Progress progress, int progressBarLength) {
         if (progress.volume() == Task.UNKNOWN_VOLUME) {
             return formatWithLocale("[~~~~%s~~~]", UNKNOWN);
         }
@@ -66,7 +66,7 @@ public final class StructuredOutputHelper {
         return decimalFormat.format(progressPercentage);
     }
 
-    static String treeViewDescription(String description, int depth) {
+    public static String treeViewDescription(String description, int depth) {
         return TASK_LEVEL_INDENTATION.repeat(depth) +
                TASK_BRANCH_TOKEN +
                description;

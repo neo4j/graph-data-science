@@ -45,6 +45,7 @@ dependencies {
     implementation project(':neo4j-api')
     implementation project(':node-embedding-algorithms')
     implementation project(':opengds-procedure-facade')
+    implementation project(':operations-procedure-facade')
     implementation project(':pipeline')
     implementation project(':proc-common')
     implementation project(':progress-tracking')

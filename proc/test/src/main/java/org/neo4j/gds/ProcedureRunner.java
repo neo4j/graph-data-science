@@ -31,6 +31,7 @@ import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.OpenModelCatalog;
+import org.neo4j.gds.core.utils.progress.EmptyTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogStore;
@@ -152,13 +153,13 @@ public final class ProcedureRunner {
     ) {
         var gdsLog = new LogAdapter(log);
 
-        var procedureContext = WriteContext.builder()
-            .build();
+        var procedureContext = WriteContext.builder().build();
 
         var requestScopedDependencies = RequestScopedDependencies.builder()
             .with(new DatabaseIdAccessor().getDatabaseId(graphDatabaseService))
             .with(GraphLoaderContext.NULL_CONTEXT)
             .with(taskRegistryFactory)
+            .with(EmptyTaskStore.INSTANCE)
             .with(new User(username.username(), false))
             .with(EmptyUserLogRegistryFactory.INSTANCE)
             .with(EmptyUserLogStore.INSTANCE)
