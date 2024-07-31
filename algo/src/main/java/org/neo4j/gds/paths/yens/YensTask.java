@@ -107,9 +107,7 @@ public class YensTask implements Runnable {
         var spurPath = computeDijkstra(spurNode);
 
         // No new candidate from this spur node, continue with next node.
-        if (spurPath.isPresent()) {
-            storePath(indexId, rootPath, spurPath);
-        }
+        spurPath.ifPresent(pathResult -> storePath(indexId, rootPath, pathResult));
 
     }
 
@@ -137,10 +135,10 @@ public class YensTask implements Runnable {
         return localDijkstra.compute().findFirst();
     }
 
-    private void storePath(int indexId, MutablePathResult rootPath, Optional<PathResult> spurPath) {
+    private void storePath(int indexId, MutablePathResult rootPath, PathResult spurPath) {
 
         // Entire path is made up of the root path and spur path.
-        pathAppender.accept(rootPath, spurPath.get());
+        pathAppender.accept(rootPath, spurPath);
 
         //https://en.wikipedia.org/wiki/Yen%27s_algorithm#Lawler's_modification
         //We store the index of the spur node
