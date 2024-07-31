@@ -63,12 +63,8 @@ CREATE
 .Project `Person` nodes and `KNOWS` relationships:
 [source, cypher, role=noplay graph-project-query]
 ----
-MATCH (source:Person)-[r:KNOWS]->(target:Person)
-RETURN gds.graph.project(
-  'persons',
-  source,
-  target
-)
+MATCH (n:Person)-[r:KNOWS]->(m:Person)
+RETURN gds.graph.project('persons', n, m)
 ----
 
 
