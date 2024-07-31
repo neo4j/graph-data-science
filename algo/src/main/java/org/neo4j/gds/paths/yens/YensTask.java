@@ -24,6 +24,8 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
+import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -46,6 +48,7 @@ public class YensTask implements Runnable {
     private final ArrayList<MutablePathResult> kShortestPaths;
     private final CandidatePathsPriorityQueue candidatePathsQueue;
     private final BiConsumer<MutablePathResult, PathResult> pathAppender;
+    private final TerminationFlag terminationFlag;
 
     YensTask(
         Graph graph,
@@ -54,7 +57,8 @@ public class YensTask implements Runnable {
         CandidatePathsPriorityQueue candidatePathsQueue,
         AtomicInteger currentSpurIndexId,
         boolean trackRelationships,
-        int k
+        int k,
+        TerminationFlag terminationFlag
     ) {
         this.currentSpurIndexId = currentSpurIndexId;
         this.localGraph = graph;
@@ -65,7 +69,10 @@ public class YensTask implements Runnable {
         this.kShortestPaths = kShortestPaths;
         this.candidatePathsQueue = candidatePathsQueue;
 
+        this.terminationFlag = terminationFlag;
+
         this.relationshipFilterer = new RelationshipFilterer(k, trackRelationships);
+
         if (trackRelationships) {
             pathAppender = (rootPath, spurPath) -> rootPath.append(MutablePathResult.of(spurPath));
         } else {
@@ -100,7 +107,7 @@ public class YensTask implements Runnable {
         var spurPath = computeDijkstra(spurNode);
 
         // No new candidate from this spur node, continue with next node.
-        if (!spurPath.isEmpty()) {
+        if (spurPath.isPresent()) {
             storePath(indexId, rootPath, spurPath);
         }
 
@@ -127,8 +134,7 @@ public class YensTask implements Runnable {
 
     private Optional<PathResult> computeDijkstra(long spurNode) {
         localDijkstra.withSourceNode(spurNode);
-        var result = localDijkstra.compute().findFirst();
-        return result;
+        return localDijkstra.compute().findFirst();
     }
 
     private void storePath(int indexId, MutablePathResult rootPath, Optional<PathResult> spurPath) {
@@ -148,18 +154,18 @@ public class YensTask implements Runnable {
 
     private void setupDijkstra() {
 
+        DijkstraSourceTargetsBaseConfig config = Yens.dijkstraConfig(targetNode);
         this.localDijkstra = Dijkstra.sourceTarget(
             localGraph,
-            Yens.dijkstraConfig(targetNode).sourceNode(),
-            Yens.dijkstraConfig(targetNode).targetsList(),
+            config.sourceNode(),
+            config.targetsList(),
             trackRelationships,
             Optional.empty(),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            terminationFlag
         );
 
-        localDijkstra.withRelationshipFilter((source, target, relationshipId) ->
-            relationshipFilterer.validRelationship(source, target, relationshipId)
-        );
+        localDijkstra.withRelationshipFilter(relationshipFilterer::validRelationship);
     }
 
 }
