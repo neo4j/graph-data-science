@@ -163,7 +163,14 @@ We can now project the graph and store it in the graph catalog.
 .The following statement will project the graph and store it in the graph catalog.
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project( 'graph', ['Male', 'Female'], 'LINK' );
+MATCH (n:Male|Female)-[r:LINK]->(m:Male|Female)
+RETURN gds.graph.project('graph', n, m,
+  {
+    sourceNodeLabels: labels(n),
+    targetNodeLabels: labels(m),
+    relationshipType: type(r)
+  }
+)
 ----
 
 
