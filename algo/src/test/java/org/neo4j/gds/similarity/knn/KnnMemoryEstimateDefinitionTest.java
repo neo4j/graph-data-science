@@ -28,9 +28,9 @@ import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.mem.MemoryTree;
-import org.neo4j.gds.mem.Estimate;
 
 import java.util.stream.Stream;
 
