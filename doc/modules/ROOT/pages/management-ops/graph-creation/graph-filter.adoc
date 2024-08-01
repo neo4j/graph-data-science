@@ -151,23 +151,18 @@ CREATE
 .Project the social network graph:
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
-  'social-graph',
+MATCH (n:Person)-[r:KNOWS|READS]->(m:Person|Book)
+RETURN gds.graph.project('social-graph', n, m,
   {
-    Person: { properties: 'age' },    // <1>
-    Book: {}                          // <2>
-  },
-  {
-    KNOWS: { properties: 'since' },   // <3>
-    READS: {}                         // <4>
+    sourceNodeLabels: labels(n),
+    targetNodeLabels: labels(m),
+    sourceNodeProperties: n { .age },
+    targetNodeProperties: CASE WHEN labels(m) = ['Person'] THEN m { .age } ELSE {} END,
+    relationshipType: type(r),
+    relationshipProperties: CASE WHEN type(r) = 'KNOWS' THEN r { .since } ELSE {} END
   }
 )
-YIELD graphName, nodeCount, relationshipCount, projectMillis
 ----
-<1> Project `Person` nodes with their `age` property.
-<2> Project `Book` nodes without any of their properties.
-<3> Project `KNOWS` relationships with their `since` property.
-<4> Project `READS` relationships without any of their properties.
 
 
 [[catalog-graph-filter-node-filter-example]]

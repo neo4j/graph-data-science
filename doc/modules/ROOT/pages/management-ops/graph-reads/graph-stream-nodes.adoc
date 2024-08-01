@@ -137,7 +137,7 @@ RETURN gds.graph.project('socialGraph', n, m,
     sourceNodeLabels: labels(n),
     targetNodeLabels: labels(m),
     sourceNodeProperties: n { .age },
-    targetNodeProperties: CASE WHEN labels(m) = ['Book'] THEN {} ELSE m { .age } END,
+    targetNodeProperties: CASE WHEN labels(m) = ['Person'] THEN m { .age } ELSE {} END,
     relationshipType: type(r)
   }
 )
