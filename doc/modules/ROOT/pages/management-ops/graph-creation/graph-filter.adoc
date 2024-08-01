@@ -128,7 +128,7 @@ The expression `degree('Foo', 'Bar') > 42` filters nodes where the sum of `Foo` 
 
 == Examples
 
-include::partial$/common-usage/examples-empty-db-note.adoc[]
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 In order to demonstrate the GDS project subgraph capabilities we are going to create a small social graph in Neo4j.
 
@@ -157,9 +157,9 @@ RETURN gds.graph.project('social-graph', n, m,
     sourceNodeLabels: labels(n),
     targetNodeLabels: labels(m),
     sourceNodeProperties: n { .age },
-    targetNodeProperties: CASE WHEN labels(m) = ['Person'] THEN m { .age } ELSE {} END,
+    targetNodeProperties: CASE WHEN m:Person THEN m { .age } ELSE {} END,
     relationshipType: type(r),
-    relationshipProperties: CASE WHEN type(r) = 'KNOWS' THEN r { .since } ELSE {} END
+    relationshipProperties: CASE WHEN r:KNOWS THEN r { .since } ELSE {} END
   }
 )
 ----
