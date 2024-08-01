@@ -111,7 +111,7 @@ YIELD
 
 == Examples
 
-include::partial$/common-usage/examples-empty-db-note.adoc[]
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 In order to demonstrate the GDS capabilities over node properties, we are going to create a small social network graph in Neo4j and project it into our graph catalog.
 
@@ -131,13 +131,15 @@ CREATE
 .Project the small social network graph:
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
-  'socialGraph',
+MATCH (n:Person)-[r:KNOWS|READ]->(m:Person|Book)
+RETURN gds.graph.project('socialGraph', n, m,
   {
-    Person: {properties: "age"},
-    Book: {}
-  },
-  ['KNOWS', 'READ']
+    sourceNodeLabels: labels(n),
+    targetNodeLabels: labels(m),
+    sourceNodeProperties: n { .age },
+    targetNodeProperties: CASE WHEN m:Person THEN m { .age } ELSE {} END,
+    relationshipType: type(r)
+  }
 )
 ----
 

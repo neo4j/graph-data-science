@@ -64,7 +64,7 @@ include::partial$/algorithms/common-configuration/common-configuration-jobid-con
 [[catalog-graph-relationship-to-undirected-example]]
 == Example
 
-include::partial$/common-usage/examples-empty-db-note.adoc[]
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 In order to demonstrate converting directed relationships to undirected, we are going to create a small graph in Neo4j and project it into our graph catalog.
 
@@ -98,14 +98,16 @@ CREATE
 .Project the graph:
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
+MATCH (person:Person)-[r:LIKES]->(instr:Instrument)
+RETURN gds.graph.project(
   'personsAndInstruments',
-  ['Person', 'Instrument'],
+  person,
+  instr,
   {
-    LIKES: {
-      type: 'LIKES',
-      properties: 'score'
-    }
+    sourceNodeLabels: labels(person),
+    targetNodeLabels: labels(instr),
+    relationshipType: type(r),
+    relationshipProperties: r { .score }
   }
 )
 ----

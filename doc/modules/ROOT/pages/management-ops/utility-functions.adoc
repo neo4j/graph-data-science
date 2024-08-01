@@ -81,7 +81,7 @@ Results in GDS often contain node IDs. You can use the following functions to co
 
 === Examples
 
-include::partial$/common-usage/examples-empty-db-note.adoc[]
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 Consider the graph created by the following Cypher statement:
 
@@ -98,7 +98,8 @@ CREATE  (nBridget)-[:LINK]->(nCharles)
 .Project the graph into GDS:
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project('socialGraph', 'User', 'LINK')
+MATCH (n:User)-[r:LINK]->(m:User)
+RETURN gds.graph.project('socialGraph', n, m)
 ----
 
 ==== `AsNode`
