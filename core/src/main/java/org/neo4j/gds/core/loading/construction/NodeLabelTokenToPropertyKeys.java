@@ -140,11 +140,12 @@ abstract class NodeLabelTokenToPropertyKeys {
 
             // We got the same keys and can check the types.
             var keysWithIncompatibleTypes = overlap.stream()
-                .filter(propertyKey -> userDefinedPropertySchemas
+                .filter(propertyKey -> !userDefinedPropertySchemas
                                            .get(propertyKey)
-                                           .valueType() != importPropertySchemas
+                                           .valueType()
+                                           .isCompatibleWith(importPropertySchemas
                                            .get(propertyKey)
-                                           .valueType()).collect(Collectors.toSet());
+                                           .valueType())).collect(Collectors.toSet());
 
             if (!keysWithIncompatibleTypes.isEmpty()) {
                 throw new IllegalStateException("Incompatible value types between input schema and input data. " +
