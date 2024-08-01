@@ -156,7 +156,7 @@ a|
 
 == Examples
 
-include::partial$/common-usage/examples-empty-db-note.adoc[]
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 In order to demonstrate the GDS capabilities over node properties, we are going to create a small graph in Neo4j and project it into our graph catalog.
 
@@ -190,29 +190,19 @@ CREATE
 .Project the graph:
 [source, cypher, role=noplay graph-project-query, group=rels]
 ----
-CALL gds.graph.project(
+MATCH (person:Person)-[r:LIKES]->(instr:Instrument)
+RETURN gds.graph.project(
   'personsAndInstruments',
-  ['Person', 'Instrument'],         // <1>
+  person,
+  instr,
   {
-    LIKES: {
-      type: 'LIKES',                // <2>
-      properties: {
-        strength: {                 // <3>
-          property: 'strength',
-          defaultValue: 1.0
-        },
-        score: {
-          property: 'score'         // <4>
-        }
-      }
-    }
+    sourceNodeLabels: labels(person),
+    targetNodeLabels: labels(instr),
+    relationshipType: type(r),
+    relationshipProperties: r { .score, strength: coalesce(r.strength, 1.0) }
   }
 )
 ----
-<1> Project node labels `Person` and `Instrument`.
-<2> Project relationship type `LIKES`.
-<3> Project property `strength` of relationship type `LIKES` setting a default value of `1.0` because not all relationships have that property.
-<4> Project property `score` of relationship type `LIKES`.
 
 .Compute the Node Similarity in our graph:
 [source, cypher, role=noplay graph-project-query]
