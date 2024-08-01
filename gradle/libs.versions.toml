@@ -1,7 +1,7 @@
 [versions]
 agrona = "1.21.2"
 asciidoctorj = "2.5.13"
-assertj = "3.26.0"
+assertj = "3.26.3"
 bouncycastle-prov = "1.78.1"
 checkStyle = "10.12.1"
 commons-io = "2.16.1"
