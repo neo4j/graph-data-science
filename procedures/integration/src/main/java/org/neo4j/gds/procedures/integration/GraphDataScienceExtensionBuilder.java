@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.procedures.integration;
 
-import org.neo4j.configuration.Config;
+import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.applications.algorithms.embeddings.GraphSageModelRepository;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
@@ -80,7 +80,7 @@ public final class GraphDataScienceExtensionBuilder {
         ModelCatalog modelCatalog,
         TaskStoreService taskStoreService,
         TaskRegistryFactoryService taskRegistryFactoryService,
-        Boolean useMaxMemoryEstimation,
+        boolean useMaxMemoryEstimation,
         UserLogServices userLogServices,
         Lifecycle gcListener
     ) {
@@ -100,7 +100,7 @@ public final class GraphDataScienceExtensionBuilder {
      * We want to build a GDS, we receive a few customisations and are able to read configuration,
      * and all the rest of the machinery goes here
      */
-    public static GraphDataScienceExtensionBuilder create(
+    public static Pair<GraphDataScienceExtensionBuilder, TaskStoreService> create(
         Log log,
         Configuration neo4jConfiguration,
         GlobalProcedures globalProcedures,
@@ -109,7 +109,6 @@ public final class GraphDataScienceExtensionBuilder {
         ExporterBuildersProviderService exporterBuildersProviderService,
         MetricsFacade metricsFacade,
         ModelCatalog modelCatalog,
-        Config config,
         GraphSageModelRepository graphSageModelRepository
     ) {
         // Read some configuration used to select behaviour
@@ -153,11 +152,11 @@ public final class GraphDataScienceExtensionBuilder {
             memoryGauge,
             metricsFacade,
             modelCatalog,
-            config,
+            neo4jConfiguration,
             graphSageModelRepository
         );
 
-        return new GraphDataScienceExtensionBuilder(
+        var graphDataScienceExtensionBuilder = new GraphDataScienceExtensionBuilder(
             log,
             componentRegistration,
             graphDataScienceProviderFactory,
@@ -169,6 +168,8 @@ public final class GraphDataScienceExtensionBuilder {
             userLogServices,
             gcListener
         );
+
+        return Pair.of(graphDataScienceExtensionBuilder, taskStoreService);
     }
 
     /**

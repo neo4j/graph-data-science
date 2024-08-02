@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.procedures.integration;
 
-import org.neo4j.configuration.Config;
 import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.applications.algorithms.embeddings.GraphSageModelRepository;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
@@ -50,6 +49,7 @@ import org.neo4j.gds.procedures.TerminationFlagAccessor;
 import org.neo4j.gds.procedures.UserAccessor;
 import org.neo4j.gds.procedures.UserLogServices;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.config.Configuration;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
@@ -83,7 +83,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
     private final TaskRegistryFactoryService taskRegistryFactoryService;
     private final TaskStoreService taskStoreService;
     private final UserLogServices userLogServices;
-    private final Config config;
+    private final Configuration neo4jConfiguration;
     private final ModelCatalog modelCatalog;
     private final GraphSageModelRepository graphSageModelRepository;
 
@@ -104,7 +104,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         TaskRegistryFactoryService taskRegistryFactoryService,
         TaskStoreService taskStoreService,
         UserLogServices userLogServices,
-        Config config,
+        Configuration neo4jConfiguration,
         ModelCatalog modelCatalog,
         GraphSageModelRepository graphSageModelRepository
     ) {
@@ -124,7 +124,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.taskStoreService = taskStoreService;
         this.userLogServices = userLogServices;
-        this.config = config;
+        this.neo4jConfiguration = neo4jConfiguration;
         this.modelCatalog = modelCatalog;
         this.graphSageModelRepository = graphSageModelRepository;
     }
@@ -198,7 +198,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
     private WriteContext constructWriteContext(Context context, GraphDatabaseService graphDatabaseService) {
         var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(
             graphDatabaseService,
-            config
+            neo4jConfiguration
         );
 
         var exporterContext = new ExporterContext.ProcedureContextWrapper(context);

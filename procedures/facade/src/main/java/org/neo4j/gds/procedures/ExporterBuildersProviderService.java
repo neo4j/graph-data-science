@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.procedures;
 
-import org.neo4j.configuration.Config;
 import org.neo4j.gds.core.write.ExportBuildersProvider;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.config.Configuration;
 
 public interface ExporterBuildersProviderService {
-    ExportBuildersProvider identifyExportBuildersProvider(GraphDatabaseService graphDatabaseService, Config config);
+    ExportBuildersProvider identifyExportBuildersProvider(GraphDatabaseService graphDatabaseService, Configuration neo4jConfiguration);
 }

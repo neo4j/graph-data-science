@@ -57,18 +57,24 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
         var modelCatalog = new OpenModelCatalogProvider().get(null);
 
         var graphSageModelRepository = new DisableGraphSageModelRepository(); // no model storing in OpenGDS
-        return GraphDataScienceExtensionBuilder.create(
+
+        var neo4jConfiguration = dependencies.config();
+
+        var graphDataScienceExtensionBuilderAndAssociatedProducts = GraphDataScienceExtensionBuilder.create(
             log,
-            dependencies.config(),
+            neo4jConfiguration,
             dependencies.globalProcedures(),
             Optional.empty(), // no extra checks in OpenGDS
             Optional.empty(), // no extra checks in OpenGDS
             exporterBuildersProviderService,
             metricsFacade,
             modelCatalog,
-            dependencies.config(),
             graphSageModelRepository
-        ).build();
+        );
+
+        var graphDataScienceExtensionBuilder = graphDataScienceExtensionBuilderAndAssociatedProducts.getLeft();
+
+        return graphDataScienceExtensionBuilder.build();
     }
 
     public interface Dependencies {
