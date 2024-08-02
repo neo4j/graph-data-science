@@ -147,7 +147,8 @@ public class CELF extends Algorithm<CELFResult> {
             while (lastUpdate.get(spreads.top()) != i) {
                 long batchUpperBound = Math.min(parameters.batchSize(), spreads.size());
                 int actualBatchSize = 0;
-                for (int j = 0; j < batchUpperBound; ++j) {
+                int CHECK_SIZE = (int)Math.ceil(2*batchUpperBound);
+                for (int j = 0; (j < CHECK_SIZE && actualBatchSize < batchUpperBound); ++j) {
                     var nextNodeId = spreads.getIth(j);
                     if (lastUpdate.get(nextNodeId) != i) {
                         firstK[actualBatchSize++] = nextNodeId;
