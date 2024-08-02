@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.wcc;
 
-import org.neo4j.gds.CommunityProcCompanion;
+import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
@@ -39,20 +39,22 @@ public final class WccSpecification {
         return procResultBuilder;
     }
 
-    public static <CONFIG extends WccBaseConfig> NodePropertyValues nodeProperties(
-        ComputationResult<Wcc, DisjointSetStruct, CONFIG> computationResult,
-        String resultProperty
+    static  NodePropertyValues mutateNodeProperties(
+        ComputationResult<Wcc, DisjointSetStruct, WccMutateConfig> computationResult
     ) {
-        var config = computationResult.config();
+        var configuration = computationResult.config();
+        var result = computationResult.result();
+        var graphStore= computationResult.graphStore();
 
-        return CommunityProcCompanion.nodeProperties(
-            config,
-            resultProperty,
-            computationResult.result()
+        return CommunityCompanion.nodePropertyValues(
+            configuration.isIncremental(),
+            configuration.mutateProperty(),
+            configuration.seedProperty(),
+            configuration.consecutiveIds(),
+            result
                 .map(DisjointSetStruct::asNodeProperties)
                 .orElse(EmptyLongNodePropertyValues.INSTANCE),
-            () -> computationResult.graphStore().nodeProperty(config.seedProperty())
-        );
+            () -> graphStore.nodeProperty(configuration.seedProperty()));
     }
 
     private WccSpecification() {}

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.louvain;
 
-import org.neo4j.gds.CommunityProcCompanion;
+import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.properties.nodes.EmptyLongArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
@@ -40,18 +40,20 @@ final class LouvainNodePropertyValuesDelegate {
 
         var result = computationResult.result().get();
 
-        var config = computationResult.config();
-        var includeIntermediateCommunities = config.includeIntermediateCommunities();
+        var configuration = computationResult.config();
+        var includeIntermediateCommunities = configuration.includeIntermediateCommunities();
 
         if (includeIntermediateCommunities) {
             return longArrayNodePropertyValues(computationResult.graph().nodeCount(), result);
         }
-
-        return CommunityProcCompanion.nodeProperties(
-            computationResult.config(),
+        var graphStore = computationResult.graphStore();
+        return CommunityCompanion.nodePropertyValues(
+            configuration.isIncremental(),
             resultProperty,
+            configuration.seedProperty(),
+            configuration.consecutiveIds(),
             NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent()),
-            () -> computationResult.graphStore().nodeProperty(config.seedProperty())
+            () -> graphStore.nodeProperty(configuration.seedProperty())
         );
     }
 

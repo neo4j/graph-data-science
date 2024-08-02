@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.leiden;
 
-import org.neo4j.gds.CommunityProcCompanion;
+import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.properties.nodes.EmptyLongArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
@@ -29,11 +29,9 @@ import org.neo4j.gds.executor.ComputationResult;
 final class LeidenCompanion {
     private LeidenCompanion() {}
 
-    static <CONFIG extends LeidenBaseConfig> NodePropertyValues leidenNodeProperties(
-
-        ComputationResult<Leiden, LeidenResult, CONFIG> computationResult,
+    static NodePropertyValues leidenNodeProperties(
+        ComputationResult<Leiden, LeidenResult, LeidenMutateConfig> computationResult,
         String resultProperty
-
     ) {
         if (computationResult.result().isEmpty()) {
             return EmptyLongArrayNodePropertyValues.INSTANCE;
@@ -50,25 +48,28 @@ final class LeidenCompanion {
                 leidenResult::getIntermediateCommunities
             );
         } else {
-            return getCommunities(computationResult, resultProperty);
+            return getCommunities(computationResult);
         }
     }
 
-    private static <CONFIG extends LeidenBaseConfig> NodePropertyValues getCommunities(
-        ComputationResult<Leiden, LeidenResult, CONFIG> computationResult,
-        String resultProperty
+    private static NodePropertyValues getCommunities(
+        ComputationResult<Leiden, LeidenResult, LeidenMutateConfig> computationResult
     ) {
-        var config = computationResult.config();
-
-        return CommunityProcCompanion.nodeProperties(
-            config,
-            resultProperty,
-            computationResult.result()
-                .map(LeidenResult::dendrogramManager)
-                .map(LeidenDendrogramManager::getCurrent)
-                .map(NodePropertyValuesAdapter::adapt)
-                .orElse(EmptyLongNodePropertyValues.INSTANCE),
-            () -> computationResult.graphStore().nodeProperty(config.seedProperty())
-        );
+        var configuration = computationResult.config();
+        var result = computationResult.result();
+        if (result.isPresent()) {
+            var actualResult = result.get();
+            var graphStore = computationResult.graphStore();
+            return CommunityCompanion.nodePropertyValues(
+                configuration.isIncremental(),
+                configuration.mutateProperty(),
+                configuration.seedProperty(),
+                configuration.consecutiveIds(),
+                NodePropertyValuesAdapter.adapt(actualResult.dendrogramManager().getCurrent()),
+                () -> graphStore.nodeProperty(configuration.seedProperty())
+            );
+        } else {
+            return EmptyLongNodePropertyValues.INSTANCE;
+        }
     }
 }

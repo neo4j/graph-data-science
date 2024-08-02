@@ -28,8 +28,8 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.algorithms.community.WccMutateResult;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
 import java.util.List;
@@ -63,9 +63,8 @@ public class WccMutateSpecification implements AlgorithmSpec<Wcc, DisjointSetStr
         MutateNodePropertyListFunction<Wcc, DisjointSetStruct, WccMutateConfig> mutateConfigNodePropertyListFunction = (computationResult) -> List.of(
             ImmutableNodeProperty.of(
                 computationResult.config().mutateProperty(),
-                WccSpecification.nodeProperties(
-                    computationResult,
-                    computationResult.config().mutateProperty()
+                WccSpecification.mutateNodeProperties(
+                    computationResult
                 )
             )
         );

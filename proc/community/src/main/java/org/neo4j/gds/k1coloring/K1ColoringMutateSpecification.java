@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.k1coloring;
 
-import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
+import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
@@ -30,8 +30,8 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.algorithms.community.K1ColoringMutateResult;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -76,8 +76,8 @@ public class K1ColoringMutateSpecification implements AlgorithmSpec<K1Coloring, 
         return List.of(
             NodeProperty.of(
                 computationResult.config().mutateProperty(),
-                CommunityProcCompanion.considerSizeFilter(
-                    computationResult.config(),
+                CommunityCompanion.nodePropertyValues(
+                    false,
                     longNodePropertyValues
                 )
             )
