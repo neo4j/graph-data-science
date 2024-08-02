@@ -127,7 +127,7 @@ Now we need to project an in-memory graph which we want to back-up.
 [source, cypher, role=noplay graph-project-query, operator=me]
 ----
 MATCH (n:Person)-[r:KNOWS]->(m:Person)
-RETURN gds.graph.project('socialGraph', n, m)
+RETURN gds.graph.project('myGraph', n, m)
 ----
 
 We can now run the back-up procedure in order to store the in-memory graph on disk.
