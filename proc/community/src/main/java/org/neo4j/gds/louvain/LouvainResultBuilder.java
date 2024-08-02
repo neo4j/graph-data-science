@@ -25,7 +25,6 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.procedures.algorithms.community.LouvainMutateResult;
-import org.neo4j.gds.procedures.algorithms.community.LouvainWriteResult;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
 abstract class LouvainResultBuilder<PROC_RESULT> extends AbstractCommunityResultBuilder<PROC_RESULT> {
@@ -58,24 +57,6 @@ abstract class LouvainResultBuilder<PROC_RESULT> extends AbstractCommunityResult
         return procResultBuilder;
     }
 
-    static LouvainResultBuilder<LouvainWriteResult> createForWrite(
-        ComputationResult<Louvain, LouvainResult, LouvainWriteConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        LouvainResultBuilder<LouvainWriteResult> procResultBuilder = new LouvainWriteResultsBuilder(
-            executionContext.returnColumns(),
-            computeResult.config().concurrency()
-        );
-        computeResult.result().ifPresent(result -> {
-            procResultBuilder
-                .withLevels(result.ranLevels())
-                .withModularity(result.modularity())
-                .withModularities(result.modularities())
-                .withCommunityFunction(result::getCommunity);
-        });
-
-        return procResultBuilder;
-    }
 
     LouvainResultBuilder<PROC_RESULT> withLevels(long levels) {
         this.levels = levels;
