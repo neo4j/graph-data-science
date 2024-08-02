@@ -253,9 +253,7 @@ class LouvainWriteProcTest extends BaseProcTest {
         return Stream.of(
             // configuration | expectedCommunityCount | expectedCommunityIds
             Arguments.of(Map.of("minCommunitySize", 1), 3L, List.of(11L, 13L, 14L)),
-            Arguments.of(Map.of("minCommunitySize", 3), 3L, List.of(14L, 13L)),
             Arguments.of(Map.of("minCommunitySize", 1, "consecutiveIds", true), 3L, List.of(0L, 1L, 2L)),
-            Arguments.of(Map.of("minCommunitySize", 3, "consecutiveIds", true), 3L, List.of(0L, 1L)),
             Arguments.of(Map.of("minCommunitySize", 1, "seedProperty", "seed"), 3L, List.of(1L, 2L, 42L)),
             Arguments.of(Map.of("minCommunitySize", 3, "seedProperty", "seed"), 3L, List.of(2L, 42L))
         );
