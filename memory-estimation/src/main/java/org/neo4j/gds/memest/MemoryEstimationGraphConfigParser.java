@@ -23,7 +23,6 @@ import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
-import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.Map;
 
@@ -40,26 +39,19 @@ public class MemoryEstimationGraphConfigParser {
         this.username = username;
     }
 
-    public GraphProjectConfig parse(Object graphNameOrConfig) {
-        if (graphNameOrConfig instanceof Map) {
-            var createConfigMap = (Map<String, Object>) graphNameOrConfig;
-            var createConfigMapWrapper = CypherMapWrapper.create(createConfigMap);
-            CypherMapWrapper.PairResult result = createConfigMapWrapper.verifyMutuallyExclusivePairs(
-                NODE_PROJECTION_KEY,
-                RELATIONSHIP_PROJECTION_KEY,
-                NODE_QUERY_KEY,
-                RELATIONSHIP_QUERY_KEY,
-                "Missing information for implicit graph creation."
-            );
-            if (result == CypherMapWrapper.PairResult.FIRST_PAIR) {
-                return GraphProjectFromStoreConfig.fromProcedureConfig(username, createConfigMapWrapper);
-            } else {
-                return GraphProjectFromCypherConfig.fromProcedureConfig(username, createConfigMapWrapper);
-            }
+    public GraphProjectConfig parse(Map<String, Object> graphConfig) {
+        var createConfigMapWrapper = CypherMapWrapper.create(graphConfig);
+        var result = createConfigMapWrapper.verifyMutuallyExclusivePairs(
+            NODE_PROJECTION_KEY,
+            RELATIONSHIP_PROJECTION_KEY,
+            NODE_QUERY_KEY,
+            RELATIONSHIP_QUERY_KEY,
+            "Missing information for implicit graph creation."
+        );
+        if (result == CypherMapWrapper.PairResult.FIRST_PAIR) {
+            return GraphProjectFromStoreConfig.fromProcedureConfig(username, createConfigMapWrapper);
+        } else {
+            return GraphProjectFromCypherConfig.fromProcedureConfig(username, createConfigMapWrapper);
         }
-        throw new IllegalArgumentException(StringFormatting.formatWithLocale(
-            "Could not parse input. Expected a configuration map, but got %s.",
-            graphNameOrConfig.getClass().getSimpleName()
-        ));
     }
 }
