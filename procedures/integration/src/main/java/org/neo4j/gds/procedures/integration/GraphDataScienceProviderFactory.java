@@ -28,6 +28,7 @@ import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryGauge;
 import org.neo4j.gds.metrics.MetricsFacade;
@@ -90,6 +91,7 @@ final class GraphDataScienceProviderFactory {
 
     GraphDataScienceProvider createGraphDataScienceProvider(
         TaskRegistryFactoryService taskRegistryFactoryService,
+        TaskStoreService taskStoreService,
         boolean useMaxMemoryEstimation,
         UserLogServices userLogServices
     ) {
@@ -116,6 +118,7 @@ final class GraphDataScienceProviderFactory {
             memoryGuard,
             metricsFacade.projectionMetrics(),
             taskRegistryFactoryService,
+            taskStoreService,
             userLogServices,
             config,
             modelCatalog,

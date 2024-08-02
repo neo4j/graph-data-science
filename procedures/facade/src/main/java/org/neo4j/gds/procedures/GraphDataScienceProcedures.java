@@ -40,6 +40,7 @@ import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 import org.neo4j.gds.procedures.catalog.CatalogProcedureFacade;
+import org.neo4j.gds.procedures.operations.OperationsProcedureFacade;
 import org.neo4j.gds.procedures.pipelines.PipelinesProcedureFacade;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -53,6 +54,7 @@ public class GraphDataScienceProcedures {
 
     private final AlgorithmsProcedureFacade algorithmsProcedureFacade;
     private final CatalogProcedureFacade catalogProcedureFacade;
+    private final OperationsProcedureFacade operationsProcedureFacade;
     private final PipelinesProcedureFacade pipelinesProcedureFacade;
 
     private final DeprecatedProceduresMetricService deprecatedProceduresMetricService;
@@ -64,12 +66,14 @@ public class GraphDataScienceProcedures {
         Log log,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
         CatalogProcedureFacade catalogProcedureFacade,
+        OperationsProcedureFacade operationsProcedureFacade,
         PipelinesProcedureFacade pipelinesProcedureFacade,
         DeprecatedProceduresMetricService deprecatedProceduresMetricService
     ) {
         this.log = log;
         this.algorithmsProcedureFacade = algorithmsProcedureFacade;
         this.catalogProcedureFacade = catalogProcedureFacade;
+        this.operationsProcedureFacade = operationsProcedureFacade;
         this.pipelinesProcedureFacade = pipelinesProcedureFacade;
         this.deprecatedProceduresMetricService = deprecatedProceduresMetricService;
     }
@@ -141,6 +145,8 @@ public class GraphDataScienceProcedures {
         var pathFindingProcedureFacade = algorithmProcedureFacadeBuilder.createPathFindingProcedureFacade();
         var similarityProcedureFacade = algorithmProcedureFacadeBuilder.createSimilarityProcedureFacade();
 
+        var operationsProcedureFacade = new OperationsProcedureFacade(requestScopedDependencies);
+
         var pipelinesProcedureFacade = new PipelinesProcedureFacade(requestScopedDependencies.getUser());
 
         return new GraphDataScienceProceduresBuilder(log)
@@ -149,6 +155,7 @@ public class GraphDataScienceProcedures {
             .with(communityProcedureFacade)
             .with(miscellaneousProcedureFacade)
             .with(nodeEmbeddingsProcedureFacade)
+            .with(operationsProcedureFacade)
             .with(pathFindingProcedureFacade)
             .with(pipelinesProcedureFacade)
             .with(similarityProcedureFacade)
@@ -166,6 +173,10 @@ public class GraphDataScienceProcedures {
 
     public CatalogProcedureFacade catalog() {
         return catalogProcedureFacade;
+    }
+
+    public OperationsProcedureFacade operations() {
+        return operationsProcedureFacade;
     }
 
     public PipelinesProcedureFacade pipelines() {

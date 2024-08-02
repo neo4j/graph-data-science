@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.procedures.operations;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -27,7 +27,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ImmutableProgress;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class StructuredOutputHelperTest {
-
     @ParameterizedTest
     @CsvSource(value = {
         "4, 10, 10, [####~~~~~~]",

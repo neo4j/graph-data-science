@@ -68,9 +68,9 @@ public class AlgorithmEstimationTemplate {
     ) {
         var estimationBuilder = MemoryEstimations.builder("Memory Estimation");
 
-        if (graphNameOrConfiguration instanceof Map) {
+        if (graphNameOrConfiguration instanceof Map graphConfig) {
             var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(requestScopedDependencies.getUser().getUsername());
-            var projectionConfiguration = memoryEstimationGraphConfigParser.parse(graphNameOrConfiguration);
+            var projectionConfiguration = memoryEstimationGraphConfigParser.parse(graphConfig);
 
             var graphMemoryEstimation = estimate(projectionConfiguration);
 
@@ -84,8 +84,8 @@ public class AlgorithmEstimationTemplate {
             );
         }
 
-        if (graphNameOrConfiguration instanceof String) {
-            GraphName graphName = GraphName.parse((String) graphNameOrConfiguration);
+        if (graphNameOrConfiguration instanceof String rawGraphName) {
+            GraphName graphName = GraphName.parse(rawGraphName);
 
             var graphDimensions = dimensionsFromActualGraph(graphName, configuration);
 

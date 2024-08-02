@@ -1,0 +1,26 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Operations Procedure Facade'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    neodeps().each {
+        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
+            transitive = false
+        }
+    }
+
+    implementation project(':algorithms-machinery')
+    implementation project(':core')
+    implementation project(':core-utils')
+    implementation project(':progress-tracking')
+    implementation project(':string-formatting')
+
+    testImplementation platform(openGds.junit5bom)
+    testImplementation openGds.junit5.jupiter.api
+    testImplementation openGds.junit5.jupiter.params
+    testRuntimeOnly openGds.junit5.jupiter.engine
+
+    testImplementation openGds.assertj.core
+}

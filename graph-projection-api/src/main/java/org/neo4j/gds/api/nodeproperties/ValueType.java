@@ -154,6 +154,35 @@ public enum ValueType {
             return visitor.visitLongArray();
         }
     },
+    UNTYPED_ARRAY {
+        @Override
+        public String cypherName() {
+            return "List of Any";
+        }
+
+        @Override
+        public String csvName() {
+            return "Any[]";
+        }
+
+        @Override
+        public DefaultValue fallbackValue() {
+            return DefaultValue.DEFAULT;
+        }
+
+        @Override
+        public <RESULT> RESULT accept(Visitor<RESULT> visitor) {
+            throw new UnsupportedOperationException("Value Type UNTYPED_ARRAY is not supported in CSV");
+        }
+
+        @Override
+        public boolean isCompatibleWith(ValueType other) {
+            return other == UNTYPED_ARRAY
+                || other == LONG_ARRAY
+                || other == DOUBLE_ARRAY
+                || other == FLOAT_ARRAY;
+        }
+    },
     UNKNOWN {
         @Override
         public String cypherName() {
@@ -183,6 +212,11 @@ public enum ValueType {
     public abstract DefaultValue fallbackValue();
 
     public abstract <RESULT> RESULT accept(Visitor<RESULT> visitor);
+
+    public boolean isCompatibleWith(ValueType other) {
+        return this == other;
+    }
+
 
     public static ValueType fromCsvName(String csvName) {
         for (ValueType value : values()) {

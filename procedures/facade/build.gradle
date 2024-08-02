@@ -5,9 +5,6 @@ description = 'Neo4j Graph Data Science :: OpenGDS Procedure Facade'
 group = 'org.neo4j.gds'
 
 dependencies {
-
-
-    // the necessary Neo4j things
     neodeps().each {
         compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
             transitive = false
@@ -45,6 +42,7 @@ dependencies {
     implementation project(':native-projection')
     implementation project(':neo4j-api')
     implementation project(':node-embedding-algorithms')
+    implementation project(':operations-procedure-facade')
     implementation project(':path-finding-algorithms')
     implementation project(':pipeline')
     implementation project(':progress-tracking')

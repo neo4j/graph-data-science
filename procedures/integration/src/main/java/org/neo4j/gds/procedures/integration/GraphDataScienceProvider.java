@@ -31,6 +31,7 @@ import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
@@ -80,6 +81,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
     private final MemoryGuard memoryGuard;
     private final ProjectionMetricsService projectionMetricsService;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
+    private final TaskStoreService taskStoreService;
     private final UserLogServices userLogServices;
     private final Config config;
     private final ModelCatalog modelCatalog;
@@ -100,6 +102,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         MemoryGuard memoryGuard,
         ProjectionMetricsService projectionMetricsService,
         TaskRegistryFactoryService taskRegistryFactoryService,
+        TaskStoreService taskStoreService,
         UserLogServices userLogServices,
         Config config,
         ModelCatalog modelCatalog,
@@ -119,6 +122,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         this.memoryGuard = memoryGuard;
         this.projectionMetricsService = projectionMetricsService;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
+        this.taskStoreService = taskStoreService;
         this.userLogServices = userLogServices;
         this.config = config;
         this.modelCatalog = modelCatalog;
@@ -140,6 +144,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         var terminationFlag = terminationFlagAccessor.createTerminationFlag(kernelTransaction);
         var user = userAccessor.getUser(context.securityContext());
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
+        var taskStore = taskStoreService.getTaskStore(databaseId);
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
         var userLogStore = userLogServices.getUserLogStore(databaseId);
 
@@ -156,6 +161,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             .with(databaseId)
             .with(graphLoaderContext)
             .with(taskRegistryFactory)
+            .with(taskStore)
             .with(terminationFlag)
             .with(user)
             .with(userLogRegistryFactory)

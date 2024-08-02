@@ -21,42 +21,141 @@ package org.neo4j.gds.algorithms.community;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.PropertyState;
+import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
+
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
- class CommunityCompanionTest {
+class CommunityCompanionTest {
 
     @Test
-    void shouldAcceptLongPropertyTypes(){
+    void shouldAcceptLongPropertyTypes() {
 
-        var nodePropertyValues = NodePropertyValuesAdapter.adapt(HugeLongArray.of(1,2,3,4));
+        var nodePropertyValues = NodePropertyValuesAdapter.adapt(HugeLongArray.of(1, 2, 3, 4));
 
         var graph = mock(Graph.class);
         when(graph.nodeProperties("foo")).thenReturn(nodePropertyValues);
 
-        var extractedNodeProperties = CommunityCompanion.extractSeedingNodePropertyValues(graph,"foo");
+        var extractedNodeProperties = CommunityCompanion.extractSeedingNodePropertyValues(graph, "foo");
 
-        for (long i=0;i<4;++i) {
-            assertThat(extractedNodeProperties.longValue(i)).isEqualTo(i+1);
+        for (long i = 0; i < 4; ++i) {
+            assertThat(extractedNodeProperties.longValue(i)).isEqualTo(i + 1);
         }
 
-        }
+    }
 
-        @Test
-        void shouldThrowForNonLongValues(){
-            var nodePropertyValues = NodePropertyValuesAdapter.adapt(HugeDoubleArray.of(1.5,2.5,3.5,4.5));
+    @Test
+    void shouldThrowForNonLongValues() {
+        var nodePropertyValues = NodePropertyValuesAdapter.adapt(HugeDoubleArray.of(1.5, 2.5, 3.5, 4.5));
 
-            var graph = mock(Graph.class);
-            when(graph.nodeProperties("foo")).thenReturn(nodePropertyValues);
+        var graph = mock(Graph.class);
+        when(graph.nodeProperties("foo")).thenReturn(nodePropertyValues);
 
-            assertThatThrownBy(()-> CommunityCompanion.extractSeedingNodePropertyValues(graph,"foo"))
-                .hasMessageContaining(
+        assertThatThrownBy(() -> CommunityCompanion.extractSeedingNodePropertyValues(graph, "foo"))
+            .hasMessageContaining(
                 "Provided seeding property `foo` does not comprise exclusively of long values");
+    }
+
+
+    @Test
+    void shouldReturnConsecutiveIds() {
+        var array = HugeLongArray.newArray(10);
+        array.setAll(id -> id % 3 + 10);
+        var nodePropertyValues = NodePropertyValuesAdapter.adapt(array);
+
+        var result = CommunityCompanion.nodePropertyValues(
+            true,
+            nodePropertyValues
+        );
+
+        assertThat(result).isInstanceOf(ConsecutiveLongNodePropertyValues.class);
+        for (int i = 0; i < 10; i++) {
+            assertThat(result.longValue(i)).isEqualTo(i % 3);
         }
+    }
+
+    @Test
+    void shouldReturnOnlyChangedProperties() {
+        var array = HugeLongArray.newArray(10);
+        array.setAll(id -> id);
+        var inputProperties = NodePropertyValuesAdapter.adapt(array);
+
+        var seedProperty = NodeProperty.of("seed", PropertyState.PERSISTENT, inputProperties);
+
+        var result = CommunityCompanion.nodePropertyValues(
+            true,
+            "seed",
+            "seed",
+            false,
+            inputProperties,
+            () -> seedProperty
+        );
+
+        assertThat(result).isInstanceOf(LongIfChangedNodePropertyValues.class);
+        for (long i = 0; i < result.nodeCount(); i++) {
+            assertThat(result.longValue(i)).isEqualTo(inputProperties.longValue(i));
+            assertThat(result.value(i)).isNull();
+        }
+    }
+
+    @Test
+    void shouldRestrictCommunitySize() {
+        var array = HugeLongArray.newArray(10);
+        array.setAll(id -> id < 5 ? id : 5);
+        var inputProperties = NodePropertyValuesAdapter.adapt(array);
+
+        var result = CommunityCompanion.nodePropertyValues(
+            false,
+            inputProperties,
+            Optional.of(2L),
+            new Concurrency(4)
+        );
+
+        for (long i = 0L; i < result.nodeCount(); i++) {
+
+            if (i < 5) {
+                assertThat(result.longValue(i)).isEqualTo(inputProperties.longValue(i));
+                assertThat(result.value(i)).isNull();
+            } else {
+                assertThat(result.longValue(i)).isEqualTo(inputProperties.longValue(i));
+                assertThat(result.value(i).asObject()).isEqualTo(5L);
+            }
+        }
+    }
+
+
+    @Test
+    void shouldWorkWithMinComponentAndConsecutive() {
+        var array = HugeLongArray.of(20, 20, 200, 10, 10, 50, 90, 10, 50, 50, 50);
+        var inputProperties = NodePropertyValuesAdapter.adapt(array);
+
+        Long[] returnedValues = new Long[]{null, null, null, 0l, 0L, 1l, null, 0l, 1l, 1l, 1l};
+
+        var result = CommunityCompanion.nodePropertyValues(
+            true,
+            inputProperties,
+            Optional.of(3L),
+            new Concurrency(4)
+        );
+
+        for (long i = 0L; i < result.nodeCount(); i++) {
+            int ii = (int) i;
+            if (returnedValues[ii] == null) {
+                assertThat(result.hasValue(i)).isFalse();
+            } else {
+                assertThat(result.hasValue(i)).isTrue();
+                assertThat(result.value(i).asObject()).isEqualTo(returnedValues[(int) i]);
+            }
+
+        }
+    }
 }
