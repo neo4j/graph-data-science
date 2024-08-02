@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.community;
 
+import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
@@ -46,11 +47,20 @@ class WccMutateStep implements MutateOrWriteStep<DisjointSetStruct, NodeProperti
         DisjointSetStruct result,
         JobId jobId
     ) {
+
+        var  nodeProperties = CommunityCompanion.nodePropertyValues(
+            configuration.isIncremental(),
+            configuration.mutateProperty(),
+            configuration.seedProperty(),
+            configuration.consecutiveIds(),
+            result.asNodeProperties(),
+            () -> graphStore.nodeProperty(configuration.seedProperty()));
+
         return mutateNodeProperty.mutateNodeProperties(
             graph,
             graphStore,
             configuration,
-            result.asNodeProperties()
+            nodeProperties
         );
     }
 }
