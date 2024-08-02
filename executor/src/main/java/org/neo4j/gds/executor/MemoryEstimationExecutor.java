@@ -88,7 +88,7 @@ public class MemoryEstimationExecutor<
         GraphDimensions graphDims;
         Optional<MemoryEstimation> maybeGraphEstimation;
 
-        if (graphNameOrConfiguration instanceof Map) {
+        if (graphNameOrConfiguration instanceof Map graphConfig) {
             // if the transaction context is empty, we are probably using EstimationCli
             var graphLoaderContext = transactionContext == EmptyTransactionContext.INSTANCE
                 ? GraphLoaderContext.NULL_CONTEXT
@@ -103,7 +103,7 @@ public class MemoryEstimationExecutor<
                     .transactionContext(transactionContext).build();
 
             var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(executionContext.username());
-            var graphProjectConfig = memoryEstimationGraphConfigParser.parse(graphNameOrConfiguration);
+            var graphProjectConfig = memoryEstimationGraphConfigParser.parse(graphConfig);
             var graphStoreCreator = graphProjectConfig.isFictitiousLoading()
                 ? new FictitiousGraphStoreLoader(graphProjectConfig)
                 : new GraphStoreFromDatabaseLoader(graphProjectConfig, executionContext.username(), graphLoaderContext);
