@@ -31,7 +31,6 @@ import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityWriteConfi
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
 import java.util.Map;
-import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FilteredNodeSimilarity;
 
@@ -78,7 +77,7 @@ final class FilteredNodeSimilarityWriteStep implements MutateOrWriteStep<NodeSim
             configuration,
             configuration,
             shouldComputeSimilarityDistribution,
-            Optional.of(resultStore),
+            configuration.resolveResultStore(resultStore),
             FilteredNodeSimilarity,
             result.graphResult(),
             configuration.jobId()
