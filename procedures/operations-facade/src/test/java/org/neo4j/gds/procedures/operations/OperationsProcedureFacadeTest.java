@@ -20,7 +20,6 @@
 package org.neo4j.gds.procedures.operations;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.ApplicationsFacadeBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -39,15 +38,14 @@ class OperationsProcedureFacadeTest {
     @Test
     void shouldQueryUserLog() {
         var userLogStore = mock(UserLogStore.class);
-        var operationsApplications = mock(OperationsApplications.class);
-        var operationsProcedureFacade = new OperationsProcedureFacade(
+        var operationsApplications = OperationsApplications.create(
             RequestScopedDependencies.builder()
-                .with(DatabaseId.of("current database"))
                 .with(new User("current user", false))
                 .with(userLogStore)
-                .build(),
-            new ApplicationsFacadeBuilder().with(operationsApplications).build()
+                .build()
         );
+        var applicationsFacade = new ApplicationsFacadeBuilder().with(operationsApplications).build();
+        var operationsProcedureFacade = new OperationsProcedureFacade(applicationsFacade);
 
         var expectedWarnings = Stream.of(
             new UserLogEntry(new LeafTask("lt", 42), "going once"),
@@ -59,5 +57,4 @@ class OperationsProcedureFacadeTest {
 
         assertThat(actualWarnings).isSameAs(expectedWarnings);
     }
-
 }

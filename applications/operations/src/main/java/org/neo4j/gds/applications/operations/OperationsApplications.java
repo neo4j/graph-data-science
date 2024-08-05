@@ -20,6 +20,8 @@
 package org.neo4j.gds.applications.operations;
 
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 
 import java.util.stream.Stream;
@@ -33,6 +35,36 @@ public final class OperationsApplications {
 
     public static OperationsApplications create(RequestScopedDependencies requestScopedDependencies) {
         return new OperationsApplications(requestScopedDependencies);
+    }
+
+    /**
+     * List progress for the given user, or for all users if in administrator mode
+     */
+    public Stream<TaskStore.UserTask> listProgress() {
+        var taskStore = requestScopedDependencies.getTaskStore();
+        var user = requestScopedDependencies.getUser();
+
+        if (user.isAdmin()) return taskStore.query();
+
+        return taskStore.query(user.getUsername());
+    }
+
+    /**
+     * List progress for the given job id, subject to user permissions.
+     */
+    public <RESULT> Stream<RESULT> listProgress(JobId jobId, ResultRenderer<RESULT> resultRenderer) {
+        var taskStore = requestScopedDependencies.getTaskStore();
+        var user = requestScopedDependencies.getUser();
+
+        if (user.isAdmin()) {
+            var results = taskStore.query(jobId);
+
+            return resultRenderer.renderAdministratorView(results);
+        }
+
+        var results = taskStore.query(user.getUsername(), jobId);
+
+        return resultRenderer.render(results);
     }
 
     /**
