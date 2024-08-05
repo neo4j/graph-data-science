@@ -31,7 +31,7 @@ import java.util.Optional;
 public class NodeImporter {
 
     private static <PROPERTY_REF> int importProperties(
-        NodeImporter.PropertyReader reader,
+        NodeImporter.PropertyReader<PROPERTY_REF> reader,
         long[] batch,
         PROPERTY_REF[] properties,
         NodeLabelTokenSet[] labelTokens,
