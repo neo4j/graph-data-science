@@ -35,6 +35,7 @@ dependencies {
     implementation project(':legacy-cypher-projection')
     implementation project(':memory-usage')
     implementation project(':neo4j-api')
+    implementation project(':operations-procedure-facade')
     implementation project(':opengds-procedure-facade')
     implementation project(':pregel')
     implementation project(':proc-catalog')

@@ -44,7 +44,6 @@ import org.neo4j.gds.applications.graphstorecatalog.WriteRelationshipResult;
 import org.neo4j.gds.beta.filter.GraphFilterResult;
 import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
-import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 import org.neo4j.gds.legacycypherprojection.GraphProjectCypherResult;
 import org.neo4j.gds.projection.GraphProjectNativeResult;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -132,13 +131,6 @@ public class GraphCatalogProcedureFacade {
             requestScopedDependencies.getDatabaseId(),
             graphName
         );
-    }
-
-    /**
-     * Huh, we never did jobId filtering...
-     */
-    public Stream<UserLogEntry> queryUserLog(String jobId) {
-        return requestScopedDependencies.getUserLogStore().query(requestScopedDependencies.getUser().getUsername());
     }
 
     /**

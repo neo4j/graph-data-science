@@ -17,14 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.userlog;
-
+package org.neo4j.gds.procedures.operations;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.User;
+import org.neo4j.gds.applications.ApplicationsFacadeBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.operations.OperationsApplications;
 import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
-import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.operations.OperationsProcedureFacade;
+import org.neo4j.gds.core.utils.warnings.UserLogStore;
 
 import java.util.stream.Stream;
 
@@ -32,22 +35,29 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class UserLogProcTest {
+class OperationsProcedureFacadeTest {
     @Test
-    void shouldLogUserWarnings() {
-        var facade = mock(GraphDataScienceProcedures.class);
-        var userLogProc = new UserLogProc(facade);
+    void shouldQueryUserLog() {
+        var userLogStore = mock(UserLogStore.class);
+        var operationsApplications = mock(OperationsApplications.class);
+        var operationsProcedureFacade = new OperationsProcedureFacade(
+            RequestScopedDependencies.builder()
+                .with(DatabaseId.of("current database"))
+                .with(new User("current user", false))
+                .with(userLogStore)
+                .build(),
+            new ApplicationsFacadeBuilder().with(operationsApplications).build()
+        );
 
         var expectedWarnings = Stream.of(
             new UserLogEntry(new LeafTask("lt", 42), "going once"),
             new UserLogEntry(new LeafTask("lt", 87), "going twice..."),
             new UserLogEntry(new LeafTask("lt", 23), "gone!")
         );
-        var operationsProcedureFacade = mock(OperationsProcedureFacade.class);
-        when(facade.operations()).thenReturn(operationsProcedureFacade);
-        when(operationsProcedureFacade.queryUserLog("unused")).thenReturn(expectedWarnings);
-        var actualWarnings = userLogProc.queryUserLog("unused");
+        when(userLogStore.query("current user")).thenReturn(expectedWarnings);
+        var actualWarnings = operationsProcedureFacade.queryUserLog(null);
 
         assertThat(actualWarnings).isSameAs(expectedWarnings);
     }
+
 }

@@ -30,6 +30,7 @@ dependencies {
     implementation project(':native-projection')
     implementation project(':neo4j-api')
     implementation project(':node-embedding-algorithms')
+    implementation project(':operations-applications')
     implementation project(':path-finding-algorithms')
     implementation project(':progress-tracking')
     implementation project(':similarity-algorithms')

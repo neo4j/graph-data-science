@@ -27,6 +27,7 @@ import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingApplications
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityApplications;
 import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
+import org.neo4j.gds.applications.operations.OperationsApplications;
 
 /**
  * This is a helper that makes it easy to inject constituents, and to not have to inject all of them.
@@ -38,6 +39,7 @@ public class ApplicationsFacadeBuilder {
     private MiscellaneousApplications miscellaneousApplications;
     private ModelCatalogApplications modelCatalogApplications;
     private NodeEmbeddingApplications nodeEmbeddingApplications;
+    private OperationsApplications operationsApplications;
     private PathFindingApplications pathFindingApplications;
     private SimilarityApplications similarityApplications;
 
@@ -71,6 +73,11 @@ public class ApplicationsFacadeBuilder {
         return this;
     }
 
+    public ApplicationsFacadeBuilder with(OperationsApplications operationsApplications) {
+        this.operationsApplications = operationsApplications;
+        return this;
+    }
+
     public ApplicationsFacadeBuilder with(PathFindingApplications pathFindingApplications) {
         this.pathFindingApplications = pathFindingApplications;
         return this;
@@ -89,6 +96,7 @@ public class ApplicationsFacadeBuilder {
             miscellaneousApplications,
             modelCatalogApplications,
             nodeEmbeddingApplications,
+            operationsApplications,
             pathFindingApplications,
             similarityApplications
         );

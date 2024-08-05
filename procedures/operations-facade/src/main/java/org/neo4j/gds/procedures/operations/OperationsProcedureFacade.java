@@ -19,10 +19,12 @@
  */
 package org.neo4j.gds.procedures.operations;
 
+import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.TaskTraversal;
+import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -32,14 +34,24 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public class OperationsProcedureFacade {
     private final RequestScopedDependencies requestScopedDependencies;
 
-    public OperationsProcedureFacade(RequestScopedDependencies requestScopedDependencies) {
+    private final ApplicationsFacade applicationsFacade;
+
+    public OperationsProcedureFacade(
+        RequestScopedDependencies requestScopedDependencies,
+        ApplicationsFacade applicationsFacade
+    ) {
         this.requestScopedDependencies = requestScopedDependencies;
+        this.applicationsFacade = applicationsFacade;
     }
 
     public Stream<ProgressResult> listProgress(String jobId) {
         return jobId.isBlank()
             ? jobsSummaryView()
             : jobDetailView(jobId);
+    }
+
+    public Stream<UserLogEntry> queryUserLog(String jobId) {
+        return applicationsFacade.operations().queryUserLog(jobId);
     }
 
     private Stream<ProgressResult> jobsSummaryView() {

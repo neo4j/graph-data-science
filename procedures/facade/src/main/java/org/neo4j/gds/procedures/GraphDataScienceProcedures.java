@@ -154,7 +154,7 @@ public class GraphDataScienceProcedures {
         var pathFindingProcedureFacade = algorithmProcedureFacadeBuilder.createPathFindingProcedureFacade();
         var similarityProcedureFacade = algorithmProcedureFacadeBuilder.createSimilarityProcedureFacade();
 
-        var operationsProcedureFacade = new OperationsProcedureFacade(requestScopedDependencies);
+        var operationsProcedureFacade = new OperationsProcedureFacade(requestScopedDependencies, applicationsFacade);
 
         var pipelinesProcedureFacade = new PipelinesProcedureFacade(requestScopedDependencies.getUser());
 

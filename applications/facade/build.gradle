@@ -19,6 +19,7 @@ dependencies {
     implementation project(":model-catalog-applications")
     implementation project(":miscellaneous-algorithms")
     implementation project(":node-embedding-algorithms")
+    implementation project(":operations-applications")
     implementation project(":path-finding-algorithms")
     implementation project(":progress-tracking")
     implementation project(":similarity-algorithms")

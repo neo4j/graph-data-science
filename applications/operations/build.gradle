@@ -1,0 +1,11 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Operations Applications'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    implementation project(":algorithms-machinery")
+    implementation project(":core")
+    implementation project(":progress-tracking")
+}

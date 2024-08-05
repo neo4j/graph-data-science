@@ -104,6 +104,9 @@ project(':graph-store-catalog-applications').projectDir = file('applications/gra
 include('model-catalog-applications')
 project(':model-catalog-applications').projectDir = file('applications/model-catalog')
 
+include('operations-applications')
+project(':operations-applications').projectDir = file('applications/operations')
+
 include('centrality-algorithms')
 project(':centrality-algorithms').projectDir = file('applications/algorithms/centrality')
 

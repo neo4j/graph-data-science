@@ -40,6 +40,7 @@ import org.neo4j.gds.applications.graphstorecatalog.DefaultGraphCatalogApplicati
 import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.DefaultModelCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
+import org.neo4j.gds.applications.operations.OperationsApplications;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.logging.Log;
@@ -64,6 +65,7 @@ public final class ApplicationsFacade {
     private final MiscellaneousApplications miscellaneousApplications;
     private final ModelCatalogApplications modelCatalogApplications;
     private final NodeEmbeddingApplications nodeEmbeddingApplications;
+    private final OperationsApplications operationsApplications;
     private final PathFindingApplications pathFindingApplications;
     private final SimilarityApplications similarityApplications;
 
@@ -74,6 +76,7 @@ public final class ApplicationsFacade {
         MiscellaneousApplications miscellaneousApplications,
         ModelCatalogApplications modelCatalogApplications,
         NodeEmbeddingApplications nodeEmbeddingApplications,
+        OperationsApplications operationsApplications,
         PathFindingApplications pathFindingApplications,
         SimilarityApplications similarityApplications
     ) {
@@ -83,6 +86,7 @@ public final class ApplicationsFacade {
         this.miscellaneousApplications = miscellaneousApplications;
         this.modelCatalogApplications = modelCatalogApplications;
         this.nodeEmbeddingApplications = nodeEmbeddingApplications;
+        this.operationsApplications = operationsApplications;
         this.pathFindingApplications = pathFindingApplications;
         this.similarityApplications = similarityApplications;
     }
@@ -183,6 +187,8 @@ public final class ApplicationsFacade {
             graphSageModelRepository
         );
 
+        var operationsApplications = OperationsApplications.create(requestScopedDependencies);
+
         var pathFindingApplications = PathFindingApplications.create(
             log,
             requestScopedDependencies,
@@ -210,6 +216,7 @@ public final class ApplicationsFacade {
             .with(miscellaneousApplications)
             .with(modelCatalogApplications)
             .with(nodeEmbeddingApplications)
+            .with(operationsApplications)
             .with(pathFindingApplications)
             .with(similarityApplications)
             .build();
@@ -290,6 +297,10 @@ public final class ApplicationsFacade {
 
     public NodeEmbeddingApplications nodeEmbeddings() {
         return nodeEmbeddingApplications;
+    }
+
+    public OperationsApplications operations() {
+        return operationsApplications;
     }
 
     public PathFindingApplications pathFinding() {
