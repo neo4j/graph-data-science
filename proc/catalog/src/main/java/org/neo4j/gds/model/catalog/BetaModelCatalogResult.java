@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.model.catalog;
 
+import org.neo4j.gds.procedures.modelcatalog.ModelCatalogResult;
+
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.stream.Collectors;

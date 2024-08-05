@@ -33,6 +33,14 @@ public class ModelCatalogProcedureFacade {
         this.applicationsFacade = applicationsFacade;
     }
 
+    public Stream<ModelCatalogResult> drop(String modelNameAsString, boolean failIfMissing) {
+        var modelName = modelNameValidationService.validate(modelNameAsString);
+
+        var model = applicationsFacade.modelCatalog().drop(modelName, failIfMissing);
+
+        return Stream.ofNullable(model).map(ModelCatalogResult::new);
+    }
+
     public Stream<ModelExistsResult> exists(String modelNameAsString) {
         var modelName = modelNameValidationService.validate(modelNameAsString);
 

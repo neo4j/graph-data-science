@@ -7,5 +7,8 @@ group = 'org.neo4j.gds'
 dependencies {
     implementation project(':annotations')
     implementation project(':applications-facade')
+    implementation project(':config-api')
+    implementation project(':graph-schema-api')
+    implementation project(':model-catalog-api')
     implementation project(':model-catalog-applications')
 }

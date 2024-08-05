@@ -39,6 +39,13 @@ public final class DefaultModelCatalogApplications implements ModelCatalogApplic
     }
 
     @Override
+    public Model<?, ?, ?> drop(ModelName modelName, boolean failIfMissing) {
+        if (failIfMissing) return modelCatalog.dropOrThrow(user.getUsername(), modelName.getValue());
+
+        return modelCatalog.drop(user.getUsername(), modelName.getValue());
+    }
+
+    @Override
     public ModelExistsResult exists(ModelName modelName) {
         var untypedModel = modelCatalog.getUntyped(user.getUsername(), modelName.getValue());
 

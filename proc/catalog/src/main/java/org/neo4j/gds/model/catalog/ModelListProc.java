@@ -20,6 +20,7 @@
 package org.neo4j.gds.model.catalog;
 
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.procedures.modelcatalog.ModelCatalogResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -30,7 +31,6 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 
 public class ModelListProc extends ModelCatalogProc {
-
     private static final String DESCRIPTION = "Lists all models contained in the model catalog.";
 
     @Procedure(name = "gds.model.list", mode = READ)

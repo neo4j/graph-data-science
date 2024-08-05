@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.model.catalog;
 
-import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.modelcatalog.ModelCatalogResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -29,9 +31,11 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class ModelDropProc extends ModelCatalogProc {
-
+public class ModelDropProc {
     private static final String DESCRIPTION = "Drops a loaded model and frees up the resources it occupies.";
+
+    @Context
+    public GraphDataScienceProcedures facade;
 
     @Procedure(name = "gds.model.drop", mode = READ)
     @Description(DESCRIPTION)
@@ -39,17 +43,7 @@ public class ModelDropProc extends ModelCatalogProc {
         @Name(value = "modelName") String modelName,
         @Name(value = "failIfMissing", defaultValue = "true") boolean failIfMissing
     ) {
-        validateModelName(modelName);
-
-        Model<?, ?, ?> model;
-
-        var modelCatalog = executionContext().modelCatalog();
-        if (failIfMissing) {
-            model = modelCatalog.dropOrThrow(username(), modelName);
-        } else {
-            model = modelCatalog.drop(username(), modelName);
-        }
-        return Stream.ofNullable(model).map(ModelCatalogResult::new);
+        return facade.modelCatalog().drop(modelName, failIfMissing);
     }
 
     @Procedure(name = "gds.beta.model.drop", mode = READ, deprecatedBy = "gds.model.drop")
@@ -60,13 +54,9 @@ public class ModelDropProc extends ModelCatalogProc {
         @Name(value = "modelName") String modelName,
         @Name(value = "failIfMissing", defaultValue = "true") boolean failIfMissing
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.beta.model.drop");
+        facade.deprecatedProcedures().called("gds.beta.model.drop");
+        facade.log().warn("Procedure `gds.beta.model.drop` has been deprecated, please use `gds.model.drop`.");
 
-        executionContext()
-            .log()
-            .warn("Procedure `gds.beta.model.drop` has been deprecated, please use `gds.model.drop`.");
         return drop(modelName, failIfMissing).map(BetaModelCatalogResult::new);
     }
 }

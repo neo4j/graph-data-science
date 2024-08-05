@@ -19,6 +19,10 @@
  */
 package org.neo4j.gds.applications.modelcatalog;
 
+import org.neo4j.gds.core.model.Model;
+
 public interface ModelCatalogApplications {
+    Model<?, ?, ?> drop(ModelName modelName, boolean failIfMissing);
+
     ModelExistsResult exists(ModelName modelName);
 }
