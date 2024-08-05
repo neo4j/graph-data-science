@@ -40,7 +40,7 @@ import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.AlgorithmProcedureFacadeBuilderFactory;
-import org.neo4j.gds.procedures.CatalogProcedureFacadeFactory;
+import org.neo4j.gds.procedures.GraphCatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.DatabaseIdAccessor;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.ProcedureCallContextReturnColumns;
@@ -166,7 +166,7 @@ public final class ProcedureRunner {
             .build();
         var graphStoreCatalogService = new GraphStoreCatalogService();
 
-        var catalogProcedureFacadeFactory = new CatalogProcedureFacadeFactory(gdsLog);
+        var catalogProcedureFacadeFactory = new GraphCatalogProcedureFacadeFactory(gdsLog);
 
         var modelCatalog = new OpenModelCatalog();
 
@@ -180,6 +180,7 @@ public final class ProcedureRunner {
             gdsLog,
             DefaultsConfiguration.Instance,
             LimitsConfiguration.Instance,
+            Optional.empty(),
             Optional.empty(),
             Optional.empty(),
             graphStoreCatalogService,

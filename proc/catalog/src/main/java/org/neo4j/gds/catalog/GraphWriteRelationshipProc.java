@@ -47,7 +47,7 @@ public class GraphWriteRelationshipProc {
         @Name(value = "relationshipProperty", defaultValue = "") @Nullable String relationshipProperty,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.catalog().writeRelationships(graphName, relationshipType, relationshipProperty, configuration);
+        return facade.graphCatalog().writeRelationships(graphName, relationshipType, relationshipProperty, configuration);
     }
 
     @Procedure(name = "gds.graph.writeRelationship", mode = WRITE, deprecatedBy = "gds.graph.relationships.write")
@@ -67,6 +67,6 @@ public class GraphWriteRelationshipProc {
             .warn(
                 "Procedure `gds.graph.writeRelationship` has been deprecated, please use `gds.graph.relationships.write`.");
 
-        return facade.catalog().writeRelationships(graphName, relationshipType, relationshipProperty, configuration);
+        return facade.graphCatalog().writeRelationships(graphName, relationshipType, relationshipProperty, configuration);
     }
 }

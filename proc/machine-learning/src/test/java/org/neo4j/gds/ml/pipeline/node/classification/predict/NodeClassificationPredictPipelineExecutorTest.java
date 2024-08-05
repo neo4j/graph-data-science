@@ -433,6 +433,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             null,
             Optional.empty(),
             Optional.empty(),
+            Optional.empty(),
             null,
             null,
             null,

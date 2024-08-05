@@ -28,7 +28,7 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.procedures.catalog.CatalogProcedureFacade.NO_VALUE_PLACEHOLDER;
+import static org.neo4j.gds.procedures.catalog.GraphCatalogProcedureFacade.NO_VALUE_PLACEHOLDER;
 import static org.neo4j.gds.catalog.GraphCatalogProcedureConstants.LIST_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
@@ -49,6 +49,6 @@ public class GraphListProc {
     public Stream<GraphInfoWithHistogram> listGraphs(
         @Name(value = "graphName", defaultValue = NO_VALUE_PLACEHOLDER) String graphName
     ) {
-        return facade.catalog().listGraphs(graphName);
+        return facade.graphCatalog().listGraphs(graphName);
     }
 }

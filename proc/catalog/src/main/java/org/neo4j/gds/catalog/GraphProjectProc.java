@@ -57,7 +57,7 @@ public class GraphProjectProc {
         @Name(value = "relationshipProjection") @Nullable Object relationshipProjection,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.catalog().nativeProject(
+        return facade.graphCatalog().nativeProject(
             graphName,
             nodeProjection,
             relationshipProjection,
@@ -72,7 +72,7 @@ public class GraphProjectProc {
         @Name(value = "relationshipProjection") @Nullable Object relationshipProjection,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.catalog().estimateNativeProject(nodeProjection, relationshipProjection, configuration);
+        return facade.graphCatalog().estimateNativeProject(nodeProjection, relationshipProjection, configuration);
     }
 
     @Procedure(name = "gds.graph.project.cypher", mode = READ, deprecatedBy = "gds.graph.project Cypher projection as an aggregation function")
@@ -88,7 +88,7 @@ public class GraphProjectProc {
             .log()
             .warn("Procedure `gds.graph.project.cypher` has been deprecated, please look into cypher projection via `gds.graph.project`");
 
-        return facade.catalog().cypherProject(graphName, nodeQuery, relationshipQuery, configuration);
+        return facade.graphCatalog().cypherProject(graphName, nodeQuery, relationshipQuery, configuration);
     }
 
     @Procedure(name = "gds.graph.project.cypher.estimate", mode = READ, deprecatedBy = "gds.graph.project Cypher projection as an aggregation function")
@@ -103,7 +103,7 @@ public class GraphProjectProc {
             .log()
             .warn("Procedure `gds.graph.project.cypher` has been deprecated, please look into cypher projection via `gds.graph.project`");
 
-        return facade.catalog().estimateCypherProject(nodeQuery, relationshipQuery, configuration);
+        return facade.graphCatalog().estimateCypherProject(nodeQuery, relationshipQuery, configuration);
     }
 
     @Internal
@@ -119,6 +119,6 @@ public class GraphProjectProc {
     ) {
         facade.deprecatedProcedures().called("gds.beta.graph.project.subgraph");
         facade.log().warn("Procedure `gds.beta.graph.project.subgraph` has been deprecated, please use `gds.graph.filter`.");
-        return facade.catalog().subGraphProject(graphName, fromGraphName, nodeFilter, relationshipFilter, configuration);
+        return facade.graphCatalog().subGraphProject(graphName, fromGraphName, nodeFilter, relationshipFilter, configuration);
     }
 }

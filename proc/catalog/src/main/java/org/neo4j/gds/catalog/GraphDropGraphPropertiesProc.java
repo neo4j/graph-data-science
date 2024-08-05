@@ -60,6 +60,6 @@ public class GraphDropGraphPropertiesProc {
         @Name(value = "graphProperty") String graphProperty,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.catalog().dropGraphProperty(graphName, graphProperty, configuration);
+        return facade.graphCatalog().dropGraphProperty(graphName, graphProperty, configuration);
     }
 }

@@ -25,24 +25,21 @@ import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingApplication
 import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplications;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingApplications;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityApplications;
-import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
+import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
+import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
 
 /**
  * This is a helper that makes it easy to inject constituents, and to not have to inject all of them.
  */
 public class ApplicationsFacadeBuilder {
-    private CatalogBusinessFacade catalogBusinessFacade;
     private CentralityApplications centralityApplications;
     private CommunityApplications communityApplications;
+    private GraphCatalogApplications graphCatalogApplications;
     private MiscellaneousApplications miscellaneousApplications;
+    private ModelCatalogApplications modelCatalogApplications;
     private NodeEmbeddingApplications nodeEmbeddingApplications;
     private PathFindingApplications pathFindingApplications;
     private SimilarityApplications similarityApplications;
-
-    public ApplicationsFacadeBuilder with(CatalogBusinessFacade catalogBusinessFacade) {
-        this.catalogBusinessFacade = catalogBusinessFacade;
-        return this;
-    }
 
     public ApplicationsFacadeBuilder with(CentralityApplications centralityApplications) {
         this.centralityApplications = centralityApplications;
@@ -54,8 +51,18 @@ public class ApplicationsFacadeBuilder {
         return this;
     }
 
+    public ApplicationsFacadeBuilder with(GraphCatalogApplications graphCatalogApplications) {
+        this.graphCatalogApplications = graphCatalogApplications;
+        return this;
+    }
+
     public ApplicationsFacadeBuilder with(MiscellaneousApplications miscellaneousApplications) {
         this.miscellaneousApplications = miscellaneousApplications;
+        return this;
+    }
+
+    public ApplicationsFacadeBuilder with(ModelCatalogApplications modelCatalogApplications) {
+        this.modelCatalogApplications = modelCatalogApplications;
         return this;
     }
 
@@ -76,10 +83,11 @@ public class ApplicationsFacadeBuilder {
 
     public ApplicationsFacade build() {
         return new ApplicationsFacade(
-            catalogBusinessFacade,
             centralityApplications,
             communityApplications,
+            graphCatalogApplications,
             miscellaneousApplications,
+            modelCatalogApplications,
             nodeEmbeddingApplications,
             pathFindingApplications,
             similarityApplications

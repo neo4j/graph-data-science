@@ -47,7 +47,7 @@ import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.applications.ApplicationsFacadeBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
-import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
+import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.DeletionResult;
@@ -70,11 +70,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class CatalogProcedureFacadeTest {
+class GraphCatalogProcedureFacadeTest {
     @Test
     void shouldDetermineIfGraphExists() {
-        var businessFacade = mock(CatalogBusinessFacade.class);
-        var catalogFacade = new CatalogProcedureFacade(
+        var businessFacade = mock(GraphCatalogApplications.class);
+        var catalogFacade = new GraphCatalogProcedureFacade(
             RequestScopedDependencies.builder()
                 .with(DatabaseId.of("current database"))
                 .with(new User("current user", false))
@@ -109,8 +109,8 @@ class CatalogProcedureFacadeTest {
     @Test
     void shouldQueryUserLog() {
         var userLogStore = mock(UserLogStore.class);
-        var businessFacade = mock(CatalogBusinessFacade.class);
-        var catalogFacade = new CatalogProcedureFacade(
+        var businessFacade = mock(GraphCatalogApplications.class);
+        var catalogFacade = new GraphCatalogProcedureFacade(
             RequestScopedDependencies.builder()
                 .with(DatabaseId.of("current database"))
                 .with(new User("current user", false))
@@ -139,10 +139,10 @@ class CatalogProcedureFacadeTest {
     @Test
     void shouldListGraphsWithoutDegreeDistribution() {
         var procedureReturnColumns = mock(ProcedureReturnColumns.class);
-        var businessFacade = mock(CatalogBusinessFacade.class);
+        var businessFacade = mock(GraphCatalogApplications.class);
 
         var procedureContext =  WriteContext.builder().build();
-        var catalogFacade = new CatalogProcedureFacade(
+        var catalogFacade = new GraphCatalogProcedureFacade(
             RequestScopedDependencies.builder()
                 .with(new User("Bob", false))
                 .build(),
@@ -175,10 +175,10 @@ class CatalogProcedureFacadeTest {
     @Test
     void shouldListGraphsWithDegreeDistribution() {
         var procedureReturnColumns = mock(ProcedureReturnColumns.class);
-        var businessFacade = mock(CatalogBusinessFacade.class);
+        var businessFacade = mock(GraphCatalogApplications.class);
         var procedureContext =  WriteContext.builder().build();
 
-        var catalogFacade = new CatalogProcedureFacade(
+        var catalogFacade = new GraphCatalogProcedureFacade(
             RequestScopedDependencies.builder()
                 .with(new User("Bob", false))
                 .build(),
@@ -223,10 +223,10 @@ class CatalogProcedureFacadeTest {
     @Test
     void shouldListGraphsWithoutMemoryUsage() {
         var procedureReturnColumns = mock(ProcedureReturnColumns.class);
-        var businessFacade = mock(CatalogBusinessFacade.class);
+        var businessFacade = mock(GraphCatalogApplications.class);
         var procedureContext =  WriteContext.builder().build();
 
-        var catalogFacade = new CatalogProcedureFacade(
+        var catalogFacade = new GraphCatalogProcedureFacade(
             RequestScopedDependencies.builder()
                 .with(new User("Bob", false))
                 .build(),
@@ -262,10 +262,10 @@ class CatalogProcedureFacadeTest {
     @ValueSource(strings = {"memoryUsage", "sizeInBytes"})
     void shouldListGraphsWithMemoryUsage(String returnColumn) {
         var procedureReturnColumns = mock(ProcedureReturnColumns.class);
-        var businessFacade = mock(CatalogBusinessFacade.class);
+        var businessFacade = mock(GraphCatalogApplications.class);
         var procedureContext =  WriteContext.builder().build();
 
-        var catalogFacade = new CatalogProcedureFacade(
+        var catalogFacade = new GraphCatalogProcedureFacade(
             RequestScopedDependencies.builder()
                 .with(new User("Bob", false))
                 .build(),

@@ -66,6 +66,7 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
             dependencies.globalProcedures(),
             Optional.empty(), // no extra checks in OpenGDS
             Optional.empty(), // no extra checks in OpenGDS
+            Optional.empty(), // no extra checks in OpenGDS
             exporterBuildersProviderService,
             metricsFacade,
             modelCatalog,

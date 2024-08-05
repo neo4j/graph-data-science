@@ -27,7 +27,8 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTempla
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
-import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
+import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
+import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -39,7 +40,8 @@ import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
-import org.neo4j.gds.procedures.catalog.CatalogProcedureFacade;
+import org.neo4j.gds.procedures.catalog.GraphCatalogProcedureFacade;
+import org.neo4j.gds.procedures.modelcatalog.ModelCatalogProcedureFacade;
 import org.neo4j.gds.procedures.operations.OperationsProcedureFacade;
 import org.neo4j.gds.procedures.pipelines.PipelinesProcedureFacade;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -53,7 +55,8 @@ public class GraphDataScienceProcedures {
     private final Log log;
 
     private final AlgorithmsProcedureFacade algorithmsProcedureFacade;
-    private final CatalogProcedureFacade catalogProcedureFacade;
+    private final GraphCatalogProcedureFacade graphCatalogProcedureFacade;
+    private final ModelCatalogProcedureFacade modelCatalogProcedureFacade;
     private final OperationsProcedureFacade operationsProcedureFacade;
     private final PipelinesProcedureFacade pipelinesProcedureFacade;
 
@@ -65,14 +68,16 @@ public class GraphDataScienceProcedures {
     GraphDataScienceProcedures(
         Log log,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
-        CatalogProcedureFacade catalogProcedureFacade,
+        GraphCatalogProcedureFacade graphCatalogProcedureFacade,
+        ModelCatalogProcedureFacade modelCatalogProcedureFacade,
         OperationsProcedureFacade operationsProcedureFacade,
         PipelinesProcedureFacade pipelinesProcedureFacade,
         DeprecatedProceduresMetricService deprecatedProceduresMetricService
     ) {
         this.log = log;
         this.algorithmsProcedureFacade = algorithmsProcedureFacade;
-        this.catalogProcedureFacade = catalogProcedureFacade;
+        this.graphCatalogProcedureFacade = graphCatalogProcedureFacade;
+        this.modelCatalogProcedureFacade = modelCatalogProcedureFacade;
         this.operationsProcedureFacade = operationsProcedureFacade;
         this.pipelinesProcedureFacade = pipelinesProcedureFacade;
         this.deprecatedProceduresMetricService = deprecatedProceduresMetricService;
@@ -83,7 +88,8 @@ public class GraphDataScienceProcedures {
         DefaultsConfiguration defaultsConfiguration,
         LimitsConfiguration limitsConfiguration,
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
-        Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> catalogBusinessFacadeDecorator,
+        Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
+        Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator,
         GraphStoreCatalogService graphStoreCatalogService,
         MemoryGuard memoryGuard,
         AlgorithmMetricsService algorithmMetricsService,
@@ -93,7 +99,7 @@ public class GraphDataScienceProcedures {
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
         ProcedureReturnColumns procedureReturnColumns,
-        CatalogProcedureFacadeFactory catalogProcedureFacadeFactory,
+        GraphCatalogProcedureFacadeFactory graphCatalogProcedureFacadeFactory,
         GraphDatabaseService graphDatabaseService,
         Transaction transaction,
         AlgorithmProcedureFacadeBuilderFactory algorithmProcedureFacadeBuilderFactory,
@@ -104,7 +110,8 @@ public class GraphDataScienceProcedures {
         var applicationsFacade = ApplicationsFacade.create(
             log,
             algorithmProcessingTemplateDecorator,
-            catalogBusinessFacadeDecorator,
+            graphCatalogApplicationsDecorator,
+            modelCatalogApplicationsDecorator,
             graphStoreCatalogService,
             memoryGuard,
             algorithmMetricsService,
@@ -115,7 +122,7 @@ public class GraphDataScienceProcedures {
             graphSageModelRepository
         );
 
-        var catalogProcedureFacade = catalogProcedureFacadeFactory.createCatalogProcedureFacade(
+        var graphCatalogProcedureFacade = graphCatalogProcedureFacadeFactory.createGraphCatalogProcedureFacade(
             applicationsFacade,
             graphDatabaseService,
             kernelTransaction,
@@ -124,6 +131,8 @@ public class GraphDataScienceProcedures {
             writeContext,
             procedureReturnColumns
         );
+
+        var modelCatalogProcedureFacade = new ModelCatalogProcedureFacade(applicationsFacade);
 
         var configurationParser = new ConfigurationParser(defaultsConfiguration, limitsConfiguration);
         var configurationCreator = new ConfigurationCreator(configurationParser, requestScopedDependencies.getUser());
@@ -150,10 +159,11 @@ public class GraphDataScienceProcedures {
         var pipelinesProcedureFacade = new PipelinesProcedureFacade(requestScopedDependencies.getUser());
 
         return new GraphDataScienceProceduresBuilder(log)
-            .with(catalogProcedureFacade)
             .with(centralityProcedureFacade)
             .with(communityProcedureFacade)
+            .with(graphCatalogProcedureFacade)
             .with(miscellaneousProcedureFacade)
+            .with(modelCatalogProcedureFacade)
             .with(nodeEmbeddingsProcedureFacade)
             .with(operationsProcedureFacade)
             .with(pathFindingProcedureFacade)
@@ -171,8 +181,12 @@ public class GraphDataScienceProcedures {
         return algorithmsProcedureFacade;
     }
 
-    public CatalogProcedureFacade catalog() {
-        return catalogProcedureFacade;
+    public GraphCatalogProcedureFacade graphCatalog() {
+        return graphCatalogProcedureFacade;
+    }
+
+    public ModelCatalogProcedureFacade modelCatalog() {
+        return modelCatalogProcedureFacade;
     }
 
     public OperationsProcedureFacade operations() {

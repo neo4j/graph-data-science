@@ -42,6 +42,6 @@ public class GraphExistsProc {
     @Procedure(name = "gds.graph.exists", mode = READ)
     @Description(EXISTS_DESCRIPTION)
     public Stream<GraphExistsResult> existsBetter(@Name(value = "graphName") String graphName) {
-        return facade.catalog().graphExists(graphName, b -> Stream.of(new GraphExistsResult(graphName, b)));
+        return facade.graphCatalog().graphExists(graphName, b -> Stream.of(new GraphExistsResult(graphName, b)));
     }
 }

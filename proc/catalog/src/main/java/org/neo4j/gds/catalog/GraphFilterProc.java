@@ -47,7 +47,7 @@ public class GraphFilterProc {
         @Name(value = "relationshipFilter") String relationshipFilter,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.catalog().subGraphProject(
+        return facade.graphCatalog().subGraphProject(
             graphName,
             fromGraphName,
             nodeFilter,

@@ -44,7 +44,7 @@ public class GraphMutateNodeLabelProc {
         @Name(value = "configuration") Map<String, Object> configuration
     ) {
 
-        return facade.catalog().mutateNodeLabel(graphName, nodeLabel, configuration);
+        return facade.graphCatalog().mutateNodeLabel(graphName, nodeLabel, configuration);
     }
 
     @Procedure(name = "gds.alpha.graph.nodeLabel.mutate", mode = READ, deprecatedBy = "gds.graph.nodeLabel.mutate")

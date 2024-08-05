@@ -51,7 +51,7 @@ public class UserLogProc {
     @Procedure("gds.userLog")
     @Description("Log warnings and hints for currently running tasks.")
     public Stream<UserLogEntry> queryUserLog(@Name(value = "jobId", defaultValue = "") String jobId) {
-        return facade.catalog().queryUserLog(jobId);
+        return facade.graphCatalog().queryUserLog(jobId);
     }
 
     @Procedure(value = "gds.alpha.userLog", deprecatedBy = "gds.userLog")

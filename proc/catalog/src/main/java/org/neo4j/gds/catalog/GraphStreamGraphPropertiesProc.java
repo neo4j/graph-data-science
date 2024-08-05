@@ -65,6 +65,6 @@ public class GraphStreamGraphPropertiesProc {
         @Name(value = "graphProperty") String graphProperty,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.catalog().streamGraphProperty(graphName, graphProperty, configuration);
+        return facade.graphCatalog().streamGraphProperty(graphName, graphProperty, configuration);
     }
 }

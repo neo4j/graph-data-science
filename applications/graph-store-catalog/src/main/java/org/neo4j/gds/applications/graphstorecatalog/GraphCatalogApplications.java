@@ -43,7 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public interface CatalogBusinessFacade {
+public interface GraphCatalogApplications {
     boolean graphExists(User user, DatabaseId databaseId, String graphNameAsString);
 
     List<GraphStoreCatalogEntry> dropGraph(

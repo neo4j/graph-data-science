@@ -22,7 +22,8 @@ package org.neo4j.gds.procedures.integration;
 import org.neo4j.gds.applications.algorithms.embeddings.GraphSageModelRepository;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.DefaultMemoryGuard;
-import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
+import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
+import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -32,7 +33,7 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryGauge;
 import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.procedures.AlgorithmProcedureFacadeBuilderFactory;
-import org.neo4j.gds.procedures.CatalogProcedureFacadeFactory;
+import org.neo4j.gds.procedures.GraphCatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.UserLogServices;
@@ -59,7 +60,8 @@ final class GraphDataScienceProviderFactory {
     private final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
 
     private final Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator;
-    private final Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> catalogBusinessFacadeDecorator;
+    private final Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator;
+    private final Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator;
     private final ExporterBuildersProviderService exporterBuildersProviderService;
     private final MemoryGauge memoryGauge;
     private final MetricsFacade metricsFacade;
@@ -70,7 +72,8 @@ final class GraphDataScienceProviderFactory {
     private GraphDataScienceProviderFactory(
         Log log,
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
-        Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> catalogBusinessFacadeDecorator,
+        Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
+        Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator,
         ExporterBuildersProviderService exporterBuildersProviderService,
         MemoryGauge memoryGauge,
         MetricsFacade metricsFacade,
@@ -80,7 +83,8 @@ final class GraphDataScienceProviderFactory {
     ) {
         this.log = log;
         this.algorithmProcessingTemplateDecorator = algorithmProcessingTemplateDecorator;
-        this.catalogBusinessFacadeDecorator = catalogBusinessFacadeDecorator;
+        this.graphCatalogApplicationsDecorator = graphCatalogApplicationsDecorator;
+        this.modelCatalogApplicationsDecorator = modelCatalogApplicationsDecorator;
         this.exporterBuildersProviderService = exporterBuildersProviderService;
         this.memoryGauge = memoryGauge;
         this.metricsFacade = metricsFacade;
@@ -95,7 +99,7 @@ final class GraphDataScienceProviderFactory {
         boolean useMaxMemoryEstimation,
         UserLogServices userLogServices
     ) {
-        var catalogProcedureFacadeFactory = new CatalogProcedureFacadeFactory(log);
+        var catalogProcedureFacadeFactory = new GraphCatalogProcedureFacadeFactory(log);
 
         var algorithmFacadeBuilderFactory = createAlgorithmFacadeBuilderFactory(
             graphStoreCatalogService
@@ -110,7 +114,8 @@ final class GraphDataScienceProviderFactory {
             algorithmFacadeBuilderFactory,
             metricsFacade.algorithmMetrics(),
             algorithmProcessingTemplateDecorator,
-            catalogBusinessFacadeDecorator,
+            graphCatalogApplicationsDecorator,
+            modelCatalogApplicationsDecorator,
             catalogProcedureFacadeFactory,
             metricsFacade.deprecatedProcedures(),
             exporterBuildersProviderService,
@@ -129,7 +134,8 @@ final class GraphDataScienceProviderFactory {
     static GraphDataScienceProviderFactory create(
         Log log,
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
-        Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> catalogBusinessFacadeDecorator,
+        Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
+        Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator,
         ExporterBuildersProviderService exporterBuildersProviderService,
         MemoryGauge memoryGauge,
         MetricsFacade metricsFacade,
@@ -140,7 +146,8 @@ final class GraphDataScienceProviderFactory {
         return new GraphDataScienceProviderFactory(
             log,
             algorithmProcessingTemplateDecorator,
-            catalogBusinessFacadeDecorator,
+            graphCatalogApplicationsDecorator,
+            modelCatalogApplicationsDecorator,
             exporterBuildersProviderService,
             memoryGauge,
             metricsFacade,

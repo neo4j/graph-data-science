@@ -1,0 +1,13 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Model Catalog Applications'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    implementation project(":config-api")
+    implementation project(":core")
+    implementation project(":model-catalog-api")
+
+    implementation openGds.commons.lang3
+}

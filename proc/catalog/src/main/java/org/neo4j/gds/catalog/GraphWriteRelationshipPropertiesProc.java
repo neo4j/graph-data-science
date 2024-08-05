@@ -46,7 +46,7 @@ public class GraphWriteRelationshipPropertiesProc {
         @Name(value = "relationshipProperties") List<String> relationshipProperties,
         @Name(value = "configuration") Map<String, Object> configuration
     ) {
-        return facade.catalog().writeRelationshipProperties(
+        return facade.graphCatalog().writeRelationshipProperties(
             graphName,
             relationshipType,
             relationshipProperties,

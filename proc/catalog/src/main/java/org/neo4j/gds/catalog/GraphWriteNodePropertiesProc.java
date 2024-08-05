@@ -46,7 +46,7 @@ public class GraphWriteNodePropertiesProc {
         @Name(value = "nodeLabels", defaultValue = "['*']") Object nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.catalog().writeNodeProperties(graphName, nodeProperties, nodeLabels, configuration);
+        return facade.graphCatalog().writeNodeProperties(graphName, nodeProperties, nodeLabels, configuration);
     }
 
     @Procedure(name = "gds.graph.writeNodeProperties", mode = WRITE, deprecatedBy = "gds.graph.nodeProperties.write")
@@ -62,6 +62,6 @@ public class GraphWriteNodePropertiesProc {
         facade.deprecatedProcedures().called("gds.graph.writeNodeProperties");
         facade.log().warn("Procedure `gds.graph.writeNodeProperties` has been deprecated, please use `gds.graph.nodeProperties.write`.");
 
-        return facade.catalog().writeNodeProperties(graphName, nodeProperties, nodeLabels, configuration);
+        return facade.graphCatalog().writeNodeProperties(graphName, nodeProperties, nodeLabels, configuration);
     }
 }

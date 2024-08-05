@@ -43,7 +43,7 @@ public class GraphDropRelationshipProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "relationshipType") String relationshipType
     ) {
-        return facade.catalog().dropRelationships(graphName, relationshipType);
+        return facade.graphCatalog().dropRelationships(graphName, relationshipType);
     }
 
     @SuppressWarnings("unused")
@@ -61,6 +61,6 @@ public class GraphDropRelationshipProc {
             .warn(
                 "Procedure `gds.graph.deleteRelationships` has been deprecated, please use `gds.graph.relationships.drop`.");
         
-        return facade.catalog().dropRelationships(graphName, relationshipType);
+        return facade.graphCatalog().dropRelationships(graphName, relationshipType);
     }
 }

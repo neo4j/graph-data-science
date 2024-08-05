@@ -19,34 +19,28 @@
  */
 package org.neo4j.gds.model.catalog;
 
-import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.applications.modelcatalog.ModelExistsResult;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class ModelExistsProc extends ModelCatalogProc {
-
+public class ModelExistsProc {
     private static final String DESCRIPTION = "Checks if a given model exists in the model catalog.";
+
+    @Context
+    public GraphDataScienceProcedures facade;
 
     @Procedure(name = "gds.model.exists", mode = READ)
     @Description(DESCRIPTION)
     public Stream<ModelExistsResult> exists(@Name(value = "modelName") String modelName) {
-        validateModelName(modelName);
-
-        ModelCatalog modelCatalog = executionContext().modelCatalog();
-
-        return Stream.of(new ModelExistsResult(
-            modelName,
-            Optional.ofNullable(modelCatalog.getUntyped(username(), modelName)).map(Model::algoType).orElse("n/a"),
-            modelCatalog.exists(username(), modelName)
-        ));
+        return facade.modelCatalog().exists(modelName);
     }
 
     @Procedure(name = "gds.beta.model.exists", mode = READ, deprecatedBy = "gds.model.exists")
@@ -54,15 +48,11 @@ public class ModelExistsProc extends ModelCatalogProc {
     @Deprecated(forRemoval = true)
     @Internal
     public Stream<ModelExistsResult> betaExists(@Name(value = "modelName") String modelName) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.beta.model.exists");
-
-        executionContext()
+        facade.deprecatedProcedures().called("gds.beta.model.exists");
+        facade
             .log()
             .warn("Procedure `gds.beta.model.exists` has been deprecated, please use `gds.model.exists`.");
 
         return exists(modelName);
     }
-
 }

@@ -24,7 +24,7 @@ import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
-import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
+import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
 import org.neo4j.gds.applications.graphstorecatalog.GraphGenerationStats;
 import org.neo4j.gds.applications.graphstorecatalog.GraphMemoryUsage;
 import org.neo4j.gds.applications.graphstorecatalog.GraphProjectMemoryUsageService;
@@ -65,7 +65,7 @@ import java.util.stream.Stream;
  * <p>
  * This class gets constructed per request.
  */
-public class CatalogProcedureFacade {
+public class GraphCatalogProcedureFacade {
     /**
      * This exists because procedures need default values sometimes.
      * For example, CALL gds.graph.list() would fail otherwise,
@@ -87,7 +87,7 @@ public class CatalogProcedureFacade {
     /**
      * @param streamCloser A special thing needed for property streaming
      */
-    public CatalogProcedureFacade(
+    public GraphCatalogProcedureFacade(
         RequestScopedDependencies requestScopedDependencies,
         Consumer<AutoCloseable> streamCloser,
         GraphDatabaseService graphDatabaseService,
@@ -698,7 +698,7 @@ public class CatalogProcedureFacade {
         return graphName;
     }
 
-    private CatalogBusinessFacade catalog() {
-        return applicationsFacade.catalog();
+    private GraphCatalogApplications catalog() {
+        return applicationsFacade.graphCatalog();
     }
 }
