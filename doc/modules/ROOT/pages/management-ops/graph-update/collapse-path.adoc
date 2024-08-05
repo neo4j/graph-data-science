@@ -71,7 +71,7 @@ include::partial$/algorithms/collapse-path/specific-configuration.adoc[]
 [[algorithms-collapse-path-examples]]
 == Examples
 
-include::partial$/common-usage/examples-empty-db-note.adoc[]
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 Consider the graph created by the following Cypher statement:
 

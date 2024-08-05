@@ -113,7 +113,7 @@ YIELD
 
 == Examples
 
-include::partial$/common-usage/examples-empty-db-note.adoc[]
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 We can write relationships stored in a named in-memory graph back to Neo4j.
 This can be used to write algorithm results (for example from xref:algorithms/node-similarity.adoc[Node Similarity]) or relationships that have been aggregated during graph creation.
@@ -155,29 +155,19 @@ CREATE
 .Project the graph:
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
+MATCH (person:Person)-[r:LIKES]->(instr:Instrument)
+RETURN gds.graph.project(
   'personsAndInstruments',
-  ['Person', 'Instrument'],         // <1>
+  person,
+  instr,
   {
-    LIKES: {
-      type: 'LIKES',                // <2>
-      properties: {
-        strength: {                 // <3>
-          property: 'strength',
-          defaultValue: 1.0
-        },
-        score: {
-          property: 'score'         // <4>
-        }
-      }
-    }
+    sourceNodeLabels: labels(person),
+    targetNodeLabels: labels(instr),
+    relationshipType: type(r),
+    relationshipProperties: r { .score, strength: coalesce(r.strength, 1.0) }
   }
 )
 ----
-<1> Project node labels `Person` and `Instrument`.
-<2> Project relationship type `LIKES`.
-<3> Project property `strength` of relationship type `LIKES` setting a default value of `1.0` because not all relationships have that property.
-<4> Project property `score` of relationship type `LIKES`.
 
 .Compute the Node Similarity in our graph:
 [source, cypher, role=noplay graph-project-query]
@@ -288,25 +278,20 @@ CREATE
 .Project the graph:
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
+MATCH (buyer:Buyer)-[r:PAYS]->(seller:Buyer|Seller)
+WITH buyer, seller, sum(r.amount) AS totalAmount, count(r.amount) AS numberOfPayments
+RETURN gds.graph.project(
   'aggregatedGraph',
-  ['Buyer', 'Seller'],                                                          // <1>
+  buyer,
+  seller,
   {
-    PAID: {                                                                     // <2>
-      type: 'PAYS',                                                             // <3>
-      properties: {
-        totalAmount: { property: 'amount', aggregation: 'SUM' },                // <4>
-        numberOfPayments: { property: 'amount', aggregation: 'COUNT' }          // <5>
-      }
-    }
+    sourceNodeLabels: labels(buyer),
+    targetNodeLabels: labels(seller),
+    relationshipType: 'PAID',
+    relationshipProperties: { totalAmount: totalAmount, numberOfPayments: numberOfPayments }
   }
 )
 ----
-<1> Project node labels `Buyer` and `Seller`.
-<2> Project relationship type `PAID` to the in-memory graph.
-<3> Use relationship type `PAYS` from the Neo4j database graph.
-<4> Project property `totalAmount` of relationship type `PAYS` using `SUM` aggregation.
-<5> Project property `numberOfPayments` of relationship type `PAYS` using `COUNT` aggregation.
 
 As we can see the Neo4j graph contains some parallel relationships.
 We use GDS projection to condense these into single relationships between the nodes.

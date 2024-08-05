@@ -165,7 +165,8 @@ We can now project the graph and store it in the graph catalog.
 .The following statement will project the graph and store it in the graph catalog.
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project( 'myGraph', 'User', 'LINK' )
+MATCH (n:User)-[r:LINK]->(m:User)
+RETURN gds.graph.project('myGraph', n, m)
 ----
 
 

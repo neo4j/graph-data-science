@@ -84,7 +84,7 @@ The `density` is the result of `relationshipCount` divided by the maximal number
 
 == Examples
 
-include::partial$/common-usage/examples-empty-db-note.adoc[]
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 In order to demonstrate the GDS Graph List capabilities we are going to create a small social network graph in Neo4j.
 
@@ -99,13 +99,7 @@ CREATE
   (florentin)-[:KNOWS { since: 2018 }]->(veselin)
 ----
 
-Additionally, we will project a few graphs to the graph catalog, for more details see xref:management-ops/graph-creation/graph-project.adoc[native projections] and xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[Cypher projections].
-
-.Project `Person` nodes and `KNOWS` relationships using native projections:
-[source, cypher, role=noplay graph-project-query]
-----
-CALL gds.graph.project('personsNative', 'Person', 'KNOWS')
-----
+Additionally, we will project a few graphs to the graph catalog, for more details see xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[Cypher projections] and xref:management-ops/graph-creation/graph-project.adoc[native projections].
 
 .Project `Person` nodes and `KNOWS` relationships using Cypher projections:
 [source, cypher, role=noplay graph-project-query]
@@ -121,16 +115,26 @@ RETURN gds.graph.project('personsCypher', n, m,
 )
 ----
 
-.Project `Person` nodes with property `age` and `KNOWS` relationships using Native projections:
+.Project `Person` nodes with property `age` and `KNOWS` relationships using Cypher projections:
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
-  'personsWithAgeNative',
+MATCH (n:Person)
+OPTIONAL MATCH (n)-[r:KNOWS]->(m:Person)
+RETURN gds.graph.project('personsWithAgeCypher', n, m,
   {
-    Person: {properties: 'age'}
-  },
-  'KNOWS'
+    sourceNodeLabels: labels(n),
+    targetNodeLabels: labels(m),
+    sourceNodeProperties: n { .age },
+    targetNodeProperties: m { .age },
+    relationshipType: type(r)
+  }
 )
+----
+
+.Project `Person` nodes and `KNOWS` relationships using native projections:
+[source, cypher, role=noplay graph-project-query]
+----
+CALL gds.graph.project('personsNative', 'Person', 'KNOWS')
 ----
 
 === List basic information about all graphs in the catalog
@@ -152,7 +156,7 @@ ORDER BY graphName ASC
 | graphName              | nodeCount   | relationshipCount
 | "personsCypher"        | 3           | 2
 | "personsNative"        | 3           | 2
-| "personsWithAgeNative" | 3           | 2
+| "personsWithAgeCypher" | 3           | 2
 |===
 --
 

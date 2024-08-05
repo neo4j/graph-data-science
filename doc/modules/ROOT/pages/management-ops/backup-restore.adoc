@@ -107,7 +107,7 @@ YIELD
 
 == Examples
 
-include::partial$/common-usage/examples-empty-db-note.adoc[]
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 First we need to create a graph in the corresponding Neo4j database.
 
@@ -126,11 +126,8 @@ Now we need to project an in-memory graph which we want to back-up.
 .The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-project-query, operator=me]
 ----
-CALL gds.graph.project(
-  'myGraph',
-  'Person',
-  'KNOWS'
-)
+MATCH (n:Person)-[r:KNOWS]->(m:Person)
+RETURN gds.graph.project('myGraph', n, m)
 ----
 
 We can now run the back-up procedure in order to store the in-memory graph on disk.

@@ -45,7 +45,7 @@ RETURN gds.graph.exists(graphName: String)::Boolean
 
 == Examples
 
-include::partial$/common-usage/examples-empty-db-note.adoc[]
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 In order to demonstrate the GDS Graph Exists capabilities we are going to create a small social network graph in Neo4j and project it into our graph catalog.
 
@@ -63,7 +63,8 @@ CREATE
 .Project `Person` nodes and `KNOWS` relationships:
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project('persons', 'Person', 'KNOWS')
+MATCH (n:Person)-[r:KNOWS]->(m:Person)
+RETURN gds.graph.project('persons', n, m)
 ----
 
 
