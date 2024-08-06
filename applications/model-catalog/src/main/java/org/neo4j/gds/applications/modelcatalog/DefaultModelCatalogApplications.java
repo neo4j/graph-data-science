@@ -23,6 +23,7 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 
+import java.util.Collection;
 import java.util.Optional;
 
 public final class DefaultModelCatalogApplications implements ModelCatalogApplications {
@@ -54,5 +55,15 @@ public final class DefaultModelCatalogApplications implements ModelCatalogApplic
         var exists = modelCatalog.exists(user.getUsername(), modelName.getValue());
 
         return new ModelExistsResult(modelName.getValue(), modelType, exists);
+    }
+
+    @Override
+    public Collection<Model<?, ?, ?>> list() {
+        return modelCatalog.list(user.getUsername());
+    }
+
+    @Override
+    public Model<?, ?, ?> lookup(ModelName modelName) {
+        return modelCatalog.getUntyped(user.getUsername(), modelName.getValue());
     }
 }

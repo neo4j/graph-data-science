@@ -21,8 +21,14 @@ package org.neo4j.gds.applications.modelcatalog;
 
 import org.neo4j.gds.core.model.Model;
 
+import java.util.Collection;
+
 public interface ModelCatalogApplications {
     Model<?, ?, ?> drop(ModelName modelName, boolean failIfMissing);
 
     ModelExistsResult exists(ModelName modelName);
+
+    Collection<Model<?, ?, ?>> list();
+
+    Model<?, ?, ?> lookup(ModelName modelName);
 }

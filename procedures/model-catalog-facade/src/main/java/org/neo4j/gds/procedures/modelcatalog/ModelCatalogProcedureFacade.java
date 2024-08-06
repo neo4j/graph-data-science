@@ -25,6 +25,8 @@ import org.neo4j.gds.applications.modelcatalog.ModelExistsResult;
 import java.util.stream.Stream;
 
 public class ModelCatalogProcedureFacade {
+    public static final String NO_VALUE = "__NO_VALUE";
+
     private final ModelNameValidationService modelNameValidationService = new ModelNameValidationService();
 
     private final ApplicationsFacade applicationsFacade;
@@ -45,6 +47,30 @@ public class ModelCatalogProcedureFacade {
         var modelName = modelNameValidationService.validate(modelNameAsString);
 
         var result = applicationsFacade.modelCatalog().exists(modelName);
+
+        return Stream.of(result);
+    }
+
+    public Stream<ModelCatalogResult> list(String modelName) {
+        if (modelName == null || modelName.equals(NO_VALUE)) return list();
+
+        return lookup(modelName);
+    }
+
+    private Stream<ModelCatalogResult> list() {
+        var models = applicationsFacade.modelCatalog().list();
+
+        return models.stream().map(ModelCatalogResult::new);
+    }
+
+    private Stream<ModelCatalogResult> lookup(String modelNameAsString) {
+        var modelName = modelNameValidationService.validate(modelNameAsString);
+
+        var model = applicationsFacade.modelCatalog().lookup(modelName);
+
+        if (model == null) return Stream.empty();
+
+        var result = new ModelCatalogResult(model);
 
         return Stream.of(result);
     }
