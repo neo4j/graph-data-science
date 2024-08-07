@@ -39,7 +39,6 @@ public abstract class RelationshipStreamExporterBuilder {
     protected TerminationFlag terminationFlag;
     protected ProgressTracker progressTracker = ProgressTracker.NULL_TRACKER;
     protected long relationshipCount = -1L;
-    protected Optional<String> remoteDatabaseName; // coupled with arrowConnectionInfo, but should not appear in external API
     protected Optional<ResultStore> resultStore;
     protected JobId jobId;
 

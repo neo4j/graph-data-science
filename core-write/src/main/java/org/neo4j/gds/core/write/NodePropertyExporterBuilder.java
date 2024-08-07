@@ -43,7 +43,6 @@ public abstract class NodePropertyExporterBuilder {
     protected ExecutorService executorService;
     protected Concurrency writeConcurrency = ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY;
     protected ProgressTracker progressTracker = ProgressTracker.NULL_TRACKER;
-    protected Optional<String> remoteDatabaseName; // coupled with arrowConnectionInfo, but should not appear in external API
     protected Optional<ResultStore> resultStore = Optional.empty();
     protected JobId jobId;
 

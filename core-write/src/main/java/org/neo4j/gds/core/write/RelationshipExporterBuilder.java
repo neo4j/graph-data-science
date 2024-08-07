@@ -40,7 +40,6 @@ public abstract class RelationshipExporterBuilder {
     protected ProgressTracker progressTracker = ProgressTracker.NULL_TRACKER;
     protected RelationshipPropertyTranslator propertyTranslator = Values::doubleValue;
     protected long batchSize = NativeNodePropertyExporter.MIN_BATCH_SIZE;
-    protected Optional<String> remoteDatabaseName; // coupled with arrowConnectionInfo, but should not appear in external API
     protected Optional<ResultStore> resultStore;
     protected JobId jobId;
 
