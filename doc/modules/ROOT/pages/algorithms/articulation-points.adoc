@@ -1,0 +1,158 @@
+[[algorithms-articulation-points]]
+= Bridges
+:description: This section describes the Articulation Points algorithm in the Neo4j Graph Data Science library.
+:entity: relationship
+:result: node
+:algorithm: Articulation Points
+:sequential: true
+
+:undirected:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+[[algorithms-articulation-points-intro]]
+== Introduction
+
+Given a graph, an articulation point is a node whose removal increases the number of connected components in the graph.
+The  Neo4j GDS Library provides an efficient linear time sequential algorithm to compute all articulation points in a graph.
+
+
+[[algorithms-briges-syntax]]
+== Syntax
+
+include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
+
+.Bridges syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-stream]
+======
+
+.Run Bridges in stream mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.articulationPoints.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodeId: Integer
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+|===
+
+.Results
+[opts="header"]
+|===
+| Name    | Type    | Description
+| nodeId  | Integer | The ID of the node representing an articulation point.
+|===
+
+======
+====
+
+
+[[algorithms-articulation-points-examples]]
+== Examples
+
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
+:algorithm-name: {algorithm}
+:graph-description: social network
+:image-file: bridges.svg
+include::partial$/algorithms/shared/examples-intro.adoc[]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (nAlice:User {name: 'Alice'}),
+  (nBridget:User {name: 'Bridget'}),
+  (nCharles:User {name: 'Charles'}),
+  (nDoug:User {name: 'Doug'}),
+  (nMark:User {name: 'Mark'}),
+  (nMichael:User {name: 'Michael'}),
+
+  (nAlice)-[:LINK]->(nBridget),
+  (nAlice)-[:LINK]->(nCharles),
+  (nCharles)-[:LINK]->(nBridget),
+
+  (nAlice)-[:LINK]->(nDoug),
+
+  (nMark)-[:LINK]->(nDoug),
+  (nMark)-[:LINK]->(nMichael),
+  (nMichael)-[:LINK]->(nDoug);
+----
+
+This graph has two clusters of _Users_, that are closely connected.
+Between those clusters there is one single edge.
+
+.The following statement will project a graph using a Cypher projection and store it in the graph catalog under the name 'myGraph'.
+[source, cypher, role=noplay graph-project-query]
+----
+MATCH (source:User)-[r:LINK]->(target:User)
+RETURN gds.graph.project(
+  'myGraph',
+  source,
+  target,
+  {},
+  { undirectedRelationshipTypes: ['*'] }
+)
+----
+
+
+[[algorithms-articulation-points-examples-memory-estimation]]
+=== Memory Estimation
+
+:mode: stream
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher, role=noplay]
+----
+CALL gds.articulationPoints.stream.estimate('myGraph', {})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header",cols="1,1,1,1,1"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 6         | 14                | 984      | 984      | "984 Bytes"
+|===
+--
+
+
+[[algorithms-articulation-points-examples-stream]]
+=== Stream
+
+include::partial$/algorithms/shared/examples-stream-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `stream` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.articulationPoints.stream('myGraph')
+YIELD nodeId
+RETURN gds.util.asNode(nodeId).name AS name
+ORDER BY name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name
+| "Alice"
+| "Doug"
+|===
+--

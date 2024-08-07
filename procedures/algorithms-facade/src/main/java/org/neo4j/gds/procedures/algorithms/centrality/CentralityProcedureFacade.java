@@ -26,6 +26,7 @@ import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsStat
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsWriteModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.articulationpoints.ArticulationPointsStreamConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
@@ -423,6 +424,36 @@ public final class CentralityProcedureFacade {
         return Stream.of(result);
     }
 
+
+    public Stream<ArticulationPoint> articulationPoints(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new ArticulationPointsResultBuilderForStreamMode();
+
+        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+            graphName,
+            configuration,
+            ArticulationPointsStreamConfig::of,
+            streamMode()::articulationPoints,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> articulationPointsStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            ArticulationPointsStreamConfig::of,
+            configuration -> estimationMode().articulationPoints(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);    }
 
     public Stream<Bridge> bridgesStream(
         String graphName,

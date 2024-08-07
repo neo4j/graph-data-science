@@ -8,6 +8,7 @@ The Neo4j GDS library includes the following centrality algorithms, grouped by q
 
 * Production-quality
 ** xref:algorithms/article-rank.adoc[Article Rank]
+** xref:algorithms/articulation-points.adoc[Articulation Points]
 ** xref:algorithms/betweenness-centrality.adoc[Betweenness Centrality]
 ** xref:algorithms/bridges.adoc[Bridges]
 ** xref:algorithms/celf.adoc[CELF]
