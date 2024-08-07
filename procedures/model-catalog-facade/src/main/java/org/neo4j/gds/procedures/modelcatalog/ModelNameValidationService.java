@@ -25,8 +25,8 @@ import org.neo4j.gds.core.CypherMapAccess;
 /**
  * A very dull utility
  */
-class ModelNameValidationService {
-    ModelName validate(String modelNameAsString) {
+public class ModelNameValidationService {
+    public ModelName validate(String modelNameAsString) {
         CypherMapAccess.failOnBlank("modelName", modelNameAsString);
 
         return ModelName.parse(modelNameAsString);
