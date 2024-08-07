@@ -1,0 +1,165 @@
+[[algorithms-bridges]]
+= Bridges
+:description: This section describes the Bridges algorithm in the Neo4j Graph Data Science library.
+:entity: relationship
+:result: bridge
+:algorithm: Bridges
+:sequential: true
+
+:undirected:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+[[algorithms-bridges-intro]]
+== Introduction
+
+In graph theory, a bridge is an edge of a graph whose deletion increases the graph's number of connected components.
+Equivalently, an edge is a bridge if and only if it is not contained in any cycle.
+For a connected graph, a bridge can uniquely determine a cut.
+A graph is said to be bridgeless if it contains no bridges.
+
+For more information on this algorithm, see:
+
+* https://en.wikipedia.org/wiki/Bridge_(graph_theory)[Bridge (graph theory)^]
+
+
+[[algorithms-briges-syntax]]
+== Syntax
+
+include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
+
+.Bridges syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-stream]
+======
+
+.Run Bridges in stream mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.bridges.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  from: Integer,
+  to: Integer
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+|===
+
+.Results
+[opts="header"]
+|===
+| Name    | Type    | Description
+| from    | Integer | Start node ID.
+| to      | Integer | End node ID.
+|===
+
+======
+====
+
+
+[[algorithms-bridges-examples]]
+== Examples
+
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
+:algorithm-name: {algorithm}
+:graph-description: social network
+:image-file: bridges.svg
+include::partial$/algorithms/shared/examples-intro.adoc[]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (nAlice:User {name: 'Alice'}),
+  (nBridget:User {name: 'Bridget'}),
+  (nCharles:User {name: 'Charles'}),
+  (nDoug:User {name: 'Doug'}),
+  (nMark:User {name: 'Mark'}),
+  (nMichael:User {name: 'Michael'}),
+
+  (nAlice)-[:LINK]->(nBridget),
+  (nAlice)-[:LINK]->(nCharles),
+  (nCharles)-[:LINK]->(nBridget),
+
+  (nAlice)-[:LINK]->(nDoug),
+
+  (nMark)-[:LINK]->(nDoug),
+  (nMark)-[:LINK]->(nMichael),
+  (nMichael)-[:LINK]->(nDoug);
+----
+
+This graph has two clusters of _Users_, that are closely connected.
+Between those clusters there is one single edge.
+
+.The following statement will project a graph using a Cypher projection and store it in the graph catalog under the name 'myGraph'.
+[source, cypher, role=noplay graph-project-query]
+----
+MATCH (source:User)-[r:LINK]->(target:User)
+RETURN gds.graph.project(
+  'myGraph',
+  source,
+  target,
+  {},
+  { undirectedRelationshipTypes: ['*'] }
+)
+----
+
+
+[[algorithms-bridges-examples-memory-estimation]]
+=== Memory Estimation
+
+:mode: stream
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher, role=noplay]
+----
+CALL gds.bridges.stream.estimate('myGraph', {})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header",cols="1,1,1,1,1"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 6         | 14                | 1040     | 1040     | "1040 Bytes"
+|===
+--
+
+
+[[algorithms-bridges-examples-stream]]
+=== Stream
+
+include::partial$/algorithms/shared/examples-stream-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `stream` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.bridges.stream('myGraph')
+YIELD from, to
+RETURN gds.util.asNode(from).name AS fromName, gds.util.asNode(to).name AS toName
+ORDER BY fromName ASC, toName ASC
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| fromName  | toName
+| "Alice"   | "Doug"
+|===
+--
