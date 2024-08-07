@@ -38,6 +38,6 @@ public class GraphExistsFunc {
     @UserFunction("gds.graph.exists")
     @Description(EXISTS_DESCRIPTION)
     public boolean existsFunctionButBetter(@Name(value = "graphName") String graphName) {
-        return facade.catalog().graphExists(graphName, Function.identity());
+        return facade.graphCatalog().graphExists(graphName, Function.identity());
     }
 }

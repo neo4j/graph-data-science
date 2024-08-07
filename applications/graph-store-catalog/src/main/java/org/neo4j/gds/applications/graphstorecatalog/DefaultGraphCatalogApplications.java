@@ -60,7 +60,7 @@ import static org.neo4j.gds.graphsampling.RandomWalkSamplerType.RWR;
  * Here we have just business logic: no Neo4j bits or other integration bits, just Java POJO things.
  * <p>
  * By nature business logic is going to be bespoke, so one method per logical thing.
- * Take {@link DefaultCatalogBusinessFacade#graphExists(User, DatabaseId, String)} for example:
+ * Take {@link DefaultGraphCatalogApplications#graphExists(User, DatabaseId, String)} for example:
  * pure expressed business logic that layers above will use in multiple places, but!
  * Any marshalling happens in those layers, not here.
  * <p>
@@ -72,7 +72,7 @@ import static org.neo4j.gds.graphsampling.RandomWalkSamplerType.RWR;
  * Ideally though this is a facade over many individual pieces of business logic in separate classes,
  * or behind other facades (oh gosh turtles, turtles everywhere :scream:).
  */
-public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
+public class DefaultGraphCatalogApplications implements GraphCatalogApplications {
     private final CatalogConfigurationService catalogConfigurationService = new CatalogConfigurationService();
     private final GraphStoreValidationService graphStoreValidationService = new GraphStoreValidationService();
 
@@ -105,7 +105,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
     private final EstimateCommonNeighbourAwareRandomWalkApplication estimateCommonNeighbourAwareRandomWalkApplication;
     private final GenerateGraphApplication generateGraphApplication;
 
-    DefaultCatalogBusinessFacade(
+    DefaultGraphCatalogApplications(
         Log log,
         GraphStoreCatalogService graphStoreCatalogService,
         ProjectionMetricsService projectionMetricsService,
@@ -157,7 +157,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         this.generateGraphApplication = generateGraphApplication;
     }
 
-    public static CatalogBusinessFacade create(
+    public static GraphCatalogApplications create(
         Log log,
         GraphStoreCatalogService graphStoreCatalogService,
         ProjectionMetricsService projectionMetricsService
@@ -199,7 +199,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         var writeRelationshipPropertiesApplication = new WriteRelationshipPropertiesApplication(log);
         var writeRelationshipsApplication = new WriteRelationshipsApplication(log);
 
-        var catalogFacade = new DefaultCatalogBusinessFacadeBuilder()
+        return new DefaultGraphCatalogApplicationsBuilder()
             .withLog(log)
             .withGraphStoreCatalogService(graphStoreCatalogService)
             .withProjectionMetricsService(projectionMetricsService)
@@ -224,8 +224,6 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
             .withWriteRelationshipPropertiesApplication(writeRelationshipPropertiesApplication)
             .withWriteRelationshipsApplication(writeRelationshipsApplication)
             .build();
-
-        return catalogFacade;
     }
 
     @Override

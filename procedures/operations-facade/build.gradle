@@ -9,13 +9,26 @@ dependencies {
         compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
             transitive = false
         }
+
+        testImplementation(group: 'org.neo4j', name: it, version: ver.'neo4j')
     }
 
     implementation project(':algorithms-machinery')
+    implementation project(':applications-facade')
+    implementation project(':centrality-algorithms')
+    implementation project(':community-algorithms')
     implementation project(':core')
     implementation project(':core-utils')
+    implementation project(':graph-store-catalog-applications')
+    implementation project(':miscellaneous-algorithms')
+    implementation project(':model-catalog-applications')
+    implementation project(':operations-applications')
+    implementation project(':node-embedding-algorithms')
+    implementation project(':path-finding-algorithms')
     implementation project(':progress-tracking')
+    implementation project(':similarity-algorithms')
     implementation project(':string-formatting')
+    implementation project(':termination')
 
     testImplementation platform(openGds.junit5bom)
     testImplementation openGds.junit5.jupiter.api
@@ -23,4 +36,6 @@ dependencies {
     testRuntimeOnly openGds.junit5.jupiter.engine
 
     testImplementation openGds.assertj.core
+
+    testImplementation openGds.mockito.junit.jupiter
 }

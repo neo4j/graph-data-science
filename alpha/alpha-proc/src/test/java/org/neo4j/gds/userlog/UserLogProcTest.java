@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.catalog.CatalogProcedureFacade;
+import org.neo4j.gds.procedures.operations.OperationsProcedureFacade;
 
 import java.util.stream.Stream;
 
@@ -43,9 +43,9 @@ class UserLogProcTest {
             new UserLogEntry(new LeafTask("lt", 87), "going twice..."),
             new UserLogEntry(new LeafTask("lt", 23), "gone!")
         );
-        var catalogFacade = mock(CatalogProcedureFacade.class);
-        when(facade.catalog()).thenReturn(catalogFacade);
-        when(catalogFacade.queryUserLog("unused")).thenReturn(expectedWarnings);
+        var operationsProcedureFacade = mock(OperationsProcedureFacade.class);
+        when(facade.operations()).thenReturn(operationsProcedureFacade);
+        when(operationsProcedureFacade.queryUserLog("unused")).thenReturn(expectedWarnings);
         var actualWarnings = userLogProc.queryUserLog("unused");
 
         assertThat(actualWarnings).isSameAs(expectedWarnings);

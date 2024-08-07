@@ -25,8 +25,7 @@ import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 
 
 
- class DefaultCatalogBusinessFacadeBuilder  {
-
+ class DefaultGraphCatalogApplicationsBuilder {
     // global dependencies
     private  Log log;
     private  GraphStoreCatalogService graphStoreCatalogService;
@@ -56,112 +55,112 @@ import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
     private  EstimateCommonNeighbourAwareRandomWalkApplication estimateCommonNeighbourAwareRandomWalkApplication;
     private  GenerateGraphApplication generateGraphApplication;
 
-    DefaultCatalogBusinessFacadeBuilder withLog(Log log) {
+    DefaultGraphCatalogApplicationsBuilder withLog(Log log) {
         this.log = log;
         return  this;
     }
 
-    DefaultCatalogBusinessFacadeBuilder withGraphStoreCatalogService(GraphStoreCatalogService graphStoreCatalogService) {
+    DefaultGraphCatalogApplicationsBuilder withGraphStoreCatalogService(GraphStoreCatalogService graphStoreCatalogService) {
         this.graphStoreCatalogService = graphStoreCatalogService;
         return  this;
     }
-    DefaultCatalogBusinessFacadeBuilder withProjectionMetricsService(ProjectionMetricsService projectionMetricsService) {
+    DefaultGraphCatalogApplicationsBuilder withProjectionMetricsService(ProjectionMetricsService projectionMetricsService) {
         this.projectionMetricsService = projectionMetricsService;
         return this;
     }
-    DefaultCatalogBusinessFacadeBuilder withGraphNameValidationService(GraphNameValidationService graphNameValidationService) {
+    DefaultGraphCatalogApplicationsBuilder withGraphNameValidationService(GraphNameValidationService graphNameValidationService) {
         this.graphNameValidationService = graphNameValidationService;
         return this;
     }
-    DefaultCatalogBusinessFacadeBuilder withCypherProjectApplication(CypherProjectApplication cypherProjectApplication) {
+    DefaultGraphCatalogApplicationsBuilder withCypherProjectApplication(CypherProjectApplication cypherProjectApplication) {
         this.cypherProjectApplication = cypherProjectApplication;
         return this;
     }
-    DefaultCatalogBusinessFacadeBuilder withDropGraphApplication(DropGraphApplication dropGraphApplication) {
+    DefaultGraphCatalogApplicationsBuilder withDropGraphApplication(DropGraphApplication dropGraphApplication) {
         this.dropGraphApplication = dropGraphApplication;
         return this;
     }
-    DefaultCatalogBusinessFacadeBuilder withDropNodePropertiesApplication(DropNodePropertiesApplication dropNodePropertiesApplication) {
+    DefaultGraphCatalogApplicationsBuilder withDropNodePropertiesApplication(DropNodePropertiesApplication dropNodePropertiesApplication) {
         this.dropNodePropertiesApplication=dropNodePropertiesApplication;
         return this;
     }
-    DefaultCatalogBusinessFacadeBuilder withDropRelationshipsApplication(DropRelationshipsApplication dropRelationshipsApplication) {
+    DefaultGraphCatalogApplicationsBuilder withDropRelationshipsApplication(DropRelationshipsApplication dropRelationshipsApplication) {
         this.dropRelationshipsApplication = dropRelationshipsApplication;
         return this;
     }
 
-    DefaultCatalogBusinessFacadeBuilder withEstimateCommonNeighbourAwareRandomWalkApplication(EstimateCommonNeighbourAwareRandomWalkApplication estimateCommonNeighbourAwareRandomWalkApplication) {
+    DefaultGraphCatalogApplicationsBuilder withEstimateCommonNeighbourAwareRandomWalkApplication(EstimateCommonNeighbourAwareRandomWalkApplication estimateCommonNeighbourAwareRandomWalkApplication) {
         this.estimateCommonNeighbourAwareRandomWalkApplication = estimateCommonNeighbourAwareRandomWalkApplication;
         return this;
     }
-    DefaultCatalogBusinessFacadeBuilder withGenerateGraphApplication(GenerateGraphApplication generateGraphApplication) {
+    DefaultGraphCatalogApplicationsBuilder withGenerateGraphApplication(GenerateGraphApplication generateGraphApplication) {
         this.generateGraphApplication = generateGraphApplication;
         return  this;
     }
-    DefaultCatalogBusinessFacadeBuilder withGraphMemoryUsageApplication(GraphMemoryUsageApplication graphMemoryUsageApplication) {
+    DefaultGraphCatalogApplicationsBuilder withGraphMemoryUsageApplication(GraphMemoryUsageApplication graphMemoryUsageApplication) {
         this.graphMemoryUsageApplication= graphMemoryUsageApplication;
         return  this;
     }
-    DefaultCatalogBusinessFacadeBuilder withGraphSamplingApplication(GraphSamplingApplication graphSamplingApplication) {
+    DefaultGraphCatalogApplicationsBuilder withGraphSamplingApplication(GraphSamplingApplication graphSamplingApplication) {
         this.graphSamplingApplication = graphSamplingApplication;
         return this;
     }
 
-    DefaultCatalogBusinessFacadeBuilder withListGraphApplication(ListGraphApplication listGraphApplication) {
+    DefaultGraphCatalogApplicationsBuilder withListGraphApplication(ListGraphApplication listGraphApplication) {
         this.listGraphApplication = listGraphApplication;
         return this;
     }
 
-    DefaultCatalogBusinessFacadeBuilder withNativeProjectApplication(NativeProjectApplication nativeProjectApplication) {
+    DefaultGraphCatalogApplicationsBuilder withNativeProjectApplication(NativeProjectApplication nativeProjectApplication) {
         this.nativeProjectApplication = nativeProjectApplication;
         return  this;
     }
 
-    DefaultCatalogBusinessFacadeBuilder withNodeLabelMutatorApplication(NodeLabelMutatorApplication nodeLabelMutatorApplication) {
+    DefaultGraphCatalogApplicationsBuilder withNodeLabelMutatorApplication(NodeLabelMutatorApplication nodeLabelMutatorApplication) {
         this.nodeLabelMutatorApplication = nodeLabelMutatorApplication;
         return  this;
     }
 
-    DefaultCatalogBusinessFacadeBuilder withStreamNodePropertiesApplication(StreamNodePropertiesApplication streamNodePropertiesApplication) {
+    DefaultGraphCatalogApplicationsBuilder withStreamNodePropertiesApplication(StreamNodePropertiesApplication streamNodePropertiesApplication) {
         this.streamNodePropertiesApplication = streamNodePropertiesApplication;
         return this;
     }
 
-    DefaultCatalogBusinessFacadeBuilder withStreamRelationshipPropertiesApplication(StreamRelationshipPropertiesApplication streamRelationshipPropertiesApplication) {
+    DefaultGraphCatalogApplicationsBuilder withStreamRelationshipPropertiesApplication(StreamRelationshipPropertiesApplication streamRelationshipPropertiesApplication) {
         this.streamRelationshipPropertiesApplication = streamRelationshipPropertiesApplication;
         return this;
     }
 
-    DefaultCatalogBusinessFacadeBuilder withStreamRelationshipsApplication(StreamRelationshipsApplication streamRelationshipsApplication) {
+    DefaultGraphCatalogApplicationsBuilder withStreamRelationshipsApplication(StreamRelationshipsApplication streamRelationshipsApplication) {
         this.streamRelationshipsApplication= streamRelationshipsApplication;
         return  this;
     }
 
 
-    DefaultCatalogBusinessFacadeBuilder withSubGraphProjectApplication(SubGraphProjectApplication subGraphProjectApplication) {
+    DefaultGraphCatalogApplicationsBuilder withSubGraphProjectApplication(SubGraphProjectApplication subGraphProjectApplication) {
         this.subGraphProjectApplication = subGraphProjectApplication;
         return this;
     }
-    DefaultCatalogBusinessFacadeBuilder withWriteNodeLabelApplication(WriteNodeLabelApplication writeNodeLabelApplication) {
+    DefaultGraphCatalogApplicationsBuilder withWriteNodeLabelApplication(WriteNodeLabelApplication writeNodeLabelApplication) {
         this.writeNodeLabelApplication = writeNodeLabelApplication;
         return this;
     }
-    DefaultCatalogBusinessFacadeBuilder withWriteNodePropertiesApplication(WriteNodePropertiesApplication writeNodePropertiesApplication) {
+    DefaultGraphCatalogApplicationsBuilder withWriteNodePropertiesApplication(WriteNodePropertiesApplication writeNodePropertiesApplication) {
         this.writeNodePropertiesApplication = writeNodePropertiesApplication;
         return this;
     }
 
-    DefaultCatalogBusinessFacadeBuilder withWriteRelationshipPropertiesApplication(WriteRelationshipPropertiesApplication writeRelationshipPropertiesApplication) {
+    DefaultGraphCatalogApplicationsBuilder withWriteRelationshipPropertiesApplication(WriteRelationshipPropertiesApplication writeRelationshipPropertiesApplication) {
         this.writeRelationshipPropertiesApplication = writeRelationshipPropertiesApplication;
         return this;
     }
-    DefaultCatalogBusinessFacadeBuilder withWriteRelationshipsApplication(WriteRelationshipsApplication writeRelationshipsApplication) {
+    DefaultGraphCatalogApplicationsBuilder withWriteRelationshipsApplication(WriteRelationshipsApplication writeRelationshipsApplication) {
         this.writeRelationshipsApplication = writeRelationshipsApplication;
         return this;
     }
 
-     DefaultCatalogBusinessFacade build(){
-            return  new DefaultCatalogBusinessFacade(
+     DefaultGraphCatalogApplications build(){
+            return  new DefaultGraphCatalogApplications(
                 log,
                 graphStoreCatalogService,
                 projectionMetricsService,

@@ -50,6 +50,6 @@ public class GraphDropProc {
         @Name(value = "dbName", defaultValue = "") String dbName,
         @Name(value = "username", defaultValue = "") String username
     ) {
-        return facade.catalog().dropGraph(graphNameOrListOfGraphNames, failIfMissing, dbName, username);
+        return facade.graphCatalog().dropGraph(graphNameOrListOfGraphNames, failIfMissing, dbName, username);
     }
 }

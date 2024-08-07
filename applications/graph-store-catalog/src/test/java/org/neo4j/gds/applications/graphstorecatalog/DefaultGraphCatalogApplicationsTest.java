@@ -33,11 +33,11 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class DefaultCatalogBusinessFacadeTest {
+class DefaultGraphCatalogApplicationsTest {
     @Test
     void shouldDetermineGraphExists() {
         var service = mock(GraphStoreCatalogService.class);
-        var facade = new DefaultCatalogBusinessFacadeBuilder()
+        var facade = new DefaultGraphCatalogApplicationsBuilder()
             .withGraphStoreCatalogService(service)
             .withGraphNameValidationService(new GraphNameValidationService())
             .build();
@@ -55,7 +55,7 @@ class DefaultCatalogBusinessFacadeTest {
     @Test
     void shouldDetermineGraphDoesNotExist() {
         var service = mock(GraphStoreCatalogService.class);
-        var facade = new DefaultCatalogBusinessFacadeBuilder()
+        var facade = new DefaultGraphCatalogApplicationsBuilder()
             .withGraphStoreCatalogService(service)
             .withGraphNameValidationService(new GraphNameValidationService())
             .build();
@@ -77,7 +77,7 @@ class DefaultCatalogBusinessFacadeTest {
     @Test
     void shouldValidateInputGraphName() {
         var service = mock(GraphStoreCatalogService.class);
-        var facade = new DefaultCatalogBusinessFacadeBuilder()
+        var facade = new DefaultGraphCatalogApplicationsBuilder()
             .withGraphStoreCatalogService(service)
             .withGraphNameValidationService(new GraphNameValidationService())
             .build();
@@ -90,7 +90,7 @@ class DefaultCatalogBusinessFacadeTest {
     @Test
     void shouldUseStrictValidationWhenProjecting() {
         var validationService = mock(GraphNameValidationService.class);
-        var facade = new DefaultCatalogBusinessFacadeBuilder()
+        var facade = new DefaultGraphCatalogApplicationsBuilder()
             .withGraphNameValidationService(validationService)
             .build();
 
@@ -137,7 +137,7 @@ class DefaultCatalogBusinessFacadeTest {
      */
     @Test
     void shouldHandleNullsInNativeProjectParameters() {
-        var facade = new DefaultCatalogBusinessFacadeBuilder()
+        var facade = new DefaultGraphCatalogApplicationsBuilder()
             .withGraphStoreCatalogService(mock(GraphStoreCatalogService.class))
             .withGraphNameValidationService(new GraphNameValidationService())
             .build();
@@ -210,7 +210,7 @@ class DefaultCatalogBusinessFacadeTest {
      */
     @Test
     void shouldHandleNullsInCypherProjectParameters() {
-        var facade = new DefaultCatalogBusinessFacadeBuilder()
+        var facade = new DefaultGraphCatalogApplicationsBuilder()
             .withGraphStoreCatalogService(mock(GraphStoreCatalogService.class))
             .withGraphNameValidationService(new GraphNameValidationService())
             .build();
@@ -281,7 +281,7 @@ class DefaultCatalogBusinessFacadeTest {
     @Test
     void shouldDoExistenceCheckWhenProjecting() {
         var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
-        var facade = new DefaultCatalogBusinessFacadeBuilder()
+        var facade = new DefaultGraphCatalogApplicationsBuilder()
             .withGraphStoreCatalogService(graphStoreCatalogService)
             .withGraphNameValidationService(new GraphNameValidationService())
             .build();
@@ -340,7 +340,7 @@ class DefaultCatalogBusinessFacadeTest {
     @Test
     void shouldDoPositiveExistenceCheckWhenProjectingSubGraph() {
         var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
-        var facade = new DefaultCatalogBusinessFacadeBuilder()
+        var facade = new DefaultGraphCatalogApplicationsBuilder()
             .withGraphStoreCatalogService(graphStoreCatalogService)
             .withGraphNameValidationService(new GraphNameValidationService())
             .build();

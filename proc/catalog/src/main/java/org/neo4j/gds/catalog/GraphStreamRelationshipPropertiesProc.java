@@ -49,7 +49,7 @@ public class GraphStreamRelationshipPropertiesProc {
         @Name(value = "relationshipTypes", defaultValue = "['*']") Object relationshipTypes,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.catalog().streamRelationshipProperties(
+        return facade.graphCatalog().streamRelationshipProperties(
             graphName,
             relationshipProperties, relationshipTypes, configuration
         );
@@ -73,7 +73,7 @@ public class GraphStreamRelationshipPropertiesProc {
             .warn(
                 "Procedure `gds.graph.streamRelationshipProperties` has been deprecated, please use `gds.graph.relationshipProperties.stream`.");
 
-        return facade.catalog().streamRelationshipProperties(
+        return facade.graphCatalog().streamRelationshipProperties(
             graphName,
             relationshipProperties, relationshipTypes, configuration
         );
@@ -88,7 +88,7 @@ public class GraphStreamRelationshipPropertiesProc {
         @Name(value = "relationshipTypes", defaultValue = "['*']") Object relationshipTypes,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.catalog().streamRelationshipProperty(
+        return facade.graphCatalog().streamRelationshipProperty(
             graphName,
             relationshipProperty,
             relationshipTypes,
@@ -114,7 +114,7 @@ public class GraphStreamRelationshipPropertiesProc {
             .warn(
                 "Procedure `gds.graph.streamRelationshipProperty` has been deprecated, please use `gds.graph.relationshipProperty.stream`.");
 
-        return facade.catalog().streamRelationshipProperty(
+        return facade.graphCatalog().streamRelationshipProperty(
             graphName,
             relationshipProperty,
             relationshipTypes,

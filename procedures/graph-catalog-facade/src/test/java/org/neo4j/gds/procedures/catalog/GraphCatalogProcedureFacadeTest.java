@@ -47,15 +47,12 @@ import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.applications.ApplicationsFacadeBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
-import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
+import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.DeletionResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
-import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
-import org.neo4j.gds.core.utils.warnings.UserLogEntry;
-import org.neo4j.gds.core.utils.warnings.UserLogStore;
 
 import java.time.ZonedDateTime;
 import java.util.Collection;
@@ -63,18 +60,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class CatalogProcedureFacadeTest {
+class GraphCatalogProcedureFacadeTest {
     @Test
     void shouldDetermineIfGraphExists() {
-        var businessFacade = mock(CatalogBusinessFacade.class);
-        var catalogFacade = new CatalogProcedureFacade(
+        var businessFacade = mock(GraphCatalogApplications.class);
+        var catalogFacade = new GraphCatalogProcedureFacade(
             RequestScopedDependencies.builder()
                 .with(DatabaseId.of("current database"))
                 .with(new User("current user", false))
@@ -97,52 +93,13 @@ class CatalogProcedureFacadeTest {
         );
     }
 
-    /**
-     * This is a lot of dependency mocking, sure; but that is the nature of this facade, it interacts with Neo4j's
-     * integration points and distills domain concepts: database and user. It then uses those to interact with domain
-     * services, the user log in this case.
-     * <p>
-     * How many of these will we need to gain confidence?
-     * Might we engineer some reuse or commonality out so that we can test this once but have it apply across the board?
-     * Sure! That's just us engineering.
-     */
-    @Test
-    void shouldQueryUserLog() {
-        var userLogStore = mock(UserLogStore.class);
-        var businessFacade = mock(CatalogBusinessFacade.class);
-        var catalogFacade = new CatalogProcedureFacade(
-            RequestScopedDependencies.builder()
-                .with(DatabaseId.of("current database"))
-                .with(new User("current user", false))
-                .with(userLogStore)
-                .build(),
-            null,
-            null,
-            null,
-            null,
-            new ApplicationsFacadeBuilder().with(businessFacade).build(),
-            WriteContext.builder().build(),
-            null
-        );
-
-        var expectedWarnings = Stream.of(
-            new UserLogEntry(new LeafTask("lt", 42), "going once"),
-            new UserLogEntry(new LeafTask("lt", 87), "going twice..."),
-            new UserLogEntry(new LeafTask("lt", 23), "gone!")
-        );
-        when(userLogStore.query("current user")).thenReturn(expectedWarnings);
-        var actualWarnings = catalogFacade.queryUserLog(null);
-
-        assertThat(actualWarnings).isSameAs(expectedWarnings);
-    }
-
     @Test
     void shouldListGraphsWithoutDegreeDistribution() {
         var procedureReturnColumns = mock(ProcedureReturnColumns.class);
-        var businessFacade = mock(CatalogBusinessFacade.class);
+        var businessFacade = mock(GraphCatalogApplications.class);
 
         var procedureContext =  WriteContext.builder().build();
-        var catalogFacade = new CatalogProcedureFacade(
+        var catalogFacade = new GraphCatalogProcedureFacade(
             RequestScopedDependencies.builder()
                 .with(new User("Bob", false))
                 .build(),
@@ -175,10 +132,10 @@ class CatalogProcedureFacadeTest {
     @Test
     void shouldListGraphsWithDegreeDistribution() {
         var procedureReturnColumns = mock(ProcedureReturnColumns.class);
-        var businessFacade = mock(CatalogBusinessFacade.class);
+        var businessFacade = mock(GraphCatalogApplications.class);
         var procedureContext =  WriteContext.builder().build();
 
-        var catalogFacade = new CatalogProcedureFacade(
+        var catalogFacade = new GraphCatalogProcedureFacade(
             RequestScopedDependencies.builder()
                 .with(new User("Bob", false))
                 .build(),
@@ -223,10 +180,10 @@ class CatalogProcedureFacadeTest {
     @Test
     void shouldListGraphsWithoutMemoryUsage() {
         var procedureReturnColumns = mock(ProcedureReturnColumns.class);
-        var businessFacade = mock(CatalogBusinessFacade.class);
+        var businessFacade = mock(GraphCatalogApplications.class);
         var procedureContext =  WriteContext.builder().build();
 
-        var catalogFacade = new CatalogProcedureFacade(
+        var catalogFacade = new GraphCatalogProcedureFacade(
             RequestScopedDependencies.builder()
                 .with(new User("Bob", false))
                 .build(),
@@ -262,10 +219,10 @@ class CatalogProcedureFacadeTest {
     @ValueSource(strings = {"memoryUsage", "sizeInBytes"})
     void shouldListGraphsWithMemoryUsage(String returnColumn) {
         var procedureReturnColumns = mock(ProcedureReturnColumns.class);
-        var businessFacade = mock(CatalogBusinessFacade.class);
+        var businessFacade = mock(GraphCatalogApplications.class);
         var procedureContext =  WriteContext.builder().build();
 
-        var catalogFacade = new CatalogProcedureFacade(
+        var catalogFacade = new GraphCatalogProcedureFacade(
             RequestScopedDependencies.builder()
                 .with(new User("Bob", false))
                 .build(),

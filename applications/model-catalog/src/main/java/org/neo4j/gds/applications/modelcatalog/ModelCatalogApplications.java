@@ -17,27 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.model.catalog;
+package org.neo4j.gds.applications.modelcatalog;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.CypherMapAccess;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.procedure.Context;
+import org.neo4j.gds.core.model.Model;
 
-public abstract class ModelCatalogProc extends BaseProc {
+import java.util.Collection;
 
-    @Context
-    public ModelCatalog internalModelCatalog;
+public interface ModelCatalogApplications {
+    Model<?, ?, ?> drop(ModelName modelName, boolean failIfMissing);
 
-    static final String NO_VALUE = "__NO_VALUE";
+    ModelExistsResult exists(ModelName modelName);
 
-    void validateModelName(String modelName) {
-        CypherMapAccess.failOnBlank("modelName", modelName);
-    }
+    Collection<Model<?, ?, ?>> list();
 
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withModelCatalog(internalModelCatalog);
-    }
+    Model<?, ?, ?> lookup(ModelName modelName);
 }

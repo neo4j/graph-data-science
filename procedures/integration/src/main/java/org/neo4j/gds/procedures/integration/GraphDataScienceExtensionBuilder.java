@@ -22,7 +22,8 @@ package org.neo4j.gds.procedures.integration;
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.applications.algorithms.embeddings.GraphSageModelRepository;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
-import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
+import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
+import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.GcListenerExtension;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
@@ -105,7 +106,8 @@ public final class GraphDataScienceExtensionBuilder {
         Configuration neo4jConfiguration,
         GlobalProcedures globalProcedures,
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
-        Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> catalogFacadeDecorator,
+        Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
+        Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator,
         ExporterBuildersProviderService exporterBuildersProviderService,
         MetricsFacade metricsFacade,
         ModelCatalog modelCatalog,
@@ -147,7 +149,8 @@ public final class GraphDataScienceExtensionBuilder {
         var graphDataScienceProviderFactory = GraphDataScienceProviderFactory.create(
             log,
             algorithmProcessingTemplateDecorator,
-            catalogFacadeDecorator,
+            graphCatalogApplicationsDecorator,
+            modelCatalogApplicationsDecorator,
             exporterBuildersProviderService,
             memoryGauge,
             metricsFacade,

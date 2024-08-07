@@ -101,6 +101,12 @@ project(':executor').projectDir = file('executor')
 include('graph-store-catalog-applications')
 project(':graph-store-catalog-applications').projectDir = file('applications/graph-store-catalog')
 
+include('model-catalog-applications')
+project(':model-catalog-applications').projectDir = file('applications/model-catalog')
+
+include('operations-applications')
+project(':operations-applications').projectDir = file('applications/operations')
+
 include('centrality-algorithms')
 project(':centrality-algorithms').projectDir = file('applications/algorithms/centrality')
 
@@ -268,6 +274,12 @@ project(':algorithms-procedure-facade').projectDir = file('procedures/algorithms
 
 include('operations-procedure-facade')
 project(':operations-procedure-facade').projectDir = file('procedures/operations-facade')
+
+include 'graph-catalog-procedure-facade'
+project(':graph-catalog-procedure-facade').projectDir = file('procedures/graph-catalog-facade')
+
+include 'model-catalog-procedure-facade'
+project(':model-catalog-procedure-facade').projectDir = file('procedures/model-catalog-facade')
 
 include('progress-tracking')
 project(':progress-tracking').projectDir = file('progress-tracking')

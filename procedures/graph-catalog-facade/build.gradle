@@ -1,0 +1,48 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Graph Catalog Procedure Facade'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    neodeps().each {
+        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
+            transitive = false
+        }
+
+        testImplementation(group: 'org.neo4j', name: it, version: ver.'neo4j')
+    }
+
+    implementation project(':algorithms-machinery')
+    implementation project(':annotations')
+    implementation project(':applications-facade')
+    implementation project(':centrality-algorithms')
+    implementation project(':community-algorithms')
+    implementation project(':config-api')
+    implementation project(':core')
+    implementation project(':core-write')
+    implementation project(':graph-schema-api')
+    implementation project(':graph-store-catalog-applications')
+    implementation project(':legacy-cypher-projection')
+    implementation project(':memory-usage')
+    implementation project(':miscellaneous-algorithms')
+    implementation project(':model-catalog-applications')
+    implementation project(':native-projection')
+    implementation project(':neo4j-api')
+    implementation project(':node-embedding-algorithms')
+    implementation project(':operations-applications')
+    implementation project(':path-finding-algorithms')
+    implementation project(':progress-tracking')
+    implementation project(':similarity-algorithms')
+    implementation project(':subgraph-filtering')
+    implementation project(':termination')
+    implementation project(':transaction')
+
+    testImplementation platform(openGds.junit5bom)
+    testImplementation openGds.junit5.jupiter.api
+    testImplementation openGds.junit5.jupiter.params
+    testImplementation openGds.mockito.junit.jupiter
+    testImplementation openGds.assertj.core
+
+    testRuntimeOnly openGds.junit5.jupiter.engine
+}

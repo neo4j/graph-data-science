@@ -25,7 +25,8 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTempla
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
-import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
+import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
+import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -37,7 +38,7 @@ import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.gds.procedures.AlgorithmProcedureFacadeBuilderFactory;
-import org.neo4j.gds.procedures.CatalogProcedureFacadeFactory;
+import org.neo4j.gds.procedures.GraphCatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.DatabaseIdAccessor;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
@@ -73,8 +74,9 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
     private final AlgorithmProcedureFacadeBuilderFactory algorithmProcedureFacadeBuilderFactory;
     private final AlgorithmMetricsService algorithmMetricsService;
     private final Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator;
-    private final Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> catalogBusinessFacadeDecorator;
-    private final CatalogProcedureFacadeFactory catalogProcedureFacadeFactory;
+    private final Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator;
+    private final Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator;
+    private final GraphCatalogProcedureFacadeFactory graphCatalogProcedureFacadeFactory;
     private final DeprecatedProceduresMetricService deprecatedProceduresMetricService;
     private final ExporterBuildersProviderService exporterBuildersProviderService;
     private final GraphStoreCatalogService graphStoreCatalogService;
@@ -94,8 +96,9 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         AlgorithmProcedureFacadeBuilderFactory algorithmProcedureFacadeBuilderFactory,
         AlgorithmMetricsService algorithmMetricsService,
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
-        Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> catalogBusinessFacadeDecorator,
-        CatalogProcedureFacadeFactory catalogProcedureFacadeFactory,
+        Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
+        Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator,
+        GraphCatalogProcedureFacadeFactory graphCatalogProcedureFacadeFactory,
         DeprecatedProceduresMetricService deprecatedProceduresMetricService,
         ExporterBuildersProviderService exporterBuildersProviderService,
         GraphStoreCatalogService graphStoreCatalogService,
@@ -114,8 +117,9 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         this.algorithmProcedureFacadeBuilderFactory = algorithmProcedureFacadeBuilderFactory;
         this.algorithmMetricsService = algorithmMetricsService;
         this.algorithmProcessingTemplateDecorator = algorithmProcessingTemplateDecorator;
-        this.catalogBusinessFacadeDecorator = catalogBusinessFacadeDecorator;
-        this.catalogProcedureFacadeFactory = catalogProcedureFacadeFactory;
+        this.graphCatalogApplicationsDecorator = graphCatalogApplicationsDecorator;
+        this.modelCatalogApplicationsDecorator = modelCatalogApplicationsDecorator;
+        this.graphCatalogProcedureFacadeFactory = graphCatalogProcedureFacadeFactory;
         this.deprecatedProceduresMetricService = deprecatedProceduresMetricService;
         this.exporterBuildersProviderService = exporterBuildersProviderService;
         this.graphStoreCatalogService = graphStoreCatalogService;
@@ -175,7 +179,8 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             defaultsConfiguration,
             limitsConfiguration,
             algorithmProcessingTemplateDecorator,
-            catalogBusinessFacadeDecorator,
+            graphCatalogApplicationsDecorator,
+            modelCatalogApplicationsDecorator,
             graphStoreCatalogService,
             memoryGuard,
             algorithmMetricsService,
@@ -185,7 +190,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             requestScopedDependencies,
             writeContext,
             procedureReturnColumns,
-            catalogProcedureFacadeFactory,
+            graphCatalogProcedureFacadeFactory,
             graphDatabaseService,
             procedureTransaction,
             algorithmProcedureFacadeBuilderFactory,

@@ -523,6 +523,7 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
             logMock,
             Optional.empty(),
             Optional.empty(),
+            Optional.empty(),
             graphStoreCatalogService,
             MemoryGuard.DISABLED,
             new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),

@@ -1,0 +1,14 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Model Catalog Procedure Facade'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    implementation project(':annotations')
+    implementation project(':applications-facade')
+    implementation project(':config-api')
+    implementation project(':graph-schema-api')
+    implementation project(':model-catalog-api')
+    implementation project(':model-catalog-applications')
+}

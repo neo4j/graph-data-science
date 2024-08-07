@@ -17,14 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.model.catalog;
+package org.neo4j.gds.procedures.modelcatalog;
 
 import org.neo4j.gds.core.model.Model;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
 
-@SuppressWarnings("unused")
 public class ModelCatalogResult {
     public final String modelName;
     public final String modelType;

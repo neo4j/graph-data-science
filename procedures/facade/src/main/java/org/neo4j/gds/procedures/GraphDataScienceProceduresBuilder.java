@@ -28,7 +28,8 @@ import org.neo4j.gds.procedures.algorithms.embeddings.NodeEmbeddingsProcedureFac
 import org.neo4j.gds.procedures.algorithms.miscellaneous.MiscellaneousProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade;
-import org.neo4j.gds.procedures.catalog.CatalogProcedureFacade;
+import org.neo4j.gds.procedures.catalog.GraphCatalogProcedureFacade;
+import org.neo4j.gds.procedures.modelcatalog.ModelCatalogProcedureFacade;
 import org.neo4j.gds.procedures.operations.OperationsProcedureFacade;
 import org.neo4j.gds.procedures.pipelines.PipelinesProcedureFacade;
 
@@ -41,9 +42,10 @@ import org.neo4j.gds.procedures.pipelines.PipelinesProcedureFacade;
 public class GraphDataScienceProceduresBuilder {
     private final Log log;
     private CentralityProcedureFacade centralityProcedureFacade;
-    private CatalogProcedureFacade catalogProcedureFacade;
+    private GraphCatalogProcedureFacade graphCatalogProcedureFacade;
     private CommunityProcedureFacade communityProcedureFacade;
     private MiscellaneousProcedureFacade miscellaneousProcedureFacade;
+    private ModelCatalogProcedureFacade modelCatalogProcedureFacade;
     private NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade;
     private OperationsProcedureFacade operationsProcedureFacade;
     private PathFindingProcedureFacade pathFindingProcedureFacade;
@@ -53,11 +55,6 @@ public class GraphDataScienceProceduresBuilder {
 
     public GraphDataScienceProceduresBuilder(Log log) {
         this.log = log;
-    }
-
-    public GraphDataScienceProceduresBuilder with(CatalogProcedureFacade catalogProcedureFacade) {
-        this.catalogProcedureFacade = catalogProcedureFacade;
-        return this;
     }
 
     public GraphDataScienceProceduresBuilder with(CentralityProcedureFacade centralityProcedureFacade) {
@@ -70,8 +67,18 @@ public class GraphDataScienceProceduresBuilder {
         return this;
     }
 
+    public GraphDataScienceProceduresBuilder with(GraphCatalogProcedureFacade graphCatalogProcedureFacade) {
+        this.graphCatalogProcedureFacade = graphCatalogProcedureFacade;
+        return this;
+    }
+
     public GraphDataScienceProceduresBuilder with(MiscellaneousProcedureFacade miscellaneousProcedureFacade) {
         this.miscellaneousProcedureFacade = miscellaneousProcedureFacade;
+        return this;
+    }
+
+    public GraphDataScienceProceduresBuilder with(ModelCatalogProcedureFacade modelCatalogProcedureFacade) {
+        this.modelCatalogProcedureFacade = modelCatalogProcedureFacade;
         return this;
     }
 
@@ -118,7 +125,8 @@ public class GraphDataScienceProceduresBuilder {
         return new GraphDataScienceProcedures(
             log,
             algorithmsProcedureFacade,
-            catalogProcedureFacade,
+            graphCatalogProcedureFacade,
+            modelCatalogProcedureFacade,
             operationsProcedureFacade,
             pipelinesProcedureFacade,
             deprecatedProceduresMetricService

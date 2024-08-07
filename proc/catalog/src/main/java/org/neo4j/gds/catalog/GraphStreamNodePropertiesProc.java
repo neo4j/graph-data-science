@@ -48,7 +48,7 @@ public class GraphStreamNodePropertiesProc {
         @Name(value = "nodeLabels", defaultValue = "['*']") Object nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.catalog().streamNodeProperties(
+        return facade.graphCatalog().streamNodeProperties(
             graphName,
             nodeProperties,
             nodeLabels,
@@ -74,7 +74,7 @@ public class GraphStreamNodePropertiesProc {
             .warn(
                 "Procedure `gds.graph.streamNodeProperties` has been deprecated, please use `gds.graph.nodeProperties.stream`.");
 
-        return facade.catalog().streamNodeProperties(
+        return facade.graphCatalog().streamNodeProperties(
             graphName,
             nodeProperties,
             nodeLabels,
@@ -91,7 +91,7 @@ public class GraphStreamNodePropertiesProc {
         @Name(value = "nodeLabels", defaultValue = "['*']") Object nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.catalog().streamNodeProperty(
+        return facade.graphCatalog().streamNodeProperty(
             graphName,
             nodeProperty,
             nodeLabels,
@@ -116,7 +116,7 @@ public class GraphStreamNodePropertiesProc {
             .warn(
                 "Procedure `gds.graph.streamNodeProperty` has been deprecated, please use `gds.graph.nodeProperty.stream`.");
 
-        return facade.catalog().streamNodeProperty(
+        return facade.graphCatalog().streamNodeProperty(
             graphName,
             nodeProperty,
             nodeLabels,

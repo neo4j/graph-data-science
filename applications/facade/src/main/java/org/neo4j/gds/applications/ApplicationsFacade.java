@@ -36,8 +36,11 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplications;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingApplications;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityApplications;
-import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
-import org.neo4j.gds.applications.graphstorecatalog.DefaultCatalogBusinessFacade;
+import org.neo4j.gds.applications.graphstorecatalog.DefaultGraphCatalogApplications;
+import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
+import org.neo4j.gds.applications.modelcatalog.DefaultModelCatalogApplications;
+import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
+import org.neo4j.gds.applications.operations.OperationsApplications;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.logging.Log;
@@ -56,28 +59,34 @@ import java.util.function.Function;
  * and we apply a breakdown into sub-facades to keep things smaller and more manageable.
  */
 public final class ApplicationsFacade {
-    private final CatalogBusinessFacade catalogBusinessFacade;
     private final CentralityApplications centralityApplications;
     private final CommunityApplications communityApplications;
+    private final GraphCatalogApplications graphCatalogApplications;
     private final MiscellaneousApplications miscellaneousApplications;
+    private final ModelCatalogApplications modelCatalogApplications;
     private final NodeEmbeddingApplications nodeEmbeddingApplications;
+    private final OperationsApplications operationsApplications;
     private final PathFindingApplications pathFindingApplications;
     private final SimilarityApplications similarityApplications;
 
     ApplicationsFacade(
-        CatalogBusinessFacade catalogBusinessFacade,
         CentralityApplications centralityApplications,
         CommunityApplications communityApplications,
+        GraphCatalogApplications graphCatalogApplications,
         MiscellaneousApplications miscellaneousApplications,
+        ModelCatalogApplications modelCatalogApplications,
         NodeEmbeddingApplications nodeEmbeddingApplications,
+        OperationsApplications operationsApplications,
         PathFindingApplications pathFindingApplications,
         SimilarityApplications similarityApplications
     ) {
-        this.catalogBusinessFacade = catalogBusinessFacade;
         this.centralityApplications = centralityApplications;
         this.communityApplications = communityApplications;
+        this.graphCatalogApplications = graphCatalogApplications;
         this.miscellaneousApplications = miscellaneousApplications;
+        this.modelCatalogApplications = modelCatalogApplications;
         this.nodeEmbeddingApplications = nodeEmbeddingApplications;
+        this.operationsApplications = operationsApplications;
         this.pathFindingApplications = pathFindingApplications;
         this.similarityApplications = similarityApplications;
     }
@@ -88,7 +97,8 @@ public final class ApplicationsFacade {
     public static ApplicationsFacade create(
         Log log,
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
-        Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> catalogBusinessFacadeDecorator,
+        Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
+        Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator,
         GraphStoreCatalogService graphStoreCatalogService,
         MemoryGuard memoryGuard,
         AlgorithmMetricsService algorithmMetricsService,
@@ -98,13 +108,6 @@ public final class ApplicationsFacade {
         ModelCatalog modelCatalog,
         GraphSageModelRepository graphSageModelRepository
     ) {
-        var catalogBusinessFacade = createCatalogBusinessFacade(
-            log,
-            catalogBusinessFacadeDecorator,
-            graphStoreCatalogService,
-            projectionMetricsService
-        );
-
         var databaseGraphStoreEstimationService = new DatabaseGraphStoreEstimationService(
             requestScopedDependencies.getGraphLoaderContext(),
             requestScopedDependencies.getUser()
@@ -149,11 +152,27 @@ public final class ApplicationsFacade {
             mutateNodeProperty
         );
 
+        var graphCatalogApplications = createGraphCatalogApplications(
+            log,
+            graphCatalogApplicationsDecorator,
+            graphStoreCatalogService,
+            projectionMetricsService
+        );
+
         var miscellaneousApplications = MiscellaneousApplications.create(
-            log, requestScopedDependencies, writeContext, algorithmEstimationTemplate,
+            log,
+            requestScopedDependencies,
+            writeContext,
+            algorithmEstimationTemplate,
             algorithmProcessingTemplateConvenience,
             progressTrackerCreator,
             mutateNodeProperty
+        );
+
+        var modelCatalogApplications = createModelCatalogApplications(
+            requestScopedDependencies,
+            modelCatalog,
+            modelCatalogApplicationsDecorator
         );
 
         var nodeEmbeddingApplications = NodeEmbeddingApplications.create(
@@ -167,6 +186,8 @@ public final class ApplicationsFacade {
             modelCatalog,
             graphSageModelRepository
         );
+
+        var operationsApplications = OperationsApplications.create(requestScopedDependencies);
 
         var pathFindingApplications = PathFindingApplications.create(
             log,
@@ -189,11 +210,13 @@ public final class ApplicationsFacade {
         );
 
         return new ApplicationsFacadeBuilder()
-            .with(catalogBusinessFacade)
             .with(centralityApplications)
             .with(communityApplications)
+            .with(graphCatalogApplications)
             .with(miscellaneousApplications)
+            .with(modelCatalogApplications)
             .with(nodeEmbeddingApplications)
+            .with(operationsApplications)
             .with(pathFindingApplications)
             .with(similarityApplications)
             .build();
@@ -220,25 +243,36 @@ public final class ApplicationsFacade {
         return algorithmProcessingTemplateDecorator.get().apply(algorithmProcessingTemplate);
     }
 
-    private static CatalogBusinessFacade createCatalogBusinessFacade(
+    private static GraphCatalogApplications createGraphCatalogApplications(
         Log log,
-        Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> catalogBusinessFacadeDecorator,
+        Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
         GraphStoreCatalogService graphStoreCatalogService,
         ProjectionMetricsService projectionMetricsService
     ) {
-        var catalogBusinessFacade = DefaultCatalogBusinessFacade.create(
+        var graphCatalogApplications = DefaultGraphCatalogApplications.create(
             log,
             graphStoreCatalogService,
             projectionMetricsService
         );
 
-        if (catalogBusinessFacadeDecorator.isEmpty()) return catalogBusinessFacade;
+        if (graphCatalogApplicationsDecorator.isEmpty()) return graphCatalogApplications;
 
-        return catalogBusinessFacadeDecorator.get().apply(catalogBusinessFacade);
+        return graphCatalogApplicationsDecorator.get().apply(graphCatalogApplications);
     }
 
-    public CatalogBusinessFacade catalog() {
-        return catalogBusinessFacade;
+    private static ModelCatalogApplications createModelCatalogApplications(
+        RequestScopedDependencies requestScopedDependencies,
+        ModelCatalog modelCatalog,
+        Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator
+    ) {
+        var modelCatalogApplications = DefaultModelCatalogApplications.create(
+            modelCatalog,
+            requestScopedDependencies.getUser()
+        );
+
+        if (modelCatalogApplicationsDecorator.isEmpty()) return modelCatalogApplications;
+
+        return modelCatalogApplicationsDecorator.get().apply(modelCatalogApplications);
     }
 
     public CentralityApplications centrality() {
@@ -249,12 +283,24 @@ public final class ApplicationsFacade {
         return communityApplications;
     }
 
+    public GraphCatalogApplications graphCatalog() {
+        return graphCatalogApplications;
+    }
+
     public MiscellaneousApplications miscellaneous() {
         return miscellaneousApplications;
     }
 
+    public ModelCatalogApplications modelCatalog() {
+        return modelCatalogApplications;
+    }
+
     public NodeEmbeddingApplications nodeEmbeddings() {
         return nodeEmbeddingApplications;
+    }
+
+    public OperationsApplications operations() {
+        return operationsApplications;
     }
 
     public PathFindingApplications pathFinding() {

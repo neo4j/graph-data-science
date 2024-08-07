@@ -37,6 +37,6 @@ public class GraphMemoryUsageProc {
     @Internal
     @Procedure(name = "gds.internal.graph.sizeOf", mode = READ)
     public Stream<GraphMemoryUsage> list(@Name(value = "graphName") String graphName) {
-        return facade.catalog().sizeOf(graphName);
+        return facade.graphCatalog().sizeOf(graphName);
     }
 }

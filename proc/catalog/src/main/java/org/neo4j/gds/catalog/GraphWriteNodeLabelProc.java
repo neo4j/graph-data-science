@@ -44,7 +44,7 @@ public class GraphWriteNodeLabelProc {
         @Name(value = "nodeLabel") String nodeLabel,
         @Name(value = "configuration") Map<String, Object> configuration
     ) {
-        return facade.catalog().writeNodeLabel(graphName, nodeLabel, configuration);
+        return facade.graphCatalog().writeNodeLabel(graphName, nodeLabel, configuration);
     }
 
     @Procedure(name = "gds.alpha.graph.nodeLabel.write", mode = WRITE, deprecatedBy = "gds.graph.nodeLabel.write")
@@ -63,6 +63,6 @@ public class GraphWriteNodeLabelProc {
             .warn(
                 "Procedure `gds.alpha.graph.nodeLabel.write` has been deprecated, please use `gds.graph.nodeLabel.write`.");
 
-        return facade.catalog().writeNodeLabel(graphName, nodeLabel, configuration);
+        return facade.graphCatalog().writeNodeLabel(graphName, nodeLabel, configuration);
     }
 }

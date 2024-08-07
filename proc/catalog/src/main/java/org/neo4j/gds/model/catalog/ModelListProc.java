@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.model.catalog;
 
-import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.modelcatalog.ModelCatalogResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -27,26 +29,19 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.procedures.modelcatalog.ModelCatalogProcedureFacade.NO_VALUE;
 import static org.neo4j.procedure.Mode.READ;
 
-public class ModelListProc extends ModelCatalogProc {
-
+public class ModelListProc {
     private static final String DESCRIPTION = "Lists all models contained in the model catalog.";
+
+    @Context
+    public GraphDataScienceProcedures facade;
 
     @Procedure(name = "gds.model.list", mode = READ)
     @Description(DESCRIPTION)
     public Stream<ModelCatalogResult> list(@Name(value = "modelName", defaultValue = NO_VALUE) String modelName) {
-        ModelCatalog modelCatalog = executionContext().modelCatalog();
-        if (modelName == null || modelName.equals(NO_VALUE)) {
-            var models = modelCatalog.list(username());
-            return models.stream().map(ModelCatalogResult::new);
-        } else {
-            validateModelName(modelName);
-            var model = modelCatalog.getUntyped(username(), modelName);
-            return model == null
-                ? Stream.empty()
-                : Stream.of(new ModelCatalogResult(model));
-        }
+        return facade.modelCatalog().list(modelName);
     }
 
     @Procedure(name = "gds.beta.model.list", mode = READ, deprecatedBy = "gds.model.list")
@@ -54,13 +49,8 @@ public class ModelListProc extends ModelCatalogProc {
     @Deprecated
     @Internal
     public Stream<BetaModelCatalogResult> betaList(@Name(value = "modelName", defaultValue = NO_VALUE) String modelName) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.beta.model.list");
-
-        executionContext()
-            .log()
-            .warn("Procedure `gds.beta.model.list` has been deprecated, please use `gds.model.list`.");
+        facade.deprecatedProcedures().called("gds.beta.model.list");
+        facade.log().warn("Procedure `gds.beta.model.list` has been deprecated, please use `gds.model.list`.");
 
         return list(modelName).map(BetaModelCatalogResult::new);
     }

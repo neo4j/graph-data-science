@@ -19,73 +19,40 @@
  */
 package org.neo4j.gds.procedures.operations;
 
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.core.utils.progress.TaskStore;
-import org.neo4j.gds.core.utils.progress.tasks.TaskTraversal;
+import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-
 public class OperationsProcedureFacade {
-    private final RequestScopedDependencies requestScopedDependencies;
+    private final ApplicationsFacade applicationsFacade;
 
-    public OperationsProcedureFacade(RequestScopedDependencies requestScopedDependencies) {
-        this.requestScopedDependencies = requestScopedDependencies;
+    public OperationsProcedureFacade(ApplicationsFacade applicationsFacade) {
+        this.applicationsFacade = applicationsFacade;
     }
 
-    public Stream<ProgressResult> listProgress(String jobId) {
-        return jobId.isBlank()
-            ? jobsSummaryView()
-            : jobDetailView(jobId);
-    }
+    public Stream<ProgressResult> listProgress(String jobIdAsString) {
+        if (jobIdAsString.isBlank()) return summaryView();
 
-    private Stream<ProgressResult> jobsSummaryView() {
-        var taskStore = requestScopedDependencies.getTaskStore();
-        var user = requestScopedDependencies.getUser();
-
-        if (user.isAdmin()) {
-            return taskStore.query().map(ProgressResult::fromTaskStoreEntry);
-        } else {
-            return taskStore.query(user.getUsername()).map(ProgressResult::fromTaskStoreEntry);
-        }
-    }
-
-    private Stream<ProgressResult> jobDetailView(String jobIdAsString) {
         var jobId = new JobId(jobIdAsString);
 
-        var taskStore = requestScopedDependencies.getTaskStore();
-        var user = requestScopedDependencies.getUser();
-
-        if (user.isAdmin()) {
-            var progressResults = taskStore
-                .query(jobId)
-                .flatMap(this::jobProgress)
-                .collect(Collectors.toList());
-
-            if (progressResults.isEmpty()) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "No task with job id `%s` was found.",
-                    jobIdAsString
-                ));
-            }
-
-            return progressResults.stream();
-        } else {
-            return taskStore.query(user.getUsername(), jobId).map(this::jobProgress).orElseThrow(
-                () -> new IllegalArgumentException(formatWithLocale(
-                    "No task with job id `%s` was found.",
-                    jobIdAsString
-                ))
-            );
-        }
+        return detailView(jobId);
     }
 
-    private Stream<ProgressResult> jobProgress(TaskStore.UserTask userTask) {
-        var jobProgressVisitor = new JobProgressVisitor(userTask.jobId(), userTask.username());
-        TaskTraversal.visitPreOrderWithDepth(userTask.task(), jobProgressVisitor);
-        return jobProgressVisitor.progressRowsStream();
+    public Stream<UserLogEntry> queryUserLog(String jobId) {
+        return applicationsFacade.operations().queryUserLog(jobId);
+    }
+
+    private Stream<ProgressResult> detailView(JobId jobId) {
+        var resultRenderer = new DefaultResultRenderer(jobId);
+
+        return applicationsFacade.operations().listProgress(jobId, resultRenderer);
+    }
+
+    private Stream<ProgressResult> summaryView() {
+        var results = applicationsFacade.operations().listProgress();
+
+        return results.map(ProgressResult::fromTaskStoreEntry);
     }
 }

@@ -26,7 +26,7 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.graphstorecatalog.GraphProjectMemoryUsageService;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.procedures.catalog.CatalogProcedureFacade;
+import org.neo4j.gds.procedures.catalog.GraphCatalogProcedureFacade;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -34,12 +34,12 @@ import org.neo4j.kernel.api.KernelTransaction;
 import java.util.function.Consumer;
 
 /**
- * Here we keep everything related to constructing the {@link org.neo4j.gds.procedures.catalog.CatalogProcedureFacade}
+ * Here we keep everything related to constructing the {@link org.neo4j.gds.procedures.catalog.GraphCatalogProcedureFacade}
  * from a {@link org.neo4j.kernel.api.procedure.Context}, at request time.
  * <p>
  * We can resolve things like user and database id here, construct termination flags, and such.
  */
-public class CatalogProcedureFacadeFactory {
+public class GraphCatalogProcedureFacadeFactory {
     // dull bits
     private final TransactionContextAccessor transactionContextAccessor = new TransactionContextAccessor();
 
@@ -52,7 +52,7 @@ public class CatalogProcedureFacadeFactory {
      * Without it, I would have to stub out Neo4j's {@link org.neo4j.kernel.api.procedure.Context}, in a non-trivial,
      * ugly way. Now instead I can inject the user by stubbing out GDS' own little POJO service.
      */
-    public CatalogProcedureFacadeFactory(Log log) {
+    public GraphCatalogProcedureFacadeFactory(Log log) {
         this.log = log;
     }
 
@@ -60,7 +60,7 @@ public class CatalogProcedureFacadeFactory {
      * We construct the catalog facade at request time. At this point things like user and database id are set in stone.
      * And we can readily construct things like termination flags.
      */
-    CatalogProcedureFacade createCatalogProcedureFacade(
+    GraphCatalogProcedureFacade createGraphCatalogProcedureFacade(
         ApplicationsFacade applicationsFacade,
         GraphDatabaseService graphDatabaseService,
         KernelTransaction kernelTransaction,
@@ -82,7 +82,7 @@ public class CatalogProcedureFacadeFactory {
             procedureTransaction
         );
 
-        return new CatalogProcedureFacade(
+        return new GraphCatalogProcedureFacade(
             requestScopedDependencies,
             streamCloser,
             graphDatabaseService,

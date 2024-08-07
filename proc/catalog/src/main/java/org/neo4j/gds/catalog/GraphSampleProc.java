@@ -48,7 +48,7 @@ public class GraphSampleProc {
         @Name(value = "fromGraphName") String fromGraphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.catalog().sampleRandomWalkWithRestarts(graphName, fromGraphName, configuration);
+        return facade.graphCatalog().sampleRandomWalkWithRestarts(graphName, fromGraphName, configuration);
     }
 
     @Internal
@@ -75,7 +75,7 @@ public class GraphSampleProc {
         @Name(value = "fromGraphName") String fromGraphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.catalog().sampleCommonNeighbourAwareRandomWalk(graphName, fromGraphName, configuration);
+        return facade.graphCatalog().sampleCommonNeighbourAwareRandomWalk(graphName, fromGraphName, configuration);
     }
 
     @SuppressWarnings("unused")
@@ -85,6 +85,6 @@ public class GraphSampleProc {
         @Name(value = "fromGraphName") String fromGraphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.catalog().estimateCommonNeighbourAwareRandomWalk(fromGraphName, configuration);
+        return facade.graphCatalog().estimateCommonNeighbourAwareRandomWalk(fromGraphName, configuration);
     }
 }

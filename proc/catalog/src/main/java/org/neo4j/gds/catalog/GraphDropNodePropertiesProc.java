@@ -46,7 +46,7 @@ public class GraphDropNodePropertiesProc {
         @Name(value = "nodeProperties") @NotNull Object nodeProperties,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.catalog().dropNodeProperties(graphName, nodeProperties, configuration);
+        return facade.graphCatalog().dropNodeProperties(graphName, nodeProperties, configuration);
     }
 
     @SuppressWarnings("unused")
@@ -66,7 +66,7 @@ public class GraphDropNodePropertiesProc {
             .warn(
                 "Procedure `gds.graph.removeNodeProperties` has been deprecated, please use `gds.graph.nodeProperties.drop`.");
 
-        return facade.catalog().dropNodeProperties(
+        return facade.graphCatalog().dropNodeProperties(
             graphName,
             nodeProperties,
             configuration

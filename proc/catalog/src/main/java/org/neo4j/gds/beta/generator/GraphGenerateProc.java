@@ -64,6 +64,6 @@ public final class GraphGenerateProc {
         @Name(value = "averageDegree") long averageDegree,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.catalog().generateGraph(graphName, nodeCount, averageDegree, configuration);
+        return facade.graphCatalog().generateGraph(graphName, nodeCount, averageDegree, configuration);
     }
 }
