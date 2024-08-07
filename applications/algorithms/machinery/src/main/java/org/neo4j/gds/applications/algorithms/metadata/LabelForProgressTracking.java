@@ -28,6 +28,7 @@ public enum LabelForProgressTracking {
     BetaClosenessCentrality("Closeness Centrality (beta)"),
     BetweennessCentrality("Betweenness Centrality"),
     BFS("BFS"),
+    BRIDGES("Bridges"),
     CELF("CELF"),
     ClosenessCentrality("Closeness Centrality"),
     CollapsePath("CollapsePath"),

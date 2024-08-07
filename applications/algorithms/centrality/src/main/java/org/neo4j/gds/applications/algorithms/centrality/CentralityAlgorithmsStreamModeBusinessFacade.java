@@ -24,6 +24,8 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
+import org.neo4j.gds.bridges.BridgeResult;
+import org.neo4j.gds.bridges.BridgesStreamConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityStreamConfig;
 import org.neo4j.gds.degree.DegreeCentralityStreamConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
@@ -34,6 +36,7 @@ import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankStreamConfig;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ArticleRank;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BRIDGES;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BetweennessCentrality;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.CELF;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ClosenessCentrality;
@@ -83,6 +86,21 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
             BetweennessCentrality,
             () -> estimationFacade.betweennessCentrality(configuration),
             (graph, __) -> centralityAlgorithms.betweennessCentrality(graph, configuration),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT bridges(
+        GraphName graphName,
+         BridgesStreamConfig configuration,
+        ResultBuilder<BridgesStreamConfig, BridgeResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+            graphName,
+            configuration,
+            BRIDGES,
+            estimationFacade::bridges,
+            (graph, __) -> centralityAlgorithms.bridges(graph, configuration),
             resultBuilder
         );
     }

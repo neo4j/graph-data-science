@@ -58,6 +58,7 @@
 ** xref:algorithms/centrality.adoc[]
 *** xref:algorithms/article-rank.adoc[]
 *** xref:algorithms/betweenness-centrality.adoc[]
+*** xref:algorithms/bridges.adoc[]
 *** xref:algorithms/celf.adoc[]
 *** xref:algorithms/closeness-centrality.adoc[]
 *** xref:algorithms/degree-centrality.adoc[]
