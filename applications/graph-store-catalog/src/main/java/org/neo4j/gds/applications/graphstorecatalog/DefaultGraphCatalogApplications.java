@@ -235,26 +235,26 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
 
     /**
      * @param failIfMissing enable validation that graphs exist before dropping them
-     * @param databaseName  optional override
-     * @param username      optional override
+     * @param databaseNameOverride  optional override
+     * @param usernameOverride      optional override
      * @throws IllegalArgumentException if a database name was null or blank or not a String
      */
     @Override
     public List<GraphStoreCatalogEntry> dropGraph(
         Object graphNameOrListOfGraphNames,
         boolean failIfMissing,
-        String databaseName,
-        String username,
+        String databaseNameOverride,
+        String usernameOverride,
         DatabaseId currentDatabase,
         User operator
     ) {
         // general parameter consolidation
         // we imagine any new endpoints will follow the exact same parameter lists I guess, for now
         var validatedGraphNames = parseGraphNameOrListOfGraphNames(graphNameOrListOfGraphNames);
-        var databaseId = currentDatabase.orOverride(databaseName);
-        var usernameOverride = User.parseUsernameOverride(username);
+        var databaseId = currentDatabase.orOverride(databaseNameOverride);
+        var parsedUsernameOverride = User.parseUsernameOverride(usernameOverride);
 
-        return dropGraphApplication.compute(validatedGraphNames, failIfMissing, databaseId, operator, usernameOverride);
+        return dropGraphApplication.compute(validatedGraphNames, failIfMissing, databaseId, operator, parsedUsernameOverride);
     }
 
     @Override
