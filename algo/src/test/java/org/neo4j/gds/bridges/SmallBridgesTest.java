@@ -80,7 +80,7 @@ class SmallBridgesTest {
         @Test
         void shouldLogProgress(){
 
-            var progressTask = BridgeProgressTaskCreator.progressTask(graph);
+            var progressTask = BridgeProgressTaskCreator.progressTask(graph.nodeCount());
             var log = new GdsTestLog();
             var progressTracker = new TaskProgressTracker(progressTask, log, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
 
