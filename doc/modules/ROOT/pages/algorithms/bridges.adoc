@@ -12,10 +12,9 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 [[algorithms-bridges-intro]]
 == Introduction
 
-In graph theory, a bridge is an edge of a graph whose deletion increases the graph's number of connected components.
-Equivalently, an edge is a bridge if and only if it is not contained in any cycle.
-For a connected graph, a bridge can uniquely determine a cut.
-A graph is said to be bridgeless if it contains no bridges.
+Given a graph, a bridge is a relationship whose removal increases the number of connected components in the graph. 
+Equivalently, a relationship can only be a bridge if and only if it is not contained in any cycle.
+The  Neo4j GDS Library provides an efficient linear time sequential algorithm to compute all bridges in a graph.
 
 For more information on this algorithm, see:
 
