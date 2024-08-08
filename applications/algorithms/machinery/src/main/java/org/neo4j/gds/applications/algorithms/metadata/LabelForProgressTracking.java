@@ -23,6 +23,7 @@ public enum LabelForProgressTracking {
     AllShortestPaths("All Shortest Paths"),
     ApproximateMaximumKCut("ApproxMaxKCut"),
     ArticleRank("ArticleRank"),
+    ArticulationPoints("ArticulationPoints"),
     AStar("AStar"),
     BellmanFord("Bellman-Ford"),
     BetaClosenessCentrality("Closeness Centrality (beta)"),
@@ -81,6 +82,7 @@ public enum LabelForProgressTracking {
             case AllShortestPaths -> AllShortestPaths;
             case ApproximateMaximumKCut -> ApproximateMaximumKCut;
             case ArticleRank -> ArticleRank;
+            case ArticulationPoints -> ArticulationPoints;
             case AStar -> AStar;
             case BellmanFord -> BellmanFord;
             case BetaClosenessCentrality -> BetaClosenessCentrality;

@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.pipeline;
 import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.ml.pipeline.stubs.ApproximateMaximumKCutStub;
 import org.neo4j.gds.ml.pipeline.stubs.ArticleRankStub;
+import org.neo4j.gds.ml.pipeline.stubs.ArticulationPointsStub;
 import org.neo4j.gds.ml.pipeline.stubs.BellmanFordStub;
 import org.neo4j.gds.ml.pipeline.stubs.BetaClosenessCentralityStub;
 import org.neo4j.gds.ml.pipeline.stubs.BetweennessCentralityStub;
@@ -76,6 +77,7 @@ class StubbyHolder {
             case AllShortestPaths -> null;
             case ApproximateMaximumKCut -> new ApproximateMaximumKCutStub();
             case ArticleRank -> new ArticleRankStub();
+            case ArticulationPoints -> new ArticulationPointsStub();
             case AStar -> new SinglePairShortestPathAStarStub();
             case BellmanFord -> new BellmanFordStub();
             case BetaClosenessCentrality -> new BetaClosenessCentralityStub();

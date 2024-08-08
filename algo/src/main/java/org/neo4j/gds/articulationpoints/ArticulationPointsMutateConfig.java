@@ -17,32 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.doc;
+package org.neo4j.gds.articulationpoints;
 
-import org.neo4j.gds.articulationpoints.ArticulationPointsMutateProc;
-import org.neo4j.gds.articulationpoints.ArticulationPointsStreamProc;
-import org.neo4j.gds.functions.AsNodeFunc;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.config.MutateNodePropertyConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.List;
+import java.util.Map;
 
-class ArticulationPointsDocTest extends SingleFileDocTestBase {
-
-    @Override
-    protected List<Class<?>> functions() {
-        return List.of(AsNodeFunc.class);
+@Configuration
+public interface ArticulationPointsMutateConfig extends ArticulationPointsBaseConfig, MutateNodePropertyConfig {
+    static ArticulationPointsMutateConfig of(CypherMapWrapper cypherMapWrapper) {
+        return new ArticulationPointsMutateConfigImpl(cypherMapWrapper);
     }
 
-    @Override
-    protected List<Class<?>> procedures() {
-        return List.of(
-            ArticulationPointsStreamProc.class,
-            ArticulationPointsMutateProc.class
-        );
+    static ArticulationPointsMutateConfig of(Map<String, Object> rawMapConfiguration) {
+        return of(CypherMapWrapper.create(rawMapConfiguration));
     }
-
-    @Override
-    protected String adocFile() {
-        return "pages/algorithms/articulation-points.adoc";
-    }
-
 }

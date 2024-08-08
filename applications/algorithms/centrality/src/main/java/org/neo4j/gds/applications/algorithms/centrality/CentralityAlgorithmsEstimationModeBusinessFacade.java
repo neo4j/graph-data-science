@@ -21,8 +21,8 @@ package org.neo4j.gds.applications.algorithms.centrality;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.articulationpoints.ArticulationPointsBaseConfig;
 import org.neo4j.gds.articulationpoints.ArticulationPointsMemoryEstimateDefinition;
-import org.neo4j.gds.articulationpoints.ArticulationPointsStreamConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityMemoryEstimateDefinition;
 import org.neo4j.gds.bridges.BridgesBaseConfig;
@@ -50,7 +50,7 @@ public class CentralityAlgorithmsEstimationModeBusinessFacade {
     }
 
     public MemoryEstimateResult articulationPoints(
-        ArticulationPointsStreamConfig configuration,
+        ArticulationPointsBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
         var memoryEstimation = articulationPoints();

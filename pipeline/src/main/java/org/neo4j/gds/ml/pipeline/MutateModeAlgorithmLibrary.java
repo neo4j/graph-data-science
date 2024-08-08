@@ -61,6 +61,7 @@ final class MutateModeAlgorithmLibrary {
             case AllShortestPaths -> null;
             case ApproximateMaximumKCut -> CanonicalProcedureName.parse("gds.maxkcut");
             case ArticleRank -> CanonicalProcedureName.parse("gds.articleRank");
+            case ArticulationPoints -> CanonicalProcedureName.parse("gds.articulationPoints");
             case AStar -> CanonicalProcedureName.parse("gds.shortestPath.astar");
             case BellmanFord -> CanonicalProcedureName.parse("gds.bellmanFord");
             case BetaClosenessCentrality -> CanonicalProcedureName.parse("gds.beta.closeness");

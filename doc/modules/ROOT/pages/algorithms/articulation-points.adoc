@@ -1,8 +1,8 @@
 [[algorithms-articulation-points]]
 = Bridges
 :description: This section describes the Articulation Points algorithm in the Neo4j Graph Data Science library.
-:entity: relationship
-:result: node
+:entity: node
+:result: node property
 :algorithm: Articulation Points
 :sequential: true
 
@@ -28,7 +28,7 @@ include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
 [.include-with-stream]
 ======
 
-.Run Bridges in stream mode on a named graph.
+.Run Articulation points in stream mode on a named graph.
 [source, cypher, role=noplay]
 ----
 CALL gds.articulationPoints.stream(
@@ -53,6 +53,46 @@ include::partial$/algorithms/common-configuration/common-stream-stats-configurat
 |===
 | Name    | Type    | Description
 | nodeId  | Integer | The ID of the node representing an articulation point.
+|===
+
+======
+[.include-with-mutate]
+======
+
+.Run Articulation points in mutate mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.articulationPoints.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  YIELD
+  mutateMillis: Integer,
+  nodePropertiesWritten: Integer,
+  computeMillis: Integer,
+  numberOfArticulationPoints: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc
+|===
+
+.Results
+[opts="header"]
+|===
+| Name                   | Type      | Description
+| mutateMillis           | Integer   | Milliseconds for adding properties to the projected graph.
+| nodePropertiesWritten  | Integer   | Number of properties added to the projected graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| numberOfArticulationPoints  | Integer   | Number of articulation points in the graph.
+| configuration          | Map       | The configuration used for running the algorithm.
 |===
 
 ======
@@ -156,3 +196,30 @@ ORDER BY name ASC
 | "Doug"
 |===
 --
+
+[[algorithms-articulation-points-examples-mutate]]
+=== Mutate
+
+The `mutate` mode updates the named graph with a new {entity} property that denotes whether a node is an articulation point or not.
+This is achieved through setting `0,1` values, where `1` denotes that the node is an articulation point.
+The name of the new property is specified using the mandatory configuration parameter `mutateProperty`.
+The result is a single summary row, similar to `stats`, but with some additional metrics.
+The `mutate` mode is especially useful when multiple algorithms are used in conjunction.
+
+[role=query-example]
+--
+.The following will run the algorithm in `mutate` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.articulationPoints.mutate('myGraph', { mutateProperty: 'articulationPoint'})
+YIELD numberOfArticulationPoints
+----
+
+.Results
+[opts="header"]
+|===
+| numberOfArticulationPoints
+| 2
+|===
+--
+

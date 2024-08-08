@@ -17,32 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.doc;
+package org.neo4j.gds.ml.pipeline.stubs;
 
-import org.neo4j.gds.articulationpoints.ArticulationPointsMutateProc;
-import org.neo4j.gds.articulationpoints.ArticulationPointsStreamProc;
-import org.neo4j.gds.functions.AsNodeFunc;
+import org.neo4j.gds.articulationpoints.ArticulationPointsMutateConfig;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.centrality.ArticulationPointsMutateResult;
+import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
-import java.util.List;
-
-class ArticulationPointsDocTest extends SingleFileDocTestBase {
-
-    @Override
-    protected List<Class<?>> functions() {
-        return List.of(AsNodeFunc.class);
+public class ArticulationPointsStub extends AbstractStub<ArticulationPointsMutateConfig, ArticulationPointsMutateResult> {
+    protected MutateStub<ArticulationPointsMutateConfig, ArticulationPointsMutateResult> stub(AlgorithmsProcedureFacade facade) {
+        return facade.centrality().articulationPointsMutateStub();
     }
-
-    @Override
-    protected List<Class<?>> procedures() {
-        return List.of(
-            ArticulationPointsStreamProc.class,
-            ArticulationPointsMutateProc.class
-        );
-    }
-
-    @Override
-    protected String adocFile() {
-        return "pages/algorithms/articulation-points.adoc";
-    }
-
 }
