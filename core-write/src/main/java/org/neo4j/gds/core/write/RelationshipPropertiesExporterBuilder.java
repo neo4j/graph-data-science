@@ -38,7 +38,6 @@ public abstract class RelationshipPropertiesExporterBuilder {
     // FIXME: These are only used by the Arrow builder; keeping this aligned with the existing builders but has to be changed.
     protected long relationshipCount = -1L;
     protected long batchSize = NativeNodePropertyExporter.MIN_BATCH_SIZE;
-    protected Optional<String> remoteDatabaseName; // coupled with arrowConnectionInfo, but should not appear in external API
     protected Optional<ResultStore> resultStore;
     protected JobId jobId;
 
