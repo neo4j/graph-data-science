@@ -56,7 +56,7 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
         var metricsFacade = MetricsFacade.PASSTHROUGH_METRICS_FACADE; // no metrics in OpenGDS
         var modelCatalog = new OpenModelCatalogProvider().get(null);
 
-        var graphSageModelRepository = new DisableGraphSageModelRepository(); // no model storing in OpenGDS
+        var graphSageModelRepository = new DisableModelRepository(); // no model storing in OpenGDS
 
         var neo4jConfiguration = dependencies.config();
 

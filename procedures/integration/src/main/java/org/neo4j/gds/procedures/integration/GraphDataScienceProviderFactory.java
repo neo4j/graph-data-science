@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.procedures.integration;
 
-import org.neo4j.gds.applications.algorithms.embeddings.GraphSageModelRepository;
+import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.DefaultMemoryGuard;
 import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
@@ -67,7 +67,7 @@ final class GraphDataScienceProviderFactory {
     private final MetricsFacade metricsFacade;
     private final ModelCatalog modelCatalog;
     private final Configuration neo4jConfiguration;
-    private final GraphSageModelRepository graphSageModelRepository;
+    private final ModelRepository modelRepository;
 
     private GraphDataScienceProviderFactory(
         Log log,
@@ -79,7 +79,7 @@ final class GraphDataScienceProviderFactory {
         MetricsFacade metricsFacade,
         ModelCatalog modelCatalog,
         Configuration neo4jConfiguration,
-        GraphSageModelRepository graphSageModelRepository
+        ModelRepository modelRepository
     ) {
         this.log = log;
         this.algorithmProcessingTemplateDecorator = algorithmProcessingTemplateDecorator;
@@ -90,7 +90,7 @@ final class GraphDataScienceProviderFactory {
         this.metricsFacade = metricsFacade;
         this.modelCatalog = modelCatalog;
         this.neo4jConfiguration = neo4jConfiguration;
-        this.graphSageModelRepository = graphSageModelRepository;
+        this.modelRepository = modelRepository;
     }
 
     GraphDataScienceProvider createGraphDataScienceProvider(
@@ -127,7 +127,7 @@ final class GraphDataScienceProviderFactory {
             userLogServices,
             neo4jConfiguration,
             modelCatalog,
-            graphSageModelRepository
+            modelRepository
         );
     }
 
@@ -141,7 +141,7 @@ final class GraphDataScienceProviderFactory {
         MetricsFacade metricsFacade,
         ModelCatalog modelCatalog,
         Configuration neo4jConfiguration,
-        GraphSageModelRepository graphSageModelRepository
+        ModelRepository modelRepository
     ) {
         return new GraphDataScienceProviderFactory(
             log,
@@ -153,7 +153,7 @@ final class GraphDataScienceProviderFactory {
             metricsFacade,
             modelCatalog,
             neo4jConfiguration,
-            graphSageModelRepository
+            modelRepository
         );
     }
 

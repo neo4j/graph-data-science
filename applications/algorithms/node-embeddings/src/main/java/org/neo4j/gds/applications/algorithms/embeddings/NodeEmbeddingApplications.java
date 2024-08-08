@@ -25,6 +25,7 @@ import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
+import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.logging.Log;
 
@@ -61,7 +62,7 @@ public final class NodeEmbeddingApplications {
         ProgressTrackerCreator progressTrackerCreator,
         MutateNodeProperty mutateNodeProperty,
         ModelCatalog modelCatalog,
-        GraphSageModelRepository graphSageModelRepository
+        ModelRepository modelRepository
     ) {
         var graphSageModelCatalog = new GraphSageModelCatalog(modelCatalog);
 
@@ -110,7 +111,7 @@ public final class NodeEmbeddingApplications {
         );
         var trainMode = new NodeEmbeddingAlgorithmsTrainModeBusinessFacade(
             graphSageModelCatalog,
-            graphSageModelRepository,
+            modelRepository,
             estimationMode,
             algorithms,
             algorithmProcessingTemplateConvenience

@@ -22,6 +22,7 @@ package org.neo4j.gds.applications.algorithms.embeddings;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
@@ -34,20 +35,20 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 
 public class NodeEmbeddingAlgorithmsTrainModeBusinessFacade {
     private final GraphSageModelCatalog graphSageModelCatalog;
-    private final GraphSageModelRepository graphSageModelRepository;
+    private final ModelRepository modelRepository;
     private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimation;
     private final NodeEmbeddingAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
 
     NodeEmbeddingAlgorithmsTrainModeBusinessFacade(
         GraphSageModelCatalog graphSageModelCatalog,
-        GraphSageModelRepository graphSageModelRepository,
+        ModelRepository modelRepository,
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimation,
         NodeEmbeddingAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience
     ) {
         this.graphSageModelCatalog = graphSageModelCatalog;
-        this.graphSageModelRepository = graphSageModelRepository;
+        this.modelRepository = modelRepository;
         this.estimation = estimation;
         this.algorithms = algorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
@@ -62,7 +63,7 @@ public class NodeEmbeddingAlgorithmsTrainModeBusinessFacade {
 
         var writeToDiskStep = new GraphSageTrainWriteToDiskStep(
             graphSageModelCatalog,
-            graphSageModelRepository,
+            modelRepository,
             configuration
         );
 

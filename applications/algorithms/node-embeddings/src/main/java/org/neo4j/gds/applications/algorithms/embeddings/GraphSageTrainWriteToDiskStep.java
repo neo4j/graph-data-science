@@ -23,6 +23,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
@@ -32,20 +33,20 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 /**
  * GraphSage train mode wants to store the trained model in memory, and optionally write it to disk.
  * The {@link org.neo4j.gds.core.model.ModelCatalog} takes care of the former.
- * The {@link GraphSageModelRepository} takes care of the latter.
+ * The {@link ModelRepository} takes care of the latter.
  */
 class GraphSageTrainWriteToDiskStep implements MutateOrWriteStep<Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>, Void> {
     private final GraphSageModelCatalog graphSageModelCatalog;
-    private final GraphSageModelRepository graphSageModelRepository;
+    private final ModelRepository modelRepository;
     private final GraphSageTrainConfig configuration;
 
     GraphSageTrainWriteToDiskStep(
         GraphSageModelCatalog graphSageModelCatalog,
-        GraphSageModelRepository graphSageModelRepository,
+        ModelRepository modelRepository,
         GraphSageTrainConfig configuration
     ) {
         this.graphSageModelCatalog = graphSageModelCatalog;
-        this.graphSageModelRepository = graphSageModelRepository;
+        this.modelRepository = modelRepository;
         this.configuration = configuration;
     }
 
@@ -59,7 +60,7 @@ class GraphSageTrainWriteToDiskStep implements MutateOrWriteStep<Model<ModelData
     ) {
         graphSageModelCatalog.store(result);
 
-        if (configuration.storeModelToDisk()) graphSageModelRepository.store(result);
+        if (configuration.storeModelToDisk()) modelRepository.store(result);
 
         return null;
     }

@@ -22,7 +22,7 @@ package org.neo4j.gds.applications;
 import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityApplications;
 import org.neo4j.gds.applications.algorithms.community.CommunityApplications;
-import org.neo4j.gds.applications.algorithms.embeddings.GraphSageModelRepository;
+import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingApplications;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
@@ -106,7 +106,7 @@ public final class ApplicationsFacade {
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
         ModelCatalog modelCatalog,
-        GraphSageModelRepository graphSageModelRepository
+        ModelRepository modelRepository
     ) {
         var databaseGraphStoreEstimationService = new DatabaseGraphStoreEstimationService(
             requestScopedDependencies.getGraphLoaderContext(),
@@ -184,7 +184,7 @@ public final class ApplicationsFacade {
             progressTrackerCreator,
             mutateNodeProperty,
             modelCatalog,
-            graphSageModelRepository
+            modelRepository
         );
 
         var operationsApplications = OperationsApplications.create(requestScopedDependencies);

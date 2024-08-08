@@ -20,7 +20,7 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.function.ThrowingFunction;
-import org.neo4j.gds.applications.algorithms.embeddings.GraphSageModelRepository;
+import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -87,7 +87,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
     private final UserLogServices userLogServices;
     private final Configuration neo4jConfiguration;
     private final ModelCatalog modelCatalog;
-    private final GraphSageModelRepository graphSageModelRepository;
+    private final ModelRepository modelRepository;
 
     GraphDataScienceProvider(
         Log log,
@@ -109,7 +109,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         UserLogServices userLogServices,
         Configuration neo4jConfiguration,
         ModelCatalog modelCatalog,
-        GraphSageModelRepository graphSageModelRepository
+        ModelRepository modelRepository
     ) {
         this.log = log;
         this.defaultsConfiguration = defaultsConfiguration;
@@ -130,7 +130,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         this.userLogServices = userLogServices;
         this.neo4jConfiguration = neo4jConfiguration;
         this.modelCatalog = modelCatalog;
-        this.graphSageModelRepository = graphSageModelRepository;
+        this.modelRepository = modelRepository;
     }
 
     @Override
@@ -196,7 +196,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             algorithmProcedureFacadeBuilderFactory,
             deprecatedProceduresMetricService,
             modelCatalog,
-            graphSageModelRepository
+            modelRepository
         );
     }
 
