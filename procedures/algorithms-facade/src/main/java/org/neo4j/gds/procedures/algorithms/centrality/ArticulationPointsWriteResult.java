@@ -26,8 +26,7 @@ public record ArticulationPointsWriteResult(
     long nodePropertiesWritten,
     long writeMillis,
     long computeMillis,
-    long nodeCount,
     Map<String, Object> configuration
 ) {
-    public static final ArticulationPointsWriteResult EMPTY = new ArticulationPointsWriteResult(0, 0, 0, 0, 0, Map.of());
+    public static final ArticulationPointsWriteResult EMPTY = new ArticulationPointsWriteResult(0, 0, 0, 0, Map.of());
 }

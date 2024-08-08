@@ -52,7 +52,6 @@ class ArticulationPointsResultBuilderForWriteMode implements ResultBuilder<Artic
                 metadata.map(n -> n.value).orElseThrow(),
                 timings.mutateOrWriteMillis,
                 timings.computeMillis,
-                graph.nodeCount(),
                 configuration.toMap()
             )
         );

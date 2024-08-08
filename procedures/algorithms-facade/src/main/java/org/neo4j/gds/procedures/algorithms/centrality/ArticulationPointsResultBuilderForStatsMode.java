@@ -41,16 +41,16 @@ class ArticulationPointsResultBuilderForStatsMode implements ResultBuilder<Artic
         Optional<Void> metadata
     ) {
         if (result.isEmpty()) {
-            return Stream.of(ArticulationPointsStatsResult.emptyFrom(timings,configuration.toMap()));
+            return Stream.of(ArticulationPointsStatsResult.EMPTY);
         }
 
         var bitSet = result.get();
         return Stream.of(
             new ArticulationPointsStatsResult(
-                timings.computeMillis,
-                configuration.toMap(),
-                bitSet.cardinality()
-                )
+                    bitSet.cardinality(),
+                    timings.computeMillis,
+                    configuration.toMap()
+            )
         );
     }
 }

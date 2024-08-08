@@ -19,58 +19,14 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
-
 import java.util.Map;
 
-public class ArticulationPointsMutateResult extends StandardMutateResult {
-    public final long articulationPointCount;
-    public final long nodePropertiesWritten;
-
-    public ArticulationPointsMutateResult(
-        long mutateMillis,
-        long nodePropertiesWritten,
-        long computeMillis,
-        Map<String, Object> configuration,
-        long articulationPointCount
-    ) {
-        super(0,computeMillis,0,mutateMillis,configuration);
-        this.articulationPointCount = articulationPointCount;
-        this.nodePropertiesWritten = nodePropertiesWritten;
-    }
-    public static Builder builder() {
-        return new Builder();
-    }
-
-
-    public static ArticulationPointsMutateResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
-        return new ArticulationPointsMutateResult(
-            timings.mutateOrWriteMillis,
-            0,
-            timings.computeMillis,
-            configurationMap,
-            0
-        );
-    }
-
-    public static class Builder extends AbstractResultBuilder<ArticulationPointsMutateResult> {
-        private long articulationPointCount;;
-
-        public ArticulationPointsMutateResult.Builder withArticulationPointCount(long articulationPointCount) {
-            this.articulationPointCount = articulationPointCount;
-            return this;
-        }
-
-        public ArticulationPointsMutateResult build() {
-            return new ArticulationPointsMutateResult(
-                mutateMillis,
-                nodePropertiesWritten,
-                computeMillis,
-                config.toMap(),
-                articulationPointCount
-            );
-        }
-    }
+public record ArticulationPointsMutateResult(
+    long articulationPointCount,
+    long nodePropertiesWritten,
+    long mutateMillis,
+    long computeMillis,
+    Map<String, Object> configuration
+) {
+    public static final ArticulationPointsMutateResult EMPTY = new ArticulationPointsMutateResult(0, 0, 0, 0, Map.of());
 }

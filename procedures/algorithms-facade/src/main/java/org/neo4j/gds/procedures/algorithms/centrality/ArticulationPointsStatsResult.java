@@ -19,50 +19,12 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
-
 import java.util.Map;
 
-public class ArticulationPointsStatsResult extends StandardStatsResult {
-    public final long articulationPointCount;
-
-    public ArticulationPointsStatsResult(
-        long computeMillis,
-        Map<String, Object> configuration,
-        long articulationPointCount
-    ) {
-        super(0,computeMillis,0,configuration);
-        this.articulationPointCount = articulationPointCount;
-    }
-    public static Builder builder() {
-        return new Builder();
-    }
-
-
-    public static ArticulationPointsStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
-        return new ArticulationPointsStatsResult(
-            timings.computeMillis,
-            configurationMap,
-            0
-        );
-    }
-
-    public static class Builder extends AbstractResultBuilder<ArticulationPointsStatsResult> {
-        private long articulationPointCount;;
-
-        public ArticulationPointsStatsResult.Builder withArticulationPointCount(long articulationPointCount) {
-            this.articulationPointCount = articulationPointCount;
-            return this;
-        }
-
-        public ArticulationPointsStatsResult build() {
-            return new ArticulationPointsStatsResult(
-                computeMillis,
-                config.toMap(),
-                articulationPointCount
-            );
-        }
-    }
+public record ArticulationPointsStatsResult(
+    long articulationPointCount,
+    long computeMillis,
+    Map<String, Object> configuration
+) {
+    public static final ArticulationPointsStatsResult EMPTY = new ArticulationPointsStatsResult(0, 0,  Map.of());
 }

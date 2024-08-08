@@ -41,17 +41,16 @@ public class ArticulationPointsResultBuilderForMutateMode implements ResultBuild
         AlgorithmProcessingTimings timings,
         Optional<NodePropertiesWritten> metadata
     ) {
-        if (result.isEmpty()) return ArticulationPointsMutateResult.emptyFrom(timings, configuration.toMap());
+        if (result.isEmpty()) return ArticulationPointsMutateResult.EMPTY;
 
-        var articulationPointsResult = result.get();
 
-        return ArticulationPointsMutateResult.builder()
-            .withArticulationPointCount(articulationPointsResult.cardinality())
-            .withPreProcessingMillis(timings.preProcessingMillis)
-            .withComputeMillis(timings.computeMillis)
-            .withMutateMillis(timings.mutateOrWriteMillis)
-            .withNodePropertiesWritten(metadata.orElseThrow().value)
-            .withConfig(configuration)
-            .build();
+        var bitSet = result.get();
+        return new ArticulationPointsMutateResult(
+                bitSet.cardinality(),
+                metadata.map(n -> n.value).orElseThrow(),
+                timings.mutateOrWriteMillis,
+                timings.computeMillis,
+                configuration.toMap()
+        );
     }
 }
