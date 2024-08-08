@@ -22,21 +22,16 @@ package org.neo4j.gds.articulationpoints;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
-import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.core.Username;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.registerProcedures;
 
-class ArticulationPointsMutateProcTest extends BaseTest {
+class ArticulationPointsStatsProcTest  extends BaseTest {
 
     @Neo4jGraph
     private static final String DB_CYPHER =
@@ -82,7 +77,7 @@ class ArticulationPointsMutateProcTest extends BaseTest {
     void setup() throws Exception {
         registerProcedures(
             db,
-            ArticulationPointsMutateProc.class,
+            ArticulationPointsStatsProc.class,
             GraphProjectProc.class
         );
 
@@ -90,17 +85,10 @@ class ArticulationPointsMutateProcTest extends BaseTest {
     }
 
     @Test
-    void shouldMutate() {
-           var expectedArticulationPoints = List.of(
-            idFunction.of("a3"),
-            idFunction.of("a7"),
-            idFunction.of("a10"),
-            idFunction.of("a11"),
-            idFunction.of("a14")
-        );
+    void shouldComputeStats() {
 
         var resultRowCount = runQueryWithRowConsumer(
-            "CALL gds.articulationPoints.mutate('graph', {mutateProperty:'foo'})",
+            "CALL gds.articulationPoints.stats('graph')",
             row -> {
                 var nodeId = row.getNumber("articulationPointCount");
                 assertThat(nodeId)
@@ -112,25 +100,12 @@ class ArticulationPointsMutateProcTest extends BaseTest {
         assertThat(resultRowCount)
             .isEqualTo(1L);
 
-        var actualGraph = GraphStoreCatalog.get(Username.EMPTY_USERNAME.username(), DatabaseId.of(db.databaseName()), "graph")
-            .graphStore()
-            .getUnion();
-
-        var mutateNodeProperties = actualGraph.nodeProperties("foo");
-        assertThat(mutateNodeProperties.nodeCount()).isEqualTo(16);
-
-        expectedArticulationPoints.stream()
-            .map( actualGraph::toMappedNodeId)
-            .map( mutateNodeProperties::longValue)
-            .forEach( v -> {
-                assertThat(v).isEqualTo(1L);
-            } );
-
     }
+
     @Test
-    void shouldEstimateMutate() {
+    void shouldEstimateStats() {
         var resultRowCount = runQueryWithRowConsumer(
-            "CALL gds.articulationPoints.mutate.estimate('graph', {mutateProperty: 'foo'})",
+            "CALL gds.articulationPoints.stats.estimate('graph',{})",
             row -> {
                 assertThat(row.get("requiredMemory")).isNotNull();
                 assertThat(row.get("treeView")).isNotNull();
@@ -141,4 +116,5 @@ class ArticulationPointsMutateProcTest extends BaseTest {
             .as("There should be one row as a result of estimating write.")
             .isEqualTo(1L);
     }
+
 }

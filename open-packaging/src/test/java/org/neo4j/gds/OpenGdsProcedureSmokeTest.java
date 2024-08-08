@@ -56,6 +56,8 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
 
         "gds.articulationPoints.mutate",
         "gds.articulationPoints.mutate.estimate",
+        "gds.articulationPoints.stats",
+        "gds.articulationPoints.stats.estimate",
         "gds.articulationPoints.stream",
         "gds.articulationPoints.stream.estimate",
         "gds.articulationPoints.write",
@@ -583,7 +585,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 426;
+        int expectedCount = 428;
         assertEquals(
             expectedCount,
             returnedRows,
