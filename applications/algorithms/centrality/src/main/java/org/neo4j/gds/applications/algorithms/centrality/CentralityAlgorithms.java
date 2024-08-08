@@ -176,9 +176,10 @@ public class CentralityAlgorithms {
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
+
     BridgeResult bridges(Graph graph, BridgesBaseConfig configuration) {
 
-        var task = BridgeProgressTaskCreator.progressTask(graph);
+        var task = BridgeProgressTaskCreator.progressTask(graph.nodeCount());
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
         var algorithm = new Bridges(graph,progressTracker);

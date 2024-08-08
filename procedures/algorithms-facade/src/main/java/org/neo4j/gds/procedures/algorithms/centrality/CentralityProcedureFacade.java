@@ -423,6 +423,7 @@ public final class CentralityProcedureFacade {
         return Stream.of(result);
     }
 
+
     public Stream<Bridge> bridgesStream(
         String graphName,
         Map<String, Object> configuration

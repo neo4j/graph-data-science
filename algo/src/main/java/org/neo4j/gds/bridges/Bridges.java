@@ -126,7 +126,7 @@ public class Bridges extends Algorithm<BridgeResult> {
     }
 
 
-    public record StackEvent(long eventNode, long triggerNode, boolean lastVisit) {
+    record StackEvent(long eventNode, long triggerNode, boolean lastVisit) {
         static StackEvent upcomingVisit(long node, long triggerNode) {
             return new StackEvent(node, triggerNode, false);
         }

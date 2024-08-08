@@ -19,13 +19,14 @@
  */
 package org.neo4j.gds.bridges;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
-public class BridgeProgressTaskCreator {
+public final class BridgeProgressTaskCreator {
 
-    public static Task progressTask(Graph graph) {
-        return Tasks.leaf("Bridges", graph.nodeCount());
+    private BridgeProgressTaskCreator() {}
+
+    public static Task progressTask(long nodeCount) {
+        return Tasks.leaf("Bridges", nodeCount);
     }
 }
