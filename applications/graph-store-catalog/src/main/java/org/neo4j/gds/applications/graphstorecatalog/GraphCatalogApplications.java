@@ -49,8 +49,8 @@ public interface GraphCatalogApplications {
     List<GraphStoreCatalogEntry> dropGraph(
         Object graphNameOrListOfGraphNames,
         boolean failIfMissing,
-        String databaseName,
-        String username,
+        String databaseNameOverride,
+        String usernameOverride,
         DatabaseId currentDatabase,
         User operator
     );
