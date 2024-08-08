@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.centrality.stubs;
+package org.neo4j.gds.procedures.algorithms.centrality;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.api.Graph;
@@ -25,33 +25,36 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.articulationpoints.ArticulationPointsMutateConfig;
-import org.neo4j.gds.procedures.algorithms.centrality.ArticulationPointsMutateResult;
+import org.neo4j.gds.articulationpoints.ArticulationPointsWriteConfig;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
-public class ArticulationPointsResultBuilderForMutateMode implements ResultBuilder<ArticulationPointsMutateConfig, BitSet, ArticulationPointsMutateResult, NodePropertiesWritten> {
+class ArticulationPointsResultBuilderForWriteMode implements ResultBuilder<ArticulationPointsWriteConfig, BitSet, Stream<ArticulationPointsWriteResult>, NodePropertiesWritten> {
 
     @Override
-    public ArticulationPointsMutateResult build(
+    public Stream<ArticulationPointsWriteResult> build(
         Graph graph,
         GraphStore graphStore,
-        ArticulationPointsMutateConfig configuration,
+        ArticulationPointsWriteConfig configuration,
         Optional<BitSet> result,
         AlgorithmProcessingTimings timings,
         Optional<NodePropertiesWritten> metadata
     ) {
-        if (result.isEmpty()) return ArticulationPointsMutateResult.emptyFrom(timings, configuration.toMap());
+        if (result.isEmpty()) {
+            return Stream.of(ArticulationPointsWriteResult.EMPTY);
+        }
 
-        var articulationPointsResult = result.get();
-
-        return ArticulationPointsMutateResult.builder()
-            .withArticulationPointCount(articulationPointsResult.cardinality())
-            .withPreProcessingMillis(timings.preProcessingMillis)
-            .withComputeMillis(timings.computeMillis)
-            .withMutateMillis(timings.mutateOrWriteMillis)
-            .withNodePropertiesWritten(metadata.orElseThrow().value)
-            .withConfig(configuration)
-            .build();
+        var bitSet = result.get();
+        return Stream.of(
+            new ArticulationPointsWriteResult(
+                bitSet.cardinality(),
+                metadata.map(n -> n.value).orElseThrow(),
+                timings.mutateOrWriteMillis,
+                timings.computeMillis,
+                graph.nodeCount(),
+                configuration.toMap()
+            )
+        );
     }
 }

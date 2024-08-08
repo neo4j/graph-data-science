@@ -26,7 +26,7 @@ import org.neo4j.gds.result.AbstractResultBuilder;
 import java.util.Map;
 
 public class ArticulationPointsMutateResult extends StandardMutateResult {
-    public final long numberOfArticulationPoints;
+    public final long articulationPointCount;
     public final long nodePropertiesWritten;
 
     public ArticulationPointsMutateResult(
@@ -34,10 +34,10 @@ public class ArticulationPointsMutateResult extends StandardMutateResult {
         long nodePropertiesWritten,
         long computeMillis,
         Map<String, Object> configuration,
-        long numberOfArticulationPoints
+        long articulationPointCount
     ) {
         super(0,computeMillis,0,mutateMillis,configuration);
-        this.numberOfArticulationPoints = numberOfArticulationPoints;
+        this.articulationPointCount = articulationPointCount;
         this.nodePropertiesWritten = nodePropertiesWritten;
     }
     public static Builder builder() {
@@ -56,10 +56,10 @@ public class ArticulationPointsMutateResult extends StandardMutateResult {
     }
 
     public static class Builder extends AbstractResultBuilder<ArticulationPointsMutateResult> {
-        private long numberOfArticulationPoints;;
+        private long articulationPointCount;;
 
-        public ArticulationPointsMutateResult.Builder withNumberOfArticulationPoints(long numberOfArticulationPoints) {
-            this.numberOfArticulationPoints = numberOfArticulationPoints;
+        public ArticulationPointsMutateResult.Builder withArticulationPointCount(long articulationPointCount) {
+            this.articulationPointCount = articulationPointCount;
             return this;
         }
 
@@ -69,7 +69,7 @@ public class ArticulationPointsMutateResult extends StandardMutateResult {
                 nodePropertiesWritten,
                 computeMillis,
                 config.toMap(),
-                numberOfArticulationPoints
+                articulationPointCount
             );
         }
     }

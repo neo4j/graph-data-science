@@ -45,7 +45,7 @@ public class ArticulationPointsStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.algorithms().centrality().articulationPoints(graphName, configuration);
+        return facade.algorithms().centrality().articulationPointsStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.articulationPoints.stream.estimate", mode = READ)

@@ -21,6 +21,7 @@ package org.neo4j.gds.doc;
 
 import org.neo4j.gds.articulationpoints.ArticulationPointsMutateProc;
 import org.neo4j.gds.articulationpoints.ArticulationPointsStreamProc;
+import org.neo4j.gds.articulationpoints.ArticulationPointsWriteProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 
 import java.util.List;
@@ -36,7 +37,8 @@ class ArticulationPointsDocTest extends SingleFileDocTestBase {
     protected List<Class<?>> procedures() {
         return List.of(
             ArticulationPointsStreamProc.class,
-            ArticulationPointsMutateProc.class
+            ArticulationPointsMutateProc.class,
+            ArticulationPointsWriteProc.class
         );
     }
 

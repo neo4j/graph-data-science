@@ -22,10 +22,7 @@ package org.neo4j.gds.articulationpoints;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
-import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.core.Username;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -36,7 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.registerProcedures;
 
-class ArticulationPointsMutateProcTest extends BaseTest {
+class ArticulationPointsWriteProcTest extends BaseTest {
 
     @Neo4jGraph
     private static final String DB_CYPHER =
@@ -82,7 +79,7 @@ class ArticulationPointsMutateProcTest extends BaseTest {
     void setup() throws Exception {
         registerProcedures(
             db,
-            ArticulationPointsMutateProc.class,
+            ArticulationPointsWriteProc.class,
             GraphProjectProc.class
         );
 
@@ -90,8 +87,8 @@ class ArticulationPointsMutateProcTest extends BaseTest {
     }
 
     @Test
-    void shouldMutate() {
-           var expectedArticulationPoints = List.of(
+    void shouldWriteBackResults() {
+        var expectedArticulationPoints = List.of(
             idFunction.of("a3"),
             idFunction.of("a7"),
             idFunction.of("a10"),
@@ -99,33 +96,49 @@ class ArticulationPointsMutateProcTest extends BaseTest {
             idFunction.of("a14")
         );
 
-        var resultRowCount = runQueryWithRowConsumer(
-            "CALL gds.articulationPoints.mutate('graph', {mutateProperty:'foo'})",
+        var writeResultRowCount = runQueryWithRowConsumer(
+            "CALL gds.articulationPoints.write('graph', { writeProperty: 'point' })",
             row -> {
-                var nodeId = row.getNumber("articulationPointCount");
-                assertThat(nodeId)
+                assertThat(row.getNumber("articulationPointCount"))
                     .asInstanceOf(LONG)
+                    .as("There should be five articulation points reported in the write result.")
                     .isEqualTo(5L);
             }
         );
 
-        assertThat(resultRowCount)
+        assertThat(writeResultRowCount)
+            .as("There should be one row as a result of write.")
             .isEqualTo(1L);
 
-        var actualGraph = GraphStoreCatalog.get(Username.EMPTY_USERNAME.username(), DatabaseId.of(db.databaseName()), "graph")
-            .graphStore()
-            .getUnion();
 
-        var mutateNodeProperties = actualGraph.nodeProperties("foo");
-        assertThat(mutateNodeProperties.nodeCount()).isEqualTo(16);
+        var resultRowCount = runQueryWithRowConsumer(
+            "MATCH (n { point: 1 }) RETURN id(n) AS nodeId",
+            row -> {
+                var nodeId = row.getNumber("nodeId");
+                assertThat(nodeId)
+                    .asInstanceOf(LONG)
+                    .isIn(expectedArticulationPoints);
+            }
+        );
 
-        expectedArticulationPoints.stream()
-            .map( actualGraph::toMappedNodeId)
-            .map( mutateNodeProperties::longValue)
-            .forEach( v -> {
-                assertThat(v).isEqualTo(1L);
-            } );
+        assertThat(resultRowCount)
+            .as("There should be five articulation points.")
+            .isEqualTo(5L);
+    }
 
+    @Test
+    void shouldEstimateWrite() {
+        var writeResultRowCount = runQueryWithRowConsumer(
+            "CALL gds.articulationPoints.write.estimate('graph', { writeProperty: 'point' })",
+            row -> {
+                assertThat(row.get("requiredMemory")).isNotNull();
+                assertThat(row.get("treeView")).isNotNull();
+            }
+        );
+
+        assertThat(writeResultRowCount)
+            .as("There should be one row as a result of estimating write.")
+            .isEqualTo(1L);
     }
 
 }

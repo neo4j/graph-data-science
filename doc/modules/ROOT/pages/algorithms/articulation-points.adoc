@@ -1,5 +1,5 @@
 [[algorithms-articulation-points]]
-= Bridges
+= Articulation Points
 :description: This section describes the Articulation Points algorithm in the Neo4j Graph Data Science library.
 :entity: node
 :result: node property
@@ -21,7 +21,7 @@ The  Neo4j GDS Library provides an efficient linear time sequential algorithm to
 
 include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
 
-.Bridges syntax per mode
+.Articulation Points syntax per mode
 [.tabbed-example, caption = ]
 ====
 
@@ -67,11 +67,10 @@ CALL gds.articulationPoints.mutate(
   configuration: Map
 )
 YIELD
-  YIELD
   mutateMillis: Integer,
   nodePropertiesWritten: Integer,
   computeMillis: Integer,
-  numberOfArticulationPoints: Integer,
+  articulationPointCount: Integer,
   configuration: Map
 ----
 
@@ -87,12 +86,52 @@ include::partial$/algorithms/common-configuration/common-mutate-configuration-en
 .Results
 [opts="header"]
 |===
-| Name                   | Type      | Description
-| mutateMillis           | Integer   | Milliseconds for adding properties to the projected graph.
-| nodePropertiesWritten  | Integer   | Number of properties added to the projected graph.
-| computeMillis          | Integer   | Milliseconds for running the algorithm.
-| numberOfArticulationPoints  | Integer   | Number of articulation points in the graph.
-| configuration          | Map       | The configuration used for running the algorithm.
+| Name                    | Type      | Description
+| mutateMillis            | Integer   | Milliseconds for adding properties to the projected graph.
+| nodePropertiesWritten   | Integer   | Number of properties added to the projected graph.
+| computeMillis           | Integer   | Milliseconds for running the algorithm.
+| articulationPointCount  | Integer   | Count of the articulation points in the graph.
+| configuration           | Map       | The configuration used for running the algorithm.
+|===
+
+======
+
+[.include-with-write]
+======
+
+.Run Articulation points in write mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.articulationPoints.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  writeMillis: Integer,
+  nodePropertiesWritten: Integer,
+  computeMillis: Integer,
+  articulationPointCount: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc
+|===
+
+.Results
+[opts="header"]
+|===
+| Name                    | Type      | Description
+| mutateMillis            | Integer   | Milliseconds for adding properties to the projected graph.
+| nodePropertiesWritten   | Integer   | Number of properties added to the projected graph.
+| computeMillis           | Integer   | Milliseconds for running the algorithm.
+| articulationPointCount  | Integer   | Count of the articulation points in the graph.
+| configuration           | Map       | The configuration used for running the algorithm.
 |===
 
 ======
@@ -204,7 +243,6 @@ The `mutate` mode updates the named graph with a new {entity} property that deno
 This is achieved through setting `0,1` values, where `1` denotes that the node is an articulation point.
 The name of the new property is specified using the mandatory configuration parameter `mutateProperty`.
 The result is a single summary row, similar to `stats`, but with some additional metrics.
-The `mutate` mode is especially useful when multiple algorithms are used in conjunction.
 
 [role=query-example]
 --
@@ -212,14 +250,75 @@ The `mutate` mode is especially useful when multiple algorithms are used in conj
 [source, cypher, role=noplay]
 ----
 CALL gds.articulationPoints.mutate('myGraph', { mutateProperty: 'articulationPoint'})
-YIELD numberOfArticulationPoints
+YIELD articulationPointCount
 ----
 
 .Results
 [opts="header"]
 |===
-| numberOfArticulationPoints
+| articulationPointCount
 | 2
 |===
 --
 
+[[algorithms-articulation-points-examples-write]]
+=== Write
+
+The `write` mode updates the Neo4j graph with a new {entity} property that denotes whether a node is an articulation point or not.
+This is achieved through setting `0,1` values, where `1` denotes that the node is an articulation point.
+The name of the new property is specified using the mandatory configuration parameter `writeProperty`.
+The result is a single summary row, similar to `stats`, but with some additional metrics.
+The `mutate` mode is especially useful when multiple algorithms are used in conjunction.
+
+[role=query-example, group=write]
+--
+.The following will run the algorithm in `write` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.articulationPoints.write('myGraph', { writeProperty: 'articulationPoint'})
+YIELD articulationPointCount
+----
+
+.Results
+[opts="header"]
+|===
+| articulationPointCount
+| 2
+|===
+--
+
+[role=query-example, group=write]
+--
+Then we can then query Neo4j to see the articulation points:
+[source, cypher, role=noplay]
+----
+MATCH (n { articulationPoint: 1 }) RETURN n.name AS name ORDER BY name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name
+| "Alice"
+| "Doug"
+|===
+--
+
+[role=query-example, group=write]
+--
+Or we can query Neo4j to see the nodes that are *not* articulation points:
+[source, cypher, role=noplay]
+----
+MATCH (n { articulationPoint: 0 }) RETURN n.name AS name ORDER BY name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name
+| "Bridget"
+| "Charles"
+| "Mark"
+| "Michael"
+|===
+--

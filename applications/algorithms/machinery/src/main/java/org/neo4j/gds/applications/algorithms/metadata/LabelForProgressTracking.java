@@ -23,7 +23,7 @@ public enum LabelForProgressTracking {
     AllShortestPaths("All Shortest Paths"),
     ApproximateMaximumKCut("ApproxMaxKCut"),
     ArticleRank("ArticleRank"),
-    ArticulationPoints("ArticulationPoints"),
+    ArticulationPoints("Articulation Points"),
     AStar("AStar"),
     BellmanFord("Bellman-Ford"),
     BetaClosenessCentrality("Closeness Centrality (beta)"),

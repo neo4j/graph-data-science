@@ -21,7 +21,7 @@ package org.neo4j.gds.articulationpoints;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.algorithms.centrality.ArticulationPointsMutateResult;
+import org.neo4j.gds.procedures.algorithms.centrality.ArticulationPointsWriteResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -33,28 +33,27 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.articulationpoints.Constants.PROC_DESCRIPTION;
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
-public class ArticulationPointsMutateProc {
-
+public class ArticulationPointsWriteProc {
     @Context
     public GraphDataScienceProcedures facade;
 
-    @Procedure(value = "gds.articulationPoints.mutate", mode = READ)
+    @Procedure(value = "gds.articulationPoints.write", mode = WRITE)
     @Description(PROC_DESCRIPTION)
-    public Stream<ArticulationPointsMutateResult> mutate(
+    public Stream<ArticulationPointsWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.algorithms().centrality().articulationPointsMutateStub().execute(graphName, configuration);
+        return facade.algorithms().centrality().articulationPointsWrite(graphName, configuration);
     }
 
-    @Procedure(value = "gds.articulationPoints.mutate.estimate", mode = READ)
+    @Procedure(value = "gds.articulationPoints.write.estimate", mode = READ)
     @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.algorithms().centrality().articulationPointsMutateEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().centrality().articulationPointsWriteEstimate(graphNameOrConfiguration, algoConfiguration);
     }
-
 }

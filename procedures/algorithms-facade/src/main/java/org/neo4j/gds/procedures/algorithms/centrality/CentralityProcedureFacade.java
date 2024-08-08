@@ -28,6 +28,7 @@ import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsWrit
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.articulationpoints.ArticulationPointsMutateConfig;
 import org.neo4j.gds.articulationpoints.ArticulationPointsStreamConfig;
+import org.neo4j.gds.articulationpoints.ArticulationPointsWriteConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
@@ -436,7 +437,7 @@ public final class CentralityProcedureFacade {
     }
 
 
-    public Stream<ArticulationPoint> articulationPoints(
+    public Stream<ArticulationPoint> articulationPointsStream(
         String graphName,
         Map<String, Object> configuration
     ) {
@@ -482,7 +483,39 @@ public final class CentralityProcedureFacade {
             )
         );
 
-        return Stream.of(result);    }
+        return Stream.of(result);
+    }
+
+
+    public Stream<ArticulationPointsWriteResult> articulationPointsWrite(
+        String graphNameAsString,
+        Map<String, Object> rawConfiguration
+    ) {
+        return algorithmExecutionScaffolding.runAlgorithm(
+            graphNameAsString,
+            rawConfiguration,
+            ArticulationPointsWriteConfig::of,
+            writeMode()::articulationPoints,
+            new ArticulationPointsResultBuilderForWriteMode()
+        );
+    }
+
+    public Stream<MemoryEstimateResult> articulationPointsWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            ArticulationPointsWriteConfig::of,
+            configuration -> estimationMode().articulationPoints(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
 
     public Stream<Bridge> bridgesStream(
         String graphName,

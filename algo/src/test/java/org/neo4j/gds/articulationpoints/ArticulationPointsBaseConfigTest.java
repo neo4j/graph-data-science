@@ -19,21 +19,24 @@
  */
 package org.neo4j.gds.articulationpoints;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 @GdlExtension
-class ArticulationPointsStreamConfigTest {
+class ArticulationPointsBaseConfigTest {
 
     @GdlGraph(orientation = Orientation.NATURAL)
     private static final String GRAPH =
@@ -47,18 +50,27 @@ class ArticulationPointsStreamConfigTest {
     @Inject
     private GraphStore graphStore;
 
-    @Test
-    void shouldRaiseAnExceptionIfGraphIsNotUndirected() {
-        var articulationPointsConfiguration = ArticulationPointsStreamConfig.of(CypherMapWrapper.empty());
-
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("baseConfigImplementations")
+    void shouldRaiseAnExceptionIfGraphIsNotUndirected(
+        String mode,
+        ArticulationPointsBaseConfig configuration
+    ) {
         assertThatIllegalArgumentException()
             .isThrownBy(() ->
-                articulationPointsConfiguration.requireUndirectedGraph(
+                configuration.requireUndirectedGraph(
                     graphStore,
                     List.of(),
                     List.of(RelationshipType.of("R"))
                 ))
             .withMessageContaining("Articulation Points")
             .withMessageContaining("requires relationship projections to be UNDIRECTED.");
+    }
+
+    private static Stream<Arguments> baseConfigImplementations() {
+        return Stream.of(
+            Arguments.of("stream", ArticulationPointsStreamConfig.of(Map.of())),
+            Arguments.of("write", ArticulationPointsWriteConfig.of(Map.of("writeProperty", "articulationPoint")))
+        );
     }
 }
