@@ -19,12 +19,15 @@
  */
 package org.neo4j.gds.applications.algorithms.centrality;
 
+import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.LongScatterSet;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
+import org.neo4j.gds.articulationpoints.ArticulationPoints;
+import org.neo4j.gds.articulationpoints.ArticulationPointsProgressTaskCreator;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.beta.pregel.PregelComputation;
 import org.neo4j.gds.betweenness.BetweennessCentrality;
@@ -36,12 +39,12 @@ import org.neo4j.gds.betweenness.RandomDegreeSelectionStrategy;
 import org.neo4j.gds.bridges.BridgeProgressTaskCreator;
 import org.neo4j.gds.bridges.BridgeResult;
 import org.neo4j.gds.bridges.Bridges;
-import org.neo4j.gds.bridges.BridgesBaseConfig;
 import org.neo4j.gds.closeness.ClosenessCentrality;
 import org.neo4j.gds.closeness.ClosenessCentralityBaseConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.closeness.DefaultCentralityComputer;
 import org.neo4j.gds.closeness.WassermanFaustCentralityComputer;
+import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -177,12 +180,22 @@ public class CentralityAlgorithms {
     }
 
 
-    BridgeResult bridges(Graph graph, BridgesBaseConfig configuration) {
+    BitSet articulationPoints(Graph graph, AlgoBaseConfig configuration) {
+
+        var task = ArticulationPointsProgressTaskCreator.progressTask(graph.nodeCount());
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var algorithm = new ArticulationPoints(graph, progressTracker);
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+    }
+
+    BridgeResult bridges(Graph graph, AlgoBaseConfig configuration) {
 
         var task = BridgeProgressTaskCreator.progressTask(graph.nodeCount());
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
-        var algorithm = new Bridges(graph,progressTracker);
+        var algorithm = new Bridges(graph, progressTracker);
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }

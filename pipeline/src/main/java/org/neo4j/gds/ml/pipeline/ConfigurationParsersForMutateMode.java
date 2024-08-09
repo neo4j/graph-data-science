@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.pipeline;
 
 import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
+import org.neo4j.gds.articulationpoints.ArticulationPointsMutateConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -76,6 +77,7 @@ public class ConfigurationParsersForMutateMode {
             case AllShortestPaths -> null;
             case ApproximateMaximumKCut -> ApproxMaxKCutMutateConfig::of;
             case ArticleRank -> PageRankMutateConfig::of;
+            case ArticulationPoints -> ArticulationPointsMutateConfig::of;
             case AStar -> ShortestPathAStarMutateConfig::of;
             case BellmanFord -> AllShortestPathsBellmanFordMutateConfig::of;
             case BetaClosenessCentrality -> ClosenessCentralityMutateConfig::of;

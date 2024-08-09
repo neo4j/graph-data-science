@@ -21,6 +21,8 @@ package org.neo4j.gds.applications.algorithms.centrality;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.articulationpoints.ArticulationPointsBaseConfig;
+import org.neo4j.gds.articulationpoints.ArticulationPointsMemoryEstimateDefinition;
 import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityMemoryEstimateDefinition;
 import org.neo4j.gds.bridges.BridgesBaseConfig;
@@ -42,6 +44,24 @@ public class CentralityAlgorithmsEstimationModeBusinessFacade {
     public CentralityAlgorithmsEstimationModeBusinessFacade(AlgorithmEstimationTemplate algorithmEstimationTemplate) {
         this.algorithmEstimationTemplate = algorithmEstimationTemplate;
     }
+
+    public MemoryEstimation articulationPoints() {
+        return new ArticulationPointsMemoryEstimateDefinition().memoryEstimation();
+    }
+
+    public MemoryEstimateResult articulationPoints(
+        ArticulationPointsBaseConfig configuration,
+        Object graphNameOrConfiguration
+    ) {
+        var memoryEstimation = articulationPoints();
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
+        );
+    }
+
 
     public MemoryEstimation betweennessCentrality(RelationshipWeightConfig configuration) {
         return new BetweennessCentralityMemoryEstimateDefinition(configuration.hasRelationshipWeightProperty()).memoryEstimation();
@@ -125,4 +145,5 @@ public class CentralityAlgorithmsEstimationModeBusinessFacade {
             memoryEstimation
         );
     }
+
 }

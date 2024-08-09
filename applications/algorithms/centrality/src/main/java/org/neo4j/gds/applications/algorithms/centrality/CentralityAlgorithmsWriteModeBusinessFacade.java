@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.centrality;
 
+import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
@@ -27,6 +28,7 @@ import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
+import org.neo4j.gds.articulationpoints.ArticulationPointsWriteConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
 import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
@@ -39,6 +41,7 @@ import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankWriteConfig;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ArticleRank;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ArticulationPoints;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BetweennessCentrality;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.CELF;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ClosenessCentrality;
@@ -115,6 +118,22 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             () -> estimationFacade.betweennessCentrality(configuration),
             (graph, __) -> centralityAlgorithms.betweennessCentrality(graph, configuration),
             writeStep,
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT articulationPoints(
+        GraphName graphName,
+        ArticulationPointsWriteConfig configuration,
+        ResultBuilder<ArticulationPointsWriteConfig, BitSet, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+            graphName,
+            configuration,
+            ArticulationPoints,
+            estimationFacade::articulationPoints,
+            (graph, __) -> centralityAlgorithms.articulationPoints(graph, configuration),
+            new ArticulationPointsWriteStep(configuration, writeToDatabase),
             resultBuilder
         );
     }
@@ -226,4 +245,5 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             resultBuilder
         );
     }
+
 }

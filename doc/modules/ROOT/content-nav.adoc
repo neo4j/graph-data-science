@@ -57,6 +57,7 @@
 ** xref:algorithms/syntax.adoc[]
 ** xref:algorithms/centrality.adoc[]
 *** xref:algorithms/article-rank.adoc[]
+*** xref:algorithms/articulation-points.adoc[]
 *** xref:algorithms/betweenness-centrality.adoc[]
 *** xref:algorithms/bridges.adoc[]
 *** xref:algorithms/celf.adoc[]

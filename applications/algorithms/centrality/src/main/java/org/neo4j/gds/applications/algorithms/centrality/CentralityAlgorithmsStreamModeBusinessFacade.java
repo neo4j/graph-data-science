@@ -19,10 +19,12 @@
  */
 package org.neo4j.gds.applications.algorithms.centrality;
 
+import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.articulationpoints.ArticulationPointsStreamConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
 import org.neo4j.gds.bridges.BridgeResult;
 import org.neo4j.gds.bridges.BridgesStreamConfig;
@@ -36,6 +38,7 @@ import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankStreamConfig;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ArticleRank;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ArticulationPoints;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BRIDGES;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BetweennessCentrality;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.CELF;
@@ -89,10 +92,23 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
             resultBuilder
         );
     }
-
+    public <RESULT> RESULT articulationPoints(
+        GraphName graphName,
+        ArticulationPointsStreamConfig configuration,
+        ResultBuilder<ArticulationPointsStreamConfig, BitSet, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+            graphName,
+            configuration,
+            ArticulationPoints,
+            estimationFacade::articulationPoints,
+            (graph, __) -> centralityAlgorithms.articulationPoints(graph, configuration),
+            resultBuilder
+        );
+    }
     public <RESULT> RESULT bridges(
         GraphName graphName,
-         BridgesStreamConfig configuration,
+        BridgesStreamConfig configuration,
         ResultBuilder<BridgesStreamConfig, BridgeResult, RESULT, Void> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(

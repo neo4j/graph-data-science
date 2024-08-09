@@ -30,6 +30,7 @@ public enum Algorithm {
     AllShortestPaths,
     ApproximateMaximumKCut,
     ArticleRank,
+    ArticulationPoints,
     AStar,
     BellmanFord,
     BetaClosenessCentrality,

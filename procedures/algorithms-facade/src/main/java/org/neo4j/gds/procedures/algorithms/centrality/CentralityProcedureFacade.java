@@ -26,6 +26,10 @@ import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsStat
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsWriteModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.articulationpoints.ArticulationPointsMutateConfig;
+import org.neo4j.gds.articulationpoints.ArticulationPointsStatsConfig;
+import org.neo4j.gds.articulationpoints.ArticulationPointsStreamConfig;
+import org.neo4j.gds.articulationpoints.ArticulationPointsWriteConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
@@ -48,6 +52,7 @@ import org.neo4j.gds.pagerank.PageRankMutateConfig;
 import org.neo4j.gds.pagerank.PageRankStatsConfig;
 import org.neo4j.gds.pagerank.PageRankStreamConfig;
 import org.neo4j.gds.pagerank.PageRankWriteConfig;
+import org.neo4j.gds.procedures.algorithms.centrality.stubs.ArticulationPointsMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetaClosenessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetweennessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.CelfMutateStub;
@@ -66,6 +71,7 @@ import java.util.stream.Stream;
 public final class CentralityProcedureFacade {
     private final ProcedureReturnColumns procedureReturnColumns;
 
+    private final ArticulationPointsMutateStub articulationPointsMutateStub;
     private final PageRankMutateStub articleRankMutateStub;
     private final BetaClosenessCentralityMutateStub betaClosenessCentralityMutateStub;
     private final BetweennessCentralityMutateStub betweennessCentralityMutateStub;
@@ -92,6 +98,7 @@ public final class CentralityProcedureFacade {
         DegreeCentralityMutateStub degreeCentralityMutateStub,
         MutateStub<PageRankMutateConfig, PageRankMutateResult> eigenVectorMutateStub,
         HarmonicCentralityMutateStub harmonicCentralityMutateStub,
+        ArticulationPointsMutateStub articulationPointsMutateStub,
         PageRankMutateStub pageRankMutateStub,
         ApplicationsFacade applicationsFacade,
         EstimationModeRunner estimationMode,
@@ -100,6 +107,7 @@ public final class CentralityProcedureFacade {
     ) {
         this.procedureReturnColumns = procedureReturnColumns;
         this.articleRankMutateStub = articleRankMutateStub;
+        this.articulationPointsMutateStub = articulationPointsMutateStub;
         this.betaClosenessCentralityMutateStub = betaClosenessCentralityMutateStub;
         this.betweennessCentralityMutateStub = betweennessCentralityMutateStub;
         this.celfMutateStub = celfMutateStub;
@@ -170,6 +178,11 @@ public final class CentralityProcedureFacade {
             applicationsFacade.centrality().mutate()::pageRank
         );
 
+        var articulationPointsMutateStub  = new ArticulationPointsMutateStub(
+            genericStub,
+            applicationsFacade
+        );
+
         return new CentralityProcedureFacade(
             procedureReturnColumns,
             articleRankMutateStub,
@@ -180,6 +193,7 @@ public final class CentralityProcedureFacade {
             degreeCentralityMutateStub,
             eigenVectorMutateStub,
             harmonicCentralityMutateStub,
+            articulationPointsMutateStub,
             pageRankMutateStub,
             applicationsFacade,
             estimationModeRunner,
@@ -415,6 +429,113 @@ public final class CentralityProcedureFacade {
             algorithmConfiguration,
             BetweennessCentralityWriteConfig::of,
             configuration -> estimationMode().betweennessCentrality(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
+
+    public Stream<ArticulationPoint> articulationPointsStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new ArticulationPointsResultBuilderForStreamMode();
+
+        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+            graphName,
+            configuration,
+            ArticulationPointsStreamConfig::of,
+            streamMode()::articulationPoints,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> articulationPointsStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            ArticulationPointsStreamConfig::of,
+            configuration -> estimationMode().articulationPoints(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+    public ArticulationPointsMutateStub articulationPointsMutateStub(){return articulationPointsMutateStub;}
+
+    public Stream<MemoryEstimateResult> articulationPointsMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            ArticulationPointsMutateConfig::of,
+            configuration -> estimationMode().articulationPoints(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<ArticulationPointsStatsResult> articulationPointsStats(
+        String graphNameAsString,
+        Map<String, Object> rawConfiguration
+    ) {
+        return algorithmExecutionScaffolding.runAlgorithm(
+            graphNameAsString,
+            rawConfiguration,
+            ArticulationPointsStatsConfig::of,
+            statsMode()::articulationPoints,
+            new ArticulationPointsResultBuilderForStatsMode()
+        );
+    }
+
+    public Stream<MemoryEstimateResult> articulationPointsStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            ArticulationPointsStatsConfig::of,
+            configuration -> estimationMode().articulationPoints(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<ArticulationPointsWriteResult> articulationPointsWrite(
+        String graphNameAsString,
+        Map<String, Object> rawConfiguration
+    ) {
+        return algorithmExecutionScaffolding.runAlgorithm(
+            graphNameAsString,
+            rawConfiguration,
+            ArticulationPointsWriteConfig::of,
+            writeMode()::articulationPoints,
+            new ArticulationPointsResultBuilderForWriteMode()
+        );
+    }
+
+    public Stream<MemoryEstimateResult> articulationPointsWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationMode.runEstimation(
+            algorithmConfiguration,
+            ArticulationPointsWriteConfig::of,
+            configuration -> estimationMode().articulationPoints(
                 configuration,
                 graphNameOrConfiguration
             )
