@@ -274,6 +274,7 @@ ORDER BY name ASC
 
 [[algorithms-articulation-points-examples-stats]]
 === Stats
+:stats-syntax: algorithms-articulation-points-syntax
 
 include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 
