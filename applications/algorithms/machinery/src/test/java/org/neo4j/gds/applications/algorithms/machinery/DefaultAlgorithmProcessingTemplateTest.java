@@ -108,7 +108,7 @@ class DefaultAlgorithmProcessingTemplateTest {
             }
         };
 
-        var resultStream = algorithmProcessingTemplate.processAlgorithm(
+        var resultStream = algorithmProcessingTemplate.processAlgorithmForStream(
             Optional.empty(),
             graphName,
             configuration,
@@ -116,7 +116,6 @@ class DefaultAlgorithmProcessingTemplateTest {
             Dijkstra,
             null,
             computation,
-            Optional.empty(),
             resultBuilder
         );
 

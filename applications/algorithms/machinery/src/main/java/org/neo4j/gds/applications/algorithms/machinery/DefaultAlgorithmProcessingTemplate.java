@@ -72,6 +72,73 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
     ) {
         // as we progress through the steps we gather timings
+        var fields = processAlgorithm(relationshipWeightOverride,graphName,configuration,postGraphStoreLoadValidationHooks,label,estimationFactory,algorithmComputation);
+
+        var graph=fields.graphResources().graph() ;
+        var graphStore = fields.graphResources().graphStore();
+        var resultStore = fields.graphResources().resultStore();
+        var timingsBuilder = fields.timingsBuilder();
+        var result=fields.result();
+        MUTATE_OR_WRITE_METADATA metadata = null;
+
+        if (!fields.empty()) {
+            // do any side effects
+            metadata = mutateOrWriteWithTiming(
+                mutateOrWriteStep,
+                timingsBuilder,
+                graph,
+                graphStore,
+                resultStore,
+                result,
+                configuration.jobId()
+            );
+        }
+
+        // inject dependencies to render results
+        return resultBuilder.build(
+            graph,
+            graphStore,
+            configuration,
+            fields.empty() ?  Optional.empty() :  Optional.ofNullable(result),
+            timingsBuilder.build(),
+            fields.empty() ?  Optional.empty() :  Optional.ofNullable(metadata)
+        );
+    }
+
+    @Override
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER processAlgorithmForStream(
+        Optional<String> relationshipWeightOverride,
+        GraphName graphName,
+        CONFIGURATION configuration,
+        Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
+        LabelForProgressTracking label,
+        Supplier<MemoryEstimation> estimationFactory,
+        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
+        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
+    ) {
+
+        var fields = processAlgorithm(relationshipWeightOverride,graphName,configuration,postGraphStoreLoadValidationHooks,label,estimationFactory,algorithmComputation);
+
+        // inject dependencies to render results
+        return resultBuilder.build(
+            fields.graphResources().graph(),
+            fields.graphResources().graphStore(),
+            configuration,
+            fields.empty() ?  Optional.empty() : Optional.ofNullable(fields.result()),
+            fields.timingsBuilder().build(),
+            Optional.empty()
+        );
+    }
+
+    <RESULT_FROM_ALGORITHM,CONFIGURATION extends AlgoBaseConfig> ProcessAlgorithmFields<RESULT_FROM_ALGORITHM> processAlgorithm(
+        Optional<String> relationshipWeightOverride,
+        GraphName graphName,
+        CONFIGURATION configuration,
+        Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
+        LabelForProgressTracking label,
+        Supplier<MemoryEstimation> estimationFactory,
+        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation
+    ){
         var timingsBuilder = new AlgorithmProcessingTimingsBuilder();
 
         var graphResources = graphLoadAndValidationWithTiming(
@@ -85,14 +152,9 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         var graph = graphResources.graph();
         var graphStore = graphResources.graphStore();
 
-        if (graph.isEmpty()) return resultBuilder.build(
-            graph,
-            graphStore,
-            configuration,
-            Optional.empty(),
-            timingsBuilder.build(),
-            Optional.empty()
-        );
+        if (graph.isEmpty()){
+            return new ProcessAlgorithmFields<>(true, timingsBuilder,graphResources,null);
+        }
 
         memoryGuard.assertAlgorithmCanRun(label, configuration, graph, estimationFactory);
 
@@ -105,28 +167,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             graphStore
         );
 
-        var resultStore = graphResources.resultStore();
-
-        // do any side effects
-        MUTATE_OR_WRITE_METADATA metadata = mutateOrWriteWithTiming(
-            mutateOrWriteStep,
-            timingsBuilder,
-            graph,
-            graphStore,
-            resultStore,
-            result,
-            configuration.jobId()
-        );
-
-        // inject dependencies to render results
-        return resultBuilder.build(
-            graph,
-            graphStore,
-            configuration,
-            Optional.ofNullable(result),
-            timingsBuilder.build(),
-            Optional.ofNullable(metadata)
-        );
+        return new ProcessAlgorithmFields<>(false, timingsBuilder,graphResources,result);
     }
 
     /**
@@ -218,4 +259,5 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             return mutateOrWriteStep.get().execute(graph, graphStore, resultStore, result, jobId);
         }
     }
+
 }
