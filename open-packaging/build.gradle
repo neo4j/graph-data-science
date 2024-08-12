@@ -53,6 +53,7 @@ shadowJar {
     relocate('io.perfmark.', 'com.neo4j.gds.shaded.io.perfmark.')
     relocate('javassist', 'com.neo4j.gds.shaded.javassist')
     relocate('javax.annotation.', 'com.neo4j.gds.shaded.javax.annotation.')
+    relocate('net.bytebuddy', 'com.neo4j.gds.shaded.net.bytebuddy')
     relocate('pabeles', 'com.neo4j.gds.shaded.pabeles')
     relocate('stormpot', 'com.neo4j.gds.shaded.stormpot')
 
