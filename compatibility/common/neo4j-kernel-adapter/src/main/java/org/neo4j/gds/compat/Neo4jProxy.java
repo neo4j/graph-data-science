@@ -57,6 +57,7 @@ import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.AuthenticationResult;
+import org.neo4j.internal.kernel.api.security.LoginContext;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.internal.recordstorage.RecordIdType;
 import org.neo4j.io.fs.FileSystemAbstraction;
@@ -483,6 +484,10 @@ public final class Neo4jProxy {
             result[i] = (char) (bits.get() & 0xFF);
         }
         return new String(result);
+    }
+
+    public static LoginContext loginContext(CompatLoginContext compatLoginContext) {
+        return IMPL.loginContext(compatLoginContext);
     }
 
     public static TestLog testLog() {
