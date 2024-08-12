@@ -22,8 +22,7 @@ package org.neo4j.gds.procedures.algorithms.community;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.kmeans.KmeansStreamConfig;
 
@@ -31,15 +30,13 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class KMeansResultBuilderForStreamMode implements ResultBuilder<KmeansStreamConfig, KmeansResult, Stream<KmeansStreamResult>, Void> {
+class KMeansResultBuilderForStreamMode implements StreamResultBuilder<KmeansStreamConfig, KmeansResult, KmeansStreamResult> {
     @Override
     public Stream<KmeansStreamResult> build(
         Graph graph,
         GraphStore graphStore,
         KmeansStreamConfig configuration,
-        Optional<KmeansResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        Optional<KmeansResult> result
     ) {
         if (result.isEmpty()) return Stream.empty();
 

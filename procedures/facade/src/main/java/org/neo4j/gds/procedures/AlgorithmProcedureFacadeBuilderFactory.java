@@ -28,9 +28,8 @@ import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
-import org.neo4j.gds.procedures.algorithms.runners.DefaultAlgorithmExecutionScaffolding;
+import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
-import org.neo4j.gds.procedures.algorithms.runners.MetadataSetter;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.kernel.api.KernelTransaction;
 
@@ -71,11 +70,8 @@ public class AlgorithmProcedureFacadeBuilderFactory {
         );
 
         var estimationModeRunner = new EstimationModeRunner(configurationCreator);
-        var algorithmExecutionScaffolding = new DefaultAlgorithmExecutionScaffolding(configurationCreator);
-        var algorithmExecutionScaffoldingForStreamMode = new MetadataSetter(
-            algorithmMetaDataSetter,
-            algorithmExecutionScaffolding
-        );
+        var algorithmExecutionScaffolding = new AlgorithmExecutionScaffolding(configurationCreator,algorithmMetaDataSetter);
+
 
         return new AlgorithmProcedureFacadeBuilder(
             requestScopedDependencies,
@@ -85,8 +81,7 @@ public class AlgorithmProcedureFacadeBuilderFactory {
             applicationsFacade,
             genericStub,
             estimationModeRunner,
-            algorithmExecutionScaffolding,
-            algorithmExecutionScaffoldingForStreamMode
+            algorithmExecutionScaffolding
         );
     }
 }

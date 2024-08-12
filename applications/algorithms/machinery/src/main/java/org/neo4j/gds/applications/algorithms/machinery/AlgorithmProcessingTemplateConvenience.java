@@ -27,6 +27,7 @@ import org.neo4j.gds.mem.MemoryEstimation;
 
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class AlgorithmProcessingTemplateConvenience {
     private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
@@ -111,19 +112,21 @@ public class AlgorithmProcessingTemplateConvenience {
         );
     }
 
-    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER processRegularAlgorithmInStreamMode(
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM> Stream<RESULT_TO_CALLER> processRegularAlgorithmInStreamMode(
         GraphName graphName,
         CONFIGURATION configuration,
         LabelForProgressTracking label,
         Supplier<MemoryEstimation> estimationFactory,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
-        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
-    ) {
+        StreamResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder,
+        Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
+        Optional<String> relationshipWeightOverride
+        ) {
         return algorithmProcessingTemplate.processAlgorithmForStream(
-            Optional.empty(),
+            relationshipWeightOverride,
             graphName,
             configuration,
-            Optional.empty(),
+            postGraphStoreLoadValidationHooks,
             label,
             estimationFactory,
             algorithmComputation,

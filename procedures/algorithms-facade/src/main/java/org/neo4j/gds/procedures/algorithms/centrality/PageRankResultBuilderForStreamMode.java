@@ -21,15 +21,14 @@ package org.neo4j.gds.procedures.algorithms.centrality;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankStreamConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class PageRankResultBuilderForStreamMode implements ResultBuilder<PageRankStreamConfig, PageRankResult, Stream<CentralityStreamResult>, Void> {
+class PageRankResultBuilderForStreamMode implements StreamResultBuilder<PageRankStreamConfig, PageRankResult, CentralityStreamResult> {
     private final CentralityAlgorithmResultTransformer transformer = new CentralityAlgorithmResultTransformer();
 
     @Override
@@ -37,9 +36,7 @@ class PageRankResultBuilderForStreamMode implements ResultBuilder<PageRankStream
         Graph graph,
         GraphStore graphStore,
         PageRankStreamConfig configuration,
-        Optional<PageRankResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        Optional<PageRankResult> result
     ) {
         return transformer.transform(graph, result);
     }

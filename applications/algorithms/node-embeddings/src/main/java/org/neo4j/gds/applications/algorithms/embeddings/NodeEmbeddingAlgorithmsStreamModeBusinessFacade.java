@@ -21,7 +21,7 @@ package org.neo4j.gds.applications.algorithms.embeddings;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
@@ -31,36 +31,37 @@ import org.neo4j.gds.embeddings.hashgnn.HashGNNStreamConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FastRP;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.GraphSage;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.HashGNN;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Node2Vec;
 
 public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
     private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final NodeEmbeddingAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final GraphSageAlgorithmProcessing graphSageAlgorithmProcessing;
-    private final Node2VecAlgorithmProcessing node2VecAlgorithmProcessing;
 
     NodeEmbeddingAlgorithmsStreamModeBusinessFacade(
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         NodeEmbeddingAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        GraphSageAlgorithmProcessing graphSageAlgorithmProcessing,
-        Node2VecAlgorithmProcessing node2VecAlgorithmProcessing
+        GraphSageAlgorithmProcessing graphSageAlgorithmProcessing
     ) {
         this.estimationFacade = estimationFacade;
         this.algorithms = algorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.graphSageAlgorithmProcessing = graphSageAlgorithmProcessing;
-        this.node2VecAlgorithmProcessing = node2VecAlgorithmProcessing;
     }
 
-    public <RESULT> RESULT fastRP(
+    public <RESULT> Stream<RESULT> fastRP(
         GraphName graphName,
         FastRPStreamConfig configuration,
-        ResultBuilder<FastRPStreamConfig, FastRPResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<FastRPStreamConfig, FastRPResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -68,22 +69,35 @@ public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
             FastRP,
             () -> estimationFacade.fastRP(configuration),
             (graph, __) -> algorithms.fastRP(graph, configuration),
-            resultBuilder
+            resultBuilder,
+            Optional.empty(),
+            Optional.empty()
         );
     }
 
-    public <RESULT> RESULT graphSage(
+    public <RESULT> Stream<RESULT> graphSage(
         GraphName graphName,
         GraphSageStreamConfig configuration,
-        ResultBuilder<GraphSageStreamConfig, GraphSageResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<GraphSageStreamConfig, GraphSageResult, RESULT> resultBuilder
     ) {
-        return graphSageAlgorithmProcessing.process(graphName, configuration, Optional.empty(), resultBuilder, false);
+
+        var graphSageProcessParameters = graphSageAlgorithmProcessing.graphSageValidationHook(configuration);
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
+            graphName,
+            configuration,
+            GraphSage,
+            () -> estimationFacade.graphSage(configuration, false),
+            (graph, __) -> algorithms.graphSage(graph, configuration),
+            resultBuilder,
+            Optional.of(List.of(graphSageProcessParameters.validationHook())),
+            graphSageProcessParameters.relationshipWeightPropertyFromTrainConfiguration()
+            );
     }
 
-    public <RESULT> RESULT hashGnn(
+    public <RESULT> Stream<RESULT> hashGnn(
         GraphName graphName,
         HashGNNStreamConfig configuration,
-        ResultBuilder<HashGNNStreamConfig, HashGNNResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<HashGNNStreamConfig, HashGNNResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -91,15 +105,26 @@ public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
             HashGNN,
             () -> estimationFacade.hashGnn(configuration),
             (graph, __) -> algorithms.hashGnn(graph, configuration),
-            resultBuilder
+            resultBuilder,
+            Optional.empty(),
+            Optional.empty()
         );
     }
 
-    public <RESULT> RESULT node2Vec(
+    public <RESULT> Stream<RESULT> node2Vec(
         GraphName graphName,
         Node2VecStreamConfig configuration,
-        ResultBuilder<Node2VecStreamConfig, Node2VecResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<Node2VecStreamConfig, Node2VecResult, RESULT> resultBuilder
     ) {
-        return node2VecAlgorithmProcessing.process(graphName, configuration, Optional.empty(), resultBuilder);
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
+            graphName,
+            configuration,
+            Node2Vec,
+            () -> estimationFacade.node2Vec(configuration),
+            (graph, __) -> algorithms.node2Vec(graph, configuration),
+            resultBuilder,
+            Optional.of(List.of(new Node2VecValidationHook(configuration))),
+            Optional.empty()
+            );
     }
 }

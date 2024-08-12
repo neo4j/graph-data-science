@@ -23,8 +23,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
 
@@ -32,15 +31,14 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class FastRPResultBuilderForStreamMode implements ResultBuilder<FastRPStreamConfig, FastRPResult, Stream<FastRPStreamResult>, Void> {
+class FastRPResultBuilderForStreamMode implements StreamResultBuilder<FastRPStreamConfig, FastRPResult, FastRPStreamResult> {
+
     @Override
     public Stream<FastRPStreamResult> build(
         Graph graph,
         GraphStore graphStore,
         FastRPStreamConfig configuration,
-        Optional<FastRPResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        Optional<FastRPResult> result
     ) {
         if (result.isEmpty()) return Stream.empty();
 

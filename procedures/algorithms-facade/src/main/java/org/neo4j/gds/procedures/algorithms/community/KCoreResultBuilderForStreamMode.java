@@ -22,8 +22,7 @@ package org.neo4j.gds.procedures.algorithms.community;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import org.neo4j.gds.kcore.KCoreDecompositionStreamConfig;
 
@@ -31,15 +30,14 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class KCoreResultBuilderForStreamMode implements ResultBuilder<KCoreDecompositionStreamConfig, KCoreDecompositionResult, Stream<KCoreDecompositionStreamResult>, Void> {
+class KCoreResultBuilderForStreamMode implements StreamResultBuilder<KCoreDecompositionStreamConfig, KCoreDecompositionResult, KCoreDecompositionStreamResult> {
+
     @Override
     public Stream<KCoreDecompositionStreamResult> build(
         Graph graph,
         GraphStore graphStore,
         KCoreDecompositionStreamConfig configuration,
-        Optional<KCoreDecompositionResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        Optional<KCoreDecompositionResult> result
     ) {
         if (result.isEmpty()) return Stream.empty();
 

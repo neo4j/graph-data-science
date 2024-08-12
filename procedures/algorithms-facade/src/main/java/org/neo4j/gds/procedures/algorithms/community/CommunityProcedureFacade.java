@@ -108,7 +108,6 @@ public final class CommunityProcedureFacade {
 
     private final EstimationModeRunner estimationMode;
     private final AlgorithmExecutionScaffolding algorithmExecutionScaffolding;
-    private final AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode;
 
     private CommunityProcedureFacade(
         CloseableResourceRegistry closeableResourceRegistry,
@@ -127,9 +126,8 @@ public final class CommunityProcedureFacade {
         WccMutateStub wccMutateStub,
         ApplicationsFacade applicationsFacade,
         EstimationModeRunner estimationMode,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffolding,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode
-    ) {
+        AlgorithmExecutionScaffolding algorithmExecutionScaffolding)
+    {
         this.closeableResourceRegistry = closeableResourceRegistry;
         this.procedureReturnColumns = procedureReturnColumns;
         this.approximateMaximumKCutMutateStub = approximateMaximumKCutMutateStub;
@@ -147,7 +145,6 @@ public final class CommunityProcedureFacade {
         this.applicationsFacade = applicationsFacade;
         this.estimationMode = estimationMode;
         this.algorithmExecutionScaffolding = algorithmExecutionScaffolding;
-        this.algorithmExecutionScaffoldingForStreamMode = algorithmExecutionScaffoldingForStreamMode;
     }
 
     public static CommunityProcedureFacade create(
@@ -156,9 +153,8 @@ public final class CommunityProcedureFacade {
         CloseableResourceRegistry closeableResourceRegistry,
         ProcedureReturnColumns procedureReturnColumns,
         EstimationModeRunner estimationModeRunner,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffolding,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode
-    ) {
+        AlgorithmExecutionScaffolding algorithmExecutionScaffolding) {
+
         var approximateMaximumKCutMutateStub = new ApproximateMaximumKCutMutateStub(genericStub, applicationsFacade);
         var k1ColoringMutateStub = new K1ColoringMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
         var kCoreMutateStub = new KCoreMutateStub(genericStub, applicationsFacade);
@@ -200,8 +196,7 @@ public final class CommunityProcedureFacade {
             wccMutateStub,
             applicationsFacade,
             estimationModeRunner,
-            algorithmExecutionScaffolding,
-            algorithmExecutionScaffoldingForStreamMode
+            algorithmExecutionScaffolding
         );
     }
 
@@ -215,7 +210,7 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new ApproxMaxKCutResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             ApproxMaxKCutStreamConfig::of,
@@ -243,7 +238,7 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new ConductanceResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             ConductanceStreamConfig::of,
@@ -290,7 +285,7 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new K1ColoringResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             K1ColoringStreamConfig::of,
@@ -378,7 +373,7 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new KCoreResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             KCoreDecompositionStreamConfig::of,
@@ -469,7 +464,7 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new KMeansResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             KmeansStreamConfig::of,
@@ -561,7 +556,7 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new LabelPropagationResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             LabelPropagationStreamConfig::of,
@@ -650,7 +645,7 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new LccResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             LocalClusteringCoefficientStreamConfig::of,
@@ -736,7 +731,7 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new LeidenResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             LeidenStreamConfig::of,
@@ -825,7 +820,7 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new LouvainResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             LouvainStreamConfig::of,
@@ -911,7 +906,7 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new ModularityResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             ModularityStreamConfig::of,
@@ -973,7 +968,7 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new ModularityOptimizationResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             ModularityOptimizationStreamConfig::of,
@@ -1064,7 +1059,7 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new SccResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             SccStreamConfig::of,
@@ -1167,7 +1162,7 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new TriangleCountResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             TriangleCountStreamConfig::of,
@@ -1220,7 +1215,7 @@ public final class CommunityProcedureFacade {
     public Stream<TriangleStreamResult> trianglesStream(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new TrianglesResultBuilderForStreamMode(closeableResourceRegistry);
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             TriangleCountBaseConfig::of,
@@ -1263,7 +1258,7 @@ public final class CommunityProcedureFacade {
     public Stream<WccStreamResult> wccStream(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new WccResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             WccStreamConfig::of,

@@ -534,7 +534,6 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
             null,
             ProcedureReturnColumns.EMPTY,
             null,
-            null,
             null
         );
 

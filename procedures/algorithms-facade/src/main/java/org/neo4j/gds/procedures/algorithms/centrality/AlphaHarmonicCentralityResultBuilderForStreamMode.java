@@ -21,25 +21,22 @@ package org.neo4j.gds.procedures.algorithms.centrality;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class AlphaHarmonicCentralityResultBuilderForStreamMode implements ResultBuilder<HarmonicCentralityStreamConfig, HarmonicResult, Stream<AlphaHarmonicStreamResult>, Void> {
+class AlphaHarmonicCentralityResultBuilderForStreamMode implements StreamResultBuilder<HarmonicCentralityStreamConfig, HarmonicResult, AlphaHarmonicStreamResult> {
     private final AlphaHarmonicResultTransformer transformer = new AlphaHarmonicResultTransformer();
 
     @Override
     public Stream<AlphaHarmonicStreamResult> build(
         Graph graph,
         GraphStore graphStore,
-        HarmonicCentralityStreamConfig configuration,
-        Optional<HarmonicResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        HarmonicCentralityStreamConfig harmonicCentralityStreamConfig,
+        Optional<HarmonicResult> result
     ) {
         return transformer.transform(graph, result);
     }

@@ -24,8 +24,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.labelpropagation.LabelPropagationStreamConfig;
 
@@ -33,15 +32,14 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class LabelPropagationResultBuilderForStreamMode implements ResultBuilder<LabelPropagationStreamConfig, LabelPropagationResult, Stream<LabelPropagationStreamResult>, Void> {
+class LabelPropagationResultBuilderForStreamMode implements StreamResultBuilder<LabelPropagationStreamConfig, LabelPropagationResult, LabelPropagationStreamResult> {
+
     @Override
     public Stream<LabelPropagationStreamResult> build(
         Graph graph,
         GraphStore graphStore,
         LabelPropagationStreamConfig configuration,
-        Optional<LabelPropagationResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        Optional<LabelPropagationResult> result
     ) {
         if (result.isEmpty()) return Stream.empty();
 

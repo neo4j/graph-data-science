@@ -24,8 +24,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.scc.SccStreamConfig;
 
@@ -33,15 +32,13 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class SccResultBuilderForStreamMode implements ResultBuilder<SccStreamConfig, HugeLongArray, Stream<SccStreamResult>, Void> {
+class SccResultBuilderForStreamMode implements StreamResultBuilder<SccStreamConfig, HugeLongArray, SccStreamResult> {
     @Override
     public Stream<SccStreamResult> build(
         Graph graph,
         GraphStore graphStore,
         SccStreamConfig configuration,
-        Optional<HugeLongArray> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        Optional<HugeLongArray> result
     ) {
         if (result.isEmpty()) return Stream.empty();
 

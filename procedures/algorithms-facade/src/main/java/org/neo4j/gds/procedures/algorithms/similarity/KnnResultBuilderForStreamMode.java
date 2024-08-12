@@ -21,8 +21,7 @@ package org.neo4j.gds.procedures.algorithms.similarity;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.knn.KnnStreamConfig;
@@ -30,15 +29,14 @@ import org.neo4j.gds.similarity.knn.KnnStreamConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class KnnResultBuilderForStreamMode implements ResultBuilder<KnnStreamConfig, KnnResult, Stream<SimilarityResult>, Void> {
+class KnnResultBuilderForStreamMode implements StreamResultBuilder<KnnStreamConfig, KnnResult, SimilarityResult> {
+
     @Override
     public Stream<SimilarityResult> build(
         Graph graph,
         GraphStore graphStore,
-        KnnStreamConfig configuration,
-        Optional<KnnResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        KnnStreamConfig streamConfig,
+        Optional<KnnResult> result
     ) {
         if (result.isEmpty()) return Stream.empty();
 

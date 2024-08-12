@@ -23,8 +23,7 @@ import org.neo4j.gds.algorithms.embeddings.FloatEmbeddingNodePropertyValues;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
 
@@ -32,15 +31,14 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class Node2VecResultBuilderForStreamMode implements ResultBuilder<Node2VecStreamConfig, Node2VecResult, Stream<Node2VecStreamResult>, Void> {
+class Node2VecResultBuilderForStreamMode implements StreamResultBuilder<Node2VecStreamConfig, Node2VecResult, Node2VecStreamResult> {
+
     @Override
     public Stream<Node2VecStreamResult> build(
         Graph graph,
         GraphStore graphStore,
         Node2VecStreamConfig configuration,
-        Optional<Node2VecResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        Optional<Node2VecResult> result
     ) {
         if (result.isEmpty()) return Stream.empty();
 

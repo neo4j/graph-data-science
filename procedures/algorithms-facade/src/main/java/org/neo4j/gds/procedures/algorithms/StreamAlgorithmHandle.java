@@ -17,27 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.centrality;
+package org.neo4j.gds.procedures.algorithms;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
-import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
-import org.neo4j.gds.harmonic.HarmonicResult;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
-class HarmonicCentralityResultBuilderForStreamMode implements StreamResultBuilder<HarmonicCentralityStreamConfig, HarmonicResult, CentralityStreamResult> {
-    private final CentralityAlgorithmResultTransformer transformer = new CentralityAlgorithmResultTransformer();
+public interface StreamAlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> {
 
-    @Override
-    public Stream<CentralityStreamResult> build(
-        Graph graph,
-        GraphStore graphStore,
-        HarmonicCentralityStreamConfig configuration,
-        Optional<HarmonicResult> result
-    ) {
-        return transformer.transform(graph, result);
-    }
+    Stream<RESULT_TO_CALLER> compute(
+        GraphName graphName,
+        CONFIGURATION configuration,
+        StreamResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
+    );
 }

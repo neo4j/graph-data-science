@@ -37,6 +37,7 @@ import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTemplate {
     private final Log log;
@@ -74,7 +75,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         // as we progress through the steps we gather timings
         var fields = processAlgorithm(relationshipWeightOverride,graphName,configuration,postGraphStoreLoadValidationHooks,label,estimationFactory,algorithmComputation);
 
-        var graph=fields.graphResources().graph() ;
+        var graph = fields.graphResources().graph();
         var graphStore = fields.graphResources().graphStore();
         var resultStore = fields.graphResources().resultStore();
         var timingsBuilder = fields.timingsBuilder();
@@ -106,7 +107,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
     }
 
     @Override
-    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER processAlgorithmForStream(
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM> Stream<RESULT_TO_CALLER> processAlgorithmForStream(
         Optional<String> relationshipWeightOverride,
         GraphName graphName,
         CONFIGURATION configuration,
@@ -114,7 +115,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         LabelForProgressTracking label,
         Supplier<MemoryEstimation> estimationFactory,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
-        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
+        StreamResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
     ) {
 
         var fields = processAlgorithm(relationshipWeightOverride,graphName,configuration,postGraphStoreLoadValidationHooks,label,estimationFactory,algorithmComputation);
@@ -124,9 +125,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             fields.graphResources().graph(),
             fields.graphResources().graphStore(),
             configuration,
-            fields.empty() ?  Optional.empty() : Optional.ofNullable(fields.result()),
-            fields.timingsBuilder().build(),
-            Optional.empty()
+            fields.empty() ?  Optional.empty() : Optional.ofNullable(fields.result())
         );
     }
 

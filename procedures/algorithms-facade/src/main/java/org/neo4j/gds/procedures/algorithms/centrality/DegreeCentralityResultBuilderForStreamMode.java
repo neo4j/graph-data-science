@@ -22,14 +22,13 @@ package org.neo4j.gds.procedures.algorithms.centrality;
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.degree.DegreeCentralityStreamConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class DegreeCentralityResultBuilderForStreamMode implements ResultBuilder<DegreeCentralityStreamConfig, CentralityAlgorithmResult, Stream<CentralityStreamResult>, Void> {
+class DegreeCentralityResultBuilderForStreamMode implements StreamResultBuilder<DegreeCentralityStreamConfig, CentralityAlgorithmResult, CentralityStreamResult> {
     private final CentralityAlgorithmResultTransformer transformer = new CentralityAlgorithmResultTransformer();
 
     @Override
@@ -37,9 +36,7 @@ class DegreeCentralityResultBuilderForStreamMode implements ResultBuilder<Degree
         Graph graph,
         GraphStore graphStore,
         DegreeCentralityStreamConfig configuration,
-        Optional<CentralityAlgorithmResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        Optional<CentralityAlgorithmResult> result
     ) {
         return transformer.transform(graph, result);
     }

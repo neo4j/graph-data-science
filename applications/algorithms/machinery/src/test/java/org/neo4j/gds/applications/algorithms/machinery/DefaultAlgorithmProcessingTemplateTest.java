@@ -87,18 +87,14 @@ class DefaultAlgorithmProcessingTemplateTest {
         var pathFindingResult = mock(ExampleResult.class);
         when(computation.compute(graph, graphStore)).thenReturn(pathFindingResult);
 
-        var resultBuilder = new ResultBuilder<ExampleConfiguration, ExampleResult, Stream<String>, Void>() {
+        var resultBuilder = new StreamResultBuilder<ExampleConfiguration, ExampleResult, String>() {
             @Override
             public Stream<String> build(
                 Graph graph,
                 GraphStore graphStore,
                 ExampleConfiguration configuration,
-                Optional<ExampleResult> pathFindingResult,
-                AlgorithmProcessingTimings timings,
-                Optional<Void> metadata
+                Optional<ExampleResult> pathFindingResult
             ) {
-                // we skip timings when no side effects requested
-                assertThat(timings.mutateOrWriteMillis).isEqualTo(-1);
 
                 return Stream.of(
                     "Huey",

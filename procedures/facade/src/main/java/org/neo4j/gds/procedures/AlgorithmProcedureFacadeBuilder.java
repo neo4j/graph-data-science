@@ -43,7 +43,6 @@ class AlgorithmProcedureFacadeBuilder {
     private final GenericStub genericStub;
     private final EstimationModeRunner estimationModeRunner;
     private final AlgorithmExecutionScaffolding algorithmExecutionScaffolding;
-    private final AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode;
 
     AlgorithmProcedureFacadeBuilder(
         RequestScopedDependencies requestScopedDependencies,
@@ -53,9 +52,8 @@ class AlgorithmProcedureFacadeBuilder {
         ApplicationsFacade applicationsFacade,
         GenericStub genericStub,
         EstimationModeRunner estimationModeRunner,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffolding,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode
-    ) {
+        AlgorithmExecutionScaffolding algorithmExecutionScaffolding)
+    {
         this.requestScopedDependencies = requestScopedDependencies;
         this.closeableResourceRegistry = closeableResourceRegistry;
         this.nodeLookup = nodeLookup;
@@ -64,7 +62,6 @@ class AlgorithmProcedureFacadeBuilder {
         this.genericStub = genericStub;
         this.estimationModeRunner = estimationModeRunner;
         this.algorithmExecutionScaffolding = algorithmExecutionScaffolding;
-        this.algorithmExecutionScaffoldingForStreamMode = algorithmExecutionScaffoldingForStreamMode;
     }
 
     CentralityProcedureFacade createCentralityProcedureFacade() {
@@ -73,8 +70,7 @@ class AlgorithmProcedureFacadeBuilder {
             applicationsFacade,
             procedureReturnColumns,
             estimationModeRunner,
-            algorithmExecutionScaffolding,
-            algorithmExecutionScaffoldingForStreamMode
+            algorithmExecutionScaffolding
         );
     }
 
@@ -85,8 +81,7 @@ class AlgorithmProcedureFacadeBuilder {
             closeableResourceRegistry,
             procedureReturnColumns,
             estimationModeRunner,
-            algorithmExecutionScaffolding,
-            algorithmExecutionScaffoldingForStreamMode
+            algorithmExecutionScaffolding
         );
     }
 
@@ -96,8 +91,7 @@ class AlgorithmProcedureFacadeBuilder {
             applicationsFacade,
             procedureReturnColumns,
             estimationModeRunner,
-            algorithmExecutionScaffolding,
-            algorithmExecutionScaffoldingForStreamMode
+            algorithmExecutionScaffolding
         );
     }
 
@@ -107,8 +101,7 @@ class AlgorithmProcedureFacadeBuilder {
             genericStub,
             applicationsFacade,
             estimationModeRunner,
-            algorithmExecutionScaffolding,
-            algorithmExecutionScaffoldingForStreamMode
+            algorithmExecutionScaffolding
         );
     }
 
@@ -120,8 +113,7 @@ class AlgorithmProcedureFacadeBuilder {
             applicationsFacade,
             genericStub,
             estimationModeRunner,
-            algorithmExecutionScaffolding,
-            algorithmExecutionScaffoldingForStreamMode
+            algorithmExecutionScaffolding
         );
     }
 
@@ -131,8 +123,7 @@ class AlgorithmProcedureFacadeBuilder {
             genericStub,
             procedureReturnColumns,
             estimationModeRunner,
-            algorithmExecutionScaffolding,
-            algorithmExecutionScaffoldingForStreamMode
+            algorithmExecutionScaffolding
         );
     }
 }

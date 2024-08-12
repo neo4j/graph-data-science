@@ -24,8 +24,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
 
@@ -33,15 +32,14 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class ApproxMaxKCutResultBuilderForStreamMode implements ResultBuilder<ApproxMaxKCutStreamConfig, ApproxMaxKCutResult, Stream<ApproxMaxKCutStreamResult>, Void> {
+class ApproxMaxKCutResultBuilderForStreamMode implements StreamResultBuilder<ApproxMaxKCutStreamConfig, ApproxMaxKCutResult, ApproxMaxKCutStreamResult> {
+
     @Override
     public Stream<ApproxMaxKCutStreamResult> build(
         Graph graph,
         GraphStore graphStore,
         ApproxMaxKCutStreamConfig configuration,
-        Optional<ApproxMaxKCutResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        Optional<ApproxMaxKCutResult> result
     ) {
         if (result.isEmpty()) return Stream.empty();
 

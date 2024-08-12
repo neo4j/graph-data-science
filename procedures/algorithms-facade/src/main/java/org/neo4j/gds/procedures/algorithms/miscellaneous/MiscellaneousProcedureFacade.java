@@ -50,7 +50,6 @@ public final class MiscellaneousProcedureFacade {
 
     private final EstimationModeRunner estimationMode;
     private final AlgorithmExecutionScaffolding algorithmExecutionScaffolding;
-    private final AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode;
 
     private MiscellaneousProcedureFacade(
         ProcedureReturnColumns procedureReturnColumns,
@@ -59,9 +58,7 @@ public final class MiscellaneousProcedureFacade {
         ScalePropertiesMutateStub scalePropertiesMutateStub,
         ApplicationsFacade applicationsFacade,
         EstimationModeRunner estimationMode,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffolding,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode
-    ) {
+        AlgorithmExecutionScaffolding algorithmExecutionScaffolding) {
         this.procedureReturnColumns = procedureReturnColumns;
         this.alphaScalePropertiesMutateStub = alphaScalePropertiesMutateStub;
         this.collapsePathMutateStub = collapsePathMutateStub;
@@ -69,7 +66,6 @@ public final class MiscellaneousProcedureFacade {
         this.applicationsFacade = applicationsFacade;
         this.estimationMode = estimationMode;
         this.algorithmExecutionScaffolding = algorithmExecutionScaffolding;
-        this.algorithmExecutionScaffoldingForStreamMode = algorithmExecutionScaffoldingForStreamMode;
     }
 
     public static MiscellaneousProcedureFacade create(
@@ -77,9 +73,7 @@ public final class MiscellaneousProcedureFacade {
         ApplicationsFacade applicationsFacade,
         ProcedureReturnColumns procedureReturnColumns,
         EstimationModeRunner estimationModeRunner,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffolding,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode
-    ) {
+        AlgorithmExecutionScaffolding algorithmExecutionScaffolding) {
         var alphaScalePropertiesMutateStub = new ScalePropertiesMutateStub(
             genericStub,
             applicationsFacade,
@@ -101,9 +95,7 @@ public final class MiscellaneousProcedureFacade {
             scalePropertiesMutateStub,
             applicationsFacade,
             estimationModeRunner,
-            algorithmExecutionScaffolding,
-            algorithmExecutionScaffoldingForStreamMode
-        );
+            algorithmExecutionScaffolding);
     }
 
     public ScalePropertiesMutateStub alphaScalePropertiesMutateStub() {
@@ -116,7 +108,7 @@ public final class MiscellaneousProcedureFacade {
     ) {
         var resultBuilder = new ScalePropertiesResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithmWithValidation(
+        return algorithmExecutionScaffolding.runStreamAlgorithmWithValidation(
             graphName,
             configuration,
             ScalePropertiesStreamConfig::of,
@@ -172,7 +164,7 @@ public final class MiscellaneousProcedureFacade {
     ) {
         var resultBuilder = new ScalePropertiesResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithmWithValidation(
+        return algorithmExecutionScaffolding.runStreamAlgorithmWithValidation(
             graphName,
             configuration,
             ScalePropertiesStreamConfig::of,

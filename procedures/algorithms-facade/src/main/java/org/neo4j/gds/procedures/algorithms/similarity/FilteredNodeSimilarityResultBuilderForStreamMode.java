@@ -21,8 +21,7 @@ package org.neo4j.gds.procedures.algorithms.similarity;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
@@ -30,7 +29,7 @@ import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class FilteredNodeSimilarityResultBuilderForStreamMode implements ResultBuilder<FilteredNodeSimilarityStreamConfig, NodeSimilarityResult, Stream<SimilarityResult>, Void> {
+class FilteredNodeSimilarityResultBuilderForStreamMode implements StreamResultBuilder<FilteredNodeSimilarityStreamConfig, NodeSimilarityResult, SimilarityResult> {
     private final SimilarityResultStreamMapper similarityResultStreamMapper = new SimilarityResultStreamMapper();
 
     @Override
@@ -38,9 +37,7 @@ class FilteredNodeSimilarityResultBuilderForStreamMode implements ResultBuilder<
         Graph graph,
         GraphStore graphStore,
         FilteredNodeSimilarityStreamConfig configuration,
-        Optional<NodeSimilarityResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        Optional<NodeSimilarityResult> result
     ) {
         return similarityResultStreamMapper.process(graph, result);
     }

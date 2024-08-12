@@ -58,7 +58,6 @@ public final class NodeEmbeddingsProcedureFacade {
 
     private final EstimationModeRunner estimationMode;
     private final AlgorithmExecutionScaffolding algorithmExecutionScaffolding;
-    private final AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode;
 
     private NodeEmbeddingsProcedureFacade(
         RequestScopedDependencies requestScopedDependencies,
@@ -68,8 +67,7 @@ public final class NodeEmbeddingsProcedureFacade {
         Node2VecMutateStub node2VecMutateStub,
         ApplicationsFacade applicationsFacade,
         EstimationModeRunner estimationMode,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffolding,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode
+        AlgorithmExecutionScaffolding algorithmExecutionScaffolding
     ) {
         this.requestScopedDependencies = requestScopedDependencies;
         this.fastRPMutateStub = fastRPMutateStub;
@@ -79,7 +77,6 @@ public final class NodeEmbeddingsProcedureFacade {
         this.applicationsFacade = applicationsFacade;
         this.estimationMode = estimationMode;
         this.algorithmExecutionScaffolding = algorithmExecutionScaffolding;
-        this.algorithmExecutionScaffoldingForStreamMode = algorithmExecutionScaffoldingForStreamMode;
     }
 
     public static NodeEmbeddingsProcedureFacade create(
@@ -87,8 +84,7 @@ public final class NodeEmbeddingsProcedureFacade {
         GenericStub genericStub,
         ApplicationsFacade applicationsFacade,
         EstimationModeRunner estimationModeRunner,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffolding,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode
+        AlgorithmExecutionScaffolding algorithmExecutionScaffolding
     ) {
         var fastRPMutateStub = new FastRPMutateStub(genericStub, applicationsFacade);
         var graphSageMutateStub = new GraphSageMutateStub(requestScopedDependencies, genericStub, applicationsFacade);
@@ -103,8 +99,7 @@ public final class NodeEmbeddingsProcedureFacade {
             node2VecMutateStub,
             applicationsFacade,
             estimationModeRunner,
-            algorithmExecutionScaffolding,
-            algorithmExecutionScaffoldingForStreamMode
+            algorithmExecutionScaffolding
         );
     }
 
@@ -146,7 +141,7 @@ public final class NodeEmbeddingsProcedureFacade {
     ) {
         var resultBuilder = new FastRPResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             FastRPStreamConfig::of,
@@ -206,7 +201,7 @@ public final class NodeEmbeddingsProcedureFacade {
     ) {
         var resultBuilder = new GraphSageResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             cypherMapWrapper -> GraphSageStreamConfig.of(
@@ -312,7 +307,7 @@ public final class NodeEmbeddingsProcedureFacade {
     ) {
         var resultBuilder = new HashGnnResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             HashGNNStreamConfig::of,
@@ -344,7 +339,7 @@ public final class NodeEmbeddingsProcedureFacade {
     ) {
         var resultBuilder = new Node2VecResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             Node2VecStreamConfig::of,

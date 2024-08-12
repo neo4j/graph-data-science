@@ -614,7 +614,6 @@ class WccMutateProcTest extends BaseProcTest {
             null,
             ProcedureReturnColumns.EMPTY,
             null,
-            null,
             null
         );
 

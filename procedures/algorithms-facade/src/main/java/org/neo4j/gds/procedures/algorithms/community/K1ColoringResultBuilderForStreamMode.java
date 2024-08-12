@@ -24,8 +24,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.k1coloring.K1ColoringStreamConfig;
 
@@ -33,15 +32,14 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class K1ColoringResultBuilderForStreamMode implements ResultBuilder<K1ColoringStreamConfig, K1ColoringResult, Stream<K1ColoringStreamResult>, Void> {
+class K1ColoringResultBuilderForStreamMode implements StreamResultBuilder<K1ColoringStreamConfig, K1ColoringResult, K1ColoringStreamResult> {
+
     @Override
     public Stream<K1ColoringStreamResult> build(
         Graph graph,
         GraphStore graphStore,
         K1ColoringStreamConfig configuration,
-        Optional<K1ColoringResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        Optional<K1ColoringResult> result
     ) {
         if (result.isEmpty()) return Stream.empty();
 

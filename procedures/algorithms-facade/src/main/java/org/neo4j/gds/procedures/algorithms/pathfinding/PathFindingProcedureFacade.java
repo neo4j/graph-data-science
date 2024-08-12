@@ -26,7 +26,7 @@ import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStatsModeBusinessFacade;
@@ -56,6 +56,7 @@ import org.neo4j.gds.paths.traverse.DfsStreamConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensWriteConfig;
 import org.neo4j.gds.procedures.algorithms.AlgorithmHandle;
+import org.neo4j.gds.procedures.algorithms.StreamAlgorithmHandle;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.BellmanFordMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.BreadthFirstSearchMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.DeltaSteppingMutateStub;
@@ -116,7 +117,6 @@ public final class PathFindingProcedureFacade {
     // infrastructure
     private final EstimationModeRunner estimationMode;
     private final AlgorithmExecutionScaffolding algorithmExecutionScaffolding;
-    private final AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode;
 
     private PathFindingProcedureFacade(
         CloseableResourceRegistry closeableResourceRegistry,
@@ -134,8 +134,7 @@ public final class PathFindingProcedureFacade {
         SpanningTreeMutateStub spanningTreeMutateStub,
         SteinerTreeMutateStub steinerTreeMutateStub,
         EstimationModeRunner estimationMode,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffolding,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode
+        AlgorithmExecutionScaffolding algorithmExecutionScaffolding
     ) {
         this.closeableResourceRegistry = closeableResourceRegistry;
         this.nodeLookup = nodeLookup;
@@ -155,9 +154,7 @@ public final class PathFindingProcedureFacade {
         this.steinerTreeMutateStub = steinerTreeMutateStub;
 
         this.estimationMode = estimationMode;
-        this.algorithmExecutionScaffolding = algorithmExecutionScaffolding;
-        this.algorithmExecutionScaffoldingForStreamMode = algorithmExecutionScaffoldingForStreamMode;
-    }
+        this.algorithmExecutionScaffolding = algorithmExecutionScaffolding;}
 
     /**
      * Encapsulating some of the boring structure stuff
@@ -169,9 +166,8 @@ public final class PathFindingProcedureFacade {
         ApplicationsFacade applicationsFacade,
         GenericStub genericStub,
         EstimationModeRunner estimationModeRunner,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffolding,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode
-    ) {
+        AlgorithmExecutionScaffolding algorithmExecutionScaffolding)
+    {
         var aStarStub = new SinglePairShortestPathAStarMutateStub(
             genericStub,
             applicationsFacade
@@ -238,8 +234,7 @@ public final class PathFindingProcedureFacade {
             spanningTreeMutateStub,
             steinerTreeMutateStub,
             estimationModeRunner,
-            algorithmExecutionScaffolding,
-            algorithmExecutionScaffoldingForStreamMode
+            algorithmExecutionScaffolding
         );
     }
 
@@ -247,10 +242,10 @@ public final class PathFindingProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        ResultBuilder<AllShortestPathsConfig, Stream<AllShortestPathsStreamResult>, Stream<AllShortestPathsStreamResult>, Void> resultBuilder =
-            (__, ___, ____, result, _____, ______) -> result.orElse(Stream.empty());
+        StreamResultBuilder<AllShortestPathsConfig, Stream<AllShortestPathsStreamResult>, AllShortestPathsStreamResult> resultBuilder =
+            (g,gs,c, result) -> result.orElse(Stream.empty());
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             AllShortestPathsConfig::of,
@@ -271,7 +266,7 @@ public final class PathFindingProcedureFacade {
             routeRequested
         );
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             AllShortestPathsBellmanFordStreamConfig::of,
@@ -392,7 +387,7 @@ public final class PathFindingProcedureFacade {
     public Stream<BfsStreamResult> breadthFirstSearchStream(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new BfsStreamResultBuilder(nodeLookup, procedureReturnColumns.contains("path"));
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             BfsStreamConfig::of,
@@ -511,7 +506,7 @@ public final class PathFindingProcedureFacade {
     public Stream<DfsStreamResult> depthFirstSearchStream(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new DfsStreamResultBuilder(nodeLookup, procedureReturnColumns.contains("path"));
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             DfsStreamConfig::of,
@@ -594,7 +589,7 @@ public final class PathFindingProcedureFacade {
             procedureReturnColumns.contains("path")
         );
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             RandomWalkStreamConfig::of,
@@ -905,7 +900,7 @@ public final class PathFindingProcedureFacade {
     public Stream<SpanningTreeStreamResult> spanningTreeStream(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new SpanningTreeResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             SpanningTreeStreamConfig::of,
@@ -995,7 +990,7 @@ public final class PathFindingProcedureFacade {
     public Stream<SteinerTreeStreamResult> steinerTreeStream(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new SteinerTreeResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             SteinerTreeStreamConfig::of,
@@ -1056,7 +1051,7 @@ public final class PathFindingProcedureFacade {
     ) {
         var resultBuilder = new TopologicalSortResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             TopologicalSortStreamConfig::of,
@@ -1072,7 +1067,7 @@ public final class PathFindingProcedureFacade {
         String graphNameAsString,
         Map<String, Object> rawConfiguration,
         Function<CypherMapWrapper, CONFIGURATION> configurationSupplier,
-        AlgorithmHandle<CONFIGURATION, PathFindingResult, Stream<PathFindingStreamResult>, Void> algorithm
+        StreamAlgorithmHandle<CONFIGURATION, PathFindingResult, PathFindingStreamResult> algorithm
     ) {
         var resultBuilder = new PathFindingResultBuilderForStreamMode<CONFIGURATION>(
             closeableResourceRegistry,
@@ -1080,7 +1075,7 @@ public final class PathFindingProcedureFacade {
             procedureReturnColumns.contains("path")
         );
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphNameAsString,
             rawConfiguration,
             configurationSupplier,
