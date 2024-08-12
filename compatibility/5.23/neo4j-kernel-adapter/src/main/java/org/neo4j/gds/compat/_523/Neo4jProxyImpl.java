@@ -21,7 +21,6 @@ package org.neo4j.gds.compat._523;
 
 import org.neo4j.configuration.Config;
 import org.neo4j.exceptions.KernelException;
-import org.neo4j.gds.compat.CompatLoginContext;
 import org.neo4j.gds.compat.GlobalProcedureRegistry;
 import org.neo4j.gds.compat.Neo4jProxyApi;
 import org.neo4j.gds.compat.Write;
@@ -40,15 +39,11 @@ import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
 import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
-import org.neo4j.internal.kernel.api.security.AbstractSecurityLog;
-import org.neo4j.internal.kernel.api.security.LoginContext;
-import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.api.CypherScope;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
-import org.neo4j.kernel.database.PrivilegeDatabaseReference;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.procedure.Mode;
 import org.neo4j.scheduler.JobScheduler;
@@ -297,31 +292,5 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         PropertyCursor cursor
     ) {
         read.relationshipProperties(relationshipReference, startNodeReference, reference, selection, cursor);
-    }
-
-    @Override
-    public LoginContext loginContext(CompatLoginContext compatLoginContext) {
-        final class LoginContextImpl extends LoginContext {
-            private final SecurityContext securityContext;
-
-            private LoginContextImpl(CompatLoginContext compatLoginContext) {
-                super(
-                    compatLoginContext.subject(),
-                    compatLoginContext.connectionInfo()
-                );
-                this.securityContext = compatLoginContext.securityContext();
-            }
-
-            @Override
-            public SecurityContext authorize(
-                IdLookup idLookup,
-                PrivilegeDatabaseReference privilegeDatabaseReference,
-                AbstractSecurityLog abstractSecurityLog
-            ) {
-                return this.securityContext;
-            }
-        }
-
-        return new LoginContextImpl(compatLoginContext);
     }
 }

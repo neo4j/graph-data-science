@@ -36,7 +36,6 @@ import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
 import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
-import org.neo4j.internal.kernel.api.security.LoginContext;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -157,7 +156,4 @@ public interface Neo4jProxyApi {
         long sizeOfRelationshipProperties,
         long numberOfNodeLabels
     );
-
-    @CompatSince(minor = 23)
-    LoginContext loginContext(CompatLoginContext compatLoginContext);
 }
