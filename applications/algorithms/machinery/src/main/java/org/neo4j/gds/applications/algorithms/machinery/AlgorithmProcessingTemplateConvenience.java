@@ -110,4 +110,24 @@ public class AlgorithmProcessingTemplateConvenience {
             resultBuilder
         );
     }
+
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER processRegularAlgorithmInStreamMode(
+        GraphName graphName,
+        CONFIGURATION configuration,
+        LabelForProgressTracking label,
+        Supplier<MemoryEstimation> estimationFactory,
+        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
+        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithmForStream(
+            Optional.empty(),
+            graphName,
+            configuration,
+            Optional.empty(),
+            label,
+            estimationFactory,
+            algorithmComputation,
+            resultBuilder
+        );
+    }
 }

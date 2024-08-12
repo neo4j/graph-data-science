@@ -62,7 +62,7 @@ public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
         FastRPStreamConfig configuration,
         ResultBuilder<FastRPStreamConfig, FastRPResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             FastRP,
@@ -85,7 +85,7 @@ public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
         HashGNNStreamConfig configuration,
         ResultBuilder<HashGNNStreamConfig, HashGNNResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             HashGNN,

@@ -68,7 +68,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
         PageRankStreamConfig configuration,
         ResultBuilder<PageRankStreamConfig, PageRankResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             ArticleRank,
@@ -83,7 +83,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
         BetweennessCentralityStreamConfig configuration,
         ResultBuilder<BetweennessCentralityStreamConfig, CentralityAlgorithmResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             BetweennessCentrality,
@@ -97,7 +97,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
         ArticulationPointsStreamConfig configuration,
         ResultBuilder<ArticulationPointsStreamConfig, BitSet, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             ArticulationPoints,
@@ -111,7 +111,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
         BridgesStreamConfig configuration,
         ResultBuilder<BridgesStreamConfig, BridgeResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             BRIDGES,
@@ -126,7 +126,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
         InfluenceMaximizationStreamConfig configuration,
         ResultBuilder<InfluenceMaximizationStreamConfig, CELFResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             CELF,
@@ -141,7 +141,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
         ClosenessCentralityStreamConfig configuration,
         ResultBuilder<ClosenessCentralityStreamConfig, CentralityAlgorithmResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             ClosenessCentrality,
@@ -156,7 +156,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
         DegreeCentralityStreamConfig configuration,
         ResultBuilder<DegreeCentralityStreamConfig, CentralityAlgorithmResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             DegreeCentrality,
@@ -171,7 +171,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
         PageRankStreamConfig configuration,
         ResultBuilder<PageRankStreamConfig, PageRankResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             EigenVector,
@@ -186,7 +186,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
         HarmonicCentralityStreamConfig configuration,
         ResultBuilder<HarmonicCentralityStreamConfig, HarmonicResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             HarmonicCentrality,
@@ -201,7 +201,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
         PageRankStreamConfig configuration,
         ResultBuilder<PageRankStreamConfig, PageRankResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             PageRank,
