@@ -91,7 +91,7 @@ public class AlgorithmProcessingTemplateConvenience {
     /**
      * No relationship weight override, no validation hooks, no mutate or write step
      */
-    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER processRegularAlgorithmInStatsOrStreamMode(
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER processRegularAlgorithmInStatsMode(
         GraphName graphName,
         CONFIGURATION configuration,
         LabelForProgressTracking label,

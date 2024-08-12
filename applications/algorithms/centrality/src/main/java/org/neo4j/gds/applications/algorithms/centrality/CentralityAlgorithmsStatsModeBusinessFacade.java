@@ -64,7 +64,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
         PageRankStatsConfig configuration,
         ResultBuilder<PageRankStatsConfig, PageRankResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             ArticleRank,
@@ -79,7 +79,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
         ArticulationPointsStatsConfig configuration,
         ResultBuilder<ArticulationPointsStatsConfig, BitSet, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             ArticulationPoints,
@@ -94,7 +94,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
         BetweennessCentralityStatsConfig configuration,
         ResultBuilder<BetweennessCentralityStatsConfig, CentralityAlgorithmResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             BetweennessCentrality,
@@ -109,7 +109,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
         InfluenceMaximizationStatsConfig configuration,
         ResultBuilder<InfluenceMaximizationStatsConfig, CELFResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             CELF,
@@ -124,7 +124,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
         ClosenessCentralityStatsConfig configuration,
         ResultBuilder<ClosenessCentralityStatsConfig, CentralityAlgorithmResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             ClosenessCentrality,
@@ -139,7 +139,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
         DegreeCentralityStatsConfig configuration,
         ResultBuilder<DegreeCentralityStatsConfig, CentralityAlgorithmResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             DegreeCentrality,
@@ -154,7 +154,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
         PageRankStatsConfig configuration,
         ResultBuilder<PageRankStatsConfig, PageRankResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             EigenVector,
@@ -169,7 +169,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
         HarmonicCentralityStatsConfig configuration,
         ResultBuilder<HarmonicCentralityStatsConfig, CentralityAlgorithmResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             HarmonicCentrality,
@@ -184,7 +184,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
         PageRankStatsConfig configuration,
         ResultBuilder<PageRankStatsConfig, PageRankResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             PageRank,

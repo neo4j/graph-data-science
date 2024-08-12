@@ -80,7 +80,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
         K1ColoringStatsConfig configuration,
         ResultBuilder<K1ColoringStatsConfig, K1ColoringResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             K1Coloring,
@@ -95,7 +95,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
         KCoreDecompositionStatsConfig configuration,
         ResultBuilder<KCoreDecompositionStatsConfig, KCoreDecompositionResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             KCore,
@@ -110,7 +110,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
         KmeansStatsConfig configuration,
         ResultBuilder<KmeansStatsConfig, KmeansResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             KMeans,
@@ -125,7 +125,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
         LabelPropagationStatsConfig configuration,
         ResultBuilder<LabelPropagationStatsConfig, LabelPropagationResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             LabelPropagation,
@@ -140,7 +140,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
         LocalClusteringCoefficientStatsConfig configuration,
         ResultBuilder<LocalClusteringCoefficientStatsConfig, LocalClusteringCoefficientResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             LCC,
@@ -155,7 +155,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
         LeidenStatsConfig configuration,
         ResultBuilder<LeidenStatsConfig, LeidenResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             Leiden,
@@ -170,7 +170,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
         LouvainStatsConfig configuration,
         ResultBuilder<LouvainStatsConfig, LouvainResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             Louvain,
@@ -185,7 +185,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
         ModularityStatsConfig configuration,
         ResultBuilder<ModularityStatsConfig, ModularityResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             Modularity,
@@ -200,7 +200,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
         ModularityOptimizationStatsConfig configuration,
         ResultBuilder<ModularityOptimizationStatsConfig, ModularityOptimizationResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             ModularityOptimization,
@@ -215,7 +215,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
         SccStatsConfig configuration,
         ResultBuilder<SccStatsConfig, HugeLongArray, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             SCC,
@@ -230,7 +230,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
         TriangleCountStatsConfig configuration,
         ResultBuilder<TriangleCountStatsConfig, TriangleCountResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             TriangleCount,
@@ -245,7 +245,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
         WccStatsConfig configuration,
         ResultBuilder<WccStatsConfig, DisjointSetStruct, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             WCC,

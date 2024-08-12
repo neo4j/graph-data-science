@@ -55,7 +55,7 @@ public class SimilarityAlgorithmsStatsModeBusinessFacade {
         FilteredKnnStatsConfig configuration,
         ResultBuilder<FilteredKnnStatsConfig, FilteredKnnResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             FilteredKNN,
@@ -70,7 +70,7 @@ public class SimilarityAlgorithmsStatsModeBusinessFacade {
         FilteredNodeSimilarityStatsConfig configuration,
         ResultBuilder<FilteredNodeSimilarityStatsConfig, NodeSimilarityResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             FilteredNodeSimilarity,
@@ -85,7 +85,7 @@ public class SimilarityAlgorithmsStatsModeBusinessFacade {
         KnnStatsConfig configuration,
         ResultBuilder<KnnStatsConfig, KnnResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             KNN,
@@ -100,7 +100,7 @@ public class SimilarityAlgorithmsStatsModeBusinessFacade {
         NodeSimilarityStatsConfig configuration,
         ResultBuilder<NodeSimilarityStatsConfig, NodeSimilarityResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             NodeSimilarity,
