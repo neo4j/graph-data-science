@@ -129,7 +129,7 @@ public final class GraphDataScienceExtensionBuilder {
         // Memory gauge integrates with the JVM
         // First, it is state held in an AtomicLong
         // Initialize with max available memory. Everything that is used at this point in time
-        //  _could_ be garbage and we want to err on the side of seeing more free heap.
+        //  _could_ be garbage, and we want to err on the side of seeing more free heap.
         // It also has the effect that we allow all operations that theoretically fit into memory
         //  if the extension does never load.
         var freeMemoryAfterLastGc = new AtomicLong(Runtime.getRuntime().maxMemory());
