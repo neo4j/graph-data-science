@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.kmeans.KmeansMutateProc;
 import org.neo4j.gds.kmeans.KmeansStatsProc;
@@ -41,8 +40,7 @@ class KMeansDocTest extends SingleFileDocTestBase {
             KmeansStreamProc.class,
             KmeansStatsProc.class,
             KmeansMutateProc.class,
-            KmeansWriteProc.class,
-            GraphProjectProc.class
+            KmeansWriteProc.class
         );
     }
 

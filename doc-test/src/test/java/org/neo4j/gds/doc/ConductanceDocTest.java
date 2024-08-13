@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.conductance.ConductanceStreamProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.louvain.LouvainMutateProc;
@@ -37,8 +36,7 @@ class ConductanceDocTest extends SingleFileDocTestBase {
     protected List<Class<?>> procedures() {
         return List.of(
             ConductanceStreamProc.class,
-            LouvainMutateProc.class,
-            GraphProjectProc.class
+            LouvainMutateProc.class
         );
     }
 

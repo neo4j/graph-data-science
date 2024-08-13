@@ -20,7 +20,6 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphFilterProc;
-import org.neo4j.gds.catalog.GraphProjectProc;
 
 import java.util.List;
 
@@ -28,7 +27,7 @@ final class GraphFilterDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> procedures() {
-        return List.of(GraphProjectProc.class, GraphFilterProc.class);
+        return List.of(GraphFilterProc.class);
     }
 
     @Override

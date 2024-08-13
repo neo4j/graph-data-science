@@ -19,9 +19,7 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
-
 import org.neo4j.gds.paths.sourcetarget.ShortestPathDijkstraStreamProc;
 import org.neo4j.gds.paths.sourcetarget.ShortestPathDijkstraWriteProc;
 
@@ -38,8 +36,7 @@ class GettingStartedBasicWorkflowDocTest extends SingleFileDocTestBase {
     protected List<Class<?>> procedures() {
         return List.of(
             ShortestPathDijkstraStreamProc.class,
-            ShortestPathDijkstraWriteProc.class,
-            GraphProjectProc.class
+            ShortestPathDijkstraWriteProc.class
         );
     }
 

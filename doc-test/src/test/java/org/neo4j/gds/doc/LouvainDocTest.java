@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.louvain.LouvainMutateProc;
@@ -43,8 +42,7 @@ class LouvainDocTest extends SingleFileDocTestBase {
             LouvainWriteProc.class,
             LouvainStatsProc.class,
             LouvainMutateProc.class,
-            GraphStreamNodePropertiesProc.class,
-            GraphProjectProc.class
+            GraphStreamNodePropertiesProc.class
         );
     }
 

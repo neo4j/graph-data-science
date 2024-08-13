@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateProc;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsProc;
@@ -43,8 +42,7 @@ class LocalClusteringCoefficientDocTest extends SingleFileDocTestBase {
             LocalClusteringCoefficientWriteProc.class,
             LocalClusteringCoefficientMutateProc.class,
             LocalClusteringCoefficientStatsProc.class,
-            TriangleCountMutateProc.class,
-            GraphProjectProc.class
+            TriangleCountMutateProc.class
         );
     }
 

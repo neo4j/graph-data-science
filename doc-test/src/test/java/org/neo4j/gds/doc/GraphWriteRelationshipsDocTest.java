@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteRelationshipProc;
 import org.neo4j.gds.catalog.GraphWriteRelationshipPropertiesProc;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateProc;
@@ -31,7 +30,6 @@ final class GraphWriteRelationshipsDocTest extends SingleFileDocTestBase {
     @Override
     protected List<Class<?>> procedures() {
         return List.of(
-            GraphProjectProc.class,
             NodeSimilarityMutateProc.class,
             GraphWriteRelationshipProc.class,
             GraphWriteRelationshipPropertiesProc.class

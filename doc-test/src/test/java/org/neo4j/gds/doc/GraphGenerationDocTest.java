@@ -35,7 +35,9 @@ class GraphGenerationDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> procedures() {
-        return List.of(GraphGenerateProc.class, GraphStreamRelationshipsProc.class,
+        return List.of(
+            GraphGenerateProc.class,
+            GraphStreamRelationshipsProc.class,
             GraphStreamRelationshipPropertiesProc.class
         );
     }

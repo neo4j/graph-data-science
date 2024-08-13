@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.harmonic.HarmonicCentralityMutateProc;
 import org.neo4j.gds.harmonic.HarmonicCentralityStatsProc;
@@ -41,8 +40,7 @@ class HarmonicCentralityDocTest extends SingleFileDocTestBase {
             HarmonicCentralityStreamProc.class,
             HarmonicCentralityStatsProc.class,
             HarmonicCentralityWriteProc.class,
-            HarmonicCentralityMutateProc.class,
-            GraphProjectProc.class
+            HarmonicCentralityMutateProc.class
         );
     }
 

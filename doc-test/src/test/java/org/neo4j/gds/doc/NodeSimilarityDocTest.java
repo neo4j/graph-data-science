@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateProc;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsProc;
@@ -41,8 +40,7 @@ class NodeSimilarityDocTest extends SingleFileDocTestBase {
             NodeSimilarityStreamProc.class,
             NodeSimilarityWriteProc.class,
             NodeSimilarityStatsProc.class,
-            NodeSimilarityMutateProc.class,
-            GraphProjectProc.class
+            NodeSimilarityMutateProc.class
         );
     }
 

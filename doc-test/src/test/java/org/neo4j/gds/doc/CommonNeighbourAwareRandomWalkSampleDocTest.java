@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphSampleProc;
 
 import java.util.List;
@@ -29,7 +28,6 @@ final class CommonNeighbourAwareRandomWalkSampleDocTest extends SingleFileDocTes
     @Override
     protected List<Class<?>> procedures() {
         return List.of(
-            GraphProjectProc.class,
             GraphSampleProc.class
         );
     }

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPStatsProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
@@ -36,8 +35,7 @@ class FastRPDocTest extends SingleFileDocTestBase {
             FastRPStreamProc.class,
             FastRPStatsProc.class,
             FastRPMutateProc.class,
-            FastRPWriteProc.class,
-            GraphProjectProc.class
+            FastRPWriteProc.class
         );
     }
 

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.paths.spanningtree.SpanningTreeMutateProc;
 import org.neo4j.gds.paths.spanningtree.SpanningTreeStatsProc;
@@ -41,8 +40,7 @@ class SpanningTreeDocTest extends SingleFileDocTestBase {
             SpanningTreeStatsProc.class,
             SpanningTreeMutateProc.class,
             SpanningTreeWriteProc.class,
-            SpanningTreeStreamProc.class,
-            GraphProjectProc.class
+            SpanningTreeStreamProc.class
         );
     }
 

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.paths.sourcetarget.ShortestPathDijkstraMutateProc;
 import org.neo4j.gds.paths.sourcetarget.ShortestPathDijkstraStreamProc;
@@ -39,8 +38,7 @@ class DijkstraSourceTargetDocTest extends SingleFileDocTestBase {
         return List.of(
             ShortestPathDijkstraStreamProc.class,
             ShortestPathDijkstraWriteProc.class,
-            ShortestPathDijkstraMutateProc.class,
-            GraphProjectProc.class
+            ShortestPathDijkstraMutateProc.class
         );
     }
 

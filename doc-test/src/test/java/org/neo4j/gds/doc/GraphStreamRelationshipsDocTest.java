@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
 import org.neo4j.gds.catalog.GraphStreamRelationshipsProc;
 import org.neo4j.gds.functions.AsNodeFunc;
@@ -32,7 +31,6 @@ final class GraphStreamRelationshipsDocTest extends SingleFileDocTestBase {
     @Override
     protected List<Class<?>> procedures() {
         return List.of(
-            GraphProjectProc.class,
             NodeSimilarityMutateProc.class,
             GraphStreamRelationshipsProc.class,
             GraphStreamRelationshipPropertiesProc.class

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnMutateProc;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnStatsProc;
@@ -41,8 +40,7 @@ class FilteredKnnDocTest extends SingleFileDocTestBase {
             FilteredKnnStreamProc.class,
             FilteredKnnStatsProc.class,
             FilteredKnnMutateProc.class,
-            FilteredKnnWriteProc.class,
-            GraphProjectProc.class
+            FilteredKnnWriteProc.class
         );
     }
 

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateProc;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsProc;
@@ -41,8 +40,7 @@ class ModularityOptimizationDocTest extends SingleFileDocTestBase {
             ModularityOptimizationMutateProc.class,
             ModularityOptimizationStreamProc.class,
             ModularityOptimizationWriteProc.class,
-            ModularityOptimizationStatsProc.class,
-            GraphProjectProc.class
+            ModularityOptimizationStatsProc.class
         );
     }
 

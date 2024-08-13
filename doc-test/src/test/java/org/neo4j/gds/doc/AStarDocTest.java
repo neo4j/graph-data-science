@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.paths.sourcetarget.ShortestPathAStarMutateProc;
 import org.neo4j.gds.paths.sourcetarget.ShortestPathAStarStreamProc;
@@ -39,8 +38,7 @@ class AStarDocTest extends SingleFileDocTestBase {
         return List.of(
             ShortestPathAStarStreamProc.class,
             ShortestPathAStarWriteProc.class,
-            ShortestPathAStarMutateProc.class,
-            GraphProjectProc.class
+            ShortestPathAStarMutateProc.class
         );
     }
 

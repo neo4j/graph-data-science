@@ -20,7 +20,6 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphMutateNodeLabelProc;
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodeLabelProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.degree.DegreeCentralityMutateProc;
@@ -32,7 +31,6 @@ final class GraphWriteBackToNodesDocTest extends SingleFileDocTestBase {
     @Override
     protected List<Class<?>> procedures() {
         return List.of(
-            GraphProjectProc.class,
             DegreeCentralityMutateProc.class,
             GraphWriteNodePropertiesProc.class,
             GraphWriteNodeLabelProc.class,

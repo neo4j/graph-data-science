@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.paths.steiner.SteinerTreeMutateProc;
 import org.neo4j.gds.paths.steiner.SteinerTreeStatsProc;
@@ -41,8 +40,7 @@ class SteinerTreeDocTest extends SingleFileDocTestBase {
             SteinerTreeStatsProc.class,
             SteinerTreeStreamProc.class,
             SteinerTreeWriteProc.class,
-            SteinerTreeMutateProc.class,
-            GraphProjectProc.class
+            SteinerTreeMutateProc.class
         );
     }
 

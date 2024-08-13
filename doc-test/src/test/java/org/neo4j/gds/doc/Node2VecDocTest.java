@@ -20,7 +20,6 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.embeddings.node2vec.Node2VecStreamProc;
-import org.neo4j.gds.catalog.GraphProjectProc;
 
 import java.util.List;
 
@@ -29,8 +28,7 @@ class Node2VecDocTest extends SingleFileDocTestBase {
     @Override
     protected List<Class<?>> procedures() {
         return List.of(
-            Node2VecStreamProc.class,
-            GraphProjectProc.class
+            Node2VecStreamProc.class
         );
     }
 

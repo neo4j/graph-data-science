@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.undirected.ToUndirectedProc;
 
@@ -34,10 +33,7 @@ final class ToUndirectedDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> procedures() {
-        return List.of(
-            GraphProjectProc.class,
-            ToUndirectedProc.class
-        );
+        return List.of(ToUndirectedProc.class);
     }
 
     @Override
