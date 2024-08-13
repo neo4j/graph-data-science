@@ -59,7 +59,7 @@ class DefaultResultRenderer implements ResultRenderer<ProgressResult> {
         return new IllegalArgumentException(
             formatWithLocale(
                 "No task with job id `%s` was found.",
-                jobId
+                jobId.asString()
             )
         );
     }
