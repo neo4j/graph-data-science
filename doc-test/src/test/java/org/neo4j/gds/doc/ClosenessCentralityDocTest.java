@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.closeness.ClosenessCentralityMutateProc;
 import org.neo4j.gds.closeness.ClosenessCentralityStatsProc;
 import org.neo4j.gds.closeness.ClosenessCentralityStreamProc;
@@ -41,8 +40,7 @@ class ClosenessCentralityDocTest extends SingleFileDocTestBase {
             ClosenessCentralityStreamProc.class,
             ClosenessCentralityStatsProc.class,
             ClosenessCentralityWriteProc.class,
-            ClosenessCentralityMutateProc.class,
-            GraphProjectProc.class
+            ClosenessCentralityMutateProc.class
         );
     }
 

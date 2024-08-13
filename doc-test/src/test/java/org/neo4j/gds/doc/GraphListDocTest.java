@@ -28,7 +28,10 @@ class GraphListDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> procedures() {
-        return List.of(GraphProjectProc.class, GraphListProc.class);
+        return List.of(
+            GraphProjectProc.class,
+            GraphListProc.class
+        );
     }
 
     @Override

@@ -20,7 +20,6 @@
 package org.neo4j.gds.doc;
 
 import org.junit.jupiter.api.AfterAll;
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.node.regression.NodeRegressionPipelineTrainProc;
@@ -44,7 +43,6 @@ class NodeRegressionPipelineDocTest extends MultiFileDocTestBase {
     @Override
     protected List<Class<?>> procedures() {
         return List.of(
-            GraphProjectProc.class,
             NodeRegressionPipelineCreateProc.class,
             NodeRegressionPipelineConfigureSplitProc.class,
             NodeRegressionPipelineAddTrainerMethodProcs.class,

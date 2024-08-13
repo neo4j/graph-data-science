@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.paths.kspanningtree.KSpanningTreeWriteProc;
 
@@ -35,8 +34,7 @@ class KSpanningTreeDocTest extends SingleFileDocTestBase {
     @Override
     protected List<Class<?>> procedures() {
         return List.of(
-            KSpanningTreeWriteProc.class,
-            GraphProjectProc.class
+            KSpanningTreeWriteProc.class
         );
     }
 

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
 
@@ -32,8 +31,7 @@ class SplitRelationshipsDocTest extends SingleFileDocTestBase {
     protected List<Class<?>> procedures() {
         return Arrays.asList(
             SplitRelationshipsMutateProc.class,
-            GraphStreamRelationshipPropertiesProc.class,
-            GraphProjectProc.class
+            GraphStreamRelationshipPropertiesProc.class
         );
     }
 

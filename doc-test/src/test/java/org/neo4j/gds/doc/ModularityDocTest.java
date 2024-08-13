@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.modularity.ModularityStatsProc;
 import org.neo4j.gds.modularity.ModularityStreamProc;
@@ -37,8 +36,7 @@ class ModularityDocTest extends SingleFileDocTestBase {
     protected List<Class<?>> procedures() {
         return List.of(
             ModularityStreamProc.class,
-            ModularityStatsProc.class,
-            GraphProjectProc.class
+            ModularityStatsProc.class
         );
     }
 

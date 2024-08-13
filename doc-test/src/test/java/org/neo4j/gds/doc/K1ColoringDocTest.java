@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.k1coloring.K1ColoringMutateProc;
 import org.neo4j.gds.k1coloring.K1ColoringStatsProc;
@@ -41,8 +40,7 @@ class K1ColoringDocTest extends SingleFileDocTestBase {
             K1ColoringStreamProc.class,
             K1ColoringWriteProc.class,
             K1ColoringStatsProc.class,
-            K1ColoringMutateProc.class,
-            GraphProjectProc.class
+            K1ColoringMutateProc.class
         );
     }
 

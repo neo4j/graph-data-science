@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateProc;
 import org.neo4j.gds.kcore.KCoreDecompositionStatsProc;
@@ -41,8 +40,7 @@ class KCoreDecompositionDocTest extends SingleFileDocTestBase {
             KCoreDecompositionStatsProc.class,
             KCoreDecompositionWriteProc.class,
             KCoreDecompositionMutateProc.class,
-            KCoreDecompositionStreamProc.class,
-            GraphProjectProc.class
+            KCoreDecompositionStreamProc.class
         );
     }
 

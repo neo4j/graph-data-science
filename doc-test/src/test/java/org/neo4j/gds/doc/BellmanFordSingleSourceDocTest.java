@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.paths.singlesource.bellmanford.BellmanFordMutateProc;
 import org.neo4j.gds.paths.singlesource.bellmanford.BellmanFordStatsProc;
@@ -41,8 +40,7 @@ class BellmanFordSingleSourceDocTest extends SingleFileDocTestBase {
             BellmanFordStatsProc.class,
             BellmanFordWriteProc.class,
             BellmanFordStreamProc.class,
-            BellmanFordMutateProc.class,
-            GraphProjectProc.class
+            BellmanFordMutateProc.class
         );
     }
 

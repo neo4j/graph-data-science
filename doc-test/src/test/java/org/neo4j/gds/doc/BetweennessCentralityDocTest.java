@@ -23,7 +23,6 @@ import org.neo4j.gds.betweenness.BetweennessCentralityMutateProc;
 import org.neo4j.gds.betweenness.BetweennessCentralityStatsProc;
 import org.neo4j.gds.betweenness.BetweennessCentralityStreamProc;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteProc;
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 
 import java.util.List;
@@ -41,8 +40,7 @@ class BetweennessCentralityDocTest extends SingleFileDocTestBase {
             BetweennessCentralityStreamProc.class,
             BetweennessCentralityWriteProc.class,
             BetweennessCentralityMutateProc.class,
-            BetweennessCentralityStatsProc.class,
-            GraphProjectProc.class
+            BetweennessCentralityStatsProc.class
         );
     }
 

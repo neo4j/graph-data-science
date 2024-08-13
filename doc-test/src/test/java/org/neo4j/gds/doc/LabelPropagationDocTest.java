@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.labelpropagation.LabelPropagationMutateProc;
 import org.neo4j.gds.labelpropagation.LabelPropagationStatsProc;
@@ -41,8 +40,8 @@ class LabelPropagationDocTest extends SingleFileDocTestBase {
             LabelPropagationStreamProc.class,
             LabelPropagationStatsProc.class,
             LabelPropagationMutateProc.class,
-            LabelPropagationWriteProc.class,
-            GraphProjectProc.class);
+            LabelPropagationWriteProc.class
+        );
     }
 
     @Override

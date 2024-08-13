@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.scc.SccMutateProc;
 import org.neo4j.gds.scc.SccStatsProc;
@@ -41,8 +40,7 @@ class SccDocTest extends SingleFileDocTestBase {
             SccStreamProc.class,
             SccWriteProc.class,
             SccMutateProc.class,
-            SccStatsProc.class,
-            GraphProjectProc.class
+            SccStatsProc.class
         );
     }
 

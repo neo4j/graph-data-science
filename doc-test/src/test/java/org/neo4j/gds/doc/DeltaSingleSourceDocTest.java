@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.paths.singlesource.delta.AllShortestPathsDeltaMutateProc;
 import org.neo4j.gds.paths.singlesource.delta.AllShortestPathsDeltaStreamProc;
@@ -39,8 +38,7 @@ class DeltaSingleSourceDocTest extends SingleFileDocTestBase {
         return List.of(
             AllShortestPathsDeltaStreamProc.class,
             AllShortestPathsDeltaWriteProc.class,
-            AllShortestPathsDeltaMutateProc.class,
-            GraphProjectProc.class
+            AllShortestPathsDeltaMutateProc.class
         );
     }
 

@@ -21,7 +21,6 @@ package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphDropNodePropertiesProc;
 import org.neo4j.gds.catalog.GraphDropRelationshipProc;
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.degree.DegreeCentralityMutateProc;
 
 import java.util.List;
@@ -31,7 +30,6 @@ final class GraphPartialDropDocTest extends SingleFileDocTestBase {
     @Override
     protected List<Class<?>> procedures() {
         return List.of(
-            GraphProjectProc.class,
             GraphDropNodePropertiesProc.class,
             GraphDropRelationshipProc.class,
             DegreeCentralityMutateProc.class

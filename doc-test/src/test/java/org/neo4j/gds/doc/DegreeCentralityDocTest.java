@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.degree.DegreeCentralityMutateProc;
 import org.neo4j.gds.degree.DegreeCentralityStatsProc;
 import org.neo4j.gds.degree.DegreeCentralityStreamProc;
@@ -41,8 +40,7 @@ class DegreeCentralityDocTest extends SingleFileDocTestBase {
             DegreeCentralityStreamProc.class,
             DegreeCentralityWriteProc.class,
             DegreeCentralityMutateProc.class,
-            DegreeCentralityStatsProc.class,
-            GraphProjectProc.class
+            DegreeCentralityStatsProc.class
         );
     }
 

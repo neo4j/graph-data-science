@@ -20,7 +20,6 @@
 package org.neo4j.gds.doc;
 
 import org.junit.jupiter.api.AfterAll;
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineAddStepProcs;
@@ -58,8 +57,7 @@ class LinkPredictionPipelineDocTest extends MultiFileDocTestBase {
             LinkPredictionPipelineConfigureSplitProc.class,
             LinkPredictionPipelineConfigureAutoTuningProc.class,
             LinkPredictionPipelineAddTrainerMethodProcs.class,
-            GraphStreamRelationshipPropertiesProc.class,
-            GraphProjectProc.class
+            GraphStreamRelationshipPropertiesProc.class
         );
     }
 

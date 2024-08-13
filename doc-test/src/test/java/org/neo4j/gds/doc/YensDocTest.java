@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.paths.sourcetarget.ShortestPathYensMutateProc;
 import org.neo4j.gds.paths.sourcetarget.ShortestPathYensStreamProc;
@@ -39,9 +38,7 @@ class YensDocTest extends SingleFileDocTestBase {
         return List.of(
             ShortestPathYensStreamProc.class,
             ShortestPathYensWriteProc.class,
-            ShortestPathYensMutateProc.class,
-            GraphProjectProc.class
-        );
+            ShortestPathYensMutateProc.class);
     }
 
     @Override

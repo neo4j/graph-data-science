@@ -20,7 +20,6 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphMutateNodeLabelProc;
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.degree.DegreeCentralityMutateProc;
 import org.neo4j.gds.functions.AsNodeFunc;
@@ -32,7 +31,6 @@ final class GraphMutateNodeLabelDocTest extends SingleFileDocTestBase {
     @Override
     protected List<Class<?>> procedures() {
         return List.of(
-            GraphProjectProc.class,
             DegreeCentralityMutateProc.class,
             GraphMutateNodeLabelProc.class,
             GraphStreamNodePropertiesProc.class

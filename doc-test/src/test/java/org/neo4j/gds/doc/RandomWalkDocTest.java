@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.paths.randomwalk.RandomWalkStatsProc;
 import org.neo4j.gds.paths.randomwalk.RandomWalkStreamProc;
 
@@ -31,8 +30,7 @@ class RandomWalkDocTest extends SingleFileDocTestBase {
     protected List<Class<?>> procedures() {
         return List.of(
             RandomWalkStreamProc.class,
-            RandomWalkStatsProc.class,
-            GraphProjectProc.class
+            RandomWalkStatsProc.class
         );
     }
 
