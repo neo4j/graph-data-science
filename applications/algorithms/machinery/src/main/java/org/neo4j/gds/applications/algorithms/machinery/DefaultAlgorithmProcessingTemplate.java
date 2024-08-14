@@ -73,36 +73,44 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
     ) {
         // as we progress through the steps we gather timings
-        var fields = processAlgorithm(relationshipWeightOverride,graphName,configuration,postGraphStoreLoadValidationHooks,label,estimationFactory,algorithmComputation);
+        var timingsBuilder = new AlgorithmProcessingTimingsBuilder();
 
-        var graph = fields.graphResources().graph();
-        var graphStore = fields.graphResources().graphStore();
-        var resultStore = fields.graphResources().resultStore();
-        var timingsBuilder = fields.timingsBuilder();
-        var result=fields.result();
-        MUTATE_OR_WRITE_METADATA metadata = null;
+        var graphResources = graphLoadAndValidationWithTiming(
+            timingsBuilder,
+            relationshipWeightOverride,
+            graphName,
+            configuration,
+            postGraphStoreLoadValidationHooks
+        );
 
-        if (!fields.empty()) {
-            // do any side effects
-            metadata = mutateOrWriteWithTiming(
-                mutateOrWriteStep,
-                timingsBuilder,
-                graph,
-                graphStore,
-                resultStore,
-                result,
-                configuration.jobId()
-            );
-        }
+        var result = runComputation(
+            configuration,
+            graphResources.graph(),
+            graphResources.graphStore(),
+            label,
+            estimationFactory,
+            algorithmComputation,
+            timingsBuilder
+        );
+
+        var metadata = mutateOrWriteWithTiming(
+            mutateOrWriteStep,
+            timingsBuilder,
+            graphResources.graph(),
+            graphResources.graphStore(),
+            graphResources.resultStore(),
+            result,
+            configuration.jobId()
+        );
 
         // inject dependencies to render results
         return resultBuilder.build(
-            graph,
-            graphStore,
+            graphResources.graph(),
+            graphResources.graphStore(),
             configuration,
-            fields.empty() ?  Optional.empty() :  Optional.ofNullable(result),
+            result,
             timingsBuilder.build(),
-            fields.empty() ?  Optional.empty() :  Optional.ofNullable(metadata)
+            metadata
         );
     }
 
@@ -118,28 +126,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         StreamResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
     ) {
 
-        var fields = processAlgorithm(relationshipWeightOverride,graphName,configuration,postGraphStoreLoadValidationHooks,label,estimationFactory,algorithmComputation);
-
-        // inject dependencies to render results
-        return resultBuilder.build(
-            fields.graphResources().graph(),
-            fields.graphResources().graphStore(),
-            configuration,
-            fields.empty() ?  Optional.empty() : Optional.ofNullable(fields.result())
-        );
-    }
-
-    <RESULT_FROM_ALGORITHM,CONFIGURATION extends AlgoBaseConfig> ProcessAlgorithmFields<RESULT_FROM_ALGORITHM> processAlgorithm(
-        Optional<String> relationshipWeightOverride,
-        GraphName graphName,
-        CONFIGURATION configuration,
-        Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
-        LabelForProgressTracking label,
-        Supplier<MemoryEstimation> estimationFactory,
-        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation
-    ){
         var timingsBuilder = new AlgorithmProcessingTimingsBuilder();
-
         var graphResources = graphLoadAndValidationWithTiming(
             timingsBuilder,
             relationshipWeightOverride,
@@ -148,15 +135,40 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             postGraphStoreLoadValidationHooks
         );
 
-        var graph = graphResources.graph();
-        var graphStore = graphResources.graphStore();
+        var result = runComputation(
+            configuration,
+            graphResources.graph(),
+            graphResources.graphStore(),
+            label,
+            estimationFactory,
+            algorithmComputation,
+            timingsBuilder
+        );
+
+        // inject dependencies to render results
+        return resultBuilder.build(
+            graphResources.graph(),
+            graphResources.graphStore(),
+            configuration,
+            result
+        );
+    }
+
+    <RESULT_FROM_ALGORITHM,CONFIGURATION extends  AlgoBaseConfig> Optional<RESULT_FROM_ALGORITHM> runComputation(
+        CONFIGURATION configuration,
+        Graph graph,
+        GraphStore graphStore,
+        LabelForProgressTracking label,
+        Supplier<MemoryEstimation> estimationFactory,
+        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
+        AlgorithmProcessingTimingsBuilder timingsBuilder
+    ){
 
         if (graph.isEmpty()){
-            return new ProcessAlgorithmFields<>(true, timingsBuilder,graphResources,null);
+            return Optional.empty();
         }
 
         memoryGuard.assertAlgorithmCanRun(label, configuration, graph, estimationFactory);
-
         // do the actual computation
         var result = computeWithTiming(
             timingsBuilder,
@@ -166,7 +178,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             graphStore
         );
 
-        return new ProcessAlgorithmFields<>(false, timingsBuilder,graphResources,result);
+        return Optional.ofNullable(result);
     }
 
     /**
@@ -243,19 +255,19 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
     /**
      * @return null if we are not in mutate or write mode; appropriate metadata otherwise
      */
-    <RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> MUTATE_OR_WRITE_METADATA mutateOrWriteWithTiming(
+    <RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> Optional<MUTATE_OR_WRITE_METADATA> mutateOrWriteWithTiming(
         Optional<MutateOrWriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA>> mutateOrWriteStep,
         AlgorithmProcessingTimingsBuilder timingsBuilder,
         Graph graph,
         GraphStore graphStore,
         ResultStore resultStore,
-        RESULT_FROM_ALGORITHM result,
+        Optional<RESULT_FROM_ALGORITHM> result,
         JobId jobId
     ) {
-        if (mutateOrWriteStep.isEmpty()) return null;
+        if (mutateOrWriteStep.isEmpty() || result.isEmpty()) return Optional.empty();
 
         try (ProgressTimer ignored = ProgressTimer.start(timingsBuilder::withMutateOrWriteMillis)) {
-            return mutateOrWriteStep.get().execute(graph, graphStore, resultStore, result, jobId);
+            return Optional.ofNullable(mutateOrWriteStep.get().execute(graph, graphStore, resultStore, result.get(), jobId));
         }
     }
 

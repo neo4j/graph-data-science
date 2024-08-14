@@ -243,22 +243,24 @@ class DefaultAlgorithmProcessingTemplateTest {
             }
 
             @Override
-            <RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> MUTATE_OR_WRITE_METADATA mutateOrWriteWithTiming(
+            <RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> Optional<MUTATE_OR_WRITE_METADATA> mutateOrWriteWithTiming(
                 Optional<MutateOrWriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA>> mutateOrWriteStep,
                 AlgorithmProcessingTimingsBuilder timingsBuilder,
                 Graph graph,
                 GraphStore graphStore,
                 ResultStore resultStore,
-                RESULT_FROM_ALGORITHM resultFromAlgorithm,
+                Optional<RESULT_FROM_ALGORITHM> resultFromAlgorithm,
                 JobId jobId
             ) {
                 timingsBuilder.withMutateOrWriteMillis(87);
-                return mutateOrWriteStep.orElseThrow().execute(
-                    graph,
-                    graphStore,
-                    resultStore,
-                    resultFromAlgorithm,
-                    jobId
+                return Optional.of(
+                    mutateOrWriteStep.orElseThrow().execute(
+                        graph,
+                        graphStore,
+                        resultStore,
+                        null,
+                        jobId
+                     )
                 );
             }
         };
