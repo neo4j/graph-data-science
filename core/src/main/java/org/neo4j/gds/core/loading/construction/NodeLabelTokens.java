@@ -19,14 +19,10 @@
  */
 package org.neo4j.gds.core.loading.construction;
 
-import org.eclipse.collections.api.block.function.primitive.ObjectIntToObjectFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.graphdb.Label;
-import org.neo4j.values.SequenceValue;
-import org.neo4j.values.storable.TextArray;
-import org.neo4j.values.storable.TextValue;
 
 import java.util.Arrays;
 import java.util.List;
@@ -89,18 +85,6 @@ public final class NodeLabelTokens {
         return Empty.INSTANCE;
     }
 
-    public static NodeLabelToken of(TextValue textValue) {
-        return new Singleton<>(textValue, tv -> NodeLabelTokens.labelOf(tv.stringValue()));
-    }
-
-    public static NodeLabelToken of(TextArray textArray) {
-        return new Sequence<>(textArray, TextArray::stringValue);
-    }
-
-    public static @NotNull NodeLabelToken of(SequenceValue nodeLabels) {
-        return new Sequence<>(nodeLabels, (s, i) -> ((TextValue) s.value(i)).stringValue());
-    }
-
     public static @NotNull NodeLabelToken ofNodeLabels(NodeLabel... nodeLabels) {
         return new Array<>(nodeLabels, Function.identity());
     }
@@ -160,7 +144,7 @@ public final class NodeLabelTokens {
         return invalid();
     }
 
-    private static NodeLabel labelOf(String label) {
+    public static NodeLabel labelOf(String label) {
         return new NodeLabel(label);
     }
 
@@ -220,7 +204,7 @@ public final class NodeLabelTokens {
         public String[] getStrings() { return new String[0]; }
     }
 
-    private interface ValidNodeLabelToken extends NodeLabelToken {
+    public interface ValidNodeLabelToken extends NodeLabelToken {
         @Override
         default boolean isMissing() { return false; }
 
@@ -393,54 +377,11 @@ public final class NodeLabelTokens {
         }
     }
 
-    private static final class Sequence<T extends SequenceValue> implements ValidNodeLabelToken {
-        private final T sequence;
-        private final ObjectIntToObjectFunction<T, String> toString;
-
-        private Sequence(T sequence, ObjectIntToObjectFunction<T, String> toString) {
-            this.sequence = sequence;
-            this.toString = toString;
-        }
-
-        @Override
-        public boolean isEmpty() { return sequence.isEmpty(); }
-
-        @Override
-        public int size() {
-            return sequence.length();
-        }
-
-        @Override
-        public @NotNull NodeLabel get(int index) {
-            return new NodeLabel(toString.valueOf(sequence, index));
-        }
-
-        @Override
-        public String[] getStrings() {
-            var result = new String[sequence.length()];
-            Arrays.setAll(result, i -> toString.valueOf(sequence, i));
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Sequence<?> sequence1 = (Sequence<?>) o;
-            return sequence.equals(sequence1.sequence);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(sequence);
-        }
-    }
-
-    private static final class Singleton<T> implements ValidNodeLabelToken {
+    public static final class Singleton<T> implements ValidNodeLabelToken {
 
         private final NodeLabel item;
 
-        private Singleton(T item, Function<T, NodeLabel> toNodeLabel) {
+        public Singleton(T item, Function<T, NodeLabel> toNodeLabel) {
             this.item = toNodeLabel.apply(item);
         }
 
