@@ -19,14 +19,6 @@
  */
 package org.neo4j.gds.api;
 
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.values.storable.Value;
 
-@ValueClass
-public interface ExportedRelationship {
-    long sourceNode();
-
-    long targetNode();
-
-    Value[] values();
-}
+public record ExportedRelationship(long sourceNode, long targetNode, Value[] values) {}

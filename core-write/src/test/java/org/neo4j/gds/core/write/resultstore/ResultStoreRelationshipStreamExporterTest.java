@@ -21,7 +21,7 @@ package org.neo4j.gds.core.write.resultstore;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.EphemeralResultStore;
-import org.neo4j.gds.api.ImmutableExportedRelationship;
+import org.neo4j.gds.api.ExportedRelationship;
 import org.neo4j.gds.api.ResultStoreEntry;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.utils.progress.JobId;
@@ -41,8 +41,8 @@ class ResultStoreRelationshipStreamExporterTest {
         var jobId = new JobId("test");
         var resultStore = new EphemeralResultStore();
         var relationshipStream = Stream.of(
-            ImmutableExportedRelationship.of(0, 1, new Value[]{ Values.doubleValue(42.0), Values.doubleArray(new double[]{ 43.0, 44.0 })}),
-            ImmutableExportedRelationship.of(1, 2, new Value[]{ Values.doubleValue(45.0), Values.doubleArray(new double[]{ 46.0, 47.0 })})
+            new ExportedRelationship(0, 1, new Value[]{ Values.doubleValue(42.0), Values.doubleArray(new double[]{ 43.0, 44.0 })}),
+            new ExportedRelationship(1, 2, new Value[]{ Values.doubleValue(45.0), Values.doubleArray(new double[]{ 46.0, 47.0 })})
         );
         LongUnaryOperator mappingOperator = l -> l + 42;
         new ResultStoreRelationshipStreamExporter(jobId, resultStore, relationshipStream, mappingOperator)
@@ -68,8 +68,8 @@ class ResultStoreRelationshipStreamExporterTest {
         var jobId = new JobId("test");
         var resultStore = new EphemeralResultStore();
         var relationshipStream = Stream.of(
-            ImmutableExportedRelationship.of(0, 1, new Value[0]),
-            ImmutableExportedRelationship.of(1, 2, new Value[0])
+            new ExportedRelationship(0, 1, new Value[0]),
+            new ExportedRelationship(1, 2, new Value[0])
         );
         LongUnaryOperator mappingOperator = l -> l + 42;
         new ResultStoreRelationshipStreamExporter(jobId, resultStore, relationshipStream, mappingOperator).write(
