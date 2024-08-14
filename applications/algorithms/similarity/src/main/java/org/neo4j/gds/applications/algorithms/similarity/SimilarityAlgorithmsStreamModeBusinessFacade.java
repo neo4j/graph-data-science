@@ -30,7 +30,6 @@ import org.neo4j.gds.similarity.knn.KnnStreamConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamConfig;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FilteredKNN;
@@ -64,9 +63,7 @@ public class SimilarityAlgorithmsStreamModeBusinessFacade {
             FilteredKNN,
             () -> estimationFacade.filteredKnn(configuration),
             (graph, __) -> similarityAlgorithms.filteredKnn(graph, configuration),
-            resultBuilder,
-            Optional.empty(),
-            Optional.empty()
+            resultBuilder
         );
     }
 
@@ -81,9 +78,7 @@ public class SimilarityAlgorithmsStreamModeBusinessFacade {
             FilteredNodeSimilarity,
             () -> estimationFacade.filteredNodeSimilarity(configuration),
             (graph, __) -> similarityAlgorithms.filteredNodeSimilarity(graph, configuration),
-            resultBuilder,
-            Optional.empty(),
-            Optional.empty()
+            resultBuilder
         );
     }
 
@@ -98,9 +93,7 @@ public class SimilarityAlgorithmsStreamModeBusinessFacade {
             KNN,
             () -> estimationFacade.knn(configuration),
             (graph, __) -> similarityAlgorithms.knn(graph, configuration),
-            resultBuilder,
-            Optional.empty(),
-            Optional.empty()
+            resultBuilder
         );
     }
 
@@ -115,9 +108,7 @@ public class SimilarityAlgorithmsStreamModeBusinessFacade {
             NodeSimilarity,
             () -> estimationFacade.nodeSimilarity(configuration),
             (graph, __) -> similarityAlgorithms.nodeSimilarity(graph, configuration),
-            resultBuilder,
-            Optional.empty(),
-            Optional.empty()
+            resultBuilder
         );
     }
 }

@@ -111,7 +111,7 @@ public class AlgorithmProcessingTemplateConvenience {
             resultBuilder
         );
     }
-
+    //STREAM
     public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM> Stream<RESULT_TO_CALLER> processRegularAlgorithmInStreamMode(
         GraphName graphName,
         CONFIGURATION configuration,
@@ -131,6 +131,25 @@ public class AlgorithmProcessingTemplateConvenience {
             estimationFactory,
             algorithmComputation,
             resultBuilder
+        );
+    }
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM> Stream<RESULT_TO_CALLER> processRegularAlgorithmInStreamMode(
+        GraphName graphName,
+        CONFIGURATION configuration,
+        LabelForProgressTracking label,
+        Supplier<MemoryEstimation> estimationFactory,
+        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
+        StreamResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
+    ) {
+        return processRegularAlgorithmInStreamMode(
+            graphName,
+            configuration,
+            label,
+            estimationFactory,
+            algorithmComputation,
+            resultBuilder,
+            Optional.empty(),
+            Optional.empty()
         );
     }
 }

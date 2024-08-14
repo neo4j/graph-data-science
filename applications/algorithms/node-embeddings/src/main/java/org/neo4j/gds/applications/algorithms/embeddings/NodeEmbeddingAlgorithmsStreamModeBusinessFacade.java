@@ -69,9 +69,7 @@ public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
             FastRP,
             () -> estimationFacade.fastRP(configuration),
             (graph, __) -> algorithms.fastRP(graph, configuration),
-            resultBuilder,
-            Optional.empty(),
-            Optional.empty()
+            resultBuilder
         );
     }
 
@@ -91,7 +89,7 @@ public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
             resultBuilder,
             Optional.of(List.of(graphSageProcessParameters.validationHook())),
             graphSageProcessParameters.relationshipWeightPropertyFromTrainConfiguration()
-            );
+        );
     }
 
     public <RESULT> Stream<RESULT> hashGnn(
@@ -105,9 +103,7 @@ public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
             HashGNN,
             () -> estimationFacade.hashGnn(configuration),
             (graph, __) -> algorithms.hashGnn(graph, configuration),
-            resultBuilder,
-            Optional.empty(),
-            Optional.empty()
+            resultBuilder
         );
     }
 
@@ -125,6 +121,6 @@ public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
             resultBuilder,
             Optional.of(List.of(new Node2VecValidationHook(configuration))),
             Optional.empty()
-            );
+        );
     }
 }

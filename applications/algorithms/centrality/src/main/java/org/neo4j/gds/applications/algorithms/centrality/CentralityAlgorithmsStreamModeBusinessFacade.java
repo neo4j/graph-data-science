@@ -37,7 +37,6 @@ import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStreamConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankStreamConfig;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ArticleRank;
@@ -77,9 +76,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
             ArticleRank,
             estimationFacade::pageRank,
             (graph, __) -> centralityAlgorithms.articleRank(graph, configuration),
-            streamResultBuilder,
-            Optional.empty(),
-            Optional.empty()
+            streamResultBuilder
         );
     }
 
@@ -94,9 +91,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
             BetweennessCentrality,
             () -> estimationFacade.betweennessCentrality(configuration),
             (graph, __) -> centralityAlgorithms.betweennessCentrality(graph, configuration),
-            streamResultBuilder,
-            Optional.empty(),
-            Optional.empty()
+            streamResultBuilder
         );
     }
     public <RESULT> Stream<RESULT> articulationPoints(
@@ -110,9 +105,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
             ArticulationPoints,
             estimationFacade::articulationPoints,
             (graph, __) -> centralityAlgorithms.articulationPoints(graph, configuration),
-            streamResultBuilder,
-            Optional.empty(),
-            Optional.empty()
+            streamResultBuilder
         );
     }
     public <RESULT> Stream<RESULT> bridges(
@@ -126,9 +119,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
             BRIDGES,
             estimationFacade::bridges,
             (graph, __) -> centralityAlgorithms.bridges(graph, configuration),
-            streamResultBuilder,
-            Optional.empty(),
-            Optional.empty()
+            streamResultBuilder
         );
     }
 
@@ -143,9 +134,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
             CELF,
             () -> estimationFacade.celf(configuration),
             (graph, __) -> centralityAlgorithms.celf(graph, configuration),
-            streamResultBuilder,
-            Optional.empty(),
-            Optional.empty()
+            streamResultBuilder
         );
     }
 
@@ -160,9 +149,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
             ClosenessCentrality,
             () -> estimationFacade.closenessCentrality(configuration),
             (graph, __) -> centralityAlgorithms.closenessCentrality(graph, configuration),
-            streamResultBuilder,
-            Optional.empty(),
-            Optional.empty()
+            streamResultBuilder
         );
     }
 
@@ -177,9 +164,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
             DegreeCentrality,
             () -> estimationFacade.degreeCentrality(configuration),
             (graph, __) -> centralityAlgorithms.degreeCentrality(graph, configuration),
-            streamResultBuilder,
-            Optional.empty(),
-            Optional.empty()
+            streamResultBuilder
         );
     }
 
@@ -194,9 +179,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
             EigenVector,
             estimationFacade::pageRank,
             (graph, __) -> centralityAlgorithms.eigenVector(graph, configuration),
-            streamResultBuilder,
-            Optional.empty(),
-            Optional.empty()
+            streamResultBuilder
         );
     }
 
@@ -211,9 +194,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
             HarmonicCentrality,
             estimationFacade::harmonicCentrality,
             (graph, __) -> centralityAlgorithms.harmonicCentrality(graph, configuration),
-            streamResultBuilder,
-            Optional.empty(),
-            Optional.empty()
+            streamResultBuilder
         );
     }
 
@@ -228,9 +209,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
             PageRank,
             estimationFacade::pageRank,
             (graph, __) -> centralityAlgorithms.pageRank(graph, configuration),
-            streamResultBuilder,
-            Optional.empty(),
-            Optional.empty()
+            streamResultBuilder
         );
     }
 }

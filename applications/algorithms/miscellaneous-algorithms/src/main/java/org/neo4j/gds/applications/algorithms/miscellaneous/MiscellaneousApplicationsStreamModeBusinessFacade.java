@@ -25,7 +25,6 @@ import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 import org.neo4j.gds.scaleproperties.ScalePropertiesStreamConfig;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ScaleProperties;
@@ -56,9 +55,7 @@ public class MiscellaneousApplicationsStreamModeBusinessFacade {
             ScaleProperties,
             () -> estimationFacade.scaleProperties(configuration),
             (graph, __) -> miscellaneousAlgorithms.scaleProperties(graph, configuration),
-            resultBuilder,
-            Optional.empty(),
-            Optional.empty()
+            resultBuilder
         );
     }
 }

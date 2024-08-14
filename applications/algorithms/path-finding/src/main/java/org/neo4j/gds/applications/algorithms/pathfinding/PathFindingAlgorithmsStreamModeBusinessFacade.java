@@ -45,7 +45,6 @@ import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.steiner.SteinerTreeStreamConfig;
 import org.neo4j.gds.traversal.RandomWalkStreamConfig;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.AStar;
@@ -93,9 +92,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             AllShortestPaths,
             estimationFacade::allShortestPaths,
             (graph, __) -> pathFindingAlgorithms.allShortestPaths(graph, configuration),
-            resultBuilder,
-            Optional.empty(),
-            Optional.empty()
+            resultBuilder
         );
     }
 
@@ -110,9 +107,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             BellmanFord,
             () -> estimationFacade.bellmanFord(configuration),
             (graph, __) -> pathFindingAlgorithms.bellmanFord(graph, configuration),
-            resultBuilder,
-            Optional.empty(),
-            Optional.empty()
+            resultBuilder
         );
     }
 
@@ -127,9 +122,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             BFS,
             estimationFacade::breadthFirstSearch,
             (graph, __) -> pathFindingAlgorithms.breadthFirstSearch(graph, configuration),
-            resultBuilder,
-            Optional.empty(),
-            Optional.empty()
+            resultBuilder
         );
     }
 
@@ -144,9 +137,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             DeltaStepping,
             estimationFacade::deltaStepping,
             (graph, __) -> pathFindingAlgorithms.deltaStepping(graph, configuration),
-            resultBuilder,
-            Optional.empty(),
-            Optional.empty()
+            resultBuilder
         );
     }
 
@@ -161,9 +152,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             DFS,
             estimationFacade::depthFirstSearch,
             (graph, __) -> pathFindingAlgorithms.depthFirstSearch(graph, configuration),
-            resultBuilder,
-            Optional.empty(),
-            Optional.empty()
+            resultBuilder
         );
     }
 
@@ -178,9 +167,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             LongestPath,
             estimationFacade::longestPath,
             (graph, __) -> pathFindingAlgorithms.longestPath(graph, configuration),
-            resultBuilder,
-            Optional.empty(),
-            Optional.empty()
+            resultBuilder
         );
     }
 
@@ -195,9 +182,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             RandomWalk,
             () -> estimationFacade.randomWalk(configuration),
             (graph, __) -> pathFindingAlgorithms.randomWalk(graph, configuration),
-            resultBuilder,
-            Optional.empty(),
-            Optional.empty()
+            resultBuilder
         );
     }
 
@@ -212,9 +197,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             AStar,
             estimationFacade::singlePairShortestPathAStar,
             (graph, __) -> pathFindingAlgorithms.singlePairShortestPathAStar(graph, configuration),
-            resultBuilder,
-            Optional.empty(),
-            Optional.empty()
+            resultBuilder
         );
     }
 
@@ -229,9 +212,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             Dijkstra,
             () -> estimationFacade.singlePairShortestPathDijkstra(configuration),
             (graph, __) -> pathFindingAlgorithms.singlePairShortestPathDijkstra(graph, configuration),
-            resultBuilder,
-            Optional.empty(),
-            Optional.empty()
+            resultBuilder
         );
     }
 
@@ -246,9 +227,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             Yens,
             () -> estimationFacade.singlePairShortestPathYens(configuration),
             (graph, __) -> pathFindingAlgorithms.singlePairShortestPathYens(graph, configuration),
-            resultBuilder,
-            Optional.empty(),
-            Optional.empty()
+            resultBuilder
 
         );
     }
@@ -264,9 +243,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             SingleSourceDijkstra,
             () -> estimationFacade.singleSourceShortestPathDijkstra(configuration),
             (graph, __) -> pathFindingAlgorithms.singleSourceShortestPathDijkstra(graph, configuration),
-            resultBuilder,
-            Optional.empty(),
-            Optional.empty()
+            resultBuilder
         );
     }
 
@@ -281,9 +258,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             LabelForProgressTracking.SpanningTree,
             estimationFacade::spanningTree,
             (graph, __) -> pathFindingAlgorithms.spanningTree(graph, configuration),
-            resultBuilder,
-            Optional.empty(),
-            Optional.empty()
+            resultBuilder
         );
     }
 
@@ -298,9 +273,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             SteinerTree,
             () -> estimationFacade.steinerTree(configuration),
             (graph, __) -> pathFindingAlgorithms.steinerTree(graph, configuration),
-            resultBuilder,
-            Optional.empty(),
-            Optional.empty()
+            resultBuilder
         );
     }
 
@@ -315,9 +288,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             TopologicalSort,
             estimationFacade::topologicalSort,
             (graph, __) -> pathFindingAlgorithms.topologicalSort(graph, configuration),
-            resultBuilder,
-            Optional.empty(),
-            Optional.empty()
+            resultBuilder
         );
     }
 }
