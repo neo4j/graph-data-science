@@ -21,7 +21,6 @@ package org.neo4j.gds.projection;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.core.AsJavaObject;
 import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.SequenceValue;
