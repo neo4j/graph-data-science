@@ -31,7 +31,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
-import org.neo4j.gds.core.write.ImmutableNodeProperty;
+import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.logging.Log;
@@ -138,7 +138,7 @@ public class WriteNodePropertiesApplication {
             var writeNodeProperties = config.nodeProperties()
                 .stream()
                 .map(
-                    nodePropertyKey -> ImmutableNodeProperty.of(
+                    nodePropertyKey -> NodeProperty.of(
                         nodePropertyKey.writeProperty(),
                         subGraph.nodeProperties(nodePropertyKey.nodeProperty())
                     )

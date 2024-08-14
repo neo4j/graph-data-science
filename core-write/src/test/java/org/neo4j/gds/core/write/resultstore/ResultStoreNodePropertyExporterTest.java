@@ -24,7 +24,7 @@ import org.neo4j.gds.api.EphemeralResultStore;
 import org.neo4j.gds.api.ResultStoreEntry;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.core.write.ImmutableNodeProperty;
+import org.neo4j.gds.core.write.NodeProperty;
 
 import java.util.List;
 import java.util.function.LongUnaryOperator;
@@ -73,8 +73,8 @@ class ResultStoreNodePropertyExporterTest {
 
         var nodePropertyExporter = new ResultStoreNodePropertyExporter(jobId, resultStore, List.of(PROJECT_ALL), toOriginalId);
         nodePropertyExporter.write(List.of(
-                ImmutableNodeProperty.of("prop1", nodePropertyValues1),
-                ImmutableNodeProperty.of("prop2", nodePropertyValues2)
+                NodeProperty.of("prop1", nodePropertyValues1),
+                NodeProperty.of("prop2", nodePropertyValues2)
             )
         );
 

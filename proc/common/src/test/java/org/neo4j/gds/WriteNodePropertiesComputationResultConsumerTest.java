@@ -48,8 +48,8 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
-import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
+import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ImmutableComputationResult;
@@ -132,7 +132,7 @@ class WriteNodePropertiesComputationResultConsumerTest extends BaseTest {
         );
         var writeConsumer = new WriteNodePropertiesComputationResultConsumer<TestAlgorithm, TestAlgorithmResult, TestWriteConfig, TestResult>(
             (computationResult, executionContext) -> new TestAlgoResultBuilder(),
-            computationResult -> List.of(ImmutableNodeProperty.of(
+            computationResult -> List.of(NodeProperty.of(
                 propertyKey,
                 graphStore.nodeProperty(propertyKey).values()
             )),

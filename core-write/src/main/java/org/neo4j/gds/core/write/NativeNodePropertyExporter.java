@@ -60,13 +60,15 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
 
     @SuppressWarnings("immutables:subtype")
     @ValueClass
-    public interface ResolvedNodeProperty extends NodeProperty {
+    public interface ResolvedNodeProperty {
+        String propertyKey();
+        NodePropertyValues properties();
         int propertyToken();
 
         static ResolvedNodeProperty of(NodeProperty nodeProperty, int propertyToken) {
             return ImmutableResolvedNodeProperty.of(
-                nodeProperty.propertyKey(),
-                nodeProperty.properties(),
+                nodeProperty.key(),
+                nodeProperty.values(),
                 propertyToken
             );
         }
@@ -97,7 +99,7 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
 
     @Override
     public void write(String property, NodePropertyValues properties) {
-        write(ImmutableNodeProperty.of(property, properties));
+        write(NodeProperty.of(property, properties));
     }
 
     @Override
@@ -115,7 +117,7 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
     @Override
     public void write(Collection<NodeProperty> nodeProperties) {
         var resolvedNodeProperties = nodeProperties.stream()
-            .map(desc -> resolveWith(desc, getOrCreatePropertyToken(desc.propertyKey())))
+            .map(desc -> resolveWith(desc, getOrCreatePropertyToken(desc.key())))
             .collect(Collectors.toList());
 
         progressTracker.beginSubTask(nodeCount);

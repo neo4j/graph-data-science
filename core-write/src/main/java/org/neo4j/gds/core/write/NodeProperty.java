@@ -19,16 +19,13 @@
  */
 package org.neo4j.gds.core.write;
 
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
-@ValueClass
-public interface NodeProperty {
-    String propertyKey();
-
-    NodePropertyValues properties();
-
-    static NodeProperty of(String propertyKey, NodePropertyValues properties) {
-        return ImmutableNodeProperty.of(propertyKey, properties);
+public record NodeProperty(
+    String key,
+    NodePropertyValues values
+) {
+    public static NodeProperty of(String key, NodePropertyValues values) {
+        return new NodeProperty(key, values);
     }
 }

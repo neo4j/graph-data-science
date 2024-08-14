@@ -34,7 +34,6 @@ import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
@@ -72,7 +71,7 @@ final class Neo4jDatabaseNodePropertyWriter {
         TerminationFlag terminationFlag,
         Log log
     ) {
-        var nodeProperties = List.of(ImmutableNodeProperty.of(writeProperty, nodePropertyValues));
+        var nodeProperties = List.of(new NodeProperty(writeProperty, nodePropertyValues));
 
         var propertiesWritten = new MutableLong();
 
@@ -143,7 +142,7 @@ final class Neo4jDatabaseNodePropertyWriter {
         var unexpectedProperties = nodeProperties
             .stream()
             .filter(nodeProperty -> {
-                var propertySchema = propertySchemas.get(nodeProperty.propertyKey());
+                var propertySchema = propertySchemas.get(nodeProperty.key());
                 if (propertySchema == null) {
                     // We are executing an algorithm write mode and the property we are writing is
                     // not in the GraphStore, therefore we do not perform any more checks
@@ -155,8 +154,8 @@ final class Neo4jDatabaseNodePropertyWriter {
             .map(
                 nodeProperty -> formatWithLocale(
                     "NodeProperty{propertyKey=%s, propertyState=%s}",
-                    nodeProperty.propertyKey(),
-                    propertySchemas.get(nodeProperty.propertyKey()).state()
+                    nodeProperty.key(),
+                    propertySchemas.get(nodeProperty.key()).state()
                 )
             )
             .collect(Collectors.toList());

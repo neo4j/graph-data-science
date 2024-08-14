@@ -76,7 +76,7 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
         var unexpectedProperties = nodeProperties
             .stream()
             .filter(nodeProperty -> {
-                var propertySchema = propertySchemas.get(nodeProperty.propertyKey());
+                var propertySchema = propertySchemas.get(nodeProperty.key());
                 if (propertySchema == null) {
                     // We are executing an algorithm write mode and the property we are writing is
                     // not in the GraphStore, therefore we do not perform any more checks
@@ -88,8 +88,8 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
             .map(
                 nodeProperty -> formatWithLocale(
                     "NodeProperty{propertyKey=%s, propertyState=%s}",
-                    nodeProperty.propertyKey(),
-                    propertySchemas.get(nodeProperty.propertyKey()).state()
+                    nodeProperty.key(),
+                    propertySchemas.get(nodeProperty.key()).state()
                 )
             )
             .toList();
