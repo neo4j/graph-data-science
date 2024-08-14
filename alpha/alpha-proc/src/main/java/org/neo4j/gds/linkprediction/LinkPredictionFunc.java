@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.linkprediction;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
@@ -34,7 +33,7 @@ import java.util.Set;
 import static org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig.RELATIONSHIP_QUERY_KEY;
 import static org.neo4j.gds.core.ProcedureConstants.DIRECTION_KEY;
 
-public class LinkPredictionFunc extends BaseProc {
+public class LinkPredictionFunc {
 
     @UserFunction("gds.alpha.linkprediction.adamicAdar")
     @Description("Given two nodes, calculate Adamic Adar similarity")
