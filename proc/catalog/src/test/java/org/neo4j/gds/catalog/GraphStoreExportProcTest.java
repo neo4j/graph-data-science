@@ -364,13 +364,8 @@ class GraphStoreExportProcTest extends BaseProcTest {
             QueryExecutionException.class,
             () -> runQuery(exportQuery)
         );
-        assertThat(rootCause(exception))
-            .hasMessageContaining("The requested operation")
-            .hasMessageContaining("(Export a graph to Neo4j database)")
-            .hasMessageContaining(
-                "is not available while running Neo4j Graph Data Science library on a Neo4j Cluster."
-            );
-
+        assertThat(rootCause(exception)).hasMessage(
+            "The requested operation is not available while running Neo4j Graph Data Science library on a Neo4j Cluster.");
     }
 
     @Test

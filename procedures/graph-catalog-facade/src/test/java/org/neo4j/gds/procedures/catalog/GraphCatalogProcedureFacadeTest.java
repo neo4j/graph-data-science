@@ -81,6 +81,7 @@ class GraphCatalogProcedureFacadeTest {
             null,
             new ApplicationsFacadeBuilder().with(businessFacade).build(),
             WriteContext.builder().build(),
+            null,
             null
         );
 
@@ -109,7 +110,8 @@ class GraphCatalogProcedureFacadeTest {
             null,
             new ApplicationsFacadeBuilder().with(businessFacade).build(),
             procedureContext,
-            procedureReturnColumns
+            procedureReturnColumns,
+            null
         );
 
         // the return columns mock returns false by default (all simple types get defaults btw) - should I code that explicitly?
@@ -145,7 +147,8 @@ class GraphCatalogProcedureFacadeTest {
             null,
             new ApplicationsFacadeBuilder().with(businessFacade).build(),
             procedureContext,
-            procedureReturnColumns
+            procedureReturnColumns,
+            null
         );
 
         when(procedureReturnColumns.contains("degreeDistribution")).thenReturn(true);
@@ -193,7 +196,8 @@ class GraphCatalogProcedureFacadeTest {
             null,
             new ApplicationsFacadeBuilder().with(businessFacade).build(),
             procedureContext,
-            procedureReturnColumns
+            procedureReturnColumns,
+            null
         );
 
         // the return columns mock returns false by default (all simple types get defaults btw) - should I code that explicitly?
@@ -232,7 +236,8 @@ class GraphCatalogProcedureFacadeTest {
             null,
             new ApplicationsFacadeBuilder().with(businessFacade).build(),
             procedureContext,
-            procedureReturnColumns
+            procedureReturnColumns,
+            null
         );
 
         when(procedureReturnColumns.contains(returnColumn)).thenReturn(true);

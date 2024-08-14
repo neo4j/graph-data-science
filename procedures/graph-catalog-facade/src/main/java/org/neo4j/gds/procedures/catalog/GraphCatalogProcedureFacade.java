@@ -19,11 +19,13 @@
  */
 package org.neo4j.gds.procedures.catalog;
 
+import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
+import org.neo4j.gds.applications.graphstorecatalog.DatabaseExportResult;
 import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
 import org.neo4j.gds.applications.graphstorecatalog.GraphGenerationStats;
 import org.neo4j.gds.applications.graphstorecatalog.GraphMemoryUsage;
@@ -42,6 +44,8 @@ import org.neo4j.gds.applications.graphstorecatalog.WriteLabelResult;
 import org.neo4j.gds.applications.graphstorecatalog.WriteRelationshipPropertiesResult;
 import org.neo4j.gds.applications.graphstorecatalog.WriteRelationshipResult;
 import org.neo4j.gds.beta.filter.GraphFilterResult;
+import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.io.db.GraphStoreToDatabaseExporterConfig;
 import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
 import org.neo4j.gds.legacycypherprojection.GraphProjectCypherResult;
@@ -79,6 +83,7 @@ public class GraphCatalogProcedureFacade {
     private final GraphDatabaseService graphDatabaseService;
     private final GraphProjectMemoryUsageService graphProjectMemoryUsageService;
     private final TransactionContext transactionContext;
+    private final DatabaseModeRestriction databaseModeRestriction;
 
     // business facade
     private final ApplicationsFacade applicationsFacade;
@@ -94,7 +99,8 @@ public class GraphCatalogProcedureFacade {
         TransactionContext transactionContext,
         ApplicationsFacade applicationsFacade,
         WriteContext writeContext,
-        ProcedureReturnColumns procedureReturnColumns
+        ProcedureReturnColumns procedureReturnColumns,
+        DatabaseModeRestriction databaseModeRestriction
     ) {
         this.requestScopedDependencies = requestScopedDependencies;
         this.streamCloser = streamCloser;
@@ -105,6 +111,7 @@ public class GraphCatalogProcedureFacade {
         this.applicationsFacade = applicationsFacade;
         this.writeContext = writeContext;
         this.procedureReturnColumns = procedureReturnColumns;
+        this.databaseModeRestriction = databaseModeRestriction;
     }
 
     /**
@@ -636,6 +643,20 @@ public class GraphCatalogProcedureFacade {
         return Stream.of(result);
     }
 
+    public Stream<DatabaseExportResult> exportToDatabase(
+        String graphNameAsString,
+        Map<String, Object> rawConfiguration
+    ) {
+        databaseModeRestriction.ensureNotOnCluster();
+
+        var graphName = GraphName.parse(graphNameAsString);
+        var configuration = parseAndValidateConfiguration(rawConfiguration);
+
+        var result = catalog().exportToDatabase(graphName, configuration);
+
+        return Stream.of(result);
+    }
+
     public Stream<GraphGenerationStats> generateGraph(
         String graphName,
         long nodeCount,
@@ -679,6 +700,13 @@ public class GraphCatalogProcedureFacade {
         streamCloser.accept(resultStream);
 
         return resultStream;
+    }
+
+    private GraphStoreToDatabaseExporterConfig parseAndValidateConfiguration(Map<String, Object> rawConfiguration) {
+        var cypherConfig = CypherMapWrapper.create(rawConfiguration);
+        var configuration = GraphStoreToDatabaseExporterConfig.of(cypherConfig);
+        cypherConfig.requireOnlyKeysFrom(configuration.configKeys());
+        return configuration;
     }
 
     /**

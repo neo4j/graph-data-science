@@ -26,6 +26,7 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.graphstorecatalog.GraphProjectMemoryUsageService;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.procedures.catalog.DatabaseModeRestriction;
 import org.neo4j.gds.procedures.catalog.GraphCatalogProcedureFacade;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -82,6 +83,8 @@ public class GraphCatalogProcedureFacadeFactory {
             procedureTransaction
         );
 
+        var databaseModeRestriction = new DatabaseModeRestriction(graphDatabaseService);
+
         return new GraphCatalogProcedureFacade(
             requestScopedDependencies,
             streamCloser,
@@ -90,7 +93,8 @@ public class GraphCatalogProcedureFacadeFactory {
             transactionContext,
             applicationsFacade,
             writeContext,
-            procedureReturnColumns
+            procedureReturnColumns,
+            databaseModeRestriction
         );
     }
 }

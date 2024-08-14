@@ -198,7 +198,8 @@ public final class ProcedureRunner {
             algorithmFacadeBuilderFactory,
             DeprecatedProceduresMetricService.PASSTHROUGH,
             modelCatalog,
-            null
+            null,
+            procedureTransaction
         );
     }
 }

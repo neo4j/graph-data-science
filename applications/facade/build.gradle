@@ -5,6 +5,12 @@ description = 'Neo4j Graph Data Science :: Application Facade'
 group = 'org.neo4j.gds'
 
 dependencies {
+    neodeps().each {
+        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
+            transitive = false
+        }
+    }
+
     implementation project(":algo")
     implementation project(":algorithms-machinery")
     implementation project(":centrality-algorithms")

@@ -22,7 +22,6 @@ package org.neo4j.gds.applications;
 import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityApplications;
 import org.neo4j.gds.applications.algorithms.community.CommunityApplications;
-import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingApplications;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
@@ -40,6 +39,7 @@ import org.neo4j.gds.applications.graphstorecatalog.DefaultGraphCatalogApplicati
 import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.DefaultModelCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
+import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.applications.operations.OperationsApplications;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -47,6 +47,8 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
+import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.Transaction;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -106,7 +108,9 @@ public final class ApplicationsFacade {
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
         ModelCatalog modelCatalog,
-        ModelRepository modelRepository
+        ModelRepository modelRepository,
+        GraphDatabaseService graphDatabaseService,
+        Transaction procedureTransaction
     ) {
         var databaseGraphStoreEstimationService = new DatabaseGraphStoreEstimationService(
             requestScopedDependencies.getGraphLoaderContext(),
@@ -154,9 +158,12 @@ public final class ApplicationsFacade {
 
         var graphCatalogApplications = createGraphCatalogApplications(
             log,
-            graphCatalogApplicationsDecorator,
             graphStoreCatalogService,
-            projectionMetricsService
+            projectionMetricsService,
+            requestScopedDependencies,
+            graphDatabaseService,
+            procedureTransaction,
+            graphCatalogApplicationsDecorator
         );
 
         var miscellaneousApplications = MiscellaneousApplications.create(
@@ -245,14 +252,20 @@ public final class ApplicationsFacade {
 
     private static GraphCatalogApplications createGraphCatalogApplications(
         Log log,
-        Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
         GraphStoreCatalogService graphStoreCatalogService,
-        ProjectionMetricsService projectionMetricsService
+        ProjectionMetricsService projectionMetricsService,
+        RequestScopedDependencies requestScopedDependencies,
+        GraphDatabaseService graphDatabaseService,
+        Transaction procedureTransaction,
+        Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator
     ) {
         var graphCatalogApplications = DefaultGraphCatalogApplications.create(
             log,
             graphStoreCatalogService,
-            projectionMetricsService
+            projectionMetricsService,
+            requestScopedDependencies,
+            graphDatabaseService,
+            procedureTransaction
         );
 
         if (graphCatalogApplicationsDecorator.isEmpty()) return graphCatalogApplications;

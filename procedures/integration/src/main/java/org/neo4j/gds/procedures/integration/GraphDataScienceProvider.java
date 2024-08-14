@@ -196,7 +196,8 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             algorithmProcedureFacadeBuilderFactory,
             deprecatedProceduresMetricService,
             modelCatalog,
-            modelRepository
+            modelRepository,
+            procedureTransaction
         );
     }
 

@@ -33,19 +33,17 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.io.GraphStoreExporterBaseConfig;
 import org.neo4j.gds.core.io.NeoNodeProperties;
-import org.neo4j.gds.core.io.db.GraphStoreToDatabaseExporter;
-import org.neo4j.gds.core.io.db.GraphStoreToDatabaseExporterConfig;
-import org.neo4j.gds.core.io.db.GraphStoreToDatabaseExporterParameters;
-import org.neo4j.gds.core.io.db.ProgressTrackerExecutionMonitor;
 import org.neo4j.gds.core.io.file.GraphStoreExporterUtil;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfig;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterParameters;
 import org.neo4j.gds.core.io.file.csv.estimation.CsvExportEstimation;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.mem.MemoryTreeWithDimensions;
-import org.neo4j.gds.preconditions.ClusterRestrictions;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.applications.graphstorecatalog.DatabaseExportResult;
+import org.neo4j.gds.applications.graphstorecatalog.GraphStoreExportResult;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.gds.utils.StringJoining;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -61,9 +59,11 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphStoreExportProc extends BaseProc {
-
     private static final String DESCRIPTION = "Exports a named graph to CSV files.";
     private static final String DESCRIPTION_ESTIMATE = "Estimate the required disk space for exporting a named graph to CSV files.";
+
+    @Context
+    public GraphDataScienceProcedures facade;
 
     @Procedure(name = "gds.graph.export", mode = READ)
     @Description("Exports a named graph into a new offline Neo4j database.")
@@ -71,72 +71,7 @@ public class GraphStoreExportProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ClusterRestrictions.disallowRunningOnCluster(databaseService, "Export a graph to Neo4j database");
-
-        var cypherConfig = CypherMapWrapper.create(configuration);
-        var exportConfig = GraphStoreToDatabaseExporterConfig.of(cypherConfig);
-        validateConfig(cypherConfig, exportConfig);
-
-        var result = runWithExceptionLogging(
-            "Graph creation failed",
-            () -> {
-                var graphStore = graphStoreFromCatalog(graphName, exportConfig).graphStore();
-
-                validateGraphStore(graphStore, exportConfig);
-
-                var progressTracker = new TaskProgressTracker(
-                    ProgressTrackerExecutionMonitor.progressTask(graphStore),
-                    executionContext().log(),
-                    exportConfig.typedWriteConcurrency(),
-                    exportConfig.jobId(),
-                    executionContext().taskRegistryFactory(),
-                    executionContext().userLogRegistryFactory()
-                );
-
-                var parameters = new GraphStoreToDatabaseExporterParameters(
-                    exportConfig.databaseName(),
-                    new Concurrency(exportConfig.writeConcurrency()),
-                    exportConfig.batchSize(),
-                    RelationshipType.of(exportConfig.defaultRelationshipType()),
-                    exportConfig.databaseFormat(),
-                    exportConfig.enableDebugLog()
-                );
-
-                var exporter = GraphStoreToDatabaseExporter.of(
-                    graphStore,
-                    databaseService,
-                    parameters,
-                    neoNodeProperties(exportConfig.additionalNodeProperties(), graphStore),
-                    executionContext().log(),
-                    progressTracker
-                );
-
-                try {
-                    var start = System.nanoTime();
-                    var exportedProperties = exporter.run();
-                    var end = System.nanoTime();
-
-                    return new DatabaseExportResult(
-                        graphName,
-                        exportConfig.databaseName(),
-                        graphStore.nodeCount(),
-                        graphStore.relationshipCount(),
-                        graphStore.relationshipTypes().size(),
-                        exportedProperties.nodePropertyCount(),
-                        exportedProperties.relationshipPropertyCount(),
-                        java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(end - start)
-                    );
-                } catch (Exception e) {
-                    // Ideally we should not have this logic on the proc level
-                    // the progress tracker is instantiated in this proc
-                    // so we need to make sure it closes as well
-                    progressTracker.endSubTaskWithFailure();
-                    throw e;
-                }
-            }
-        );
-
-        return Stream.of(result);
+        return facade.graphCatalog().exportToDatabase(graphName, configuration);
     }
 
     @Internal
@@ -147,13 +82,9 @@ public class GraphStoreExportProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.beta.graph.export.csv");
-
-        executionContext()
-            .log()
-            .warn("Procedure `gds.beta.graph.export.csv` has been deprecated, please use `gds.graph.export.csv`.");
+        facade.deprecatedProcedures().called("gds.beta.graph.export.csv");
+        facade.log().warn(
+            "Procedure `gds.beta.graph.export.csv` has been deprecated, please use `gds.graph.export.csv`.");
 
         return csv(graphName, configuration);
     }
@@ -212,14 +143,8 @@ public class GraphStoreExportProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.beta.graph.export.csv.estimate");
-        executionContext()
-            .log()
-            .warn(
-                "Procedure `gds.beta.graph.export.csv.estimate` has been deprecated, please use `gds.graph.export.csv.estimate`."
-            );
+        facade.deprecatedProcedures().called("gds.beta.graph.export.csv.estimate");
+        facade.log().warn("Procedure `gds.beta.graph.export.csv.estimate` has been deprecated, please use `gds.graph.export.csv.estimate`.");
 
         return csvEstimate(graphName, configuration);
     }
@@ -288,62 +213,6 @@ public class GraphStoreExportProc extends BaseProc {
                     StringJoining.joinVerbose(duplicateProperties)
                 )
             );
-        }
-    }
-
-    @SuppressWarnings("unused")
-    public abstract static class GraphStoreExportResult {
-        public final String graphName;
-        public final long nodeCount;
-        public final long relationshipCount;
-        public final long relationshipTypeCount;
-        public final long nodePropertyCount;
-        public final long relationshipPropertyCount;
-        public final long writeMillis;
-
-        public GraphStoreExportResult(
-            String graphName,
-            long nodeCount,
-            long relationshipCount,
-            long relationshipTypeCount,
-            long nodePropertyCount,
-            long relationshipPropertyCount,
-            long writeMillis
-        ) {
-            this.graphName = graphName;
-            this.nodeCount = nodeCount;
-            this.relationshipCount = relationshipCount;
-            this.relationshipTypeCount = relationshipTypeCount;
-            this.nodePropertyCount = nodePropertyCount;
-            this.relationshipPropertyCount = relationshipPropertyCount;
-            this.writeMillis = writeMillis;
-        }
-    }
-
-    @SuppressWarnings("unused")
-    public static class DatabaseExportResult extends GraphStoreExportResult {
-        public final String dbName;
-
-        public DatabaseExportResult(
-            String graphName,
-            String dbName,
-            long nodeCount,
-            long relationshipCount,
-            long relationshipTypeCount,
-            long nodePropertyCount,
-            long relationshipPropertyCount,
-            long writeMillis
-        ) {
-            super(
-                graphName,
-                nodeCount,
-                relationshipCount,
-                relationshipTypeCount,
-                nodePropertyCount,
-                relationshipPropertyCount,
-                writeMillis
-            );
-            this.dbName = dbName;
         }
     }
 

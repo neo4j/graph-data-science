@@ -596,6 +596,8 @@ class WccMutateProcTest extends BaseProcTest {
             requestScopedDependencies,
             WriteContext.builder().build(),
             null,
+            null,
+            null,
             null
         );
         var configurationParser = new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance);

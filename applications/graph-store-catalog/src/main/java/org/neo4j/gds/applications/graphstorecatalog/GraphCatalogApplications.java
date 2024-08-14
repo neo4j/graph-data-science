@@ -21,9 +21,11 @@ package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.beta.filter.GraphFilterResult;
+import org.neo4j.gds.core.io.db.GraphStoreToDatabaseExporterConfig;
 import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
@@ -285,4 +287,6 @@ public interface GraphCatalogApplications {
         long averageDegree,
         Map<String, Object> configuration
     );
+
+    DatabaseExportResult exportToDatabase(GraphName graphName, GraphStoreToDatabaseExporterConfig configuration);
 }

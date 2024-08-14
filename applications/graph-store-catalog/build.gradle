@@ -38,6 +38,7 @@ dependencies {
     implementation project(':graph-projection-api')
     implementation project(':graph-sampling')
     implementation project(':graph-schema-api')
+    implementation project(':io-core')
     implementation project(':legacy-cypher-projection')
     implementation project(':logging')
     implementation project(':memory-usage')

@@ -23,84 +23,99 @@ import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 
-
-
- class DefaultGraphCatalogApplicationsBuilder {
+class DefaultGraphCatalogApplicationsBuilder {
     // global dependencies
-    private  Log log;
-    private  GraphStoreCatalogService graphStoreCatalogService;
-    private  ProjectionMetricsService projectionMetricsService;
+    private Log log;
+    private GraphStoreCatalogService graphStoreCatalogService;
+    private ProjectionMetricsService projectionMetricsService;
 
     // services
-    private  GraphNameValidationService graphNameValidationService;
+    private GraphNameValidationService graphNameValidationService;
 
     // applications
-    private  DropGraphApplication dropGraphApplication;
-    private  ListGraphApplication listGraphApplication;
-    private  NativeProjectApplication nativeProjectApplication;
-    private  CypherProjectApplication cypherProjectApplication;
-    private  SubGraphProjectApplication subGraphProjectApplication;
-    private  GraphMemoryUsageApplication graphMemoryUsageApplication;
-    private  DropNodePropertiesApplication dropNodePropertiesApplication;
-    private  DropRelationshipsApplication dropRelationshipsApplication;
-    private  NodeLabelMutatorApplication nodeLabelMutatorApplication;
-    private  StreamNodePropertiesApplication streamNodePropertiesApplication;
-    private  StreamRelationshipPropertiesApplication streamRelationshipPropertiesApplication;
-    private  StreamRelationshipsApplication streamRelationshipsApplication;
-    private  WriteNodePropertiesApplication writeNodePropertiesApplication;
-    private  WriteRelationshipPropertiesApplication writeRelationshipPropertiesApplication;
-    private  WriteNodeLabelApplication writeNodeLabelApplication;
-    private  WriteRelationshipsApplication writeRelationshipsApplication;
-    private  GraphSamplingApplication graphSamplingApplication;
-    private  EstimateCommonNeighbourAwareRandomWalkApplication estimateCommonNeighbourAwareRandomWalkApplication;
-    private  GenerateGraphApplication generateGraphApplication;
+    private DropGraphApplication dropGraphApplication;
+    private ListGraphApplication listGraphApplication;
+    private NativeProjectApplication nativeProjectApplication;
+    private CypherProjectApplication cypherProjectApplication;
+    private SubGraphProjectApplication subGraphProjectApplication;
+    private GraphMemoryUsageApplication graphMemoryUsageApplication;
+    private DropNodePropertiesApplication dropNodePropertiesApplication;
+    private DropRelationshipsApplication dropRelationshipsApplication;
+    private NodeLabelMutatorApplication nodeLabelMutatorApplication;
+    private StreamNodePropertiesApplication streamNodePropertiesApplication;
+    private StreamRelationshipPropertiesApplication streamRelationshipPropertiesApplication;
+    private StreamRelationshipsApplication streamRelationshipsApplication;
+    private WriteNodePropertiesApplication writeNodePropertiesApplication;
+    private WriteRelationshipPropertiesApplication writeRelationshipPropertiesApplication;
+    private WriteNodeLabelApplication writeNodeLabelApplication;
+    private WriteRelationshipsApplication writeRelationshipsApplication;
+    private GraphSamplingApplication graphSamplingApplication;
+    private EstimateCommonNeighbourAwareRandomWalkApplication estimateCommonNeighbourAwareRandomWalkApplication;
+    private GenerateGraphApplication generateGraphApplication;
+    private ExportToDatabaseApplication exportToDatabaseApplication;
 
     DefaultGraphCatalogApplicationsBuilder withLog(Log log) {
         this.log = log;
-        return  this;
+        return this;
     }
 
     DefaultGraphCatalogApplicationsBuilder withGraphStoreCatalogService(GraphStoreCatalogService graphStoreCatalogService) {
         this.graphStoreCatalogService = graphStoreCatalogService;
-        return  this;
+        return this;
     }
+
     DefaultGraphCatalogApplicationsBuilder withProjectionMetricsService(ProjectionMetricsService projectionMetricsService) {
         this.projectionMetricsService = projectionMetricsService;
         return this;
     }
+
     DefaultGraphCatalogApplicationsBuilder withGraphNameValidationService(GraphNameValidationService graphNameValidationService) {
         this.graphNameValidationService = graphNameValidationService;
         return this;
     }
+
     DefaultGraphCatalogApplicationsBuilder withCypherProjectApplication(CypherProjectApplication cypherProjectApplication) {
         this.cypherProjectApplication = cypherProjectApplication;
         return this;
     }
+
     DefaultGraphCatalogApplicationsBuilder withDropGraphApplication(DropGraphApplication dropGraphApplication) {
         this.dropGraphApplication = dropGraphApplication;
         return this;
     }
+
     DefaultGraphCatalogApplicationsBuilder withDropNodePropertiesApplication(DropNodePropertiesApplication dropNodePropertiesApplication) {
-        this.dropNodePropertiesApplication=dropNodePropertiesApplication;
+        this.dropNodePropertiesApplication = dropNodePropertiesApplication;
         return this;
     }
+
     DefaultGraphCatalogApplicationsBuilder withDropRelationshipsApplication(DropRelationshipsApplication dropRelationshipsApplication) {
         this.dropRelationshipsApplication = dropRelationshipsApplication;
         return this;
     }
 
-    DefaultGraphCatalogApplicationsBuilder withEstimateCommonNeighbourAwareRandomWalkApplication(EstimateCommonNeighbourAwareRandomWalkApplication estimateCommonNeighbourAwareRandomWalkApplication) {
+    DefaultGraphCatalogApplicationsBuilder withEstimateCommonNeighbourAwareRandomWalkApplication(
+        EstimateCommonNeighbourAwareRandomWalkApplication estimateCommonNeighbourAwareRandomWalkApplication
+    ) {
         this.estimateCommonNeighbourAwareRandomWalkApplication = estimateCommonNeighbourAwareRandomWalkApplication;
         return this;
     }
+
+    DefaultGraphCatalogApplicationsBuilder withExportToDatabaseApplication(ExportToDatabaseApplication exportToDatabaseApplication) {
+        this.exportToDatabaseApplication = exportToDatabaseApplication;
+        return this;
+    }
+
     DefaultGraphCatalogApplicationsBuilder withGenerateGraphApplication(GenerateGraphApplication generateGraphApplication) {
         this.generateGraphApplication = generateGraphApplication;
-        return  this;
+        return this;
     }
+
     DefaultGraphCatalogApplicationsBuilder withGraphMemoryUsageApplication(GraphMemoryUsageApplication graphMemoryUsageApplication) {
-        this.graphMemoryUsageApplication= graphMemoryUsageApplication;
-        return  this;
+        this.graphMemoryUsageApplication = graphMemoryUsageApplication;
+        return this;
     }
+
     DefaultGraphCatalogApplicationsBuilder withGraphSamplingApplication(GraphSamplingApplication graphSamplingApplication) {
         this.graphSamplingApplication = graphSamplingApplication;
         return this;
@@ -113,12 +128,12 @@ import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 
     DefaultGraphCatalogApplicationsBuilder withNativeProjectApplication(NativeProjectApplication nativeProjectApplication) {
         this.nativeProjectApplication = nativeProjectApplication;
-        return  this;
+        return this;
     }
 
     DefaultGraphCatalogApplicationsBuilder withNodeLabelMutatorApplication(NodeLabelMutatorApplication nodeLabelMutatorApplication) {
         this.nodeLabelMutatorApplication = nodeLabelMutatorApplication;
-        return  this;
+        return this;
     }
 
     DefaultGraphCatalogApplicationsBuilder withStreamNodePropertiesApplication(StreamNodePropertiesApplication streamNodePropertiesApplication) {
@@ -126,64 +141,71 @@ import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
         return this;
     }
 
-    DefaultGraphCatalogApplicationsBuilder withStreamRelationshipPropertiesApplication(StreamRelationshipPropertiesApplication streamRelationshipPropertiesApplication) {
+    DefaultGraphCatalogApplicationsBuilder withStreamRelationshipPropertiesApplication(
+        StreamRelationshipPropertiesApplication streamRelationshipPropertiesApplication
+    ) {
         this.streamRelationshipPropertiesApplication = streamRelationshipPropertiesApplication;
         return this;
     }
 
     DefaultGraphCatalogApplicationsBuilder withStreamRelationshipsApplication(StreamRelationshipsApplication streamRelationshipsApplication) {
-        this.streamRelationshipsApplication= streamRelationshipsApplication;
-        return  this;
+        this.streamRelationshipsApplication = streamRelationshipsApplication;
+        return this;
     }
-
 
     DefaultGraphCatalogApplicationsBuilder withSubGraphProjectApplication(SubGraphProjectApplication subGraphProjectApplication) {
         this.subGraphProjectApplication = subGraphProjectApplication;
         return this;
     }
+
     DefaultGraphCatalogApplicationsBuilder withWriteNodeLabelApplication(WriteNodeLabelApplication writeNodeLabelApplication) {
         this.writeNodeLabelApplication = writeNodeLabelApplication;
         return this;
     }
+
     DefaultGraphCatalogApplicationsBuilder withWriteNodePropertiesApplication(WriteNodePropertiesApplication writeNodePropertiesApplication) {
         this.writeNodePropertiesApplication = writeNodePropertiesApplication;
         return this;
     }
 
-    DefaultGraphCatalogApplicationsBuilder withWriteRelationshipPropertiesApplication(WriteRelationshipPropertiesApplication writeRelationshipPropertiesApplication) {
+    DefaultGraphCatalogApplicationsBuilder withWriteRelationshipPropertiesApplication(
+        WriteRelationshipPropertiesApplication writeRelationshipPropertiesApplication
+    ) {
         this.writeRelationshipPropertiesApplication = writeRelationshipPropertiesApplication;
         return this;
     }
+
     DefaultGraphCatalogApplicationsBuilder withWriteRelationshipsApplication(WriteRelationshipsApplication writeRelationshipsApplication) {
         this.writeRelationshipsApplication = writeRelationshipsApplication;
         return this;
     }
 
-     DefaultGraphCatalogApplications build(){
-            return  new DefaultGraphCatalogApplications(
-                log,
-                graphStoreCatalogService,
-                projectionMetricsService,
-                graphNameValidationService,
-                cypherProjectApplication,
-                dropGraphApplication,
-                dropNodePropertiesApplication,
-                dropRelationshipsApplication,
-                estimateCommonNeighbourAwareRandomWalkApplication,
-                generateGraphApplication,
-                graphMemoryUsageApplication,
-                graphSamplingApplication,
-                listGraphApplication,
-                nativeProjectApplication,
-                nodeLabelMutatorApplication,
-                streamNodePropertiesApplication,
-                streamRelationshipPropertiesApplication,
-                streamRelationshipsApplication,
-                subGraphProjectApplication,
-                writeNodeLabelApplication,
-                writeNodePropertiesApplication,
-                writeRelationshipPropertiesApplication,
-                writeRelationshipsApplication
-            );
+    DefaultGraphCatalogApplications build() {
+        return new DefaultGraphCatalogApplications(
+            log,
+            graphStoreCatalogService,
+            projectionMetricsService,
+            graphNameValidationService,
+            cypherProjectApplication,
+            dropGraphApplication,
+            dropNodePropertiesApplication,
+            dropRelationshipsApplication,
+            estimateCommonNeighbourAwareRandomWalkApplication,
+            generateGraphApplication,
+            graphMemoryUsageApplication,
+            graphSamplingApplication,
+            listGraphApplication,
+            nativeProjectApplication,
+            nodeLabelMutatorApplication,
+            streamNodePropertiesApplication,
+            streamRelationshipPropertiesApplication,
+            streamRelationshipsApplication,
+            subGraphProjectApplication,
+            writeNodeLabelApplication,
+            writeNodePropertiesApplication,
+            writeRelationshipPropertiesApplication,
+            writeRelationshipsApplication,
+            exportToDatabaseApplication
+        );
     }
 }

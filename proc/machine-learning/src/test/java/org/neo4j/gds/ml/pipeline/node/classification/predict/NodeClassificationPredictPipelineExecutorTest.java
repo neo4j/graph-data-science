@@ -441,6 +441,8 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             requestScopedDependencies,
             WriteContext.builder().build(),
             null,
+            null,
+            null,
             null
         );
         var configurationParser = new ConfigurationParser(null, null);

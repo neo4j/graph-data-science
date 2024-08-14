@@ -105,7 +105,8 @@ public class GraphDataScienceProcedures {
         AlgorithmProcedureFacadeBuilderFactory algorithmProcedureFacadeBuilderFactory,
         DeprecatedProceduresMetricService deprecatedProceduresMetricService,
         ModelCatalog modelCatalog,
-        ModelRepository modelRepository
+        ModelRepository modelRepository,
+        Transaction procedureTransaction
     ) {
         var applicationsFacade = ApplicationsFacade.create(
             log,
@@ -119,7 +120,9 @@ public class GraphDataScienceProcedures {
             requestScopedDependencies,
             writeContext,
             modelCatalog,
-            modelRepository
+            modelRepository,
+            graphDatabaseService,
+            procedureTransaction
         );
 
         var graphCatalogProcedureFacade = graphCatalogProcedureFacadeFactory.createGraphCatalogProcedureFacade(

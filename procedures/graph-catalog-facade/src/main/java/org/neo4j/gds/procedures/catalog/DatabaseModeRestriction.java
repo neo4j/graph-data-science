@@ -17,22 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.preconditions;
+package org.neo4j.gds.procedures.catalog;
 
 import org.neo4j.gds.compat.DatabaseMode;
 import org.neo4j.gds.compat.SettingProxy;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-public final class ClusterRestrictions {
+public class DatabaseModeRestriction {
+    private final GraphDatabaseService databaseService;
 
-    private ClusterRestrictions() {}
+    public DatabaseModeRestriction(GraphDatabaseService databaseService) {
+        this.databaseService = databaseService;
+    }
 
-    public static void disallowRunningOnCluster(GraphDatabaseService databaseService, String detail) throws IllegalStateException {
+    /**
+     * @throws java.lang.IllegalStateException if you are running on a cluster
+     */
+    void ensureNotOnCluster() {
         var neo4jMode = SettingProxy.databaseMode(databaseService);
-        if (neo4jMode == DatabaseMode.CORE || neo4jMode == DatabaseMode.READ_REPLICA) {
+
+        if (neo4jMode == DatabaseMode.CORE || neo4jMode == DatabaseMode.READ_REPLICA)
             throw new IllegalStateException(
-                "The requested operation (" + detail +
-                ") is not available while running Neo4j Graph Data Science library on a Neo4j Cluster.");
-        }
+                "The requested operation is not available while running Neo4j Graph Data Science library on a Neo4j Cluster."
+            );
     }
 }
