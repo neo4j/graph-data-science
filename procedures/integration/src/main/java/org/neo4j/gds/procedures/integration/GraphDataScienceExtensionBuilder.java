@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.procedures.integration;
 
-import org.apache.commons.lang3.tuple.Pair;
-import org.neo4j.gds.applications.modelcatalog.ModelRepository;
+import org.apache.commons.lang3.tuple.Triple;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
+import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.GcListenerExtension;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
@@ -101,7 +101,7 @@ public final class GraphDataScienceExtensionBuilder {
      * We want to build a GDS, we receive a few customisations and are able to read configuration,
      * and all the rest of the machinery goes here
      */
-    public static Pair<GraphDataScienceExtensionBuilder, TaskStoreService> create(
+    public static Triple<GraphDataScienceExtensionBuilder, TaskRegistryFactoryService, TaskStoreService> create(
         Log log,
         Configuration neo4jConfiguration,
         GlobalProcedures globalProcedures,
@@ -172,7 +172,7 @@ public final class GraphDataScienceExtensionBuilder {
             gcListener
         );
 
-        return Pair.of(graphDataScienceExtensionBuilder, taskStoreService);
+        return Triple.of(graphDataScienceExtensionBuilder, taskRegistryFactoryService, taskStoreService);
     }
 
     /**
