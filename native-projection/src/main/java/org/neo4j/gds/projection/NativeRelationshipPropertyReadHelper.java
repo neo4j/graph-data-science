@@ -31,9 +31,9 @@ import java.util.Arrays;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
-public final class ReadHelper {
+public final class NativeRelationshipPropertyReadHelper {
 
-    private ReadHelper() {
+    private NativeRelationshipPropertyReadHelper() {
         throw new UnsupportedOperationException("No instances");
     }
 

@@ -222,7 +222,7 @@ final class RelationshipsScannerTask extends StatementAction implements RecordSc
                             propertyReference,
                             pc
                         );
-                        ReadHelper.readProperties(
+                        NativeRelationshipPropertyReadHelper.readProperties(
                             pc,
                             propertyKeyIds,
                             defaultPropertyValues,
