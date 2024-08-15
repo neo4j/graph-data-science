@@ -17,19 +17,57 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.projection;
 
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.NumberValue;
+import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
+import java.util.Arrays;
+
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
 public final class ReadHelper {
 
     private ReadHelper() {
         throw new UnsupportedOperationException("No instances");
+    }
+
+    public static void readProperties(
+        PropertyCursor pc,
+        int[] propertyIds,
+        double[] defaultValues,
+        Aggregation[] aggregations,
+        double[] properties
+    ) {
+        Arrays.setAll(properties, indexOfPropertyId -> {
+            double defaultValue = defaultValues[indexOfPropertyId];
+            Aggregation aggregation = aggregations[indexOfPropertyId];
+            if (propertyIds[indexOfPropertyId] == NO_SUCH_PROPERTY_KEY) {
+                // we are in `count(*)` mode, so we don't expect any loads on the property
+                // and need to return a valid count value, since we are just counting rows
+                return aggregation.normalizePropertyValue(defaultValue);
+            } else {
+                return aggregation.emptyValue(defaultValue);
+            }
+        });
+        while (pc.next()) {
+            // TODO: We used ArrayUtil#linearSearchIndex before which looks at four array positions in one loop iteration.
+            //       We could do the same here and benchmark if it affects performance.
+            for (int indexOfPropertyId = 0; indexOfPropertyId < propertyIds.length; indexOfPropertyId++) {
+                if (propertyIds[indexOfPropertyId] == pc.propertyKey()) {
+                    Aggregation aggregation = aggregations[indexOfPropertyId];
+                    Value value = pc.propertyValue();
+                    double defaultValue = defaultValues[indexOfPropertyId];
+                    double propertyValue = extractValue(aggregation, value, defaultValue);
+                    properties[indexOfPropertyId] = propertyValue;
+                }
+            }
+        }
     }
 
     public static double extractValue(AnyValue value, double defaultValue) {

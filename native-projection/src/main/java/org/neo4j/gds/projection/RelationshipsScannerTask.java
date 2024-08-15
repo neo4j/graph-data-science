@@ -26,7 +26,6 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.AdjacencyBuffer;
 import org.neo4j.gds.core.loading.PropertyReader;
-import org.neo4j.gds.core.loading.ReadHelper;
 import org.neo4j.gds.core.loading.RecordScannerTask;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
 import org.neo4j.gds.core.utils.RawValues;

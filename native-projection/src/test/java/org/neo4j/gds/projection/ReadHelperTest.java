@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.projection;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -29,6 +29,13 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
@@ -100,13 +107,13 @@ class ReadHelperTest {
     @MethodSource("invalidProperties")
     void extractValueFailsForNonNumericTypes(Value value, String typePart, String valuePart) {
         IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> ReadHelper.extractValue(value, 42.0)
+            IllegalArgumentException.class,
+            () -> ReadHelper.extractValue(value, 42.0)
         );
         String expectedErrorMessage = formatWithLocale(
-                "Unsupported type [%s] of value %s. Please use a numeric property.",
-                typePart,
-                valuePart
+            "Unsupported type [%s] of value %s. Please use a numeric property.",
+            typePart,
+            valuePart
         );
         assertEquals(expectedErrorMessage, exception.getMessage());
     }
@@ -115,21 +122,44 @@ class ReadHelperTest {
     @MethodSource("invalidPropertyAndAnyAggregation")
     void extractValueFailsForNonNumericTypesAndAggregation(Value value, String typePart, String valuePart, Aggregation aggregation) {
         IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> ReadHelper.extractValue(aggregation, value, 42.0)
+            IllegalArgumentException.class,
+            () -> ReadHelper.extractValue(aggregation, value, 42.0)
         );
         String expectedErrorMessage = formatWithLocale(
-                "Unsupported type [%s] of value %s. Please use a numeric property.",
-                typePart,
-                valuePart
+            "Unsupported type [%s] of value %s. Please use a numeric property.",
+            typePart,
+            valuePart
         );
         assertEquals(expectedErrorMessage, exception.getMessage());
     }
 
     static Stream<Arguments> invalidProperties() {
         return Stream.of(
-                arguments(Values.booleanValue(true), "BOOLEAN", "Boolean('true')"),
-                arguments(Values.stringValue("42"), "TEXT", "String(\"42\")")
+            arguments(Values.booleanValue(true), "BOOLEAN", "Boolean('true')"),
+            arguments(Values.stringValue("42"), "TEXT", "String(\"42\")"),
+            arguments(
+                Values.temporalValue(LocalDateTime.ofEpochSecond(42, 0, ZoneOffset.UTC)),
+                "LOCAL_DATE_TIME",
+                "1970-01-01T00:00:42"),
+            arguments(
+                Values.temporalValue(ZonedDateTime.of(
+                    LocalDateTime.ofEpochSecond(42, 0, ZoneOffset.UTC),
+                    ZoneOffset.UTC)),
+                "ZONED_DATE_TIME",
+                "1970-01-01T00:00:42Z"),
+            // offset date times are stored internally as zoned date times in Neo4j
+            arguments(
+                Values.temporalValue(OffsetDateTime.of(
+                    LocalDateTime.ofEpochSecond(42, 0, ZoneOffset.UTC),
+                    ZoneOffset.UTC)),
+                "ZONED_DATE_TIME",
+                "1970-01-01T00:00:42Z"),
+            arguments(Values.temporalValue(LocalDate.ofEpochDay(42)), "DATE", "1970-02-12"),
+            arguments(Values.temporalValue(LocalTime.ofSecondOfDay(42)), "LOCAL_TIME", "00:00:42"),
+            arguments(
+                Values.temporalValue(OffsetTime.of(LocalTime.ofSecondOfDay(42), ZoneOffset.UTC)),
+                "ZONED_TIME",
+                "00:00:42Z")
         );
     }
 
