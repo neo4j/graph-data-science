@@ -20,8 +20,8 @@
 package org.neo4j.gds.projection;
 
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.NumberValue;
+import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -32,11 +32,11 @@ public final class RelationshipPropertyExtractor {
         throw new UnsupportedOperationException("No instances");
     }
 
-    public static double extractValue(AnyValue value, double defaultValue) {
+    public static double extractValue(Value value, double defaultValue) {
         return extractValue(Aggregation.NONE, value, defaultValue);
     }
 
-    public static double extractValue(Aggregation aggregation, AnyValue value, double defaultValue) {
+    public static double extractValue(Aggregation aggregation, Value value, double defaultValue) {
         // slightly different logic than org.neo4j.values.storable.Values#coerceToDouble
         // b/c we want to fall back to the default value if the value is empty
         if (value instanceof NumberValue) {
