@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.projection;
 
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.values.AnyValue;
@@ -26,9 +26,9 @@ import org.neo4j.values.storable.Values;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class ReadHelper {
+public final class RelationshipPropertyExtractor {
 
-    private ReadHelper() {
+    private RelationshipPropertyExtractor() {
         throw new UnsupportedOperationException("No instances");
     }
 

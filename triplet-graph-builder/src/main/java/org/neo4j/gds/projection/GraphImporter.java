@@ -35,7 +35,6 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.ImmutableNodes;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.loading.LazyIdMapBuilder;
-import org.neo4j.gds.core.loading.ReadHelper;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.ImmutablePropertyConfig;
@@ -115,14 +114,14 @@ public final class GraphImporter {
             if (relationshipProperties != null) {
                 if (relationshipProperties.size() == 1) {
                     relationshipProperties.forEach((key, value) -> {
-                        var property = ReadHelper.extractValue(value, DefaultValue.DOUBLE_DEFAULT_FALLBACK);
+                        var property = RelationshipPropertyExtractor.extractValue(value, DefaultValue.DOUBLE_DEFAULT_FALLBACK);
                         relImporter.addFromInternal(intermediateSourceId, intermediateTargetId, property);
                     });
                 } else {
                     var propertyValues = new double[relationshipProperties.size()];
                     int[] index = {0};
                     relationshipProperties.forEach((key, value) -> {
-                        var property = ReadHelper.extractValue(value, DefaultValue.DOUBLE_DEFAULT_FALLBACK);
+                        var property = RelationshipPropertyExtractor.extractValue(value, DefaultValue.DOUBLE_DEFAULT_FALLBACK);
                         var i = index[0]++;
                         propertyValues[i] = property;
                     });
