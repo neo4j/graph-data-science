@@ -106,8 +106,7 @@ public final class NodeEmbeddingApplications {
             estimationMode,
             algorithms,
             algorithmProcessingTemplateConvenience,
-            graphSageAlgorithmProcessing,
-            node2VecAlgorithmProcessing
+            graphSageAlgorithmProcessing
         );
         var trainMode = new NodeEmbeddingAlgorithmsTrainModeBusinessFacade(
             graphSageModelCatalog,

@@ -22,8 +22,7 @@ package org.neo4j.gds.procedures.algorithms.pathfinding;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
 
@@ -32,15 +31,14 @@ import java.util.function.LongFunction;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class TopologicalSortResultBuilderForStreamMode implements ResultBuilder<TopologicalSortStreamConfig, TopologicalSortResult, Stream<TopologicalSortStreamResult>, Void> {
+class TopologicalSortResultBuilderForStreamMode implements StreamResultBuilder<TopologicalSortStreamConfig, TopologicalSortResult, TopologicalSortStreamResult> {
+
     @Override
     public Stream<TopologicalSortStreamResult> build(
         Graph graph,
         GraphStore graphStore,
         TopologicalSortStreamConfig topologicalSortStreamConfig,
-        Optional<TopologicalSortResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> metadata
+        Optional<TopologicalSortResult> result
     ) {
         if (result.isEmpty()) return Stream.empty();
 

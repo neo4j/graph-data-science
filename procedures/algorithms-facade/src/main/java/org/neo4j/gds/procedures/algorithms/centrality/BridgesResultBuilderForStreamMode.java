@@ -21,8 +21,7 @@ package org.neo4j.gds.procedures.algorithms.centrality;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.bridges.Bridge;
 import org.neo4j.gds.bridges.BridgeResult;
 import org.neo4j.gds.bridges.BridgesStreamConfig;
@@ -30,7 +29,7 @@ import org.neo4j.gds.bridges.BridgesStreamConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class BridgesResultBuilderForStreamMode implements ResultBuilder<BridgesStreamConfig, BridgeResult, Stream<Bridge>, Void> {
+class BridgesResultBuilderForStreamMode implements StreamResultBuilder<BridgesStreamConfig, BridgeResult,Bridge> {
 
 
     @Override
@@ -38,9 +37,7 @@ class BridgesResultBuilderForStreamMode implements ResultBuilder<BridgesStreamCo
         Graph graph,
         GraphStore graphStore,
         BridgesStreamConfig bridgesStreamConfig,
-        Optional<BridgeResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        Optional<BridgeResult> result
     ) {
         if (result.isEmpty()) return Stream.empty();
 

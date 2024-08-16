@@ -87,18 +87,14 @@ class DefaultAlgorithmProcessingTemplateTest {
         var pathFindingResult = mock(ExampleResult.class);
         when(computation.compute(graph, graphStore)).thenReturn(pathFindingResult);
 
-        var resultBuilder = new ResultBuilder<ExampleConfiguration, ExampleResult, Stream<String>, Void>() {
+        var resultBuilder = new StreamResultBuilder<ExampleConfiguration, ExampleResult, String>() {
             @Override
             public Stream<String> build(
                 Graph graph,
                 GraphStore graphStore,
                 ExampleConfiguration configuration,
-                Optional<ExampleResult> pathFindingResult,
-                AlgorithmProcessingTimings timings,
-                Optional<Void> metadata
+                Optional<ExampleResult> pathFindingResult
             ) {
-                // we skip timings when no side effects requested
-                assertThat(timings.mutateOrWriteMillis).isEqualTo(-1);
 
                 return Stream.of(
                     "Huey",
@@ -108,7 +104,7 @@ class DefaultAlgorithmProcessingTemplateTest {
             }
         };
 
-        var resultStream = algorithmProcessingTemplate.processAlgorithm(
+        var resultStream = algorithmProcessingTemplate.processAlgorithmForStream(
             Optional.empty(),
             graphName,
             configuration,
@@ -116,7 +112,6 @@ class DefaultAlgorithmProcessingTemplateTest {
             Dijkstra,
             null,
             computation,
-            Optional.empty(),
             resultBuilder
         );
 
@@ -248,22 +243,24 @@ class DefaultAlgorithmProcessingTemplateTest {
             }
 
             @Override
-            <RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> MUTATE_OR_WRITE_METADATA mutateOrWriteWithTiming(
+            <RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> Optional<MUTATE_OR_WRITE_METADATA> mutateOrWriteWithTiming(
                 Optional<MutateOrWriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA>> mutateOrWriteStep,
                 AlgorithmProcessingTimingsBuilder timingsBuilder,
                 Graph graph,
                 GraphStore graphStore,
                 ResultStore resultStore,
-                RESULT_FROM_ALGORITHM resultFromAlgorithm,
+                Optional<RESULT_FROM_ALGORITHM> resultFromAlgorithm,
                 JobId jobId
             ) {
                 timingsBuilder.withMutateOrWriteMillis(87);
-                return mutateOrWriteStep.orElseThrow().execute(
-                    graph,
-                    graphStore,
-                    resultStore,
-                    resultFromAlgorithm,
-                    jobId
+                return Optional.of(
+                    mutateOrWriteStep.orElseThrow().execute(
+                        graph,
+                        graphStore,
+                        resultStore,
+                        null,
+                        jobId
+                     )
                 );
             }
         };

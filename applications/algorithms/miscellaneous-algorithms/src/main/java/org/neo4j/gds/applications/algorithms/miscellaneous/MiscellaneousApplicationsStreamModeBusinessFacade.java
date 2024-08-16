@@ -21,9 +21,11 @@ package org.neo4j.gds.applications.algorithms.miscellaneous;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 import org.neo4j.gds.scaleproperties.ScalePropertiesStreamConfig;
+
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ScaleProperties;
 
@@ -42,12 +44,12 @@ public class MiscellaneousApplicationsStreamModeBusinessFacade {
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
     }
 
-    public <RESULT> RESULT scaleProperties(
+    public <RESULT> Stream<RESULT> scaleProperties(
         GraphName graphName,
         ScalePropertiesStreamConfig configuration,
-        ResultBuilder<ScalePropertiesStreamConfig, ScalePropertiesResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<ScalePropertiesStreamConfig, ScalePropertiesResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             ScaleProperties,

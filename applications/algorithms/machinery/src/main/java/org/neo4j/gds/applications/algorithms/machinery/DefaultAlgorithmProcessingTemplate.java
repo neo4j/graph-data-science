@@ -37,6 +37,7 @@ import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTemplate {
     private final Log log;
@@ -82,20 +83,92 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             postGraphStoreLoadValidationHooks
         );
 
-        var graph = graphResources.graph();
-        var graphStore = graphResources.graphStore();
-
-        if (graph.isEmpty()) return resultBuilder.build(
-            graph,
-            graphStore,
+        var result = runComputation(
             configuration,
-            Optional.empty(),
-            timingsBuilder.build(),
-            Optional.empty()
+            graphResources.graph(),
+            graphResources.graphStore(),
+            label,
+            estimationFactory,
+            algorithmComputation,
+            timingsBuilder
         );
 
-        memoryGuard.assertAlgorithmCanRun(label, configuration, graph, estimationFactory);
+        var metadata = mutateOrWriteWithTiming(
+            mutateOrWriteStep,
+            timingsBuilder,
+            graphResources.graph(),
+            graphResources.graphStore(),
+            graphResources.resultStore(),
+            result,
+            configuration.jobId()
+        );
 
+        // inject dependencies to render results
+        return resultBuilder.build(
+            graphResources.graph(),
+            graphResources.graphStore(),
+            configuration,
+            result,
+            timingsBuilder.build(),
+            metadata
+        );
+    }
+
+    @Override
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM> Stream<RESULT_TO_CALLER> processAlgorithmForStream(
+        Optional<String> relationshipWeightOverride,
+        GraphName graphName,
+        CONFIGURATION configuration,
+        Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
+        LabelForProgressTracking label,
+        Supplier<MemoryEstimation> estimationFactory,
+        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
+        StreamResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
+    ) {
+
+        var timingsBuilder = new AlgorithmProcessingTimingsBuilder();
+        var graphResources = graphLoadAndValidationWithTiming(
+            timingsBuilder,
+            relationshipWeightOverride,
+            graphName,
+            configuration,
+            postGraphStoreLoadValidationHooks
+        );
+
+        var result = runComputation(
+            configuration,
+            graphResources.graph(),
+            graphResources.graphStore(),
+            label,
+            estimationFactory,
+            algorithmComputation,
+            timingsBuilder
+        );
+
+        // inject dependencies to render results
+        return resultBuilder.build(
+            graphResources.graph(),
+            graphResources.graphStore(),
+            configuration,
+            result
+        );
+    }
+
+    <RESULT_FROM_ALGORITHM,CONFIGURATION extends  AlgoBaseConfig> Optional<RESULT_FROM_ALGORITHM> runComputation(
+        CONFIGURATION configuration,
+        Graph graph,
+        GraphStore graphStore,
+        LabelForProgressTracking label,
+        Supplier<MemoryEstimation> estimationFactory,
+        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
+        AlgorithmProcessingTimingsBuilder timingsBuilder
+    ){
+
+        if (graph.isEmpty()){
+            return Optional.empty();
+        }
+
+        memoryGuard.assertAlgorithmCanRun(label, configuration, graph, estimationFactory);
         // do the actual computation
         var result = computeWithTiming(
             timingsBuilder,
@@ -105,28 +178,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             graphStore
         );
 
-        var resultStore = graphResources.resultStore();
-
-        // do any side effects
-        MUTATE_OR_WRITE_METADATA metadata = mutateOrWriteWithTiming(
-            mutateOrWriteStep,
-            timingsBuilder,
-            graph,
-            graphStore,
-            resultStore,
-            result,
-            configuration.jobId()
-        );
-
-        // inject dependencies to render results
-        return resultBuilder.build(
-            graph,
-            graphStore,
-            configuration,
-            Optional.ofNullable(result),
-            timingsBuilder.build(),
-            Optional.ofNullable(metadata)
-        );
+        return Optional.ofNullable(result);
     }
 
     /**
@@ -203,19 +255,20 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
     /**
      * @return null if we are not in mutate or write mode; appropriate metadata otherwise
      */
-    <RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> MUTATE_OR_WRITE_METADATA mutateOrWriteWithTiming(
+    <RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> Optional<MUTATE_OR_WRITE_METADATA> mutateOrWriteWithTiming(
         Optional<MutateOrWriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA>> mutateOrWriteStep,
         AlgorithmProcessingTimingsBuilder timingsBuilder,
         Graph graph,
         GraphStore graphStore,
         ResultStore resultStore,
-        RESULT_FROM_ALGORITHM result,
+        Optional<RESULT_FROM_ALGORITHM> result,
         JobId jobId
     ) {
-        if (mutateOrWriteStep.isEmpty()) return null;
+        if (mutateOrWriteStep.isEmpty() || result.isEmpty()) return Optional.empty();
 
         try (ProgressTimer ignored = ProgressTimer.start(timingsBuilder::withMutateOrWriteMillis)) {
-            return mutateOrWriteStep.get().execute(graph, graphStore, resultStore, result, jobId);
+            return Optional.ofNullable(mutateOrWriteStep.get().execute(graph, graphStore, resultStore, result.get(), jobId));
         }
     }
+
 }

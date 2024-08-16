@@ -24,8 +24,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.NodeLookup;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.paths.PathFactory;
 import org.neo4j.gds.traversal.RandomWalkStreamConfig;
 import org.neo4j.graphdb.Path;
@@ -37,7 +36,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-class RandomWalkResultBuilderForStreamMode implements ResultBuilder<RandomWalkStreamConfig, Stream<long[]>, Stream<RandomWalkStreamResult>, Void> {
+class RandomWalkResultBuilderForStreamMode implements StreamResultBuilder<RandomWalkStreamConfig, Stream<long[]>, RandomWalkStreamResult> {
     private final CloseableResourceRegistry closeableResourceRegistry;
     private final NodeLookup nodeLookup;
     private final boolean returnPath;
@@ -57,9 +56,7 @@ class RandomWalkResultBuilderForStreamMode implements ResultBuilder<RandomWalkSt
         Graph graph,
         GraphStore graphStore,
         RandomWalkStreamConfig randomWalkStreamConfig,
-        Optional<Stream<long[]>> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> metadata
+        Optional<Stream<long[]>> result
     ) {
         if (result.isEmpty()) return Stream.empty();
 

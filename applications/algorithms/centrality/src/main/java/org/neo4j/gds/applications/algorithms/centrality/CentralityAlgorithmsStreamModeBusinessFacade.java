@@ -23,7 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.articulationpoints.ArticulationPointsStreamConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
 import org.neo4j.gds.bridges.BridgeResult;
@@ -36,6 +36,8 @@ import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStreamConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankStreamConfig;
+
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ArticleRank;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ArticulationPoints;
@@ -63,151 +65,151 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
     }
 
-    public <RESULT> RESULT articleRank(
+    public <RESULT> Stream<RESULT> articleRank(
         GraphName graphName,
         PageRankStreamConfig configuration,
-        ResultBuilder<PageRankStreamConfig, PageRankResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<PageRankStreamConfig, PageRankResult, RESULT> streamResultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             ArticleRank,
             estimationFacade::pageRank,
             (graph, __) -> centralityAlgorithms.articleRank(graph, configuration),
-            resultBuilder
+            streamResultBuilder
         );
     }
 
-    public <RESULT> RESULT betweennessCentrality(
+    public <RESULT> Stream<RESULT> betweennessCentrality(
         GraphName graphName,
         BetweennessCentralityStreamConfig configuration,
-        ResultBuilder<BetweennessCentralityStreamConfig, CentralityAlgorithmResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<BetweennessCentralityStreamConfig, CentralityAlgorithmResult, RESULT> streamResultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             BetweennessCentrality,
             () -> estimationFacade.betweennessCentrality(configuration),
             (graph, __) -> centralityAlgorithms.betweennessCentrality(graph, configuration),
-            resultBuilder
+            streamResultBuilder
         );
     }
-    public <RESULT> RESULT articulationPoints(
+    public <RESULT> Stream<RESULT> articulationPoints(
         GraphName graphName,
         ArticulationPointsStreamConfig configuration,
-        ResultBuilder<ArticulationPointsStreamConfig, BitSet, RESULT, Void> resultBuilder
+        StreamResultBuilder<ArticulationPointsStreamConfig, BitSet, RESULT> streamResultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             ArticulationPoints,
             estimationFacade::articulationPoints,
             (graph, __) -> centralityAlgorithms.articulationPoints(graph, configuration),
-            resultBuilder
+            streamResultBuilder
         );
     }
-    public <RESULT> RESULT bridges(
+    public <RESULT> Stream<RESULT> bridges(
         GraphName graphName,
         BridgesStreamConfig configuration,
-        ResultBuilder<BridgesStreamConfig, BridgeResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<BridgesStreamConfig, BridgeResult, RESULT> streamResultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             BRIDGES,
             estimationFacade::bridges,
             (graph, __) -> centralityAlgorithms.bridges(graph, configuration),
-            resultBuilder
+            streamResultBuilder
         );
     }
 
-    public <RESULT> RESULT celf(
+    public <RESULT> Stream<RESULT> celf(
         GraphName graphName,
         InfluenceMaximizationStreamConfig configuration,
-        ResultBuilder<InfluenceMaximizationStreamConfig, CELFResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<InfluenceMaximizationStreamConfig, CELFResult, RESULT> streamResultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             CELF,
             () -> estimationFacade.celf(configuration),
             (graph, __) -> centralityAlgorithms.celf(graph, configuration),
-            resultBuilder
+            streamResultBuilder
         );
     }
 
-    public <RESULT> RESULT closenessCentrality(
+    public <RESULT> Stream<RESULT> closenessCentrality(
         GraphName graphName,
         ClosenessCentralityStreamConfig configuration,
-        ResultBuilder<ClosenessCentralityStreamConfig, CentralityAlgorithmResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<ClosenessCentralityStreamConfig, CentralityAlgorithmResult, RESULT> streamResultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             ClosenessCentrality,
             () -> estimationFacade.closenessCentrality(configuration),
             (graph, __) -> centralityAlgorithms.closenessCentrality(graph, configuration),
-            resultBuilder
+            streamResultBuilder
         );
     }
 
-    public <RESULT> RESULT degreeCentrality(
+    public <RESULT> Stream<RESULT> degreeCentrality(
         GraphName graphName,
         DegreeCentralityStreamConfig configuration,
-        ResultBuilder<DegreeCentralityStreamConfig, CentralityAlgorithmResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<DegreeCentralityStreamConfig, CentralityAlgorithmResult, RESULT> streamResultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             DegreeCentrality,
             () -> estimationFacade.degreeCentrality(configuration),
             (graph, __) -> centralityAlgorithms.degreeCentrality(graph, configuration),
-            resultBuilder
+            streamResultBuilder
         );
     }
 
-    public <RESULT> RESULT eigenvector(
+    public <RESULT> Stream<RESULT> eigenvector(
         GraphName graphName,
         PageRankStreamConfig configuration,
-        ResultBuilder<PageRankStreamConfig, PageRankResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<PageRankStreamConfig, PageRankResult, RESULT> streamResultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             EigenVector,
             estimationFacade::pageRank,
             (graph, __) -> centralityAlgorithms.eigenVector(graph, configuration),
-            resultBuilder
+            streamResultBuilder
         );
     }
 
-    public <RESULT> RESULT harmonicCentrality(
+    public <RESULT> Stream<RESULT> harmonicCentrality(
         GraphName graphName,
         HarmonicCentralityStreamConfig configuration,
-        ResultBuilder<HarmonicCentralityStreamConfig, HarmonicResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<HarmonicCentralityStreamConfig, HarmonicResult, RESULT> streamResultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             HarmonicCentrality,
             estimationFacade::harmonicCentrality,
             (graph, __) -> centralityAlgorithms.harmonicCentrality(graph, configuration),
-            resultBuilder
+            streamResultBuilder
         );
     }
 
-    public <RESULT> RESULT pageRank(
+    public <RESULT> Stream<RESULT> pageRank(
         GraphName graphName,
         PageRankStreamConfig configuration,
-        ResultBuilder<PageRankStreamConfig, PageRankResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<PageRankStreamConfig, PageRankResult, RESULT> streamResultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             PageRank,
             estimationFacade::pageRank,
             (graph, __) -> centralityAlgorithms.pageRank(graph, configuration),
-            resultBuilder
+            streamResultBuilder
         );
     }
 }

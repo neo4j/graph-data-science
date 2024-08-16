@@ -23,8 +23,7 @@ import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 
@@ -32,15 +31,14 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class ModularityOptimizationResultBuilderForStreamMode implements ResultBuilder<ModularityOptimizationStreamConfig, ModularityOptimizationResult, Stream<ModularityOptimizationStreamResult>, Void> {
+class ModularityOptimizationResultBuilderForStreamMode implements StreamResultBuilder<ModularityOptimizationStreamConfig, ModularityOptimizationResult, ModularityOptimizationStreamResult> {
+
     @Override
     public Stream<ModularityOptimizationStreamResult> build(
         Graph graph,
         GraphStore graphStore,
         ModularityOptimizationStreamConfig configuration,
-        Optional<ModularityOptimizationResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        Optional<ModularityOptimizationResult> result
     ) {
         if (result.isEmpty()) return Stream.empty();
 

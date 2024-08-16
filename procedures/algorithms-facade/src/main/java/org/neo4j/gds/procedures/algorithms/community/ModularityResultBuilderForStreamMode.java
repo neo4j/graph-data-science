@@ -21,8 +21,7 @@ package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.modularity.ModularityStreamConfig;
 
@@ -30,15 +29,13 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class ModularityResultBuilderForStreamMode implements ResultBuilder<ModularityStreamConfig, ModularityResult, Stream<ModularityStreamResult>, Void> {
+class ModularityResultBuilderForStreamMode implements StreamResultBuilder<ModularityStreamConfig, ModularityResult, ModularityStreamResult> {
     @Override
     public Stream<ModularityStreamResult> build(
         Graph graph,
         GraphStore graphStore,
         ModularityStreamConfig configuration,
-        Optional<ModularityResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        Optional<ModularityResult> result
     ) {
         if (result.isEmpty()) return Stream.empty();
 

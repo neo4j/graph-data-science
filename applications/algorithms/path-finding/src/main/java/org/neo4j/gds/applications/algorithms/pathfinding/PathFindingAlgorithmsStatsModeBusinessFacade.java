@@ -64,7 +64,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         AllShortestPathsBellmanFordStatsConfig configuration,
         ResultBuilder<AllShortestPathsBellmanFordStatsConfig, BellmanFordResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             BellmanFord,
@@ -79,7 +79,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         BfsStatsConfig configuration,
         ResultBuilder<BfsStatsConfig, HugeLongArray, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             BFS,
@@ -94,7 +94,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         AllShortestPathsDeltaStatsConfig configuration,
         ResultBuilder<AllShortestPathsDeltaStatsConfig, PathFindingResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             DeltaStepping,
@@ -109,7 +109,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         RandomWalkStatsConfig configuration,
         ResultBuilder<RandomWalkStatsConfig, Stream<long[]>, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             RandomWalk,
@@ -124,7 +124,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         SpanningTreeStatsConfig configuration,
         ResultBuilder<SpanningTreeStatsConfig, SpanningTree, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             LabelForProgressTracking.SpanningTree,
@@ -139,7 +139,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         SteinerTreeStatsConfig configuration,
         ResultBuilder<SteinerTreeStatsConfig, SteinerTreeResult, RESULT, Void> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
             SteinerTree,

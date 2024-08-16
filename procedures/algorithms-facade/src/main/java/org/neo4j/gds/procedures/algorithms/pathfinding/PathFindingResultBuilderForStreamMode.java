@@ -23,8 +23,7 @@ import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.paths.PathFactory;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.graphdb.Path;
@@ -38,7 +37,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class PathFindingResultBuilderForStreamMode<CONFIGURATION> implements ResultBuilder<CONFIGURATION, PathFindingResult, Stream<PathFindingStreamResult>, Void> {
+public class PathFindingResultBuilderForStreamMode<CONFIGURATION> implements StreamResultBuilder<CONFIGURATION, PathFindingResult, PathFindingStreamResult> {
     private final CloseableResourceRegistry closeableResourceRegistry;
     private final NodeLookup nodeLookup;
     private final boolean pathRequested;
@@ -58,9 +57,7 @@ public class PathFindingResultBuilderForStreamMode<CONFIGURATION> implements Res
         Graph graph,
         GraphStore graphStore,
         CONFIGURATION configuration,
-        Optional<PathFindingResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> metadata
+        Optional<PathFindingResult> result
     ) {
         if (result.isEmpty()) return Stream.of();
 

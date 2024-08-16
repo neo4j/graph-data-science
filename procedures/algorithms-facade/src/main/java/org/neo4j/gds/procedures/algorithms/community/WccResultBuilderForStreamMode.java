@@ -23,8 +23,7 @@ import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.wcc.WccStreamConfig;
 
@@ -32,15 +31,14 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class WccResultBuilderForStreamMode implements ResultBuilder<WccStreamConfig, DisjointSetStruct, Stream<WccStreamResult>, Void> {
+class WccResultBuilderForStreamMode implements StreamResultBuilder<WccStreamConfig, DisjointSetStruct, WccStreamResult> {
+
     @Override
     public Stream<WccStreamResult> build(
         Graph graph,
         GraphStore graphStore,
         WccStreamConfig configuration,
-        Optional<DisjointSetStruct> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        Optional<DisjointSetStruct> result
     ) {
         if (result.isEmpty()) return Stream.empty();
 

@@ -23,7 +23,7 @@ import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.dag.longestPath.DagLongestPathStreamConfig;
@@ -81,12 +81,12 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         this.estimationFacade = estimationFacade;
     }
 
-    public <RESULT> RESULT allShortestPaths(
+    public <RESULT> Stream<RESULT> allShortestPaths(
         GraphName graphName,
         AllShortestPathsConfig configuration,
-        ResultBuilder<AllShortestPathsConfig, Stream<AllShortestPathsStreamResult>, RESULT, Void> resultBuilder
+        StreamResultBuilder<AllShortestPathsConfig, Stream<AllShortestPathsStreamResult>, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             AllShortestPaths,
@@ -96,12 +96,12 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         );
     }
 
-    public <RESULT> RESULT bellmanFord(
+    public <RESULT> Stream<RESULT> bellmanFord(
         GraphName graphName,
         AllShortestPathsBellmanFordStreamConfig configuration,
-        ResultBuilder<AllShortestPathsBellmanFordStreamConfig, BellmanFordResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<AllShortestPathsBellmanFordStreamConfig, BellmanFordResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             BellmanFord,
@@ -111,12 +111,12 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         );
     }
 
-    public <RESULT> RESULT breadthFirstSearch(
+    public <RESULT> Stream<RESULT> breadthFirstSearch(
         GraphName graphName,
         BfsStreamConfig configuration,
-        ResultBuilder<BfsStreamConfig, HugeLongArray, RESULT, Void> resultBuilder
+        StreamResultBuilder<BfsStreamConfig, HugeLongArray, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             BFS,
@@ -126,12 +126,12 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         );
     }
 
-    public <RESULT> RESULT deltaStepping(
+    public <RESULT> Stream<RESULT> deltaStepping(
         GraphName graphName,
         AllShortestPathsDeltaStreamConfig configuration,
-        ResultBuilder<AllShortestPathsDeltaStreamConfig, PathFindingResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<AllShortestPathsDeltaStreamConfig, PathFindingResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             DeltaStepping,
@@ -141,12 +141,12 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         );
     }
 
-    public <RESULT> RESULT depthFirstSearch(
+    public <RESULT> Stream<RESULT> depthFirstSearch(
         GraphName graphName,
         DfsStreamConfig configuration,
-        ResultBuilder<DfsStreamConfig, HugeLongArray, RESULT, Void> resultBuilder
+        StreamResultBuilder<DfsStreamConfig, HugeLongArray, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             DFS,
@@ -156,12 +156,12 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         );
     }
 
-    public <RESULT> RESULT longestPath(
+    public <RESULT> Stream<RESULT> longestPath(
         GraphName graphName,
         DagLongestPathStreamConfig configuration,
-        ResultBuilder<DagLongestPathStreamConfig, PathFindingResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<DagLongestPathStreamConfig, PathFindingResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             LongestPath,
@@ -171,12 +171,12 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         );
     }
 
-    public <RESULT> RESULT randomWalk(
+    public <RESULT> Stream<RESULT> randomWalk(
         GraphName graphName,
         RandomWalkStreamConfig configuration,
-        ResultBuilder<RandomWalkStreamConfig, Stream<long[]>, RESULT, Void> resultBuilder
+        StreamResultBuilder<RandomWalkStreamConfig, Stream<long[]>, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             RandomWalk,
@@ -186,12 +186,12 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         );
     }
 
-    public <RESULT> RESULT singlePairShortestPathAStar(
+    public <RESULT> Stream<RESULT> singlePairShortestPathAStar(
         GraphName graphName,
         ShortestPathAStarStreamConfig configuration,
-        ResultBuilder<ShortestPathAStarStreamConfig, PathFindingResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<ShortestPathAStarStreamConfig, PathFindingResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             AStar,
@@ -201,12 +201,12 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         );
     }
 
-    public <RESULT> RESULT singlePairShortestPathDijkstra(
+    public <RESULT> Stream<RESULT> singlePairShortestPathDijkstra(
         GraphName graphName,
         ShortestPathDijkstraStreamConfig configuration,
-        ResultBuilder<ShortestPathDijkstraStreamConfig, PathFindingResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<ShortestPathDijkstraStreamConfig, PathFindingResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             Dijkstra,
@@ -216,27 +216,28 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         );
     }
 
-    public <RESULT> RESULT singlePairShortestPathYens(
+    public <RESULT> Stream<RESULT> singlePairShortestPathYens(
         GraphName graphName,
         ShortestPathYensStreamConfig configuration,
-        ResultBuilder<ShortestPathYensStreamConfig, PathFindingResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<ShortestPathYensStreamConfig, PathFindingResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             Yens,
             () -> estimationFacade.singlePairShortestPathYens(configuration),
             (graph, __) -> pathFindingAlgorithms.singlePairShortestPathYens(graph, configuration),
             resultBuilder
+
         );
     }
 
-    public <RESULT> RESULT singleSourceShortestPathDijkstra(
+    public <RESULT> Stream<RESULT> singleSourceShortestPathDijkstra(
         GraphName graphName,
         AllShortestPathsDijkstraStreamConfig configuration,
-        ResultBuilder<AllShortestPathsDijkstraStreamConfig, PathFindingResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<AllShortestPathsDijkstraStreamConfig, PathFindingResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             SingleSourceDijkstra,
@@ -246,12 +247,12 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         );
     }
 
-    public <RESULT> RESULT spanningTree(
+    public <RESULT> Stream<RESULT> spanningTree(
         GraphName graphName,
         SpanningTreeStreamConfig configuration,
-        ResultBuilder<SpanningTreeStreamConfig, SpanningTree, RESULT, Void> resultBuilder
+        StreamResultBuilder<SpanningTreeStreamConfig, SpanningTree, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             LabelForProgressTracking.SpanningTree,
@@ -261,12 +262,12 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         );
     }
 
-    public <RESULT> RESULT steinerTree(
+    public <RESULT> Stream<RESULT> steinerTree(
         GraphName graphName,
         SteinerTreeStreamConfig configuration,
-        ResultBuilder<SteinerTreeStreamConfig, SteinerTreeResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<SteinerTreeStreamConfig, SteinerTreeResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             SteinerTree,
@@ -276,12 +277,12 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         );
     }
 
-    public <RESULT> RESULT topologicalSort(
+    public <RESULT> Stream<RESULT> topologicalSort(
         GraphName graphName,
         TopologicalSortStreamConfig configuration,
-        ResultBuilder<TopologicalSortStreamConfig, TopologicalSortResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<TopologicalSortStreamConfig, TopologicalSortResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             TopologicalSort,

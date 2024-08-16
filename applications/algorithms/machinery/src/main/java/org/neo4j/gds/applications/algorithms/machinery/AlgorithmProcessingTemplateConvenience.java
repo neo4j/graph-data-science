@@ -27,6 +27,7 @@ import org.neo4j.gds.mem.MemoryEstimation;
 
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class AlgorithmProcessingTemplateConvenience {
     private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
@@ -90,7 +91,7 @@ public class AlgorithmProcessingTemplateConvenience {
     /**
      * No relationship weight override, no validation hooks, no mutate or write step
      */
-    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER processRegularAlgorithmInStatsOrStreamMode(
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER processRegularAlgorithmInStatsMode(
         GraphName graphName,
         CONFIGURATION configuration,
         LabelForProgressTracking label,
@@ -108,6 +109,47 @@ public class AlgorithmProcessingTemplateConvenience {
             algorithmComputation,
             Optional.empty(),
             resultBuilder
+        );
+    }
+    //STREAM
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM> Stream<RESULT_TO_CALLER> processRegularAlgorithmInStreamMode(
+        GraphName graphName,
+        CONFIGURATION configuration,
+        LabelForProgressTracking label,
+        Supplier<MemoryEstimation> estimationFactory,
+        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
+        StreamResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder,
+        Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
+        Optional<String> relationshipWeightOverride
+        ) {
+        return algorithmProcessingTemplate.processAlgorithmForStream(
+            relationshipWeightOverride,
+            graphName,
+            configuration,
+            postGraphStoreLoadValidationHooks,
+            label,
+            estimationFactory,
+            algorithmComputation,
+            resultBuilder
+        );
+    }
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM> Stream<RESULT_TO_CALLER> processRegularAlgorithmInStreamMode(
+        GraphName graphName,
+        CONFIGURATION configuration,
+        LabelForProgressTracking label,
+        Supplier<MemoryEstimation> estimationFactory,
+        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
+        StreamResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
+    ) {
+        return processRegularAlgorithmInStreamMode(
+            graphName,
+            configuration,
+            label,
+            estimationFactory,
+            algorithmComputation,
+            resultBuilder,
+            Optional.empty(),
+            Optional.empty()
         );
     }
 }

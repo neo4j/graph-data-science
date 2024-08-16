@@ -55,7 +55,6 @@ public final class SimilarityProcedureFacade {
     private final ApplicationsFacade applicationsFacade;
     private final EstimationModeRunner estimationMode;
     private final AlgorithmExecutionScaffolding algorithmExecutionScaffolding;
-    private final AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode;
 
     private SimilarityProcedureFacade(
         ProcedureReturnColumns procedureReturnColumns,
@@ -65,8 +64,7 @@ public final class SimilarityProcedureFacade {
         NodeSimilarityMutateStub nodeSimilarityMutateStub,
         ApplicationsFacade applicationsFacade,
         EstimationModeRunner estimationMode,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffolding,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode
+        AlgorithmExecutionScaffolding algorithmExecutionScaffolding
     ) {
         this.procedureReturnColumns = procedureReturnColumns;
         this.filteredKnnMutateStub = filteredKnnMutateStub;
@@ -76,7 +74,6 @@ public final class SimilarityProcedureFacade {
         this.applicationsFacade = applicationsFacade;
         this.estimationMode = estimationMode;
         this.algorithmExecutionScaffolding = algorithmExecutionScaffolding;
-        this.algorithmExecutionScaffoldingForStreamMode = algorithmExecutionScaffoldingForStreamMode;
     }
 
     public static SimilarityProcedureFacade create(
@@ -84,9 +81,8 @@ public final class SimilarityProcedureFacade {
         GenericStub genericStub,
         ProcedureReturnColumns procedureReturnColumns,
         EstimationModeRunner estimationModeRunner,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffolding,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode
-    ) {
+        AlgorithmExecutionScaffolding algorithmExecutionScaffolding)
+    {
         var filteredKnnMutateStub = new FilteredKnnMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
         var filteredNodeSimilarityMutateStub = new FilteredNodeSimilarityMutateStub(
             genericStub,
@@ -108,8 +104,7 @@ public final class SimilarityProcedureFacade {
             nodeSimilarityMutateStub,
             applicationsFacade,
             estimationModeRunner,
-            algorithmExecutionScaffolding,
-            algorithmExecutionScaffoldingForStreamMode
+            algorithmExecutionScaffolding
         );
     }
 
@@ -149,7 +144,7 @@ public final class SimilarityProcedureFacade {
     public Stream<SimilarityResult> filteredKnnStream(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new FilteredKnnResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             FilteredKnnStreamConfig::of,
@@ -248,7 +243,7 @@ public final class SimilarityProcedureFacade {
     public Stream<SimilarityResult> filteredNodeSimilarityStream(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new FilteredNodeSimilarityResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             FilteredNodeSimilarityStreamConfig::of,
@@ -353,7 +348,7 @@ public final class SimilarityProcedureFacade {
     ) {
         var resultBuilder = new KnnResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             KnnStreamConfig::of,
@@ -452,7 +447,7 @@ public final class SimilarityProcedureFacade {
     public Stream<SimilarityResult> nodeSimilarityStream(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new NodeSimilarityResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             NodeSimilarityStreamConfig::of,

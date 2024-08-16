@@ -22,24 +22,21 @@ package org.neo4j.gds.procedures.algorithms.centrality;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.articulationpoints.ArticulationPointsStreamConfig;
 
 import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class ArticulationPointsResultBuilderForStreamMode implements ResultBuilder<ArticulationPointsStreamConfig, BitSet, Stream<ArticulationPoint>, Void> {
+class ArticulationPointsResultBuilderForStreamMode implements StreamResultBuilder<ArticulationPointsStreamConfig, BitSet, ArticulationPoint> {
 
     @Override
     public Stream<ArticulationPoint> build(
         Graph graph,
         GraphStore graphStore,
-        ArticulationPointsStreamConfig bridgesStreamConfig,
-        Optional<BitSet> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        ArticulationPointsStreamConfig articulationPointsStreamConfig,
+        Optional<BitSet> result
     ) {
         if (result.isEmpty()) return Stream.empty();
 
@@ -50,6 +47,5 @@ class ArticulationPointsResultBuilderForStreamMode implements ResultBuilder<Arti
             .filter(bridges::get)
             .map(graph::toOriginalNodeId)
             .mapToObj(ArticulationPoint::new);
-
     }
 }

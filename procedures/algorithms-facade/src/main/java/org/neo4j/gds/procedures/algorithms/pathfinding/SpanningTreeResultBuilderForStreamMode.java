@@ -22,8 +22,7 @@ package org.neo4j.gds.procedures.algorithms.pathfinding;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeStreamConfig;
 
@@ -31,15 +30,13 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class SpanningTreeResultBuilderForStreamMode implements ResultBuilder<SpanningTreeStreamConfig, SpanningTree, Stream<SpanningTreeStreamResult>, Void> {
+class SpanningTreeResultBuilderForStreamMode implements StreamResultBuilder<SpanningTreeStreamConfig, SpanningTree, SpanningTreeStreamResult> {
     @Override
     public Stream<SpanningTreeStreamResult> build(
         Graph graph,
         GraphStore graphStore,
         SpanningTreeStreamConfig configuration,
-        Optional<SpanningTree> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> metadata
+        Optional<SpanningTree> result
     ) {
         if (result.isEmpty()) return Stream.empty();
 

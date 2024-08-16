@@ -21,7 +21,7 @@ package org.neo4j.gds.applications.algorithms.community;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -86,228 +86,228 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
     }
 
-    public <RESULT> RESULT approximateMaximumKCut(
+    public <RESULT> Stream<RESULT> approximateMaximumKCut(
         GraphName graphName,
         ApproxMaxKCutStreamConfig configuration,
-        ResultBuilder<ApproxMaxKCutStreamConfig, ApproxMaxKCutResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<ApproxMaxKCutStreamConfig, ApproxMaxKCutResult, RESULT> streamResultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             ApproximateMaximumKCut,
             () -> estimationFacade.approximateMaximumKCut(configuration),
             (graph, __) -> algorithms.approximateMaximumKCut(graph, configuration),
-            resultBuilder
+            streamResultBuilder
         );
     }
 
-    public <RESULT> RESULT conductance(
+    public <RESULT> Stream<RESULT> conductance(
         GraphName graphName,
         ConductanceStreamConfig configuration,
-        ResultBuilder<ConductanceStreamConfig, ConductanceResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<ConductanceStreamConfig, ConductanceResult, RESULT> streamResultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             Conductance,
             estimationFacade::conductance,
             (graph, __) -> algorithms.conductance(graph, configuration),
-            resultBuilder
+            streamResultBuilder
         );
     }
 
-    public <RESULT> RESULT k1Coloring(
+    public <RESULT> Stream<RESULT> k1Coloring(
         GraphName graphName,
         K1ColoringStreamConfig configuration,
-        ResultBuilder<K1ColoringStreamConfig, K1ColoringResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<K1ColoringStreamConfig, K1ColoringResult, RESULT> streamResultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             K1Coloring,
             estimationFacade::k1Coloring,
             (graph, __) -> algorithms.k1Coloring(graph, configuration),
-            resultBuilder
+            streamResultBuilder
         );
     }
 
-    public <RESULT> RESULT kCore(
+    public <RESULT> Stream<RESULT> kCore(
         GraphName graphName,
         KCoreDecompositionStreamConfig configuration,
-        ResultBuilder<KCoreDecompositionStreamConfig, KCoreDecompositionResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<KCoreDecompositionStreamConfig, KCoreDecompositionResult, RESULT> streamResultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             KCore,
             estimationFacade::kCore,
             (graph, __) -> algorithms.kCore(graph, configuration),
-            resultBuilder
+            streamResultBuilder
         );
     }
 
-    public <RESULT> RESULT kMeans(
+    public <RESULT> Stream<RESULT> kMeans(
         GraphName graphName,
         KmeansStreamConfig configuration,
-        ResultBuilder<KmeansStreamConfig, KmeansResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<KmeansStreamConfig, KmeansResult, RESULT> streamResultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             KMeans,
             () -> estimationFacade.kMeans(configuration),
             (graph, __) -> algorithms.kMeans(graph, configuration),
-            resultBuilder
+            streamResultBuilder
         );
     }
 
-    public <RESULT> RESULT labelPropagation(
+    public <RESULT> Stream<RESULT> labelPropagation(
         GraphName graphName,
         LabelPropagationStreamConfig configuration,
-        ResultBuilder<LabelPropagationStreamConfig, LabelPropagationResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<LabelPropagationStreamConfig, LabelPropagationResult, RESULT> streamResultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             LabelPropagation,
             estimationFacade::labelPropagation,
             (graph, __) -> algorithms.labelPropagation(graph, configuration),
-            resultBuilder
+            streamResultBuilder
         );
     }
 
-    public <RESULT> RESULT lcc(
+    public <RESULT> Stream<RESULT> lcc(
         GraphName graphName,
         LocalClusteringCoefficientStreamConfig configuration,
-        ResultBuilder<LocalClusteringCoefficientStreamConfig, LocalClusteringCoefficientResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<LocalClusteringCoefficientStreamConfig, LocalClusteringCoefficientResult, RESULT> streamResultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             LCC,
             () -> estimationFacade.lcc(configuration),
             (graph, __) -> algorithms.lcc(graph, configuration),
-            resultBuilder
+            streamResultBuilder
         );
     }
 
-    public <RESULT> RESULT leiden(
+    public <RESULT> Stream<RESULT> leiden(
         GraphName graphName,
         LeidenStreamConfig configuration,
-        ResultBuilder<LeidenStreamConfig, LeidenResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<LeidenStreamConfig, LeidenResult, RESULT> streamResultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             Leiden,
             () -> estimationFacade.leiden(configuration),
             (graph, __) -> algorithms.leiden(graph, configuration),
-            resultBuilder
+            streamResultBuilder
         );
     }
 
-    public <RESULT> RESULT louvain(
+    public <RESULT> Stream<RESULT> louvain(
         GraphName graphName,
         LouvainStreamConfig configuration,
-        ResultBuilder<LouvainStreamConfig, LouvainResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<LouvainStreamConfig, LouvainResult, RESULT> streamResultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             Louvain,
             () -> estimationFacade.louvain(configuration),
             (graph, __) -> algorithms.louvain(graph, configuration),
-            resultBuilder
+            streamResultBuilder
         );
     }
 
-    public <RESULT> RESULT modularity(
+    public <RESULT> Stream<RESULT> modularity(
         GraphName graphName,
         ModularityStreamConfig configuration,
-        ResultBuilder<ModularityStreamConfig, ModularityResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<ModularityStreamConfig, ModularityResult, RESULT> streamResultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             Modularity,
             estimationFacade::modularity,
             (graph, __) -> algorithms.modularity(graph, configuration),
-            resultBuilder
+            streamResultBuilder
         );
     }
 
-    public <RESULT> RESULT modularityOptimization(
+    public <RESULT> Stream<RESULT> modularityOptimization(
         GraphName graphName,
         ModularityOptimizationStreamConfig configuration,
-        ResultBuilder<ModularityOptimizationStreamConfig, ModularityOptimizationResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<ModularityOptimizationStreamConfig, ModularityOptimizationResult, RESULT> streamResultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             ModularityOptimization,
             estimationFacade::modularityOptimization,
             (graph, __) -> algorithms.modularityOptimization(graph, configuration),
-            resultBuilder
+            streamResultBuilder
         );
     }
 
-    public <RESULT> RESULT scc(
+    public <RESULT> Stream<RESULT> scc(
         GraphName graphName,
         SccStreamConfig configuration,
-        ResultBuilder<SccStreamConfig, HugeLongArray, RESULT, Void> resultBuilder
+        StreamResultBuilder<SccStreamConfig, HugeLongArray, RESULT> streamResultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             SCC,
             estimationFacade::scc,
             (graph, __) -> algorithms.scc(graph, configuration),
-            resultBuilder
+            streamResultBuilder
         );
     }
 
-    public <RESULT> RESULT triangleCount(
+    public <RESULT> Stream<RESULT> triangleCount(
         GraphName graphName,
         TriangleCountStreamConfig configuration,
-        ResultBuilder<TriangleCountStreamConfig, TriangleCountResult, RESULT, Void> resultBuilder
+        StreamResultBuilder<TriangleCountStreamConfig, TriangleCountResult, RESULT> streamResultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             TriangleCount,
             estimationFacade::triangleCount,
             (graph, __) -> algorithms.triangleCount(graph, configuration),
-            resultBuilder
+            streamResultBuilder
         );
     }
 
-    public <RESULT> RESULT triangles(
+    public <RESULT> Stream<RESULT> triangles(
         GraphName graphName,
         TriangleCountBaseConfig configuration,
-        ResultBuilder<TriangleCountBaseConfig, Stream<TriangleStreamResult>, RESULT, Void> resultBuilder
+        StreamResultBuilder<TriangleCountBaseConfig, Stream<TriangleStreamResult>, RESULT> streamResultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             Triangles,
             estimationFacade::triangles,
             (graph, __) -> algorithms.triangles(graph, configuration),
-            resultBuilder
+            streamResultBuilder
         );
     }
 
-    public <RESULT> RESULT wcc(
+    public <RESULT> Stream<RESULT> wcc(
         GraphName graphName,
         WccStreamConfig configuration,
-        ResultBuilder<WccStreamConfig, DisjointSetStruct, RESULT, Void> resultBuilder
+        StreamResultBuilder<WccStreamConfig, DisjointSetStruct, RESULT> streamResultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsOrStreamMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             WCC,
             () -> estimationFacade.wcc(configuration),
             (graph, __) -> algorithms.wcc(graph, configuration),
-            resultBuilder
+            streamResultBuilder
         );
     }
 }

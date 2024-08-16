@@ -86,7 +86,6 @@ public final class CentralityProcedureFacade {
 
     private final EstimationModeRunner estimationMode;
     private final AlgorithmExecutionScaffolding algorithmExecutionScaffolding;
-    private final AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode;
 
     private CentralityProcedureFacade(
         ProcedureReturnColumns procedureReturnColumns,
@@ -102,9 +101,7 @@ public final class CentralityProcedureFacade {
         PageRankMutateStub pageRankMutateStub,
         ApplicationsFacade applicationsFacade,
         EstimationModeRunner estimationMode,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffolding,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode
-    ) {
+        AlgorithmExecutionScaffolding algorithmExecutionScaffolding) {
         this.procedureReturnColumns = procedureReturnColumns;
         this.articleRankMutateStub = articleRankMutateStub;
         this.articulationPointsMutateStub = articulationPointsMutateStub;
@@ -119,7 +116,6 @@ public final class CentralityProcedureFacade {
         this.applicationsFacade = applicationsFacade;
         this.estimationMode = estimationMode;
         this.algorithmExecutionScaffolding = algorithmExecutionScaffolding;
-        this.algorithmExecutionScaffoldingForStreamMode = algorithmExecutionScaffoldingForStreamMode;
     }
 
     public static CentralityProcedureFacade create(
@@ -127,8 +123,7 @@ public final class CentralityProcedureFacade {
         ApplicationsFacade applicationsFacade,
         ProcedureReturnColumns procedureReturnColumns,
         EstimationModeRunner estimationModeRunner,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffolding,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffoldingForStreamMode
+        AlgorithmExecutionScaffolding algorithmExecutionScaffolding
     ) {
         var articleRankMutateStub = new PageRankMutateStub(
             genericStub,
@@ -197,8 +192,7 @@ public final class CentralityProcedureFacade {
             pageRankMutateStub,
             applicationsFacade,
             estimationModeRunner,
-            algorithmExecutionScaffolding,
-            algorithmExecutionScaffoldingForStreamMode
+            algorithmExecutionScaffolding
         );
     }
 
@@ -208,7 +202,7 @@ public final class CentralityProcedureFacade {
     ) {
         var resultBuilder = new AlphaHarmonicCentralityResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             HarmonicCentralityStreamConfig::of,
@@ -266,7 +260,7 @@ public final class CentralityProcedureFacade {
     public Stream<CentralityStreamResult> articleRankStream(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new PageRankResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             PageRankStreamConfig::of,
@@ -378,7 +372,7 @@ public final class CentralityProcedureFacade {
     ) {
         var resultBuilder = new BetweennessCentralityResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             BetweennessCentralityStreamConfig::of,
@@ -444,7 +438,7 @@ public final class CentralityProcedureFacade {
     ) {
         var resultBuilder = new ArticulationPointsResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             ArticulationPointsStreamConfig::of,
@@ -551,7 +545,7 @@ public final class CentralityProcedureFacade {
     ) {
         var resultBuilder = new BridgesResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             BridgesStreamConfig::of,
@@ -617,7 +611,7 @@ public final class CentralityProcedureFacade {
     ) {
         var resultBuilder = new CelfResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             InfluenceMaximizationStreamConfig::of,
@@ -696,7 +690,7 @@ public final class CentralityProcedureFacade {
     ) {
         var resultBuilder = new ClosenessCentralityResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             ClosenessCentralityStreamConfig::of,
@@ -757,7 +751,7 @@ public final class CentralityProcedureFacade {
     ) {
         var resultBuilder = new DegreeCentralityResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             DegreeCentralityStreamConfig::of,
@@ -850,7 +844,7 @@ public final class CentralityProcedureFacade {
 
         var resultBuilder = new PageRankResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             PageRankStreamConfig::of,
@@ -927,7 +921,7 @@ public final class CentralityProcedureFacade {
     ) {
         var resultBuilder = new HarmonicCentralityResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             HarmonicCentralityStreamConfig::of,
@@ -982,7 +976,7 @@ public final class CentralityProcedureFacade {
     public Stream<CentralityStreamResult> pageRankStream(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new PageRankResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffoldingForStreamMode.runAlgorithm(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             PageRankStreamConfig::of,

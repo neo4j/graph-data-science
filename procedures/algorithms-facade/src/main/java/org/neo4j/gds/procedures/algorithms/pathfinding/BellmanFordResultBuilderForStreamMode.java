@@ -23,8 +23,7 @@ import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStreamConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
@@ -32,7 +31,7 @@ import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class BellmanFordResultBuilderForStreamMode implements ResultBuilder<AllShortestPathsBellmanFordStreamConfig, BellmanFordResult, Stream<BellmanFordStreamResult>, Void> {
+class BellmanFordResultBuilderForStreamMode implements StreamResultBuilder<AllShortestPathsBellmanFordStreamConfig, BellmanFordResult, BellmanFordStreamResult> {
     private final CloseableResourceRegistry closeableResourceRegistry;
     private final NodeLookup nodeLookup;
     private final boolean routeRequested;
@@ -52,9 +51,7 @@ class BellmanFordResultBuilderForStreamMode implements ResultBuilder<AllShortest
         Graph graph,
         GraphStore graphStore,
         AllShortestPathsBellmanFordStreamConfig configuration,
-        Optional<BellmanFordResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> metadata
+        Optional<BellmanFordResult> result
     ) {
         if (result.isEmpty()) return Stream.of();
 
