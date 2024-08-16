@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.procedures;
 
-import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -51,7 +50,6 @@ public class AlgorithmProcedureFacadeBuilderFactory {
         ConfigurationParser configurationParser,
         RequestScopedDependencies requestScopedDependencies,
         KernelTransaction kernelTransaction,
-        AlgorithmMetaDataSetter algorithmMetaDataSetter,
         ApplicationsFacade applicationsFacade,
         ProcedureReturnColumns procedureReturnColumns
     ) {
@@ -70,8 +68,7 @@ public class AlgorithmProcedureFacadeBuilderFactory {
 
         var algorithmExecutionScaffolding = new AlgorithmExecutionScaffolding(
             configurationParser,
-            algorithmMetaDataSetter,
-            requestScopedDependencies.getUser()
+            requestScopedDependencies
         );
 
         return new AlgorithmProcedureFacadeBuilder(

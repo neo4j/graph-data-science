@@ -144,18 +144,19 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
 
     @Override
     public GraphDataScienceProcedures apply(Context context) throws ProcedureException {
+        var graphDatabaseService = context.graphDatabaseAPI();
+        var exporterContext = new ExporterContext.ProcedureContextWrapper(context);
         var kernelTransaction = kernelTransactionAccessor.getKernelTransaction(context);
         var procedureCallContext = context.procedureCallContext();
+        var procedureTransaction = procedureTransactionAccessor.getProcedureTransaction(context);
 
         var algorithmMetaDataSetter = algorithmMetaDataSetterService.getAlgorithmMetaDataSetter(kernelTransaction);
-        var graphDatabaseService = context.graphDatabaseAPI();
         var databaseId = databaseIdAccessor.getDatabaseId(graphDatabaseService);
-
-        var writeContext = createWriteContext(context, graphDatabaseService);
-
         var procedureReturnColumns = new ProcedureCallContextReturnColumns(procedureCallContext);
         var terminationFlag = terminationFlagAccessor.createTerminationFlag(kernelTransaction);
         var user = userAccessor.getUser(context.securityContext());
+        var writeContext = createWriteContext(exporterContext, graphDatabaseService);
+
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var taskStore = taskStoreService.getTaskStore(databaseId);
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
@@ -171,6 +172,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         );
 
         var requestScopedDependencies = RequestScopedDependencies.builder()
+            .with(algorithmMetaDataSetter)
             .with(databaseId)
             .with(graphLoaderContext)
             .with(taskRegistryFactory)
@@ -181,43 +183,40 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
             .with(userLogStore)
             .build();
 
-        var procedureTransaction = procedureTransactionAccessor.getProcedureTransaction(context);
-
         return GraphDataScienceProcedures.create(
             log,
-            defaultsConfiguration,
-            exportLocation,
-            limitsConfiguration,
-            algorithmProcessingTemplateDecorator,
-            graphCatalogApplicationsDecorator,
-            modelCatalogApplicationsDecorator,
-            graphStoreCatalogService,
-            memoryGuard,
             algorithmMetricsService,
-            projectionMetricsService,
-            algorithmMetaDataSetter,
-            kernelTransaction,
-            requestScopedDependencies,
-            writeContext,
-            procedureReturnColumns,
-            graphCatalogProcedureFacadeFactory,
-            graphDatabaseService,
-            procedureTransaction,
             algorithmProcedureFacadeBuilderFactory,
+            defaultsConfiguration,
             deprecatedProceduresMetricService,
+            exportLocation,
+            graphCatalogProcedureFacadeFactory,
+            graphStoreCatalogService,
+            limitsConfiguration,
+            memoryGuard,
             modelCatalog,
             modelRepository,
-            procedureTransaction
+            projectionMetricsService,
+            graphDatabaseService,
+            kernelTransaction,
+            procedureReturnColumns,
+            requestScopedDependencies,
+            procedureTransaction,
+            writeContext,
+            algorithmProcessingTemplateDecorator,
+            graphCatalogApplicationsDecorator,
+            modelCatalogApplicationsDecorator
         );
     }
 
-    private WriteContext createWriteContext(Context context, GraphDatabaseService graphDatabaseService) {
+    private WriteContext createWriteContext(
+        ExporterContext exporterContext,
+        GraphDatabaseService graphDatabaseService
+    ) {
         var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(
             graphDatabaseService,
             neo4jConfiguration
         );
-
-        var exporterContext = new ExporterContext.ProcedureContextWrapper(context);
 
         return WriteContext.create(exportBuildersProvider, exporterContext);
     }

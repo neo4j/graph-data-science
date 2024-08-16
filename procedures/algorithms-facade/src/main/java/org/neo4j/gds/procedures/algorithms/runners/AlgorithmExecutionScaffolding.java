@@ -19,9 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.runners;
 
-import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.api.User;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
@@ -38,17 +37,14 @@ import java.util.stream.Stream;
 
 public class AlgorithmExecutionScaffolding {
     private final ConfigurationParser configurationParser;
-    private final AlgorithmMetaDataSetter algorithmMetaDataSetter;
-    private final User user;
+    private final RequestScopedDependencies requestScopedDependencies;
 
     public AlgorithmExecutionScaffolding(
         ConfigurationParser configurationParser,
-        AlgorithmMetaDataSetter algorithmMetaDataSetter,
-        User user
+        RequestScopedDependencies requestScopedDependencies
     ) {
         this.configurationParser = configurationParser;
-        this.algorithmMetaDataSetter = algorithmMetaDataSetter;
-        this.user = user;
+        this.requestScopedDependencies = requestScopedDependencies;
     }
 
     public <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER runAlgorithm(
@@ -63,7 +59,7 @@ public class AlgorithmExecutionScaffolding {
         var configuration = configurationParser.parseConfiguration(
             rawConfiguration,
             configurationLexer,
-            user
+            requestScopedDependencies.getUser()
         );
 
         return algorithm.compute(graphName, configuration, resultBuilder);
@@ -81,12 +77,11 @@ public class AlgorithmExecutionScaffolding {
         var configuration = configurationParser.parseConfiguration(
             rawConfiguration,
             configurationLexer,
-            user
+            requestScopedDependencies.getUser()
         );
 
         return algorithm.compute(graphName, configuration, resultBuilder);
     }
-
 
     public <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> Stream<RESULT_TO_CALLER> runStreamAlgorithm(
         String graphNameAsString,
@@ -99,12 +94,11 @@ public class AlgorithmExecutionScaffolding {
         var configuration = configurationParser.parseConfiguration(
             rawConfiguration,
             configurationLexer,
-            user
+            requestScopedDependencies.getUser()
         );
 
-        algorithmMetaDataSetter.set(configuration);
+        requestScopedDependencies.getAlgorithmMetaDataSetter().set(configuration);
+
         return algorithm.compute(graphName, configuration, resultBuilder);
     }
-
-
 }

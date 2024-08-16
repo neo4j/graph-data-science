@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.procedures;
 
-import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
@@ -86,29 +85,27 @@ public class GraphDataScienceProcedures {
 
     public static GraphDataScienceProcedures create(
         Log log,
-        DefaultsConfiguration defaultsConfiguration,
-        Supplier<Path> exportLocation,
-        LimitsConfiguration limitsConfiguration,
-        Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
-        Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
-        Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator,
-        GraphStoreCatalogService graphStoreCatalogService,
-        MemoryGuard memoryGuard,
         AlgorithmMetricsService algorithmMetricsService,
-        ProjectionMetricsService projectionMetricsService,
-        AlgorithmMetaDataSetter algorithmMetaDataSetter,
-        KernelTransaction kernelTransaction,
-        RequestScopedDependencies requestScopedDependencies,
-        WriteContext writeContext,
-        ProcedureReturnColumns procedureReturnColumns,
-        GraphCatalogProcedureFacadeFactory graphCatalogProcedureFacadeFactory,
-        GraphDatabaseService graphDatabaseService,
-        Transaction transaction,
         AlgorithmProcedureFacadeBuilderFactory algorithmProcedureFacadeBuilderFactory,
+        DefaultsConfiguration defaultsConfiguration,
         DeprecatedProceduresMetricService deprecatedProceduresMetricService,
+        Supplier<Path> exportLocation,
+        GraphCatalogProcedureFacadeFactory graphCatalogProcedureFacadeFactory,
+        GraphStoreCatalogService graphStoreCatalogService,
+        LimitsConfiguration limitsConfiguration,
+        MemoryGuard memoryGuard,
         ModelCatalog modelCatalog,
         ModelRepository modelRepository,
-        Transaction procedureTransaction
+        ProjectionMetricsService projectionMetricsService,
+        GraphDatabaseService graphDatabaseService,
+        KernelTransaction kernelTransaction,
+        ProcedureReturnColumns procedureReturnColumns,
+        RequestScopedDependencies requestScopedDependencies,
+        Transaction procedureTransaction,
+        WriteContext writeContext,
+        Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
+        Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
+        Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator
     ) {
         var applicationsFacade = ApplicationsFacade.create(
             log,
@@ -132,7 +129,7 @@ public class GraphDataScienceProcedures {
             applicationsFacade,
             graphDatabaseService,
             kernelTransaction,
-            transaction,
+            procedureTransaction,
             requestScopedDependencies,
             writeContext,
             procedureReturnColumns
@@ -146,7 +143,6 @@ public class GraphDataScienceProcedures {
             configurationParser,
             requestScopedDependencies,
             kernelTransaction,
-            algorithmMetaDataSetter,
             applicationsFacade,
             procedureReturnColumns
         );
