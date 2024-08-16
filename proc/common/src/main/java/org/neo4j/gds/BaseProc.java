@@ -20,22 +20,18 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.applications.graphstorecatalog.GraphStoreFromCatalogLoader;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.config.BaseConfig;
-import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.Username;
-import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
+import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.ProcedureCallContextReturnColumns;
 import org.neo4j.gds.procedures.TransactionCloseableResourceRegistry;
 import org.neo4j.gds.procedures.TransactionNodeLookup;
-import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.gds.procedures.integration.TransactionTerminationMonitor;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.gds.transaction.EmptyTransactionContext;
@@ -47,8 +43,6 @@ import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Context;
-
-import java.util.function.Supplier;
 
 public abstract class BaseProc {
 
@@ -88,16 +82,6 @@ public abstract class BaseProc {
         return username.username();
     }
 
-    protected GraphStoreCatalogEntry graphStoreFromCatalog(String graphName, BaseConfig config) {
-        return GraphStoreFromCatalogLoader.graphStoreFromCatalog(
-            graphName,
-            config,
-            username(),
-            databaseId(),
-            isGdsAdmin()
-        );
-    }
-
     protected boolean isGdsAdmin() {
         if (transaction == null) {
             // No transaction available (likely we're in a test), no-one is admin here
@@ -107,19 +91,6 @@ public abstract class BaseProc {
         // com.neo4j.server.security.enterprise.auth.plugin.api.PredefinedRoles.ADMIN
         String PREDEFINED_ADMIN_ROLE = "admin";
         return transaction.securityContext().roles().contains(PREDEFINED_ADMIN_ROLE);
-    }
-
-    protected final <R> R runWithExceptionLogging(String message, Supplier<R> supplier) {
-        try {
-            return supplier.get();
-        } catch (Exception e) {
-            log.warn(message, e);
-            throw e;
-        }
-    }
-
-    protected final void validateConfig(CypherMapAccess cypherConfig, BaseConfig config) {
-        cypherConfig.requireOnlyKeysFrom(config.configKeys());
     }
 
     public ExecutionContext executionContext() {

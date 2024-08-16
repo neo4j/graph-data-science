@@ -35,7 +35,6 @@ import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
-import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
@@ -77,9 +76,6 @@ public interface ExecutionContext {
     AlgorithmsProcedureFacade algorithmsProcedureFacade();
 
     @Nullable
-    RelationshipStreamExporterBuilder relationshipStreamExporterBuilder();
-
-    @Nullable
     RelationshipExporterBuilder relationshipExporterBuilder();
 
     @Nullable
@@ -90,14 +86,6 @@ public interface ExecutionContext {
             .builder()
             .from(this)
             .nodePropertyExporterBuilder(nodePropertyExporterBuilder)
-            .build();
-    }
-
-    default ExecutionContext withRelationshipStreamExporterBuilder(RelationshipStreamExporterBuilder relationshipStreamExporterBuilder) {
-        return ImmutableExecutionContext
-            .builder()
-            .from(this)
-            .relationshipStreamExporterBuilder(relationshipStreamExporterBuilder)
             .build();
     }
 
@@ -182,16 +170,10 @@ public interface ExecutionContext {
         @Override
         public MetricsFacade metricsFacade() {
             return MetricsFacade.PASSTHROUGH_METRICS_FACADE;
-
         }
 
         @Override
         public AlgorithmsProcedureFacade algorithmsProcedureFacade() {
-            return null;
-        }
-
-        @Override
-        public @Nullable RelationshipStreamExporterBuilder relationshipStreamExporterBuilder() {
             return null;
         }
 
