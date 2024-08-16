@@ -309,7 +309,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
         );
 
         assertThat(rootCause(exception)).hasMessage(
-            "The configuration option 'gds.export.location' must be set."
+            "The configuration 'gds.export.location' needs to be set."
         );
     }
 
