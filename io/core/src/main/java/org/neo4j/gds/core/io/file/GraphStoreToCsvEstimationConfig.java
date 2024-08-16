@@ -17,15 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.catalog;
+package org.neo4j.gds.core.io.file;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfig;
 
 @Configuration
 public interface GraphStoreToCsvEstimationConfig extends GraphStoreToFileExporterConfig {
-
     @Configuration.DoubleRange(min = 0.0, max = 1.0)
     default double samplingFactor() {
         return 0.001;

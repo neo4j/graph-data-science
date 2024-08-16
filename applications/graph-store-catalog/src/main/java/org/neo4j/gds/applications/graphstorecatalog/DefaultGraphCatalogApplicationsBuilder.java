@@ -56,6 +56,7 @@ class DefaultGraphCatalogApplicationsBuilder {
     private EstimateCommonNeighbourAwareRandomWalkApplication estimateCommonNeighbourAwareRandomWalkApplication;
     private GenerateGraphApplication generateGraphApplication;
     private ExportToCsvApplication exportToCsvApplication;
+    private ExportToCsvEstimateApplication exportToCsvEstimateApplication;
     private ExportToDatabaseApplication exportToDatabaseApplication;
 
     public DefaultGraphCatalogApplicationsBuilder(
@@ -119,6 +120,11 @@ class DefaultGraphCatalogApplicationsBuilder {
 
     DefaultGraphCatalogApplicationsBuilder withExportToCsvApplication(ExportToCsvApplication exportToCsvApplication) {
         this.exportToCsvApplication = exportToCsvApplication;
+        return this;
+    }
+
+    DefaultGraphCatalogApplicationsBuilder withExportToCsvEstimateApplication(ExportToCsvEstimateApplication exportToCsvEstimateApplication) {
+        this.exportToCsvEstimateApplication = exportToCsvEstimateApplication;
         return this;
     }
 
@@ -228,6 +234,7 @@ class DefaultGraphCatalogApplicationsBuilder {
             writeRelationshipPropertiesApplication,
             writeRelationshipsApplication,
             exportToCsvApplication,
+            exportToCsvEstimateApplication,
             exportToDatabaseApplication
         );
     }
