@@ -650,6 +650,12 @@ public class GraphCatalogProcedureFacade {
         return Stream.of(result);
     }
 
+    public Stream<MemoryEstimateResult> exportToCsvEstimate(String graphName, Map<String, Object> configuration) {
+        var result = catalog().exportToCsvEstimate(graphName, configuration);
+
+        return Stream.of(result);
+    }
+
     public Stream<DatabaseExportResult> exportToDatabase(
         String graphName,
         Map<String, Object> configuration

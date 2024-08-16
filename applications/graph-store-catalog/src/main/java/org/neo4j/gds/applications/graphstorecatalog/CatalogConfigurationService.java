@@ -29,6 +29,7 @@ import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.io.db.GraphStoreToDatabaseExporterConfig;
+import org.neo4j.gds.core.io.file.GraphStoreToCsvEstimationConfig;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
 import org.neo4j.gds.graphsampling.config.CommonNeighbourAwareRandomWalkConfig;
@@ -148,7 +149,7 @@ public class CatalogConfigurationService {
         return configuration;
     }
 
-    public GraphProjectFromGraphConfig parseSubGraphProjectConfiguration(
+    GraphProjectFromGraphConfig parseSubGraphProjectConfiguration(
         User user,
         GraphName graphName,
         GraphName originGraphName,
@@ -174,7 +175,7 @@ public class CatalogConfigurationService {
         return configuration;
     }
 
-    public GraphDropNodePropertiesConfig parseGraphDropNodePropertiesConfiguration(
+    GraphDropNodePropertiesConfig parseGraphDropNodePropertiesConfiguration(
         GraphName graphName,
         Object nodeProperties,
         Map<String, Object> rawConfiguration
@@ -192,7 +193,7 @@ public class CatalogConfigurationService {
         return configuration;
     }
 
-    public void validateDropGraphPropertiesConfiguration(
+    void validateDropGraphPropertiesConfiguration(
         GraphName graphName,
         String graphProperty,
         Map<String, Object> rawConfiguration
@@ -208,7 +209,7 @@ public class CatalogConfigurationService {
         ensureThereAreNoExtraConfigurationKeys(cypherConfig, configuration);
     }
 
-    public void validateGraphStreamGraphPropertiesConfig(
+    void validateGraphStreamGraphPropertiesConfig(
         GraphName graphName,
         String graphProperty,
         Map<String, Object> rawConfiguration
@@ -361,6 +362,17 @@ public class CatalogConfigurationService {
     ) {
         var cypherConfig = CypherMapWrapper.create(rawConfiguration);
         var configuration = GraphStoreToFileExporterConfig.of(user.getUsername(), cypherConfig);
+        ensureThereAreNoExtraConfigurationKeys(cypherConfig, configuration);
+
+        return configuration;
+    }
+
+    GraphStoreToCsvEstimationConfig parseGraphStoreToCsvEstimationConfiguration(
+        User user,
+        Map<String, Object> rawConfiguration
+    ) {
+        var cypherConfig = CypherMapWrapper.create(rawConfiguration);
+        var configuration = GraphStoreToCsvEstimationConfig.of(user.getUsername(), cypherConfig);
         ensureThereAreNoExtraConfigurationKeys(cypherConfig, configuration);
 
         return configuration;

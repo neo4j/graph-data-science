@@ -288,5 +288,7 @@ public interface GraphCatalogApplications {
 
     FileExportResult exportToCsv(String graphName, Map<String, Object> configuration);
 
+    MemoryEstimateResult exportToCsvEstimate(String graphName, Map<String, Object> configuration);
+
     DatabaseExportResult exportToDatabase(String graphName, Map<String, Object> configuration);
 }

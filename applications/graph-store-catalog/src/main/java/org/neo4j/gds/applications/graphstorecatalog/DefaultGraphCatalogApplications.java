@@ -20,7 +20,6 @@
 package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
@@ -28,6 +27,7 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.beta.filter.GraphFilterResult;
+import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.core.io.GraphStoreExporterBaseConfig;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
@@ -114,6 +114,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
     private final EstimateCommonNeighbourAwareRandomWalkApplication estimateCommonNeighbourAwareRandomWalkApplication;
     private final GenerateGraphApplication generateGraphApplication;
     private final ExportToCsvApplication exportToCsvApplication;
+    private final ExportToCsvEstimateApplication exportToCsvEstimateApplication;
     private final ExportToDatabaseApplication exportToDatabaseApplication;
 
     DefaultGraphCatalogApplications(
@@ -142,6 +143,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         WriteRelationshipPropertiesApplication writeRelationshipPropertiesApplication,
         WriteRelationshipsApplication writeRelationshipsApplication,
         ExportToCsvApplication exportToCsvApplication,
+        ExportToCsvEstimateApplication exportToCsvEstimateApplication,
         ExportToDatabaseApplication exportToDatabaseApplication
     ) {
         this.log = log;
@@ -172,18 +174,24 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         this.estimateCommonNeighbourAwareRandomWalkApplication = estimateCommonNeighbourAwareRandomWalkApplication;
         this.generateGraphApplication = generateGraphApplication;
         this.exportToCsvApplication = exportToCsvApplication;
+        this.exportToCsvEstimateApplication = exportToCsvEstimateApplication;
         this.exportToDatabaseApplication = exportToDatabaseApplication;
     }
 
+    /**
+     * A special entrypoint for Snowgraph integration, where we are selective about which functionality we touch.
+     * Case in point, we want Snowgraph to be Neo4j-less.
+     * We ought to address this later with a more categorical solution.
+     */
     public static GraphCatalogApplications create(
         Log log,
-        Supplier<Path> exportLocation,
         GraphStoreCatalogService graphStoreCatalogService,
         ProjectionMetricsService projectionMetricsService,
         RequestScopedDependencies requestScopedDependencies
     ) {
         return create(
             log,
+            null,
             graphStoreCatalogService,
             projectionMetricsService,
             requestScopedDependencies,
@@ -194,6 +202,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
 
     public static GraphCatalogApplications create(
         Log log,
+        Supplier<Path> exportLocation,
         GraphStoreCatalogService graphStoreCatalogService,
         ProjectionMetricsService projectionMetricsService,
         RequestScopedDependencies requestScopedDependencies,
@@ -220,6 +229,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             exportLocation,
             requestScopedDependencies.getTaskRegistryFactory()
         );
+        var exportToCsvEstimateApplication = new ExportToCsvEstimateApplication();
         var exportToDatabaseApplication = new ExportToDatabaseApplication(
             log,
             graphDatabaseService,
@@ -264,6 +274,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             .withDropRelationshipsApplication(dropRelationshipsApplication)
             .withEstimateCommonNeighbourAwareRandomWalkApplication(estimateCommonNeighbourAwareRandomWalkApplication)
             .withExportToCsvApplication(exportToCsvApplication)
+            .withExportToCsvEstimateApplication(exportToCsvEstimateApplication)
             .withExportToDatabaseApplication(exportToDatabaseApplication)
             .withGenerateGraphApplication(generateGraphApplication)
             .withGraphMemoryUsageApplication(graphMemoryUsageApplication)
@@ -1045,6 +1056,20 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
     }
 
     @Override
+    public MemoryEstimateResult exportToCsvEstimate(String graphNameAsString, Map<String, Object> rawConfiguration) {
+        var graphName = graphNameValidationService.validate(graphNameAsString);
+
+        var configuration = catalogConfigurationService.parseGraphStoreToCsvEstimationConfiguration(
+            requestScopedDependencies.getUser(),
+            rawConfiguration
+        );
+
+        var graphStore = getGraphStore(graphName, configuration);
+
+        return exportToCsvEstimateApplication.run(configuration, graphStore);
+    }
+
+    @Override
     public DatabaseExportResult exportToDatabase(String graphNameAsString, Map<String, Object> rawConfiguration) {
         var graphName = graphNameValidationService.validate(graphNameAsString);
 
@@ -1055,11 +1080,21 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         return exportToDatabaseApplication.run(graphName, configuration, graphStore);
     }
 
-    @NotNull
     private GraphStore getGraphStoreAndValidateForExport(
         GraphName graphName,
         GraphStoreExporterBaseConfig configuration
     ) {
+        var graphStore = getGraphStore(graphName, configuration);
+
+        var shouldExportAdditionalNodeProperties = !configuration.additionalNodeProperties().mappings().isEmpty();
+
+        graphStoreValidationService.ensureReadAccess(graphStore, shouldExportAdditionalNodeProperties);
+        graphStoreValidationService.ensureNodePropertiesNotExist(graphStore, configuration.additionalNodeProperties());
+
+        return graphStore;
+    }
+
+    private GraphStore getGraphStore(GraphName graphName, BaseConfig configuration) {
         var graphStoreCatalogEntry = graphStoreCatalogService.getGraphStoreCatalogEntry(
             graphName,
             configuration,
@@ -1067,13 +1102,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             requestScopedDependencies.getDatabaseId()
         );
 
-        var graphStore = graphStoreCatalogEntry.graphStore();
-
-        var shouldExportAdditionalNodeProperties = !configuration.additionalNodeProperties().mappings().isEmpty();
-
-        graphStoreValidationService.ensureReadAccess(graphStore, shouldExportAdditionalNodeProperties);
-        graphStoreValidationService.ensureNodePropertiesNotExist(graphStore, configuration.additionalNodeProperties());
-        return graphStore;
+        return graphStoreCatalogEntry.graphStore();
     }
 
     private RandomWalkSamplingResult sampleRandomWalk(

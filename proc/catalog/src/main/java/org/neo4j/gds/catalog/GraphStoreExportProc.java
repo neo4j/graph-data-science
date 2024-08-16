@@ -19,16 +19,10 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.graphstorecatalog.DatabaseExportResult;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.io.file.csv.estimation.CsvExportEstimation;
-import org.neo4j.gds.mem.MemoryTreeWithDimensions;
-import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.applications.graphstorecatalog.FileExportResult;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -40,7 +34,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class GraphStoreExportProc extends BaseProc {
+public class GraphStoreExportProc {
     private static final String DESCRIPTION = "Exports a named graph to CSV files.";
     private static final String DESCRIPTION_ESTIMATE = "Estimate the required disk space for exporting a named graph to CSV files.";
 
@@ -99,24 +93,6 @@ public class GraphStoreExportProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var cypherConfig = CypherMapWrapper.create(configuration);
-        var exportConfig = GraphStoreToCsvEstimationConfig.of(username(), cypherConfig);
-        validateConfig(cypherConfig, exportConfig);
-
-        var estimate = runWithExceptionLogging(
-            "CSV export estimation failed",
-            () -> {
-                var graphStore = graphStoreFromCatalog(graphName, exportConfig).graphStore();
-
-
-                var dimensions = GraphDimensions.of(graphStore.nodeCount(), graphStore.relationshipCount());
-                var memoryTree = CsvExportEstimation
-                    .estimate(graphStore, exportConfig.samplingFactor())
-                    .estimate(dimensions, new Concurrency(1));
-                return new MemoryTreeWithDimensions(memoryTree, dimensions);
-            }
-        );
-
-        return Stream.of(new MemoryEstimateResult(estimate));
+        return facade.graphCatalog().exportToCsvEstimate(graphName, configuration);
     }
 }
