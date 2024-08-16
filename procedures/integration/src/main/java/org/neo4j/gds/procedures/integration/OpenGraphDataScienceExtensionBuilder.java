@@ -56,13 +56,13 @@ import java.util.function.Supplier;
  * in terms of the components it registers and the lifecycles it spawns.
  * We encapsulate it here, with allowances for customisations.
  */
-public final class GraphDataScienceExtensionBuilder {
+public final class OpenGraphDataScienceExtensionBuilder {
     // fundamentals
     private final Log log;
     private final ComponentRegistration componentRegistration;
 
     // structural
-    private final GraphDataScienceProviderFactory graphDataScienceProviderFactory;
+    private final GraphDataScienceProceduresProviderFactory graphDataScienceProceduresProviderFactory;
 
     // edition specifics
     private final MetricsFacade metricsFacade;
@@ -75,10 +75,10 @@ public final class GraphDataScienceExtensionBuilder {
     private final UserLogServices userLogServices;
     private final Lifecycle gcListener;
 
-    private GraphDataScienceExtensionBuilder(
+    private OpenGraphDataScienceExtensionBuilder(
         Log log,
         ComponentRegistration componentRegistration,
-        GraphDataScienceProviderFactory graphDataScienceProviderFactory,
+        GraphDataScienceProceduresProviderFactory graphDataScienceProceduresProviderFactory,
         MetricsFacade metricsFacade,
         ModelCatalog modelCatalog,
         TaskStoreService taskStoreService,
@@ -89,7 +89,7 @@ public final class GraphDataScienceExtensionBuilder {
     ) {
         this.log = log;
         this.componentRegistration = componentRegistration;
-        this.graphDataScienceProviderFactory = graphDataScienceProviderFactory;
+        this.graphDataScienceProceduresProviderFactory = graphDataScienceProceduresProviderFactory;
         this.metricsFacade = metricsFacade;
         this.modelCatalog = modelCatalog;
         this.taskStoreService = taskStoreService;
@@ -103,18 +103,17 @@ public final class GraphDataScienceExtensionBuilder {
      * We want to build a GDS, we receive a few customisations and are able to read configuration,
      * and all the rest of the machinery goes here
      */
-    public static Triple<GraphDataScienceExtensionBuilder, TaskRegistryFactoryService, TaskStoreService> create(
+    public static Triple<OpenGraphDataScienceExtensionBuilder, TaskRegistryFactoryService, TaskStoreService> create(
         Log log,
-        Configuration neo4jConfiguration,
         GlobalProcedures globalProcedures,
-        Supplier<Path> exportLocation,
-        Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
-        Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
-        Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator,
-        ExporterBuildersProviderService exporterBuildersProviderService,
+        Configuration neo4jConfiguration,
+        ExporterBuildersProviderService exporterBuildersProviderService, Supplier<Path> exportLocation,
         MetricsFacade metricsFacade,
         ModelCatalog modelCatalog,
-        ModelRepository modelRepository
+        ModelRepository modelRepository,
+        Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
+        Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
+        Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator
     ) {
         // Read some configuration used to select behaviour
         var progressTrackingEnabled = neo4jConfiguration.get(ProgressFeatureSettings.progress_tracking_enabled);
@@ -149,21 +148,21 @@ public final class GraphDataScienceExtensionBuilder {
 
         var componentRegistration = new ComponentRegistration(log, globalProcedures);
 
-        var graphDataScienceProviderFactory = GraphDataScienceProviderFactory.create(
+        var graphDataScienceProviderFactory = new GraphDataScienceProceduresProviderFactory(
             log,
-            exportLocation,
-            algorithmProcessingTemplateDecorator,
-            graphCatalogApplicationsDecorator,
-            modelCatalogApplicationsDecorator,
+            neo4jConfiguration,
             exporterBuildersProviderService,
+            exportLocation,
             memoryGauge,
             metricsFacade,
             modelCatalog,
-            neo4jConfiguration,
-            modelRepository
+            modelRepository,
+            algorithmProcessingTemplateDecorator,
+            graphCatalogApplicationsDecorator,
+            modelCatalogApplicationsDecorator
         );
 
-        var graphDataScienceExtensionBuilder = new GraphDataScienceExtensionBuilder(
+        var graphDataScienceExtensionBuilder = new OpenGraphDataScienceExtensionBuilder(
             log,
             componentRegistration,
             graphDataScienceProviderFactory,
@@ -203,7 +202,7 @@ public final class GraphDataScienceExtensionBuilder {
     }
 
     private void registerGraphDataScienceComponent() {
-        var graphDataScienceProvider = graphDataScienceProviderFactory.createGraphDataScienceProvider(
+        var graphDataScienceProvider = graphDataScienceProceduresProviderFactory.createGraphDataScienceProvider(
             taskRegistryFactoryService,
             taskStoreService,
             useMaxMemoryEstimation,

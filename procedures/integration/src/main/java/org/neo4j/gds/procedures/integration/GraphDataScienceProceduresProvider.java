@@ -62,7 +62,7 @@ import java.util.function.Supplier;
 /**
  * We use this at request time to construct the facade that the procedures call.
  */
-public class GraphDataScienceProvider implements ThrowingFunction<Context, GraphDataScienceProcedures, ProcedureException> {
+public class GraphDataScienceProceduresProvider implements ThrowingFunction<Context, GraphDataScienceProcedures, ProcedureException> {
     private final AlgorithmMetaDataSetterService algorithmMetaDataSetterService = new AlgorithmMetaDataSetterService();
     private final DatabaseIdAccessor databaseIdAccessor = new DatabaseIdAccessor();
     private final KernelTransactionAccessor kernelTransactionAccessor = new KernelTransactionAccessor();
@@ -71,71 +71,75 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
     private final UserAccessor userAccessor = new UserAccessor();
 
     private final Log log;
-    private final DefaultsConfiguration defaultsConfiguration;
-    private final LimitsConfiguration limitsConfiguration;
-    private final AlgorithmProcedureFacadeBuilderFactory algorithmProcedureFacadeBuilderFactory;
+    private final Configuration neo4jConfiguration;
+
     private final AlgorithmMetricsService algorithmMetricsService;
-    private final Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator;
-    private final Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator;
-    private final Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator;
-    private final GraphCatalogProcedureFacadeFactory graphCatalogProcedureFacadeFactory;
+    private final AlgorithmProcedureFacadeBuilderFactory algorithmProcedureFacadeBuilderFactory;
+    private final DefaultsConfiguration defaultsConfiguration;
     private final DeprecatedProceduresMetricService deprecatedProceduresMetricService;
     private final ExporterBuildersProviderService exporterBuildersProviderService;
+    private final Supplier<Path> exportLocation;
+    private final GraphCatalogProcedureFacadeFactory graphCatalogProcedureFacadeFactory;
     private final GraphStoreCatalogService graphStoreCatalogService;
+    private final LimitsConfiguration limitsConfiguration;
     private final MemoryGuard memoryGuard;
+    private final ModelCatalog modelCatalog;
+    private final ModelRepository modelRepository;
     private final ProjectionMetricsService projectionMetricsService;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
     private final TaskStoreService taskStoreService;
     private final UserLogServices userLogServices;
-    private final Configuration neo4jConfiguration;
-    private final ModelCatalog modelCatalog;
-    private final ModelRepository modelRepository;
-    private final Supplier<Path> exportLocation;
 
-    GraphDataScienceProvider(
+    private final Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator;
+    private final Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator;
+    private final Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator;
+
+    GraphDataScienceProceduresProvider(
         Log log,
-        DefaultsConfiguration defaultsConfiguration,
-        LimitsConfiguration limitsConfiguration,
-        AlgorithmProcedureFacadeBuilderFactory algorithmProcedureFacadeBuilderFactory,
+        Configuration neo4jConfiguration,
         AlgorithmMetricsService algorithmMetricsService,
-        Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
-        Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
-        Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator,
-        GraphCatalogProcedureFacadeFactory graphCatalogProcedureFacadeFactory,
+        AlgorithmProcedureFacadeBuilderFactory algorithmProcedureFacadeBuilderFactory,
+        DefaultsConfiguration defaultsConfiguration,
         DeprecatedProceduresMetricService deprecatedProceduresMetricService,
         ExporterBuildersProviderService exporterBuildersProviderService,
+        Supplier<Path> exportLocation,
+        GraphCatalogProcedureFacadeFactory graphCatalogProcedureFacadeFactory,
         GraphStoreCatalogService graphStoreCatalogService,
+        LimitsConfiguration limitsConfiguration,
         MemoryGuard memoryGuard,
+        ModelCatalog modelCatalog,
+        ModelRepository modelRepository,
         ProjectionMetricsService projectionMetricsService,
         TaskRegistryFactoryService taskRegistryFactoryService,
         TaskStoreService taskStoreService,
         UserLogServices userLogServices,
-        Configuration neo4jConfiguration,
-        ModelCatalog modelCatalog,
-        ModelRepository modelRepository,
-        Supplier<Path> exportLocation
+        Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
+        Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
+        Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator
     ) {
         this.log = log;
-        this.defaultsConfiguration = defaultsConfiguration;
-        this.limitsConfiguration = limitsConfiguration;
-        this.algorithmProcedureFacadeBuilderFactory = algorithmProcedureFacadeBuilderFactory;
+        this.neo4jConfiguration = neo4jConfiguration;
+
         this.algorithmMetricsService = algorithmMetricsService;
-        this.algorithmProcessingTemplateDecorator = algorithmProcessingTemplateDecorator;
-        this.graphCatalogApplicationsDecorator = graphCatalogApplicationsDecorator;
-        this.modelCatalogApplicationsDecorator = modelCatalogApplicationsDecorator;
-        this.graphCatalogProcedureFacadeFactory = graphCatalogProcedureFacadeFactory;
+        this.algorithmProcedureFacadeBuilderFactory = algorithmProcedureFacadeBuilderFactory;
+        this.defaultsConfiguration = defaultsConfiguration;
         this.deprecatedProceduresMetricService = deprecatedProceduresMetricService;
         this.exporterBuildersProviderService = exporterBuildersProviderService;
+        this.exportLocation = exportLocation;
+        this.graphCatalogProcedureFacadeFactory = graphCatalogProcedureFacadeFactory;
         this.graphStoreCatalogService = graphStoreCatalogService;
+        this.limitsConfiguration = limitsConfiguration;
         this.memoryGuard = memoryGuard;
+        this.modelCatalog = modelCatalog;
+        this.modelRepository = modelRepository;
         this.projectionMetricsService = projectionMetricsService;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.taskStoreService = taskStoreService;
         this.userLogServices = userLogServices;
-        this.neo4jConfiguration = neo4jConfiguration;
-        this.modelCatalog = modelCatalog;
-        this.modelRepository = modelRepository;
-        this.exportLocation = exportLocation;
+
+        this.algorithmProcessingTemplateDecorator = algorithmProcessingTemplateDecorator;
+        this.graphCatalogApplicationsDecorator = graphCatalogApplicationsDecorator;
+        this.modelCatalogApplicationsDecorator = modelCatalogApplicationsDecorator;
     }
 
     @Override
@@ -147,7 +151,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         var graphDatabaseService = context.graphDatabaseAPI();
         var databaseId = databaseIdAccessor.getDatabaseId(graphDatabaseService);
 
-        var writeContext = constructWriteContext(context, graphDatabaseService);
+        var writeContext = createWriteContext(context, graphDatabaseService);
 
         var procedureReturnColumns = new ProcedureCallContextReturnColumns(procedureCallContext);
         var terminationFlag = terminationFlagAccessor.createTerminationFlag(kernelTransaction);
@@ -207,7 +211,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         );
     }
 
-    private WriteContext constructWriteContext(Context context, GraphDatabaseService graphDatabaseService) {
+    private WriteContext createWriteContext(Context context, GraphDatabaseService graphDatabaseService) {
         var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(
             graphDatabaseService,
             neo4jConfiguration

@@ -48,7 +48,7 @@ import java.util.function.Supplier;
  * This is a way to squirrel away some dull code.
  * We want to keep Neo4j out from here, this could be reusable.
  */
-final class GraphDataScienceProviderFactory {
+final class GraphDataScienceProceduresProviderFactory {
     /**
      * These are currently global singletons; when they seize to be, this is the place to initialise them.
      * They are similar in lifecycle to {@link org.neo4j.gds.core.loading.GraphStoreCatalogService}
@@ -56,49 +56,49 @@ final class GraphDataScienceProviderFactory {
     private final DefaultsConfiguration defaultsConfiguration = DefaultsConfiguration.Instance;
     private final LimitsConfiguration limitsConfiguration = LimitsConfiguration.Instance;
 
-    private final Log log;
-
     // Graph catalog state initialised here, currently just a front for a big shared singleton
     private final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
 
-    private final Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator;
-    private final Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator;
-    private final Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator;
+    private final Log log;
+
+    private final Configuration neo4jConfiguration;
     private final ExporterBuildersProviderService exporterBuildersProviderService;
+    private final Supplier<Path> exportLocation;
     private final MemoryGauge memoryGauge;
     private final MetricsFacade metricsFacade;
     private final ModelCatalog modelCatalog;
-    private final Configuration neo4jConfiguration;
     private final ModelRepository modelRepository;
-    private final Supplier<Path> exportLocation;
+    private final Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator;
+    private final Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator;
+    private final Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator;
 
-    private GraphDataScienceProviderFactory(
+    GraphDataScienceProceduresProviderFactory(
         Log log,
-        Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
-        Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
-        Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator,
+        Configuration neo4jConfiguration,
         ExporterBuildersProviderService exporterBuildersProviderService,
+        Supplier<Path> exportLocation,
         MemoryGauge memoryGauge,
         MetricsFacade metricsFacade,
         ModelCatalog modelCatalog,
-        Configuration neo4jConfiguration,
         ModelRepository modelRepository,
-        Supplier<Path> exportLocation
+        Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
+        Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
+        Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator
     ) {
         this.log = log;
-        this.algorithmProcessingTemplateDecorator = algorithmProcessingTemplateDecorator;
-        this.graphCatalogApplicationsDecorator = graphCatalogApplicationsDecorator;
-        this.modelCatalogApplicationsDecorator = modelCatalogApplicationsDecorator;
+        this.neo4jConfiguration = neo4jConfiguration;
         this.exporterBuildersProviderService = exporterBuildersProviderService;
+        this.exportLocation = exportLocation;
         this.memoryGauge = memoryGauge;
         this.metricsFacade = metricsFacade;
         this.modelCatalog = modelCatalog;
-        this.neo4jConfiguration = neo4jConfiguration;
         this.modelRepository = modelRepository;
-        this.exportLocation = exportLocation;
+        this.algorithmProcessingTemplateDecorator = algorithmProcessingTemplateDecorator;
+        this.graphCatalogApplicationsDecorator = graphCatalogApplicationsDecorator;
+        this.modelCatalogApplicationsDecorator = modelCatalogApplicationsDecorator;
     }
 
-    GraphDataScienceProvider createGraphDataScienceProvider(
+    GraphDataScienceProceduresProvider createGraphDataScienceProvider(
         TaskRegistryFactoryService taskRegistryFactoryService,
         TaskStoreService taskStoreService,
         boolean useMaxMemoryEstimation,
@@ -112,56 +112,28 @@ final class GraphDataScienceProviderFactory {
 
         var memoryGuard = new DefaultMemoryGuard(log, useMaxMemoryEstimation, memoryGauge);
 
-        return new GraphDataScienceProvider(
+        return new GraphDataScienceProceduresProvider(
             log,
-            defaultsConfiguration,
-            limitsConfiguration,
-            algorithmFacadeBuilderFactory,
+            neo4jConfiguration,
             metricsFacade.algorithmMetrics(),
-            algorithmProcessingTemplateDecorator,
-            graphCatalogApplicationsDecorator,
-            modelCatalogApplicationsDecorator,
-            catalogProcedureFacadeFactory,
+            algorithmFacadeBuilderFactory,
+            defaultsConfiguration,
             metricsFacade.deprecatedProcedures(),
             exporterBuildersProviderService,
+            exportLocation,
+            catalogProcedureFacadeFactory,
             graphStoreCatalogService,
+            limitsConfiguration,
             memoryGuard,
+            modelCatalog,
+            modelRepository,
             metricsFacade.projectionMetrics(),
             taskRegistryFactoryService,
             taskStoreService,
             userLogServices,
-            neo4jConfiguration,
-            modelCatalog,
-            modelRepository,
-            exportLocation
-        );
-    }
-
-    static GraphDataScienceProviderFactory create(
-        Log log,
-        Supplier<Path> exportLocation,
-        Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
-        Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
-        Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator,
-        ExporterBuildersProviderService exporterBuildersProviderService,
-        MemoryGauge memoryGauge,
-        MetricsFacade metricsFacade,
-        ModelCatalog modelCatalog,
-        Configuration neo4jConfiguration,
-        ModelRepository modelRepository
-    ) {
-        return new GraphDataScienceProviderFactory(
-            log,
             algorithmProcessingTemplateDecorator,
             graphCatalogApplicationsDecorator,
-            modelCatalogApplicationsDecorator,
-            exporterBuildersProviderService,
-            memoryGauge,
-            metricsFacade,
-            modelCatalog,
-            neo4jConfiguration,
-            modelRepository,
-            exportLocation
+            modelCatalogApplicationsDecorator
         );
     }
 

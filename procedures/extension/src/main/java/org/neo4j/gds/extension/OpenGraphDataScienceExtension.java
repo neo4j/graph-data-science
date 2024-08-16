@@ -26,7 +26,7 @@ import org.neo4j.gds.core.write.NativeExportBuildersProvider;
 import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
 import org.neo4j.gds.procedures.integration.ExportLocation;
-import org.neo4j.gds.procedures.integration.GraphDataScienceExtensionBuilder;
+import org.neo4j.gds.procedures.integration.OpenGraphDataScienceExtensionBuilder;
 import org.neo4j.gds.procedures.integration.LogAccessor;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.extension.ExtensionFactory;
@@ -51,30 +51,28 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
     @Override
     public Lifecycle newInstance(ExtensionContext extensionContext, Dependencies dependencies) {
         var log = new LogAccessor().getLog(dependencies.logService(), getClass());
+        var globalProcedures = dependencies.globalProcedures();
+        var neo4jConfiguration = dependencies.config();
 
         // OpenGDS edition customisations go here
         ExporterBuildersProviderService exporterBuildersProviderService = (__, ___) -> new NativeExportBuildersProvider(); // we always just offer native writes in OpenGDS
+        var exportLocation = ExportLocation.create(neo4jConfiguration);
         var metricsFacade = MetricsFacade.PASSTHROUGH_METRICS_FACADE; // no metrics in OpenGDS
         var modelCatalog = new OpenModelCatalogProvider().get(null);
-
         var graphSageModelRepository = new DisableModelRepository(); // no model storing in OpenGDS
 
-        var neo4jConfiguration = dependencies.config();
-
-        var exportLocation = ExportLocation.create(neo4jConfiguration);
-
-        var graphDataScienceExtensionBuilderAndAssociatedProducts = GraphDataScienceExtensionBuilder.create(
+        var graphDataScienceExtensionBuilderAndAssociatedProducts = OpenGraphDataScienceExtensionBuilder.create(
             log,
+            globalProcedures,
             neo4jConfiguration,
-            dependencies.globalProcedures(),
-            exportLocation,
-            Optional.empty(), // no extra checks in OpenGDS
-            Optional.empty(), // no extra checks in OpenGDS
-            Optional.empty(), // no extra checks in OpenGDS
             exporterBuildersProviderService,
+            exportLocation,
             metricsFacade,
             modelCatalog,
-            graphSageModelRepository
+            graphSageModelRepository,
+            Optional.empty(), // no extra checks in OpenGDS
+            Optional.empty(), // no extra checks in OpenGDS
+            Optional.empty() // no extra checks in OpenGDS
         );
 
         var graphDataScienceExtensionBuilder = graphDataScienceExtensionBuilderAndAssociatedProducts.getLeft();
