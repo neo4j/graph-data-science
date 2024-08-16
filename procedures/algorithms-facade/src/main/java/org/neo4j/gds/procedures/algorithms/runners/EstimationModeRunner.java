@@ -19,30 +19,34 @@
  */
 package org.neo4j.gds.procedures.algorithms.runners;
 
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
+import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
 public class EstimationModeRunner {
-    private final ConfigurationCreator configurationCreator;
+    private final ConfigurationParser configurationParser;
+    private final User user;
 
-    public EstimationModeRunner(ConfigurationCreator configurationCreator) {
-        this.configurationCreator = configurationCreator;
+    public EstimationModeRunner(ConfigurationParser configurationParser, User user) {
+        this.configurationParser = configurationParser;
+        this.user = user;
     }
 
     public <CONFIGURATION extends AlgoBaseConfig> MemoryEstimateResult runEstimation(
-        Map<String, Object> algorithmConfiguration,
-        Function<CypherMapWrapper, CONFIGURATION> configurationParser,
+        Map<String, Object> rawConfiguration,
+        Function<CypherMapWrapper, CONFIGURATION> configurationLexer,
         Function<CONFIGURATION, MemoryEstimateResult> supplier
     ) {
-        var configuration = configurationCreator.parseAndValidate(
-            algorithmConfiguration,
-            configurationParser,
+        var configuration = configurationParser.parseAndValidate(
+            rawConfiguration,
+            configurationLexer,
+            user,
             Optional.empty()
         );
 

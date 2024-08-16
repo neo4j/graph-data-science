@@ -74,7 +74,6 @@ import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.GraphDataScienceProceduresBuilder;
 import org.neo4j.gds.procedures.algorithms.community.CommunityProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
@@ -507,15 +506,10 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
             .with(new User(getUsername(), false))
             .with(EmptyUserLogRegistryFactory.INSTANCE)
             .build();
-        var configurationCreator = new ConfigurationCreator(
-            configurationParser,
-            requestScopedDependencies.getUser()
-        );
         var genericStub = GenericStub.create(
             DefaultsConfiguration.Instance,
             LimitsConfiguration.Instance,
             graphStoreCatalogService,
-            configurationCreator,
             configurationParser,
             requestScopedDependencies
         );

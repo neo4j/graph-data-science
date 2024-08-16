@@ -31,8 +31,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class ConfigurationParser {
     private final DefaultsConfiguration defaults;
@@ -43,15 +45,32 @@ public class ConfigurationParser {
         this.limits = limits;
     }
 
+    public <CONFIGURATION extends AlgoBaseConfig> CONFIGURATION parseAndValidate(
+        Map<String, Object> rawConfiguration,
+        Function<CypherMapWrapper, CONFIGURATION> lexer,
+        User user,
+        Optional<ConfigurationValidationHook<CONFIGURATION>> configurationValidation
+    ) {
+        CONFIGURATION configuration = parseConfiguration(
+            rawConfiguration,
+            (__, cypherMapWrapper) -> lexer.apply(cypherMapWrapper),
+            user
+        );
+
+        configurationValidation.ifPresent(hook -> hook.onConfigurationParsed(configuration));
+
+        return configuration;
+    }
+
     /**
      * Convenient configuration parsing using globally configured defaults and limits
      */
     <CONFIG extends AlgoBaseConfig> CONFIG parseConfiguration(
         Map<String, Object> configuration,
-        BiFunction<String, CypherMapWrapper, CONFIG> parser,
+        BiFunction<String, CypherMapWrapper, CONFIG> lexer,
         User user
     ) {
-        return parseConfiguration(defaults, limits, user.getUsername(), configuration, parser);
+        return parseConfiguration(defaults, limits, user.getUsername(), configuration, lexer);
     }
 
     /**
@@ -62,13 +81,13 @@ public class ConfigurationParser {
         LimitsConfiguration limitsConfiguration,
         String username,
         Map<String, Object> rawConfiguration,
-        BiFunction<String, CypherMapWrapper, CONFIG> parser
+        BiFunction<String, CypherMapWrapper, CONFIG> lexer
     ) {
         var configurationWithDefaultsAdded = applyDefaults(rawConfiguration, username, defaultsConfiguration);
 
         var cypherMapWrapper = CypherMapWrapper.create(configurationWithDefaultsAdded);
 
-        var configuration = parser.apply(username, cypherMapWrapper);
+        var configuration = lexer.apply(username, cypherMapWrapper);
 
         validateOriginalConfiguration(rawConfiguration, configuration.configKeys());
 

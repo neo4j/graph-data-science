@@ -26,7 +26,6 @@ import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
@@ -50,7 +49,6 @@ public class AlgorithmProcedureFacadeBuilderFactory {
 
     AlgorithmProcedureFacadeBuilder create(
         ConfigurationParser configurationParser,
-        ConfigurationCreator configurationCreator,
         RequestScopedDependencies requestScopedDependencies,
         KernelTransaction kernelTransaction,
         AlgorithmMetaDataSetter algorithmMetaDataSetter,
@@ -64,14 +62,17 @@ public class AlgorithmProcedureFacadeBuilderFactory {
             defaultsConfiguration,
             limitsConfiguration,
             graphStoreCatalogService,
-            configurationCreator,
             configurationParser,
             requestScopedDependencies
         );
 
-        var estimationModeRunner = new EstimationModeRunner(configurationCreator);
-        var algorithmExecutionScaffolding = new AlgorithmExecutionScaffolding(configurationCreator,algorithmMetaDataSetter);
+        var estimationModeRunner = new EstimationModeRunner(configurationParser, requestScopedDependencies.getUser());
 
+        var algorithmExecutionScaffolding = new AlgorithmExecutionScaffolding(
+            configurationParser,
+            algorithmMetaDataSetter,
+            requestScopedDependencies.getUser()
+        );
 
         return new AlgorithmProcedureFacadeBuilder(
             requestScopedDependencies,

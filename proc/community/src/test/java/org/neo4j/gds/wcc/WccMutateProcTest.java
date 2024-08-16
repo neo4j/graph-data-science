@@ -76,7 +76,6 @@ import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.GraphDataScienceProceduresBuilder;
 import org.neo4j.gds.procedures.algorithms.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.community.WccMutateResult;
-import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
@@ -602,12 +601,10 @@ class WccMutateProcTest extends BaseProcTest {
             null
         );
         var configurationParser = new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance);
-        var configurationCreator = new ConfigurationCreator(configurationParser, requestScopedDependencies.getUser());
         var genericStub = GenericStub.create(
             DefaultsConfiguration.Instance,
             LimitsConfiguration.Instance,
             graphStoreCatalogService,
-            configurationCreator,
             configurationParser,
             requestScopedDependencies
         );

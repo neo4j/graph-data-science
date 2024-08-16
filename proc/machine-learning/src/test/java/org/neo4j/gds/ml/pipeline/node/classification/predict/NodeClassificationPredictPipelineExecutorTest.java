@@ -447,7 +447,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             null
         );
         var configurationParser = new ConfigurationParser(null, null);
-        var genericStub = GenericStub.create(null, null, null, null, configurationParser, requestScopedDependencies);
+        var genericStub = GenericStub.create(null, null, null, configurationParser, requestScopedDependencies);
         var centralityProcedureFacade = CentralityProcedureFacade.create(
             genericStub,
             applicationsFacade,

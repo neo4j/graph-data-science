@@ -21,13 +21,14 @@ package org.neo4j.gds.procedures.algorithms.runners;
 
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.procedures.algorithms.AlgorithmHandle;
 import org.neo4j.gds.procedures.algorithms.StreamAlgorithmHandle;
-import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
+import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationValidationHook;
 
 import java.util.Map;
@@ -36,25 +37,31 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class AlgorithmExecutionScaffolding {
-    private final ConfigurationCreator configurationCreator;
-    public  final AlgorithmMetaDataSetter algorithmMetaDataSetter;
+    private final ConfigurationParser configurationParser;
+    private final AlgorithmMetaDataSetter algorithmMetaDataSetter;
+    private final User user;
 
-    public AlgorithmExecutionScaffolding(ConfigurationCreator configurationCreator, AlgorithmMetaDataSetter algorithmMetaDataSetter) {
-        this.configurationCreator = configurationCreator;
+    public AlgorithmExecutionScaffolding(
+        ConfigurationParser configurationParser,
+        AlgorithmMetaDataSetter algorithmMetaDataSetter,
+        User user
+    ) {
+        this.configurationParser = configurationParser;
         this.algorithmMetaDataSetter = algorithmMetaDataSetter;
+        this.user = user;
     }
 
     public <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER runAlgorithm(
         String graphNameAsString,
         Map<String, Object> rawConfiguration,
-        Function<CypherMapWrapper, CONFIGURATION> configurationParser,
+        Function<CypherMapWrapper, CONFIGURATION> configurationLexer,
         AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> algorithm,
         ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
     ) {
         return runAlgorithmWithValidation(
             graphNameAsString,
             rawConfiguration,
-            configurationParser,
+            configurationLexer,
             Optional.empty(),
             algorithm,
             resultBuilder
@@ -64,15 +71,17 @@ public class AlgorithmExecutionScaffolding {
     public <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER runAlgorithmWithValidation(
         String graphNameAsString,
         Map<String, Object> rawConfiguration,
-        Function<CypherMapWrapper, CONFIGURATION> configurationParser,
+        Function<CypherMapWrapper, CONFIGURATION> configurationLexer,
         Optional<ConfigurationValidationHook<CONFIGURATION>> configurationValidation,
         AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> algorithm,
         ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
     ) {
         var graphName = GraphName.parse(graphNameAsString);
-        var configuration = configurationCreator.parseAndValidate(
+
+        var configuration = configurationParser.parseAndValidate(
             rawConfiguration,
-            configurationParser,
+            configurationLexer,
+            user,
             configurationValidation
         );
 
@@ -82,14 +91,14 @@ public class AlgorithmExecutionScaffolding {
     public <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> Stream<RESULT_TO_CALLER> runStreamAlgorithm(
         String graphNameAsString,
         Map<String, Object> rawConfiguration,
-        Function<CypherMapWrapper, CONFIGURATION> configurationParser,
+        Function<CypherMapWrapper, CONFIGURATION> configurationLexer,
         StreamAlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> algorithm,
         StreamResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
     ) {
         return runStreamAlgorithmWithValidation(
             graphNameAsString,
             rawConfiguration,
-            configurationParser,
+            configurationLexer,
             Optional.empty(),
             algorithm,
             resultBuilder
@@ -99,19 +108,20 @@ public class AlgorithmExecutionScaffolding {
     public <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> Stream<RESULT_TO_CALLER> runStreamAlgorithmWithValidation(
         String graphNameAsString,
         Map<String, Object> rawConfiguration,
-        Function<CypherMapWrapper, CONFIGURATION> configurationParser,
+        Function<CypherMapWrapper, CONFIGURATION> configurationLexer,
         Optional<ConfigurationValidationHook<CONFIGURATION>> configurationValidation,
         StreamAlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> algorithm,
         StreamResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
     ) {
         var graphName = GraphName.parse(graphNameAsString);
-        var configuration = configurationCreator.parseAndValidate(
+        var configuration = configurationParser.parseAndValidate(
             rawConfiguration,
-            configurationParser,
+            configurationLexer,
+            user,
             configurationValidation
         );
-        StreamAlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER>  actual =
-            (g,c, r) -> {
+        StreamAlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> actual =
+            (g, c, r) -> {
                 // the shoehorning
                 algorithmMetaDataSetter.set(c);
                 return algorithm.compute(g, c, r);
@@ -119,5 +129,4 @@ public class AlgorithmExecutionScaffolding {
 
         return actual.compute(graphName, configuration, resultBuilder);
     }
-
 }

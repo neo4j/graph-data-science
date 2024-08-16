@@ -33,7 +33,6 @@ import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.procedures.algorithms.AlgorithmHandle;
-import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationValidationHook;
 
@@ -45,7 +44,6 @@ import java.util.stream.Stream;
 public final class GenericStub {
     private final DefaultsConfiguration defaultsConfiguration;
     private final LimitsConfiguration limitsConfiguration;
-    private final ConfigurationCreator configurationCreator;
     private final ConfigurationParser configurationParser;
     private final User user;
     private final AlgorithmEstimationTemplate algorithmEstimationTemplate;
@@ -53,14 +51,12 @@ public final class GenericStub {
     private GenericStub(
         DefaultsConfiguration defaultsConfiguration,
         LimitsConfiguration limitsConfiguration,
-        ConfigurationCreator configurationCreator,
         ConfigurationParser configurationParser,
         User user,
         AlgorithmEstimationTemplate algorithmEstimationTemplate
     ) {
         this.defaultsConfiguration = defaultsConfiguration;
         this.limitsConfiguration = limitsConfiguration;
-        this.configurationCreator = configurationCreator;
         this.configurationParser = configurationParser;
         this.user = user;
         this.algorithmEstimationTemplate = algorithmEstimationTemplate;
@@ -70,7 +66,6 @@ public final class GenericStub {
         DefaultsConfiguration defaultsConfiguration,
         LimitsConfiguration limitsConfiguration,
         GraphStoreCatalogService graphStoreCatalogService,
-        ConfigurationCreator configurationCreator,
         ConfigurationParser configurationParser,
         RequestScopedDependencies requestScopedDependencies
     ) {
@@ -87,7 +82,6 @@ public final class GenericStub {
         return new GenericStub(
             defaultsConfiguration,
             limitsConfiguration,
-            configurationCreator,
             configurationParser,
             requestScopedDependencies.getUser(),
             algorithmEstimationTemplate
@@ -98,7 +92,7 @@ public final class GenericStub {
      * @see org.neo4j.gds.procedures.algorithms.stubs.MutateStub#parseConfiguration(java.util.Map)
      */
     public <CONFIGURATION extends AlgoBaseConfig> CONFIGURATION parseConfiguration(
-        Function<CypherMapWrapper, CONFIGURATION> parser,
+        Function<CypherMapWrapper, CONFIGURATION> configurationLexer,
         Map<String, Object> configuration
     ) {
         return configurationParser.parseConfiguration(
@@ -106,7 +100,7 @@ public final class GenericStub {
             limitsConfiguration,
             user.getUsername(),
             configuration,
-            (__, cmw) -> parser.apply(cmw)
+            (__, cmw) -> configurationLexer.apply(cmw)
         );
     }
 
@@ -116,7 +110,7 @@ public final class GenericStub {
     public <CONFIGURATION extends AlgoBaseConfig> MemoryEstimation getMemoryEstimation(
         String username,
         Map<String, Object> rawConfiguration,
-        Function<CypherMapWrapper, CONFIGURATION> parser,
+        Function<CypherMapWrapper, CONFIGURATION> configurationLexer,
         Function<CONFIGURATION, MemoryEstimation> estimator
     ) {
         var configuration = configurationParser.parseConfiguration(
@@ -124,7 +118,7 @@ public final class GenericStub {
             LimitsConfiguration.Empty,
             username,
             rawConfiguration,
-            (__, cmw) -> parser.apply(cmw)
+            (__, cmw) -> configurationLexer.apply(cmw)
         );
 
         return estimator.apply(configuration);
@@ -136,12 +130,12 @@ public final class GenericStub {
     public <CONFIGURATION extends AlgoBaseConfig> Stream<MemoryEstimateResult> estimate(
         Object graphName,
         Map<String, Object> rawConfiguration,
-        Function<CypherMapWrapper, CONFIGURATION> parser,
+        Function<CypherMapWrapper, CONFIGURATION> configurationLexer,
         Function<CONFIGURATION, MemoryEstimation> estimator
     ) {
-        var memoryEstimation = getMemoryEstimation(user.getUsername(), rawConfiguration, parser, estimator);
+        var memoryEstimation = getMemoryEstimation(user.getUsername(), rawConfiguration, configurationLexer, estimator);
 
-        var configuration = parseConfiguration(parser, rawConfiguration);
+        var configuration = parseConfiguration(configurationLexer, rawConfiguration);
 
         var memoryEstimateResult = algorithmEstimationTemplate.estimate(
             configuration,
@@ -158,14 +152,14 @@ public final class GenericStub {
     public <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> Stream<RESULT_TO_CALLER> execute(
         String graphNameAsString,
         Map<String, Object> rawConfiguration,
-        Function<CypherMapWrapper, CONFIGURATION> parser,
+        Function<CypherMapWrapper, CONFIGURATION> configurationLexer,
         AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> executor,
         ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
     ) {
         return executeWithValidation(
             graphNameAsString,
             rawConfiguration,
-            parser,
+            configurationLexer,
             Optional.empty(), // no extra configuration validation
             executor,
             resultBuilder
@@ -178,13 +172,18 @@ public final class GenericStub {
     public <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> Stream<RESULT_TO_CALLER> executeWithValidation(
         String graphNameAsString,
         Map<String, Object> rawConfiguration,
-        Function<CypherMapWrapper, CONFIGURATION> parser,
+        Function<CypherMapWrapper, CONFIGURATION> configurationLexer,
         Optional<ConfigurationValidationHook<CONFIGURATION>> configurationValidation,
         AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> executor,
         ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
     ) {
         var graphName = GraphName.parse(graphNameAsString);
-        var configuration = configurationCreator.parseAndValidate(rawConfiguration, parser, configurationValidation);
+        var configuration = configurationParser.parseAndValidate(
+            rawConfiguration,
+            configurationLexer,
+            user,
+            configurationValidation
+        );
 
         var result = executor.compute(graphName, configuration, resultBuilder);
 
