@@ -20,6 +20,7 @@
 package org.neo4j.gds.modularityoptimization;
 
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
+import org.neo4j.gds.algorithms.community.ConsecutiveLongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
@@ -29,9 +30,8 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
-import org.neo4j.gds.nodeproperties.ConsecutiveLongNodePropertyValues;
 import org.neo4j.gds.procedures.algorithms.community.ModularityOptimizationMutateResult;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;

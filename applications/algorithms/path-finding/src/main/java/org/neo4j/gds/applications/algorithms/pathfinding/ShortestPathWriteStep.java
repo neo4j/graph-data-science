@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
+import org.neo4j.gds.api.ExportedRelationship;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.ImmutableExportedRelationship;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
@@ -95,7 +95,7 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
         try (
             var relationshipStream = result
                 .mapPaths(
-                    pathResult -> ImmutableExportedRelationship.of(
+                    pathResult -> new ExportedRelationship(
                         pathResult.sourceNode(),
                         pathResult.targetNode(),
                         createValues(graph, pathResult, writeNodeIds, writeCosts)

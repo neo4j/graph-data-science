@@ -29,7 +29,6 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.ExportedRelationship;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.ImmutableExportedRelationship;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -273,7 +272,7 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
     }
 
     ExportedRelationship relationship(String sourceVariable, String targetVariable, Value... values) {
-        return ImmutableExportedRelationship.of(
+        return new ExportedRelationship(
             graph.toMappedNodeId(idFunction.of(sourceVariable)),
             graph.toMappedNodeId(idFunction.of(targetVariable)),
             values

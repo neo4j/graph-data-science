@@ -17,11 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.projection;
 
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.internal.kernel.api.PropertyCursor;
-import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.NumberValue;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
@@ -31,9 +30,9 @@ import java.util.Arrays;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
-public final class ReadHelper {
+public final class NativeRelationshipPropertyReadHelper {
 
-    private ReadHelper() {
+    private NativeRelationshipPropertyReadHelper() {
         throw new UnsupportedOperationException("No instances");
     }
 
@@ -70,11 +69,11 @@ public final class ReadHelper {
         }
     }
 
-    public static double extractValue(AnyValue value, double defaultValue) {
+    public static double extractValue(Value value, double defaultValue) {
         return extractValue(Aggregation.NONE, value, defaultValue);
     }
 
-    public static double extractValue(Aggregation aggregation, AnyValue value, double defaultValue) {
+    public static double extractValue(Aggregation aggregation, Value value, double defaultValue) {
         // slightly different logic than org.neo4j.values.storable.Values#coerceToDouble
         // b/c we want to fall back to the default value if the value is empty
         if (value instanceof NumberValue) {

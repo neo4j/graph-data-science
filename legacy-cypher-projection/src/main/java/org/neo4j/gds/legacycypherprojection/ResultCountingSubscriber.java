@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.legacycypherprojection;
 
-import org.neo4j.gds.core.utils.ErrorCachingQuerySubscriber;
 import org.neo4j.graphdb.QueryStatistics;
 import org.neo4j.values.AnyValue;
 
