@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.core.concurrency;
 
-import org.neo4j.internal.helpers.NamedThreadFactory;
-
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;

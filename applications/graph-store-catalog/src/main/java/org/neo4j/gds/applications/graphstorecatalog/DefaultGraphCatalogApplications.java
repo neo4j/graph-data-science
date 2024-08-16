@@ -180,6 +180,22 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         Supplier<Path> exportLocation,
         GraphStoreCatalogService graphStoreCatalogService,
         ProjectionMetricsService projectionMetricsService,
+        RequestScopedDependencies requestScopedDependencies
+    ) {
+        return create(
+            log,
+            graphStoreCatalogService,
+            projectionMetricsService,
+            requestScopedDependencies,
+            null,
+            null
+        );
+    }
+
+    public static GraphCatalogApplications create(
+        Log log,
+        GraphStoreCatalogService graphStoreCatalogService,
+        ProjectionMetricsService projectionMetricsService,
         RequestScopedDependencies requestScopedDependencies,
         GraphDatabaseService graphDatabaseService,
         Transaction procedureTransaction

@@ -10,7 +10,6 @@ dependencies {
 
     compileOnly openGds.immutables.value.annotations
     compileOnly openGds.jetbrains.annotations
-    compileOnly group: 'org.neo4j',      name: 'neo4j-common',      version: ver.'neo4j'
     compileOnly project(':annotations')
 
     implementation project(':core-utils')
