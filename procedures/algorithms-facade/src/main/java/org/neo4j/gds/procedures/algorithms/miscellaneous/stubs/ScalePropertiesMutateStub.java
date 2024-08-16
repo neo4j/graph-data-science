@@ -23,38 +23,38 @@ import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsEstimationModeBusinessFacade;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.procedures.algorithms.miscellaneous.ScalePropertiesConfigurationValidationHook;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.ScalePropertiesMutateResult;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 import org.neo4j.gds.scaleproperties.ScalePropertiesMutateConfig;
 
 import java.util.Map;
-import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class ScalePropertiesMutateStub implements MutateStub<ScalePropertiesMutateConfig, ScalePropertiesMutateResult> {
     private final GenericStub genericStub;
     private final ApplicationsFacade applicationsFacade;
     private final ProcedureReturnColumns procedureReturnColumns;
-    private final boolean allowL1L2Scalers;
+    private final Function<CypherMapWrapper, ScalePropertiesMutateConfig> configFunction;
 
     public ScalePropertiesMutateStub(
         GenericStub genericStub,
         ApplicationsFacade applicationsFacade,
         ProcedureReturnColumns procedureReturnColumns,
-        boolean allowL1L2Scalers
+        Function<CypherMapWrapper, ScalePropertiesMutateConfig> configFunction
     ) {
         this.genericStub = genericStub;
         this.applicationsFacade = applicationsFacade;
         this.procedureReturnColumns = procedureReturnColumns;
-        this.allowL1L2Scalers = allowL1L2Scalers;
+        this.configFunction = configFunction;
     }
 
     @Override
     public ScalePropertiesMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(ScalePropertiesMutateConfig::of, configuration);
+        return genericStub.parseConfiguration(configFunction, configuration);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class ScalePropertiesMutateStub implements MutateStub<ScalePropertiesMuta
         return genericStub.getMemoryEstimation(
             username,
             rawConfiguration,
-            ScalePropertiesMutateConfig::of,
+            configFunction,
             configuration -> estimationMode().scaleProperties(configuration)
         );
     }
@@ -72,7 +72,7 @@ public class ScalePropertiesMutateStub implements MutateStub<ScalePropertiesMuta
         return genericStub.estimate(
             graphNameAsString,
             rawConfiguration,
-            ScalePropertiesMutateConfig::of,
+            configFunction,
             configuration -> estimationMode().scaleProperties(configuration)
         );
     }
@@ -82,16 +82,14 @@ public class ScalePropertiesMutateStub implements MutateStub<ScalePropertiesMuta
         String graphNameAsString,
         Map<String, Object> rawConfiguration
     ) {
-        var validationHook = new ScalePropertiesConfigurationValidationHook<ScalePropertiesMutateConfig>(allowL1L2Scalers);
 
         var shouldDisplayScalerStatistics = procedureReturnColumns.contains("scalerStatistics");
         var resultBuilder = new ScalePropertiesResultBuilderForMutateMode(shouldDisplayScalerStatistics);
 
-        return genericStub.executeWithValidation(
+        return genericStub.execute(
             graphNameAsString,
             rawConfiguration,
-            ScalePropertiesMutateConfig::of,
-            Optional.of(validationHook),
+            configFunction,
             applicationsFacade.miscellaneous().mutate()::scaleProperties,
             resultBuilder
         );

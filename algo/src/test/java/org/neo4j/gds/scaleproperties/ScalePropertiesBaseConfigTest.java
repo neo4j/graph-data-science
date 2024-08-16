@@ -25,6 +25,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.scaling.L1Norm;
+import org.neo4j.gds.scaling.L2Norm;
 import org.neo4j.gds.scaling.ScalerFactory;
 
 import java.util.List;
@@ -40,8 +42,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class ScalePropertiesBaseConfigTest {
 
     static Stream<Arguments> scalers() {
-        return ScalerFactory.ALL_SCALERS.keySet().stream().map(Arguments::of);
+        return ScalerFactory.ALL_SCALERS.keySet()
+            .stream()
+            .filter(s -> !(s.equals(L1Norm.TYPE) || s.equals(L2Norm.TYPE)))
+            .map(Arguments::of);
     }
+    static Stream<Arguments> scalersL1L2(){
+        return ScalerFactory.ALL_SCALERS.keySet()
+            .stream()
+            .filter(s -> (s.equals(L1Norm.TYPE) || s.equals(L2Norm.TYPE)))
+            .map(Arguments::of);
+    }
+
 
     @ParameterizedTest
     @MethodSource("scalers")
@@ -90,6 +102,19 @@ class ScalePropertiesBaseConfigTest {
         );
 
         assertThat(ex.getMessage()).contains("Unrecognised scaler type specified: `nonExistent`");
+    }
+
+    @Test
+    void failOnL1L2Scaler() {
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> new ScalePropertiesMutateConfigImpl(
+            CypherMapWrapper.create(
+                Map.of(
+                    "mutateProperty", "test",
+                    "scaler", "l1norm",
+                    "nodeProperties", List.of("a")
+                )
+            )
+        )).withMessageContaining("Unrecognised scaler type specified");
     }
 
     @Test

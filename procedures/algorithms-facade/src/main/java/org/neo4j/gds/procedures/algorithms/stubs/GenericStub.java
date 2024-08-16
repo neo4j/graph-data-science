@@ -34,10 +34,8 @@ import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.procedures.algorithms.AlgorithmHandle;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
-import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationValidationHook;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -156,37 +154,17 @@ public final class GenericStub {
         AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> executor,
         ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
     ) {
-        return executeWithValidation(
-            graphNameAsString,
-            rawConfiguration,
-            configurationLexer,
-            Optional.empty(), // no extra configuration validation
-            executor,
-            resultBuilder
-        );
-    }
-
-    /**
-     * @see org.neo4j.gds.procedures.algorithms.stubs.MutateStub#execute(String, java.util.Map)
-     */
-    public <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> Stream<RESULT_TO_CALLER> executeWithValidation(
-        String graphNameAsString,
-        Map<String, Object> rawConfiguration,
-        Function<CypherMapWrapper, CONFIGURATION> configurationLexer,
-        Optional<ConfigurationValidationHook<CONFIGURATION>> configurationValidation,
-        AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> executor,
-        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
-    ) {
         var graphName = GraphName.parse(graphNameAsString);
-        var configuration = configurationParser.parseAndValidate(
+        var configuration = configurationParser.parseConfiguration(
             rawConfiguration,
             configurationLexer,
-            user,
-            configurationValidation
+            user
         );
 
         var result = executor.compute(graphName, configuration, resultBuilder);
 
         return Stream.of(result);
     }
+
+
 }

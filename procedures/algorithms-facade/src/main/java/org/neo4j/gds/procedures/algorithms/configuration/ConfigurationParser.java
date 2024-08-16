@@ -31,7 +31,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -45,21 +44,14 @@ public class ConfigurationParser {
         this.limits = limits;
     }
 
-    public <CONFIGURATION extends AlgoBaseConfig> CONFIGURATION parseAndValidate(
-        Map<String, Object> rawConfiguration,
-        Function<CypherMapWrapper, CONFIGURATION> lexer,
-        User user,
-        Optional<ConfigurationValidationHook<CONFIGURATION>> configurationValidation
+
+    public <CONFIG extends AlgoBaseConfig> CONFIG parseConfiguration(
+        Map<String, Object> configuration,
+       Function<CypherMapWrapper, CONFIG> lexer,
+        User user
     ) {
-        CONFIGURATION configuration = parseConfiguration(
-            rawConfiguration,
-            (__, cypherMapWrapper) -> lexer.apply(cypherMapWrapper),
-            user
-        );
 
-        configurationValidation.ifPresent(hook -> hook.onConfigurationParsed(configuration));
-
-        return configuration;
+       return parseConfiguration(configuration, (__, cypherMapWrapper) -> lexer.apply(cypherMapWrapper),user);
     }
 
     /**

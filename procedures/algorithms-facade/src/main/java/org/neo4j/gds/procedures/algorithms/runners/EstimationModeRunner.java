@@ -26,7 +26,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 
 public class EstimationModeRunner {
@@ -43,11 +42,10 @@ public class EstimationModeRunner {
         Function<CypherMapWrapper, CONFIGURATION> configurationLexer,
         Function<CONFIGURATION, MemoryEstimateResult> supplier
     ) {
-        var configuration = configurationParser.parseAndValidate(
+        var configuration = configurationParser.parseConfiguration(
             rawConfiguration,
             configurationLexer,
-            user,
-            Optional.empty()
+            user
         );
 
         return supplier.apply(configuration);

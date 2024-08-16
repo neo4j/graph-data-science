@@ -50,6 +50,8 @@ public interface ScalerFactory {
         MinMax.TYPE, MinMax::buildFrom
     );
 
+
+
     List<String> SUPPORTED_SCALER_NAMES = ALL_SCALERS
         .keySet()
         .stream()
