@@ -25,6 +25,8 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.scaling.L1Norm;
+import org.neo4j.gds.scaling.L2Norm;
 import org.neo4j.gds.scaling.ScalerFactory;
 import org.neo4j.gds.utils.StringJoining;
 
@@ -86,5 +88,20 @@ public interface ScalePropertiesBaseConfig extends AlgoBaseConfig {
             .stream()
             .map(PropertyMapping::propertyKey)
             .collect(Collectors.toList());
+    }
+
+    @Configuration.Ignore
+    default boolean allowL1L2(){
+        return  false;
+    }
+
+    @Configuration.Check
+    default void validateScaler() {
+        if (!allowL1L2()) {
+            var specifiedScaler = scaler().type();
+            if ((specifiedScaler.equals(L1Norm.TYPE) || specifiedScaler.equals(L2Norm.TYPE))) {
+                ScalerFactory.throwForInvalidScaler(specifiedScaler);
+            }
+        }
     }
 }

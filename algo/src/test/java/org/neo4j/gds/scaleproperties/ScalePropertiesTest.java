@@ -187,6 +187,29 @@ class ScalePropertiesTest {
         LongStream.range(0, graph.nodeCount()).forEach(id -> assertArrayEquals(expected.get(id), actualDouble.get(id)));
     }
 
+    @ParameterizedTest
+    @MethodSource("org.neo4j.gds.scaleproperties.ScalePropertiesBaseConfigTest#scalersL1L2")
+    void supportLongAndFloatArraysForL1L2(String scaler) {
+        var baseConfigBuilder = AlphaScalePropertiesStreamConfigImpl.builder()
+            .scaler(ScalerFactory.ALL_SCALERS.get(scaler).apply(CypherMapWrapper.empty()));
+        var bConfig = baseConfigBuilder.nodeProperties(List.of("b")).build();
+        var longArrayBConfig = baseConfigBuilder.nodeProperties(List.of("longArrayB")).build();
+        var doubleArrayBConfig = baseConfigBuilder.nodeProperties(List.of("floatArrayB")).build();
+
+        var expected = new ScaleProperties(graph, bConfig, ProgressTracker.NULL_TRACKER, DefaultPool.INSTANCE)
+            .compute()
+            .scaledProperties();
+        var actualLong = new ScaleProperties(graph, longArrayBConfig, ProgressTracker.NULL_TRACKER, DefaultPool.INSTANCE)
+            .compute()
+            .scaledProperties();
+        var actualDouble = new ScaleProperties(graph, doubleArrayBConfig, ProgressTracker.NULL_TRACKER, DefaultPool.INSTANCE)
+            .compute()
+            .scaledProperties();
+
+        LongStream.range(0, graph.nodeCount()).forEach(id -> assertArrayEquals(expected.get(id), actualLong.get(id)));
+        LongStream.range(0, graph.nodeCount()).forEach(id -> assertArrayEquals(expected.get(id), actualDouble.get(id)));
+    }
+
     @Test
     void supportDoubleArrays() {
         var baseConfigBuilder = ScalePropertiesStreamConfigImpl
