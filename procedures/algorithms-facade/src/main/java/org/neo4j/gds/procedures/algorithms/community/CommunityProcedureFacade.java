@@ -257,7 +257,7 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new K1ColoringResultBuilderForStatsMode(procedureReturnColumns.contains("colorCount"));
 
-        return algorithmExecutionScaffolding.runAlgorithm(
+        return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
             K1ColoringStatsConfig::of,
@@ -345,7 +345,7 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new KCoreResultBuilderForStatsMode();
 
-        return algorithmExecutionScaffolding.runAlgorithm(
+        return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
             KCoreDecompositionStatsConfig::of,
@@ -436,7 +436,7 @@ public final class CommunityProcedureFacade {
             shouldComputeListOfCentroids
         );
 
-        return algorithmExecutionScaffolding.runAlgorithm(
+        return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
             KmeansStatsConfig::of,
@@ -529,7 +529,7 @@ public final class CommunityProcedureFacade {
             procedureReturnColumns);
         var resultBuilder = new LabelPropagationResultBuilderForStatsMode(statisticsComputationInstructions);
 
-        return algorithmExecutionScaffolding.runAlgorithm(
+        return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
             LabelPropagationStatsConfig::of,
@@ -618,7 +618,7 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new LccResultBuilderForStatsMode();
 
-        return algorithmExecutionScaffolding.runAlgorithm(
+        return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
             LocalClusteringCoefficientStatsConfig::of,
@@ -703,7 +703,7 @@ public final class CommunityProcedureFacade {
             procedureReturnColumns);
         var resultBuilder = new LeidenResultBuilderForStatsMode(statisticsComputationInstructions);
 
-        return algorithmExecutionScaffolding.runAlgorithm(
+        return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
             LeidenStatsConfig::of,
@@ -792,7 +792,7 @@ public final class CommunityProcedureFacade {
             procedureReturnColumns);
         var resultBuilder = new LouvainResultBuilderForStatsMode(statisticsComputationInstructions);
 
-        return algorithmExecutionScaffolding.runAlgorithm(
+        return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
             LouvainStatsConfig::of,
@@ -878,7 +878,7 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new ModularityResultBuilderForStatsMode();
 
-        return algorithmExecutionScaffolding.runAlgorithm(
+        return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
             ModularityStatsConfig::of,
@@ -940,7 +940,7 @@ public final class CommunityProcedureFacade {
             procedureReturnColumns);
         var resultBuilder = new ModularityOptimizationResultBuilderForStatsMode(statisticsComputationInstructions);
 
-        return algorithmExecutionScaffolding.runAlgorithm(
+        return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
             ModularityOptimizationStatsConfig::of,
@@ -1031,7 +1031,7 @@ public final class CommunityProcedureFacade {
             procedureReturnColumns);
         var resultBuilder = new SccResultBuilderForStatsMode(statisticsComputationInstructions);
 
-        return algorithmExecutionScaffolding.runAlgorithm(
+        return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
             SccStatsConfig::of,
@@ -1134,7 +1134,7 @@ public final class CommunityProcedureFacade {
     public Stream<TriangleCountStatsResult> triangleCountStats(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new TriangleCountResultBuilderForStatsMode();
 
-        return algorithmExecutionScaffolding.runAlgorithm(
+        return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
             TriangleCountStatsConfig::of,
@@ -1233,7 +1233,7 @@ public final class CommunityProcedureFacade {
             procedureReturnColumns);
         var resultBuilder = new WccResultBuilderForStatsMode(statisticsComputationInstructions);
 
-        return algorithmExecutionScaffolding.runAlgorithm(
+        return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
             WccStatsConfig::of,

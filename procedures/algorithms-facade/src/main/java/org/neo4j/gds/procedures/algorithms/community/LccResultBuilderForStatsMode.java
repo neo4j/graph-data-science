@@ -20,24 +20,21 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class LccResultBuilderForStatsMode implements ResultBuilder<LocalClusteringCoefficientStatsConfig, LocalClusteringCoefficientResult, Stream<LocalClusteringCoefficientStatsResult>, Void> {
+class LccResultBuilderForStatsMode implements StatsResultBuilder<LocalClusteringCoefficientStatsConfig, LocalClusteringCoefficientResult, Stream<LocalClusteringCoefficientStatsResult>> {
     @Override
     public Stream<LocalClusteringCoefficientStatsResult> build(
         Graph graph,
-        GraphStore graphStore,
         LocalClusteringCoefficientStatsConfig configuration,
         Optional<LocalClusteringCoefficientResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        AlgorithmProcessingTimings timings
     ) {
         if (result.isEmpty()) return Stream.of(LocalClusteringCoefficientStatsResult.emptyFrom(
             timings,

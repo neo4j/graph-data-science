@@ -97,9 +97,9 @@ public class AlgorithmProcessingTemplateConvenience {
         LabelForProgressTracking label,
         Supplier<MemoryEstimation> estimationFactory,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
-        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
+        StatsResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
+        return algorithmProcessingTemplate.processAlgorithmForStats(
             Optional.empty(),
             graphName,
             configuration,
@@ -107,7 +107,6 @@ public class AlgorithmProcessingTemplateConvenience {
             label,
             estimationFactory,
             algorithmComputation,
-            Optional.empty(),
             resultBuilder
         );
     }

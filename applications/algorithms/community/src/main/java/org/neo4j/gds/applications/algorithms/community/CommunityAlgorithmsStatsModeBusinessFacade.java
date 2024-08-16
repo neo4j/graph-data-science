@@ -21,7 +21,7 @@ package org.neo4j.gds.applications.algorithms.community;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
@@ -78,7 +78,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT k1Coloring(
         GraphName graphName,
         K1ColoringStatsConfig configuration,
-        ResultBuilder<K1ColoringStatsConfig, K1ColoringResult, RESULT, Void> resultBuilder
+        StatsResultBuilder<K1ColoringStatsConfig, K1ColoringResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
@@ -93,7 +93,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT kCore(
         GraphName graphName,
         KCoreDecompositionStatsConfig configuration,
-        ResultBuilder<KCoreDecompositionStatsConfig, KCoreDecompositionResult, RESULT, Void> resultBuilder
+        StatsResultBuilder<KCoreDecompositionStatsConfig, KCoreDecompositionResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
@@ -108,7 +108,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT kMeans(
         GraphName graphName,
         KmeansStatsConfig configuration,
-        ResultBuilder<KmeansStatsConfig, KmeansResult, RESULT, Void> resultBuilder
+        StatsResultBuilder<KmeansStatsConfig, KmeansResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
@@ -123,7 +123,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT labelPropagation(
         GraphName graphName,
         LabelPropagationStatsConfig configuration,
-        ResultBuilder<LabelPropagationStatsConfig, LabelPropagationResult, RESULT, Void> resultBuilder
+        StatsResultBuilder<LabelPropagationStatsConfig, LabelPropagationResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
@@ -138,7 +138,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT lcc(
         GraphName graphName,
         LocalClusteringCoefficientStatsConfig configuration,
-        ResultBuilder<LocalClusteringCoefficientStatsConfig, LocalClusteringCoefficientResult, RESULT, Void> resultBuilder
+        StatsResultBuilder<LocalClusteringCoefficientStatsConfig, LocalClusteringCoefficientResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
@@ -153,7 +153,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT leiden(
         GraphName graphName,
         LeidenStatsConfig configuration,
-        ResultBuilder<LeidenStatsConfig, LeidenResult, RESULT, Void> resultBuilder
+        StatsResultBuilder<LeidenStatsConfig, LeidenResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
@@ -168,7 +168,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT louvain(
         GraphName graphName,
         LouvainStatsConfig configuration,
-        ResultBuilder<LouvainStatsConfig, LouvainResult, RESULT, Void> resultBuilder
+        StatsResultBuilder<LouvainStatsConfig, LouvainResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
@@ -183,7 +183,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT modularity(
         GraphName graphName,
         ModularityStatsConfig configuration,
-        ResultBuilder<ModularityStatsConfig, ModularityResult, RESULT, Void> resultBuilder
+        StatsResultBuilder<ModularityStatsConfig, ModularityResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
@@ -198,7 +198,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT modularityOptimization(
         GraphName graphName,
         ModularityOptimizationStatsConfig configuration,
-        ResultBuilder<ModularityOptimizationStatsConfig, ModularityOptimizationResult, RESULT, Void> resultBuilder
+        StatsResultBuilder<ModularityOptimizationStatsConfig, ModularityOptimizationResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
@@ -213,7 +213,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT scc(
         GraphName graphName,
         SccStatsConfig configuration,
-        ResultBuilder<SccStatsConfig, HugeLongArray, RESULT, Void> resultBuilder
+        StatsResultBuilder<SccStatsConfig, HugeLongArray, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
@@ -228,7 +228,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT triangleCount(
         GraphName graphName,
         TriangleCountStatsConfig configuration,
-        ResultBuilder<TriangleCountStatsConfig, TriangleCountResult, RESULT, Void> resultBuilder
+        StatsResultBuilder<TriangleCountStatsConfig, TriangleCountResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
@@ -243,7 +243,7 @@ public class CommunityAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT wcc(
         GraphName graphName,
         WccStatsConfig configuration,
-        ResultBuilder<WccStatsConfig, DisjointSetStruct, RESULT, Void> resultBuilder
+        StatsResultBuilder<WccStatsConfig, DisjointSetStruct, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,

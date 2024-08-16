@@ -21,7 +21,7 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStatsConfig;
@@ -62,7 +62,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT bellmanFord(
         GraphName graphName,
         AllShortestPathsBellmanFordStatsConfig configuration,
-        ResultBuilder<AllShortestPathsBellmanFordStatsConfig, BellmanFordResult, RESULT, Void> resultBuilder
+        StatsResultBuilder<AllShortestPathsBellmanFordStatsConfig, BellmanFordResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
@@ -77,7 +77,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT breadthFirstSearch(
         GraphName graphName,
         BfsStatsConfig configuration,
-        ResultBuilder<BfsStatsConfig, HugeLongArray, RESULT, Void> resultBuilder
+        StatsResultBuilder<BfsStatsConfig, HugeLongArray, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
@@ -92,7 +92,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT deltaStepping(
         GraphName graphName,
         AllShortestPathsDeltaStatsConfig configuration,
-        ResultBuilder<AllShortestPathsDeltaStatsConfig, PathFindingResult, RESULT, Void> resultBuilder
+        StatsResultBuilder<AllShortestPathsDeltaStatsConfig, PathFindingResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
@@ -107,7 +107,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT randomWalk(
         GraphName graphName,
         RandomWalkStatsConfig configuration,
-        ResultBuilder<RandomWalkStatsConfig, Stream<long[]>, RESULT, Void> resultBuilder
+        StatsResultBuilder<RandomWalkStatsConfig, Stream<long[]>, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
@@ -122,7 +122,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT spanningTree(
         GraphName graphName,
         SpanningTreeStatsConfig configuration,
-        ResultBuilder<SpanningTreeStatsConfig, SpanningTree, RESULT, Void> resultBuilder
+        StatsResultBuilder<SpanningTreeStatsConfig, SpanningTree, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
@@ -137,7 +137,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT steinerTree(
         GraphName graphName,
         SteinerTreeStatsConfig configuration,
-        ResultBuilder<SteinerTreeStatsConfig, SteinerTreeResult, RESULT, Void> resultBuilder
+        StatsResultBuilder<SteinerTreeStatsConfig, SteinerTreeResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,

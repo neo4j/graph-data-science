@@ -20,24 +20,21 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.triangle.TriangleCountStatsConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class TriangleCountResultBuilderForStatsMode implements ResultBuilder<TriangleCountStatsConfig, TriangleCountResult, Stream<TriangleCountStatsResult>, Void> {
+class TriangleCountResultBuilderForStatsMode implements StatsResultBuilder<TriangleCountStatsConfig, TriangleCountResult, Stream<TriangleCountStatsResult>> {
     @Override
     public Stream<TriangleCountStatsResult> build(
         Graph graph,
-        GraphStore graphStore,
         TriangleCountStatsConfig configuration,
         Optional<TriangleCountResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        AlgorithmProcessingTimings timings
     ) {
         if (result.isEmpty()) return Stream.of(TriangleCountStatsResult.emptyFrom(timings, configuration.toMap()));
 

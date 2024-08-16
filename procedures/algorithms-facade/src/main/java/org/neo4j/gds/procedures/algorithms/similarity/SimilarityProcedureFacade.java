@@ -116,7 +116,7 @@ public final class SimilarityProcedureFacade {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("similarityDistribution");
         var resultBuilder = new FilteredKnnResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
 
-        return algorithmExecutionScaffolding.runAlgorithm(
+        return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
             FilteredKnnStatsConfig::of,
@@ -215,7 +215,7 @@ public final class SimilarityProcedureFacade {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("similarityDistribution");
         var resultBuilder = new FilteredNodeSimilarityResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
 
-        return algorithmExecutionScaffolding.runAlgorithm(
+        return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
             FilteredNodeSimilarityStatsConfig::of,
@@ -317,7 +317,7 @@ public final class SimilarityProcedureFacade {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("similarityDistribution");
         var resultBuilder = new KnnResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
 
-        return algorithmExecutionScaffolding.runAlgorithm(
+        return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
             KnnStatsConfig::of,
@@ -419,7 +419,7 @@ public final class SimilarityProcedureFacade {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("similarityDistribution");
         var resultBuilder = new NodeSimilarityResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
 
-        return algorithmExecutionScaffolding.runAlgorithm(
+        return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
             NodeSimilarityStatsConfig::of,

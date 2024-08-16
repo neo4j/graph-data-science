@@ -21,7 +21,7 @@ package org.neo4j.gds.applications.algorithms.embeddings;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 import org.neo4j.gds.embeddings.fastrp.FastRPStatsConfig;
 
@@ -45,7 +45,7 @@ public class NodeEmbeddingAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT fastRP(
         GraphName graphName,
         FastRPStatsConfig configuration,
-        ResultBuilder<FastRPStatsConfig, FastRPResult, RESULT, Void> resultBuilder
+        StatsResultBuilder<FastRPStatsConfig, FastRPResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,

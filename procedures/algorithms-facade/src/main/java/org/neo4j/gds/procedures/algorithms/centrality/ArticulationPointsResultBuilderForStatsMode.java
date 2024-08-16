@@ -21,24 +21,21 @@ package org.neo4j.gds.procedures.algorithms.centrality;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.articulationpoints.ArticulationPointsStatsConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class ArticulationPointsResultBuilderForStatsMode implements ResultBuilder<ArticulationPointsStatsConfig, BitSet, Stream<ArticulationPointsStatsResult>, Void> {
+class ArticulationPointsResultBuilderForStatsMode implements StatsResultBuilder<ArticulationPointsStatsConfig, BitSet, Stream<ArticulationPointsStatsResult>> {
 
     @Override
     public Stream<ArticulationPointsStatsResult> build(
         Graph graph,
-        GraphStore graphStore,
         ArticulationPointsStatsConfig configuration,
         Optional<BitSet> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> metadata
+        AlgorithmProcessingTimings timings
     ) {
         if (result.isEmpty()) {
             return Stream.of(ArticulationPointsStatsResult.EMPTY);

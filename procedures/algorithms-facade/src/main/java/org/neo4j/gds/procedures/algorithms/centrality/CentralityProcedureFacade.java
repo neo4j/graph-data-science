@@ -235,7 +235,7 @@ public final class CentralityProcedureFacade {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("centralityDistribution");
         var resultBuilder = new PageRankResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
 
-        return algorithmExecutionScaffolding.runAlgorithm(
+        return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
             PageRankStatsConfig::of,
@@ -341,7 +341,7 @@ public final class CentralityProcedureFacade {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("centralityDistribution");
         var resultBuilder = new BetweennessCentralityResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
 
-        return algorithmExecutionScaffolding.runAlgorithm(
+        return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
             BetweennessCentralityStatsConfig::of,
@@ -484,7 +484,7 @@ public final class CentralityProcedureFacade {
         String graphNameAsString,
         Map<String, Object> rawConfiguration
     ) {
-        return algorithmExecutionScaffolding.runAlgorithm(
+        return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphNameAsString,
             rawConfiguration,
             ArticulationPointsStatsConfig::of,
@@ -580,7 +580,7 @@ public final class CentralityProcedureFacade {
     ) {
         var resultBuilder = new CelfResultBuilderForStatsMode();
 
-        return algorithmExecutionScaffolding.runAlgorithm(
+        return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
             InfluenceMaximizationStatsConfig::of,
@@ -675,7 +675,7 @@ public final class CentralityProcedureFacade {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("centralityDistribution");
         var resultBuilder = new ClosenessCentralityResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
 
-        return algorithmExecutionScaffolding.runAlgorithm(
+        return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
             ClosenessCentralityStatsConfig::of,
@@ -720,7 +720,7 @@ public final class CentralityProcedureFacade {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("centralityDistribution");
         var resultBuilder = new DegreeCentralityResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
 
-        return algorithmExecutionScaffolding.runAlgorithm(
+        return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
             DegreeCentralityStatsConfig::of,
@@ -815,7 +815,7 @@ public final class CentralityProcedureFacade {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("centralityDistribution");
         var resultBuilder = new PageRankResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
 
-        return algorithmExecutionScaffolding.runAlgorithm(
+        return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
             PageRankStatsConfig::of,
@@ -906,7 +906,7 @@ public final class CentralityProcedureFacade {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("centralityDistribution");
         var resultBuilder = new HarmonicCentralityResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
 
-        return algorithmExecutionScaffolding.runAlgorithm(
+        return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
             HarmonicCentralityStatsConfig::of,
@@ -951,7 +951,7 @@ public final class CentralityProcedureFacade {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("centralityDistribution");
         var resultBuilder = new PageRankResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
 
-        return algorithmExecutionScaffolding.runAlgorithm(
+        return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
             PageRankStatsConfig::of,

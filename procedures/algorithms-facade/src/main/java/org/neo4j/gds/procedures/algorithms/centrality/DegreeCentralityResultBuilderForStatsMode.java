@@ -21,15 +21,14 @@ package org.neo4j.gds.procedures.algorithms.centrality;
 
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.degree.DegreeCentralityStatsConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class DegreeCentralityResultBuilderForStatsMode implements ResultBuilder<DegreeCentralityStatsConfig, CentralityAlgorithmResult, Stream<CentralityStatsResult>, Void> {
+class DegreeCentralityResultBuilderForStatsMode implements StatsResultBuilder<DegreeCentralityStatsConfig, CentralityAlgorithmResult, Stream<CentralityStatsResult>> {
     private final GenericCentralityResultBuilderForStatsMode genericResultBuilder = new GenericCentralityResultBuilderForStatsMode();
 
     private final boolean shouldComputeCentralityDistribution;
@@ -41,11 +40,9 @@ class DegreeCentralityResultBuilderForStatsMode implements ResultBuilder<DegreeC
     @Override
     public Stream<CentralityStatsResult> build(
         Graph graph,
-        GraphStore graphStore,
         DegreeCentralityStatsConfig configuration,
         Optional<CentralityAlgorithmResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        AlgorithmProcessingTimings timings
     ) {
         var centralityStatsResult = genericResultBuilder.build(
             graph,

@@ -21,16 +21,15 @@ package org.neo4j.gds.procedures.algorithms.centrality;
 
 import org.neo4j.gds.algorithms.centrality.PageRankDistributionComputer;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankStatsConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class PageRankResultBuilderForStatsMode implements ResultBuilder<PageRankStatsConfig, PageRankResult, Stream<PageRankStatsResult>, Void> {
+class PageRankResultBuilderForStatsMode implements StatsResultBuilder<PageRankStatsConfig, PageRankResult, Stream<PageRankStatsResult>> {
     private final boolean shouldComputeCentralityDistribution;
 
     PageRankResultBuilderForStatsMode(boolean shouldComputeCentralityDistribution) {
@@ -40,11 +39,9 @@ class PageRankResultBuilderForStatsMode implements ResultBuilder<PageRankStatsCo
     @Override
     public Stream<PageRankStatsResult> build(
         Graph graph,
-        GraphStore graphStore,
         PageRankStatsConfig configuration,
         Optional<PageRankResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        AlgorithmProcessingTimings timings
     ) {
         var configurationMap = configuration.toMap();
 

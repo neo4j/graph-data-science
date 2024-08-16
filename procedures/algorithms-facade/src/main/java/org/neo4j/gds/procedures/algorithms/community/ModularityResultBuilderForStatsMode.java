@@ -20,24 +20,21 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.modularity.ModularityStatsConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class ModularityResultBuilderForStatsMode implements ResultBuilder<ModularityStatsConfig, ModularityResult, Stream<ModularityStatsResult>, Void> {
+class ModularityResultBuilderForStatsMode implements StatsResultBuilder<ModularityStatsConfig, ModularityResult, Stream<ModularityStatsResult>> {
     @Override
     public Stream<ModularityStatsResult> build(
         Graph graph,
-        GraphStore graphStore,
         ModularityStatsConfig configuration,
         Optional<ModularityResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        AlgorithmProcessingTimings timings
     ) {
         if (result.isEmpty()) return Stream.of(ModularityStatsResult.emptyFrom(timings, configuration.toMap()));
 

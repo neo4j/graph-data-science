@@ -20,24 +20,21 @@
 package org.neo4j.gds.procedures.algorithms.embeddings;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 import org.neo4j.gds.embeddings.fastrp.FastRPStatsConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class FastRPResultBuilderForStatsMode implements ResultBuilder<FastRPStatsConfig, FastRPResult, Stream<FastRPStatsResult>, Void> {
+class FastRPResultBuilderForStatsMode implements StatsResultBuilder<FastRPStatsConfig, FastRPResult, Stream<FastRPStatsResult>> {
     @Override
     public Stream<FastRPStatsResult> build(
         Graph graph,
-        GraphStore graphStore,
         FastRPStatsConfig configuration,
         Optional<FastRPResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        AlgorithmProcessingTimings timings
     ) {
         if (result.isEmpty()) return Stream.of(FastRPStatsResult.emptyFrom(timings, configuration.toMap()));
 
