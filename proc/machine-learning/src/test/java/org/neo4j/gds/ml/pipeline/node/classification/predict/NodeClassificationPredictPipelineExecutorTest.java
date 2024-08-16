@@ -431,6 +431,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             .build();
         var applicationsFacade = ApplicationsFacade.create(
             null,
+            null,
             Optional.empty(),
             Optional.empty(),
             Optional.empty(),

@@ -22,6 +22,8 @@ package org.neo4j.gds.applications.graphstorecatalog;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.PropertyMapping;
+import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
@@ -273,6 +275,31 @@ public class GraphStoreValidationService {
                 "Expecting all specified relationship types to be present in graph store, but could not find %s",
                 StringJoining.join(missingRelationshipTypes, ElementIdentifier::name)
             ));
+        }
+    }
+
+    void ensureReadAccess(GraphStore graphStore, boolean shouldExportAdditionalNodeProperties) {
+        if (shouldExportAdditionalNodeProperties && !graphStore.capabilities().canWriteToLocalDatabase()) {
+            throw new IllegalArgumentException("Exporting additional node properties is not allowed for this graph.");
+        }
+    }
+
+    void ensureNodePropertiesNotExist(GraphStore graphStore, PropertyMappings additionalNodeProperties) {
+        var nodeProperties = graphStore.nodePropertyKeys();
+
+        var duplicateProperties = additionalNodeProperties
+            .stream()
+            .map(PropertyMapping::neoPropertyKey)
+            .filter(nodeProperties::contains)
+            .collect(Collectors.toList());
+
+        if (!duplicateProperties.isEmpty()) {
+            throw new IllegalArgumentException(
+                formatWithLocale(
+                    "The following provided additional node properties are already present in the in-memory graph: %s",
+                    StringJoining.joinVerbose(duplicateProperties)
+                )
+            );
         }
     }
 

@@ -27,7 +27,6 @@ import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.io.file.csv.GraphStoreToCsvExporter;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.settings.GdsSettings;
-import org.neo4j.graphdb.config.Configuration;
 import org.neo4j.gds.logging.Log;
 
 import java.io.IOException;
@@ -78,12 +77,6 @@ public final class GraphStoreExporterUtil {
             log.warn("CSV export failed", e);
             throw e;
         }
-    }
-
-    public static Path exportLocation(Configuration neo4jConfig, String exportName) {
-        var rootPath = neo4jConfig.get(GdsSettings.exportLocation());
-        var exportPath = rootPath != null ? rootPath.resolve(EXPORT_DIR) : null;
-        return exportPath(exportPath, exportName);
     }
 
     public static Path exportPath(@Nullable Path rootPath, String exportName) {

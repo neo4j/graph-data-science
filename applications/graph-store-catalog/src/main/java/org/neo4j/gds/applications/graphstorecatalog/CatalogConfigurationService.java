@@ -28,6 +28,8 @@ import org.neo4j.gds.config.GraphProjectFromGraphConfig;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.io.db.GraphStoreToDatabaseExporterConfig;
+import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
 import org.neo4j.gds.graphsampling.config.CommonNeighbourAwareRandomWalkConfig;
 import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
@@ -348,6 +350,25 @@ public class CatalogConfigurationService {
             cypherConfig
         );
 
+        ensureThereAreNoExtraConfigurationKeys(cypherConfig, configuration);
+
+        return configuration;
+    }
+
+    GraphStoreToFileExporterConfig parseGraphStoreToFileExporterConfiguration(
+        User user,
+        Map<String, Object> rawConfiguration
+    ) {
+        var cypherConfig = CypherMapWrapper.create(rawConfiguration);
+        var configuration = GraphStoreToFileExporterConfig.of(user.getUsername(), cypherConfig);
+        ensureThereAreNoExtraConfigurationKeys(cypherConfig, configuration);
+
+        return configuration;
+    }
+
+    GraphStoreToDatabaseExporterConfig parseGraphStoreToDatabaseExporterConfig(Map<String, Object> rawConfiguration) {
+        var cypherConfig = CypherMapWrapper.create(rawConfiguration);
+        var configuration = GraphStoreToDatabaseExporterConfig.of(cypherConfig);
         ensureThereAreNoExtraConfigurationKeys(cypherConfig, configuration);
 
         return configuration;

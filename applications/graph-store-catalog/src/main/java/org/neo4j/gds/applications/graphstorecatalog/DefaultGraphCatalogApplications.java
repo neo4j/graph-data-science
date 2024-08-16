@@ -20,13 +20,15 @@
 package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.beta.filter.GraphFilterResult;
-import org.neo4j.gds.core.io.db.GraphStoreToDatabaseExporterConfig;
+import org.neo4j.gds.core.io.GraphStoreExporterBaseConfig;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
@@ -48,8 +50,10 @@ import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -87,6 +91,8 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
     // services
     private final GraphNameValidationService graphNameValidationService;
 
+    private final RequestScopedDependencies requestScopedDependencies;
+
     // applications
     private final DropGraphApplication dropGraphApplication;
     private final ListGraphApplication listGraphApplication;
@@ -107,6 +113,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
     private final GraphSamplingApplication graphSamplingApplication;
     private final EstimateCommonNeighbourAwareRandomWalkApplication estimateCommonNeighbourAwareRandomWalkApplication;
     private final GenerateGraphApplication generateGraphApplication;
+    private final ExportToCsvApplication exportToCsvApplication;
     private final ExportToDatabaseApplication exportToDatabaseApplication;
 
     DefaultGraphCatalogApplications(
@@ -114,6 +121,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         GraphStoreCatalogService graphStoreCatalogService,
         ProjectionMetricsService projectionMetricsService,
         GraphNameValidationService graphNameValidationService,
+        RequestScopedDependencies requestScopedDependencies,
         CypherProjectApplication cypherProjectApplication,
         DropGraphApplication dropGraphApplication,
         DropNodePropertiesApplication dropNodePropertiesApplication,
@@ -133,6 +141,7 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         WriteNodePropertiesApplication writeNodePropertiesApplication,
         WriteRelationshipPropertiesApplication writeRelationshipPropertiesApplication,
         WriteRelationshipsApplication writeRelationshipsApplication,
+        ExportToCsvApplication exportToCsvApplication,
         ExportToDatabaseApplication exportToDatabaseApplication
     ) {
         this.log = log;
@@ -140,6 +149,8 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         this.projectionMetricsService = projectionMetricsService;
 
         this.graphNameValidationService = graphNameValidationService;
+
+        this.requestScopedDependencies = requestScopedDependencies;
 
         this.dropGraphApplication = dropGraphApplication;
         this.listGraphApplication = listGraphApplication;
@@ -160,11 +171,13 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         this.graphSamplingApplication = graphSamplingApplication;
         this.estimateCommonNeighbourAwareRandomWalkApplication = estimateCommonNeighbourAwareRandomWalkApplication;
         this.generateGraphApplication = generateGraphApplication;
+        this.exportToCsvApplication = exportToCsvApplication;
         this.exportToDatabaseApplication = exportToDatabaseApplication;
     }
 
     public static GraphCatalogApplications create(
         Log log,
+        Supplier<Path> exportLocation,
         GraphStoreCatalogService graphStoreCatalogService,
         ProjectionMetricsService projectionMetricsService,
         RequestScopedDependencies requestScopedDependencies,
@@ -184,7 +197,20 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         var dropNodePropertiesApplication = new DropNodePropertiesApplication(log);
         var dropRelationshipsApplication = new DropRelationshipsApplication(log);
         var estimateCommonNeighbourAwareRandomWalkApplication = new EstimateCommonNeighbourAwareRandomWalkApplication();
-        var exportToDatabaseApplication = new ExportToDatabaseApplication(log, graphStoreCatalogService, graphDatabaseService, procedureTransaction, requestScopedDependencies.getDatabaseId(), requestScopedDependencies.getTaskRegistryFactory(), requestScopedDependencies.getUser(), requestScopedDependencies.getUserLogRegistryFactory());
+        var exportToCsvApplication = new ExportToCsvApplication(
+            log,
+            graphDatabaseService,
+            procedureTransaction,
+            exportLocation,
+            requestScopedDependencies.getTaskRegistryFactory()
+        );
+        var exportToDatabaseApplication = new ExportToDatabaseApplication(
+            log,
+            graphDatabaseService,
+            procedureTransaction,
+            requestScopedDependencies.getTaskRegistryFactory(),
+            requestScopedDependencies.getUserLogRegistryFactory()
+        );
         var generateGraphApplication = new GenerateGraphApplication(log, graphStoreCatalogService);
         var graphMemoryUsageApplication = new GraphMemoryUsageApplication(graphStoreCatalogService);
         var graphSamplingApplication = new GraphSamplingApplication(log, graphStoreCatalogService);
@@ -209,16 +235,19 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         var writeRelationshipPropertiesApplication = new WriteRelationshipPropertiesApplication(log);
         var writeRelationshipsApplication = new WriteRelationshipsApplication(log);
 
-        return new DefaultGraphCatalogApplicationsBuilder()
-            .withLog(log)
-            .withGraphStoreCatalogService(graphStoreCatalogService)
-            .withProjectionMetricsService(projectionMetricsService)
-            .withGraphNameValidationService(graphNameValidationService)
+        return new DefaultGraphCatalogApplicationsBuilder(
+            log,
+            graphStoreCatalogService,
+            projectionMetricsService,
+            requestScopedDependencies,
+            graphNameValidationService
+        )
             .withCypherProjectApplication(cypherProjectApplication)
             .withDropGraphApplication(dropGraphApplication)
             .withDropNodePropertiesApplication(dropNodePropertiesApplication)
             .withDropRelationshipsApplication(dropRelationshipsApplication)
             .withEstimateCommonNeighbourAwareRandomWalkApplication(estimateCommonNeighbourAwareRandomWalkApplication)
+            .withExportToCsvApplication(exportToCsvApplication)
             .withExportToDatabaseApplication(exportToDatabaseApplication)
             .withGenerateGraphApplication(generateGraphApplication)
             .withGraphMemoryUsageApplication(graphMemoryUsageApplication)
@@ -986,11 +1015,49 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
     }
 
     @Override
-    public DatabaseExportResult exportToDatabase(
+    public FileExportResult exportToCsv(String graphNameAsString, Map<String, Object> rawConfiguration) {
+        var graphName = graphNameValidationService.validate(graphNameAsString);
+
+        var configuration = catalogConfigurationService.parseGraphStoreToFileExporterConfiguration(
+            requestScopedDependencies.getUser(),
+            rawConfiguration
+        );
+
+        var graphStore = getGraphStoreAndValidateForExport(graphName, configuration);
+
+        return exportToCsvApplication.run(graphName, configuration, graphStore);
+    }
+
+    @Override
+    public DatabaseExportResult exportToDatabase(String graphNameAsString, Map<String, Object> rawConfiguration) {
+        var graphName = graphNameValidationService.validate(graphNameAsString);
+
+        var configuration = catalogConfigurationService.parseGraphStoreToDatabaseExporterConfig(rawConfiguration);
+
+        var graphStore = getGraphStoreAndValidateForExport(graphName, configuration);
+
+        return exportToDatabaseApplication.run(graphName, configuration, graphStore);
+    }
+
+    @NotNull
+    private GraphStore getGraphStoreAndValidateForExport(
         GraphName graphName,
-        GraphStoreToDatabaseExporterConfig configuration
+        GraphStoreExporterBaseConfig configuration
     ) {
-        return exportToDatabaseApplication.run(graphName, configuration);
+        var graphStoreCatalogEntry = graphStoreCatalogService.getGraphStoreCatalogEntry(
+            graphName,
+            configuration,
+            requestScopedDependencies.getUser(),
+            requestScopedDependencies.getDatabaseId()
+        );
+
+        var graphStore = graphStoreCatalogEntry.graphStore();
+
+        var shouldExportAdditionalNodeProperties = !configuration.additionalNodeProperties().mappings().isEmpty();
+
+        graphStoreValidationService.ensureReadAccess(graphStore, shouldExportAdditionalNodeProperties);
+        graphStoreValidationService.ensureNodePropertiesNotExist(graphStore, configuration.additionalNodeProperties());
+        return graphStore;
     }
 
     private RandomWalkSamplingResult sampleRandomWalk(

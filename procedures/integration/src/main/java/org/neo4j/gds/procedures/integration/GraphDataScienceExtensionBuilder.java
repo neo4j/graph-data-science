@@ -45,9 +45,11 @@ import org.neo4j.kernel.lifecycle.LifeSupport;
 import org.neo4j.kernel.lifecycle.Lifecycle;
 
 import java.lang.management.ManagementFactory;
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * The GraphDataScience component has a certain contract,
@@ -105,6 +107,7 @@ public final class GraphDataScienceExtensionBuilder {
         Log log,
         Configuration neo4jConfiguration,
         GlobalProcedures globalProcedures,
+        Supplier<Path> exportLocation,
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
         Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
         Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator,
@@ -148,6 +151,7 @@ public final class GraphDataScienceExtensionBuilder {
 
         var graphDataScienceProviderFactory = GraphDataScienceProviderFactory.create(
             log,
+            exportLocation,
             algorithmProcessingTemplateDecorator,
             graphCatalogApplicationsDecorator,
             modelCatalogApplicationsDecorator,

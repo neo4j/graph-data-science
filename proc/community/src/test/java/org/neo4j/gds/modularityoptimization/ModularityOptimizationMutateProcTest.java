@@ -521,6 +521,7 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
         );
         var applicationsFacade = ApplicationsFacade.create(
             logMock,
+            null,
             Optional.empty(),
             Optional.empty(),
             Optional.empty(),

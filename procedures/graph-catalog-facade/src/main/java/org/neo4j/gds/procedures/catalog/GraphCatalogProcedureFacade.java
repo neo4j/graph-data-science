@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.procedures.catalog;
 
-import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.graphstorecatalog.DatabaseExportResult;
+import org.neo4j.gds.applications.graphstorecatalog.FileExportResult;
 import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
 import org.neo4j.gds.applications.graphstorecatalog.GraphGenerationStats;
 import org.neo4j.gds.applications.graphstorecatalog.GraphMemoryUsage;
@@ -44,8 +44,6 @@ import org.neo4j.gds.applications.graphstorecatalog.WriteLabelResult;
 import org.neo4j.gds.applications.graphstorecatalog.WriteRelationshipPropertiesResult;
 import org.neo4j.gds.applications.graphstorecatalog.WriteRelationshipResult;
 import org.neo4j.gds.beta.filter.GraphFilterResult;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.io.db.GraphStoreToDatabaseExporterConfig;
 import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
 import org.neo4j.gds.legacycypherprojection.GraphProjectCypherResult;
@@ -643,14 +641,20 @@ public class GraphCatalogProcedureFacade {
         return Stream.of(result);
     }
 
+    public Stream<FileExportResult> exportToCsv(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var result = catalog().exportToCsv(graphName, configuration);
+
+        return Stream.of(result);
+    }
+
     public Stream<DatabaseExportResult> exportToDatabase(
-        String graphNameAsString,
-        Map<String, Object> rawConfiguration
+        String graphName,
+        Map<String, Object> configuration
     ) {
         databaseModeRestriction.ensureNotOnCluster();
-
-        var graphName = GraphName.parse(graphNameAsString);
-        var configuration = parseAndValidateConfiguration(rawConfiguration);
 
         var result = catalog().exportToDatabase(graphName, configuration);
 
@@ -700,13 +704,6 @@ public class GraphCatalogProcedureFacade {
         streamCloser.accept(resultStream);
 
         return resultStream;
-    }
-
-    private GraphStoreToDatabaseExporterConfig parseAndValidateConfiguration(Map<String, Object> rawConfiguration) {
-        var cypherConfig = CypherMapWrapper.create(rawConfiguration);
-        var configuration = GraphStoreToDatabaseExporterConfig.of(cypherConfig);
-        cypherConfig.requireOnlyKeysFrom(configuration.configKeys());
-        return configuration;
     }
 
     /**

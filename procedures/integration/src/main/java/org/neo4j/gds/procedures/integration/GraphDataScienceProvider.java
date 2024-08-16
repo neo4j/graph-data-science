@@ -20,13 +20,13 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.function.ThrowingFunction;
-import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
+import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -38,9 +38,9 @@ import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.gds.procedures.AlgorithmProcedureFacadeBuilderFactory;
-import org.neo4j.gds.procedures.GraphCatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.DatabaseIdAccessor;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
+import org.neo4j.gds.procedures.GraphCatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.KernelTransactionAccessor;
 import org.neo4j.gds.procedures.ProcedureCallContextReturnColumns;
@@ -54,8 +54,10 @@ import org.neo4j.graphdb.config.Configuration;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * We use this at request time to construct the facade that the procedures call.
@@ -88,6 +90,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
     private final Configuration neo4jConfiguration;
     private final ModelCatalog modelCatalog;
     private final ModelRepository modelRepository;
+    private final Supplier<Path> exportLocation;
 
     GraphDataScienceProvider(
         Log log,
@@ -109,7 +112,8 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         UserLogServices userLogServices,
         Configuration neo4jConfiguration,
         ModelCatalog modelCatalog,
-        ModelRepository modelRepository
+        ModelRepository modelRepository,
+        Supplier<Path> exportLocation
     ) {
         this.log = log;
         this.defaultsConfiguration = defaultsConfiguration;
@@ -131,6 +135,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         this.neo4jConfiguration = neo4jConfiguration;
         this.modelCatalog = modelCatalog;
         this.modelRepository = modelRepository;
+        this.exportLocation = exportLocation;
     }
 
     @Override
@@ -177,6 +182,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         return GraphDataScienceProcedures.create(
             log,
             defaultsConfiguration,
+            exportLocation,
             limitsConfiguration,
             algorithmProcessingTemplateDecorator,
             graphCatalogApplicationsDecorator,

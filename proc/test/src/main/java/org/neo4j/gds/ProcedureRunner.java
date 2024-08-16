@@ -179,6 +179,7 @@ public final class ProcedureRunner {
         return GraphDataScienceProcedures.create(
             gdsLog,
             DefaultsConfiguration.Instance,
+            null,
             LimitsConfiguration.Instance,
             Optional.empty(),
             Optional.empty(),

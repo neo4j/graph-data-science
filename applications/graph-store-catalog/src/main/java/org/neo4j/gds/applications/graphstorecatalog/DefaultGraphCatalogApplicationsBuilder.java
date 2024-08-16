@@ -19,18 +19,21 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 
+/**
+ * This exists so that we may supply only _some_ applications when creating the facade. Handy for testing.
+ */
 class DefaultGraphCatalogApplicationsBuilder {
     // global dependencies
-    private Log log;
-    private GraphStoreCatalogService graphStoreCatalogService;
-    private ProjectionMetricsService projectionMetricsService;
-
-    // services
-    private GraphNameValidationService graphNameValidationService;
+    private final Log log;
+    private final RequestScopedDependencies requestScopedDependencies;
+    private final GraphStoreCatalogService graphStoreCatalogService;
+    private final ProjectionMetricsService projectionMetricsService;
+    private final GraphNameValidationService graphNameValidationService;
 
     // applications
     private DropGraphApplication dropGraphApplication;
@@ -52,26 +55,39 @@ class DefaultGraphCatalogApplicationsBuilder {
     private GraphSamplingApplication graphSamplingApplication;
     private EstimateCommonNeighbourAwareRandomWalkApplication estimateCommonNeighbourAwareRandomWalkApplication;
     private GenerateGraphApplication generateGraphApplication;
+    private ExportToCsvApplication exportToCsvApplication;
     private ExportToDatabaseApplication exportToDatabaseApplication;
 
-    DefaultGraphCatalogApplicationsBuilder withLog(Log log) {
+    public DefaultGraphCatalogApplicationsBuilder(
+        Log log,
+        GraphStoreCatalogService graphStoreCatalogService,
+        ProjectionMetricsService projectionMetricsService,
+        RequestScopedDependencies requestScopedDependencies
+    ) {
+        this(
+            log,
+            graphStoreCatalogService,
+            projectionMetricsService,
+            requestScopedDependencies,
+            new GraphNameValidationService()
+        );
+    }
+
+    /**
+     * @param graphNameValidationService _Sometimes_ you want to inject the name validation service, e.g. for testing
+     */
+    DefaultGraphCatalogApplicationsBuilder(
+        Log log,
+        GraphStoreCatalogService graphStoreCatalogService,
+        ProjectionMetricsService projectionMetricsService,
+        RequestScopedDependencies requestScopedDependencies,
+        GraphNameValidationService graphNameValidationService
+    ) {
         this.log = log;
-        return this;
-    }
-
-    DefaultGraphCatalogApplicationsBuilder withGraphStoreCatalogService(GraphStoreCatalogService graphStoreCatalogService) {
+        this.requestScopedDependencies = requestScopedDependencies;
         this.graphStoreCatalogService = graphStoreCatalogService;
-        return this;
-    }
-
-    DefaultGraphCatalogApplicationsBuilder withProjectionMetricsService(ProjectionMetricsService projectionMetricsService) {
         this.projectionMetricsService = projectionMetricsService;
-        return this;
-    }
-
-    DefaultGraphCatalogApplicationsBuilder withGraphNameValidationService(GraphNameValidationService graphNameValidationService) {
         this.graphNameValidationService = graphNameValidationService;
-        return this;
     }
 
     DefaultGraphCatalogApplicationsBuilder withCypherProjectApplication(CypherProjectApplication cypherProjectApplication) {
@@ -98,6 +114,11 @@ class DefaultGraphCatalogApplicationsBuilder {
         EstimateCommonNeighbourAwareRandomWalkApplication estimateCommonNeighbourAwareRandomWalkApplication
     ) {
         this.estimateCommonNeighbourAwareRandomWalkApplication = estimateCommonNeighbourAwareRandomWalkApplication;
+        return this;
+    }
+
+    DefaultGraphCatalogApplicationsBuilder withExportToCsvApplication(ExportToCsvApplication exportToCsvApplication) {
+        this.exportToCsvApplication = exportToCsvApplication;
         return this;
     }
 
@@ -186,6 +207,7 @@ class DefaultGraphCatalogApplicationsBuilder {
             graphStoreCatalogService,
             projectionMetricsService,
             graphNameValidationService,
+            requestScopedDependencies,
             cypherProjectApplication,
             dropGraphApplication,
             dropNodePropertiesApplication,
@@ -205,6 +227,7 @@ class DefaultGraphCatalogApplicationsBuilder {
             writeNodePropertiesApplication,
             writeRelationshipPropertiesApplication,
             writeRelationshipsApplication,
+            exportToCsvApplication,
             exportToDatabaseApplication
         );
     }

@@ -19,81 +19,56 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
-import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.io.GraphStoreExporter;
-import org.neo4j.gds.core.io.GraphStoreExporterBaseConfig;
 import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.io.db.GraphStoreToDatabaseExporter;
 import org.neo4j.gds.core.io.db.GraphStoreToDatabaseExporterConfig;
 import org.neo4j.gds.core.io.db.GraphStoreToDatabaseExporterParameters;
 import org.neo4j.gds.core.io.db.ProgressTrackerExecutionMonitor;
-import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
-import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
 import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class ExportToDatabaseApplication {
     private final Log log;
-    private final GraphStoreCatalogService graphStoreCatalogService;
 
     private final GraphDatabaseService graphDatabaseService;
     private final Transaction procedureTransaction;
 
-    private final DatabaseId databaseId;
     private final TaskRegistryFactory taskRegistryFactory;
-    private final User user;
     private final UserLogRegistryFactory userLogRegistryFactory;
 
     ExportToDatabaseApplication(
         Log log,
-        GraphStoreCatalogService graphStoreCatalogService,
         GraphDatabaseService graphDatabaseService,
         Transaction procedureTransaction,
-        DatabaseId databaseId,
         TaskRegistryFactory taskRegistryFactory,
-        User user,
         UserLogRegistryFactory userLogRegistryFactory
     ) {
         this.log = log;
-        this.graphStoreCatalogService = graphStoreCatalogService;
         this.graphDatabaseService = graphDatabaseService;
         this.procedureTransaction = procedureTransaction;
-        this.databaseId = databaseId;
         this.taskRegistryFactory = taskRegistryFactory;
-        this.user = user;
         this.userLogRegistryFactory = userLogRegistryFactory;
     }
 
-    DatabaseExportResult run(GraphName graphName, GraphStoreToDatabaseExporterConfig configuration) {
-        var graphStoreCatalogEntry = graphStoreCatalogService.getGraphStoreCatalogEntry(
-            graphName,
-            configuration,
-            user,
-            databaseId
-        );
-
-        var graphStore = graphStoreCatalogEntry.graphStore();
-
-        validateGraphStore(graphStore, configuration);
-
+    DatabaseExportResult run(
+        GraphName graphName,
+        GraphStoreToDatabaseExporterConfig configuration,
+        GraphStore graphStore
+    ) {
         var progressTracker = new TaskProgressTracker(
             ProgressTrackerExecutionMonitor.progressTask(graphStore),
             log,
@@ -160,34 +135,6 @@ class ExportToDatabaseApplication {
             // so, we need to make sure it closes as well
             progressTracker.endSubTaskWithFailure();
             throw e;
-        }
-    }
-
-    private void validateGraphStore(GraphStore graphStore, GraphStoreExporterBaseConfig exportConfig) {
-        validateReadAccess(graphStore, !exportConfig.additionalNodeProperties().mappings().isEmpty());
-        validateAdditionalNodeProperties(graphStore, exportConfig.additionalNodeProperties());
-    }
-
-    private void validateReadAccess(GraphStore graphStore, boolean exportAdditionalNodeProperties) {
-        if (exportAdditionalNodeProperties && !graphStore.capabilities().canWriteToLocalDatabase()) {
-            throw new IllegalArgumentException("Exporting additional node properties is not allowed for this graph.");
-        }
-    }
-
-    private void validateAdditionalNodeProperties(GraphStore graphStore, PropertyMappings additionalNodeProperties) {
-        var nodeProperties = graphStore.nodePropertyKeys();
-        var duplicateProperties = additionalNodeProperties
-            .stream()
-            .map(PropertyMapping::neoPropertyKey)
-            .filter(nodeProperties::contains)
-            .collect(Collectors.toList());
-        if (!duplicateProperties.isEmpty()) {
-            throw new IllegalArgumentException(
-                formatWithLocale(
-                    "The following provided additional node properties are already present in the in-memory graph: %s",
-                    StringJoining.joinVerbose(duplicateProperties)
-                )
-            );
         }
     }
 }

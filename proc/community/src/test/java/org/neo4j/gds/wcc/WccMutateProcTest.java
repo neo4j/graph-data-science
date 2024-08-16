@@ -586,6 +586,7 @@ class WccMutateProcTest extends BaseProcTest {
             .build();
         var applicationsFacade = ApplicationsFacade.create(
             logMock,
+            null,
             Optional.empty(),
             Optional.empty(),
             Optional.empty(),

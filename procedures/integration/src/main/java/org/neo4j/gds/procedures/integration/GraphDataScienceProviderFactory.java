@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.procedures.integration;
 
-import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.DefaultMemoryGuard;
 import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
+import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -33,14 +33,16 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryGauge;
 import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.procedures.AlgorithmProcedureFacadeBuilderFactory;
-import org.neo4j.gds.procedures.GraphCatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
+import org.neo4j.gds.procedures.GraphCatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.UserLogServices;
 import org.neo4j.graphdb.config.Configuration;
 
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * This is a way to squirrel away some dull code.
@@ -68,6 +70,7 @@ final class GraphDataScienceProviderFactory {
     private final ModelCatalog modelCatalog;
     private final Configuration neo4jConfiguration;
     private final ModelRepository modelRepository;
+    private final Supplier<Path> exportLocation;
 
     private GraphDataScienceProviderFactory(
         Log log,
@@ -79,7 +82,8 @@ final class GraphDataScienceProviderFactory {
         MetricsFacade metricsFacade,
         ModelCatalog modelCatalog,
         Configuration neo4jConfiguration,
-        ModelRepository modelRepository
+        ModelRepository modelRepository,
+        Supplier<Path> exportLocation
     ) {
         this.log = log;
         this.algorithmProcessingTemplateDecorator = algorithmProcessingTemplateDecorator;
@@ -91,6 +95,7 @@ final class GraphDataScienceProviderFactory {
         this.modelCatalog = modelCatalog;
         this.neo4jConfiguration = neo4jConfiguration;
         this.modelRepository = modelRepository;
+        this.exportLocation = exportLocation;
     }
 
     GraphDataScienceProvider createGraphDataScienceProvider(
@@ -127,12 +132,14 @@ final class GraphDataScienceProviderFactory {
             userLogServices,
             neo4jConfiguration,
             modelCatalog,
-            modelRepository
+            modelRepository,
+            exportLocation
         );
     }
 
     static GraphDataScienceProviderFactory create(
         Log log,
+        Supplier<Path> exportLocation,
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
         Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
         Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator,
@@ -153,7 +160,8 @@ final class GraphDataScienceProviderFactory {
             metricsFacade,
             modelCatalog,
             neo4jConfiguration,
-            modelRepository
+            modelRepository,
+            exportLocation
         );
     }
 

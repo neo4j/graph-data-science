@@ -23,6 +23,11 @@ import org.neo4j.gds.compat.DatabaseMode;
 import org.neo4j.gds.compat.SettingProxy;
 import org.neo4j.graphdb.GraphDatabaseService;
 
+/**
+ * A step we need to block execution on Neo4j clusters.
+ * This can be Neo4j-ful since this is only relevant for the plugin deployment model,
+ * and lives in the Neo4j Procedure layer.
+ */
 public class DatabaseModeRestriction {
     private final GraphDatabaseService databaseService;
 

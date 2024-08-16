@@ -35,6 +35,7 @@ dependencies {
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':core-write')
+    implementation project(':csv')
     implementation project(':graph-projection-api')
     implementation project(':graph-sampling')
     implementation project(':graph-schema-api')

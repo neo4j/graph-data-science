@@ -25,6 +25,7 @@ import org.neo4j.gds.core.model.OpenModelCatalogProvider;
 import org.neo4j.gds.core.write.NativeExportBuildersProvider;
 import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
+import org.neo4j.gds.procedures.integration.ExportLocation;
 import org.neo4j.gds.procedures.integration.GraphDataScienceExtensionBuilder;
 import org.neo4j.gds.procedures.integration.LogAccessor;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
@@ -60,10 +61,13 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
 
         var neo4jConfiguration = dependencies.config();
 
+        var exportLocation = ExportLocation.create(neo4jConfiguration);
+
         var graphDataScienceExtensionBuilderAndAssociatedProducts = GraphDataScienceExtensionBuilder.create(
             log,
             neo4jConfiguration,
             dependencies.globalProcedures(),
+            exportLocation,
             Optional.empty(), // no extra checks in OpenGDS
             Optional.empty(), // no extra checks in OpenGDS
             Optional.empty(), // no extra checks in OpenGDS

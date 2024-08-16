@@ -19,30 +19,16 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.configuration.Config;
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.PropertyMapping;
-import org.neo4j.gds.PropertyMappings;
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.applications.graphstorecatalog.DatabaseExportResult;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.io.GraphStoreExporterBaseConfig;
-import org.neo4j.gds.core.io.NeoNodeProperties;
-import org.neo4j.gds.core.io.file.GraphStoreExporterUtil;
-import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfig;
-import org.neo4j.gds.core.io.file.GraphStoreToFileExporterParameters;
 import org.neo4j.gds.core.io.file.csv.estimation.CsvExportEstimation;
 import org.neo4j.gds.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.applications.graphstorecatalog.DatabaseExportResult;
-import org.neo4j.gds.applications.graphstorecatalog.GraphStoreExportResult;
-import org.neo4j.gds.transaction.DatabaseTransactionContext;
-import org.neo4j.gds.utils.StringJoining;
+import org.neo4j.gds.applications.graphstorecatalog.FileExportResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -50,12 +36,8 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.core.io.file.GraphStoreExporterUtil.exportLocation;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.READ;
 
 public class GraphStoreExportProc extends BaseProc {
@@ -83,8 +65,7 @@ public class GraphStoreExportProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         facade.deprecatedProcedures().called("gds.beta.graph.export.csv");
-        facade.log().warn(
-            "Procedure `gds.beta.graph.export.csv` has been deprecated, please use `gds.graph.export.csv`.");
+        facade.log().warn("Procedure `gds.beta.graph.export.csv` has been deprecated, please use `gds.graph.export.csv`.");
 
         return csv(graphName, configuration);
     }
@@ -95,44 +76,7 @@ public class GraphStoreExportProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var cypherConfig = CypherMapWrapper.create(configuration);
-        var exportConfig = GraphStoreToFileExporterConfig.of(username(), cypherConfig);
-        validateConfig(cypherConfig, exportConfig);
-
-        var graphStore = graphStoreFromCatalog(graphName, exportConfig).graphStore();
-        validateGraphStore(graphStore, exportConfig);
-
-        var neo4jConfig = GraphDatabaseApiProxy.resolveDependency(databaseService, Config.class);
-
-        var exportParameters = new GraphStoreToFileExporterParameters(
-            exportConfig.exportName(),
-            exportConfig.username(),
-            RelationshipType.of(exportConfig.defaultRelationshipType()),
-            exportConfig.typedWriteConcurrency(),
-            exportConfig.batchSize()
-        );
-        var result = GraphStoreExporterUtil.export(
-            graphStore,
-            exportLocation(neo4jConfig, exportParameters.exportName()),
-            exportParameters,
-            neoNodeProperties(exportConfig.additionalNodeProperties(), graphStore),
-            executionContext().taskRegistryFactory(),
-            executionContext().log(),
-            DefaultPool.INSTANCE
-        );
-
-        return Stream.of(
-            new FileExportResult(
-                graphName,
-                exportConfig.exportName(),
-                graphStore.nodeCount(),
-                graphStore.relationshipCount(),
-                graphStore.relationshipTypes().size(),
-                result.importedProperties().nodePropertyCount(),
-                result.importedProperties().relationshipPropertyCount(),
-                result.tookMillis()
-            )
-        );
+        return facade.graphCatalog().exportToCsv(graphName, configuration);
     }
 
     @Internal
@@ -174,72 +118,5 @@ public class GraphStoreExportProc extends BaseProc {
         );
 
         return Stream.of(new MemoryEstimateResult(estimate));
-    }
-
-    private Optional<NeoNodeProperties> neoNodeProperties(
-        PropertyMappings additionalNodeProperties,
-        GraphStore graphStore
-    ) {
-        return NeoNodeProperties.of(
-            graphStore,
-            DatabaseTransactionContext.of(databaseService, procedureTransaction),
-            additionalNodeProperties,
-            executionContext().log()
-        );
-    }
-
-    private void validateGraphStore(GraphStore graphStore, GraphStoreExporterBaseConfig exportConfig) {
-        validateReadAccess(graphStore, !exportConfig.additionalNodeProperties().mappings().isEmpty());
-        validateAdditionalNodeProperties(graphStore, exportConfig.additionalNodeProperties());
-    }
-
-    private void validateReadAccess(GraphStore graphStore, boolean exportAdditionalNodeProperties) {
-        if (exportAdditionalNodeProperties && !graphStore.capabilities().canWriteToLocalDatabase()) {
-            throw new IllegalArgumentException("Exporting additional node properties is not allowed for this graph.");
-        }
-    }
-
-    private void validateAdditionalNodeProperties(GraphStore graphStore, PropertyMappings additionalNodeProperties) {
-        var nodeProperties = graphStore.nodePropertyKeys();
-        var duplicateProperties = additionalNodeProperties
-            .stream()
-            .map(PropertyMapping::neoPropertyKey)
-            .filter(nodeProperties::contains)
-            .collect(Collectors.toList());
-        if (!duplicateProperties.isEmpty()) {
-            throw new IllegalArgumentException(
-                formatWithLocale(
-                    "The following provided additional node properties are already present in the in-memory graph: %s",
-                    StringJoining.joinVerbose(duplicateProperties)
-                )
-            );
-        }
-    }
-
-    @SuppressWarnings("unused")
-    public static class FileExportResult extends GraphStoreExportResult {
-        public final String exportName;
-
-        public FileExportResult(
-            String graphName,
-            String exportName,
-            long nodeCount,
-            long relationshipCount,
-            long relationshipTypeCount,
-            long nodePropertyCount,
-            long relationshipPropertyCount,
-            long writeMillis
-        ) {
-            super(
-                graphName,
-                nodeCount,
-                relationshipCount,
-                relationshipTypeCount,
-                nodePropertyCount,
-                relationshipPropertyCount,
-                writeMillis
-            );
-            this.exportName = exportName;
-        }
     }
 }

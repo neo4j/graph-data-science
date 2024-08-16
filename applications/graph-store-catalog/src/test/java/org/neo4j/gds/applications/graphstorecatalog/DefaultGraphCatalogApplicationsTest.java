@@ -23,7 +23,9 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.logging.Log;
 
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -36,13 +38,15 @@ import static org.mockito.Mockito.when;
 class DefaultGraphCatalogApplicationsTest {
     @Test
     void shouldDetermineGraphExists() {
-        var service = mock(GraphStoreCatalogService.class);
-        var facade = new DefaultGraphCatalogApplicationsBuilder()
-            .withGraphStoreCatalogService(service)
-            .withGraphNameValidationService(new GraphNameValidationService())
-            .build();
+        var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
+        var facade = new DefaultGraphCatalogApplicationsBuilder(
+            Log.noOpLog(),
+            graphStoreCatalogService,
+            null,
+            RequestScopedDependencies.builder().build()
+        ).build();
 
-        when(service.graphExists(
+        when(graphStoreCatalogService.graphExists(
             new User("someUser", false),
             DatabaseId.of("someDatabase"),
             GraphName.parse("someGraph")
@@ -54,13 +58,15 @@ class DefaultGraphCatalogApplicationsTest {
 
     @Test
     void shouldDetermineGraphDoesNotExist() {
-        var service = mock(GraphStoreCatalogService.class);
-        var facade = new DefaultGraphCatalogApplicationsBuilder()
-            .withGraphStoreCatalogService(service)
-            .withGraphNameValidationService(new GraphNameValidationService())
-            .build();
+        var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
+        var facade = new DefaultGraphCatalogApplicationsBuilder(
+            Log.noOpLog(),
+            graphStoreCatalogService,
+            null,
+            RequestScopedDependencies.builder().build()
+        ).build();
 
-        when(service.graphExists(
+        when(graphStoreCatalogService.graphExists(
             new User("someUser", false),
             DatabaseId.of("someDatabase"),
             GraphName.parse("someGraph")
@@ -76,11 +82,13 @@ class DefaultGraphCatalogApplicationsTest {
 
     @Test
     void shouldValidateInputGraphName() {
-        var service = mock(GraphStoreCatalogService.class);
-        var facade = new DefaultGraphCatalogApplicationsBuilder()
-            .withGraphStoreCatalogService(service)
-            .withGraphNameValidationService(new GraphNameValidationService())
-            .build();
+        var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
+        var facade = new DefaultGraphCatalogApplicationsBuilder(
+            Log.noOpLog(),
+            graphStoreCatalogService,
+            null,
+            RequestScopedDependencies.builder().build()
+        ).build();
 
         assertThatThrownBy(
             () -> facade.graphExists(new User("someUser", false), DatabaseId.of("someDatabase"), "   ")
@@ -89,12 +97,16 @@ class DefaultGraphCatalogApplicationsTest {
 
     @Test
     void shouldUseStrictValidationWhenProjecting() {
-        var validationService = mock(GraphNameValidationService.class);
-        var facade = new DefaultGraphCatalogApplicationsBuilder()
-            .withGraphNameValidationService(validationService)
-            .build();
+        var graphNameValidationService = mock(GraphNameValidationService.class);
+        var facade = new DefaultGraphCatalogApplicationsBuilder(
+            Log.noOpLog(),
+            null,
+            null,
+            RequestScopedDependencies.builder().build(),
+            graphNameValidationService
+        ).build();
 
-        when(validationService.validateStrictly("   some graph   "))
+        when(graphNameValidationService.validateStrictly("   some graph   "))
             .thenThrow(new IllegalArgumentException("whitespace!"));
 
         assertThatIllegalArgumentException().isThrownBy(
@@ -137,10 +149,12 @@ class DefaultGraphCatalogApplicationsTest {
      */
     @Test
     void shouldHandleNullsInNativeProjectParameters() {
-        var facade = new DefaultGraphCatalogApplicationsBuilder()
-            .withGraphStoreCatalogService(mock(GraphStoreCatalogService.class))
-            .withGraphNameValidationService(new GraphNameValidationService())
-            .build();
+        var facade = new DefaultGraphCatalogApplicationsBuilder(
+            Log.noOpLog(),
+            mock(GraphStoreCatalogService.class),
+            null,
+            RequestScopedDependencies.builder().build()
+        ).build();
 
         assertThatIllegalArgumentException().isThrownBy(() -> facade.nativeProject(
             null,
@@ -210,10 +224,12 @@ class DefaultGraphCatalogApplicationsTest {
      */
     @Test
     void shouldHandleNullsInCypherProjectParameters() {
-        var facade = new DefaultGraphCatalogApplicationsBuilder()
-            .withGraphStoreCatalogService(mock(GraphStoreCatalogService.class))
-            .withGraphNameValidationService(new GraphNameValidationService())
-            .build();
+        var facade = new DefaultGraphCatalogApplicationsBuilder(
+            Log.noOpLog(),
+            mock(GraphStoreCatalogService.class),
+            null,
+            RequestScopedDependencies.builder().build()
+        ).build();
 
         assertThatIllegalArgumentException().isThrownBy(() -> facade.cypherProject(
             null,
@@ -281,10 +297,12 @@ class DefaultGraphCatalogApplicationsTest {
     @Test
     void shouldDoExistenceCheckWhenProjecting() {
         var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
-        var facade = new DefaultGraphCatalogApplicationsBuilder()
-            .withGraphStoreCatalogService(graphStoreCatalogService)
-            .withGraphNameValidationService(new GraphNameValidationService())
-            .build();
+        var facade = new DefaultGraphCatalogApplicationsBuilder(
+            Log.noOpLog(),
+            graphStoreCatalogService,
+            null,
+            RequestScopedDependencies.builder().build()
+        ).build();
 
         var user = new User("some user", false);
         var databaseId = DatabaseId.of("some database name");
@@ -340,10 +358,12 @@ class DefaultGraphCatalogApplicationsTest {
     @Test
     void shouldDoPositiveExistenceCheckWhenProjectingSubGraph() {
         var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
-        var facade = new DefaultGraphCatalogApplicationsBuilder()
-            .withGraphStoreCatalogService(graphStoreCatalogService)
-            .withGraphNameValidationService(new GraphNameValidationService())
-            .build();
+        var facade = new DefaultGraphCatalogApplicationsBuilder(
+            Log.noOpLog(),
+            graphStoreCatalogService,
+            null,
+            RequestScopedDependencies.builder().build()
+        ).build();
 
         var user = new User("some user", false);
         var databaseId = DatabaseId.of("some database name");
