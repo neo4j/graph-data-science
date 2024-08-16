@@ -31,12 +31,14 @@ import org.neo4j.gds.procedures.algorithms.miscellaneous.stubs.ScalePropertiesMu
 import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
+import org.neo4j.gds.scaleproperties.AlphaScalePropertiesMutateConfig;
+import org.neo4j.gds.scaleproperties.AlphaScalePropertiesStreamConfig;
+import org.neo4j.gds.scaleproperties.ScalePropertiesMutateConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesStatsConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesStreamConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesWriteConfig;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 public final class MiscellaneousProcedureFacade {
@@ -78,14 +80,14 @@ public final class MiscellaneousProcedureFacade {
             genericStub,
             applicationsFacade,
             procedureReturnColumns,
-            true
+            AlphaScalePropertiesMutateConfig::of
         );
         var collapsePathMutateStub = new CollapsePathMutateStub(genericStub, applicationsFacade);
         var scalePropertiesMutateStub = new ScalePropertiesMutateStub(
             genericStub,
             applicationsFacade,
             procedureReturnColumns,
-            false
+            ScalePropertiesMutateConfig::of
         );
 
         return new MiscellaneousProcedureFacade(
@@ -108,11 +110,10 @@ public final class MiscellaneousProcedureFacade {
     ) {
         var resultBuilder = new ScalePropertiesResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffolding.runStreamAlgorithmWithValidation(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
-            ScalePropertiesStreamConfig::of,
-            Optional.of(new ScalePropertiesConfigurationValidationHook<>(true)),
+            AlphaScalePropertiesStreamConfig::of,
             streamMode()::scaleProperties,
             resultBuilder
         );
@@ -130,16 +131,14 @@ public final class MiscellaneousProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var validationHook = new ScalePropertiesConfigurationValidationHook<ScalePropertiesStatsConfig>(false);
 
         var shouldDisplayScalerStatistics = procedureReturnColumns.contains("scalerStatistics");
         var resultBuilder = new ScalePropertiesResultBuilderForStatsMode(shouldDisplayScalerStatistics);
 
-        return algorithmExecutionScaffolding.runAlgorithmWithValidation(
+        return algorithmExecutionScaffolding.runAlgorithm(
             graphName,
             configuration,
             ScalePropertiesStatsConfig::of,
-            Optional.of(validationHook),
             statsMode()::scaleProperties,
             resultBuilder
         );
@@ -164,11 +163,10 @@ public final class MiscellaneousProcedureFacade {
     ) {
         var resultBuilder = new ScalePropertiesResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffolding.runStreamAlgorithmWithValidation(
+        return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
             ScalePropertiesStreamConfig::of,
-            Optional.of(new ScalePropertiesConfigurationValidationHook<>(false)),
             streamMode()::scaleProperties,
             resultBuilder
         );
@@ -191,16 +189,14 @@ public final class MiscellaneousProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var validationHook = new ScalePropertiesConfigurationValidationHook<ScalePropertiesWriteConfig>(false);
 
         var shouldDisplayScalerStatistics = procedureReturnColumns.contains("scalerStatistics");
         var resultBuilder = new ScalePropertiesResultBuilderForWriteMode(shouldDisplayScalerStatistics);
 
-        return algorithmExecutionScaffolding.runAlgorithmWithValidation(
+        return algorithmExecutionScaffolding.runAlgorithm(
             graphName,
             configuration,
             ScalePropertiesWriteConfig::of,
-            Optional.of(validationHook),
             writeMode()::scaleProperties,
             resultBuilder
         );
