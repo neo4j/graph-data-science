@@ -20,16 +20,15 @@
 package org.neo4j.gds.procedures.algorithms.miscellaneous;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 import org.neo4j.gds.scaleproperties.ScalePropertiesStatsConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class ScalePropertiesResultBuilderForStatsMode implements ResultBuilder<ScalePropertiesStatsConfig, ScalePropertiesResult, Stream<ScalePropertiesStatsResult>, Void> {
+class ScalePropertiesResultBuilderForStatsMode implements StatsResultBuilder<ScalePropertiesStatsConfig, ScalePropertiesResult, Stream<ScalePropertiesStatsResult>> {
     private final boolean shouldDisplayScalerStatistics;
 
     ScalePropertiesResultBuilderForStatsMode(boolean shouldDisplayScalerStatistics) {
@@ -39,11 +38,9 @@ class ScalePropertiesResultBuilderForStatsMode implements ResultBuilder<ScalePro
     @Override
     public Stream<ScalePropertiesStatsResult> build(
         Graph graph,
-        GraphStore graphStore,
         ScalePropertiesStatsConfig configuration,
         Optional<ScalePropertiesResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        AlgorithmProcessingTimings timings
     ) {
         if (result.isEmpty()) return Stream.of(ScalePropertiesStatsResult.emptyFrom(timings, configuration.toMap()));
 

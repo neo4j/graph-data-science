@@ -20,24 +20,21 @@
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeStatsConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class SpanningTreeResultBuilderForStatsMode implements ResultBuilder<SpanningTreeStatsConfig, SpanningTree, Stream<SpanningTreeStatsResult>, Void> {
+class SpanningTreeResultBuilderForStatsMode implements StatsResultBuilder<SpanningTreeStatsConfig, SpanningTree, Stream<SpanningTreeStatsResult>> {
     @Override
     public Stream<SpanningTreeStatsResult> build(
         Graph graph,
-        GraphStore graphStore,
         SpanningTreeStatsConfig configuration,
         Optional<SpanningTree> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> metadata
+        AlgorithmProcessingTimings timings
     ) {
         var builder = new SpanningTreeStatsResult.Builder();
 

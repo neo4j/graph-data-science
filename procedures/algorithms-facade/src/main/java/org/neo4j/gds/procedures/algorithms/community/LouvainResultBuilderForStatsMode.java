@@ -20,9 +20,8 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.louvain.LouvainStatsConfig;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
@@ -30,7 +29,7 @@ import org.neo4j.gds.result.StatisticsComputationInstructions;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class LouvainResultBuilderForStatsMode implements ResultBuilder<LouvainStatsConfig, LouvainResult, Stream<LouvainStatsResult>, Void> {
+class LouvainResultBuilderForStatsMode implements StatsResultBuilder<LouvainStatsConfig, LouvainResult, Stream<LouvainStatsResult>> {
     private final CommunityStatisticsWithTimingComputer communityStatisticsWithTimingComputer = new CommunityStatisticsWithTimingComputer();
 
     private final StatisticsComputationInstructions statisticsComputationInstructions;
@@ -42,11 +41,9 @@ class LouvainResultBuilderForStatsMode implements ResultBuilder<LouvainStatsConf
     @Override
     public Stream<LouvainStatsResult> build(
         Graph graph,
-        GraphStore graphStore,
         LouvainStatsConfig configuration,
         Optional<LouvainResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        AlgorithmProcessingTimings timings
     ) {
         if (result.isEmpty()) return Stream.of(LouvainStatsResult.emptyFrom(timings, configuration.toMap()));
 

@@ -23,10 +23,12 @@ import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.procedures.algorithms.AlgorithmHandle;
+import org.neo4j.gds.procedures.algorithms.StatsAlgorithmHandle;
 import org.neo4j.gds.procedures.algorithms.StreamAlgorithmHandle;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 
@@ -55,6 +57,24 @@ public class AlgorithmExecutionScaffolding {
         Function<CypherMapWrapper, CONFIGURATION> configurationLexer,
         AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> algorithm,
         ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
+    ) {
+        var graphName = GraphName.parse(graphNameAsString);
+
+        var configuration = configurationParser.parseConfiguration(
+            rawConfiguration,
+            configurationLexer,
+            user
+        );
+
+        return algorithm.compute(graphName, configuration, resultBuilder);
+    }
+
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> RESULT_TO_CALLER runStatsAlgorithm(
+        String graphNameAsString,
+        Map<String, Object> rawConfiguration,
+        Function<CypherMapWrapper, CONFIGURATION> configurationLexer,
+        StatsAlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> algorithm,
+        StatsResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
     ) {
         var graphName = GraphName.parse(graphNameAsString);
 

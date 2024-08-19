@@ -21,7 +21,7 @@ package org.neo4j.gds.applications.algorithms.similarity;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnStatsConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStatsConfig;
@@ -53,7 +53,7 @@ public class SimilarityAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT filteredKnn(
         GraphName graphName,
         FilteredKnnStatsConfig configuration,
-        ResultBuilder<FilteredKnnStatsConfig, FilteredKnnResult, RESULT, Void> resultBuilder
+        StatsResultBuilder<FilteredKnnStatsConfig, FilteredKnnResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
@@ -68,7 +68,7 @@ public class SimilarityAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT filteredNodeSimilarity(
         GraphName graphName,
         FilteredNodeSimilarityStatsConfig configuration,
-        ResultBuilder<FilteredNodeSimilarityStatsConfig, NodeSimilarityResult, RESULT, Void> resultBuilder
+        StatsResultBuilder<FilteredNodeSimilarityStatsConfig, NodeSimilarityResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
@@ -83,7 +83,7 @@ public class SimilarityAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT knn(
         GraphName graphName,
         KnnStatsConfig configuration,
-        ResultBuilder<KnnStatsConfig, KnnResult, RESULT, Void> resultBuilder
+        StatsResultBuilder<KnnStatsConfig, KnnResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
@@ -98,7 +98,7 @@ public class SimilarityAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT nodeSimilarity(
         GraphName graphName,
         NodeSimilarityStatsConfig configuration,
-        ResultBuilder<NodeSimilarityStatsConfig, NodeSimilarityResult, RESULT, Void> resultBuilder
+        StatsResultBuilder<NodeSimilarityStatsConfig, NodeSimilarityResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,

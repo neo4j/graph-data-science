@@ -20,9 +20,8 @@
 package org.neo4j.gds.procedures.algorithms.similarity;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityResultStreamDelegate;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnStatsConfig;
@@ -30,7 +29,7 @@ import org.neo4j.gds.similarity.filteredknn.FilteredKnnStatsConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class FilteredKnnResultBuilderForStatsMode implements ResultBuilder<FilteredKnnStatsConfig, FilteredKnnResult, Stream<KnnStatsResult>, Void> {
+class FilteredKnnResultBuilderForStatsMode implements StatsResultBuilder<FilteredKnnStatsConfig, FilteredKnnResult, Stream<KnnStatsResult>> {
     private final SimilarityResultStreamDelegate similarityResultStreamDelegate = new SimilarityResultStreamDelegate();
     private final SimilarityStatsProcessor similarityStatsProcessor = new SimilarityStatsProcessor();
 
@@ -43,11 +42,9 @@ class FilteredKnnResultBuilderForStatsMode implements ResultBuilder<FilteredKnnS
     @Override
     public Stream<KnnStatsResult> build(
         Graph graph,
-        GraphStore graphStore,
         FilteredKnnStatsConfig configuration,
         Optional<FilteredKnnResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        AlgorithmProcessingTimings timings
     ) {
         var configurationMap = configuration.toMap();
 

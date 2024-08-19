@@ -20,10 +20,9 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.kmeans.KmeansStatsConfig;
@@ -33,7 +32,7 @@ import org.neo4j.gds.result.StatisticsComputationInstructions;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class KMeansResultBuilderForStatsMode implements ResultBuilder<KmeansStatsConfig, KmeansResult, Stream<KmeansStatsResult>, Void> {
+class KMeansResultBuilderForStatsMode implements StatsResultBuilder<KmeansStatsConfig, KmeansResult, Stream<KmeansStatsResult>> {
     private final StatisticsComputationInstructions statisticsComputationInstructions;
     private final boolean shouldComputeListOfCentroids;
 
@@ -48,11 +47,9 @@ class KMeansResultBuilderForStatsMode implements ResultBuilder<KmeansStatsConfig
     @Override
     public Stream<KmeansStatsResult> build(
         Graph graph,
-        GraphStore graphStore,
         KmeansStatsConfig configuration,
         Optional<KmeansResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        AlgorithmProcessingTimings timings
     ) {
         if (result.isEmpty()) return Stream.of(KmeansStatsResult.emptyFrom(timings, configuration.toMap()));
 

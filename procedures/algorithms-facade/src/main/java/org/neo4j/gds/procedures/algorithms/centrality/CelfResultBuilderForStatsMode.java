@@ -20,24 +20,21 @@
 package org.neo4j.gds.procedures.algorithms.centrality;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class CelfResultBuilderForStatsMode implements ResultBuilder<InfluenceMaximizationStatsConfig, CELFResult, Stream<CELFStatsResult>, Void> {
+class CelfResultBuilderForStatsMode implements StatsResultBuilder<InfluenceMaximizationStatsConfig, CELFResult, Stream<CELFStatsResult>> {
     @Override
     public Stream<CELFStatsResult> build(
         Graph graph,
-        GraphStore graphStore,
         InfluenceMaximizationStatsConfig configuration,
         Optional<CELFResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        AlgorithmProcessingTimings timings
     ) {
         if (result.isEmpty()) return Stream.of(CELFStatsResult.emptyFrom(timings, configuration.toMap()));
 

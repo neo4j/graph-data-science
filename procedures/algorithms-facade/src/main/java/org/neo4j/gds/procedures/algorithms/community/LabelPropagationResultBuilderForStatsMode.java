@@ -20,9 +20,8 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
@@ -30,7 +29,7 @@ import org.neo4j.gds.result.StatisticsComputationInstructions;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class LabelPropagationResultBuilderForStatsMode implements ResultBuilder<LabelPropagationStatsConfig, LabelPropagationResult, Stream<LabelPropagationStatsResult>, Void> {
+class LabelPropagationResultBuilderForStatsMode implements StatsResultBuilder<LabelPropagationStatsConfig, LabelPropagationResult, Stream<LabelPropagationStatsResult>> {
     private final CommunityStatisticsWithTimingComputer communityStatisticsWithTimingComputer = new CommunityStatisticsWithTimingComputer();
 
     private final StatisticsComputationInstructions statisticsComputationInstructions;
@@ -42,11 +41,9 @@ class LabelPropagationResultBuilderForStatsMode implements ResultBuilder<LabelPr
     @Override
     public Stream<LabelPropagationStatsResult> build(
         Graph graph,
-        GraphStore graphStore,
         LabelPropagationStatsConfig configuration,
         Optional<LabelPropagationResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        AlgorithmProcessingTimings timings
     ) {
         if (result.isEmpty()) return Stream.of(LabelPropagationStatsResult.emptyFrom(timings, configuration.toMap()));
 

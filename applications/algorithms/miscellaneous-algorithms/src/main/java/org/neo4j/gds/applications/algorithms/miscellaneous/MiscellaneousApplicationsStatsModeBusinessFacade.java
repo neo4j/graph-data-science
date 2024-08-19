@@ -21,7 +21,7 @@ package org.neo4j.gds.applications.algorithms.miscellaneous;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 import org.neo4j.gds.scaleproperties.ScalePropertiesStatsConfig;
 
@@ -45,7 +45,7 @@ public class MiscellaneousApplicationsStatsModeBusinessFacade {
     public <RESULT> RESULT scaleProperties(
         GraphName graphName,
         ScalePropertiesStatsConfig configuration,
-        ResultBuilder<ScalePropertiesStatsConfig, ScalePropertiesResult, RESULT, Void> resultBuilder
+        StatsResultBuilder<ScalePropertiesStatsConfig, ScalePropertiesResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,

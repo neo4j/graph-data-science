@@ -294,7 +294,7 @@ public final class PathFindingProcedureFacade {
     public Stream<BellmanFordStatsResult> bellmanFordStats(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new BellmanFordResultBuilderForStatsMode();
 
-        return algorithmExecutionScaffolding.runAlgorithm(
+        return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
             AllShortestPathsBellmanFordStatsConfig::of,
@@ -359,7 +359,7 @@ public final class PathFindingProcedureFacade {
     public Stream<StandardStatsResult> breadthFirstSearchStats(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new BfsStatsResultBuilder();
 
-        return algorithmExecutionScaffolding.runAlgorithm(
+        return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
             BfsStatsConfig::of,
@@ -419,7 +419,7 @@ public final class PathFindingProcedureFacade {
     public Stream<StandardStatsResult> deltaSteppingStats(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new DeltaSteppingResultBuilderForStatsMode();
 
-        return algorithmExecutionScaffolding.runAlgorithm(
+        return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
             AllShortestPathsDeltaStatsConfig::of,
@@ -557,7 +557,7 @@ public final class PathFindingProcedureFacade {
     public Stream<StandardModeResult> randomWalkStats(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new RandomWalkResultBuilderForStatsMode();
 
-        return algorithmExecutionScaffolding.runAlgorithm(
+        return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
             RandomWalkStatsConfig::of,
@@ -872,7 +872,7 @@ public final class PathFindingProcedureFacade {
     ) {
         var resultBuilder = new SpanningTreeResultBuilderForStatsMode();
 
-        return algorithmExecutionScaffolding.runAlgorithm(
+        return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
             SpanningTreeStatsConfig::of,
@@ -962,7 +962,7 @@ public final class PathFindingProcedureFacade {
     public Stream<SteinerStatsResult> steinerTreeStats(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new SteinerTreeResultBuilderForStatsMode();
 
-        return algorithmExecutionScaffolding.runAlgorithm(
+        return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
             SteinerTreeStatsConfig::of,

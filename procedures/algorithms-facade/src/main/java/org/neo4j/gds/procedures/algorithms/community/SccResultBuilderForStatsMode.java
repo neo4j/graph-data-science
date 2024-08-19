@@ -20,9 +20,8 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
 import org.neo4j.gds.scc.SccStatsConfig;
@@ -30,7 +29,7 @@ import org.neo4j.gds.scc.SccStatsConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class SccResultBuilderForStatsMode implements ResultBuilder<SccStatsConfig, HugeLongArray, Stream<SccStatsResult>, Void> {
+class SccResultBuilderForStatsMode implements StatsResultBuilder<SccStatsConfig, HugeLongArray, Stream<SccStatsResult>> {
     private final CommunityStatisticsWithTimingComputer communityStatisticsWithTimingComputer = new CommunityStatisticsWithTimingComputer();
 
     private final StatisticsComputationInstructions statisticsComputationInstructions;
@@ -42,11 +41,9 @@ class SccResultBuilderForStatsMode implements ResultBuilder<SccStatsConfig, Huge
     @Override
     public Stream<SccStatsResult> build(
         Graph graph,
-        GraphStore graphStore,
         SccStatsConfig configuration,
         Optional<HugeLongArray> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        AlgorithmProcessingTimings timings
     ) {
         if (result.isEmpty()) return Stream.of(SccStatsResult.emptyFrom(timings, configuration.toMap()));
 

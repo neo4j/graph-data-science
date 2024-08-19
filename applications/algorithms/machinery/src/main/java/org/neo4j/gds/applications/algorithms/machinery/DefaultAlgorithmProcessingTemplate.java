@@ -154,7 +154,46 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         );
     }
 
-    <RESULT_FROM_ALGORITHM,CONFIGURATION extends  AlgoBaseConfig> Optional<RESULT_FROM_ALGORITHM> runComputation(
+    @Override
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM> RESULT_TO_CALLER processAlgorithmForStats(
+        Optional<String> relationshipWeightOverride,
+        GraphName graphName,
+        CONFIGURATION configuration,
+        Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
+        LabelForProgressTracking label,
+        Supplier<MemoryEstimation> estimationFactory,
+        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
+        StatsResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
+    ) {
+        var timingsBuilder = new AlgorithmProcessingTimingsBuilder();
+        var graphResources = graphLoadAndValidationWithTiming(
+            timingsBuilder,
+            relationshipWeightOverride,
+            graphName,
+            configuration,
+            postGraphStoreLoadValidationHooks
+        );
+
+        var result = runComputation(
+            configuration,
+            graphResources.graph(),
+            graphResources.graphStore(),
+            label,
+            estimationFactory,
+            algorithmComputation,
+            timingsBuilder
+        );
+
+        // inject dependencies to render results
+        return resultBuilder.build(
+            graphResources.graph(),
+            configuration,
+            result,
+            timingsBuilder.build()
+        );
+    }
+
+    private <RESULT_FROM_ALGORITHM,CONFIGURATION extends  AlgoBaseConfig> Optional<RESULT_FROM_ALGORITHM> runComputation(
         CONFIGURATION configuration,
         Graph graph,
         GraphStore graphStore,

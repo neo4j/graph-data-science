@@ -113,7 +113,7 @@ public final class NodeEmbeddingsProcedureFacade {
     ) {
         var resultBuilder = new FastRPResultBuilderForStatsMode();
 
-        return algorithmExecutionScaffolding.runAlgorithm(
+        return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
             FastRPStatsConfig::of,

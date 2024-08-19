@@ -79,4 +79,16 @@ public interface AlgorithmProcessingTemplate {
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
         StreamResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
     );
+
+    <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM>
+    RESULT_TO_CALLER processAlgorithmForStats(
+        Optional<String> relationshipWeightOverride,
+        GraphName graphName,
+        CONFIGURATION configuration,
+        Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
+        LabelForProgressTracking label,
+        Supplier<MemoryEstimation> estimationFactory,
+        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
+        StatsResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
+    );
 }

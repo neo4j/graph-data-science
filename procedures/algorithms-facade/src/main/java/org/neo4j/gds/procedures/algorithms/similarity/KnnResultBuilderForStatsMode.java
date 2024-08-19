@@ -20,9 +20,8 @@
 package org.neo4j.gds.procedures.algorithms.similarity;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityResultStreamDelegate;
 import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.knn.KnnStatsConfig;
@@ -30,7 +29,7 @@ import org.neo4j.gds.similarity.knn.KnnStatsConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class KnnResultBuilderForStatsMode implements ResultBuilder<KnnStatsConfig, KnnResult, Stream<KnnStatsResult>, Void> {
+class KnnResultBuilderForStatsMode implements StatsResultBuilder<KnnStatsConfig, KnnResult, Stream<KnnStatsResult>> {
     private final SimilarityResultStreamDelegate similarityResultStreamDelegate = new SimilarityResultStreamDelegate();
     private final SimilarityStatsProcessor similarityStatsProcessor = new SimilarityStatsProcessor();
 
@@ -43,11 +42,9 @@ class KnnResultBuilderForStatsMode implements ResultBuilder<KnnStatsConfig, KnnR
     @Override
     public Stream<KnnStatsResult> build(
         Graph graph,
-        GraphStore graphStore,
         KnnStatsConfig configuration,
         Optional<KnnResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        AlgorithmProcessingTimings timings
     ) {
         var configurationMap = configuration.toMap();
 

@@ -20,24 +20,22 @@
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.steiner.SteinerTreeStatsConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class SteinerTreeResultBuilderForStatsMode implements ResultBuilder<SteinerTreeStatsConfig, SteinerTreeResult, Stream<SteinerStatsResult>, Void> {
+class SteinerTreeResultBuilderForStatsMode implements StatsResultBuilder<SteinerTreeStatsConfig, SteinerTreeResult, Stream<SteinerStatsResult>> {
+
     @Override
     public Stream<SteinerStatsResult> build(
         Graph graph,
-        GraphStore graphStore,
         SteinerTreeStatsConfig configuration,
         Optional<SteinerTreeResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> metadata
+        AlgorithmProcessingTimings timings
     ) {
         var builder = new SteinerStatsResult.Builder();
 

@@ -20,16 +20,15 @@
 package org.neo4j.gds.procedures.algorithms.similarity;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStatsConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class FilteredNodeSimilarityResultBuilderForStatsMode implements ResultBuilder<FilteredNodeSimilarityStatsConfig, NodeSimilarityResult, Stream<SimilarityStatsResult>, Void> {
+class FilteredNodeSimilarityResultBuilderForStatsMode implements StatsResultBuilder<FilteredNodeSimilarityStatsConfig, NodeSimilarityResult, Stream<SimilarityStatsResult>> {
     private final GenericNodeSimilarityResultBuilderForStatsMode genericResultBuilder = new GenericNodeSimilarityResultBuilderForStatsMode();
 
     private final boolean shouldComputeSimilarityDistribution;
@@ -41,11 +40,9 @@ class FilteredNodeSimilarityResultBuilderForStatsMode implements ResultBuilder<F
     @Override
     public Stream<SimilarityStatsResult> build(
         Graph graph,
-        GraphStore graphStore,
         FilteredNodeSimilarityStatsConfig configuration,
         Optional<NodeSimilarityResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        AlgorithmProcessingTimings timings
     ) {
         return genericResultBuilder.build(
             configuration.toMap(),

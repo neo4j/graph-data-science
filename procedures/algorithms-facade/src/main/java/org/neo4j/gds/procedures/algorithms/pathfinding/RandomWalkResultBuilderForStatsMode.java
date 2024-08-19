@@ -20,24 +20,21 @@
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.procedures.algorithms.results.StandardModeResult;
 import org.neo4j.gds.traversal.RandomWalkStatsConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class RandomWalkResultBuilderForStatsMode implements ResultBuilder<RandomWalkStatsConfig, Stream<long[]>, Stream<StandardModeResult>, Void> {
+class RandomWalkResultBuilderForStatsMode implements StatsResultBuilder<RandomWalkStatsConfig, Stream<long[]>, Stream<StandardModeResult>> {
     @Override
     public Stream<StandardModeResult> build(
         Graph graph,
-        GraphStore graphStore,
         RandomWalkStatsConfig configuration,
         Optional<Stream<long[]>> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> metadata
+        AlgorithmProcessingTimings timings
     ) {
         return Stream.of(
             new StandardModeResult(

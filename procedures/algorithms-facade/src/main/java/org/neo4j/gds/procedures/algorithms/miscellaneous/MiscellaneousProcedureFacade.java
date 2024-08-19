@@ -135,7 +135,7 @@ public final class MiscellaneousProcedureFacade {
         var shouldDisplayScalerStatistics = procedureReturnColumns.contains("scalerStatistics");
         var resultBuilder = new ScalePropertiesResultBuilderForStatsMode(shouldDisplayScalerStatistics);
 
-        return algorithmExecutionScaffolding.runAlgorithm(
+        return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
             ScalePropertiesStatsConfig::of,

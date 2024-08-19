@@ -20,24 +20,21 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class KCoreResultBuilderForStatsMode implements ResultBuilder<KCoreDecompositionStatsConfig, KCoreDecompositionResult, Stream<KCoreDecompositionStatsResult>, Void> {
+class KCoreResultBuilderForStatsMode implements StatsResultBuilder<KCoreDecompositionStatsConfig, KCoreDecompositionResult, Stream<KCoreDecompositionStatsResult>> {
     @Override
     public Stream<KCoreDecompositionStatsResult> build(
         Graph graph,
-        GraphStore graphStore,
         KCoreDecompositionStatsConfig configuration,
         Optional<KCoreDecompositionResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        AlgorithmProcessingTimings timings
     ) {
         if (result.isEmpty()) return KCoreDecompositionStatsResult.emptyFrom(timings, configuration.toMap());
 

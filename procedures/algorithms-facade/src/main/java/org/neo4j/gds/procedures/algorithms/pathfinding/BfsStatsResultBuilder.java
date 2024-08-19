@@ -20,9 +20,8 @@
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.paths.traverse.BfsStatsConfig;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
@@ -30,15 +29,13 @@ import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class BfsStatsResultBuilder implements ResultBuilder<BfsStatsConfig, HugeLongArray, Stream<StandardStatsResult>, Void> {
+class BfsStatsResultBuilder implements StatsResultBuilder<BfsStatsConfig, HugeLongArray, Stream<StandardStatsResult>> {
     @Override
     public Stream<StandardStatsResult> build(
         Graph graph,
-        GraphStore graphStore,
         BfsStatsConfig configuration,
         Optional<HugeLongArray> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> metadata
+        AlgorithmProcessingTimings timings
     ) {
         return Stream.of(
             new StandardStatsResult(

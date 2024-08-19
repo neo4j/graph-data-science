@@ -20,16 +20,15 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.k1coloring.K1ColoringStatsConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class K1ColoringResultBuilderForStatsMode implements ResultBuilder<K1ColoringStatsConfig, K1ColoringResult, Stream<K1ColoringStatsResult>, Void> {
+class K1ColoringResultBuilderForStatsMode implements StatsResultBuilder<K1ColoringStatsConfig, K1ColoringResult, Stream<K1ColoringStatsResult>> {
     private final boolean computeUsedColors;
 
     K1ColoringResultBuilderForStatsMode(boolean computeUsedColors) {
@@ -39,11 +38,9 @@ class K1ColoringResultBuilderForStatsMode implements ResultBuilder<K1ColoringSta
     @Override
     public Stream<K1ColoringStatsResult> build(
         Graph graph,
-        GraphStore graphStore,
         K1ColoringStatsConfig configuration,
         Optional<K1ColoringResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        AlgorithmProcessingTimings timings
     ) {
         if (result.isEmpty()) return K1ColoringStatsResult.emptyFrom(timings, configuration.toMap());
 

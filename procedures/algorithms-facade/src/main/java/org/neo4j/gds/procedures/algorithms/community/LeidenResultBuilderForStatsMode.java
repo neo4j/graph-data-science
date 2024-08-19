@@ -20,9 +20,8 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.leiden.LeidenStatsConfig;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
@@ -32,7 +31,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-class LeidenResultBuilderForStatsMode implements ResultBuilder<LeidenStatsConfig, LeidenResult, Stream<LeidenStatsResult>, Void> {
+class LeidenResultBuilderForStatsMode implements StatsResultBuilder<LeidenStatsConfig, LeidenResult, Stream<LeidenStatsResult>> {
     private final CommunityStatisticsWithTimingComputer communityStatisticsWithTimingComputer = new CommunityStatisticsWithTimingComputer();
 
     private final StatisticsComputationInstructions statisticsComputationInstructions;
@@ -44,11 +43,9 @@ class LeidenResultBuilderForStatsMode implements ResultBuilder<LeidenStatsConfig
     @Override
     public Stream<LeidenStatsResult> build(
         Graph graph,
-        GraphStore graphStore,
         LeidenStatsConfig configuration,
         Optional<LeidenResult> result,
-        AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        AlgorithmProcessingTimings timings
     ) {
         if (result.isEmpty()) return Stream.of(LeidenStatsResult.emptyFrom(timings, configuration.toMap()));
 
