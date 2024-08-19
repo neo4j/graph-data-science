@@ -21,7 +21,7 @@ package org.neo4j.gds.termination;
 
 public class TerminatedException extends RuntimeException {
 
-    TerminatedException() {
+   public TerminatedException() {
         super("The execution has been terminated.");
     }
 }
