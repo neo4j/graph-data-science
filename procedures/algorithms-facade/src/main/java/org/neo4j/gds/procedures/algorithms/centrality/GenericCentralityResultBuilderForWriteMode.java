@@ -51,7 +51,7 @@ class GenericCentralityResultBuilderForWriteMode {
         );
 
         return new CentralityWriteResult(
-            nodePropertiesWritten.orElseThrow().value,
+            nodePropertiesWritten.orElseThrow().value(),
             timings.preProcessingMillis,
             timings.computeMillis,
             centralityDistributionAndTiming.getRight(),

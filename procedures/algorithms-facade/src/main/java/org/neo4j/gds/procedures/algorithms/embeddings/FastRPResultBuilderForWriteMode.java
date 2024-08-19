@@ -47,7 +47,7 @@ class FastRPResultBuilderForWriteMode implements ResultBuilder<FastRPWriteConfig
 
         var defaultNodeEmbeddingsWriteResult = new DefaultNodeEmbeddingsWriteResult(
             graph.nodeCount(),
-            nodePropertiesWritten.orElseThrow().value,
+            nodePropertiesWritten.orElseThrow().value(),
             timings.preProcessingMillis,
             timings.computeMillis,
             timings.mutateOrWriteMillis,

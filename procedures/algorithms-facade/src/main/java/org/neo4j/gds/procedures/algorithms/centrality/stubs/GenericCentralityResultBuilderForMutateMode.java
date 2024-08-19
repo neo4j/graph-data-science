@@ -55,7 +55,7 @@ class GenericCentralityResultBuilderForMutateMode {
         );
 
         return new CentralityMutateResult(
-            metadata.orElseThrow().value,
+            metadata.orElseThrow().value(),
             timings.preProcessingMillis,
             timings.computeMillis,
             centralityDistributionAndTiming.getRight(),

@@ -67,7 +67,7 @@ public class PageRankResultBuilderForMutateMode implements ResultBuilder<PageRan
             timings.computeMillis,
             pageRankDistribution.postProcessingMillis,
             timings.mutateOrWriteMillis,
-            metadata.orElseThrow().value,
+            metadata.orElseThrow().value(),
             configurationMap
         );
     }

@@ -47,7 +47,7 @@ class BellmanFordResultBuilderForWriteMode implements ResultBuilder<AllShortestP
         builder.withComputeMillis(timings.computeMillis);
         builder.withWriteMillis(timings.mutateOrWriteMillis);
 
-        metadata.ifPresent(rw -> builder.withRelationshipsWritten(rw.value));
+        metadata.ifPresent(rw -> builder.withRelationshipsWritten(rw.value()));
 
         //noinspection OptionalIsPresent
         if (result.isPresent()) builder.withContainsNegativeCycle(result.get().containsNegativeCycle());

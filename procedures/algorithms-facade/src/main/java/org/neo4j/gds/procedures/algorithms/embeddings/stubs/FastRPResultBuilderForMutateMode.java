@@ -44,7 +44,7 @@ public class FastRPResultBuilderForMutateMode implements ResultBuilder<FastRPMut
 
         return new DefaultNodeEmbeddingMutateResult(
             graph.nodeCount(),
-            metadata.orElseThrow().value,
+            metadata.orElseThrow().value(),
             timings.preProcessingMillis,
             timings.computeMillis,
             timings.mutateOrWriteMillis,

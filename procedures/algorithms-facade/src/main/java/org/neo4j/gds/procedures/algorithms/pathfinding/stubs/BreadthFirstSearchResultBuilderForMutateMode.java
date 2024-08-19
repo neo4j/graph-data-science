@@ -46,7 +46,7 @@ public class BreadthFirstSearchResultBuilderForMutateMode implements ResultBuild
             .withComputeMillis(timings.computeMillis)
             .withMutateMillis(timings.mutateOrWriteMillis);
 
-        metadata.ifPresent(rw -> resultBuilder.withRelationshipsWritten(rw.value));
+        metadata.ifPresent(rw -> resultBuilder.withRelationshipsWritten(rw.value()));
 
         return resultBuilder.build();
     }

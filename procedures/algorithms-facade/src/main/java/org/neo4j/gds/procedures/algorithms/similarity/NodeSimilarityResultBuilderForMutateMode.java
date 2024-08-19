@@ -49,7 +49,7 @@ public class NodeSimilarityResultBuilderForMutateMode implements ResultBuilder<N
             timings.mutateOrWriteMillis,
             0,
             nodeSimilarityResult.graphResult().comparedNodes(),
-            metadata.orElseThrow().getLeft().value,
+            metadata.orElseThrow().getLeft().value(),
             metadata.orElseThrow().getRight(),
             configurationMap
         )).orElseGet(() -> SimilarityMutateResult.emptyFrom(timings, configurationMap));

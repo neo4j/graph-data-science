@@ -83,7 +83,7 @@ public class SimilarityWriteResult {
             timings.mutateOrWriteMillis,
             0,
             nodesCompared,
-            relationshipsWritten.value,
+            relationshipsWritten.value(),
             similarityDistribution,
             configurationMap
         );

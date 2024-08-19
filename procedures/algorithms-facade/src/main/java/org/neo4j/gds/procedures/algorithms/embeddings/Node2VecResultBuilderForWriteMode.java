@@ -46,7 +46,7 @@ class Node2VecResultBuilderForWriteMode implements ResultBuilder<Node2VecWriteCo
 
         var node2VecWriteResult = new Node2VecWriteResult(
             graph.nodeCount(),
-            nodePropertiesWritten.orElseThrow().value,
+            nodePropertiesWritten.orElseThrow().value(),
             timings.preProcessingMillis,
             timings.computeMillis,
             timings.mutateOrWriteMillis,

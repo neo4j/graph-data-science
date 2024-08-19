@@ -45,7 +45,7 @@ public class KCoreResultBuilderForMutateMode implements ResultBuilder<KCoreDecom
         var kCoreDecompositionResult = result.get();
 
         return new KCoreDecompositionMutateResult(
-            metadata.orElseThrow().value,
+            metadata.orElseThrow().value(),
             kCoreDecompositionResult.degeneracy(),
             timings.preProcessingMillis,
             timings.computeMillis,

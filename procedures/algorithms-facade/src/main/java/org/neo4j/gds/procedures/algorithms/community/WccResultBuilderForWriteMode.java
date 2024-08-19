@@ -74,7 +74,7 @@ class WccResultBuilderForWriteMode implements ResultBuilder<WccWriteConfig, Disj
             timings.computeMillis,
             communityStatistics.computeMilliseconds(),
             timings.mutateOrWriteMillis,
-            nodePropertiesWrittenAndConvertedNodePropertyValues.getLeft().value,
+            nodePropertiesWrittenAndConvertedNodePropertyValues.getLeft().value(),
             configuration.toMap()
         );
 

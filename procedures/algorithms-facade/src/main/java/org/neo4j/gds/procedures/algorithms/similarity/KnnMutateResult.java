@@ -91,7 +91,7 @@ public class KnnMutateResult extends SimilarityMutateResult {
             timings.mutateOrWriteMillis,
             0,
             nodesCompared,
-            relationshipsWritten.value,
+            relationshipsWritten.value(),
             similarityDistribution,
             didConverge,
             ranIterations,

@@ -79,7 +79,7 @@ public class LouvainResultBuilderForMutateMode implements ResultBuilder<LouvainM
             timings.computeMillis,
             communityStatisticsWithTiming.getRight(),
             timings.mutateOrWriteMillis,
-            metadata.orElseThrow().value,
+            metadata.orElseThrow().value(),
             configuration.toMap()
         );
     }

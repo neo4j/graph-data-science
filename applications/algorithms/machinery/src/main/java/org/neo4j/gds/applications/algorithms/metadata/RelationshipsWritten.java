@@ -22,8 +22,4 @@ package org.neo4j.gds.applications.algorithms.metadata;
 /**
  * Yay, microtypes!
  */
-public class RelationshipsWritten {
-    public final long value;
-
-    public RelationshipsWritten(long value) {this.value = value;}
-}
+public record RelationshipsWritten(long value){}

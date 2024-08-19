@@ -22,8 +22,4 @@ package org.neo4j.gds.applications.algorithms.metadata;
 /**
  * Yay, microtypes!
  */
-public class NodePropertiesWritten {
-    public final long value;
-
-    public NodePropertiesWritten(long value) {this.value = value;}
-}
+public record NodePropertiesWritten(long value) {}

@@ -50,7 +50,7 @@ public class CelfResultBuilderForMutateMode implements ResultBuilder<InfluenceMa
             .withPreProcessingMillis(timings.preProcessingMillis)
             .withComputeMillis(timings.computeMillis)
             .withMutateMillis(timings.mutateOrWriteMillis)
-            .withNodePropertiesWritten(metadata.orElseThrow().value)
+            .withNodePropertiesWritten(metadata.orElseThrow().value())
             .withConfig(configuration)
             .build();
     }

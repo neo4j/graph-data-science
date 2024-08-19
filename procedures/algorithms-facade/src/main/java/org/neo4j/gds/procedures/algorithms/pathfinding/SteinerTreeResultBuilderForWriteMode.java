@@ -46,7 +46,7 @@ class SteinerTreeResultBuilderForWriteMode implements ResultBuilder<SteinerTreeW
         builder.withComputeMillis(timings.computeMillis);
         builder.withWriteMillis(timings.mutateOrWriteMillis);
 
-        metadata.ifPresent(rw -> builder.withRelationshipsWritten(rw.value));
+        metadata.ifPresent(rw -> builder.withRelationshipsWritten(rw.value()));
 
         steinerTreeResult.ifPresent(result -> {
             builder.withEffectiveNodeCount(result.effectiveNodeCount());

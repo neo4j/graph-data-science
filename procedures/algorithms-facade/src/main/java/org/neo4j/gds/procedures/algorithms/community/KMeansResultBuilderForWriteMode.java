@@ -78,7 +78,7 @@ class KMeansResultBuilderForWriteMode implements ResultBuilder<KmeansWriteConfig
             timings.computeMillis,
             communityStatistics.computeMilliseconds(),
             timings.mutateOrWriteMillis,
-            metadata.orElseThrow().value,
+            metadata.orElseThrow().value(),
             communitySummary,
             centroids,
             kmeansResult.averageDistanceToCentroid(),

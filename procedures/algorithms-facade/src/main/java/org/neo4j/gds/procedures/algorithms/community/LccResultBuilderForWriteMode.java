@@ -53,7 +53,7 @@ class LccResultBuilderForWriteMode implements ResultBuilder<LocalClusteringCoeff
             timings.preProcessingMillis,
             timings.computeMillis,
             timings.mutateOrWriteMillis,
-            metadata.orElseThrow().value,
+            metadata.orElseThrow().value(),
             configuration.toMap()
         );
 

@@ -47,7 +47,7 @@ public class SteinerTreeResultBuilderForMutateMode implements ResultBuilder<Stei
         builder.withComputeMillis(timings.computeMillis);
         builder.withMutateMillis(timings.mutateOrWriteMillis);
 
-        metadata.ifPresent(rw -> builder.withRelationshipsWritten(rw.value));
+        metadata.ifPresent(rw -> builder.withRelationshipsWritten(rw.value()));
 
         steinerTreeResult.ifPresent(result -> {
             builder.withEffectiveNodeCount(result.effectiveNodeCount());

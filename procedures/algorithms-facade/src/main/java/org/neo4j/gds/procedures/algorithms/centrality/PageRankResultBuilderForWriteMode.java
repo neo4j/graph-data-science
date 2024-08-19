@@ -67,7 +67,7 @@ class PageRankResultBuilderForWriteMode implements ResultBuilder<PageRankWriteCo
             timings.computeMillis,
             pageRankDistribution.postProcessingMillis,
             timings.mutateOrWriteMillis,
-            metadata.orElseThrow().value,
+            metadata.orElseThrow().value(),
             configurationMap
         );
 

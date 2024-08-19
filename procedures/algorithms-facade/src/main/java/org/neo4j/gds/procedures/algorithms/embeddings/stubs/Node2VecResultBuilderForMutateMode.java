@@ -46,7 +46,7 @@ public class Node2VecResultBuilderForMutateMode implements ResultBuilder<Node2Ve
 
         return new Node2VecMutateResult(
             graph.nodeCount(),
-            metadata.orElseThrow().value,
+            metadata.orElseThrow().value(),
             timings.preProcessingMillis,
             timings.computeMillis,
             timings.mutateOrWriteMillis,

@@ -45,7 +45,7 @@ class KCoreResultBuilderForWriteMode implements ResultBuilder<KCoreDecomposition
         var kCoreDecompositionResult = result.get();
 
         var kCoreDecompositionWriteResult = new KCoreDecompositionWriteResult(
-            metadata.orElseThrow().value,
+            metadata.orElseThrow().value(),
             kCoreDecompositionResult.degeneracy(),
             timings.preProcessingMillis,
             timings.computeMillis,

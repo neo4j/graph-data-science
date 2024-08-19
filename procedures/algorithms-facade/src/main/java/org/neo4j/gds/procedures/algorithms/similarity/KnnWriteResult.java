@@ -91,7 +91,7 @@ public class KnnWriteResult extends SimilarityWriteResult {
             timings.mutateOrWriteMillis,
             0,
             nodesCompared,
-            relationshipsWritten.value,
+            relationshipsWritten.value(),
             didConverge,
             ranIterations,
             nodePairsConsidered,

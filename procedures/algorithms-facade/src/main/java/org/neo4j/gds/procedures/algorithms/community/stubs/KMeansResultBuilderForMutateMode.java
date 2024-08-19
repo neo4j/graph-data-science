@@ -77,7 +77,7 @@ public class KMeansResultBuilderForMutateMode implements ResultBuilder<KmeansMut
             timings.computeMillis,
             communityStatisticsWithTiming.getRight(),
             timings.mutateOrWriteMillis,
-            metadata.orElseThrow().value,
+            metadata.orElseThrow().value(),
             communityStatisticsWithTiming.getMiddle(),
             centroids,
             kmeansResult.averageDistanceToCentroid(),

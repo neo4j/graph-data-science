@@ -20,10 +20,10 @@
 package org.neo4j.gds.algorithms.community;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.extension.GdlExtension;
@@ -83,7 +83,7 @@ class MutateNodePropertyTest {
             nodePropertyValuesToMutate
         );
 
-        assertThat(result.value)
+        assertThat(result.value())
             .as("NodeProperties added count don't match")
             .isEqualTo(4);
 

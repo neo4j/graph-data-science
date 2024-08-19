@@ -47,7 +47,7 @@ public class ApproxMaxKCutResultBuilderForMutateMode implements ResultBuilder<Ap
         var approxMaxKCutResult = result.get();
 
         return new ApproxMaxKCutMutateResult(
-            metadata.orElseThrow().value,
+            metadata.orElseThrow().value(),
             approxMaxKCutResult.cutCost(),
             timings.preProcessingMillis,
             timings.computeMillis,

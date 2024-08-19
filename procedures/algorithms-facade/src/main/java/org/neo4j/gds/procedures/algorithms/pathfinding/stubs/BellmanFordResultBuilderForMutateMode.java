@@ -47,7 +47,7 @@ public class BellmanFordResultBuilderForMutateMode implements ResultBuilder<AllS
         resultBuilder.withComputeMillis(timings.computeMillis);
         resultBuilder.withMutateMillis(timings.mutateOrWriteMillis);
 
-        metadata.ifPresent(rw -> resultBuilder.withRelationshipsWritten(rw.value));
+        metadata.ifPresent(rw -> resultBuilder.withRelationshipsWritten(rw.value()));
 
         //noinspection OptionalIsPresent
         if (result.isPresent()) resultBuilder.withContainsNegativeCycle(result.get().containsNegativeCycle());

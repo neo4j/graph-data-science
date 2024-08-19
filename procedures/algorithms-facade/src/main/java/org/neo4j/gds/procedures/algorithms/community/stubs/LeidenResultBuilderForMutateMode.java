@@ -75,7 +75,7 @@ public class LeidenResultBuilderForMutateMode implements ResultBuilder<LeidenMut
             timings.computeMillis,
             communityStatisticsWithTiming.getRight(),
             timings.mutateOrWriteMillis,
-            nodePropertiesWrittenAndConvertedNodePropertyValues.getLeft().value,
+            nodePropertiesWrittenAndConvertedNodePropertyValues.getLeft().value(),
             communityStatisticsWithTiming.getMiddle(),
             Arrays.stream(leidenResult.modularities()).boxed().collect(Collectors.toList()),
             leidenResult.modularity(),
