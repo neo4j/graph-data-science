@@ -101,14 +101,9 @@ public class AlgorithmExecutionScaffolding {
             configurationLexer,
             user
         );
-        StreamAlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> actual =
-            (g, c, r) -> {
-                // the shoehorning
-                algorithmMetaDataSetter.set(c);
-                return algorithm.compute(g, c, r);
-            };
 
-        return actual.compute(graphName, configuration, resultBuilder);
+        algorithmMetaDataSetter.set(configuration);
+        return algorithm.compute(graphName, configuration, resultBuilder);
     }
 
 
