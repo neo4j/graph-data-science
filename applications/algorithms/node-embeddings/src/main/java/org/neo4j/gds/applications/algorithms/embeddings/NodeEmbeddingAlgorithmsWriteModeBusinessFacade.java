@@ -34,8 +34,6 @@ import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
 import org.neo4j.gds.logging.Log;
 
-import java.util.Optional;
-
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FastRP;
 
 public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
@@ -111,7 +109,7 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
         return graphSageAlgorithmProcessing.process(
             graphName,
             configuration,
-            Optional.of(writeStep),
+            writeStep,
             resultBuilder,
             false
         );
@@ -124,6 +122,6 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new Node2VecWriteStep(writeToDatabase, configuration);
 
-        return node2VecAlgorithmProcessing.process(graphName, configuration, Optional.of(writeStep), resultBuilder);
+        return node2VecAlgorithmProcessing.process(graphName, configuration, writeStep, resultBuilder);
     }
 }

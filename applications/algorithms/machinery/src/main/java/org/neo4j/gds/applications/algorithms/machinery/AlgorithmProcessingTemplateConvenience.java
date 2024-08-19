@@ -47,7 +47,7 @@ public class AlgorithmProcessingTemplateConvenience {
         LabelForProgressTracking label,
         Supplier<MemoryEstimation> estimationFactory,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
-        Optional<MutateOrWriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA>> mutateOrWriteStep,
+        MutateOrWriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> mutateOrWriteStep,
         ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
@@ -83,7 +83,7 @@ public class AlgorithmProcessingTemplateConvenience {
             label,
             estimationFactory,
             algorithmComputation,
-            Optional.of(mutateStep),
+            mutateStep,
             resultBuilder
         );
     }

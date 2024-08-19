@@ -33,8 +33,6 @@ import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
 import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 
-import java.util.Optional;
-
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FastRP;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.HashGNN;
 
@@ -90,7 +88,7 @@ public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
         return graphSageAlgorithmProcessing.process(
             graphName,
             configuration,
-            Optional.of(mutateStep),
+            mutateStep,
             resultBuilder,
             true
         );
@@ -121,6 +119,6 @@ public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new Node2VecMutateStep(mutateNodeProperty, configuration);
 
-        return node2VecAlgorithmProcessing.process(graphName, configuration, Optional.of(mutateStep), resultBuilder);
+        return node2VecAlgorithmProcessing.process(graphName, configuration, mutateStep, resultBuilder);
     }
 }

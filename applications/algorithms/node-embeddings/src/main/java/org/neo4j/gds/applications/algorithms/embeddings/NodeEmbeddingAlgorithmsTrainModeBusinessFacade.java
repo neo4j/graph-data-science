@@ -75,7 +75,7 @@ public class NodeEmbeddingAlgorithmsTrainModeBusinessFacade {
             GraphSageTrain,
             () -> estimation.graphSageTrain(configuration),
             (graph, __) -> algorithms.graphSageTrain(graph, configuration),
-            Optional.of(writeToDiskStep),
+            writeToDiskStep,
             resultBuilder
         );
     }

@@ -202,7 +202,7 @@ class DefaultAlgorithmProcessingTemplateTest {
             KNN,
             null,
             computation,
-            Optional.of(mutateOrWriteStep),
+            mutateOrWriteStep,
             resultBuilder
         );
 
@@ -244,7 +244,7 @@ class DefaultAlgorithmProcessingTemplateTest {
 
             @Override
             <RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> Optional<MUTATE_OR_WRITE_METADATA> mutateOrWriteWithTiming(
-                Optional<MutateOrWriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA>> mutateOrWriteStep,
+                MutateOrWriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> mutateOrWriteStep,
                 AlgorithmProcessingTimingsBuilder timingsBuilder,
                 Graph graph,
                 GraphStore graphStore,
@@ -254,7 +254,7 @@ class DefaultAlgorithmProcessingTemplateTest {
             ) {
                 timingsBuilder.withMutateOrWriteMillis(87);
                 return Optional.of(
-                    mutateOrWriteStep.orElseThrow().execute(
+                    mutateOrWriteStep.execute(
                         graph,
                         graphStore,
                         resultStore,
@@ -292,7 +292,7 @@ class DefaultAlgorithmProcessingTemplateTest {
             null,
             null,
             null,
-            Optional.of((graph, graphStore, resultStore, unused, jobId) -> 6573L),
+            (graph, graphStore, resultStore, unused, jobId) -> 6573L,
             resultBuilder
         );
 

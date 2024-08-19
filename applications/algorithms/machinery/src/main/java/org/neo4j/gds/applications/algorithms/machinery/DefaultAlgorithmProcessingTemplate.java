@@ -69,7 +69,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         LabelForProgressTracking label,
         Supplier<MemoryEstimation> estimationFactory,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
-        Optional<MutateOrWriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA>> mutateOrWriteStep,
+        MutateOrWriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> mutateOrWriteStep,
         ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
     ) {
         // as we progress through the steps we gather timings
@@ -295,7 +295,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
      * @return null if we are not in mutate or write mode; appropriate metadata otherwise
      */
     <RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> Optional<MUTATE_OR_WRITE_METADATA> mutateOrWriteWithTiming(
-        Optional<MutateOrWriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA>> mutateOrWriteStep,
+        MutateOrWriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> mutateOrWriteStep,
         AlgorithmProcessingTimingsBuilder timingsBuilder,
         Graph graph,
         GraphStore graphStore,
@@ -303,10 +303,10 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         Optional<RESULT_FROM_ALGORITHM> result,
         JobId jobId
     ) {
-        if (mutateOrWriteStep.isEmpty() || result.isEmpty()) return Optional.empty();
+        if (result.isEmpty()) return Optional.empty();
 
         try (ProgressTimer ignored = ProgressTimer.start(timingsBuilder::withMutateOrWriteMillis)) {
-            return Optional.ofNullable(mutateOrWriteStep.get().execute(graph, graphStore, resultStore, result.get(), jobId));
+            return Optional.ofNullable(mutateOrWriteStep.execute(graph, graphStore, resultStore, result.get(), jobId));
         }
     }
 

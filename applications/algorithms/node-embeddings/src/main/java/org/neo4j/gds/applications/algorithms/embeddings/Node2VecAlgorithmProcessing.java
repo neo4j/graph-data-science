@@ -52,7 +52,7 @@ public class Node2VecAlgorithmProcessing {
     <CONFIGURATION extends Node2VecBaseConfig, RESULT, MUTATE_OR_WRITE_METADATA> RESULT process(
         GraphName graphName,
         CONFIGURATION configuration,
-        Optional<MutateOrWriteStep<Node2VecResult, MUTATE_OR_WRITE_METADATA>> mutateOrWriteStep,
+        MutateOrWriteStep<Node2VecResult, MUTATE_OR_WRITE_METADATA> mutateOrWriteStep,
         ResultBuilder<CONFIGURATION, Node2VecResult, RESULT, MUTATE_OR_WRITE_METADATA> resultBuilder
     ) {
         var validationHook = new Node2VecValidationHook(configuration);

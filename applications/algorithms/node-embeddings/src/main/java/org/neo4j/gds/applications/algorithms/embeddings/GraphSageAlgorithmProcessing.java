@@ -52,7 +52,7 @@ public class GraphSageAlgorithmProcessing {
     <CONFIGURATION extends GraphSageBaseConfig, RESULT, MUTATE_OR_WRITE_METADATA> RESULT process(
         GraphName graphName,
         CONFIGURATION configuration,
-        Optional<MutateOrWriteStep<GraphSageResult, MUTATE_OR_WRITE_METADATA>> mutateOrWriteStep,
+        MutateOrWriteStep<GraphSageResult, MUTATE_OR_WRITE_METADATA> mutateOrWriteStep,
         ResultBuilder<CONFIGURATION, GraphSageResult, RESULT, MUTATE_OR_WRITE_METADATA> resultBuilder,
         boolean mutating
     ) {
