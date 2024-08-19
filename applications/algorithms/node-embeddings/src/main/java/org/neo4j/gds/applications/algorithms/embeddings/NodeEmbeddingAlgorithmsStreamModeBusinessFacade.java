@@ -80,7 +80,7 @@ public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
     ) {
 
         var graphSageProcessParameters = graphSageAlgorithmProcessing.graphSageValidationHook(configuration);
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
+        return algorithmProcessingTemplateConvenience.processAlgorithmInStreamMode(
             graphName,
             configuration,
             GraphSage,
@@ -112,7 +112,7 @@ public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
         Node2VecStreamConfig configuration,
         StreamResultBuilder<Node2VecStreamConfig, Node2VecResult, RESULT> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
+        return algorithmProcessingTemplateConvenience.processAlgorithmInStreamMode(
             graphName,
             configuration,
             Node2Vec,

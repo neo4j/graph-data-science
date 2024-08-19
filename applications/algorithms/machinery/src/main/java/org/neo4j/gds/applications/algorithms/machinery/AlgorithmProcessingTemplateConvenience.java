@@ -91,7 +91,7 @@ public class AlgorithmProcessingTemplateConvenience {
     /**
      * No relationship weight override, no validation hooks, no mutate or write step
      */
-    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER processRegularAlgorithmInStatsMode(
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM> RESULT_TO_CALLER processRegularAlgorithmInStatsMode(
         GraphName graphName,
         CONFIGURATION configuration,
         LabelForProgressTracking label,
@@ -111,7 +111,7 @@ public class AlgorithmProcessingTemplateConvenience {
         );
     }
     //STREAM
-    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM> Stream<RESULT_TO_CALLER> processRegularAlgorithmInStreamMode(
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM> Stream<RESULT_TO_CALLER> processAlgorithmInStreamMode(
         GraphName graphName,
         CONFIGURATION configuration,
         LabelForProgressTracking label,
@@ -140,7 +140,7 @@ public class AlgorithmProcessingTemplateConvenience {
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
         StreamResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
     ) {
-        return processRegularAlgorithmInStreamMode(
+        return processAlgorithmInStreamMode(
             graphName,
             configuration,
             label,
