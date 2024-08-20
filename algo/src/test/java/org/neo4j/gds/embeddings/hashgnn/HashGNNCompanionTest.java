@@ -38,7 +38,7 @@ class HashGNNCompanionTest {
         int a = rng.nextInt(c - 1) + 1;
         int b = rng.nextInt(c - 1) + 1;
 
-        var hashTriple = ImmutableHashTriple.of(a, b, c);
+        var hashTriple = new HashGNNCompanion.HashTriple(a, b, c);
         var hashes = HashGNNCompanion.HashTriple.computeHashesFromTriple(EMBEDDING_DIMENSION, hashTriple);
 
         assertThat(hashes.length).isEqualTo(EMBEDDING_DIMENSION);

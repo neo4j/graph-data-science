@@ -35,7 +35,7 @@ public class LouvainNodePropertyValuesComputer {
     ) {
         if (configuration.includeIntermediateCommunities())
             return CommunityCompanion.createIntermediateCommunitiesNodePropertyValues(
-                result::getIntermediateCommunities,
+                result::intermediateCommunities,
                 result.size()
             );
 

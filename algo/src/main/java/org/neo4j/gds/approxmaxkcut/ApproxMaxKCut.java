@@ -222,7 +222,7 @@ public final class ApproxMaxKCut extends Algorithm<ApproxMaxKCutResult> {
 
         progressTracker.endSubTask();
 
-        return ApproxMaxKCutResult.of(candidateSolutions[bestIdx], costs[bestIdx].get());
+        return new ApproxMaxKCutResult(candidateSolutions[bestIdx], costs[bestIdx].get());
     }
 
 }

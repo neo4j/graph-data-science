@@ -21,14 +21,4 @@ package org.neo4j.gds.embeddings.hashgnn;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
-public class HashGNNResult {
-    private final NodePropertyValues embeddings;
-
-    public HashGNNResult(NodePropertyValues embeddings) {
-        this.embeddings = embeddings;
-    }
-
-    public NodePropertyValues embeddings() {
-        return embeddings;
-    }
-}
+public record HashGNNResult(NodePropertyValues embeddings) {}

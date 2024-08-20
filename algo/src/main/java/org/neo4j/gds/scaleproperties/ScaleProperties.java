@@ -101,7 +101,7 @@ public class ScaleProperties extends Algorithm<ScalePropertiesResult> {
         progressTracker.endSubTask("Scale properties");
 
         progressTracker.endSubTask("ScaleProperties");
-        return ScalePropertiesResult.of(scaledProperties, scalerStatistics);
+        return new ScalePropertiesResult(scaledProperties, scalerStatistics);
     }
 
     private void initializeArrays(HugeObjectArray<double[]> scaledProperties, int propertyCount) {

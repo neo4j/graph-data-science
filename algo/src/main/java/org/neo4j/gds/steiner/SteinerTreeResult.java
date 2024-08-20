@@ -19,38 +19,14 @@
  */
 package org.neo4j.gds.steiner;
 
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 
-@ValueClass
 @SuppressWarnings("immutables:subtype")
-public interface SteinerTreeResult {
-
-    HugeLongArray parentArray();
-
-    HugeDoubleArray relationshipToParentCost();
-
-    double totalCost();
-
-    long effectiveNodeCount();
-
-    long effectiveTargetNodesCount();
-
-
-    static SteinerTreeResult of(
-        HugeLongArray parent,
+public record SteinerTreeResult(
+        HugeLongArray parentArray,
         HugeDoubleArray relationshipToParentCost,
         double totalCost,
         long effectiveNodeCount,
         long effectiveTargetNodesCount
-    ) {
-        return ImmutableSteinerTreeResult.of(
-            parent,
-            relationshipToParentCost,
-            totalCost,
-            effectiveNodeCount,
-            effectiveTargetNodesCount
-        );
-    }
-}
+    ) {}

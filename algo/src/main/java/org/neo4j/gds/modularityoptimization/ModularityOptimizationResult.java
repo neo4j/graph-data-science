@@ -23,43 +23,16 @@ import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 
 import java.util.function.LongUnaryOperator;
 
-public class ModularityOptimizationResult {
-
-    private final LongUnaryOperator communityIdLookup;
-    private final double modularity;
-    private final int ranIterations;
-    private final boolean didConverge;
-    private final long nodeCount;
-
-    public ModularityOptimizationResult(
+public record ModularityOptimizationResult(
         LongUnaryOperator communityIdLookup,
         double modularity,
         int ranIterations,
         boolean didConverge,
         long nodeCount
     ) {
-        this.communityIdLookup = communityIdLookup;
-        this.nodeCount = nodeCount;
-
-        this.modularity = modularity;
-        this.ranIterations = ranIterations;
-        this.didConverge = didConverge;
-    }
-
-    public double modularity() {
-        return modularity;
-    }
-
-    public int ranIterations() {
-        return ranIterations;
-    }
 
     public long communityId(long nodeId) {
         return communityIdLookup.applyAsLong(nodeId);
-    }
-
-    public boolean didConverge() {
-        return didConverge;
     }
 
     public LongNodePropertyValues asNodeProperties() {

@@ -174,7 +174,7 @@ public class Node2VecModel {
         }
         progressTracker.endSubTask();
 
-        return ImmutableNode2VecResult.of(centerEmbeddings, lossPerIteration);
+        return  new Node2VecResult(centerEmbeddings, lossPerIteration);
     }
 
     private HugeObjectArray<FloatVector> initializeEmbeddings(LongUnaryOperator toOriginalNodeId, long nodeCount, int embeddingDimensions, Random random) {

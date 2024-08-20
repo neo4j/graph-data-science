@@ -19,13 +19,8 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 
-@ValueClass
-public interface GraphSageModel {
-
-    Layer[] layers();
-
-    GraphSageTrainConfig config();
-}
+public record GraphSageModel(
+    Layer[] layers,
+    GraphSageTrainConfig config){}

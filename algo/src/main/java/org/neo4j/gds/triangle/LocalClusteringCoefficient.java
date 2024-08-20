@@ -81,7 +81,7 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
         }
 
         progressTracker.endSubTask();
-        return LocalClusteringCoefficientResult.of(
+        return new LocalClusteringCoefficientResult(
             localClusteringCoefficients,
             averageClusteringCoefficient
         );

@@ -25,11 +25,11 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.Direction;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.collections.ha.HugeDoubleArray;
-import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
@@ -252,16 +252,16 @@ public class Leiden extends Algorithm<LeidenResult> {
         boolean stoppedAtFirstIteration = didConverge && iteration == 0;
         if (stoppedAtFirstIteration) {
             var modularity = modularities[0];
-            return LeidenResult.of(
+            return new LeidenResult(
                 LeidenUtils.createStartingCommunities(rootGraph.nodeCount(), seedValues.orElse(null)),
                 1,
-                didConverge,
+                true,
                 null,
                 new double[]{modularity},
                 modularity
             );
         } else {
-            return LeidenResult.of(
+            return new LeidenResult(
                 dendrogramManager.getCurrent(),
                 iteration,
                 didConverge,

@@ -19,24 +19,9 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 
-@ValueClass
-public interface LocalClusteringCoefficientResult {
-
-    HugeDoubleArray localClusteringCoefficients();
-
-    double averageClusteringCoefficient();
-
-    static LocalClusteringCoefficientResult of(
+public record LocalClusteringCoefficientResult(
         HugeDoubleArray localClusteringCoefficients,
         double averageClusteringCoefficient
-    ) {
-        return ImmutableLocalClusteringCoefficientResult
-            .builder()
-            .localClusteringCoefficients(localClusteringCoefficients)
-            .averageClusteringCoefficient(averageClusteringCoefficient)
-            .build();
-    }
-}
+    ){}

@@ -66,7 +66,7 @@ final class LouvainNodePropertyValuesDelegate {
 
             @Override
             public long[] longArrayValue(long nodeId) {
-                return result.getIntermediateCommunities(nodeId);
+                return result.intermediateCommunities(nodeId);
             }
         };
     }

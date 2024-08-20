@@ -39,17 +39,17 @@ class HashGNNMemoryEstimateDefinitionTest {
     @ParameterizedTest
     @CsvSource(value = {
         // BASE
-        "    10,  4,  10_000, 20_000, 1,   5_924_072, 86_324_072",
+        "    10,  4,  10_000, 20_000, 1,   5_924_152, 86_324_152",
         // Should increase fairly little with higher density
-        "   100,  4,  10_000, 20_000, 1,   7_038_992, 87_438_992",
+        "   100,  4,  10_000, 20_000, 1,   7_039_792, 87_439_792",
         // Should increase fairly little with more iterations
-        "    10, 16,  10_000, 20_000, 1,   5_924_072, 86_324_072",
+        "    10, 16,  10_000, 20_000, 1,   5_924_152, 86_324_152",
         // Should increase almost linearly with node count
-        "    10,  4, 100_000, 20_000, 1,  58_124_432, 862_124_432",
+        "    10,  4, 100_000, 20_000, 1,  58_124_512, 862_124_512",
         // Should be unaffected by relationship count
-        "    10,  4,  10_000, 80_000, 1,   5_924_072, 86_324_072",
+        "    10,  4,  10_000, 80_000, 1,   5_924_152, 86_324_152",
         // Should be unaffected by concurrency
-        "    10,  4,  10_000, 20_000, 8,  5_924_072, 86_324_072",
+        "    10,  4,  10_000, 20_000, 8,  5_924_152, 86_324_152",
     })
     void shouldEstimateMemory(
         int embeddingDensity,
@@ -91,7 +91,7 @@ class HashGNNMemoryEstimateDefinitionTest {
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(10_000,20_000,new Concurrency(8))
-            .hasSameMinAndMaxEqualTo(12_404_072);
+            .hasSameMinAndMaxEqualTo(12_404_152);
     }
 
     @Test

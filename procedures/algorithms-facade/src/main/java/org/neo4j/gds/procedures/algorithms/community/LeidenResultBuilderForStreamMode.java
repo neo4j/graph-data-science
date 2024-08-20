@@ -55,7 +55,7 @@ class LeidenResultBuilderForStreamMode implements StreamResultBuilder<LeidenStre
             .filter(nodePropertyValues::hasValue)
             .map(nodeId -> {
                 var communities = configuration.includeIntermediateCommunities()
-                    ? leidenResult.getIntermediateCommunities(nodeId)
+                    ? leidenResult.intermediateCommunities(nodeId)
                     : null;
                 var communityId = nodePropertyValues.longValue(nodeId);
                 return LeidenStreamResult.create(graph.toOriginalNodeId(nodeId), communities, communityId);

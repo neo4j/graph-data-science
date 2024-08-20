@@ -21,14 +21,5 @@ package org.neo4j.gds.embeddings.fastrp;
 
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 
-public class FastRPResult {
-    private final HugeObjectArray<float[]> embeddings;
+public record FastRPResult(HugeObjectArray<float[]> embeddings){}
 
-    public FastRPResult(HugeObjectArray<float[]> embeddings) {
-        this.embeddings = embeddings;
-    }
-
-    public HugeObjectArray<float[]> embeddings() {
-        return embeddings;
-    }
-}

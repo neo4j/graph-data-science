@@ -161,7 +161,7 @@ public class ShortestPathsSteinerAlgorithm extends Algorithm<SteinerTreeResult> 
         }
 
         progressTracker.endSubTask("SteinerTree");
-        return SteinerTreeResult.of(
+        return new SteinerTreeResult(
             parent,
             parentCost,
             totalCost.doubleValue(),

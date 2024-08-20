@@ -19,22 +19,14 @@
  */
 package org.neo4j.gds.scaleproperties;
 
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 
 import java.util.List;
 import java.util.Map;
 
-@ValueClass
-public interface ScalePropertiesResult {
-    HugeObjectArray<double[]> scaledProperties();
-
-    Map<String, Map<String, List<Double>>> scalerStatistics();
-
-    static ScalePropertiesResult of(
-        HugeObjectArray<double[]> properties,
-        Map<String, Map<String, List<Double>>> stats
+public record  ScalePropertiesResult(
+        HugeObjectArray<double[]> scaledProperties,
+        Map<String, Map<String, List<Double>>> scalerStatistics
     ) {
-        return ImmutableScalePropertiesResult.of(properties, stats);
-    }
+
 }

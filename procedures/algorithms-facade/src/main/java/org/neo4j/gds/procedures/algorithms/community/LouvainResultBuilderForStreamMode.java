@@ -56,7 +56,7 @@ class LouvainResultBuilderForStreamMode implements StreamResultBuilder<LouvainSt
             .filter(nodePropertyValues::hasValue)
             .map(nodeId -> {
                 var communities = configuration.includeIntermediateCommunities()
-                    ? louvainResult.getIntermediateCommunities(nodeId)
+                    ? louvainResult.intermediateCommunities(nodeId)
                     : null;
                 var communityId = nodePropertyValues.longValue(nodeId);
                 return LouvainStreamResult.create(graph.toOriginalNodeId(nodeId), communities, communityId);

@@ -19,15 +19,10 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
 
 import java.util.List;
 
-@ValueClass
-public interface Node2VecResult {
-    HugeObjectArray<FloatVector> embeddings();
-
-    List<Double> lossPerIteration();
-}
+public record Node2VecResult(HugeObjectArray<FloatVector> embeddings,List<Double> lossPerIteration)
+{ }

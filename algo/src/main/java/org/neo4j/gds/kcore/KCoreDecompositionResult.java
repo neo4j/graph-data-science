@@ -19,16 +19,6 @@
  */
 package org.neo4j.gds.kcore;
 
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 
-@ValueClass
-public interface KCoreDecompositionResult {
-
-    HugeIntArray coreValues();
-    int degeneracy();
-
-    static KCoreDecompositionResult of(HugeIntArray coreValues, int degeneracy){
-        return ImmutableKCoreDecompositionResult.of(coreValues,degeneracy);
-    }
-}
+public record KCoreDecompositionResult(HugeIntArray coreValues, int degeneracy){}

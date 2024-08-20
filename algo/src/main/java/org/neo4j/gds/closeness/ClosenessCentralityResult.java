@@ -27,14 +27,8 @@ import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import java.util.function.LongToDoubleFunction;
 
 
-public class ClosenessCentralityResult implements CentralityAlgorithmResult {
+public record ClosenessCentralityResult(HugeDoubleArray centralities) implements CentralityAlgorithmResult {
 
-    private final HugeDoubleArray centralities;
-
-    ClosenessCentralityResult(HugeDoubleArray centralities) {
-        this.centralities = centralities;
-    }
-    
     @Override
     public NodePropertyValues nodePropertyValues() {
         return NodePropertyValuesAdapter.adapt(centralities);

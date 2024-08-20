@@ -125,7 +125,7 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
         globalTriangleCount = globalTriangleCounter.longValue();
 
         progressTracker.endSubTask();
-        return TriangleCountResult.of(
+        return new TriangleCountResult(
             triangleCounts,
             globalTriangleCount
         );

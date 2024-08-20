@@ -51,7 +51,7 @@ abstract class LouvainResultBuilder<PROC_RESULT> extends AbstractCommunityResult
                 .withLevels(result.ranLevels())
                 .withModularity(result.modularity())
                 .withModularities(result.modularities())
-                .withCommunityFunction(result::getCommunity);
+                .withCommunityFunction(result::community);
         });
 
         return procResultBuilder;

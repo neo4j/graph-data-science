@@ -27,29 +27,12 @@ import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import java.util.function.LongToDoubleFunction;
 
 
-public class PageRankResult implements CentralityAlgorithmResult {
+public record PageRankResult(
+    HugeDoubleArray scores,
+    int iterations,
+    boolean didConverge
+) implements CentralityAlgorithmResult {
 
-    private final HugeDoubleArray scores;
-    private final int ranIterations;
-    private final boolean didConverge;
-
-    public PageRankResult(HugeDoubleArray scores, int ranIterations, boolean didConverge) {
-        this.scores = scores;
-        this.ranIterations = ranIterations;
-        this.didConverge = didConverge;
-    }
-
-    public int iterations() {
-        return ranIterations;
-    }
-
-    public boolean didConverge() {
-        return didConverge;
-    }
-
-    public long nodeCount() {
-        return scores.size();
-    }
 
     @Override
     public NodePropertyValues nodePropertyValues() {
@@ -61,4 +44,7 @@ public class PageRankResult implements CentralityAlgorithmResult {
         return scores::get;
     }
 
+    public long nodeCount() {
+        return scores.size();
+    }
 }

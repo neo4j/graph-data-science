@@ -23,17 +23,9 @@ import com.carrotsearch.hppc.LongDoubleScatterMap;
 
 import java.util.Arrays;
 
-public class CELFResult {
-    private  final  LongDoubleScatterMap seedSetNodes;
+public record CELFResult(LongDoubleScatterMap seedSetNodes){
 
-    public CELFResult(LongDoubleScatterMap seedSetNodes){
-            this.seedSetNodes=seedSetNodes;
-    }
-
-    public  LongDoubleScatterMap seedSetNodes(){
-        return  seedSetNodes;
-    }
-    public double totalSpread(){
-        return  Arrays.stream(seedSetNodes.values).sum();
+    public double totalSpread() {
+        return Arrays.stream(seedSetNodes.values).sum();
     }
 }

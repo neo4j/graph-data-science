@@ -21,7 +21,6 @@ package org.neo4j.gds.embeddings.hashgnn;
 
 
 import org.apache.commons.math3.primes.Primes;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -35,7 +34,7 @@ import java.util.stream.IntStream;
 
 import static org.neo4j.gds.embeddings.hashgnn.HashGNNCompanion.HashTriple.computeHashesFromTriple;
 
-class HashTask implements Runnable {
+final class HashTask implements Runnable {
     private static final double MAX_FINAL_INFLUENCE = 1e4;
     private static final int PRIME_LOWER_BOUND = 50_000;
 
@@ -48,7 +47,7 @@ class HashTask implements Runnable {
     private List<int[]> preAggregationHashes;
     private final ProgressTracker progressTracker;
 
-    HashTask(
+    private HashTask(
         int embeddingDimension,
         double scaledNeighborInfluence,
         int numberOfRelationshipTypes,
@@ -95,13 +94,11 @@ class HashTask implements Runnable {
         return hashTasks.stream().map(HashTask::hashes).collect(Collectors.toList());
     }
 
-    @ValueClass
-    interface Hashes {
-        int[] neighborsAggregationHashes();
 
-        int[] selfAggregationHashes();
-
-        List<int[]> preAggregationHashes();
+    record Hashes(
+        int[] neighborsAggregationHashes,
+        int[] selfAggregationHashes,
+        List<int[]> preAggregationHashes){
 
         static long memoryEstimation(int ambientDimension, int numRelTypes) {
             long neighborAggregation = Estimate.sizeOfIntArrayList(ambientDimension);
@@ -148,7 +145,7 @@ class HashTask implements Runnable {
         progressTracker.logSteps(1);
     }
 
-    Hashes hashes() {
-        return ImmutableHashes.of(neighborsAggregationHashes, selfAggregationHashes, preAggregationHashes);
+    private Hashes hashes() {
+        return new Hashes(neighborsAggregationHashes, selfAggregationHashes, preAggregationHashes);
     }
 }

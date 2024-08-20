@@ -66,7 +66,7 @@ class LouvainResultBuilderForWriteMode implements ResultBuilder<LouvainWriteConf
 
         var communityStatistics = CommunityStatistics.communityStats(
             nodePropertyValues.nodeCount(),
-            louvainResult::getCommunity,
+            louvainResult::community,
             DefaultPool.INSTANCE,
             configuration.concurrency(),
             statisticsComputationInstructions

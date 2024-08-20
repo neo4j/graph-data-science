@@ -21,7 +21,6 @@ package org.neo4j.gds.conductance;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.hsa.HugeSparseDoubleArray;
@@ -190,7 +189,7 @@ public class Conductance extends Algorithm<ConductanceResult> {
 
         progressTracker.endSubTask();
 
-        return ImmutableRelationshipCounts.of(internalCountsBuilder.build(), externalCountsBuilder.build());
+        return new RelationshipCounts(internalCountsBuilder.build(), externalCountsBuilder.build());
     }
 
     private ConductanceResult computeConductances(
@@ -244,7 +243,7 @@ public class Conductance extends Algorithm<ConductanceResult> {
 
         progressTracker.endSubTask();
 
-        return ConductanceResult.of(
+        return new ConductanceResult(
             conductancesBuilder.build(),
             globalConductanceSum.get() / globalValidCommunities.longValue()
         );
@@ -316,11 +315,10 @@ public class Conductance extends Algorithm<ConductanceResult> {
         }
     }
 
-    @ValueClass
-    interface RelationshipCounts {
-        HugeSparseDoubleArray internalCounts();
 
-        HugeSparseDoubleArray externalCounts();
-    }
+    record RelationshipCounts(
+        HugeSparseDoubleArray internalCounts,
+        HugeSparseDoubleArray externalCounts){}
+
 
 }

@@ -138,7 +138,7 @@ public class K1Coloring extends Algorithm<K1ColoringResult> {
 
         progressTracker.endSubTask();
 
-        return K1ColoringResult.of(colors,ranIterations, didConverge);
+        return new K1ColoringResult(colors,ranIterations, didConverge);
     }
 
     private long updateVolume() {

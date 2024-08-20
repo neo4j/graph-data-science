@@ -26,13 +26,7 @@ import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 
 import java.util.function.LongToDoubleFunction;
 
-public class HarmonicResult implements CentralityAlgorithmResult {
-
-    private final HugeAtomicDoubleArray centralities;
-
-    HarmonicResult(HugeAtomicDoubleArray centralities) {
-        this.centralities = centralities;
-    }
+public record HarmonicResult(HugeAtomicDoubleArray centralities) implements CentralityAlgorithmResult {
 
     @Override
     public NodePropertyValues nodePropertyValues() {

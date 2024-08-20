@@ -65,7 +65,7 @@ class LeidenMutateStep implements MutateOrWriteStep<LeidenResult, Pair<NodePrope
     private NodePropertyValues calculateNodePropertyValues(GraphStore graphStore, LeidenResult result) {
         if (configuration.includeIntermediateCommunities())
             return CommunityCompanion.createIntermediateCommunitiesNodePropertyValues(
-                result::getIntermediateCommunities,
+                result::intermediateCommunities,
                 result.communities().size()
             );
 

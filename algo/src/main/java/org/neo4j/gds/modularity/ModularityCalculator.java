@@ -114,7 +114,7 @@ public final class ModularityCalculator extends Algorithm<ModularityResult> {
             communityModularities.set(resultIndex++, CommunityModularity.of(communityId, modularity));
         }
 
-        return ModularityResult.of(
+        return new ModularityResult(
             graph.nodeCount(),
             graph.relationshipCount(),
             totalModularity.doubleValue(),

@@ -21,27 +21,4 @@ package org.neo4j.gds.labelpropagation;
 
 import org.neo4j.gds.collections.ha.HugeLongArray;
 
-public class LabelPropagationResult {
-
-    private final HugeLongArray labels;
-    private final boolean didConverge;
-    private final long ranIterations;
-
-    public LabelPropagationResult(HugeLongArray labels, boolean didConverge, long ranIterations) {
-        this.labels = labels;
-        this.didConverge = didConverge;
-        this.ranIterations = ranIterations;
-    }
-
-    public HugeLongArray labels() {
-        return labels;
-    }
-
-    public boolean didConverge() {
-        return didConverge;
-    }
-
-    public long ranIterations() {
-        return ranIterations;
-    }
-}
+public record LabelPropagationResult(HugeLongArray labels, boolean didConverge, long ranIterations) {}

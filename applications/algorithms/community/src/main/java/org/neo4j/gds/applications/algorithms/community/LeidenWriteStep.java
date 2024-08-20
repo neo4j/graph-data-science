@@ -71,7 +71,7 @@ class LeidenWriteStep implements MutateOrWriteStep<LeidenResult, Pair<NodeProper
     private NodePropertyValues constructNodePropertyValues(GraphStore graphStore, LeidenResult result) {
         if (configuration.includeIntermediateCommunities())
             return CommunityCompanion.createIntermediateCommunitiesNodePropertyValues(
-                result::getIntermediateCommunities,
+                result::intermediateCommunities,
                 result.communities().size()
             );
 

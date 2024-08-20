@@ -19,24 +19,9 @@
  */
 package org.neo4j.gds.conductance;
 
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.collections.hsa.HugeSparseDoubleArray;
 
-@ValueClass
-public interface ConductanceResult {
-    HugeSparseDoubleArray communityConductances();
-
-    double globalAverageConductance();
-
-    static ConductanceResult of(
+public record ConductanceResult(
         HugeSparseDoubleArray communityConductances,
         double globalAverageConductance
-    ) {
-        return ImmutableConductanceResult
-            .builder()
-            .communityConductances(communityConductances)
-            .globalAverageConductance(globalAverageConductance)
-            .build();
-    }
-
-}
+    ) {}

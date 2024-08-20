@@ -20,44 +20,25 @@
 package org.neo4j.gds.k1coloring;
 
 import com.carrotsearch.hppc.BitSet;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 
 
-@ValueClass
 @SuppressWarnings("immutables:subtype")
-public interface K1ColoringResult {
+public record K1ColoringResult(HugeLongArray colors,
+                               long ranIterations,
+                               boolean didConverge) {
 
-        HugeLongArray colors();
+    public BitSet usedColors() {
+        var colors = colors();
+        var nodeCount = colors.size();
+        var usedColors = new BitSet(nodeCount);
 
-        long ranIterations();
-
-        boolean didConverge();
-
-        default BitSet usedColors(){
-                var colors=colors();
-                var nodeCount=colors.size();
-                var usedColors = new BitSet(nodeCount);
-
-                for (long u=0;u<nodeCount;++u) {
-                        usedColors.set(colors.get(u));
-                }
-
-                return usedColors;
+        for (long u = 0; u < nodeCount; ++u) {
+            usedColors.set(colors.get(u));
         }
 
-        static K1ColoringResult of(
-            HugeLongArray color,
-            long ranIterations,
-            boolean didConverge
-        ) {
-
-            return ImmutableK1ColoringResult.of(
-                color,
-                ranIterations,
-                didConverge
-            );
-        }
-
+        return usedColors;
     }
+
+}
 

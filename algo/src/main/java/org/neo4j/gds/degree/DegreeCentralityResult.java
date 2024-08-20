@@ -24,21 +24,9 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
 import java.util.function.LongToDoubleFunction;
 
-public class DegreeCentralityResult  implements CentralityAlgorithmResult {
+public record DegreeCentralityResult(long nodeCount, DegreeFunction degreeFunction)  implements CentralityAlgorithmResult {
 
-    static DegreeCentralityResult EMPTY=new DegreeCentralityResult(0, v -> 0);
-
-    private  final  DegreeFunction degreeFunction;
-    private final  long nodeCount;
-
-    DegreeCentralityResult(long nodeCount, DegreeFunction degreeFunction){
-        this.degreeFunction=degreeFunction;
-        this.nodeCount=nodeCount;
-    }
-
-    public DegreeFunction degreeFunction(){
-        return degreeFunction;
-    }
+    static DegreeCentralityResult EMPTY = new DegreeCentralityResult(0, v -> 0);
 
     @Override
     public NodePropertyValues nodePropertyValues() {

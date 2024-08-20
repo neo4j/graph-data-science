@@ -21,9 +21,9 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.GraphSageEmbeddingsGenerator;
 import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
@@ -86,6 +86,6 @@ public class GraphSage extends Algorithm<GraphSageResult> {
             graph,
             features
         );
-        return GraphSageResult.of(embeddings);
+        return new GraphSageResult(embeddings);
     }
 }

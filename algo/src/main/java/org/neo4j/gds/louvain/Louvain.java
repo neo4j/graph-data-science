@@ -147,7 +147,7 @@ public final class Louvain extends Algorithm<LouvainResult> {
             resizeResultArrays();
         }
         progressTracker.endSubTask();
-        return LouvainResult.of(
+        return new LouvainResult(
             dendrogramManager.getCurrent(),
             levels(),
             dendrogramManager,

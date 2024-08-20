@@ -66,7 +66,7 @@ public class LouvainResultBuilderForMutateMode implements ResultBuilder<LouvainM
             configuration,
             statisticsComputationInstructions,
             nodePropertyValues.nodeCount(),
-            louvainResult::getCommunity
+            louvainResult::community
         );
 
         return LouvainMutateResult.create(

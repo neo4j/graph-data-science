@@ -70,7 +70,7 @@ class LouvainWriteStep implements MutateOrWriteStep<LouvainResult, NodePropertie
     private NodePropertyValues constructNodePropertyValues(GraphStore graphStore, LouvainResult result) {
         if (configuration.includeIntermediateCommunities())
             return CommunityCompanion.createIntermediateCommunitiesNodePropertyValues(
-                result::getIntermediateCommunities,
+                result::intermediateCommunities,
                 result.size()
             );
 

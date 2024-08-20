@@ -19,33 +19,25 @@
  */
 package org.neo4j.gds.leiden;
 
-import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 
 import java.util.function.LongUnaryOperator;
 
-@ValueClass
 @SuppressWarnings("immutables:subtype")
-public interface LeidenResult {
+public record LeidenResult(
+    HugeLongArray communities,
+    int ranLevels,
+    boolean didConverge,
+    @Nullable LeidenDendrogramManager dendrogramManager,
+    double[] modularities,
+    double modularity
+){
 
-    HugeLongArray communities();
+    public long[] intermediateCommunities(long nodeId) {
 
-    int ranLevels();
-
-    boolean didConverge();
-
-    @Nullable LeidenDendrogramManager dendrogramManager();
-
-    double[] modularities();
-
-    double modularity();
-
-    default long[] getIntermediateCommunities(long nodeId) {
-
-        if (dendrogramManager() != null) {
-            var dendrograms = dendrogramManager().getAllDendrograms();
+        if (dendrogramManager != null) {
+            var dendrograms = dendrogramManager.getAllDendrograms();
             int levels = ranLevels();
             long[] communities = new long[levels];
             for (int i = 0; i < levels; i++) {
@@ -54,32 +46,13 @@ public interface LeidenResult {
             return communities;
 
         } else {
-            return new long[]{communities().get(nodeId)};
+            return new long[]{communities.get(nodeId)};
         }
 
     }
 
-    @Value.Derived
-    default LongUnaryOperator communitiesFunction() {
-        return communities()::get;
-    }
-
-    static LeidenResult of(
-        HugeLongArray communities,
-        int ranLevels,
-        boolean didConverge,
-        @Nullable LeidenDendrogramManager dendrogramManager,
-        double[] modularities,
-        double modularity
-    ) {
-        return ImmutableLeidenResult.of(
-            communities,
-            ranLevels,
-            didConverge,
-            dendrogramManager,
-            modularities,
-            modularity
-        );
+    public  LongUnaryOperator communitiesFunction() {
+        return communities::get;
     }
 
 }

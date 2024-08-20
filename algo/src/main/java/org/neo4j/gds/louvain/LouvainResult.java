@@ -19,31 +19,22 @@
  */
 package org.neo4j.gds.louvain;
 
-import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 
-import java.util.function.LongUnaryOperator;
-
-@ValueClass
 @SuppressWarnings("immutables:subtype")
-public interface LouvainResult {
+public record LouvainResult(
+        HugeLongArray communities,
+        int ranLevels,
+        @Nullable LouvainDendrogramManager dendrogramManager,
+        double[] modularities,
+        double modularity
+    ){
 
-    HugeLongArray communities();
+    public  long[] intermediateCommunities(long nodeId) {
 
-    int ranLevels();
-
-     LouvainDendrogramManager dendrogramManager();
-
-    double[] modularities();
-
-    double modularity();
-
-    default long[] getIntermediateCommunities(long nodeId) {
-
-        if (dendrogramManager() != null) {
-            var dendrograms = dendrogramManager().getAllDendrograms();
+        if (dendrogramManager!= null) {
+            var dendrograms = dendrogramManager.getAllDendrograms();
             int levels = ranLevels();
             long[] communities = new long[levels];
             for (int i = 0; i < levels; i++) {
@@ -52,38 +43,17 @@ public interface LouvainResult {
             return communities;
 
         } else {
-            return new long[]{communities().get(nodeId)};
+            return new long[]{communities.get(nodeId)};
         }
 
     }
 
-   default long getCommunity(long node){
-        return communities().get(node);
-    }
-    @Value.Derived
-    default LongUnaryOperator communitiesFunction() {
-        return communities()::get;
+    public long community(long node){
+        return communities.get(node);
     }
 
-    @Value.Derived
-    default long size() {
-        return communities().size();
-    }
-
-    static LouvainResult of(
-        HugeLongArray communities,
-        int ranLevels,
-        @Nullable LouvainDendrogramManager dendrogramManager,
-        double[] modularities,
-        double modularity
-    ) {
-        return ImmutableLouvainResult.of(
-            communities,
-            ranLevels,
-            dendrogramManager,
-            modularities,
-            modularity
-        );
+    public long size() {
+        return communities.size();
     }
 
 }

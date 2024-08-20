@@ -26,13 +26,9 @@ import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 
 import java.util.function.LongToDoubleFunction;
 
-public class BetwennessCentralityResult  implements CentralityAlgorithmResult {
+public record BetwennessCentralityResult(HugeAtomicDoubleArray centralities) implements CentralityAlgorithmResult{
 
-   private final HugeAtomicDoubleArray centralities;
 
-   BetwennessCentralityResult(HugeAtomicDoubleArray centralities){
-       this.centralities=centralities;
-   }
     @Override
     public NodePropertyValues nodePropertyValues() {
         return NodePropertyValuesAdapter.adapt(centralities);
@@ -43,7 +39,4 @@ public class BetwennessCentralityResult  implements CentralityAlgorithmResult {
         return centralities::get;
     }
 
-    public HugeAtomicDoubleArray centralities(){
-       return centralities;
-    }
 }

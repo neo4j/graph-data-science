@@ -19,24 +19,9 @@
  */
 package org.neo4j.gds.approxmaxkcut;
 
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.collections.ha.HugeByteArray;
 
-@ValueClass
-public interface ApproxMaxKCutResult {
-    // Value at index `i` is the idx of the community to which node with id `i` belongs.
-    HugeByteArray candidateSolution();
-
-    double cutCost();
-
-    static ApproxMaxKCutResult of(
+public record ApproxMaxKCutResult(
         HugeByteArray candidateSolution,
         double cutCost
-    ) {
-        return ImmutableApproxMaxKCutResult
-            .builder()
-            .candidateSolution(candidateSolution)
-            .cutCost(cutCost)
-            .build();
-    }
-}
+    ) {}

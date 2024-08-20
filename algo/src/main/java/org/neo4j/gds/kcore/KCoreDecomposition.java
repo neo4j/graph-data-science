@@ -146,7 +146,7 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
         }
         progressTracker.endSubTask("KCoreDecomposition");
 
-        return ImmutableKCoreDecompositionResult.of(core, degeneracy);
+        return new KCoreDecompositionResult(core, degeneracy);
     }
 
     private List<KCoreDecompositionTask> createTasks(

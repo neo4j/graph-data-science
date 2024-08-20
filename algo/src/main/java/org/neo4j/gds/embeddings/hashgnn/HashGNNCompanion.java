@@ -22,7 +22,6 @@ package org.neo4j.gds.embeddings.hashgnn;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.BitSetIterator;
 import org.apache.commons.math3.primes.Primes;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 
 import java.util.SplittableRandom;
@@ -69,19 +68,13 @@ public final class HashGNNCompanion {
         result.argMin = argMin;
     }
 
-    @ValueClass
-    interface HashTriple {
+    record HashTriple(int a,int b,int c) {
 
         /*
         The values a, b and c represent parameters of the hash function: h(x) = x * a + b mod c,
         where 0 < a, b < c and c is a prime number.
         */
 
-        int a();
-
-        int b();
-
-        int c();
 
         static HashTriple generate(SplittableRandom rng) {
             int c = Primes.nextPrime(rng.nextInt(1, Integer.MAX_VALUE));
@@ -91,7 +84,7 @@ public final class HashGNNCompanion {
         static HashTriple generate(SplittableRandom rng, int c) {
             int a = rng.nextInt(1, c);
             int b = rng.nextInt(1, c);
-            return ImmutableHashTriple.of(a, b, c);
+            return new HashTriple(a, b, c);
         }
 
         static int[] computeHashesFromTriple(int embeddingDimension, HashTriple hashTriple) {

@@ -19,14 +19,9 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 
-@ValueClass
-public interface GraphSageResult {
-    HugeObjectArray<double[]> embeddings();
-
-    static GraphSageResult of(HugeObjectArray<double[]> embeddings) {
-        return ImmutableGraphSageResult.of(embeddings);
-    }
+public record GraphSageResult(
+    HugeObjectArray<double[]> embeddings)
+    {
 }
