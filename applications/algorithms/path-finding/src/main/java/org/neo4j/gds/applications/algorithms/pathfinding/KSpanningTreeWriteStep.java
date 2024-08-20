@@ -69,7 +69,7 @@ class KSpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree, Void> {
             requestScopedDependencies.getTaskRegistryFactory()
         );
 
-        var nodePropertyExporter = writeContext.getNodePropertyExporterBuilder()
+        var nodePropertyExporter = writeContext.nodePropertyExporterBuilder()
             .withIdMap(graph)
             .withTerminationFlag(requestScopedDependencies.getTerminationFlag())
             .withProgressTracker(progressTracker)

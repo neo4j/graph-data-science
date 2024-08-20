@@ -55,7 +55,7 @@ public class WriteRelationshipService {
             writeRelationshipType,
             writeProperty,
             requestScopedDependencies.getTaskRegistryFactory(),
-            writeContext.getRelationshipExporterBuilder(),
+            writeContext.relationshipExporterBuilder(),
             graph,
             rootIdMap,
             log,
