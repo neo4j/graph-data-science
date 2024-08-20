@@ -97,7 +97,7 @@ class BellmanFordWriteStep implements MutateOrWriteStep<BellmanFordResult, Relat
             requestScopedDependencies.getTaskRegistryFactory()
         );
 
-        var exporter = writeContext.getRelationshipStreamExporterBuilder()
+        var exporter = writeContext.relationshipStreamExporterBuilder()
             .withIdMappingOperator(graph::toOriginalNodeId)
             .withRelationships(relationshipStream)
             .withTerminationFlag(requestScopedDependencies.getTerminationFlag())

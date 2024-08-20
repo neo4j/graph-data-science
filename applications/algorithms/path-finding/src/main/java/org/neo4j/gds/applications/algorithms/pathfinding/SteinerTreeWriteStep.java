@@ -68,7 +68,7 @@ class SteinerTreeWriteStep implements MutateOrWriteStep<SteinerTreeResult, Relat
         );
         var spanningGraph = new SpanningGraph(graph, spanningTree);
 
-        var relationshipExporter = writeContext.getRelationshipExporterBuilder()
+        var relationshipExporter = writeContext.relationshipExporterBuilder()
             .withGraph(spanningGraph)
             .withIdMappingOperator(spanningGraph::toOriginalNodeId)
             .withTerminationFlag(requestScopedDependencies.getTerminationFlag())

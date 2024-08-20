@@ -70,7 +70,7 @@ class SpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree, Relations
             requestScopedDependencies.getTaskRegistryFactory()
         );
 
-        var relationshipExporter = writeContext.getRelationshipExporterBuilder()
+        var relationshipExporter = writeContext.relationshipExporterBuilder()
             .withGraph(spanningGraph)
             .withIdMappingOperator(spanningGraph::toOriginalNodeId)
             .withTerminationFlag(requestScopedDependencies.getTerminationFlag())

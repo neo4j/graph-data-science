@@ -518,7 +518,7 @@ public class GraphCatalogProcedureFacade {
         var result = catalog().writeNodeProperties(
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId(),
-            writeContext.getNodePropertyExporterBuilder(),
+            writeContext.nodePropertyExporterBuilder(),
             requestScopedDependencies.getTaskRegistryFactory(),
             requestScopedDependencies.getTerminationFlag(),
             requestScopedDependencies.getUserLogRegistryFactory(),
@@ -540,7 +540,7 @@ public class GraphCatalogProcedureFacade {
         var result = catalog().writeRelationshipProperties(
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId(),
-            writeContext.getRelationshipPropertiesExporterBuilder(),
+            writeContext.relationshipPropertiesExporterBuilder(),
             requestScopedDependencies.getTerminationFlag(),
             graphName,
             relationshipType,
@@ -559,7 +559,7 @@ public class GraphCatalogProcedureFacade {
         var result = catalog().writeNodeLabel(
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId(),
-            writeContext.getNodeLabelExporterBuilder(),
+            writeContext.nodeLabelExporterBuilder(),
             requestScopedDependencies.getTerminationFlag(),
             graphName,
             nodeLabel,
@@ -578,7 +578,7 @@ public class GraphCatalogProcedureFacade {
         var result = catalog().writeRelationships(
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId(),
-            writeContext.getRelationshipExporterBuilder(),
+            writeContext.relationshipExporterBuilder(),
             requestScopedDependencies.getTaskRegistryFactory(),
             requestScopedDependencies.getTerminationFlag(),
             requestScopedDependencies.getUserLogRegistryFactory(),

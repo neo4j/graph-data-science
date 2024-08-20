@@ -33,27 +33,12 @@ import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
  * Not included in {@link org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies},
  * because we could want to isolate the write code paths, since they are all Neo4j Procedures specific.
  */
-public final class WriteContext {
-    private final NodeLabelExporterBuilder nodeLabelExporterBuilder;
-    private final NodePropertyExporterBuilder nodePropertyExporterBuilder;
-    private final RelationshipExporterBuilder relationshipExporterBuilder;
-    private final RelationshipPropertiesExporterBuilder relationshipPropertiesExporterBuilder;
-    private final RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
-
-    private WriteContext(
-        NodeLabelExporterBuilder nodeLabelExporterBuilder,
-        NodePropertyExporterBuilder nodePropertyExporterBuilder,
-        RelationshipExporterBuilder relationshipExporterBuilder,
-        RelationshipPropertiesExporterBuilder relationshipPropertiesExporterBuilder,
-        RelationshipStreamExporterBuilder relationshipStreamExporterBuilder
-    ) {
-
-        this.nodeLabelExporterBuilder = nodeLabelExporterBuilder;
-        this.nodePropertyExporterBuilder = nodePropertyExporterBuilder;
-        this.relationshipExporterBuilder = relationshipExporterBuilder;
-        this.relationshipPropertiesExporterBuilder = relationshipPropertiesExporterBuilder;
-        this.relationshipStreamExporterBuilder = relationshipStreamExporterBuilder;
-    }
+public record WriteContext(
+    NodeLabelExporterBuilder nodeLabelExporterBuilder,
+    NodePropertyExporterBuilder nodePropertyExporterBuilder,
+    RelationshipExporterBuilder relationshipExporterBuilder,
+    RelationshipPropertiesExporterBuilder relationshipPropertiesExporterBuilder,
+    RelationshipStreamExporterBuilder relationshipStreamExporterBuilder) {
 
     public static WriteContext create(ExportBuildersProvider exportBuildersProvider, ExporterContext exporterContext) {
         var nodeLabelExporterBuilder = exportBuildersProvider.nodeLabelExporterBuilder(exporterContext);
@@ -70,27 +55,6 @@ public final class WriteContext {
             relationshipPropertiesExporterBuilder,
             relationshipStreamExporterBuilder
         );
-    }
-
-    public NodeLabelExporterBuilder getNodeLabelExporterBuilder() {
-        return nodeLabelExporterBuilder;
-    }
-
-    public NodePropertyExporterBuilder getNodePropertyExporterBuilder() {
-        return nodePropertyExporterBuilder;
-    }
-
-
-    public RelationshipExporterBuilder getRelationshipExporterBuilder() {
-        return relationshipExporterBuilder;
-    }
-
-    public RelationshipPropertiesExporterBuilder getRelationshipPropertiesExporterBuilder() {
-        return relationshipPropertiesExporterBuilder;
-    }
-
-    public RelationshipStreamExporterBuilder getRelationshipStreamExporterBuilder() {
-        return relationshipStreamExporterBuilder;
     }
 
     public static WriteContextBuilder builder() {
@@ -139,4 +103,5 @@ public final class WriteContext {
             );
         }
     }
+
 }

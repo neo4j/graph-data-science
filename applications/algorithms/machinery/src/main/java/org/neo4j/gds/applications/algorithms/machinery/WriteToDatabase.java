@@ -52,7 +52,7 @@ public class WriteToDatabase {
         NodePropertyValues nodePropertyValues
     ) {
         return Neo4jDatabaseNodePropertyWriter.writeNodeProperty(
-            writeContext.getNodePropertyExporterBuilder(),
+            writeContext.nodePropertyExporterBuilder(),
             requestScopedDependencies.getTaskRegistryFactory(),
             graph,
             graphStore,

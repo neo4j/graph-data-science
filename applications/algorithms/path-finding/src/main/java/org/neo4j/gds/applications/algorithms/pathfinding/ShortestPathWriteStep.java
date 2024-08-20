@@ -119,7 +119,7 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
                 .orElse(relationshipStream);
 
             // configure the exporter
-            var relationshipStreamExporter = writeContext.getRelationshipStreamExporterBuilder()
+            var relationshipStreamExporter = writeContext.relationshipStreamExporterBuilder()
                 .withResultStore(maybeResultStore)
                 .withIdMappingOperator(graph::toOriginalNodeId)
                 .withProgressTracker(progressTracker)
