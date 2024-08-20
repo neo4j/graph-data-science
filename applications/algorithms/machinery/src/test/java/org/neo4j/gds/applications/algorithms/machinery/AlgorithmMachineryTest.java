@@ -20,6 +20,7 @@
 package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,15 +28,21 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 class AlgorithmMachineryTest {
+
     @Test
     void shouldRunAlgorithm() {
         var algorithmMachinery = new AlgorithmMachinery();
 
         var progressTracker = mock(ProgressTracker.class);
+
+        var algo = mock(Algorithm.class);
+        when(algo.compute()).thenReturn("Hello, world!");
+
         var result = algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            new RegurgitatingAlgorithm("Hello, world!"),
+            algo,
             progressTracker,
             false
         );
@@ -50,8 +57,12 @@ class AlgorithmMachineryTest {
         var algorithmMachinery = new AlgorithmMachinery();
 
         var progressTracker = mock(ProgressTracker.class);
+
+        var algo = mock(Algorithm.class);
+        when(algo.compute()).thenReturn("Dodgers win world series!");
+
         var result = algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            new RegurgitatingAlgorithm("Dodgers win world series!"),
+            algo,
             progressTracker,
             true
         );
@@ -67,9 +78,13 @@ class AlgorithmMachineryTest {
 
         var progressTracker = mock(ProgressTracker.class);
         var exception = new RuntimeException("Whoops!");
+
+        var algo = mock(Algorithm.class);
+        when(algo.compute()).thenThrow(exception);
+
         try {
             algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-                new FailingAlgorithm(exception),
+                algo,
                 progressTracker,
                 false
             );
@@ -87,9 +102,13 @@ class AlgorithmMachineryTest {
 
         var progressTracker = mock(ProgressTracker.class);
         var exception = new RuntimeException("Yeah, no...");
+
+        var algo = mock(Algorithm.class);
+        when(algo.compute()).thenThrow(exception);
+
         try {
             algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-                new FailingAlgorithm(exception),
+                algo,
                 progressTracker,
                 true
             );

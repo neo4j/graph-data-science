@@ -19,10 +19,4 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 
-class ExampleResult {
-    String foo;
-
-    int bar;
-
-    boolean baz;
-}
+class ExampleResult {}
