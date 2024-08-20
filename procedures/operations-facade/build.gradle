@@ -23,6 +23,7 @@ dependencies {
     implementation project(':miscellaneous-algorithms')
     implementation project(':model-catalog-applications')
     implementation project(':operations-applications')
+    implementation project(':neo4j-api')
     implementation project(':node-embedding-algorithms')
     implementation project(':path-finding-algorithms')
     implementation project(':progress-tracking')

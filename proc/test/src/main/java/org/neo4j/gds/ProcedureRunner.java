@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
@@ -178,29 +177,27 @@ public final class ProcedureRunner {
 
         return GraphDataScienceProcedures.create(
             gdsLog,
-            DefaultsConfiguration.Instance,
-            null,
-            LimitsConfiguration.Instance,
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty(),
-            graphStoreCatalogService,
-            MemoryGuard.DISABLED,
             MetricsFacade.PASSTHROUGH_METRICS_FACADE.algorithmMetrics(),
-            MetricsFacade.PASSTHROUGH_METRICS_FACADE.projectionMetrics(),
-            AlgorithmMetaDataSetter.EMPTY,
-            kernelTransaction,
-            requestScopedDependencies,
-            procedureContext,
-            new ProcedureCallContextReturnColumns(procedureCallContext),
-            catalogProcedureFacadeFactory,
-            graphDatabaseService,
-            procedureTransaction,
             algorithmFacadeBuilderFactory,
+            DefaultsConfiguration.Instance,
             DeprecatedProceduresMetricService.PASSTHROUGH,
+            null,
+            catalogProcedureFacadeFactory,
+            graphStoreCatalogService,
+            LimitsConfiguration.Instance,
+            MemoryGuard.DISABLED,
             modelCatalog,
             null,
-            procedureTransaction
+            MetricsFacade.PASSTHROUGH_METRICS_FACADE.projectionMetrics(),
+            graphDatabaseService,
+            kernelTransaction,
+            new ProcedureCallContextReturnColumns(procedureCallContext),
+            requestScopedDependencies,
+            procedureTransaction,
+            procedureContext,
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty()
         );
     }
 }
