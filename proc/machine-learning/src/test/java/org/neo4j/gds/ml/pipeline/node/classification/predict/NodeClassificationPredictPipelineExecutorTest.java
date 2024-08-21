@@ -439,6 +439,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             null,
             null,
             null,
+            null,
             requestScopedDependencies,
             WriteContext.builder().build(),
             null,

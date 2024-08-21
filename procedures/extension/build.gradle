@@ -34,6 +34,7 @@ dependencies {
     implementation project(':node-embedding-algorithms')
     implementation project(':opengds-procedure-facade')
     implementation project(':open-model-catalog')
+    implementation project(':operations-applications')
     implementation project(':path-finding-algorithms')
     implementation project(':proc-catalog')
     implementation project(':proc-community')

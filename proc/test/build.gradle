@@ -38,6 +38,7 @@ dependencies {
     implementation project(':opengds-procedure-facade')
     implementation project(':open-licensing')
     implementation project(':open-model-catalog')
+    implementation project(':operations-applications')
     implementation project(':pregel')
     implementation project(':procedure-integration')
     implementation project(':progress-tracking')

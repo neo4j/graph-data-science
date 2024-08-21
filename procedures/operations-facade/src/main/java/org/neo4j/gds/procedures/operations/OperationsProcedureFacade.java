@@ -50,6 +50,14 @@ public class OperationsProcedureFacade {
         return applicationsFacade.operations().listProgress(jobId, resultRenderer);
     }
 
+    public void setPagesPerThread(long pagesPerThread) {
+        applicationsFacade.operations().setPagesPerThread(pagesPerThread);
+    }
+
+    public void setUseUncompressedAdjacencyList(boolean useUncompressedAdjacencyList) {
+        applicationsFacade.operations().setUseUncompressedAdjacencyList(useUncompressedAdjacencyList);
+    }
+
     private Stream<ProgressResult> summaryView() {
         var results = applicationsFacade.operations().listProgress();
 

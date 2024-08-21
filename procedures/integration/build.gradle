@@ -37,6 +37,7 @@ dependencies {
     implementation project(':neo4j-settings')
     implementation project(':node-embedding-algorithms')
     implementation project(':opengds-procedure-facade')
+    implementation project(':operations-applications')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':termination')

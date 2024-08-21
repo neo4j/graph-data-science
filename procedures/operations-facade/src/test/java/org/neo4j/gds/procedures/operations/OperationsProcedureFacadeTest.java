@@ -39,6 +39,7 @@ class OperationsProcedureFacadeTest {
     void shouldQueryUserLog() {
         var userLogStore = mock(UserLogStore.class);
         var operationsApplications = OperationsApplications.create(
+            null,
             RequestScopedDependencies.builder()
                 .with(new User("current user", false))
                 .with(userLogStore)

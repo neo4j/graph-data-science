@@ -7,5 +7,7 @@ group = 'org.neo4j.gds'
 dependencies {
     implementation project(":algorithms-machinery")
     implementation project(":core")
+    implementation project(":core-utils")
     implementation project(":progress-tracking")
+    implementation project(":string-formatting")
 }

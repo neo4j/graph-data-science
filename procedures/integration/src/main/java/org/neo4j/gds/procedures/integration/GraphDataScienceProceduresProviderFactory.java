@@ -25,6 +25,7 @@ import org.neo4j.gds.applications.graphstorecatalog.ExportLocation;
 import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
+import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -64,6 +65,7 @@ final class GraphDataScienceProceduresProviderFactory {
     private final Configuration neo4jConfiguration;
     private final ExporterBuildersProviderService exporterBuildersProviderService;
     private final ExportLocation exportLocation;
+    private final FeatureTogglesRepository featureTogglesRepository;
     private final MemoryGauge memoryGauge;
     private final MetricsFacade metricsFacade;
     private final ModelCatalog modelCatalog;
@@ -77,6 +79,7 @@ final class GraphDataScienceProceduresProviderFactory {
         Configuration neo4jConfiguration,
         ExporterBuildersProviderService exporterBuildersProviderService,
         ExportLocation exportLocation,
+        FeatureTogglesRepository featureTogglesRepository,
         MemoryGauge memoryGauge,
         MetricsFacade metricsFacade,
         ModelCatalog modelCatalog,
@@ -89,6 +92,7 @@ final class GraphDataScienceProceduresProviderFactory {
         this.neo4jConfiguration = neo4jConfiguration;
         this.exporterBuildersProviderService = exporterBuildersProviderService;
         this.exportLocation = exportLocation;
+        this.featureTogglesRepository = featureTogglesRepository;
         this.memoryGauge = memoryGauge;
         this.metricsFacade = metricsFacade;
         this.modelCatalog = modelCatalog;
@@ -122,6 +126,7 @@ final class GraphDataScienceProceduresProviderFactory {
             exporterBuildersProviderService,
             exportLocation,
             catalogProcedureFacadeFactory,
+            featureTogglesRepository,
             graphStoreCatalogService,
             limitsConfiguration,
             memoryGuard,

@@ -25,6 +25,7 @@ import org.neo4j.gds.applications.graphstorecatalog.ExportLocation;
 import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
+import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.GcListenerExtension;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
@@ -108,6 +109,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
         Configuration neo4jConfiguration,
         ExporterBuildersProviderService exporterBuildersProviderService,
         ExportLocation exportLocation,
+        FeatureTogglesRepository featureTogglesRepository,
         MetricsFacade metricsFacade,
         ModelCatalog modelCatalog,
         ModelRepository modelRepository,
@@ -153,6 +155,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
             neo4jConfiguration,
             exporterBuildersProviderService,
             exportLocation,
+            featureTogglesRepository,
             memoryGauge,
             metricsFacade,
             modelCatalog,

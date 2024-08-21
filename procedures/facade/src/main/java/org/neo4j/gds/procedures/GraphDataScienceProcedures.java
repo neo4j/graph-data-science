@@ -29,6 +29,7 @@ import org.neo4j.gds.applications.graphstorecatalog.ExportLocation;
 import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
+import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -90,6 +91,7 @@ public class GraphDataScienceProcedures {
         DeprecatedProceduresMetricService deprecatedProceduresMetricService,
         ExportLocation exportLocation,
         GraphCatalogProcedureFacadeFactory graphCatalogProcedureFacadeFactory,
+        FeatureTogglesRepository featureTogglesRepository,
         GraphStoreCatalogService graphStoreCatalogService,
         LimitsConfiguration limitsConfiguration,
         MemoryGuard memoryGuard,
@@ -112,6 +114,7 @@ public class GraphDataScienceProcedures {
             algorithmProcessingTemplateDecorator,
             graphCatalogApplicationsDecorator,
             modelCatalogApplicationsDecorator,
+            featureTogglesRepository,
             graphStoreCatalogService,
             memoryGuard,
             algorithmMetricsService,

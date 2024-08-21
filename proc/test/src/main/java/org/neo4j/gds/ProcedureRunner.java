@@ -183,6 +183,7 @@ public final class ProcedureRunner {
             DeprecatedProceduresMetricService.PASSTHROUGH,
             null,
             catalogProcedureFacadeFactory,
+            null,
             graphStoreCatalogService,
             LimitsConfiguration.Instance,
             MemoryGuard.DISABLED,

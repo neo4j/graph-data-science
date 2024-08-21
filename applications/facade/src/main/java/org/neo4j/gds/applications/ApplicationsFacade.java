@@ -41,6 +41,7 @@ import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.DefaultModelCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
+import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
 import org.neo4j.gds.applications.operations.OperationsApplications;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -103,6 +104,7 @@ public final class ApplicationsFacade {
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
         Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
         Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator,
+        FeatureTogglesRepository featureTogglesRepository,
         GraphStoreCatalogService graphStoreCatalogService,
         MemoryGuard memoryGuard,
         AlgorithmMetricsService algorithmMetricsService,
@@ -197,7 +199,7 @@ public final class ApplicationsFacade {
             modelRepository
         );
 
-        var operationsApplications = OperationsApplications.create(requestScopedDependencies);
+        var operationsApplications = OperationsApplications.create(featureTogglesRepository, requestScopedDependencies);
 
         var pathFindingApplications = PathFindingApplications.create(
             log,

@@ -19,7 +19,10 @@
  */
 package org.neo4j.gds;
 
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.operations.FeatureState;
 import org.neo4j.gds.utils.GdsFeatureToggles;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -37,25 +40,21 @@ import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
  * toggle procedure will be excluded from gds.list
  */
 public final class FeatureToggleProc {
+    @Context
+    public GraphDataScienceProcedures facade;
 
     @Internal
     @Procedure("gds.features.pagesPerThread")
     @Description("Toggle how many pages per thread are being used by the loader.")
     public void pagesPerThread(@Name(value = "pagesPerThread") long pagesPerThread) {
-        if (pagesPerThread <= 0 || pagesPerThread > Integer.MAX_VALUE) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Invalid value for pagesPerThread: %d, must be a non-zero, positive integer",
-                pagesPerThread
-            ));
-        }
-        GdsFeatureToggles.PAGES_PER_THREAD.set((int) pagesPerThread);
+        facade.operations().setPagesPerThread(pagesPerThread);
     }
 
     @Internal
     @Procedure("gds.features.useUncompressedAdjacencyList")
     @Description("Toggle whether the adjacency list should be stored uncompressed during graph creation.")
     public void useUncompressedAdjacencyList(@Name(value = "useUncompressedAdjacencyList") boolean useUncompressedAdjacencyList) {
-        GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.toggle(useUncompressedAdjacencyList);
+        facade.operations().setUseUncompressedAdjacencyList(useUncompressedAdjacencyList);
     }
 
     @Internal
@@ -180,15 +179,6 @@ public final class FeatureToggleProc {
     public Stream<FeatureState> resetEnableAdjacencyCompressionMemoryTracking() {
         GdsFeatureToggles.ENABLE_ADJACENCY_COMPRESSION_MEMORY_TRACKING.reset();
         return Stream.of(new FeatureState(GdsFeatureToggles.ENABLE_ADJACENCY_COMPRESSION_MEMORY_TRACKING.isEnabled()));
-    }
-
-    @SuppressWarnings("unused")
-    public static final class FeatureState {
-        public final boolean enabled;
-
-        public FeatureState(boolean enabled) {
-            this.enabled = enabled;
-        }
     }
 
     @SuppressWarnings("unused")

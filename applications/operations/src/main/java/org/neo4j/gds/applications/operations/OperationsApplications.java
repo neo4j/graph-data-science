@@ -26,15 +26,25 @@ import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 public final class OperationsApplications {
+    private final FeatureTogglesRepository featureTogglesRepository;
     private final RequestScopedDependencies requestScopedDependencies;
 
-    private OperationsApplications(RequestScopedDependencies requestScopedDependencies) {
+    private OperationsApplications(
+        FeatureTogglesRepository featureTogglesRepository,
+        RequestScopedDependencies requestScopedDependencies
+    ) {
+        this.featureTogglesRepository = featureTogglesRepository;
         this.requestScopedDependencies = requestScopedDependencies;
     }
 
-    public static OperationsApplications create(RequestScopedDependencies requestScopedDependencies) {
-        return new OperationsApplications(requestScopedDependencies);
+    public static OperationsApplications create(
+        FeatureTogglesRepository featureTogglesRepository,
+        RequestScopedDependencies requestScopedDependencies
+    ) {
+        return new OperationsApplications(featureTogglesRepository, requestScopedDependencies);
     }
 
     /**
@@ -75,5 +85,20 @@ public final class OperationsApplications {
         var userLogStore = requestScopedDependencies.getUserLogStore();
 
         return userLogStore.query(user.getUsername());
+    }
+
+    public void setPagesPerThread(long pagesPerThread) {
+        if (pagesPerThread <= 0 || pagesPerThread > Integer.MAX_VALUE) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Invalid value for pagesPerThread: %d, must be a non-zero, positive integer",
+                pagesPerThread
+            ));
+        }
+
+        featureTogglesRepository.setPagesPerThread((int) pagesPerThread);
+    }
+
+    public void setUseUncompressedAdjacencyList(boolean useUncompressedAdjacencyList) {
+        featureTogglesRepository.setUseUncompressedAdjacencyList(useUncompressedAdjacencyList);
     }
 }
