@@ -21,18 +21,17 @@ package org.neo4j.gds.core.huge;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.BaseTest;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.api.Graph;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @GdlExtension
-class CompositeAdjacencyCursorTest extends BaseTest {
+class CompositeAdjacencyCursorTest {
 
     @GdlGraph
     private static final String DB_CYPHER =
