@@ -311,6 +311,8 @@ project(':open-write-services').projectDir = file('open-write-services')
 include('defaults-and-limits-configuration')
 project(':defaults-and-limits-configuration').projectDir = file('defaults-and-limits-configuration')
 
+include('neo4j-values')
+project(':neo4j-values').projectDir = file('neo4j-values')
 
 
 include('neo4j-kernel-adapter-5.17')

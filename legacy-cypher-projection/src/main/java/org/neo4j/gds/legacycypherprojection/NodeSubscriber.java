@@ -20,7 +20,7 @@
 package org.neo4j.gds.legacycypherprojection;
 
 import org.neo4j.gds.core.loading.ValueConverter;
-import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
+import org.neo4j.gds.core.loading.construction.CypherNodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.graphdb.QueryStatistics;
@@ -135,7 +135,7 @@ class NodeSubscriber extends ErrorCachingQuerySubscriber {
         } else if (labels.isEmpty()) {
             nodesBuilder.addNode(neoId, properties);
         } else {
-            nodesBuilder.addNode(neoId, properties, NodeLabelTokens.of(labels));
+            nodesBuilder.addNode(neoId, properties, CypherNodeLabelTokens.of(labels));
         }
         rows++;
         progressTracker.logProgress();

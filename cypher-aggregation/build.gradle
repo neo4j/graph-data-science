@@ -25,6 +25,7 @@ dependencies {
     implementation project(':graph-schema-api')
     implementation project(':metrics-api')
     implementation project(':neo4j-kernel-adapter-api')
+    implementation project(':neo4j-values')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':triplet-graph-builder')
