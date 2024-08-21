@@ -63,4 +63,7 @@ dependencies {
     testImplementation project(":core-utils")
     testImplementation project(":neo4j-api")
     testImplementation project(":test-utils")
+
+    integrationTestAnnotationProcessor project(':annotations')
+    integrationTestAnnotationProcessor project(':config-generator')
 }
