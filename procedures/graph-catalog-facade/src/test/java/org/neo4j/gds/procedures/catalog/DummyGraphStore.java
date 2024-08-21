@@ -60,9 +60,11 @@ import java.util.Set;
  * Feel free to evolve it if you find it useful.
  */
 class DummyGraphStore implements GraphStore {
+    private final ZonedDateTime creationTime;
     private final ZonedDateTime modificationTime;
 
-    DummyGraphStore(ZonedDateTime modificationTime) {
+    DummyGraphStore(ZonedDateTime creationTime, ZonedDateTime modificationTime) {
+        this.creationTime = creationTime;
         this.modificationTime = modificationTime;
     }
 
@@ -185,6 +187,11 @@ class DummyGraphStore implements GraphStore {
                 throw new UnsupportedOperationException("TODO");
             }
         };
+    }
+
+    @Override
+    public ZonedDateTime creationTime() {
+        return creationTime;
     }
 
     @Override

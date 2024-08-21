@@ -123,7 +123,7 @@ public class GraphInfo {
             sizeInBytes,
             graphStore.nodeCount(),
             graphStore.relationshipCount(),
-            graphProjectConfig.creationTime(),
+            graphStore.creationTime(),
             graphStore.modificationTime(),
             graphStore.schema().toMapOld(),
             graphStore.schema().toMap()

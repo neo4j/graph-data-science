@@ -49,6 +49,8 @@ public interface GraphStore {
 
     GraphSchema schema();
 
+    ZonedDateTime creationTime();
+
     ZonedDateTime modificationTime();
 
     Capabilities capabilities();

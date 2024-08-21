@@ -94,6 +94,7 @@ public final class CSRGraphStore implements GraphStore {
 
     private NodePropertyStore nodeProperties;
 
+    private final ZonedDateTime creationTime;
     private ZonedDateTime modificationTime;
 
     private CSRGraphStore(
@@ -120,7 +121,8 @@ public final class CSRGraphStore implements GraphStore {
         this.relationships = new HashMap<>(relationships);
 
         this.concurrency = concurrency;
-        this.modificationTime = TimeUtil.now();
+        this.creationTime = TimeUtil.now();
+        this.modificationTime = this.creationTime;
     }
 
     @Builder.Factory
@@ -153,6 +155,11 @@ public final class CSRGraphStore implements GraphStore {
     @Override
     public GraphSchema schema() {
         return schema;
+    }
+
+    @Override
+    public ZonedDateTime creationTime() {
+        return creationTime;
     }
 
     @Override

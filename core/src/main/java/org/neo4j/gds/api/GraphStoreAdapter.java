@@ -60,6 +60,11 @@ public abstract class GraphStoreAdapter implements GraphStore {
     }
 
     @Override
+    public ZonedDateTime creationTime() {
+        return graphStore.creationTime();
+    }
+
+    @Override
     public ZonedDateTime modificationTime() {
         return graphStore.modificationTime();
     }

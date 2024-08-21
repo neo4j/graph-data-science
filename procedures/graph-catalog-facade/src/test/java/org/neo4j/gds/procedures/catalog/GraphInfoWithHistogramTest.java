@@ -42,14 +42,12 @@ class GraphInfoWithHistogramTest {
             "REL",
             CypherMapWrapper.create(
                 Map.of(
-                    "creationTime",
-                    creationTime,
                     "jobId",
                     "some job"
                 )
             )
         );
-        var graphStore = new DummyGraphStore(modificationTime);
+        var graphStore = new DummyGraphStore(creationTime, modificationTime);
         Map<String, Object> degreeDistribution = Map.of(
             "min",
             5L,
@@ -80,8 +78,6 @@ class GraphInfoWithHistogramTest {
         assertThat(graphInfoWithHistogram.creationTime).isEqualTo(creationTime);
         assertThat(graphInfoWithHistogram.configuration).containsExactlyInAnyOrderEntriesOf(
             Map.of(
-                "creationTime",
-                creationTime,
                 "jobId",
                 "some job",
                 "logProgress",

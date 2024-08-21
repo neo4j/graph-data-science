@@ -33,8 +33,6 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
-import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -42,7 +40,6 @@ import java.util.stream.Stream;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.fail;
 
 class CatalogConfigurationServiceTest {
@@ -62,7 +59,6 @@ class CatalogConfigurationServiceTest {
             emptyMap()
         );
 
-        assertThat(configuration.creationTime()).isCloseTo(ZonedDateTime.now(), within(2, ChronoUnit.SECONDS));
         assertThat(configuration.graphName()).isEqualTo("some graph");
         assertThat(configuration.nodeCount()).isEqualTo(-1);
         assertThat(configuration.nodeProjections().projections()).containsExactlyInAnyOrderEntriesOf(Map.of(
@@ -111,7 +107,6 @@ class CatalogConfigurationServiceTest {
             emptyMap()
         );
 
-        assertThat(configuration.creationTime()).isCloseTo(ZonedDateTime.now(), within(2, ChronoUnit.SECONDS));
         assertThat(configuration.graphName()).isEqualTo("some graph");
         assertThat(configuration.nodeCount()).isEqualTo(-1);
         assertThat(configuration.nodeQuery()).isEqualTo("some node query");

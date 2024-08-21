@@ -56,7 +56,6 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -798,8 +797,6 @@ class CypherAggregationTest extends BaseProcTest {
                 Map.of(
                     "config",
                     Map.of(
-                        "creationTime",
-                        any(ZonedDateTime.class),
                         "inverseIndexedRelationshipTypes",
                         List.of(),
                         "jobId",

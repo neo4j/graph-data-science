@@ -26,9 +26,7 @@ import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
 import org.neo4j.gds.core.StringIdentifierValidations;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.utils.TimeUtil;
 
-import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -91,10 +89,6 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
     @Configuration.Ignore
     default boolean isFictitiousLoading() {
         return nodeCount() > -1 || relationshipCount() > -1;
-    }
-
-    default ZonedDateTime creationTime() {
-        return TimeUtil.now();
     }
 
     @Configuration.Key(VALIDATE_RELATIONSHIPS_KEY)

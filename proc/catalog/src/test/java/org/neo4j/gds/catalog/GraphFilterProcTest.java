@@ -87,12 +87,11 @@ class GraphFilterProcTest extends BaseProcTest {
         // name is the name of the new subgraph and the filters expressions
         // are added.
 
-        var originalGraphProjectConfig = (GraphProjectFromStoreConfig) GraphStoreCatalog
-            .get(getUsername(), DatabaseId.of(db.databaseName()), "graph")
-            .config();
+        var graphStoreCatalogEntry = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), "graph");
+        var originalCreationTime = graphStoreCatalogEntry.graphStore().creationTime();
+        var originalGraphProjectConfig = (GraphProjectFromStoreConfig) graphStoreCatalogEntry.config();
         var expectedNodeProjection = originalGraphProjectConfig.nodeProjections().toObject();
         var expectedRelationshipProjection = originalGraphProjectConfig.relationshipProjections().toObject();
-        var originalCreationTime = originalGraphProjectConfig.creationTime();
 
         var listQuery = "CALL gds.graph.list('subgraph') " +
                         "YIELD graphName, nodeCount, relationshipCount, creationTime, configuration " +

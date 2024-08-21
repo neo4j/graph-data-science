@@ -271,6 +271,11 @@ class GraphCatalogProcedureFacadeTest {
         }
 
         @Override
+        public ZonedDateTime creationTime() {
+            return ZonedDateTime.now();
+        }
+
+        @Override
         public ZonedDateTime modificationTime() {
             return ZonedDateTime.now();
         }

@@ -78,6 +78,11 @@ class StubGraphStore implements GraphStore {
     }
 
     @Override
+    public ZonedDateTime creationTime() {
+        throw new UnsupportedOperationException("TODO");
+    }
+
+    @Override
     public ZonedDateTime modificationTime() {
         throw new UnsupportedOperationException("TODO");
     }

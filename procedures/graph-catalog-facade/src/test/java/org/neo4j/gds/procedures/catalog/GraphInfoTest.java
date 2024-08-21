@@ -130,18 +130,16 @@ final class GraphInfoTest {
             "REL",
             CypherMapWrapper.create(
                 Map.of(
-                    "creationTime", creationTime,
                     "jobId", "some job"
                 )
             )
         );
-        var graphStore = new DummyGraphStore(modificationTime);
+        var graphStore = new DummyGraphStore(creationTime, modificationTime);
         var graphInfo = GraphInfo.withoutMemoryUsage(graphProjectConfig, graphStore);
 
         assertThat(graphInfo.creationTime).isEqualTo(creationTime);
         assertThat(graphInfo.configuration).containsExactlyInAnyOrderEntriesOf(
             Map.of(
-                "creationTime", creationTime,
                 "jobId", "some job",
                 "logProgress", true,
                 "nodeProjection", Map.of(
