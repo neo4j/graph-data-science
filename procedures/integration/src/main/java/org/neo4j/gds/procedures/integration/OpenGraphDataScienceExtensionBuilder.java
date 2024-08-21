@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.integration;
 
 import org.apache.commons.lang3.tuple.Triple;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.graphstorecatalog.ExportLocation;
 import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
@@ -45,11 +46,9 @@ import org.neo4j.kernel.lifecycle.LifeSupport;
 import org.neo4j.kernel.lifecycle.Lifecycle;
 
 import java.lang.management.ManagementFactory;
-import java.nio.file.Path;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * The GraphDataScience component has a certain contract,
@@ -107,7 +106,8 @@ public final class OpenGraphDataScienceExtensionBuilder {
         Log log,
         GlobalProcedures globalProcedures,
         Configuration neo4jConfiguration,
-        ExporterBuildersProviderService exporterBuildersProviderService, Supplier<Path> exportLocation,
+        ExporterBuildersProviderService exporterBuildersProviderService,
+        ExportLocation exportLocation,
         MetricsFacade metricsFacade,
         ModelCatalog modelCatalog,
         ModelRepository modelRepository,

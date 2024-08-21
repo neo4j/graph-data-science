@@ -36,6 +36,7 @@ import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicat
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingApplications;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityApplications;
 import org.neo4j.gds.applications.graphstorecatalog.DefaultGraphCatalogApplications;
+import org.neo4j.gds.applications.graphstorecatalog.ExportLocation;
 import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.DefaultModelCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
@@ -50,10 +51,8 @@ import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
-import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * This is the top level facade for GDS applications. If you are integrating GDS,
@@ -100,7 +99,7 @@ public final class ApplicationsFacade {
      */
     public static ApplicationsFacade create(
         Log log,
-        Supplier<Path> exportLocation,
+        ExportLocation exportLocation,
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
         Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
         Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator,
@@ -256,7 +255,7 @@ public final class ApplicationsFacade {
 
     private static GraphCatalogApplications createGraphCatalogApplications(
         Log log,
-        Supplier<Path> exportLocation,
+        ExportLocation exportLocation,
         GraphStoreCatalogService graphStoreCatalogService,
         ProjectionMetricsService projectionMetricsService,
         RequestScopedDependencies requestScopedDependencies,

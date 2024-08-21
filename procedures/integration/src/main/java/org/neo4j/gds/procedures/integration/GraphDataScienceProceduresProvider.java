@@ -24,6 +24,7 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTempla
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
+import org.neo4j.gds.applications.graphstorecatalog.ExportLocation;
 import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
@@ -54,10 +55,8 @@ import org.neo4j.graphdb.config.Configuration;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
-import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * We use this at request time to construct the facade that the procedures call.
@@ -78,7 +77,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
     private final DefaultsConfiguration defaultsConfiguration;
     private final DeprecatedProceduresMetricService deprecatedProceduresMetricService;
     private final ExporterBuildersProviderService exporterBuildersProviderService;
-    private final Supplier<Path> exportLocation;
+    private final ExportLocation exportLocation;
     private final GraphCatalogProcedureFacadeFactory graphCatalogProcedureFacadeFactory;
     private final GraphStoreCatalogService graphStoreCatalogService;
     private final LimitsConfiguration limitsConfiguration;
@@ -102,7 +101,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         DefaultsConfiguration defaultsConfiguration,
         DeprecatedProceduresMetricService deprecatedProceduresMetricService,
         ExporterBuildersProviderService exporterBuildersProviderService,
-        Supplier<Path> exportLocation,
+        ExportLocation exportLocation,
         GraphCatalogProcedureFacadeFactory graphCatalogProcedureFacadeFactory,
         GraphStoreCatalogService graphStoreCatalogService,
         LimitsConfiguration limitsConfiguration,

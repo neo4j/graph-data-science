@@ -36,7 +36,6 @@ import org.neo4j.graphdb.Transaction;
 
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import static org.neo4j.gds.core.io.file.GraphStoreExporterUtil.EXPORT_DIR;
 import static org.neo4j.gds.core.io.file.GraphStoreExporterUtil.exportPath;
@@ -47,14 +46,14 @@ class ExportToCsvApplication {
     private final GraphDatabaseService graphDatabaseService;
     private final Transaction procedureTransaction;
 
-    private final Supplier<Path> exportLocation;
+    private final ExportLocation exportLocation;
     private final TaskRegistryFactory taskRegistryFactory;
 
     ExportToCsvApplication(
         Log log,
         GraphDatabaseService graphDatabaseService,
         Transaction procedureTransaction,
-        Supplier<Path> exportLocation,
+        ExportLocation exportLocation,
         TaskRegistryFactory taskRegistryFactory
     ) {
         this.log = log;
@@ -73,7 +72,7 @@ class ExportToCsvApplication {
             configuration.batchSize()
         );
 
-        var exportLocation = this.exportLocation.get();
+        var exportLocation = this.exportLocation.getAcceptingError();
         var exportDirectory = readyExportDirectory(exportParameters.exportName(), exportLocation);
 
         var result = GraphStoreExporterUtil.export(

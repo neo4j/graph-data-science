@@ -25,6 +25,7 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTempla
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
+import org.neo4j.gds.applications.graphstorecatalog.ExportLocation;
 import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
@@ -46,10 +47,8 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.api.KernelTransaction;
 
-import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class GraphDataScienceProcedures {
     private final Log log;
@@ -89,7 +88,7 @@ public class GraphDataScienceProcedures {
         AlgorithmProcedureFacadeBuilderFactory algorithmProcedureFacadeBuilderFactory,
         DefaultsConfiguration defaultsConfiguration,
         DeprecatedProceduresMetricService deprecatedProceduresMetricService,
-        Supplier<Path> exportLocation,
+        ExportLocation exportLocation,
         GraphCatalogProcedureFacadeFactory graphCatalogProcedureFacadeFactory,
         GraphStoreCatalogService graphStoreCatalogService,
         LimitsConfiguration limitsConfiguration,

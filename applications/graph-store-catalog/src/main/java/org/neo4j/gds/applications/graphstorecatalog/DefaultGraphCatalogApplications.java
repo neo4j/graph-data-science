@@ -50,10 +50,8 @@ import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -178,31 +176,9 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         this.exportToDatabaseApplication = exportToDatabaseApplication;
     }
 
-    /**
-     * A special entrypoint for Snowgraph integration, where we are selective about which functionality we touch.
-     * Case in point, we want Snowgraph to be Neo4j-less.
-     * We ought to address this later with a more categorical solution.
-     */
     public static GraphCatalogApplications create(
         Log log,
-        GraphStoreCatalogService graphStoreCatalogService,
-        ProjectionMetricsService projectionMetricsService,
-        RequestScopedDependencies requestScopedDependencies
-    ) {
-        return create(
-            log,
-            null,
-            graphStoreCatalogService,
-            projectionMetricsService,
-            requestScopedDependencies,
-            null,
-            null
-        );
-    }
-
-    public static GraphCatalogApplications create(
-        Log log,
-        Supplier<Path> exportLocation,
+        ExportLocation exportLocation,
         GraphStoreCatalogService graphStoreCatalogService,
         ProjectionMetricsService projectionMetricsService,
         RequestScopedDependencies requestScopedDependencies,

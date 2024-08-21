@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.DefaultMemoryGuard;
+import org.neo4j.gds.applications.graphstorecatalog.ExportLocation;
 import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
@@ -39,14 +40,13 @@ import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.UserLogServices;
 import org.neo4j.graphdb.config.Configuration;
 
-import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * This is a way to squirrel away some dull code.
  * We want to keep Neo4j out from here, this could be reusable.
+ * PS: _Best_ class name ever, bar none.
  */
 final class GraphDataScienceProceduresProviderFactory {
     /**
@@ -63,7 +63,7 @@ final class GraphDataScienceProceduresProviderFactory {
 
     private final Configuration neo4jConfiguration;
     private final ExporterBuildersProviderService exporterBuildersProviderService;
-    private final Supplier<Path> exportLocation;
+    private final ExportLocation exportLocation;
     private final MemoryGauge memoryGauge;
     private final MetricsFacade metricsFacade;
     private final ModelCatalog modelCatalog;
@@ -76,7 +76,7 @@ final class GraphDataScienceProceduresProviderFactory {
         Log log,
         Configuration neo4jConfiguration,
         ExporterBuildersProviderService exporterBuildersProviderService,
-        Supplier<Path> exportLocation,
+        ExportLocation exportLocation,
         MemoryGauge memoryGauge,
         MetricsFacade metricsFacade,
         ModelCatalog modelCatalog,
