@@ -40,6 +40,7 @@ import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
+import org.neo4j.gds.settings.Neo4jSettings;
 
 import java.util.Collection;
 import java.util.List;
@@ -259,7 +260,7 @@ class PipelineExecutorTest {
 
     private class BogusNodePropertyPipeline extends TrainingPipeline<FeatureStep> {
 
-        BogusNodePropertyPipeline() {super(TrainingType.REGRESSION);}
+        BogusNodePropertyPipeline() {super(TrainingType.REGRESSION, Neo4jSettings.dbTemporalTimezone().defaultValue());}
 
         @Override
         public List<ExecutableNodePropertyStep> nodePropertySteps() {
@@ -293,7 +294,7 @@ class PipelineExecutorTest {
 
     private class FailingNodePropertyPipeline extends TrainingPipeline<FeatureStep> {
 
-        FailingNodePropertyPipeline() {super(TrainingType.CLASSIFICATION);}
+        FailingNodePropertyPipeline() {super(TrainingType.CLASSIFICATION, Neo4jSettings.dbTemporalTimezone().defaultValue());}
 
         @Override
         public List<ExecutableNodePropertyStep> nodePropertySteps() {

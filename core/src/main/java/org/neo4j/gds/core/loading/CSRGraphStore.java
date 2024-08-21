@@ -57,6 +57,7 @@ import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.core.utils.TimeUtil;
 import org.neo4j.gds.utils.StringJoining;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Collections;
@@ -94,6 +95,7 @@ public final class CSRGraphStore implements GraphStore {
 
     private NodePropertyStore nodeProperties;
 
+    private final ZoneId zoneId;
     private final ZonedDateTime creationTime;
     private ZonedDateTime modificationTime;
 
@@ -105,7 +107,8 @@ public final class CSRGraphStore implements GraphStore {
         NodePropertyStore nodeProperties,
         Map<RelationshipType, SingleTypeRelationships> relationships,
         GraphPropertyStore graphProperties,
-        Concurrency concurrency
+        Concurrency concurrency,
+        ZoneId zoneId
     ) {
         this.databaseInfo = databaseInfo;
         this.capabilities = capabilities;
@@ -121,7 +124,8 @@ public final class CSRGraphStore implements GraphStore {
         this.relationships = new HashMap<>(relationships);
 
         this.concurrency = concurrency;
-        this.creationTime = TimeUtil.now();
+        this.zoneId = zoneId;
+        this.creationTime = TimeUtil.now(zoneId);
         this.modificationTime = this.creationTime;
     }
 
@@ -133,7 +137,8 @@ public final class CSRGraphStore implements GraphStore {
         Nodes nodes,
         RelationshipImportResult relationshipImportResult,
         Optional<GraphPropertyStore> graphProperties,
-        Concurrency concurrency
+        Concurrency concurrency,
+        Optional<ZoneId> zoneId
     ) {
         return new CSRGraphStore(
             databaseInfo,
@@ -143,7 +148,8 @@ public final class CSRGraphStore implements GraphStore {
             nodes.properties(),
             relationshipImportResult.importResults(),
             graphProperties.orElseGet(GraphPropertyStore::empty),
-            concurrency
+            concurrency,
+            zoneId.orElseGet(ZoneId::systemDefault)
         );
     }
 
@@ -585,7 +591,7 @@ public final class CSRGraphStore implements GraphStore {
 
     private synchronized void updateGraphStore(Consumer<CSRGraphStore> updateFunction) {
         updateFunction.accept(this);
-        this.modificationTime = TimeUtil.now();
+        this.modificationTime = TimeUtil.now(zoneId);
     }
 
     private CSRGraph createGraph(

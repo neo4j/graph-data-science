@@ -19,18 +19,14 @@
  */
 package org.neo4j.gds.core.utils;
 
-import org.neo4j.gds.settings.Neo4jSettings;
-
 import java.time.Clock;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 public final class TimeUtil {
 
-    public static ZonedDateTime now() {
-        var zoneId = Neo4jSettings.dbTemporalTimezone().defaultValue();
+    public static ZonedDateTime now(ZoneId zoneId) {
         return ZonedDateTime.now(Clock.system(zoneId != null ? zoneId : ZoneId.systemDefault()));
     }
-
     private TimeUtil() {}
 }
