@@ -46,15 +46,16 @@ dependencies {
         }
     }
 
-    testCompileOnly openGds.immutables.builder
+    integrationTestCompileOnly openGds.immutables.builder
+    integrationTestCompileOnly project(':graph-schema-api')
 
-    testImplementation project(':algo-test')
-    testImplementation project(':test-utils')
-    testImplementation project(':proc-catalog')
+    integrationTestImplementation project(':algo-test')
+    integrationTestImplementation project(':test-utils')
+    integrationTestImplementation project(':proc-catalog')
 
-    testAnnotationProcessor project(':annotations')
-    testAnnotationProcessor project(':config-generator')
-    testAnnotationProcessor openGds.immutables.value
+    integrationTestAnnotationProcessor project(':annotations')
+    integrationTestAnnotationProcessor project(':config-generator')
+    integrationTestAnnotationProcessor openGds.immutables.value
 
-    testImplementation project(':opengds-extension')
+    integrationTestImplementation project(':opengds-extension')
 }
