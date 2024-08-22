@@ -44,18 +44,28 @@ public class OperationsProcedureFacade {
         return applicationsFacade.operations().queryUserLog(jobId);
     }
 
+    public Stream<FeatureState> resetUsePackedAdjacencyList() {
+        var isEnabled = applicationsFacade.operations().resetUsePackedAdjacencyList();
+
+        return Stream.of(new FeatureState(isEnabled));
+    }
+
     public Stream<FeatureState> resetUseUncompressedAdjacencyList() {
         var isEnabled = applicationsFacade.operations().resetUseUncompressedAdjacencyList();
 
         return Stream.of(new FeatureState(isEnabled));
     }
 
-    public void setPagesPerThread(long pagesPerThread) {
-        applicationsFacade.operations().setPagesPerThread(pagesPerThread);
+    public void setPagesPerThread(long value) {
+        applicationsFacade.operations().setPagesPerThread(value);
     }
 
-    public void setUseUncompressedAdjacencyList(boolean useUncompressedAdjacencyList) {
-        applicationsFacade.operations().setUseUncompressedAdjacencyList(useUncompressedAdjacencyList);
+    public void setUsePackedAdjacencyList(boolean value) {
+        applicationsFacade.operations().setUsePackedAdjacencyList(value);
+    }
+
+    public void setUseUncompressedAdjacencyList(boolean value) {
+        applicationsFacade.operations().setUseUncompressedAdjacencyList(value);
     }
 
     private Stream<ProgressResult> detailView(JobId jobId) {

@@ -87,6 +87,10 @@ public final class OperationsApplications {
         return userLogStore.query(user.getUsername());
     }
 
+    public boolean resetUsePackedAdjacencyList() {
+        return featureTogglesRepository.resetUsePackedAdjacencyList();
+    }
+
     public boolean resetUseUncompressedAdjacencyList() {
         return featureTogglesRepository.resetUseUncompressedAdjacencyList();
     }
@@ -100,6 +104,10 @@ public final class OperationsApplications {
         }
 
         featureTogglesRepository.setPagesPerThread((int) pagesPerThread);
+    }
+
+    public void setUsePackedAdjacencyList(boolean value) {
+        featureTogglesRepository.setUsePackedAdjacencyList(value);
     }
 
     public void setUseUncompressedAdjacencyList(boolean useUncompressedAdjacencyList) {

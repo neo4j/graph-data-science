@@ -51,6 +51,13 @@ public final class FeatureToggleProc {
     }
 
     @Internal
+    @Procedure("gds.features.usePackedAdjacencyList.reset")
+    @Description("Set the default behaviour of whether to use bit packing compression for adjacency lists during graph creation. That value is returned.")
+    public Stream<FeatureState> resetUsePackedAdjacencyList() {
+        return facade.operations().resetUsePackedAdjacencyList();
+    }
+
+    @Internal
     @Procedure("gds.features.useUncompressedAdjacencyList.reset")
     @Description("Set the default behaviour of whether to store uncompressed adjacency lists during graph creation. That value is returned.")
     public Stream<FeatureState> resetUseUncompressedAdjacencyList() {
@@ -58,25 +65,17 @@ public final class FeatureToggleProc {
     }
 
     @Internal
+    @Procedure("gds.features.usePackedAdjacencyList")
+    @Description("Toggle whether the adjacency list should use bit packing compression during graph creation.")
+    public void usePackedAdjacencyList(@Name(value = "usePackedAdjacencyList") boolean usePackedAdjacencyList) {
+        facade.operations().setUsePackedAdjacencyList(usePackedAdjacencyList);
+    }
+
+    @Internal
     @Procedure("gds.features.useUncompressedAdjacencyList")
     @Description("Toggle whether the adjacency list should be stored uncompressed during graph creation.")
     public void useUncompressedAdjacencyList(@Name(value = "useUncompressedAdjacencyList") boolean useUncompressedAdjacencyList) {
         facade.operations().setUseUncompressedAdjacencyList(useUncompressedAdjacencyList);
-    }
-
-    @Internal
-    @Procedure("gds.features.usePackedAdjacencyList")
-    @Description("Toggle whether the adjacency list should use bit packing compression during graph creation.")
-    public void usePackedAdjacencyList(@Name(value = "usePackedAdjacencyList") boolean usePackedAdjacencyList) {
-        GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST.toggle(usePackedAdjacencyList);
-    }
-
-    @Internal
-    @Procedure("gds.features.usePackedAdjacencyList.reset")
-    @Description("Set the default behaviour of whether to use bit packing compression for adjacency lists during graph creation. That value is returned.")
-    public Stream<FeatureState> resetUsePackedAdjacencyList() {
-        GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST.reset();
-        return Stream.of(new FeatureState(GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST.isEnabled()));
     }
 
     @Internal
