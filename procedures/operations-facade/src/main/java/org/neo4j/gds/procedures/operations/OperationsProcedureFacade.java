@@ -32,8 +32,8 @@ public class OperationsProcedureFacade {
         this.applicationsFacade = applicationsFacade;
     }
 
-    public void setAdjacencyPackingStrategy(String strategyIdentifier) {
-        applicationsFacade.operations().setAdjacencyPackingStrategy(strategyIdentifier);
+    public void enableArrowDatabaseImport(boolean value) {
+        applicationsFacade.operations().enableArrowDatabaseImport(value);
     }
 
     public Stream<ProgressResult> listProgress(String jobIdAsString) {
@@ -76,6 +76,10 @@ public class OperationsProcedureFacade {
         var isEnabled = applicationsFacade.operations().resetUseUncompressedAdjacencyList();
 
         return Stream.of(new FeatureState(isEnabled));
+    }
+
+    public void setAdjacencyPackingStrategy(String strategyIdentifier) {
+        applicationsFacade.operations().setAdjacencyPackingStrategy(strategyIdentifier);
     }
 
     public void setPagesPerThread(long value) {

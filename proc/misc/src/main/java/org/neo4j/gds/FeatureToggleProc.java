@@ -48,6 +48,13 @@ public final class FeatureToggleProc {
     }
 
     @Internal
+    @Procedure("gds.features.enableArrowDatabaseImport")
+    @Description("Enables support for importing Neo4j databases via the GDS Arrow Flight Server.")
+    public void enableArrowDatabaseImport(@Name(value = "useReorderedAdjacencyList") boolean enableArrowDatabaseImport) {
+        facade.operations().enableArrowDatabaseImport(enableArrowDatabaseImport);
+    }
+
+    @Internal
     @Procedure("gds.features.pagesPerThread")
     @Description("Toggle how many pages per thread are being used by the loader.")
     public void pagesPerThread(@Name(value = "pagesPerThread") long pagesPerThread) {
@@ -115,13 +122,6 @@ public final class FeatureToggleProc {
     @Description("Toggle whether the adjacency list should be stored uncompressed during graph creation.")
     public void useUncompressedAdjacencyList(@Name(value = "useUncompressedAdjacencyList") boolean useUncompressedAdjacencyList) {
         facade.operations().setUseUncompressedAdjacencyList(useUncompressedAdjacencyList);
-    }
-
-    @Internal
-    @Procedure("gds.features.enableArrowDatabaseImport")
-    @Description("Enables support for importing Neo4j databases via the GDS Arrow Flight Server.")
-    public void enableArrowDatabaseImport(@Name(value = "useReorderedAdjacencyList") boolean useReorderedAdjacencyList) {
-        GdsFeatureToggles.ENABLE_ARROW_DATABASE_IMPORT.toggle(useReorderedAdjacencyList);
     }
 
     @Internal

@@ -47,8 +47,8 @@ public final class OperationsApplications {
         return new OperationsApplications(featureTogglesRepository, requestScopedDependencies);
     }
 
-    public void setAdjacencyPackingStrategy(String strategyIdentifier) {
-        featureTogglesRepository.setAdjacencyPackingStrategy(strategyIdentifier);
+    public void enableArrowDatabaseImport(boolean value) {
+        featureTogglesRepository.enableArrowDatabaseImport(value);
     }
 
     /**
@@ -109,6 +109,10 @@ public final class OperationsApplications {
 
     public boolean resetUseUncompressedAdjacencyList() {
         return featureTogglesRepository.resetUseUncompressedAdjacencyList();
+    }
+
+    public void setAdjacencyPackingStrategy(String strategyIdentifier) {
+        featureTogglesRepository.setAdjacencyPackingStrategy(strategyIdentifier);
     }
 
     public void setPagesPerThread(long pagesPerThread) {
