@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.test;
 
-import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
+import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -28,8 +28,9 @@ import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.STATS;
+import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.test.Constants.STATS_DESCRIPTION;
+import static org.neo4j.gds.executor.ExecutionMode.STATS;
 
 @GdsCallable(name = "gds.testProc.write", description = STATS_DESCRIPTION, executionMode = STATS)
 public class TestSpec implements AlgorithmSpec<TestAlgorithm, TestAlgorithmResult, TestWriteConfig, Stream<TestResult>, TestAlgorithmFactory<TestWriteConfig>> {
@@ -50,6 +51,24 @@ public class TestSpec implements AlgorithmSpec<TestAlgorithm, TestAlgorithmResul
 
     @Override
     public ComputationResultConsumer<TestAlgorithm, TestAlgorithmResult, TestWriteConfig, Stream<TestResult>> computationResultConsumer() {
-        return new NullComputationResultConsumer<>();
+        return (computationResult, executionContext) -> runWithExceptionLogging("Stats call failed",
+            executionContext.log(),
+            () -> Stream.of(
+            resultBuilder(computationResult, executionContext)
+                .withPreProcessingMillis(computationResult.preProcessingMillis())
+                .withComputeMillis(computationResult.computeMillis())
+                .withNodeCount(computationResult.graph().nodeCount())
+                .withConfig(computationResult.config())
+                .build()
+        ));
+    }
+
+    private TestResult.TestResultBuilder resultBuilder(
+        ComputationResult<TestAlgorithm, TestAlgorithmResult, TestWriteConfig> computeResult,
+        ExecutionContext executionContext
+    ) {
+        return new TestResult.TestResultBuilder().withRelationshipCount(computeResult.result()
+            .map(TestAlgorithmResult::relationshipCount)
+            .orElse(-1L));
     }
 }

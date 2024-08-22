@@ -20,20 +20,24 @@
 package org.neo4j.gds.test;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.NullComputationResultConsumer;
+import org.neo4j.gds.MutatePropertyComputationResultConsumer;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.executor.AlgorithmSpec;
+import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.mem.MemoryEstimations;
-import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.test.Constants.STATS_DESCRIPTION;
@@ -88,6 +92,35 @@ public class TestMutateSpec implements AlgorithmSpec<TestAlgorithm, TestAlgorith
 
     @Override
     public ComputationResultConsumer<TestAlgorithm, TestAlgorithmResult, TestMutateConfig, Stream<TestResult>> computationResultConsumer() {
-        return new NullComputationResultConsumer<>();
+        return new MutatePropertyComputationResultConsumer<>(
+            this::nodePropertyList,
+            this::resultBuilder
+        );
+    }
+
+    private List<NodeProperty> nodePropertyList(ComputationResult<TestAlgorithm, TestAlgorithmResult, TestMutateConfig> computationResult) {
+        return List.of(NodeProperty.of(
+            computationResult.config().mutateProperty(),
+            new LongNodePropertyValues() {
+                @Override
+                public long longValue(long nodeId) {
+                    return nodeId;
+                }
+
+                @Override
+                public long nodeCount() {
+                    return 0;
+                }
+            }
+        ));
+    }
+
+    private TestResult.TestResultBuilder resultBuilder(
+        ComputationResult<TestAlgorithm, TestAlgorithmResult, TestMutateConfig> computeResult,
+        ExecutionContext executionContext
+    ) {
+        return new TestResult.TestResultBuilder().withRelationshipCount(computeResult.result()
+            .map(TestAlgorithmResult::relationshipCount)
+            .orElse(-1L));
     }
 }
