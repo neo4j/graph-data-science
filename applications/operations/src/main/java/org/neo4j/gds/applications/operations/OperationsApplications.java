@@ -47,6 +47,10 @@ public final class OperationsApplications {
         return new OperationsApplications(featureTogglesRepository, requestScopedDependencies);
     }
 
+    public void setAdjacencyPackingStrategy(String strategyIdentifier) {
+        featureTogglesRepository.setAdjacencyPackingStrategy(strategyIdentifier);
+    }
+
     /**
      * List progress for the given user, or for all users if in administrator mode
      */

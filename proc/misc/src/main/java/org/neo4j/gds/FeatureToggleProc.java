@@ -28,11 +28,7 @@ import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Arrays;
 import java.util.stream.Stream;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
 
 /**
  * General heap of feature toggles we have and procedures to toggle them
@@ -42,6 +38,13 @@ import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
 public final class FeatureToggleProc {
     @Context
     public GraphDataScienceProcedures facade;
+
+    @Internal
+    @Procedure("gds.features.adjacencyPackingStrategy")
+    @Description("If `usePackedAdjacencyList` is enabled, this function allows setting the implementation strategy.")
+    public void adjacencyPackingStrategy(@Name(value = "adjacencyPackingStrategy") String adjacencyPackingStrategy) {
+        facade.operations().setAdjacencyPackingStrategy(adjacencyPackingStrategy);
+    }
 
     @Internal
     @Procedure("gds.features.pagesPerThread")
@@ -90,27 +93,6 @@ public final class FeatureToggleProc {
     @Description("Toggle whether the adjacency list should be stored uncompressed during graph creation.")
     public void useUncompressedAdjacencyList(@Name(value = "useUncompressedAdjacencyList") boolean useUncompressedAdjacencyList) {
         facade.operations().setUseUncompressedAdjacencyList(useUncompressedAdjacencyList);
-    }
-
-    @Internal
-    @Procedure("gds.features.adjacencyPackingStrategy")
-    @Description("If `usePackedAdjacencyList` is enabled, this function allows setting the implementation strategy.")
-    public void adjacencyPackingStrategy(@Name(value = "adjacencyPackingStrategy") String adjacencyPackingStrategy) {
-        if (GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST.isEnabled()) {
-            try {
-                var strategy = GdsFeatureToggles.AdjacencyPackingStrategy.valueOf(toUpperCaseWithLocale(
-                    adjacencyPackingStrategy));
-                GdsFeatureToggles.ADJACENCY_PACKING_STRATEGY.set(strategy);
-            } catch (IllegalArgumentException iae) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Invalid adjacency packing strategy: %s, must be one of %s",
-                    adjacencyPackingStrategy,
-                    Arrays.toString(GdsFeatureToggles.AdjacencyPackingStrategy.values())
-                ));
-            }
-        } else {
-            throw new IllegalStateException("Cannot set adjacency packing strategy when packed adjacency list is disabled.");
-        }
     }
 
     @Internal

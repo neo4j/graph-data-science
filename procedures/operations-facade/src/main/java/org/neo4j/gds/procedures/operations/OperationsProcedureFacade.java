@@ -32,6 +32,10 @@ public class OperationsProcedureFacade {
         this.applicationsFacade = applicationsFacade;
     }
 
+    public void setAdjacencyPackingStrategy(String strategyIdentifier) {
+        applicationsFacade.operations().setAdjacencyPackingStrategy(strategyIdentifier);
+    }
+
     public Stream<ProgressResult> listProgress(String jobIdAsString) {
         if (jobIdAsString.isBlank()) return summaryView();
 

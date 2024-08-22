@@ -21,6 +21,11 @@ package org.neo4j.gds.applications.operations;
 
 import org.neo4j.gds.utils.GdsFeatureToggles;
 
+import java.util.Arrays;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
+
 /**
  * Let's encapsulate feature toggles and eventually make them not a global singleton.
  */
@@ -43,6 +48,14 @@ public class FeatureTogglesRepository {
         return GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled();
     }
 
+    void setAdjacencyPackingStrategy(String strategyIdentifierAsString) {
+        ensureAdjacencyPackingEnabled();
+
+        var strategyIdentifier = parseStrategyIdentifier(strategyIdentifierAsString);
+
+        GdsFeatureToggles.ADJACENCY_PACKING_STRATEGY.set(strategyIdentifier);
+    }
+
     void setPagesPerThread(int value) {
         GdsFeatureToggles.PAGES_PER_THREAD.set(value);
     }
@@ -57,5 +70,27 @@ public class FeatureTogglesRepository {
 
     void setUseUncompressedAdjacencyList(boolean value) {
         GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.toggle(value);
+    }
+
+    private void ensureAdjacencyPackingEnabled() {
+        if (GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST.isEnabled()) return;
+
+        throw new IllegalStateException("Cannot set adjacency packing strategy when packed adjacency list is disabled.");
+    }
+
+    private GdsFeatureToggles.AdjacencyPackingStrategy parseStrategyIdentifier(String strategyIdentifierAsString) {
+        var canonicalizedStrategyIdentifier = toUpperCaseWithLocale(strategyIdentifierAsString);
+
+        try {
+            return GdsFeatureToggles.AdjacencyPackingStrategy.valueOf(canonicalizedStrategyIdentifier);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(
+                formatWithLocale(
+                    "Invalid adjacency packing strategy: %s, must be one of %s",
+                    strategyIdentifierAsString,
+                    Arrays.toString(GdsFeatureToggles.AdjacencyPackingStrategy.values())
+                )
+            );
+        }
     }
 }
