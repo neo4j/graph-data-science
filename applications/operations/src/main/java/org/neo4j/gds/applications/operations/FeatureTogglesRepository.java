@@ -30,6 +30,10 @@ import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
  * Let's encapsulate feature toggles and eventually make them not a global singleton.
  */
 public class FeatureTogglesRepository {
+    void enableAdjacencyCompressionMemoryTracking(boolean value) {
+        GdsFeatureToggles.ENABLE_ADJACENCY_COMPRESSION_MEMORY_TRACKING.toggle(value);
+    }
+
     void enableArrowDatabaseImport(boolean value) {
         GdsFeatureToggles.ENABLE_ARROW_DATABASE_IMPORT.toggle(value);
     }

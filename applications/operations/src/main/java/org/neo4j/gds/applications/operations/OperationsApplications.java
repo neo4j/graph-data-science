@@ -47,6 +47,10 @@ public final class OperationsApplications {
         return new OperationsApplications(featureTogglesRepository, requestScopedDependencies);
     }
 
+    public void enableAdjacencyCompressionMemoryTracking(boolean value) {
+        featureTogglesRepository.enableAdjacencyCompressionMemoryTracking(value);
+    }
+
     public void enableArrowDatabaseImport(boolean value) {
         featureTogglesRepository.enableArrowDatabaseImport(value);
     }

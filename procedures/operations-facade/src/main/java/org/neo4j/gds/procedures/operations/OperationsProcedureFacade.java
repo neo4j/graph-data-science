@@ -32,6 +32,10 @@ public class OperationsProcedureFacade {
         this.applicationsFacade = applicationsFacade;
     }
 
+    public void enableAdjacencyCompressionMemoryTracking(boolean value) {
+        applicationsFacade.operations().enableAdjacencyCompressionMemoryTracking(value);
+    }
+
     public void enableArrowDatabaseImport(boolean value) {
         applicationsFacade.operations().enableArrowDatabaseImport(value);
     }

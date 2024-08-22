@@ -49,6 +49,13 @@ public final class FeatureToggleProc {
     }
 
     @Internal
+    @Procedure("gds.features.enableAdjacencyCompressionMemoryTracking")
+    @Description("Enables memory tracking during the construction of an adjacency list.")
+    public void enableAdjacencyCompressionMemoryTracking(@Name(value = "enableAdjacencyCompressionMemoryTracking") boolean enableAdjacencyCompressionMemoryTracking) {
+        facade.operations().enableAdjacencyCompressionMemoryTracking(enableAdjacencyCompressionMemoryTracking);
+    }
+
+    @Internal
     @Procedure("gds.features.enableArrowDatabaseImport")
     @Description("Enables support for importing Neo4j databases via the GDS Arrow Flight Server.")
     public void enableArrowDatabaseImport(@Name(value = "useReorderedAdjacencyList") boolean enableArrowDatabaseImport) {
@@ -137,13 +144,6 @@ public final class FeatureToggleProc {
     @Description("Toggle whether the adjacency list should be stored uncompressed during graph creation.")
     public void useUncompressedAdjacencyList(@Name(value = "useUncompressedAdjacencyList") boolean useUncompressedAdjacencyList) {
         facade.operations().setUseUncompressedAdjacencyList(useUncompressedAdjacencyList);
-    }
-
-    @Internal
-    @Procedure("gds.features.enableAdjacencyCompressionMemoryTracking")
-    @Description("Enables memory tracking during the construction of an adjacency list.")
-    public void enableAdjacencyCompressionMemoryTracking(@Name(value = "enableAdjacencyCompressionMemoryTracking") boolean enableAdjacencyCompressionMemoryTracking) {
-        GdsFeatureToggles.ENABLE_ADJACENCY_COMPRESSION_MEMORY_TRACKING.toggle(enableAdjacencyCompressionMemoryTracking);
     }
 
     @Internal
