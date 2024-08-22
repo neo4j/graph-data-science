@@ -21,6 +21,7 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.operations.FeatureState;
+import org.neo4j.gds.procedures.operations.FeatureStringValue;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -51,6 +52,13 @@ public final class FeatureToggleProc {
     @Description("Toggle how many pages per thread are being used by the loader.")
     public void pagesPerThread(@Name(value = "pagesPerThread") long pagesPerThread) {
         facade.operations().setPagesPerThread(pagesPerThread);
+    }
+
+    @Internal
+    @Procedure("gds.features.adjacencyPackingStrategy.reset")
+    @Description("If `usePackedAdjacencyList` is enabled, this function resets the implementation strategy to the default.")
+    public Stream<FeatureStringValue> resetAdjacencyPackingStrategy() {
+        return facade.operations().resetAdjacencyPackingStrategy();
     }
 
     @Internal
@@ -93,18 +101,6 @@ public final class FeatureToggleProc {
     @Description("Toggle whether the adjacency list should be stored uncompressed during graph creation.")
     public void useUncompressedAdjacencyList(@Name(value = "useUncompressedAdjacencyList") boolean useUncompressedAdjacencyList) {
         facade.operations().setUseUncompressedAdjacencyList(useUncompressedAdjacencyList);
-    }
-
-    @Internal
-    @Procedure("gds.features.adjacencyPackingStrategy.reset")
-    @Description("If `usePackedAdjacencyList` is enabled, this function resets the implementation strategy to the default.")
-    public Stream<FeatureStringValue> resetAdjacencyPackingStrategy() {
-        if (GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST.isEnabled()) {
-            GdsFeatureToggles.ADJACENCY_PACKING_STRATEGY.set(GdsFeatureToggles.ADJACENCY_PACKING_STRATEGY_DEFAULT_SETTING);
-            return Stream.of(new FeatureStringValue(GdsFeatureToggles.ADJACENCY_PACKING_STRATEGY.get().name()));
-        } else {
-            throw new IllegalStateException("Cannot reset adjacency packing strategy when packed adjacency list is disabled.");
-        }
     }
 
     @Internal
@@ -165,14 +161,6 @@ public final class FeatureToggleProc {
         public final long value;
 
         FeatureLongValue(long value) {
-            this.value = value;
-        }
-    }
-
-    public static final class FeatureStringValue {
-        public final String value;
-
-        FeatureStringValue(String value) {
             this.value = value;
         }
     }

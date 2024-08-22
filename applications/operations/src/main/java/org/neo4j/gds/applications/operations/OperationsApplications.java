@@ -91,6 +91,10 @@ public final class OperationsApplications {
         return userLogStore.query(user.getUsername());
     }
 
+    public String resetAdjacencyPackingStrategy() {
+        return featureTogglesRepository.resetAdjacencyPackingStrategy();
+    }
+
     public boolean resetUseMixedAdjacencyList() {
         return featureTogglesRepository.resetUseMixedAdjacencyList();
     }

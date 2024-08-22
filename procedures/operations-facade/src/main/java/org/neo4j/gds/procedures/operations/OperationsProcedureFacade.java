@@ -48,6 +48,12 @@ public class OperationsProcedureFacade {
         return applicationsFacade.operations().queryUserLog(jobId);
     }
 
+    public Stream<FeatureStringValue> resetAdjacencyPackingStrategy() {
+        var canonicalStrategyIdentifier = applicationsFacade.operations().resetAdjacencyPackingStrategy();
+
+        return Stream.of(new FeatureStringValue(canonicalStrategyIdentifier));
+    }
+
     public Stream<FeatureState> resetUseMixedAdjacencyList() {
         var isEnabled = applicationsFacade.operations().resetUseMixedAdjacencyList();
 

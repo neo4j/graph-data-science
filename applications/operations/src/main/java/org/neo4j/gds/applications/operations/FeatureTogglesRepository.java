@@ -30,6 +30,14 @@ import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
  * Let's encapsulate feature toggles and eventually make them not a global singleton.
  */
 public class FeatureTogglesRepository {
+    String resetAdjacencyPackingStrategy() {
+        ensureAdjacencyPackingEnabled("reset");
+
+        GdsFeatureToggles.ADJACENCY_PACKING_STRATEGY.set(GdsFeatureToggles.ADJACENCY_PACKING_STRATEGY_DEFAULT_SETTING);
+
+        return GdsFeatureToggles.ADJACENCY_PACKING_STRATEGY.get().name();
+    }
+
     boolean resetUseMixedAdjacencyList() {
         GdsFeatureToggles.USE_MIXED_ADJACENCY_LIST.reset();
 
@@ -49,7 +57,7 @@ public class FeatureTogglesRepository {
     }
 
     void setAdjacencyPackingStrategy(String strategyIdentifierAsString) {
-        ensureAdjacencyPackingEnabled();
+        ensureAdjacencyPackingEnabled("set");
 
         var strategyIdentifier = parseStrategyIdentifier(strategyIdentifierAsString);
 
@@ -72,10 +80,10 @@ public class FeatureTogglesRepository {
         GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.toggle(value);
     }
 
-    private void ensureAdjacencyPackingEnabled() {
+    private void ensureAdjacencyPackingEnabled(String operation) {
         if (GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST.isEnabled()) return;
 
-        throw new IllegalStateException("Cannot set adjacency packing strategy when packed adjacency list is disabled.");
+        throw new IllegalStateException("Cannot " + operation + " adjacency packing strategy when packed adjacency list is disabled.");
     }
 
     private GdsFeatureToggles.AdjacencyPackingStrategy parseStrategyIdentifier(String strategyIdentifierAsString) {
