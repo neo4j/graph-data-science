@@ -126,7 +126,11 @@ public final class OperationsApplications {
         featureTogglesRepository.setUsePackedAdjacencyList(value);
     }
 
-    public void setUseUncompressedAdjacencyList(boolean useUncompressedAdjacencyList) {
-        featureTogglesRepository.setUseUncompressedAdjacencyList(useUncompressedAdjacencyList);
+    public void setUseReorderedAdjacencyList(boolean value) {
+        featureTogglesRepository.setUseReorderedAdjacencyList(value);
+    }
+
+    public void setUseUncompressedAdjacencyList(boolean value) {
+        featureTogglesRepository.setUseUncompressedAdjacencyList(value);
     }
 }

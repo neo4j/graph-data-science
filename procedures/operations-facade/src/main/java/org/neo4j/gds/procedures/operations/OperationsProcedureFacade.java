@@ -84,6 +84,10 @@ public class OperationsProcedureFacade {
         applicationsFacade.operations().setUsePackedAdjacencyList(value);
     }
 
+    public void setUseReorderedAdjacencyList(boolean value) {
+        applicationsFacade.operations().setUseReorderedAdjacencyList(value);
+    }
+
     public void setUseUncompressedAdjacencyList(boolean value) {
         applicationsFacade.operations().setUseUncompressedAdjacencyList(value);
     }

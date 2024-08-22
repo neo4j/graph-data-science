@@ -76,6 +76,10 @@ public class FeatureTogglesRepository {
         GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST.toggle(value);
     }
 
+    void setUseReorderedAdjacencyList(boolean value) {
+        GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.toggle(value);
+    }
+
     void setUseUncompressedAdjacencyList(boolean value) {
         GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.toggle(value);
     }

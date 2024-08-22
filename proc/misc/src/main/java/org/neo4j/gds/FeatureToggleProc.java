@@ -97,17 +97,17 @@ public final class FeatureToggleProc {
     }
 
     @Internal
+    @Procedure("gds.features.useReorderedAdjacencyList")
+    @Description("Toggle whether the adjacency list should be reordered during graph creation.")
+    public void useReorderedAdjacencyList(@Name(value = "useReorderedAdjacencyList") boolean useReorderedAdjacencyList) {
+        facade.operations().setUseReorderedAdjacencyList(useReorderedAdjacencyList);
+    }
+
+    @Internal
     @Procedure("gds.features.useUncompressedAdjacencyList")
     @Description("Toggle whether the adjacency list should be stored uncompressed during graph creation.")
     public void useUncompressedAdjacencyList(@Name(value = "useUncompressedAdjacencyList") boolean useUncompressedAdjacencyList) {
         facade.operations().setUseUncompressedAdjacencyList(useUncompressedAdjacencyList);
-    }
-
-    @Internal
-    @Procedure("gds.features.useReorderedAdjacencyList")
-    @Description("Toggle whether the adjacency list should be reordered during graph creation.")
-    public void useReorderedAdjacencyList(@Name(value = "useReorderedAdjacencyList") boolean useReorderedAdjacencyList) {
-        GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.toggle(useReorderedAdjacencyList);
     }
 
     @Internal
