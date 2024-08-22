@@ -51,6 +51,13 @@ public final class FeatureToggleProc {
     }
 
     @Internal
+    @Procedure("gds.features.useMixedAdjacencyList.reset")
+    @Description("Set the default behaviour of whether to use bit packing compression for high degree nodes during graph creation. That value is returned.")
+    public Stream<FeatureState> resetUseMixedAdjacencyList() {
+        return facade.operations().resetUseMixedAdjacencyList();
+    }
+
+    @Internal
     @Procedure("gds.features.usePackedAdjacencyList.reset")
     @Description("Set the default behaviour of whether to use bit packing compression for adjacency lists during graph creation. That value is returned.")
     public Stream<FeatureState> resetUsePackedAdjacencyList() {
@@ -65,6 +72,13 @@ public final class FeatureToggleProc {
     }
 
     @Internal
+    @Procedure("gds.features.useMixedAdjacencyList")
+    @Description("Toggle whether the adjacency list should use bit packing compression for high degree nodes during graph creation.")
+    public void useMixedAdjacencyList(@Name(value = "useMixedAdjacencyList") boolean useMixedAdjacencyList) {
+        facade.operations().setUseMixedAdjacencyList(useMixedAdjacencyList);
+    }
+
+    @Internal
     @Procedure("gds.features.usePackedAdjacencyList")
     @Description("Toggle whether the adjacency list should use bit packing compression during graph creation.")
     public void usePackedAdjacencyList(@Name(value = "usePackedAdjacencyList") boolean usePackedAdjacencyList) {
@@ -76,21 +90,6 @@ public final class FeatureToggleProc {
     @Description("Toggle whether the adjacency list should be stored uncompressed during graph creation.")
     public void useUncompressedAdjacencyList(@Name(value = "useUncompressedAdjacencyList") boolean useUncompressedAdjacencyList) {
         facade.operations().setUseUncompressedAdjacencyList(useUncompressedAdjacencyList);
-    }
-
-    @Internal
-    @Procedure("gds.features.useMixedAdjacencyList")
-    @Description("Toggle whether the adjacency list should use bit packing compression for high degree nodes during graph creation.")
-    public void useMixedAdjacencyList(@Name(value = "useMixedAdjacencyList") boolean useMixedAdjacencyList) {
-        GdsFeatureToggles.USE_MIXED_ADJACENCY_LIST.toggle(useMixedAdjacencyList);
-    }
-
-    @Internal
-    @Procedure("gds.features.useMixedAdjacencyList.reset")
-    @Description("Set the default behaviour of whether to use bit packing compression for high degree nodes during graph creation. That value is returned.")
-    public Stream<FeatureState> resetUseMixedAdjacencyList() {
-        GdsFeatureToggles.USE_MIXED_ADJACENCY_LIST.reset();
-        return Stream.of(new FeatureState(GdsFeatureToggles.USE_MIXED_ADJACENCY_LIST.isEnabled()));
     }
 
     @Internal

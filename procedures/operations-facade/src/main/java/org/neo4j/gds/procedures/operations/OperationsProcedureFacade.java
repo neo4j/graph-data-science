@@ -44,6 +44,12 @@ public class OperationsProcedureFacade {
         return applicationsFacade.operations().queryUserLog(jobId);
     }
 
+    public Stream<FeatureState> resetUseMixedAdjacencyList() {
+        var isEnabled = applicationsFacade.operations().resetUseMixedAdjacencyList();
+
+        return Stream.of(new FeatureState(isEnabled));
+    }
+
     public Stream<FeatureState> resetUsePackedAdjacencyList() {
         var isEnabled = applicationsFacade.operations().resetUsePackedAdjacencyList();
 
@@ -58,6 +64,10 @@ public class OperationsProcedureFacade {
 
     public void setPagesPerThread(long value) {
         applicationsFacade.operations().setPagesPerThread(value);
+    }
+
+    public void setUseMixedAdjacencyList(boolean value) {
+        applicationsFacade.operations().setUseMixedAdjacencyList(value);
     }
 
     public void setUsePackedAdjacencyList(boolean value) {
