@@ -19,7 +19,10 @@
  */
 package org.neo4j.gds.ml.pipeline.node.regression.predict;
 
-import org.neo4j.gds.NullComputationResultConsumer;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -28,8 +31,10 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 
 import java.util.Map;
+import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.ml.pipeline.node.regression.NodeRegressionProcCompanion.PREDICT_DESCRIPTION;
 
@@ -68,6 +73,22 @@ public class NodeRegressionPipelineStreamSpec
 
     @Override
     public ComputationResultConsumer<NodeRegressionPredictPipelineExecutor, HugeDoubleArray, NodeRegressionPredictPipelineBaseConfig, Stream<StreamResult>> computationResultConsumer() {
-        return new NullComputationResultConsumer<>();
+        return (computationResult, executionContext) ->
+            runWithExceptionLogging(
+                "Result streaming failed",
+                executionContext.log(),
+                () -> computationResult.result()
+                    .map(result -> {
+                        Graph graph = computationResult.graph();
+                        NodePropertyValues nodePropertyValues = NodePropertyValuesAdapter.adapt(result);
+                        return LongStream
+                            .range(IdMap.START_NODE_ID, graph.nodeCount())
+                            .filter(nodePropertyValues::hasValue)
+                            .mapToObj(nodeId -> new StreamResult(
+                                graph.toOriginalNodeId(nodeId),
+                                nodePropertyValues.doubleValue(nodeId)
+                            ));
+                    }).orElseGet(Stream::empty)
+            );
     }
 }

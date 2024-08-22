@@ -19,12 +19,16 @@
  */
 package org.neo4j.gds.ml.kge;
 
-import org.neo4j.gds.NullComputationResultConsumer;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.executor.AlgorithmSpec;
+import org.neo4j.gds.executor.AlgorithmSpecProgressTrackerProvider;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
+import org.neo4j.gds.similarity.nodesim.TopKGraph;
 
 import java.util.stream.Stream;
 
@@ -53,6 +57,43 @@ public class KGEPredictWriteSpec implements
 
     @Override
     public ComputationResultConsumer<TopKMapComputer, KGEPredictResult, KGEPredictWriteConfig, Stream<KGEWriteResult>> computationResultConsumer() {
-        return new NullComputationResultConsumer<>();
+        return (computationResult, executionContext) -> {
+            KGEWriteResult.Builder builder = new KGEWriteResult.Builder();
+
+            if (computationResult.result().isEmpty()) {
+                return Stream.of(builder.build());
+            }
+
+            Graph graph = computationResult.graph();
+
+            var topKMap = computationResult.result().get().topKMap();
+            var topKGraph = new TopKGraph(graph, topKMap);
+            var config = computationResult.config();
+
+            try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
+
+                executionContext.relationshipExporterBuilder()
+                    .withGraph(topKGraph)
+                    .withIdMappingOperator(topKGraph::toOriginalNodeId)
+                    .withTerminationFlag(computationResult.algorithm().getTerminationFlag())
+                    .withProgressTracker(
+                        AlgorithmSpecProgressTrackerProvider.createProgressTracker(
+                            name(),
+                            graph.nodeCount(),
+                            RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY,
+                            executionContext
+                        )
+                    )
+                    .withResultStore(config.resolveResultStore(computationResult.resultStore()))
+                    .withJobId(config.jobId())
+                    .build()
+                    .write(config.writeRelationshipType(), config.writeProperty());
+            }
+            builder.withComputeMillis(computationResult.computeMillis());
+            builder.withPreProcessingMillis(computationResult.preProcessingMillis());
+            builder.withRelationshipsWritten(topKGraph.relationshipCount());
+            builder.withConfig(config);
+            return Stream.of(builder.build());
+        };
     }
 }

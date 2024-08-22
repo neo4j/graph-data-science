@@ -19,13 +19,15 @@
  */
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
-import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.VerifyThatModelCanBeStored;
 import org.neo4j.gds.compat.GdsVersionInfoProvider;
+import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.executor.AlgorithmSpec;
+import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.executor.validation.BeforeLoadValidation;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
@@ -33,7 +35,7 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassific
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrainAlgorithm;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrainPipelineAlgorithmFactory;
-import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
+import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -60,7 +62,31 @@ public class NodeClassificationPipelineTrainSpec implements AlgorithmSpec<NodeCl
 
     @Override
     public ComputationResultConsumer<NodeClassificationTrainAlgorithm, NodeClassificationModelResult, NodeClassificationPipelineTrainConfig, Stream<NodeClassificationPipelineTrainResult>> computationResultConsumer() {
-        return new NullComputationResultConsumer<>();
+        return (computationResult, executionContext) -> {
+            if (computationResult.result().isPresent()) {
+                var model = (Model<?, ?, ?>) computationResult.result().get().model();
+                var modelCatalog = executionContext.modelCatalog();
+                modelCatalog.set(model);
+
+                if (computationResult.config().storeModelToDisk()) {
+                    try {
+                        // FIXME: This works but is not what we want to do!
+                        var databaseService = executionContext.dependencyResolver()
+                            .resolveDependency(GraphDatabaseService.class);
+
+                        modelCatalog.checkLicenseBeforeStoreModel(databaseService, "Store a model");
+                        var modelDir = modelCatalog.getModelDirectory(databaseService);
+                        modelCatalog.store(model.creator(), model.name(), modelDir);
+                    } catch (Exception e) {
+                        executionContext.log().error("Failed to store model to disk after training.", e.getMessage());
+                        throw e;
+                    }
+                }
+                return Stream.of(constructProcResult(computationResult));
+            }
+
+            return Stream.empty();
+        };
     }
 
     @Override
@@ -73,5 +99,15 @@ public class NodeClassificationPipelineTrainSpec implements AlgorithmSpec<NodeCl
                 );
             }
         };
+    }
+
+    private NodeClassificationPipelineTrainResult constructProcResult(
+        ComputationResult<
+            NodeClassificationTrainAlgorithm,
+            NodeClassificationModelResult,
+            NodeClassificationPipelineTrainConfig> computationResult
+    ) {
+        var transformedResult = computationResult.result();
+        return new NodeClassificationPipelineTrainResult(transformedResult, computationResult.computeMillis());
     }
 }
