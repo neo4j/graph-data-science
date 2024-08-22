@@ -51,18 +51,17 @@ public final class FeatureToggleProc {
     }
 
     @Internal
+    @Procedure("gds.features.useUncompressedAdjacencyList.reset")
+    @Description("Set the default behaviour of whether to store uncompressed adjacency lists during graph creation. That value is returned.")
+    public Stream<FeatureState> resetUseUncompressedAdjacencyList() {
+        return facade.operations().resetUseUncompressedAdjacencyList();
+    }
+
+    @Internal
     @Procedure("gds.features.useUncompressedAdjacencyList")
     @Description("Toggle whether the adjacency list should be stored uncompressed during graph creation.")
     public void useUncompressedAdjacencyList(@Name(value = "useUncompressedAdjacencyList") boolean useUncompressedAdjacencyList) {
         facade.operations().setUseUncompressedAdjacencyList(useUncompressedAdjacencyList);
-    }
-
-    @Internal
-    @Procedure("gds.features.useUncompressedAdjacencyList.reset")
-    @Description("Set the default behaviour of whether to store uncompressed adjacency lists during graph creation. That value is returned.")
-    public Stream<FeatureState> resetUseUncompressedAdjacencyList() {
-        GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.reset();
-        return Stream.of(new FeatureState(GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled()));
     }
 
     @Internal

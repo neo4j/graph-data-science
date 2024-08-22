@@ -87,6 +87,10 @@ public final class OperationsApplications {
         return userLogStore.query(user.getUsername());
     }
 
+    public boolean resetUseUncompressedAdjacencyList() {
+        return featureTogglesRepository.resetUseUncompressedAdjacencyList();
+    }
+
     public void setPagesPerThread(long pagesPerThread) {
         if (pagesPerThread <= 0 || pagesPerThread > Integer.MAX_VALUE) {
             throw new IllegalArgumentException(formatWithLocale(

@@ -44,10 +44,10 @@ public class OperationsProcedureFacade {
         return applicationsFacade.operations().queryUserLog(jobId);
     }
 
-    private Stream<ProgressResult> detailView(JobId jobId) {
-        var resultRenderer = new DefaultResultRenderer(jobId);
+    public Stream<FeatureState> resetUseUncompressedAdjacencyList() {
+        var isEnabled = applicationsFacade.operations().resetUseUncompressedAdjacencyList();
 
-        return applicationsFacade.operations().listProgress(jobId, resultRenderer);
+        return Stream.of(new FeatureState(isEnabled));
     }
 
     public void setPagesPerThread(long pagesPerThread) {
@@ -56,6 +56,12 @@ public class OperationsProcedureFacade {
 
     public void setUseUncompressedAdjacencyList(boolean useUncompressedAdjacencyList) {
         applicationsFacade.operations().setUseUncompressedAdjacencyList(useUncompressedAdjacencyList);
+    }
+
+    private Stream<ProgressResult> detailView(JobId jobId) {
+        var resultRenderer = new DefaultResultRenderer(jobId);
+
+        return applicationsFacade.operations().listProgress(jobId, resultRenderer);
     }
 
     private Stream<ProgressResult> summaryView() {

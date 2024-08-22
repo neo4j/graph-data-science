@@ -25,6 +25,12 @@ import org.neo4j.gds.utils.GdsFeatureToggles;
  * Let's encapsulate feature toggles and eventually make them not a global singleton.
  */
 public class FeatureTogglesRepository {
+    boolean resetUseUncompressedAdjacencyList() {
+        GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.reset();
+
+        return GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled();
+    }
+
     void setPagesPerThread(int value) {
         GdsFeatureToggles.PAGES_PER_THREAD.set(value);
     }
