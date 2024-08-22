@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.kge;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -27,7 +28,6 @@ import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
 @GdsCallable(
@@ -58,21 +58,6 @@ public class KGEPredictStreamSpec implements AlgorithmSpec<
 
     @Override
     public ComputationResultConsumer<TopKMapComputer, KGEPredictResult, KGEPredictStreamConfig, Stream<KGEStreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging(
-            "Result streaming failed",
-            executionContext.log(),
-            () -> computationResult.result()
-                .map(result -> {
-                    var graphStore = computationResult.graphStore();
-                    var graph = graphStore.getGraph();
-
-                    return result.topKMap().stream((node1, node2, similarity) -> new KGEStreamResult(
-                        graph.toOriginalNodeId(node1),
-                        graph.toOriginalNodeId(node2),
-                        similarity
-                    ));
-                }).orElseGet(Stream::empty)
-        );
+        return new NullComputationResultConsumer<>();
     }
-
 }

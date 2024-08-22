@@ -19,11 +19,7 @@
  */
 package org.neo4j.gds.paths.steiner;
 
-import org.neo4j.gds.Orientation;
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.core.loading.SingleTypeRelationships;
-import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -35,7 +31,6 @@ import org.neo4j.gds.steiner.SteinerTreeAlgorithmFactory;
 import org.neo4j.gds.steiner.SteinerTreeMutateConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
@@ -65,67 +60,6 @@ public class SteinerTreeMutateSpec implements AlgorithmSpec<ShortestPathsSteiner
     }
 
     public ComputationResultConsumer<ShortestPathsSteinerAlgorithm, SteinerTreeResult, SteinerTreeMutateConfig, Stream<SteinerMutateResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-            var builder = new SteinerMutateResult.Builder();
-
-            if (computationResult.result().isEmpty()) {
-                return Stream.of(builder.build());
-            }
-
-            var steinerTreeResult = computationResult.result().get();
-            var graph = computationResult.graph();
-            var config = computationResult.config();
-
-
-            var mutateRelationshipType = RelationshipType.of(config.mutateRelationshipType());
-            var relationshipsBuilder = GraphFactory
-                .initRelationshipsBuilder()
-                .nodes(computationResult.graph())
-                .relationshipType(mutateRelationshipType)
-                .addPropertyConfig(GraphFactory.PropertyConfig.of(config.mutateProperty()))
-                .orientation(Orientation.NATURAL)
-                .build();
-
-            builder
-                .withTotalWeight(steinerTreeResult.totalCost())
-                .withEffectiveNodeCount(steinerTreeResult.effectiveNodeCount());
-
-            SingleTypeRelationships relationships;
-
-            var sourceNode = config.sourceNode();
-
-
-            try (ProgressTimer ignored = ProgressTimer.start(builder::withMutateMillis)) {
-
-                var parentArray=steinerTreeResult.parentArray();
-                var costArray=steinerTreeResult.relationshipToParentCost();
-                LongStream.range(0, graph.nodeCount())
-                    .filter(nodeId -> parentArray.get(nodeId) != ShortestPathsSteinerAlgorithm.PRUNED)
-                    .forEach(nodeId -> {
-                        var sourceNodeId = (sourceNode == graph.toOriginalNodeId(nodeId)) ?
-                            nodeId :
-                            parentArray.get(nodeId);
-
-                        if (nodeId != sourceNodeId) {
-                            relationshipsBuilder.addFromInternal(sourceNodeId, nodeId, costArray.get(nodeId));
-                        }
-                    });
-
-            }
-            relationships = relationshipsBuilder.build();
-
-            computationResult
-                .graphStore()
-                .addRelationshipType(relationships);
-            builder
-                .withEffectiveTargetNodeCount(steinerTreeResult.effectiveTargetNodesCount())
-                .withComputeMillis(computationResult.computeMillis())
-                .withPreProcessingMillis(computationResult.preProcessingMillis())
-                .withRelationshipsWritten(steinerTreeResult.effectiveNodeCount() - 1)
-                .withConfig(config);
-
-            return Stream.of(builder.build());
-        };
-
+        return new NullComputationResultConsumer<>();
     }
 }

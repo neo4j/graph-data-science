@@ -19,22 +19,14 @@
  */
 package org.neo4j.gds.modularityoptimization;
 
-import org.neo4j.gds.MutatePropertyComputationResultConsumer;
-import org.neo4j.gds.algorithms.community.ConsecutiveLongNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.write.ImmutableNodeProperty;
-import org.neo4j.gds.core.write.NodeProperty;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.community.ModularityOptimizationMutateResult;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
-import org.neo4j.gds.result.AbstractResultBuilder;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
@@ -60,32 +52,6 @@ public class ModularityOptimizationMutateSpecification implements AlgorithmSpec<
 
     @Override
     public ComputationResultConsumer<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationMutateConfig, Stream<ModularityOptimizationMutateResult>> computationResultConsumer() {
-        return new MutatePropertyComputationResultConsumer<>(
-            this::nodePropertyList,
-            this::resultBuilder
-        );
-    }
-
-    private List<NodeProperty> nodePropertyList(ComputationResult<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationMutateConfig> computationResult) {
-        var resultCommunities = computationResult.result()
-            .map(ModularityOptimizationResult::asNodeProperties)
-            .orElse(EmptyLongNodePropertyValues.INSTANCE);
-        NodePropertyValues nodePropertyValues;
-        if (computationResult.config().consecutiveIds()) {
-            nodePropertyValues = new ConsecutiveLongNodePropertyValues(resultCommunities);
-        } else {
-            nodePropertyValues = resultCommunities;
-        }
-        return List.of(ImmutableNodeProperty.of(computationResult.config().mutateProperty(), nodePropertyValues));
-    }
-
-    private AbstractResultBuilder<ModularityOptimizationMutateResult> resultBuilder(
-        ComputationResult<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationMutateConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return ModularityOptimizationSpecificationHelper.resultBuilder(
-            new ModularityOptimizationMutateResult.Builder(executionContext.returnColumns(), computeResult.config().concurrency()),
-            computeResult
-        );
+        return new NullComputationResultConsumer<>();
     }
 }

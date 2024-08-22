@@ -19,22 +19,18 @@
  */
 package org.neo4j.gds.louvain;
 
-import org.neo4j.gds.MutateNodePropertyListFunction;
-import org.neo4j.gds.MutatePropertyComputationResultConsumer;
-import org.neo4j.gds.core.write.ImmutableNodeProperty;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.algorithms.community.LouvainMutateResult;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.louvain.LouvainConstants.LOUVAIN_DESCRIPTION;
-import static org.neo4j.gds.louvain.LouvainNodePropertyValuesDelegate.extractNodeProperties;
 
 @GdsCallable(name = "gds.louvain.mutate", description = LOUVAIN_DESCRIPTION, executionMode = ExecutionMode.MUTATE_NODE_PROPERTY)
 public class LouvainMutateSpec implements AlgorithmSpec<Louvain, LouvainResult, LouvainMutateConfig, Stream<LouvainMutateResult>, LouvainAlgorithmFactory<LouvainMutateConfig>> {
@@ -55,15 +51,6 @@ public class LouvainMutateSpec implements AlgorithmSpec<Louvain, LouvainResult, 
 
     @Override
     public ComputationResultConsumer<Louvain, LouvainResult, LouvainMutateConfig, Stream<LouvainMutateResult>> computationResultConsumer() {
-        MutateNodePropertyListFunction<Louvain, LouvainResult, LouvainMutateConfig> mutateConfigNodePropertyListFunction =
-            computationResult -> List.of(ImmutableNodeProperty.of(
-                computationResult.config().mutateProperty(),
-                extractNodeProperties(computationResult, computationResult.config().mutateProperty())
-            ));
-
-        return new MutatePropertyComputationResultConsumer<>(
-            mutateConfigNodePropertyListFunction,
-            LouvainResultBuilder::createForMutate
-        );
+        return new NullComputationResultConsumer<>();
     }
 }

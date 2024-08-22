@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.undirected;
 
-import org.neo4j.gds.MutateComputationResultConsumer;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -28,8 +28,8 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
-import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
+import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -69,19 +69,7 @@ public class ToUndirectedSpec implements AlgorithmSpec<ToUndirected, SingleTypeR
 
     @Override
     public ComputationResultConsumer<ToUndirected, SingleTypeRelationships, ToUndirectedConfig, Stream<MutateResult>> computationResultConsumer() {
-        return new MutateComputationResultConsumer<>(this::resultBuilder) {
-            @Override
-            protected void updateGraphStore(
-                AbstractResultBuilder<?> resultBuilder,
-                ComputationResult<ToUndirected, SingleTypeRelationships, ToUndirectedConfig> computationResult,
-                ExecutionContext executionContext
-            ) {
-                computationResult.result().ifPresent(result -> {
-                    computationResult.graphStore().addRelationshipType(result);
-                    resultBuilder.withRelationshipsWritten(result.topology().elementCount());
-                });
-            }
-        };
+        return new NullComputationResultConsumer<>();
     }
 
     public static final class MutateResult extends StandardMutateResult {

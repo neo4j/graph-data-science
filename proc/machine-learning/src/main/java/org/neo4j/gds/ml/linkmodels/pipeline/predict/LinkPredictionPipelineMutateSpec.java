@@ -19,15 +19,14 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 
-import java.util.Collections;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
@@ -58,21 +57,6 @@ public class LinkPredictionPipelineMutateSpec implements AlgorithmSpec<
 
     @Override
     public ComputationResultConsumer<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPredictPipelineMutateConfig, Stream<MutateResult>> computationResultConsumer() {
-        return new LinkPredictionPipelineMutateResultConsumer(this::resultBuilder);
-    }
-
-    private MutateResult.Builder resultBuilder(
-        ComputationResult<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPredictPipelineMutateConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        var builder = new MutateResult.Builder()
-            .withSamplingStats(computeResult.result()
-                .map(LinkPredictionResult::samplingStats)
-                .orElseGet(Collections::emptyMap));
-
-        if (executionContext.returnColumns().contains("probabilityDistribution")) {
-            builder.withHistogram();
-        }
-        return builder;
+        return new NullComputationResultConsumer<>();
     }
 }

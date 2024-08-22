@@ -19,17 +19,13 @@
  */
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
-import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
-import org.neo4j.gds.WriteNodePropertyListFunction;
-import org.neo4j.gds.core.write.NodeProperty;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -55,22 +51,7 @@ public class NodeClassificationPipelineWriteSpec implements AlgorithmSpec<NodeCl
 
     @Override
     public ComputationResultConsumer<NodeClassificationPredictPipelineExecutor, NodeClassificationPipelineResult, NodeClassificationPredictPipelineWriteConfig, Stream<WriteResult>> computationResultConsumer() {
-        var writeNodePropertyListFunction = new WriteNodePropertyListFunction<NodeClassificationPredictPipelineExecutor, NodeClassificationPipelineResult, NodeClassificationPredictPipelineWriteConfig>() {
-            @Override
-            public List<NodeProperty> apply(ComputationResult<NodeClassificationPredictPipelineExecutor, NodeClassificationPipelineResult, NodeClassificationPredictPipelineWriteConfig> computationResult) {
-                return PredictedProbabilities.asProperties(
-                    computationResult.result(),
-                    computationResult.config().writeProperty(),
-                    computationResult.config().predictedProbabilityProperty()
-                );
-            }
-        };
-
-        return new WriteNodePropertiesComputationResultConsumer<>(
-            (computationResult, executionContext) -> new WriteResult.Builder(),
-            writeNodePropertyListFunction,
-            name()
-        );
+        return new NullComputationResultConsumer<>();
     }
 
     @Override

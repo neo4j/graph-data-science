@@ -19,19 +19,14 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
-import org.neo4j.gds.MutatePropertyComputationResultConsumer;
-import org.neo4j.gds.api.properties.nodes.EmptyDoubleArrayNodePropertyValues;
-import org.neo4j.gds.core.write.ImmutableNodeProperty;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.algorithms.embeddings.DefaultNodeEmbeddingMutateResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.embeddings.hashgnn.HashGNNProcCompanion.HASH_GNN_DESCRIPTION;
@@ -57,22 +52,6 @@ public class HashGNNMutateSpec implements AlgorithmSpec<HashGNN, HashGNNResult, 
 
     @Override
     public ComputationResultConsumer<HashGNN, HashGNNResult, HashGNNMutateConfig, Stream<DefaultNodeEmbeddingMutateResult>> computationResultConsumer() {
-        return new MutatePropertyComputationResultConsumer<>(
-            computationResult -> List.of(ImmutableNodeProperty.of(
-                computationResult.config().mutateProperty(),
-                computationResult.result()
-                    .map(HashGNNResult::embeddings)
-                    .orElse(EmptyDoubleArrayNodePropertyValues.INSTANCE)
-            )),
-            this::resultBuilder
-        );
-
-    }
-
-    private AbstractResultBuilder<DefaultNodeEmbeddingMutateResult> resultBuilder(
-        ComputationResult<HashGNN, HashGNNResult, HashGNNMutateConfig> computationResult,
-        ExecutionContext executionContext
-    ) {
-        return new DefaultNodeEmbeddingMutateResult.Builder();
+        return new NullComputationResultConsumer<>();
     }
 }

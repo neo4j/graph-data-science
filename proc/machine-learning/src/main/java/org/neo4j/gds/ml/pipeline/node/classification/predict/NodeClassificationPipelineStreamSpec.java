@@ -19,26 +19,19 @@
  */
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.ml.models.BaseModelData;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelineConstants.PREDICT_DESCRIPTION;
 
@@ -63,37 +56,7 @@ public class NodeClassificationPipelineStreamSpec implements AlgorithmSpec<NodeC
 
     @Override
     public ComputationResultConsumer<NodeClassificationPredictPipelineExecutor, NodeClassificationPipelineResult, NodeClassificationPredictPipelineStreamConfig, Stream<NodeClassificationStreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging(
-            "Result streaming failed",
-            executionContext.log(),
-            () -> computationResult.result()
-                .map(result -> {
-                    var pipelineGraphFilter = computationResult.algorithm().nodePropertyStepFilter();
-                    var graph = computationResult.graphStore().getGraph(pipelineGraphFilter.nodeLabels());
-
-                    var predictedClasses = result.predictedClasses();
-                    var predictedProbabilities = result.predictedProbabilities();
-                    return LongStream
-                        .range(IdMap.START_NODE_ID, graph.nodeCount())
-                        .mapToObj(nodeId ->
-                            new NodeClassificationStreamResult(
-                                graph.toOriginalNodeId(nodeId),
-                                predictedClasses.get(nodeId),
-                                nodePropertiesAsList(predictedProbabilities, nodeId)
-                            )
-                        );
-                }).orElseGet(Stream::empty)
-        );
-    }
-
-    private static List<Double> nodePropertiesAsList(
-        Optional<HugeObjectArray<double[]>> predictedProbabilities,
-        long nodeId
-    ) {
-        return predictedProbabilities.map(p -> {
-            var values = p.get(nodeId);
-            return Arrays.stream(values).boxed().collect(Collectors.toList());
-        }).orElse(null);
+        return new NullComputationResultConsumer<>();
     }
 
     @Override

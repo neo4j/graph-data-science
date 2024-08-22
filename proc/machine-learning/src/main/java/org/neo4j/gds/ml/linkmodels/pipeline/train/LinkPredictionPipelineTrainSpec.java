@@ -19,19 +19,19 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.train;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.VerifyThatModelCanBeStored;
 import org.neo4j.gds.compat.GdsVersionInfoProvider;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.executor.validation.BeforeLoadValidation;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainPipelineExecutor;
-import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -64,30 +64,7 @@ public class LinkPredictionPipelineTrainSpec implements AlgorithmSpec<
 
     @Override
     public ComputationResultConsumer<LinkPredictionTrainPipelineExecutor, LinkPredictionTrainPipelineExecutor.LinkPredictionTrainPipelineResult, LinkPredictionTrainConfig, Stream<TrainResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-            return computationResult.result().map(result -> {
-                var model = result.model();
-                var modelCatalog = executionContext.modelCatalog();
-                assert modelCatalog != null : "ModelCatalog should have been set in the ExecutionContext by this point!!!";
-                modelCatalog.set(model);
-
-                if (computationResult.config().storeModelToDisk()) {
-                    try {
-                        // FIXME: This works but is not what we want to do!
-                        var databaseService = executionContext.dependencyResolver()
-                            .resolveDependency(GraphDatabaseService.class);
-                        modelCatalog.checkLicenseBeforeStoreModel(databaseService, "Store a model");
-                        var modelDir = modelCatalog.getModelDirectory(databaseService);
-                        modelCatalog.store(model.creator(), model.name(), modelDir);
-                    } catch (Exception e) {
-                        executionContext.log().error("Failed to store model to disk after training.", e.getMessage());
-                        throw e;
-                    }
-                }
-                return Stream.of(new TrainResult(model, result.trainingStatistics(), computationResult.computeMillis()
-                ));
-            }).orElseGet(Stream::empty);
-        };
+        return new NullComputationResultConsumer<>();
     }
 
     @Override

@@ -19,16 +19,14 @@
  */
 package org.neo4j.gds.walking;
 
-import org.neo4j.gds.MutateComputationResultConsumer;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.CollapsePathMutateResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.stream.Stream;
 
@@ -60,27 +58,6 @@ public class CollapsePathMutateSpec implements AlgorithmSpec<CollapsePath, Singl
 
     @Override
     public ComputationResultConsumer<CollapsePath, SingleTypeRelationships, CollapsePathConfig, Stream<CollapsePathMutateResult>> computationResultConsumer() {
-            return new MutateComputationResultConsumer<>(this::resultBuilder) {
-                @Override
-                protected void updateGraphStore(
-                    AbstractResultBuilder<?> resultBuilder,
-                    ComputationResult<CollapsePath, SingleTypeRelationships, CollapsePathConfig> computationResult,
-                    ExecutionContext executionContext
-                ) {
-                    computationResult.result().ifPresent(result -> {
-                        computationResult.graphStore().addRelationshipType(result);
-                        resultBuilder.withRelationshipsWritten(result.topology().elementCount());
-                    });
-                }
-            };
-        }
-
-
-    private AbstractResultBuilder<CollapsePathMutateResult> resultBuilder(
-        ComputationResult<CollapsePath, SingleTypeRelationships, CollapsePathConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return new CollapsePathMutateResult.Builder();
+        return new NullComputationResultConsumer<>();
     }
-
 }

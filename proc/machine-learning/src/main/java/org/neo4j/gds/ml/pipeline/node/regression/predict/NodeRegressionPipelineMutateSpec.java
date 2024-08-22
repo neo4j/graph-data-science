@@ -19,21 +19,15 @@
  */
 package org.neo4j.gds.ml.pipeline.node.regression.predict;
 
-import org.neo4j.gds.MutatePropertyComputationResultConsumer;
-import org.neo4j.gds.api.properties.nodes.EmptyDoubleNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
-import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.ml.pipeline.node.PredictMutateResult;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -75,29 +69,6 @@ public class NodeRegressionPipelineMutateSpec
 
     @Override
     public ComputationResultConsumer<NodeRegressionPredictPipelineExecutor, HugeDoubleArray, NodeRegressionPredictPipelineMutateConfig, Stream<PredictMutateResult>> computationResultConsumer() {
-        return new MutatePropertyComputationResultConsumer<>(
-            this::nodePropertyList,
-            this::resultBuilder
-        );
-    }
-
-    private List<NodeProperty> nodePropertyList(ComputationResult<NodeRegressionPredictPipelineExecutor, HugeDoubleArray, NodeRegressionPredictPipelineMutateConfig> computationResult) {
-        return List.of(NodeProperty.of(
-            computationResult.config().mutateProperty(),
-            nodeProperties(computationResult)
-        ));
-    }
-
-    private NodePropertyValues nodeProperties(ComputationResult<NodeRegressionPredictPipelineExecutor, HugeDoubleArray, NodeRegressionPredictPipelineMutateConfig> computationResult) {
-        return computationResult.result()
-            .map(NodePropertyValuesAdapter::adapt)
-            .orElse(EmptyDoubleNodePropertyValues.INSTANCE);
-    }
-
-    private PredictMutateResult.Builder resultBuilder(
-        ComputationResult<NodeRegressionPredictPipelineExecutor, HugeDoubleArray, NodeRegressionPredictPipelineMutateConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return new PredictMutateResult.Builder();
+        return new NullComputationResultConsumer<>();
     }
 }

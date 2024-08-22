@@ -19,19 +19,14 @@
  */
 package org.neo4j.gds.closeness;
 
-import org.neo4j.gds.MutatePropertyComputationResultConsumer;
-import org.neo4j.gds.api.properties.nodes.EmptyDoubleNodePropertyValues;
-import org.neo4j.gds.core.write.ImmutableNodeProperty;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityMutateResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.closeness.Constants.CLOSENESS_DESCRIPTION;
@@ -57,30 +52,6 @@ public class ClosenessCentralityMutateSpec implements AlgorithmSpec<ClosenessCen
 
     @Override
     public ComputationResultConsumer<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityMutateConfig, Stream<CentralityMutateResult>> computationResultConsumer() {
-        return new MutatePropertyComputationResultConsumer<>(
-            computationResult -> List.of(ImmutableNodeProperty.of(
-                computationResult.config().mutateProperty(),
-                computationResult.result()
-                    .map(ClosenessCentralityResult::nodePropertyValues)
-                    .orElse(EmptyDoubleNodePropertyValues.INSTANCE)
-            )),
-            this::resultBuilder
-        );
+        return new NullComputationResultConsumer<>();
     }
-
-    private AbstractResultBuilder<CentralityMutateResult> resultBuilder(
-        ComputationResult<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityMutateConfig> computationResult,
-        ExecutionContext executionContext
-    ) {
-        var builder = new CentralityMutateResult.Builder(
-            executionContext.returnColumns(),
-            computationResult.config().concurrency()
-        );
-
-        computationResult.result()
-            .ifPresent(result -> builder.withCentralityFunction(result.centralityScoreProvider()));
-
-        return builder;
-    }
-
 }

@@ -19,22 +19,17 @@
  */
 package org.neo4j.gds.kcore;
 
-import org.neo4j.gds.MutatePropertyComputationResultConsumer;
-import org.neo4j.gds.core.write.ImmutableNodeProperty;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.algorithms.community.KCoreDecompositionMutateResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
-import static org.neo4j.gds.kcore.KCoreCompanion.nodePropertyValues;
 import static org.neo4j.gds.kcore.KCoreDecomposition.KCORE_DESCRIPTION;
 
 @GdsCallable(name = "gds.kcore.mutate", description = KCORE_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
@@ -56,22 +51,6 @@ public class KCoreDecompositionMutateSpec implements AlgorithmSpec<KCoreDecompos
 
     @Override
     public ComputationResultConsumer<KCoreDecomposition, KCoreDecompositionResult, KCoreDecompositionMutateConfig, Stream<KCoreDecompositionMutateResult>> computationResultConsumer() {
-        return new MutatePropertyComputationResultConsumer<>(
-            computationResult -> List.of(ImmutableNodeProperty.of(
-                computationResult.config().mutateProperty(),
-                nodePropertyValues(computationResult.result()))),
-            this::resultBuilder
-        );
-
-    }
-
-    private AbstractResultBuilder<KCoreDecompositionMutateResult> resultBuilder(
-        ComputationResult<KCoreDecomposition, KCoreDecompositionResult, KCoreDecompositionMutateConfig> computationResult,
-        ExecutionContext executionContext
-    ) {
-        var builder = new KCoreDecompositionMutateResult.Builder();
-        computationResult.result().ifPresent(result -> builder.withDegeneracy(result.degeneracy()));
-
-        return builder;
+        return new NullComputationResultConsumer<>();
     }
 }

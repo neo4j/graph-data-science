@@ -19,18 +19,16 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
-import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 
-import java.util.Collection;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.PREDICT_DESCRIPTION;
 
@@ -63,22 +61,6 @@ public class LinkPredictionPipelineStreamSpec implements
 
     @Override
     public ComputationResultConsumer<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPredictPipelineStreamConfig, Stream<StreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging(
-            "Result streaming failed",
-            executionContext.log(),
-            () -> computationResult.result()
-                .map(result -> {
-                    var graphStore = computationResult.graphStore();
-                    Collection<NodeLabel> labelFilter = computationResult.algorithm().labelFilter().predictNodeLabels();
-                    var graph = graphStore.getGraph(labelFilter);
-
-                    return result.stream()
-                        .map(predictedLink -> new StreamResult(
-                            graph.toOriginalNodeId(predictedLink.sourceId()),
-                            graph.toOriginalNodeId(predictedLink.targetId()),
-                            predictedLink.probability()
-                        ));
-                }).orElseGet(Stream::empty)
-        );
+        return new NullComputationResultConsumer<>();
     }
 }

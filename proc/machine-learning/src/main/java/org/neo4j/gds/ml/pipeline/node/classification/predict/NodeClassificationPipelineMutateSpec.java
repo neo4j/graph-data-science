@@ -19,16 +19,13 @@
  */
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
-import org.neo4j.gds.GraphStoreUpdater;
-import org.neo4j.gds.MutateComputationResultConsumer;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.ml.pipeline.node.PredictMutateResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -55,25 +52,7 @@ public class NodeClassificationPipelineMutateSpec implements AlgorithmSpec<NodeC
 
     @Override
     public ComputationResultConsumer<NodeClassificationPredictPipelineExecutor, NodeClassificationPipelineResult, NodeClassificationPredictPipelineMutateConfig, Stream<PredictMutateResult>> computationResultConsumer() {
-        return new MutateComputationResultConsumer<>((computationResult, executionContext) -> new PredictMutateResult.Builder()) {
-            @Override
-            protected void updateGraphStore(
-                AbstractResultBuilder<?> resultBuilder,
-                ComputationResult<NodeClassificationPredictPipelineExecutor, NodeClassificationPipelineResult, NodeClassificationPredictPipelineMutateConfig> computationResult,
-                ExecutionContext executionContext
-            ) {
-                GraphStoreUpdater.UpdateGraphStore(
-                    resultBuilder,
-                    computationResult,
-                    executionContext,
-                    PredictedProbabilities.asProperties(
-                        computationResult.result(),
-                        computationResult.config().mutateProperty(),
-                        computationResult.config().predictedProbabilityProperty()
-                    )
-                );
-            }
-        };
+        return new NullComputationResultConsumer<>();
     }
 
     @Override
