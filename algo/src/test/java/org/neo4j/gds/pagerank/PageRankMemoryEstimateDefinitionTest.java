@@ -33,15 +33,15 @@ class PageRankMemoryEstimateDefinitionTest {
 
     private static Stream<Arguments> expectedMemoryEstimation() {
         return Stream.of(
-            Arguments.of(1, 2412832L, 2412832L),
-            Arguments.of(4, 2413000L, 2413000L),
-            Arguments.of(42, 2415128L, 2415128L)
+            Arguments.of(1, 2412832L),
+            Arguments.of(4, 2413000L),
+            Arguments.of(42, 2415128L)
         );
     }
 
     @ParameterizedTest
     @MethodSource("expectedMemoryEstimation")
-    void shouldComputeMemoryEstimation(int concurrency, long expectedMinBytes, long expectedMaxBytes) {
+    void shouldComputeMemoryEstimation(int concurrency, long expectedBytes) {
         var nodeCount = 100_000;
         var relationshipCount = nodeCount * 10;
 
@@ -49,8 +49,7 @@ class PageRankMemoryEstimateDefinitionTest {
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(nodeCount, relationshipCount, new Concurrency(concurrency))
-            .hasMin(expectedMinBytes)
-            .hasMax(expectedMaxBytes);
+            .hasSameMinAndMaxEqualTo(expectedBytes);
     }
 
     @Test
@@ -62,8 +61,7 @@ class PageRankMemoryEstimateDefinitionTest {
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(nodeCount, relationshipCount, new Concurrency(4))
-            .hasMin(241_286_621_640L)
-            .hasMax(241_286_621_640L);
+            .hasSameMinAndMaxEqualTo(241_286_621_640L);
     }
 
 }

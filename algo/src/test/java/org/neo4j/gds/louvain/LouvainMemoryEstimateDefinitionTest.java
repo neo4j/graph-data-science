@@ -80,8 +80,7 @@ class LouvainMemoryEstimateDefinitionTest {
 
         MemoryEstimationAssert.assertThat(memoryEstimation).
             memoryRange(nodeCount,relCount, concurrency)
-            .hasMin(expectedMinBytes)
-            .hasMax(expectedMaxBytes);
+            .hasRange(expectedMinBytes,expectedMaxBytes);
     }
 
     @Test

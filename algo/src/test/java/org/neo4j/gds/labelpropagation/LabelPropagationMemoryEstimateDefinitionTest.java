@@ -45,8 +45,7 @@ class LabelPropagationMemoryEstimateDefinitionTest {
         var memoryEstimation = new LabelPropagationMemoryEstimateDefinition().memoryEstimation();
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(100_000L, new Concurrency(concurrency))
-            .hasMin(expectedMinBytes)
-            .hasMax(expectedMaxBytes);
+            .hasRange(expectedMinBytes,expectedMaxBytes);
     }
 
     @Test

@@ -31,8 +31,7 @@ class SccMemoryEstimateDefinitionTest {
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(100, 6000, new Concurrency(1))
-            .hasMin(36348L)
-            .hasMax(69132L);
+            .hasRange(36348L,69132L);
     }
 
 }

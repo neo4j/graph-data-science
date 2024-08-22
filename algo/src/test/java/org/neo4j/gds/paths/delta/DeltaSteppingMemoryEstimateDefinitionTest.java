@@ -36,8 +36,7 @@ class DeltaSteppingMemoryEstimateDefinitionTest {
 
         MemoryEstimationAssert.assertThat(memoryEstimation.memoryEstimation())
             .memoryRange(dimensions, new Concurrency(4))
-            .hasMin(expectedMin)
-            .hasMax(expectedMax);
+            .hasRange(expectedMin,expectedMax);
     }
 
 }

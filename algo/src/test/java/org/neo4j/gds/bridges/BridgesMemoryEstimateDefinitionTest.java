@@ -31,7 +31,6 @@ class BridgesMemoryEstimateDefinitionTest {
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(100, 6000, new Concurrency(1))
-            .hasMin(221056L)
-            .hasMax(221056L);
+            .hasSameMinAndMaxEqualTo(221056L);
     }
 }

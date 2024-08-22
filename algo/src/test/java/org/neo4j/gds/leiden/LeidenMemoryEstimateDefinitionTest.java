@@ -40,7 +40,6 @@ class LeidenMemoryEstimateDefinitionTest {
 
         MemoryEstimationAssert.assertThat(estimate)
             .memoryRange(10_1000,100_000, new Concurrency(concurrency))
-            .hasMin(expectedMin)
-            .hasMax(expectedMax);
+            .hasRange(expectedMin,expectedMax);
     }
 }

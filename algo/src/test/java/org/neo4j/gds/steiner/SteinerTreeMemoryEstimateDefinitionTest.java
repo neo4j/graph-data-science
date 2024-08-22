@@ -36,8 +36,7 @@ class SteinerTreeMemoryEstimateDefinitionTest {
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(10, 23, new Concurrency(4))
-            .hasMin(minExpectedBytes)
-            .hasMax(maxExpectedBytes);
+            .hasRange(minExpectedBytes,maxExpectedBytes);
     }
 
     static Stream<Arguments> memoryEstimationSetup() {

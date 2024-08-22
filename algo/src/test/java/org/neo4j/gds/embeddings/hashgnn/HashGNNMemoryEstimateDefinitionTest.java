@@ -72,9 +72,7 @@ class HashGNNMemoryEstimateDefinitionTest {
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(nodeCount,relationshipCount,new Concurrency(concurrency))
-            .hasMin(expectedMinMemory)
-            .hasMax(expectedMaxMemory);
-
+            .hasRange(expectedMinMemory,expectedMaxMemory);
     }
 
     @Test

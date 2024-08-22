@@ -37,8 +37,7 @@ class ModularityOptimizationMemoryEstimateDefinitionTest {
         var memoryEstimation = new ModularityOptimizationMemoryEstimateDefinition().memoryEstimation();
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(100_000L,  new Concurrency(concurrency))
-            .hasMax(max)
-            .hasMin(min);
+            .hasRange(min, max);
     }
 
     static Stream<Arguments> memoryEstimationTuples() {

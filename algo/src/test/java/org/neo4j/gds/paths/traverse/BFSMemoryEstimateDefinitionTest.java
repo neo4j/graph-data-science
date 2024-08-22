@@ -49,7 +49,6 @@ class BFSMemoryEstimateDefinitionTest {
 
         MemoryEstimationAssert.assertThat(memoryEstimation.memoryEstimation())
             .memoryRange(dimensions, new Concurrency(concurrency))
-            .hasMin(expectedMin)
-            .hasMax(expectedMax);
+            .hasRange(expectedMin,expectedMax);
     }
 }

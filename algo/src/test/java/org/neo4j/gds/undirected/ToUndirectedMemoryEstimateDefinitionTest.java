@@ -27,7 +27,6 @@ import org.neo4j.gds.assertions.MemoryEstimationAssert;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.TestMethodRunner;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.mem.MemoryRange;
 
 import java.util.stream.Stream;
 
@@ -41,14 +40,14 @@ class ToUndirectedMemoryEstimateDefinitionTest {
         var uncompressedRunner = TestMethodRunner.runUncompressedOrdered();
 
         return Stream.of(
-            Arguments.of(compressedRunner, MemoryRange.of(1_724_496, 1_724_496)),
-            Arguments.of(uncompressedRunner, MemoryRange.of(3_035_320, 3_035_320))
+            Arguments.of(compressedRunner, 1_724_496),
+            Arguments.of(uncompressedRunner, 3_035_320)
         );
     }
 
     @ParameterizedTest
     @MethodSource("compressions")
-    void memoryEstimationWithUncompressedFeatureToggle(TestMethodRunner runner, MemoryRange expected) {
+    void memoryEstimationWithUncompressedFeatureToggle(TestMethodRunner runner, long expectedBytes) {
 
         var config = mock(ToUndirectedMemoryEstimateParameters.class);
         when(config.internalRelationshipType()).thenReturn(RelationshipType .of("T1"));
@@ -59,8 +58,7 @@ class ToUndirectedMemoryEstimateDefinitionTest {
             var memoryEstimation = new ToUndirectedMemoryEstimateDefinition(config).memoryEstimation();
             MemoryEstimationAssert.assertThat(memoryEstimation)
                 .memoryRange(graphDimensions, new Concurrency(4))
-                .hasMin(expected.min)
-                .hasMax(expected.max);
+                .hasSameMinAndMaxEqualTo(expectedBytes);
         });
     }
 
