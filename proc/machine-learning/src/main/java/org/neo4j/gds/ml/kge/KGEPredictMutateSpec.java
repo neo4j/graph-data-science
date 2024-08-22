@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.ml.kge;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -54,13 +54,6 @@ public class KGEPredictMutateSpec implements AlgorithmSpec<
 
     @Override
     public ComputationResultConsumer<TopKMapComputer, KGEPredictResult, KGEPredictMutateConfig, Stream<KGEMutateResult>> computationResultConsumer() {
-        return new KGEMutateResultConsumer(this::resultBuilder);
-    }
-
-    private KGEMutateResult.Builder resultBuilder(
-        ComputationResult<TopKMapComputer, KGEPredictResult, KGEPredictMutateConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return new KGEMutateResult.Builder();
+        return new NullComputationResultConsumer<>();
     }
 }

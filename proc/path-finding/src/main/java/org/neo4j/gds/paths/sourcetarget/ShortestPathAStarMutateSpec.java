@@ -19,17 +19,17 @@
  */
 package org.neo4j.gds.paths.sourcetarget;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
-import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
-import org.neo4j.gds.paths.ShortestPathMutateResultConsumer;
 import org.neo4j.gds.paths.astar.AStar;
 import org.neo4j.gds.paths.astar.AStarFactory;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
 
 import java.util.stream.Stream;
 
@@ -56,7 +56,7 @@ public class ShortestPathAStarMutateSpec implements AlgorithmSpec<AStar, PathFin
 
     @Override
     public ComputationResultConsumer<AStar, PathFindingResult, ShortestPathAStarMutateConfig, Stream<PathFindingMutateResult>> computationResultConsumer() {
-        return new ShortestPathMutateResultConsumer<>();
+        return new NullComputationResultConsumer<>();
     }
 
     @Override
