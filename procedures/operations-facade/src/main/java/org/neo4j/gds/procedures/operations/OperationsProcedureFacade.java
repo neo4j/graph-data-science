@@ -54,6 +54,12 @@ public class OperationsProcedureFacade {
         return Stream.of(new FeatureStringValue(canonicalStrategyIdentifier));
     }
 
+    public Stream<FeatureState> resetEnableArrowDatabaseImport() {
+        var isEnabled = applicationsFacade.operations().resetEnableArrowDatabaseImport();
+
+        return Stream.of(new FeatureState(isEnabled));
+    }
+
     public Stream<FeatureState> resetUseMixedAdjacencyList() {
         var isEnabled = applicationsFacade.operations().resetUseMixedAdjacencyList();
 

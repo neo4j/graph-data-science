@@ -69,6 +69,13 @@ public final class FeatureToggleProc {
     }
 
     @Internal
+    @Procedure("gds.features.enableArrowDatabaseImport.reset")
+    @Description("Sets the default behaviour for enabling Neo4j database import via the GDS Arrow Flight Server. That value is returned.")
+    public Stream<FeatureState> resetEnableArrowDatabaseImport() {
+        return facade.operations().resetEnableArrowDatabaseImport();
+    }
+
+    @Internal
     @Procedure("gds.features.useMixedAdjacencyList.reset")
     @Description("Set the default behaviour of whether to use bit packing compression for high degree nodes during graph creation. That value is returned.")
     public Stream<FeatureState> resetUseMixedAdjacencyList() {
@@ -122,14 +129,6 @@ public final class FeatureToggleProc {
     @Description("Toggle whether the adjacency list should be stored uncompressed during graph creation.")
     public void useUncompressedAdjacencyList(@Name(value = "useUncompressedAdjacencyList") boolean useUncompressedAdjacencyList) {
         facade.operations().setUseUncompressedAdjacencyList(useUncompressedAdjacencyList);
-    }
-
-    @Internal
-    @Procedure("gds.features.enableArrowDatabaseImport.reset")
-    @Description("Sets the default behaviour for enabling Neo4j database import via the GDS Arrow Flight Server. That value is returned.")
-    public Stream<FeatureState> resetEnableArrowDatabaseImport() {
-        GdsFeatureToggles.ENABLE_ARROW_DATABASE_IMPORT.reset();
-        return Stream.of(new FeatureState(GdsFeatureToggles.ENABLE_ARROW_DATABASE_IMPORT.isEnabled()));
     }
 
     @Internal

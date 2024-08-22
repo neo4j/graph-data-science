@@ -95,6 +95,10 @@ public final class OperationsApplications {
         return featureTogglesRepository.resetAdjacencyPackingStrategy();
     }
 
+    public boolean resetEnableArrowDatabaseImport() {
+        return featureTogglesRepository.resetEnableArrowDatabaseImport();
+    }
+
     public boolean resetUseMixedAdjacencyList() {
         return featureTogglesRepository.resetUseMixedAdjacencyList();
     }

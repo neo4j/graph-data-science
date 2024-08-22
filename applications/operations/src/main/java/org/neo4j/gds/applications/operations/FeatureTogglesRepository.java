@@ -42,6 +42,12 @@ public class FeatureTogglesRepository {
         return GdsFeatureToggles.ADJACENCY_PACKING_STRATEGY.get().name();
     }
 
+    boolean resetEnableArrowDatabaseImport() {
+        GdsFeatureToggles.ENABLE_ARROW_DATABASE_IMPORT.reset();
+
+        return GdsFeatureToggles.ENABLE_ARROW_DATABASE_IMPORT.isEnabled();
+    }
+
     boolean resetUseMixedAdjacencyList() {
         GdsFeatureToggles.USE_MIXED_ADJACENCY_LIST.reset();
 
