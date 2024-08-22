@@ -103,6 +103,10 @@ public final class OperationsApplications {
         return featureTogglesRepository.resetUsePackedAdjacencyList();
     }
 
+    public boolean resetUseReorderedAdjacencyList() {
+        return featureTogglesRepository.resetUseReorderedAdjacencyList();
+    }
+
     public boolean resetUseUncompressedAdjacencyList() {
         return featureTogglesRepository.resetUseUncompressedAdjacencyList();
     }

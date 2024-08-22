@@ -66,6 +66,12 @@ public class OperationsProcedureFacade {
         return Stream.of(new FeatureState(isEnabled));
     }
 
+    public Stream<FeatureState> resetUseReorderedAdjacencyList() {
+        var isEnabled = applicationsFacade.operations().resetUseReorderedAdjacencyList();
+
+        return Stream.of(new FeatureState(isEnabled));
+    }
+
     public Stream<FeatureState> resetUseUncompressedAdjacencyList() {
         var isEnabled = applicationsFacade.operations().resetUseUncompressedAdjacencyList();
 

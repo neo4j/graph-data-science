@@ -76,6 +76,13 @@ public final class FeatureToggleProc {
     }
 
     @Internal
+    @Procedure("gds.features.useReorderedAdjacencyList.reset")
+    @Description("Set the default behaviour of whether to reorder adjacency lists during graph creation. That value is returned.")
+    public Stream<FeatureState> resetUseReorderedAdjacencyList() {
+        return facade.operations().resetUseReorderedAdjacencyList();
+    }
+
+    @Internal
     @Procedure("gds.features.useUncompressedAdjacencyList.reset")
     @Description("Set the default behaviour of whether to store uncompressed adjacency lists during graph creation. That value is returned.")
     public Stream<FeatureState> resetUseUncompressedAdjacencyList() {
@@ -108,14 +115,6 @@ public final class FeatureToggleProc {
     @Description("Toggle whether the adjacency list should be stored uncompressed during graph creation.")
     public void useUncompressedAdjacencyList(@Name(value = "useUncompressedAdjacencyList") boolean useUncompressedAdjacencyList) {
         facade.operations().setUseUncompressedAdjacencyList(useUncompressedAdjacencyList);
-    }
-
-    @Internal
-    @Procedure("gds.features.useReorderedAdjacencyList.reset")
-    @Description("Set the default behaviour of whether to reorder adjacency lists during graph creation. That value is returned.")
-    public Stream<FeatureState> resetUseReorderedAdjacencyList() {
-        GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.reset();
-        return Stream.of(new FeatureState(GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.isEnabled()));
     }
 
     @Internal

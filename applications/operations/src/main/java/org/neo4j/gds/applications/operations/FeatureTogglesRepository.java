@@ -50,6 +50,12 @@ public class FeatureTogglesRepository {
         return GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST.isEnabled();
     }
 
+    boolean resetUseReorderedAdjacencyList() {
+        GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.reset();
+
+        return GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST.isEnabled();
+    }
+
     boolean resetUseUncompressedAdjacencyList() {
         GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.reset();
 
