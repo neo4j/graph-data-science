@@ -48,6 +48,12 @@ public class FeatureTogglesRepository {
         return GdsFeatureToggles.ENABLE_ARROW_DATABASE_IMPORT.isEnabled();
     }
 
+    int resetPagesPerThread() {
+        GdsFeatureToggles.PAGES_PER_THREAD.set(GdsFeatureToggles.PAGES_PER_THREAD_DEFAULT_SETTING);
+
+        return GdsFeatureToggles.PAGES_PER_THREAD_DEFAULT_SETTING;
+    }
+
     boolean resetUseMixedAdjacencyList() {
         GdsFeatureToggles.USE_MIXED_ADJACENCY_LIST.reset();
 

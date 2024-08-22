@@ -20,6 +20,7 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.operations.FeatureLongValue;
 import org.neo4j.gds.procedures.operations.FeatureState;
 import org.neo4j.gds.procedures.operations.FeatureStringValue;
 import org.neo4j.gds.utils.GdsFeatureToggles;
@@ -73,6 +74,13 @@ public final class FeatureToggleProc {
     @Description("Sets the default behaviour for enabling Neo4j database import via the GDS Arrow Flight Server. That value is returned.")
     public Stream<FeatureState> resetEnableArrowDatabaseImport() {
         return facade.operations().resetEnableArrowDatabaseImport();
+    }
+
+    @Internal
+    @Procedure("gds.features.pagesPerThread.reset")
+    @Description("Set the value of pages per thread to the default. That value is returned.")
+    public Stream<FeatureLongValue> resetPagesPerThread() {
+        return facade.operations().resetPagesPerThread();
     }
 
     @Internal
@@ -132,14 +140,6 @@ public final class FeatureToggleProc {
     }
 
     @Internal
-    @Procedure("gds.features.pagesPerThread.reset")
-    @Description("Set the value of pages per thread to the default. That value is returned.")
-    public Stream<FeatureLongValue> resetPagesPerThread() {
-        GdsFeatureToggles.PAGES_PER_THREAD.set(GdsFeatureToggles.PAGES_PER_THREAD_DEFAULT_SETTING);
-        return Stream.of(new FeatureLongValue(GdsFeatureToggles.PAGES_PER_THREAD_DEFAULT_SETTING));
-    }
-
-    @Internal
     @Procedure("gds.features.enableAdjacencyCompressionMemoryTracking")
     @Description("Enables memory tracking during the construction of an adjacency list.")
     public void enableAdjacencyCompressionMemoryTracking(@Name(value = "enableAdjacencyCompressionMemoryTracking") boolean enableAdjacencyCompressionMemoryTracking) {
@@ -152,14 +152,5 @@ public final class FeatureToggleProc {
     public Stream<FeatureState> resetEnableAdjacencyCompressionMemoryTracking() {
         GdsFeatureToggles.ENABLE_ADJACENCY_COMPRESSION_MEMORY_TRACKING.reset();
         return Stream.of(new FeatureState(GdsFeatureToggles.ENABLE_ADJACENCY_COMPRESSION_MEMORY_TRACKING.isEnabled()));
-    }
-
-    @SuppressWarnings("unused")
-    public static final class FeatureLongValue {
-        public final long value;
-
-        FeatureLongValue(long value) {
-            this.value = value;
-        }
     }
 }

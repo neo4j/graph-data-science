@@ -60,6 +60,12 @@ public class OperationsProcedureFacade {
         return Stream.of(new FeatureState(isEnabled));
     }
 
+    public Stream<FeatureLongValue> resetPagesPerThread() {
+        var pagesPerThread = applicationsFacade.operations().resetPagesPerThread();
+
+        return Stream.of(new FeatureLongValue(pagesPerThread));
+    }
+
     public Stream<FeatureState> resetUseMixedAdjacencyList() {
         var isEnabled = applicationsFacade.operations().resetUseMixedAdjacencyList();
 

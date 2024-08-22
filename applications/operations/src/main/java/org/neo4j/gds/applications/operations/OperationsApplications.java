@@ -99,6 +99,10 @@ public final class OperationsApplications {
         return featureTogglesRepository.resetEnableArrowDatabaseImport();
     }
 
+    public int resetPagesPerThread() {
+        return featureTogglesRepository.resetPagesPerThread();
+    }
+
     public boolean resetUseMixedAdjacencyList() {
         return featureTogglesRepository.resetUseMixedAdjacencyList();
     }
