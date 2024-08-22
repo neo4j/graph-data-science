@@ -46,6 +46,12 @@ public class FeatureTogglesRepository {
         return GdsFeatureToggles.ADJACENCY_PACKING_STRATEGY.get().name();
     }
 
+    boolean resetEnableAdjacencyCompressionMemoryTracking() {
+        GdsFeatureToggles.ENABLE_ADJACENCY_COMPRESSION_MEMORY_TRACKING.reset();
+
+        return GdsFeatureToggles.ENABLE_ADJACENCY_COMPRESSION_MEMORY_TRACKING.isEnabled();
+    }
+
     boolean resetEnableArrowDatabaseImport() {
         GdsFeatureToggles.ENABLE_ARROW_DATABASE_IMPORT.reset();
 

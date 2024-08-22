@@ -23,7 +23,6 @@ import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.operations.FeatureLongValue;
 import org.neo4j.gds.procedures.operations.FeatureState;
 import org.neo4j.gds.procedures.operations.FeatureStringValue;
-import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -74,6 +73,13 @@ public final class FeatureToggleProc {
     @Description("If `usePackedAdjacencyList` is enabled, this function resets the implementation strategy to the default.")
     public Stream<FeatureStringValue> resetAdjacencyPackingStrategy() {
         return facade.operations().resetAdjacencyPackingStrategy();
+    }
+
+    @Internal
+    @Procedure("gds.features.enableAdjacencyCompressionMemoryTracking.reset")
+    @Description("Sets the default behaviour for enabling memory tracking during the construction of an adjacency list. That value is returned.")
+    public Stream<FeatureState> resetEnableAdjacencyCompressionMemoryTracking() {
+        return facade.operations().resetEnableAdjacencyCompressionMemoryTracking();
     }
 
     @Internal
@@ -144,13 +150,5 @@ public final class FeatureToggleProc {
     @Description("Toggle whether the adjacency list should be stored uncompressed during graph creation.")
     public void useUncompressedAdjacencyList(@Name(value = "useUncompressedAdjacencyList") boolean useUncompressedAdjacencyList) {
         facade.operations().setUseUncompressedAdjacencyList(useUncompressedAdjacencyList);
-    }
-
-    @Internal
-    @Procedure("gds.features.enableAdjacencyCompressionMemoryTracking.reset")
-    @Description("Sets the default behaviour for enabling memory tracking during the construction of an adjacency list. That value is returned.")
-    public Stream<FeatureState> resetEnableAdjacencyCompressionMemoryTracking() {
-        GdsFeatureToggles.ENABLE_ADJACENCY_COMPRESSION_MEMORY_TRACKING.reset();
-        return Stream.of(new FeatureState(GdsFeatureToggles.ENABLE_ADJACENCY_COMPRESSION_MEMORY_TRACKING.isEnabled()));
     }
 }

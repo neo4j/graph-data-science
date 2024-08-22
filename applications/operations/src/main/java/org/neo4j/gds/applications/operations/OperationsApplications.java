@@ -99,6 +99,10 @@ public final class OperationsApplications {
         return featureTogglesRepository.resetAdjacencyPackingStrategy();
     }
 
+    public boolean resetEnableAdjacencyCompressionMemoryTracking() {
+        return featureTogglesRepository.resetEnableAdjacencyCompressionMemoryTracking();
+    }
+
     public boolean resetEnableArrowDatabaseImport() {
         return featureTogglesRepository.resetEnableArrowDatabaseImport();
     }

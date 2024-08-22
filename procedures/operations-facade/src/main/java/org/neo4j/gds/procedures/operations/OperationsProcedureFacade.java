@@ -58,6 +58,12 @@ public class OperationsProcedureFacade {
         return Stream.of(new FeatureStringValue(canonicalStrategyIdentifier));
     }
 
+    public Stream<FeatureState> resetEnableAdjacencyCompressionMemoryTracking() {
+        var isEnabled = applicationsFacade.operations().resetEnableAdjacencyCompressionMemoryTracking();
+
+        return Stream.of(new FeatureState(isEnabled));
+    }
+
     public Stream<FeatureState> resetEnableArrowDatabaseImport() {
         var isEnabled = applicationsFacade.operations().resetEnableArrowDatabaseImport();
 
