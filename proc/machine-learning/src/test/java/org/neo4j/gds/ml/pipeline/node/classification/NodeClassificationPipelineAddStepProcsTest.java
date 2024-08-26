@@ -55,7 +55,10 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
         var facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
             .with(new PipelinesProcedureFacade(new User(getUsername(), false)))
             .build();
-        var result = new NodeClassificationPipelineAddStepProcs(facade).addNodeProperty(
+        var procedure = new NodeClassificationPipelineAddStepProcs();
+        procedure.facade = facade;
+
+        var result = procedure.addNodeProperty(
             "myPipeline",
             "pageRank",
             Map.of("mutateProperty", "pr")
@@ -73,16 +76,16 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
 
     @Test
     void shouldSelectFeatures() {
-        NodeClassificationPipelineAddStepProcs.selectFeatures(
-            getUsername(),
-            "myPipeline",
-            "test"
-        );
-        var result = NodeClassificationPipelineAddStepProcs.selectFeatures(
-            getUsername(),
-            "myPipeline",
-            List.of("pr", "pr2")
-        );
+        var facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
+            .with(new PipelinesProcedureFacade(new User(getUsername(), false)))
+            .build();
+        var procedure = new NodeClassificationPipelineAddStepProcs();
+        procedure.facade = facade;
+
+        procedure.selectFeatures("myPipeline", "test");
+
+        var result = procedure.selectFeatures("myPipeline", List.of("pr", "pr2")).findFirst().orElseThrow();
+
         assertThat(result.name).isEqualTo("myPipeline");
         assertThat(result.splitConfig).isEqualTo(DEFAULT_CONFIG.toMap());
         assertThat(result.nodePropertySteps).isEqualTo(List.of());
@@ -92,16 +95,13 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
 
     @Test
     void failOnIncompleteNodePropertyStepConfig() {
-        assertThatThrownBy(() -> {
-            var facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
-                .with(new PipelinesProcedureFacade(new User(getUsername(), false)))
-                .build();
-            new NodeClassificationPipelineAddStepProcs(facade).addNodeProperty(
-                "myPipeline",
-                "fastRP",
-                Map.of()
-            );
-        })
+        var facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
+            .with(new PipelinesProcedureFacade(new User(getUsername(), false)))
+            .build();
+        var procedure = new NodeClassificationPipelineAddStepProcs();
+        procedure.facade = facade;
+
+        assertThatThrownBy(() -> procedure.addNodeProperty("myPipeline", "fastRP", Map.of()))
             .isExactlyInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Multiple errors in configuration arguments:")
             .hasMessageContaining("No value specified for the mandatory configuration parameter `embeddingDimension`")
@@ -113,13 +113,15 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
         var facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
             .with(new PipelinesProcedureFacade(new User(getUsername(), false)))
             .build();
-        var nodeClassificationPipelineAddStepProcs = new NodeClassificationPipelineAddStepProcs(facade);
-        nodeClassificationPipelineAddStepProcs.addNodeProperty(
+        var procedure = new NodeClassificationPipelineAddStepProcs();
+        procedure.facade = facade;
+
+        procedure.addNodeProperty(
             "myPipeline",
             "pageRank",
             Map.of("mutateProperty", "pr")
         );
-        assertThatThrownBy(() -> nodeClassificationPipelineAddStepProcs.addNodeProperty(
+        assertThatThrownBy(() -> procedure.addNodeProperty(
             "myPipeline",
             "pageRank",
             Map.of("mutateProperty", "pr")
@@ -134,8 +136,10 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
         var facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
             .with(new PipelinesProcedureFacade(new User(getUsername(), false)))
             .build();
-        var nodeClassificationPipelineAddStepProcs = new NodeClassificationPipelineAddStepProcs(facade);
-        assertThatThrownBy(() -> nodeClassificationPipelineAddStepProcs.addNodeProperty(
+        var procedure = new NodeClassificationPipelineAddStepProcs();
+        procedure.facade = facade;
+
+        assertThatThrownBy(() -> procedure.addNodeProperty(
             "myPipeline",
             "pageRank",
             Map.of("mutateProperty", "pr", "destroyEverything", true)
@@ -149,22 +153,22 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
         var facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
             .with(new PipelinesProcedureFacade(new User(getUsername(), false)))
             .build();
-        var nodeClassificationPipelineAddStepProcs = new NodeClassificationPipelineAddStepProcs(facade);
-        nodeClassificationPipelineAddStepProcs.addNodeProperty(
+        var procedure = new NodeClassificationPipelineAddStepProcs();
+        procedure.facade = facade;
+
+        procedure.addNodeProperty(
             "myPipeline",
             "pageRank",
             Map.of("mutateProperty", "pr")
         );
-        NodeClassificationPipelineAddStepProcs.selectFeatures(
-            getUsername(),
+        procedure.selectFeatures(
             "myPipeline",
             "pr"
         );
-        var result = NodeClassificationPipelineAddStepProcs.selectFeatures(
-            getUsername(),
+        var result = procedure.selectFeatures(
             "myPipeline",
             "pr2"
-        );
+        ).findFirst().orElseThrow();
         assertThat(result.name).isEqualTo("myPipeline");
         assertThat(result.splitConfig).isEqualTo(DEFAULT_CONFIG.toMap());
         assertThat(result.nodePropertySteps).isEqualTo(List.of(
@@ -181,13 +185,15 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
         var facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
             .with(new PipelinesProcedureFacade(new User(getUsername(), false)))
             .build();
-        var nodeClassificationPipelineAddStepProcs = new NodeClassificationPipelineAddStepProcs(facade);
-        nodeClassificationPipelineAddStepProcs.addNodeProperty(
+        var procedure = new NodeClassificationPipelineAddStepProcs();
+        procedure.facade = facade;
+
+        procedure.addNodeProperty(
             "myPipeline",
             "pageRank",
             Map.of("mutateProperty", "pr")
         );
-        var result = nodeClassificationPipelineAddStepProcs.addNodeProperty(
+        var result = procedure.addNodeProperty(
             "myPipeline",
             "pageRank",
             Map.of("mutateProperty", "pr2", "contextNodeLabels", List.of("A"), "contextRelationshipTypes", List.of("T"))
@@ -214,8 +220,10 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
         var facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
             .with(new PipelinesProcedureFacade(new User(getUsername(), false)))
             .build();
-        var nodeClassificationPipelineAddStepProcs = new NodeClassificationPipelineAddStepProcs(facade);
-        assertThatThrownBy(() -> nodeClassificationPipelineAddStepProcs.addNodeProperty(
+        var procedure = new NodeClassificationPipelineAddStepProcs();
+        procedure.facade = facade;
+
+        assertThatThrownBy(() -> procedure.addNodeProperty(
             "ceci n'est pas une pipe",
             "pageRank",
             Map.of("mutateProperty", "pr")
@@ -226,8 +234,13 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
 
     @Test
     void shouldThrowIfPipelineDoesntExistForFeatureStep() {
-        assertThatThrownBy(() -> NodeClassificationPipelineAddStepProcs.selectFeatures(
-            getUsername(),
+        var facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
+            .with(new PipelinesProcedureFacade(new User(getUsername(), false)))
+            .build();
+        var procedure = new NodeClassificationPipelineAddStepProcs();
+        procedure.facade = facade;
+
+        assertThatThrownBy(() -> procedure.selectFeatures(
             "ceci n'est pas une pipe",
             "test"
         ))
@@ -240,8 +253,10 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
         var facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
             .with(new PipelinesProcedureFacade(new User(getUsername(), false)))
             .build();
-        var nodeClassificationPipelineAddStepProcs = new NodeClassificationPipelineAddStepProcs(facade);
-        assertThatThrownBy(() -> nodeClassificationPipelineAddStepProcs.addNodeProperty(
+        var procedure = new NodeClassificationPipelineAddStepProcs();
+        procedure.facade = facade;
+
+        assertThatThrownBy(() -> procedure.addNodeProperty(
             "myPipeline",
             "juggleSpoons",
             Map.of("mutateProperty", "pr")
@@ -255,8 +270,10 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
         var facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
             .with(new PipelinesProcedureFacade(new User(getUsername(), false)))
             .build();
-        var nodeClassificationPipelineAddStepProcs = new NodeClassificationPipelineAddStepProcs(facade);
-        assertThatThrownBy(() -> nodeClassificationPipelineAddStepProcs.addNodeProperty(
+        var procedure = new NodeClassificationPipelineAddStepProcs();
+        procedure.facade = facade;
+
+        assertThatThrownBy(() -> procedure.addNodeProperty(
             "myPipeline",
             "pageRank",
             Map.of("nodeLabels", List.of("LABEL"), "mutateProperty", "pr")
@@ -273,8 +290,10 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
         var facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
             .with(new PipelinesProcedureFacade(new User(getUsername(), false)))
             .build();
-        var nodeClassificationPipelineAddStepProcs = new NodeClassificationPipelineAddStepProcs(facade);
-        assertThatThrownBy(() -> nodeClassificationPipelineAddStepProcs.addNodeProperty(
+        var procedure = new NodeClassificationPipelineAddStepProcs();
+        procedure.facade = facade;
+
+        assertThatThrownBy(() -> procedure.addNodeProperty(
             "testPipe",
             "pageRank",
             Map.of("mutateProperty", "pr")
@@ -288,12 +307,18 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
     @Test
     void shouldThrowIfAddingFeatureToANonPipeline() {
         PipelineCatalog.set(getUsername(), "testPipe", new LinkPredictionTrainingPipeline());
+        var facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
+            .with(new PipelinesProcedureFacade(new User(getUsername(), false)))
+            .build();
+        var procedure = new NodeClassificationPipelineAddStepProcs();
+        procedure.facade = facade;
 
-        assertThatThrownBy(() -> NodeClassificationPipelineAddStepProcs.selectFeatures(
-            getUsername(),
-            "testPipe",
-            "something"
-        ))
+        assertThatThrownBy(() -> {
+            procedure.selectFeatures(
+                "testPipe",
+                "something"
+            );
+        })
             .isExactlyInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining(
                 "The pipeline `testPipe` is of type `Link prediction training pipeline`, but expected type `Node classification training pipeline`.");
