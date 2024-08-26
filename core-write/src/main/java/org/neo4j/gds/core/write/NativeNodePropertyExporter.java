@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.write;
 
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.compat.Neo4jProxy;
@@ -58,18 +57,13 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
             .withTerminationFlag(terminationFlag);
     }
 
-    @SuppressWarnings("immutables:subtype")
-    @ValueClass
-    public interface ResolvedNodeProperty {
-        String propertyKey();
-        NodePropertyValues properties();
-        int propertyToken();
+    record ResolvedNodeProperty(int propertyToken, String propertyKey, NodePropertyValues properties) {
 
         static ResolvedNodeProperty of(NodeProperty nodeProperty, int propertyToken) {
-            return ImmutableResolvedNodeProperty.of(
+            return new ResolvedNodeProperty(
+                propertyToken,
                 nodeProperty.key(),
-                nodeProperty.values(),
-                propertyToken
+                nodeProperty.values()
             );
         }
     }
