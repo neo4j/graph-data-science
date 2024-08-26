@@ -26,6 +26,7 @@ import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.termination.TerminationFlag;
 
 public class ToUndirectedAlgorithmFactory extends GraphStoreAlgorithmFactory<ToUndirected, ToUndirectedConfig> {
 
@@ -35,7 +36,7 @@ public class ToUndirectedAlgorithmFactory extends GraphStoreAlgorithmFactory<ToU
         ToUndirectedConfig configuration,
         ProgressTracker progressTracker
     ) {
-        return new ToUndirected(graphStore, configuration, progressTracker, DefaultPool.INSTANCE);
+        return new ToUndirected(graphStore, configuration, progressTracker, DefaultPool.INSTANCE, TerminationFlag.RUNNING_TRUE);
     }
 
     @Override

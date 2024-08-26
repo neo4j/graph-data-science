@@ -32,6 +32,9 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.scaleproperties.ScaleProperties;
 import org.neo4j.gds.scaleproperties.ScalePropertiesBaseConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
+import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.undirected.ToUndirected;
+import org.neo4j.gds.undirected.ToUndirectedConfig;
 import org.neo4j.gds.walking.CollapsePath;
 import org.neo4j.gds.walking.CollapsePathConfig;
 
@@ -45,9 +48,11 @@ class MiscellaneousAlgorithms {
     private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
 
     private final ProgressTrackerCreator progressTrackerCreator;
+    private final TerminationFlag terminationFlag;
 
-    MiscellaneousAlgorithms(ProgressTrackerCreator progressTrackerCreator) {
+    MiscellaneousAlgorithms(ProgressTrackerCreator progressTrackerCreator, TerminationFlag terminationFlag) {
         this.progressTrackerCreator = progressTrackerCreator;
+        this.terminationFlag = terminationFlag;
     }
 
     SingleTypeRelationships collapsePath(GraphStore graphStore, CollapsePathConfig configuration) {
@@ -102,6 +107,25 @@ class MiscellaneousAlgorithms {
             configuration,
             progressTracker,
             DefaultPool.INSTANCE
+        );
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+    }
+
+    SingleTypeRelationships toUndirected(GraphStore graphStore, ToUndirectedConfig configuration) {
+        var task = Tasks.task(
+            LabelForProgressTracking.ToUndirected.value,
+            Tasks.leaf("Create Undirected Relationships", graphStore.nodeCount()),
+            Tasks.leaf("Build undirected Adjacency list")
+        );
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var algorithm = new ToUndirected(
+            graphStore,
+            configuration,
+            progressTracker,
+            DefaultPool.INSTANCE,
+            terminationFlag
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);

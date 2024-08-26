@@ -28,21 +28,19 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.miscellaneous.ToUndirectedMutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
 
-import java.util.Map;
 import java.util.stream.Stream;
 
 @GdsCallable(
     name = ToUndirectedSpec.CALLABLE_NAME,
     executionMode = ExecutionMode.MUTATE_RELATIONSHIP,
-    description = ToUndirectedSpec.DESCRIPTION,
+    description = Constants.TO_UNDIRECTED_DESCRIPTION,
     aliases = {"gds.beta.graph.relationships.toUndirected"}
 )
-public class ToUndirectedSpec implements AlgorithmSpec<ToUndirected, SingleTypeRelationships, ToUndirectedConfig, Stream<ToUndirectedSpec.MutateResult>, ToUndirectedAlgorithmFactory> {
+public class ToUndirectedSpec implements AlgorithmSpec<ToUndirected, SingleTypeRelationships, ToUndirectedConfig, Stream<ToUndirectedMutateResult>, ToUndirectedAlgorithmFactory> {
 
-    static final String DESCRIPTION = "The ToUndirected procedure converts directed relationships to undirected relationships";
     static final String CALLABLE_NAME = "gds.graph.relationships.toUndirected";
 
     @Override
@@ -60,15 +58,15 @@ public class ToUndirectedSpec implements AlgorithmSpec<ToUndirected, SingleTypeR
         return ((__, config) -> ToUndirectedConfig.of(config));
     }
 
-    protected AbstractResultBuilder<MutateResult> resultBuilder(
+    protected AbstractResultBuilder<ToUndirectedMutateResult> resultBuilder(
         ComputationResult<ToUndirected, SingleTypeRelationships, ToUndirectedConfig> computeResult,
         ExecutionContext executionContext
     ) {
-        return new MutateResult.Builder().withInputRelationships(computeResult.graph().relationshipCount());
+        return new ToUndirectedMutateResult.Builder().withInputRelationships(computeResult.graph().relationshipCount());
     }
 
     @Override
-    public ComputationResultConsumer<ToUndirected, SingleTypeRelationships, ToUndirectedConfig, Stream<MutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<ToUndirected, SingleTypeRelationships, ToUndirectedConfig, Stream<ToUndirectedMutateResult>> computationResultConsumer() {
         return new MutateComputationResultConsumer<>(this::resultBuilder) {
             @Override
             protected void updateGraphStore(
@@ -82,47 +80,5 @@ public class ToUndirectedSpec implements AlgorithmSpec<ToUndirected, SingleTypeR
                 });
             }
         };
-    }
-
-    public static final class MutateResult extends StandardMutateResult {
-        public final long inputRelationships;
-        public final long relationshipsWritten;
-
-        private MutateResult(
-            long preProcessingMillis,
-            long computeMillis,
-            long mutateMillis,
-            long postProcessingMillis,
-            long inputRelationships,
-            long relationshipsWritten,
-            Map<String, Object> configuration
-        ) {
-            super(preProcessingMillis, computeMillis, postProcessingMillis, mutateMillis, configuration);
-            this.inputRelationships = inputRelationships;
-            this.relationshipsWritten = relationshipsWritten;
-        }
-
-        public static class Builder extends AbstractResultBuilder<MutateResult> {
-
-            private long inputRelationships;
-
-            Builder withInputRelationships(long inputRelationships) {
-                this.inputRelationships = inputRelationships;
-                return this;
-            }
-
-            @Override
-            public MutateResult build() {
-                return new MutateResult(
-                    preProcessingMillis,
-                    computeMillis,
-                    mutateMillis,
-                    0,
-                    inputRelationships,
-                    relationshipsWritten,
-                    config.toMap()
-                );
-            }
-        }
     }
 }

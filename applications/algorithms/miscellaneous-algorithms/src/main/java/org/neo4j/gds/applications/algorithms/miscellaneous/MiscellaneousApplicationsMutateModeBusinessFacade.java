@@ -24,13 +24,16 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTempla
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
+import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.scaleproperties.ScalePropertiesMutateConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
+import org.neo4j.gds.undirected.ToUndirectedConfig;
 import org.neo4j.gds.walking.CollapsePathConfig;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.CollapsePath;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ScaleProperties;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ToUndirected;
 
 public class MiscellaneousApplicationsMutateModeBusinessFacade {
     private final MiscellaneousApplicationsEstimationModeBusinessFacade estimation;
@@ -81,6 +84,24 @@ public class MiscellaneousApplicationsMutateModeBusinessFacade {
             ScaleProperties,
             () -> estimation.scaleProperties(configuration),
             (graph, __) -> algorithms.scaleProperties(graph, configuration),
+            mutateStep,
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT toUndirected(
+        GraphName graphName,
+        ToUndirectedConfig configuration,
+        ResultBuilder<ToUndirectedConfig, SingleTypeRelationships, RESULT, RelationshipsWritten> resultBuilder
+    ) {
+        var mutateStep = new ToUndirectedMutateStep();
+
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+            graphName,
+            configuration,
+            ToUndirected,
+            () -> estimation.toUndirected(configuration),
+            (graph, graphStore) -> algorithms.toUndirected(graphStore, configuration),
             mutateStep,
             resultBuilder
         );

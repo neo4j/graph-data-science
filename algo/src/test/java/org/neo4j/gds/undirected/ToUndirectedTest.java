@@ -36,6 +36,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 import java.util.Optional;
@@ -82,7 +83,8 @@ class ToUndirectedTest {
             directedGraphStore,
             config,
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
 
         directedGraphStore.addRelationshipType(undirectedRelationships);
@@ -129,7 +131,8 @@ class ToUndirectedTest {
             singleDirectedGraphStore,
             config,
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
 
         singleDirectedGraphStore.addRelationshipType(undirectedRelationships);
@@ -175,7 +178,8 @@ class ToUndirectedTest {
             noPropertyDirectedGraphStore,
             config,
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
 
         noPropertyDirectedGraphStore.addRelationshipType(undirectedRelationships);
@@ -207,7 +211,8 @@ class ToUndirectedTest {
             inputGraphStore,
             config,
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
 
         inputGraphStore.addRelationshipType(undirectedRels);
@@ -240,7 +245,8 @@ class ToUndirectedTest {
             input,
             config,
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
 
         input.addRelationshipType(aggregatedUndirectedRelationships);
@@ -281,7 +287,8 @@ class ToUndirectedTest {
             input,
             config,
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
 
         input.addRelationshipType(aggregatedUndirectedRelationships);

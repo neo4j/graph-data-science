@@ -60,6 +60,7 @@ import org.neo4j.gds.ml.pipeline.stubs.SingleSourceShortestPathDeltaStub;
 import org.neo4j.gds.ml.pipeline.stubs.SingleSourceShortestPathDijkstraStub;
 import org.neo4j.gds.ml.pipeline.stubs.SpanningTreeStub;
 import org.neo4j.gds.ml.pipeline.stubs.SteinerTreeStub;
+import org.neo4j.gds.ml.pipeline.stubs.ToUndirectedStub;
 import org.neo4j.gds.ml.pipeline.stubs.TriangleCountStub;
 import org.neo4j.gds.ml.pipeline.stubs.WccStub;
 
@@ -121,6 +122,7 @@ class StubbyHolder {
             case SpanningTree -> new SpanningTreeStub();
             case SteinerTree -> new SteinerTreeStub();
             case TopologicalSort -> null;
+            case ToUndirected -> new ToUndirectedStub();
             case TriangleCount -> new TriangleCountStub();
             case Triangles -> null;
             case WCC -> new WccStub();

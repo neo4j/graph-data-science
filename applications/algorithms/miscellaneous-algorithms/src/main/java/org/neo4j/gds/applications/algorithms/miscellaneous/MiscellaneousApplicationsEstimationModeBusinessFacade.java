@@ -25,6 +25,8 @@ import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.scaleproperties.ScalePropertiesBaseConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesMemoryEstimateDefinition;
+import org.neo4j.gds.undirected.ToUndirectedConfig;
+import org.neo4j.gds.undirected.ToUndirectedMemoryEstimateDefinition;
 
 public class MiscellaneousApplicationsEstimationModeBusinessFacade {
     private final AlgorithmEstimationTemplate algorithmEstimationTemplate;
@@ -33,12 +35,12 @@ public class MiscellaneousApplicationsEstimationModeBusinessFacade {
         this.algorithmEstimationTemplate = algorithmEstimationTemplate;
     }
 
-    public MemoryEstimation scaleProperties(ScalePropertiesBaseConfig configuration) {
-        return new ScalePropertiesMemoryEstimateDefinition(configuration.nodeProperties()).memoryEstimation();
-    }
-
     public MemoryEstimation collapsePath() {
         throw new MemoryEstimationNotImplementedException();
+    }
+
+    public MemoryEstimation scaleProperties(ScalePropertiesBaseConfig configuration) {
+        return new ScalePropertiesMemoryEstimateDefinition(configuration.nodeProperties()).memoryEstimation();
     }
 
     public MemoryEstimateResult scaleProperties(
@@ -52,5 +54,9 @@ public class MiscellaneousApplicationsEstimationModeBusinessFacade {
             graphNameOrConfiguration,
             memoryEstimation
         );
+    }
+
+    public MemoryEstimation toUndirected(ToUndirectedConfig configuration) {
+        return new ToUndirectedMemoryEstimateDefinition(configuration.toMemoryEstimateParameters()).memoryEstimation();
     }
 }

@@ -68,6 +68,7 @@ public enum LabelForProgressTracking {
     SpanningTree("SpanningTree"),
     SteinerTree("SteinerTree"),
     TopologicalSort("TopologicalSort"),
+    ToUndirected("ToUndirected"),
     TriangleCount("TriangleCount"),
     Triangles("Triangles"),
     WCC("WCC"),
@@ -126,6 +127,7 @@ public enum LabelForProgressTracking {
             case SpanningTree -> SpanningTree;
             case SteinerTree -> SteinerTree;
             case TopologicalSort -> TopologicalSort;
+            case ToUndirected -> ToUndirected;
             case TriangleCount -> TriangleCount;
             case Triangles -> Triangles;
             case WCC -> WCC;

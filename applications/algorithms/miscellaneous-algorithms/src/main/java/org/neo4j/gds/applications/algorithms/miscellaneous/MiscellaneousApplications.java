@@ -58,7 +58,10 @@ public final class MiscellaneousApplications {
         ProgressTrackerCreator progressTrackerCreator,
         MutateNodeProperty mutateNodeProperty
     ) {
-        var algorithms = new MiscellaneousAlgorithms(progressTrackerCreator);
+        var algorithms = new MiscellaneousAlgorithms(
+            progressTrackerCreator,
+            requestScopedDependencies.getTerminationFlag()
+        );
 
         var estimation = new MiscellaneousApplicationsEstimationModeBusinessFacade(algorithmEstimationTemplate);
         var mutation = new MiscellaneousApplicationsMutateModeBusinessFacade(
