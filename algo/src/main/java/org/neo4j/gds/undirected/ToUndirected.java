@@ -39,6 +39,7 @@ import org.neo4j.gds.core.loading.construction.RelationshipsBuilderBuilder;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Optional;
@@ -52,11 +53,12 @@ public class ToUndirected extends Algorithm<SingleTypeRelationships> {
     private final ExecutorService executorService;
     private final Concurrency concurrency;
 
-    protected ToUndirected(
+    public ToUndirected(
         GraphStore graphStore,
         ToUndirectedConfig config,
         ProgressTracker progressTracker,
-        ExecutorService executorService
+        ExecutorService executorService,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
 
@@ -64,6 +66,7 @@ public class ToUndirected extends Algorithm<SingleTypeRelationships> {
         this.config = config;
         this.executorService = executorService;
         this.concurrency = config.concurrency();
+        this.terminationFlag = terminationFlag;
     }
 
     @Override

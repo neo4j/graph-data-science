@@ -60,6 +60,7 @@ import org.neo4j.gds.spanningtree.SpanningTreeMutateConfig;
 import org.neo4j.gds.steiner.SteinerTreeMutateConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateConfig;
 import org.neo4j.gds.triangle.TriangleCountMutateConfig;
+import org.neo4j.gds.undirected.ToUndirectedConfig;
 import org.neo4j.gds.walking.CollapsePathConfig;
 import org.neo4j.gds.wcc.WccMutateConfig;
 
@@ -121,6 +122,7 @@ public class ConfigurationParsersForMutateMode {
             case SpanningTree -> SpanningTreeMutateConfig::of;
             case SteinerTree -> SteinerTreeMutateConfig::of;
             case TopologicalSort -> null;
+            case ToUndirected -> ToUndirectedConfig::of;
             case TriangleCount -> TriangleCountMutateConfig::of;
             case Triangles -> null;
             case WCC -> WccMutateConfig::of;

@@ -19,12 +19,10 @@
  */
 package org.neo4j.gds.undirected;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.loading.SingleTypeRelationships;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
-import org.neo4j.gds.executor.ProcedureExecutorSpec;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.algorithms.miscellaneous.ToUndirectedMutateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -33,9 +31,13 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
+import static org.neo4j.gds.undirected.Constants.TO_UNDIRECTED_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class ToUndirectedProc extends BaseProc {
+public class ToUndirectedProc {
+    @Context
+    public GraphDataScienceProcedures facade;
 
     @Internal
     @Deprecated(forRemoval = true)
@@ -43,70 +45,51 @@ public class ToUndirectedProc extends BaseProc {
         value = "gds.beta.graph.relationships.toUndirected", mode = READ,
         deprecatedBy = ToUndirectedSpec.CALLABLE_NAME
     )
-    @Description(ToUndirectedSpec.DESCRIPTION)
-    public Stream<ToUndirectedSpec.MutateResult> mutateDeprecated(
+    @Description(TO_UNDIRECTED_DESCRIPTION)
+    public Stream<ToUndirectedMutateResult> mutateDeprecated(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.beta.graph.relationships.toUndirected");
-        executionContext()
+        facade.deprecatedProcedures().called("gds.beta.graph.relationships.toUndirected");
+        facade
             .log()
             .warn("Procedure `gds.beta.graph.relationships.toUndirected` has been deprecated, please use `gds.graph.relationships.toUndirected`.");
         return mutate(graphName, configuration);
     }
 
-    @Procedure(value = ToUndirectedSpec.CALLABLE_NAME, mode = READ)
-    @Description(ToUndirectedSpec.DESCRIPTION)
-    public Stream<ToUndirectedSpec.MutateResult> mutate(
+    @Procedure(value = "gds.graph.relationships.toUndirected", mode = READ)
+    @Description(TO_UNDIRECTED_DESCRIPTION)
+    public Stream<ToUndirectedMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var mutateSpec = new ToUndirectedSpec();
-        var pipelineSpec = new ProcedureExecutorSpec<ToUndirected, SingleTypeRelationships, ToUndirectedConfig>();
-
-        return new ProcedureExecutor<>(
-            mutateSpec,
-            pipelineSpec,
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.algorithms().miscellaneous().toUndirectedMutateStub().execute(graphName, configuration);
     }
 
     @Internal
     @Deprecated(forRemoval = true)
     @Procedure(
         value = "gds.beta.graph.relationships.toUndirected.estimate", mode = READ,
-        deprecatedBy = ToUndirectedSpec.CALLABLE_NAME + ".estimate"
+        deprecatedBy = "gds.graph.relationships.toUndirected.estimate"
     )
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimateDeprecated(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.beta.graph.relationships.toUndirected.estimate");
-        executionContext()
+        facade.deprecatedProcedures().called("gds.beta.graph.relationships.toUndirected.estimate");
+        facade
             .log()
             .warn("Procedure `gds.beta.graph.relationships.toUndirected.estimate` has been deprecated, please use `gds.graph.relationships.toUndirected.estimate`.");
         return estimate(graphNameOrConfiguration, algoConfiguration);
     }
 
-    @Procedure(value = ToUndirectedSpec.CALLABLE_NAME + ".estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Procedure(value = "gds.graph.relationships.toUndirected.estimate", mode = READ)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        var mutateSpec = new ToUndirectedSpec();
-        var pipelineSpec = new ProcedureExecutorSpec<ToUndirected, SingleTypeRelationships, ToUndirectedConfig>();
-
-        return new MemoryEstimationExecutor<>(
-            mutateSpec,
-            pipelineSpec,
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().miscellaneous().toUndirectedMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

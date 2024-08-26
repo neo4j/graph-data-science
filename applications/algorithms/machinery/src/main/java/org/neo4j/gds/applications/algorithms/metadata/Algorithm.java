@@ -74,6 +74,7 @@ public enum Algorithm {
     SpanningTree,
     SteinerTree,
     TopologicalSort,
+    ToUndirected,
     TriangleCount,
     Triangles,
     WCC,
