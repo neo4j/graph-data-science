@@ -17,28 +17,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading.construction;
+package org.neo4j.gds.values;
 
-import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.FloatArrayNodePropertyValues;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
-public class Neo4jLongNodePropertyValues implements LongNodePropertyValues, Neo4jNodePropertyValues {
+public class Neo4jFloatArrayNodePropertyValues implements FloatArrayNodePropertyValues, Neo4jNodePropertyValues {
 
-    private final LongNodePropertyValues internal;
+    private final FloatArrayNodePropertyValues internal;
 
-    public Neo4jLongNodePropertyValues(LongNodePropertyValues internal) {
+    public Neo4jFloatArrayNodePropertyValues(FloatArrayNodePropertyValues internal) {
         this.internal = internal;
     }
 
     @Override
     public Value value(long nodeId) {
-        return Values.longValue(longValue(nodeId));
+        var value = floatArrayValue(nodeId);
+        return value == null ? null : Values.floatArray(value);
     }
 
     @Override
-    public long longValue(long nodeId) {
-        return internal.longValue(nodeId);
+    public float[] floatArrayValue(long nodeId) {
+        return internal.floatArrayValue(nodeId);
     }
 
     @Override

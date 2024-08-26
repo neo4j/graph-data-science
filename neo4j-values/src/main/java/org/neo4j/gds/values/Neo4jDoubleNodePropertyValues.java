@@ -17,11 +17,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading.construction;
+package org.neo4j.gds.values;
 
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
 import org.neo4j.values.storable.Value;
+import org.neo4j.values.storable.Values;
 
-public interface Neo4jNodePropertyValues extends NodePropertyValues {
-    Value value(long nodeId);
+public class Neo4jDoubleNodePropertyValues implements DoubleNodePropertyValues, Neo4jNodePropertyValues {
+
+    private final DoubleNodePropertyValues internal;
+
+    public Neo4jDoubleNodePropertyValues(DoubleNodePropertyValues internal) {
+        this.internal = internal;
+    }
+
+    @Override
+    public Value value(long nodeId) {
+        var value = doubleValue(nodeId);
+        return Double.isNaN(value) ? null : Values.doubleValue(value);
+    }
+
+    @Override
+    public double doubleValue(long nodeId) {
+        return internal.doubleValue(nodeId);
+    }
+
+    @Override
+    public long nodeCount() {
+        return internal.nodeCount();
+    }
 }
