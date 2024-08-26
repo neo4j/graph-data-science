@@ -9,7 +9,7 @@ ext {
         '5.23': properties.getOrDefault('neo4jVersion523', '5.23.0'),
     ]
 
-    neo4jDefault = neos.'5.20'
+    neo4jDefault = neos.'5.23'
     neo4j_minor = properties.getOrDefault('neo4jVersion', neo4jDefault).toString().split('\\.')[0..1].join('.')
 
     scalas = [
