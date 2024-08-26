@@ -19,19 +19,14 @@
  */
 package org.neo4j.gds.pagerank;
 
-import org.neo4j.gds.MutatePropertyComputationResultConsumer;
-import org.neo4j.gds.api.properties.nodes.EmptyDoubleNodePropertyValues;
-import org.neo4j.gds.core.write.NodeProperty;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.algorithms.centrality.PageRankMutateResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
@@ -57,39 +52,6 @@ public class PageRankMutateSpec implements AlgorithmSpec<PageRankAlgorithm, Page
 
     @Override
     public ComputationResultConsumer<PageRankAlgorithm, PageRankResult, PageRankMutateConfig, Stream<PageRankMutateResult>> computationResultConsumer() {
-        return new MutatePropertyComputationResultConsumer<>(
-            computationResult ->
-                List.of(
-                    NodeProperty.of(
-                        computationResult.config().mutateProperty(),
-                        computationResult.result()
-                            .map(PageRankResult::nodePropertyValues)
-                            .orElse(EmptyDoubleNodePropertyValues.INSTANCE)
-                    )
-                ),
-            this::resultBuilder
-        );
+        return new NullComputationResultConsumer<>();
     }
-
-    private AbstractResultBuilder<PageRankMutateResult> resultBuilder(
-        ComputationResult<PageRankAlgorithm, PageRankResult, PageRankMutateConfig> computationResult,
-        ExecutionContext executionContext
-    ) {
-        var builder = new PageRankMutateResult.Builder(
-            executionContext.returnColumns(),
-            computationResult.config().concurrency()
-        );
-
-        computationResult.result().ifPresent(result -> {
-            builder
-                .withDidConverge(result.didConverge())
-                .withRanIterations(result.iterations())
-                .withCentralityFunction(result.centralityScoreProvider())
-                .withScalerVariant(computationResult.config().scaler());
-        });
-
-        return builder;
-    }
-
-
 }

@@ -19,20 +19,14 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.neo4j.gds.MutatePropertyComputationResultConsumer;
-import org.neo4j.gds.api.properties.nodes.EmptyDoubleNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.core.write.ImmutableNodeProperty;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.algorithms.community.LocalClusteringCoefficientMutateResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
@@ -56,28 +50,6 @@ public class LocalClusteringCoefficientMutateSpec implements AlgorithmSpec<Local
 
     @Override
     public ComputationResultConsumer<LocalClusteringCoefficient, LocalClusteringCoefficientResult, LocalClusteringCoefficientMutateConfig, Stream<LocalClusteringCoefficientMutateResult>> computationResultConsumer() {
-        return new MutatePropertyComputationResultConsumer<>(
-            computationResult -> List.of(ImmutableNodeProperty.of(
-                computationResult.config().mutateProperty(),
-                computationResult.result()
-                    .map(LocalClusteringCoefficientResult::localClusteringCoefficients)
-                    .map(NodePropertyValuesAdapter::adapt)
-                    .orElse(EmptyDoubleNodePropertyValues.INSTANCE)
-            )),
-            this::resultBuilder
-        );
-    }
-
-
-    private AbstractResultBuilder<LocalClusteringCoefficientMutateResult> resultBuilder(
-        ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficientResult, LocalClusteringCoefficientMutateConfig> computationResult,
-        ExecutionContext executionContext
-    ) {
-        var builder = LocalClusteringCoefficientMutateResult.builder();
-
-        computationResult.result()
-            .ifPresent(result -> builder.withAverageClusteringCoefficient(result.averageClusteringCoefficient()));
-
-        return builder;
+        return new NullComputationResultConsumer<>();
     }
 }

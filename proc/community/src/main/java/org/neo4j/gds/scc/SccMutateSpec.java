@@ -19,22 +19,16 @@
  */
 package org.neo4j.gds.scc;
 
-import org.neo4j.gds.MutatePropertyComputationResultConsumer;
-import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.algorithms.community.SccMutateResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.scc.Scc.SCC_DESCRIPTION;
@@ -63,36 +57,6 @@ public class SccMutateSpec implements AlgorithmSpec<Scc, HugeLongArray, SccMutat
 
     @Override
     public ComputationResultConsumer<Scc, HugeLongArray, SccMutateConfig, Stream<SccMutateResult>> computationResultConsumer() {
-        return new MutatePropertyComputationResultConsumer<>(
-            computationResult -> List.of(ImmutableNodeProperty.of(
-                computationResult.config().mutateProperty(),
-                computationResult.result()
-                    .map(NodePropertyValuesAdapter::adapt)
-                    .orElse(EmptyLongNodePropertyValues.INSTANCE)
-            )),
-            this::resultBuilder);
-    }
-
-    private AbstractResultBuilder<SccMutateResult> resultBuilder(
-        ComputationResult<Scc, HugeLongArray, SccMutateConfig> computationResult,
-        ExecutionContext executionContext
-    ) {
-        var config = computationResult.config();
-        var mutateBuilder = new SccMutateResult.Builder(
-            executionContext.returnColumns(),
-            config.concurrency()
-        )
-            .buildCommunityCount(true)
-            .buildHistogram(true);
-
-        computationResult.result().ifPresent(result -> mutateBuilder.withCommunityFunction(result::get));
-
-        mutateBuilder
-            .withNodeCount(computationResult.graph().nodeCount())
-            .withConfig(config)
-            .withPreProcessingMillis(computationResult.preProcessingMillis())
-            .withComputeMillis(computationResult.computeMillis());
-
-        return mutateBuilder;
+        return new NullComputationResultConsumer<>();
     }
 }

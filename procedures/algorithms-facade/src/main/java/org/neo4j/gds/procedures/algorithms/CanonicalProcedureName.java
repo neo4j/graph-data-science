@@ -64,7 +64,11 @@ public final class CanonicalProcedureName {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        return normalised.equals(obj);
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (other instanceof CanonicalProcedureName otherCanonicalProcedureName) {
+            return normalised.equals(otherCanonicalProcedureName.normalised);
+        }
+        return false;
     }
 }

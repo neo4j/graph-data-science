@@ -19,23 +19,15 @@
  */
 package org.neo4j.gds.leiden;
 
-import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.MutateNodePropertyListFunction;
-import org.neo4j.gds.MutatePropertyComputationResultConsumer;
-import org.neo4j.gds.core.write.ImmutableNodeProperty;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.algorithms.community.LeidenMutateResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.leiden.Constants.LEIDEN_DESCRIPTION;
@@ -60,39 +52,6 @@ public class LeidenMutateSpec implements AlgorithmSpec<Leiden, LeidenResult, Lei
 
     @Override
     public ComputationResultConsumer<Leiden, LeidenResult, LeidenMutateConfig, Stream<LeidenMutateResult>> computationResultConsumer() {
-        MutateNodePropertyListFunction<Leiden, LeidenResult, LeidenMutateConfig> mutateConfigNodePropertyListFunction =
-            computationResult -> List.of(ImmutableNodeProperty.of(
-                computationResult.config().mutateProperty(),
-                LeidenCompanion.leidenNodeProperties(computationResult, computationResult.config().mutateProperty())
-            ));
-        return new MutatePropertyComputationResultConsumer<>(
-            mutateConfigNodePropertyListFunction,
-            this::resultBuilder
-        );
-    }
-
-    @NotNull
-    private AbstractResultBuilder<LeidenMutateResult> resultBuilder(
-        ComputationResult<Leiden, LeidenResult, LeidenMutateConfig> computationResult,
-        ExecutionContext executionContext
-    ) {
-        var builder = new LeidenMutateResult.Builder(
-            executionContext.returnColumns(),
-            computationResult.config().concurrency()
-        );
-
-        computationResult.result().ifPresent(leidenResult -> {
-            builder
-                .withLevels(leidenResult.ranLevels())
-                .withDidConverge(leidenResult.didConverge())
-                .withModularities(Arrays.stream(leidenResult.modularities())
-                    .boxed()
-                    .collect(Collectors.toList()))
-                .withModularity(leidenResult.modularity())
-                .withCommunityFunction(leidenResult.communitiesFunction());
-        });
-
-        return builder
-            .withConfig(computationResult.config());
+        return new NullComputationResultConsumer<>();
     }
 }

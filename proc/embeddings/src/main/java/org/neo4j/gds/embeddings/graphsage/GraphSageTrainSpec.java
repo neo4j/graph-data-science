@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrain;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainAlgorithmFactory;
@@ -29,7 +30,6 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.algorithms.embeddings.GraphSageTrainResult;
-import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.stream.Stream;
 
@@ -60,28 +60,6 @@ public class GraphSageTrainSpec implements AlgorithmSpec<
 
     @Override
     public ComputationResultConsumer<GraphSageTrain, Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>, GraphSageTrainConfig, Stream<GraphSageTrainResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-            return computationResult.result().map(model -> {
-                var modelCatalog = executionContext.modelCatalog();
-                assert modelCatalog != null : "ModelCatalog should have been set in the ExecutionContext by this point!!!";
-                modelCatalog.set(model);
-
-                if (computationResult.config().storeModelToDisk()) {
-                    try {
-                        // FIXME: This works but is not what we want to do!
-                        var databaseService = executionContext.dependencyResolver()
-                            .resolveDependency(GraphDatabaseService.class);
-                        modelCatalog.checkLicenseBeforeStoreModel(databaseService, "Store a model");
-                        var modelDir = modelCatalog.getModelDirectory(databaseService);
-                        modelCatalog.store(model.creator(), model.name(), modelDir);
-                    } catch (Exception e) {
-                        executionContext.log().error("Failed to store model to disk after training.", e.getMessage());
-                        throw e;
-                    }
-                }
-                return Stream.of(GraphSageTrainResult.create(model, computationResult.computeMillis()
-                ));
-            }).orElseGet(Stream::empty);
-        };
+        return new NullComputationResultConsumer<>();
     }
 }

@@ -19,17 +19,14 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
-import org.neo4j.gds.MutatePropertyComputationResultConsumer;
-import org.neo4j.gds.core.write.NodeProperty;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.algorithms.embeddings.DefaultNodeEmbeddingMutateResult;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
@@ -53,21 +50,6 @@ public class FastRPMutateSpec implements AlgorithmSpec<FastRP, FastRPResult, Fas
 
     @Override
     public ComputationResultConsumer<FastRP, FastRPResult, FastRPMutateConfig, Stream<DefaultNodeEmbeddingMutateResult>> computationResultConsumer() {
-        return new MutatePropertyComputationResultConsumer<>(
-            (computationResult) -> List.of(
-                NodeProperty.of(
-                    computationResult.config().mutateProperty(),
-                    FastRPCompanion.nodeProperties(computationResult)
-                )
-            ),
-            this::resultBuilder
-        );
-    }
-
-    private DefaultNodeEmbeddingMutateResult.Builder resultBuilder(
-        ComputationResult<FastRP, FastRPResult, FastRPMutateConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return new DefaultNodeEmbeddingMutateResult.Builder();
+        return new NullComputationResultConsumer<>();
     }
 }

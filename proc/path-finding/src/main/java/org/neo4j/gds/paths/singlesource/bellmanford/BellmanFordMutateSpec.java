@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.paths.singlesource.bellmanford;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -55,6 +56,6 @@ public class BellmanFordMutateSpec implements AlgorithmSpec<BellmanFord, Bellman
 
     @Override
     public ComputationResultConsumer<BellmanFord, BellmanFordResult, AllShortestPathsBellmanFordMutateConfig, Stream<BellmanFordMutateResult>> computationResultConsumer() {
-        return new BellmanFordMutateResultConsumer();
+        return new NullComputationResultConsumer<>();
     }
 }

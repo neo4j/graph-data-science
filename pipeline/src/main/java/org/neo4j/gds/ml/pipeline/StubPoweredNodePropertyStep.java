@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.config.MutateNodePropertyConfig.MUTATE_PROPERTY_KEY;
@@ -146,5 +147,19 @@ class StubPoweredNodePropertyStep implements ExecutableNodePropertyStep {
     @Override
     public String rootTaskName() {
         return labelForProgressTracking.value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        StubPoweredNodePropertyStep that = (StubPoweredNodePropertyStep) o;
+        return Objects.equals(canonicalProcedureName, that.canonicalProcedureName) &&
+            Objects.equals(configuration, that.configuration);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(canonicalProcedureName, configuration);
     }
 }

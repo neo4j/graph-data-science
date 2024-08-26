@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.paths.traverse;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -50,6 +51,6 @@ public class BfsMutateSpec implements AlgorithmSpec<BFS, HugeLongArray, BfsMutat
 
     @Override
     public ComputationResultConsumer<BFS, HugeLongArray, BfsMutateConfig, Stream<PathFindingMutateResult>> computationResultConsumer() {
-        return new BfsMutateComputationResultConsumer();
+        return new NullComputationResultConsumer<>();
     }
 }

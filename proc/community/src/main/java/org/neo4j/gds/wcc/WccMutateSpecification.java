@@ -19,20 +19,15 @@
  */
 package org.neo4j.gds.wcc;
 
-import org.neo4j.gds.MutateNodePropertyListFunction;
-import org.neo4j.gds.MutatePropertyComputationResultConsumer;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
-import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.community.WccMutateResult;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
-import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
@@ -60,28 +55,6 @@ public class WccMutateSpecification implements AlgorithmSpec<Wcc, DisjointSetStr
 
     @Override
     public ComputationResultConsumer<Wcc, DisjointSetStruct, WccMutateConfig, Stream<WccMutateResult>> computationResultConsumer() {
-        MutateNodePropertyListFunction<Wcc, DisjointSetStruct, WccMutateConfig> mutateConfigNodePropertyListFunction = (computationResult) -> List.of(
-            ImmutableNodeProperty.of(
-                computationResult.config().mutateProperty(),
-                WccSpecification.mutateNodeProperties(
-                    computationResult
-                )
-            )
-        );
-        return new MutatePropertyComputationResultConsumer<>(mutateConfigNodePropertyListFunction, this::resultBuilder);
+        return new NullComputationResultConsumer<>();
     }
-
-    private AbstractCommunityResultBuilder<WccMutateResult> resultBuilder(
-        ComputationResult<Wcc, DisjointSetStruct, WccMutateConfig> computationResult,
-        ExecutionContext executionContext
-    ) {
-        return WccSpecification.resultBuilder(
-            new WccMutateResult.Builder(
-                executionContext.returnColumns(),
-                computationResult.config().concurrency()
-            ),
-            computationResult
-        );
-    }
-
 }

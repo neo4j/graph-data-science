@@ -19,12 +19,7 @@
  */
 package org.neo4j.gds.paths.spanningtree;
 
-import org.neo4j.gds.Orientation;
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.loading.SingleTypeRelationships;
-import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -32,7 +27,6 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeMutateResult;
 import org.neo4j.gds.spanningtree.Prim;
-import org.neo4j.gds.spanningtree.SpanningGraph;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeAlgorithmFactory;
 import org.neo4j.gds.spanningtree.SpanningTreeMutateConfig;
@@ -66,59 +60,6 @@ public class SpanningTreeMutateSpec implements AlgorithmSpec<Prim, SpanningTree,
     }
 
     public ComputationResultConsumer<Prim, SpanningTree, SpanningTreeMutateConfig, Stream<SpanningTreeMutateResult>> computationResultConsumer() {
-
-        return (computationResult, executionContext) -> {
-            SpanningTreeMutateResult.Builder builder = new SpanningTreeMutateResult.Builder();
-
-            if (computationResult.result().isEmpty()) {
-                return Stream.of(builder.build());
-            }
-
-            Graph graph = computationResult.graph();
-            SpanningTree spanningTree = computationResult.result().get();
-            SpanningTreeMutateConfig config = computationResult.config();
-
-
-            var mutateRelationshipType = RelationshipType.of(config.mutateRelationshipType());
-            var relationshipsBuilder = GraphFactory
-                .initRelationshipsBuilder()
-                .relationshipType(mutateRelationshipType)
-                .nodes(computationResult.graph())
-                .addPropertyConfig(GraphFactory.PropertyConfig.builder().propertyKey(config.mutateProperty()).build())
-                .orientation(Orientation.NATURAL)
-                .build();
-
-            builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount());
-            builder.withTotalWeight(spanningTree.totalWeight());
-
-            SingleTypeRelationships relationships;
-
-            try (ProgressTimer ignored = ProgressTimer.start(builder::withMutateMillis)) {
-
-                var spanningGraph = new SpanningGraph(graph, spanningTree);
-                spanningGraph.forEachNode(nodeId -> {
-                        spanningGraph.forEachRelationship(nodeId, 1.0, (s, t, w) ->
-                            {
-                                relationshipsBuilder.addFromInternal(s, t, w);
-                                return true;
-                            }
-                        );
-                        return true;
-                    }
-                );
-
-            }
-            relationships = relationshipsBuilder.build();
-
-            computationResult
-                .graphStore()
-                .addRelationshipType(relationships);
-
-            builder.withComputeMillis(computationResult.computeMillis());
-            builder.withPreProcessingMillis(computationResult.preProcessingMillis());
-            builder.withRelationshipsWritten(spanningTree.effectiveNodeCount() - 1);
-            builder.withConfig(config);
-            return Stream.of(builder.build());
-        };
+        return new NullComputationResultConsumer<>();
     }
 }

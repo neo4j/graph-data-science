@@ -19,28 +19,16 @@
  */
 package org.neo4j.gds.similarity.filteredknn;
 
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.schema.RelationshipPropertySchema;
-import org.neo4j.gds.core.huge.HugeGraph;
-import org.neo4j.gds.core.loading.SingleTypeRelationships;
-import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.algorithms.similarity.KnnMutateResult;
-import org.neo4j.gds.similarity.SimilarityGraphResult;
-import org.neo4j.gds.similarity.SimilarityProc;
-import org.neo4j.gds.similarity.knn.KnnMutateResultBuilder;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
 
 @GdsCallable(
@@ -67,71 +55,6 @@ public class FilteredKnnMutateSpecification implements AlgorithmSpec<FilteredKnn
 
     @Override
     public ComputationResultConsumer<FilteredKnn, FilteredKnnResult, FilteredKnnMutateConfig, Stream<KnnMutateResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging(
-            "Graph mutation failed",
-            executionContext.log(),
-            () -> {
-                var config = computationResult.config();
-                var resultBuilder = new KnnMutateResultBuilder();
-
-                computationResult.result()
-                    .ifPresent(result -> {
-                        resultBuilder
-                            .ranIterations(result.ranIterations())
-                            .didConverge(result.didConverge())
-                            .withNodePairsConsidered(result.nodePairsConsidered());
-
-
-                        var filteredKnn = Objects.requireNonNull(computationResult.algorithm());
-
-                        var mutateMillis = new AtomicLong();
-
-                        SimilarityGraphResult similarityGraphResult;
-                        try (ProgressTimer ignored = ProgressTimer.start(mutateMillis::addAndGet)) {
-                            similarityGraphResult = FilteredKnnHelpers.computeToGraph(
-                                computationResult.graph(),
-                                computationResult.graph().nodeCount(),
-                                config.concurrency(),
-                                result,
-                                filteredKnn.executorService()
-                            );
-
-                            SimilarityProc.withGraphsizeAndTimings(
-                                resultBuilder,
-                                computationResult,
-                                (ignore) -> similarityGraphResult
-                            );
-
-                            var similarityGraph = (HugeGraph) similarityGraphResult.similarityGraph();
-                            if (SimilarityProc.shouldComputeHistogram(executionContext.returnColumns())) {
-                                resultBuilder.withHistogram(SimilarityProc.computeHistogram(similarityGraph));
-                            }
-
-
-                            RelationshipType relationshipType = RelationshipType.of(config.mutateRelationshipType());
-                            computationResult
-                                .graphStore()
-                                .addRelationshipType(
-                                    SingleTypeRelationships.of(
-                                        relationshipType,
-                                        similarityGraph.relationshipTopology(),
-                                        similarityGraphResult.direction(),
-                                        similarityGraph.relationshipProperties(),
-                                        Optional.of(RelationshipPropertySchema.of(
-                                            config.mutateProperty(),
-                                            ValueType.DOUBLE
-                                        ))
-                                    )
-                                );
-                        }
-
-                        resultBuilder.withMutateMillis(mutateMillis.get());
-
-                    });
-
-                return Stream.of(resultBuilder.build());
-
-            }
-        );
+        return new NullComputationResultConsumer<>();
     }
 }

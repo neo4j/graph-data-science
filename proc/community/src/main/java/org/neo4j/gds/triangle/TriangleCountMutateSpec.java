@@ -19,20 +19,14 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.neo4j.gds.MutatePropertyComputationResultConsumer;
-import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.core.write.ImmutableNodeProperty;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.algorithms.community.TriangleCountMutateResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
@@ -57,27 +51,6 @@ public class TriangleCountMutateSpec implements AlgorithmSpec<IntersectingTriang
 
     @Override
     public ComputationResultConsumer<IntersectingTriangleCount, TriangleCountResult, TriangleCountMutateConfig, Stream<TriangleCountMutateResult>> computationResultConsumer() {
-        return new MutatePropertyComputationResultConsumer<>(
-            computationResult -> List.of(ImmutableNodeProperty.of(
-                computationResult.config().mutateProperty(),
-                computationResult.result()
-                    .map(result -> NodePropertyValuesAdapter.adapt(result.localTriangles()))
-                    .orElse(EmptyLongNodePropertyValues.INSTANCE)
-            )),
-            this::resultBuilder
-        );
-    }
-
-
-    private AbstractResultBuilder<TriangleCountMutateResult> resultBuilder(
-        ComputationResult<IntersectingTriangleCount, TriangleCountResult, TriangleCountMutateConfig> computationResult,
-        ExecutionContext executionContext
-    ) {
-        var builder = new TriangleCountMutateResult.Builder();
-
-        computationResult.result()
-            .ifPresent(result -> builder.withGlobalTriangleCount(result.globalTriangles()));
-
-        return builder;
+        return new NullComputationResultConsumer<>();
     }
 }

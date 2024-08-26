@@ -19,23 +19,15 @@
  */
 package org.neo4j.gds.kmeans;
 
-import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.MutateNodePropertyListFunction;
-import org.neo4j.gds.MutatePropertyComputationResultConsumer;
-import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.core.write.ImmutableNodeProperty;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.algorithms.community.KmeansMutateResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.kmeans.Kmeans.KMEANS_DESCRIPTION;
@@ -60,51 +52,6 @@ public class KmeansMutateSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kme
 
     @Override
     public ComputationResultConsumer<Kmeans, KmeansResult, KmeansMutateConfig, Stream<KmeansMutateResult>> computationResultConsumer() {
-        MutateNodePropertyListFunction<Kmeans, KmeansResult, KmeansMutateConfig> mutateConfigNodePropertyListFunction =
-            computationResult -> List.of(ImmutableNodeProperty.of(
-                computationResult.config().mutateProperty(),
-                computationResult.result()
-                    .map(KmeansResult::communities)
-                    .map(NodePropertyValuesAdapter::adapt)
-                    .orElse(EmptyLongNodePropertyValues.INSTANCE)
-            ));
-        return new MutatePropertyComputationResultConsumer<>(
-            mutateConfigNodePropertyListFunction,
-            this::resultBuilder
-        );
-    }
-
-    @NotNull
-    private AbstractResultBuilder<KmeansMutateResult> resultBuilder(
-        ComputationResult<Kmeans, KmeansResult, KmeansMutateConfig> computationResult,
-        ExecutionContext executionContext
-    ) {
-        var returnColumns = executionContext.returnColumns();
-        var builder = new KmeansMutateResult.Builder(
-            returnColumns,
-            computationResult.config().concurrency()
-        );
-
-        computationResult.result().ifPresent(result -> {
-            if (returnColumns.contains("centroids")) {
-                builder.withCentroids(KmeansProcHelper.arrayMatrixToListMatrix(result.centers()));
-            }
-            if (returnColumns.contains("averageDistanceToCentroid")) {
-                builder.withAverageDistanceToCentroid(result.averageDistanceToCentroid());
-            }
-
-            if (returnColumns.contains("averageSilhouette")) {
-                builder.withAverageSilhouette(result.averageSilhouette());
-            }
-            builder.withCommunityFunction(result.communities()::get);
-        });
-
-        builder
-            .withPreProcessingMillis(computationResult.preProcessingMillis())
-            .withComputeMillis(computationResult.computeMillis())
-            .withNodeCount(computationResult.graph().nodeCount())
-            .withConfig(computationResult.config());
-
-        return builder;
+        return new NullComputationResultConsumer<>();
     }
 }

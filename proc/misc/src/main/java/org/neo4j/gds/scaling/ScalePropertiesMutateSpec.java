@@ -19,22 +19,18 @@
  */
 package org.neo4j.gds.scaling;
 
-import org.neo4j.gds.MutatePropertyComputationResultConsumer;
-import org.neo4j.gds.core.write.ImmutableNodeProperty;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.ScalePropertiesMutateResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.scaleproperties.ScaleProperties;
 import org.neo4j.gds.scaleproperties.ScalePropertiesFactory;
 import org.neo4j.gds.scaleproperties.ScalePropertiesMutateConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
@@ -71,22 +67,6 @@ public class ScalePropertiesMutateSpec implements AlgorithmSpec<ScaleProperties,
 
     @Override
     public ComputationResultConsumer<ScaleProperties, ScalePropertiesResult, ScalePropertiesMutateConfig, Stream<ScalePropertiesMutateResult>> computationResultConsumer() {
-        return new MutatePropertyComputationResultConsumer<>(
-            computationResult -> List.of(ImmutableNodeProperty.of(
-                computationResult.config().mutateProperty(),
-                ScalePropertiesProc.nodeProperties(computationResult)
-            )),
-            this::resultBuilder
-        );
-    }
-
-    private AbstractResultBuilder<ScalePropertiesMutateResult> resultBuilder(
-        ComputationResult<ScaleProperties, ScalePropertiesResult, ScalePropertiesMutateConfig> computationResult,
-        ExecutionContext executionContext
-    ) {
-        var builder = new ScalePropertiesMutateResult.Builder();
-        computationResult.result()
-            .ifPresent(result -> builder.withScalerStatistics(result.scalerStatistics()));
-        return builder;
+        return new NullComputationResultConsumer<>();
     }
 }

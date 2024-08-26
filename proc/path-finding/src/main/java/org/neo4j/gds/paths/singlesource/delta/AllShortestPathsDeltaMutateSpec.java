@@ -19,18 +19,17 @@
  */
 package org.neo4j.gds.paths.singlesource.delta;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
-
-import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
-import org.neo4j.gds.paths.ShortestPathMutateResultConsumer;
 import org.neo4j.gds.paths.delta.DeltaStepping;
 import org.neo4j.gds.paths.delta.DeltaSteppingFactory;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaMutateConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
 
 import java.util.stream.Stream;
 
@@ -57,7 +56,7 @@ public class AllShortestPathsDeltaMutateSpec implements AlgorithmSpec<DeltaStepp
 
     @Override
     public ComputationResultConsumer<DeltaStepping, PathFindingResult, AllShortestPathsDeltaMutateConfig, Stream<PathFindingMutateResult>> computationResultConsumer() {
-        return new ShortestPathMutateResultConsumer<>();
+        return new NullComputationResultConsumer<>();
     }
 
 @Override
