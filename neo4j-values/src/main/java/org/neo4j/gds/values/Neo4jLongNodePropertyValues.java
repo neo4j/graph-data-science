@@ -33,6 +33,11 @@ public class Neo4jLongNodePropertyValues implements LongNodePropertyValues, Neo4
 
     @Override
     public Value value(long nodeId) {
+        return neo4jValue(nodeId);
+    }
+
+    @Override
+    public Value neo4jValue(long nodeId) {
         return Values.longValue(longValue(nodeId));
     }
 

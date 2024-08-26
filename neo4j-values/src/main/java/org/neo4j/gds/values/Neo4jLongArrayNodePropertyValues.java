@@ -33,6 +33,11 @@ public class Neo4jLongArrayNodePropertyValues implements LongArrayNodePropertyVa
 
     @Override
     public Value value(long nodeId) {
+        return neo4jValue(nodeId);
+    }
+
+    @Override
+    public Value neo4jValue(long nodeId) {
         var value = longArrayValue(nodeId);
         return value == null ? null : Values.longArray(value);
     }

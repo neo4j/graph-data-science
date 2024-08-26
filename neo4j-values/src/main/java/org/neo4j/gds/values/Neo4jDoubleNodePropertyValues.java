@@ -33,6 +33,11 @@ public class Neo4jDoubleNodePropertyValues implements DoubleNodePropertyValues, 
 
     @Override
     public Value value(long nodeId) {
+        return neo4jValue(nodeId);
+    }
+
+    @Override
+    public Value neo4jValue(long nodeId) {
         var value = doubleValue(nodeId);
         return Double.isNaN(value) ? null : Values.doubleValue(value);
     }

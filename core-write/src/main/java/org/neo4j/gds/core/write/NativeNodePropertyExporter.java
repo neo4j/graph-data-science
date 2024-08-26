@@ -144,7 +144,7 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
     private void doWrite(Iterable<ResolvedNodeProperty> nodeProperties, Write ops, long nodeId) throws Exception {
         for (ResolvedNodeProperty nodeProperty : nodeProperties) {
             int propertyId = nodeProperty.token();
-            final Value prop = nodeProperty.values().value(nodeId);
+            final Value prop = nodeProperty.values().neo4jValue(nodeId);
             if (prop != null) {
                 ops.nodeSetProperty(
                     toOriginalId.applyAsLong(nodeId),

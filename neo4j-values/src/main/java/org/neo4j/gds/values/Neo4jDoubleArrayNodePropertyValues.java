@@ -33,6 +33,11 @@ public class Neo4jDoubleArrayNodePropertyValues implements DoubleArrayNodeProper
 
     @Override
     public Value value(long nodeId) {
+        return neo4jValue(nodeId);
+    }
+
+    @Override
+    public Value neo4jValue(long nodeId) {
         var value = doubleArrayValue(nodeId);
         return value == null ? null : Values.doubleArray(value);
     }

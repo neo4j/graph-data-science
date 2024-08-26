@@ -24,4 +24,6 @@ import org.neo4j.values.storable.Value;
 
 public interface Neo4jNodePropertyValues extends NodePropertyValues {
     Value value(long nodeId);
+
+    Value neo4jValue(long nodeId);
 }

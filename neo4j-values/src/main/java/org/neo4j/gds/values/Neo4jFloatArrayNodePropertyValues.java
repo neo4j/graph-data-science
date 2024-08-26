@@ -33,6 +33,11 @@ public class Neo4jFloatArrayNodePropertyValues implements FloatArrayNodeProperty
 
     @Override
     public Value value(long nodeId) {
+        return neo4jValue(nodeId);
+    }
+
+    @Override
+    public Value neo4jValue(long nodeId) {
         var value = floatArrayValue(nodeId);
         return value == null ? null : Values.floatArray(value);
     }
