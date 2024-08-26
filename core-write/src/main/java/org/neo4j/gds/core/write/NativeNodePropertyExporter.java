@@ -31,6 +31,8 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.gds.utils.StatementApi;
+import org.neo4j.gds.values.Neo4jNodePropertyValues;
+import org.neo4j.gds.values.Neo4jNodePropertyValuesUtil;
 import org.neo4j.values.storable.Value;
 
 import java.util.Collection;
@@ -57,13 +59,13 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
             .withTerminationFlag(terminationFlag);
     }
 
-    record ResolvedNodeProperty(int propertyToken, String propertyKey, NodePropertyValues properties) {
+    record ResolvedNodeProperty(int token, String key, Neo4jNodePropertyValues values) {
 
-        static ResolvedNodeProperty of(NodeProperty nodeProperty, int propertyToken) {
+        static ResolvedNodeProperty of(NodeProperty nodeProperty, int token) {
             return new ResolvedNodeProperty(
-                propertyToken,
+                token,
                 nodeProperty.key(),
-                nodeProperty.values()
+                Neo4jNodePropertyValuesUtil.of(nodeProperty.values())
             );
         }
     }
@@ -141,8 +143,8 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
 
     private void doWrite(Iterable<ResolvedNodeProperty> nodeProperties, Write ops, long nodeId) throws Exception {
         for (ResolvedNodeProperty nodeProperty : nodeProperties) {
-            int propertyId = nodeProperty.propertyToken();
-            final Value prop = nodeProperty.properties().value(nodeId);
+            int propertyId = nodeProperty.token();
+            final Value prop = nodeProperty.values().value(nodeId);
             if (prop != null) {
                 ops.nodeSetProperty(
                     toOriginalId.applyAsLong(nodeId),
