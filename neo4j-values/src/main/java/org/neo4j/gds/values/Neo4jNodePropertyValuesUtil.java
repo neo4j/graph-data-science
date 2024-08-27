@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.values;
 
+import org.neo4j.gds.api.properties.nodes.BinaryArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.FilteredNodePropertyValuesMarker;
@@ -30,6 +31,9 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 public final class Neo4jNodePropertyValuesUtil {
 
     public static Neo4jNodePropertyValues of(NodePropertyValues internal) {
+        if (internal instanceof BinaryArrayNodePropertyValues asBinaryArrayNodePropertyValues) {
+            return new Neo4jBinaryArrayNodePropertyValues(asBinaryArrayNodePropertyValues);
+        }
         return switch(internal.valueType()) {
             case DOUBLE -> new Neo4jDoubleNodePropertyValues((DoubleNodePropertyValues) internal);
             case LONG -> new Neo4jLongNodePropertyValues((LongNodePropertyValues) internal, internal instanceof FilteredNodePropertyValuesMarker);
