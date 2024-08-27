@@ -30,7 +30,6 @@ import org.neo4j.gds.api.ImmutableTopology;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
-import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.ValueTypes;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.Direction;
@@ -60,30 +59,6 @@ public interface RelationshipImportResult {
 
     static ImmutableRelationshipImportResult.Builder builder() {
         return ImmutableRelationshipImportResult.builder();
-    }
-
-    static RelationshipImportResult of(
-        Map<RelationshipType, Topology> topologies,
-        Map<RelationshipType, RelationshipPropertyStore> properties,
-        Map<RelationshipType, Direction> directions
-    ) {
-        var relationshipImportResultBuilder = RelationshipImportResult.builder();
-
-        topologies.forEach((relationshipType, topology) -> {
-            Direction direction = directions.get(relationshipType);
-            var schemaEntry = new MutableRelationshipSchemaEntry(relationshipType, direction);
-
-
-            relationshipImportResultBuilder.putImportResult(
-                relationshipType,
-                SingleTypeRelationships.builder()
-                    .topology(topology)
-                    .properties(Optional.ofNullable(properties.get(relationshipType)))
-                    .build()
-            );
-        });
-
-        return relationshipImportResultBuilder.build();
     }
 
     static RelationshipImportResult of(Map<RelationshipType, SingleTypeRelationships> relationshipsByType) {
@@ -190,19 +165,4 @@ public interface RelationshipImportResult {
 
         return propertyStoreBuilder.build();
     }
-
-    @ValueClass
-    interface RelationshipTypeAndProjection {
-        RelationshipType relationshipType();
-
-        RelationshipProjection relationshipProjection();
-
-        static RelationshipTypeAndProjection of(
-            RelationshipType relationshipType,
-            RelationshipProjection relationshipProjection
-        ) {
-            return ImmutableRelationshipTypeAndProjection.of(relationshipType, relationshipProjection);
-        }
-    }
-
 }
