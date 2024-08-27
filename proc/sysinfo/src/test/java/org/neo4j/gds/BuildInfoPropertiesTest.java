@@ -119,7 +119,7 @@ class BuildInfoPropertiesTest {
     }
 
     private Optional<String> findVersion(Path file) throws IOException {
-        Pattern pattern = Pattern.compile(".*gdsBaseVersion = '(\\d\\.\\d\\.\\d+(-alpha\\d+|-beta\\d+)?)'.*");
+        Pattern pattern = Pattern.compile(".*gdsBaseVersion = '(\\d+\\.\\d+\\.\\d+(-alpha\\d+|-beta\\d+)?)'.*");
         try(var lines = Files.lines(file, StandardCharsets.UTF_8)) {
             return lines
                 .flatMap(line -> pattern.matcher(line).results())
