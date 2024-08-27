@@ -316,8 +316,6 @@ project(':neo4j-values').projectDir = file('neo4j-values')
 
 
 
-include('neo4j-kernel-adapter-5.18')
-project(':neo4j-kernel-adapter-5.18').projectDir = file('compatibility/5.18/neo4j-kernel-adapter')
 
 include('neo4j-kernel-adapter-5.19')
 project(':neo4j-kernel-adapter-5.19').projectDir = file('compatibility/5.19/neo4j-kernel-adapter')
