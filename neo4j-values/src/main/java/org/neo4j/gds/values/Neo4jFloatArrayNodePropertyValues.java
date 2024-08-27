@@ -20,14 +20,15 @@
 package org.neo4j.gds.values;
 
 import org.neo4j.gds.api.properties.nodes.FloatArrayNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
 public class Neo4jFloatArrayNodePropertyValues implements FloatArrayNodePropertyValues, Neo4jNodePropertyValues {
 
-    private final FloatArrayNodePropertyValues internal;
+    private final NodePropertyValues internal;
 
-    public Neo4jFloatArrayNodePropertyValues(FloatArrayNodePropertyValues internal) {
+    public Neo4jFloatArrayNodePropertyValues(NodePropertyValues internal) {
         this.internal = internal;
     }
 

@@ -20,20 +20,21 @@
 package org.neo4j.gds.values;
 
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
 public class Neo4jLongNodePropertyValues implements LongNodePropertyValues, Neo4jNodePropertyValues {
 
-    private final LongNodePropertyValues internal;
+    private final NodePropertyValues internal;
     private final boolean deafultIsNull;
 
-    public Neo4jLongNodePropertyValues(LongNodePropertyValues internal, boolean deafultIsNull) {
+    public Neo4jLongNodePropertyValues(NodePropertyValues internal, boolean deafultIsNull) {
         this.internal = internal;
         this.deafultIsNull = deafultIsNull;
     }
 
-    public Neo4jLongNodePropertyValues(LongNodePropertyValues internal) {
+    public Neo4jLongNodePropertyValues(NodePropertyValues internal) {
         this(internal, false);
     }
 

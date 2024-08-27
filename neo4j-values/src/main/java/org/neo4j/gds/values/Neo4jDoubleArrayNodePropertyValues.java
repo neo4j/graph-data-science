@@ -20,14 +20,15 @@
 package org.neo4j.gds.values;
 
 import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
 public class Neo4jDoubleArrayNodePropertyValues implements DoubleArrayNodePropertyValues, Neo4jNodePropertyValues {
 
-    private final DoubleArrayNodePropertyValues internal;
+    private final NodePropertyValues internal;
 
-    public Neo4jDoubleArrayNodePropertyValues(DoubleArrayNodePropertyValues internal) {
+    public Neo4jDoubleArrayNodePropertyValues(NodePropertyValues internal) {
         this.internal = internal;
     }
 

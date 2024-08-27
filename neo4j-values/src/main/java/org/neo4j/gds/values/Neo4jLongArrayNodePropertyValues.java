@@ -20,14 +20,15 @@
 package org.neo4j.gds.values;
 
 import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
 public class Neo4jLongArrayNodePropertyValues implements LongArrayNodePropertyValues, Neo4jNodePropertyValues {
 
-    private final LongArrayNodePropertyValues internal;
+    private final NodePropertyValues internal;
 
-    public Neo4jLongArrayNodePropertyValues(LongArrayNodePropertyValues internal) {
+    public Neo4jLongArrayNodePropertyValues(NodePropertyValues internal) {
         this.internal = internal;
     }
 
