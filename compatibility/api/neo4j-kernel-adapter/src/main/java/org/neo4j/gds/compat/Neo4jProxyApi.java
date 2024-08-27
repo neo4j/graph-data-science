@@ -27,29 +27,15 @@ import org.neo4j.gds.compat.batchimport.Monitor;
 import org.neo4j.gds.compat.batchimport.input.Collector;
 import org.neo4j.gds.compat.batchimport.input.Estimates;
 import org.neo4j.gds.compat.batchimport.input.ReadableGroups;
-import org.neo4j.internal.kernel.api.PropertyCursor;
-import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.scheduler.JobScheduler;
-import org.neo4j.storageengine.api.PropertySelection;
-import org.neo4j.storageengine.api.Reference;
 
 import java.io.OutputStream;
 import java.util.function.LongConsumer;
 
 public interface Neo4jProxyApi {
-
-    @CompatSince(minor = 22)
-    void relationshipProperties(
-        Read read,
-        long relationshipReference,
-        long startNodeReference,
-        Reference reference,
-        PropertySelection selection,
-        PropertyCursor cursor
-    );
 
     @CompatSince(minor = 23)
     BatchImporter instantiateBlockBatchImporter(

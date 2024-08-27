@@ -35,6 +35,7 @@ import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.storageengine.api.Reference;
 
 import java.util.Collection;
@@ -212,14 +213,15 @@ final class RelationshipsScannerTask extends StatementAction implements RecordSc
         return (producer, propertyKeyIds, defaultPropertyValues, aggregations, atLeastOnePropertyToLoad) -> {
             long[][] properties = new long[propertyKeyIds.length][producer.numberOfElements()];
             if (atLeastOnePropertyToLoad) {
+                var read = kernelTransaction.dataRead();
                 try (PropertyCursor pc = Neo4jProxy.allocatePropertyCursor(kernelTransaction)) {
                     double[] relProps = new double[propertyKeyIds.length];
                     producer.forEach((index, source, target, relationshipReference, propertyReference) -> {
-                        Neo4jProxy.relationshipProperties(
-                            kernelTransaction,
+                        read.relationshipProperties(
                             relationshipReference,
                             source,
                             propertyReference,
+                            PropertySelection.ALL_PROPERTIES,
                             pc
                         );
                         NativeRelationshipPropertyReadHelper.readProperties(

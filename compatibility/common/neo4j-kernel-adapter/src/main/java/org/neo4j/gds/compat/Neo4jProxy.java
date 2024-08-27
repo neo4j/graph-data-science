@@ -250,23 +250,6 @@ public final class Neo4jProxy {
             .nodeProperties(nodeReference, reference, PropertySelection.ALL_PROPERTIES, cursor);
     }
 
-    public static void relationshipProperties(
-        KernelTransaction kernelTransaction,
-        long relationshipReference,
-        long sourceNodeReference,
-        Reference reference,
-        PropertyCursor cursor
-    ) {
-        IMPL.relationshipProperties(
-            kernelTransaction.dataRead(),
-            relationshipReference,
-            sourceNodeReference,
-            reference,
-            PropertySelection.ALL_PROPERTIES,
-            cursor
-        );
-    }
-
     public static NodeCursor allocateNodeCursor(KernelTransaction kernelTransaction) {
         return kernelTransaction.cursors().allocateNodeCursor(kernelTransaction.cursorContext());
     }
