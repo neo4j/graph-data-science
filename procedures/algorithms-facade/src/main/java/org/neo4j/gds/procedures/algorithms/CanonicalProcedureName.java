@@ -47,6 +47,10 @@ public final class CanonicalProcedureName {
         normalisedInput = !normalisedInput.startsWith("gds.") ? formatWithLocale("gds.%s", normalisedInput) : normalisedInput;
         normalisedInput = !normalisedInput.endsWith(".mutate") ? formatWithLocale("%s.mutate", normalisedInput) : normalisedInput;
 
+        normalisedInput = normalisedInput.replace("beta.", "");
+        normalisedInput= normalisedInput.replace("alpha.", "");
+
+
         return new CanonicalProcedureName(normalisedInput.substring(0, normalisedInput.length() - ".mutate".length()), rawInput);
     }
 

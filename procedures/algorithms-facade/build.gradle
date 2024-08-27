@@ -39,7 +39,7 @@ dependencies {
     testCompileOnly openGds.jetbrains.annotations
 
     testImplementation platform(openGds.junit5bom)
-    testImplementation openGds.junit5.jupiter.api
+    testImplementation openGds.junit5.jupiter
     testImplementation openGds.mockito.junit.jupiter
     testImplementation openGds.assertj.core
 

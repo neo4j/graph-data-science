@@ -20,30 +20,44 @@
 package org.neo4j.gds.procedures.algorithms;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CanonicalProcedureNameTest {
-    @Test
-    void shouldNormalizeInput() {
-        assertNormalizesProperly("gds.shortestpath.dijkstra");
-        assertNormalizesProperly("gds.shortestPath.dijkstra.mutate");
-        assertNormalizesProperly("GDS.SHORTESTPATH.DiJkStRa");
-        assertNormalizesProperly("shortestPath.dijkstra");
-        assertNormalizesProperly("gds.shortestPath.dijkstra");
-    }
 
-    @Test
-    void shouldRetainRawInput() {
-        assertEquals(CanonicalProcedureName.parse("gds.shortestpath.dijkstra").getRawForm(), "gds.shortestpath.dijkstra");
-        assertEquals(CanonicalProcedureName.parse("gds.shortestPath.dijkstra.mutate").getRawForm(), "gds.shortestPath.dijkstra.mutate");
-        assertEquals(CanonicalProcedureName.parse("GDS.SHORTESTPATH.DiJkStRa").getRawForm(), "GDS.SHORTESTPATH.DiJkStRa");
-        assertEquals(CanonicalProcedureName.parse("shortestPath.dijkstra").getRawForm(), "shortestPath.dijkstra");
-        assertEquals(CanonicalProcedureName.parse("gds.shortestPath.dijkstra").getRawForm(), "gds.shortestPath.dijkstra");
-    }
-
-    private static void assertNormalizesProperly(String input) {
+    @ParameterizedTest
+    @ValueSource(strings={"gds.shortestpath.dijkstra",
+        "gds.shortestPath.dijkstra.mutate",
+        "GDS.SHORTESTPATH.DiJkStRa",
+        "shortestPath.dijkstra",
+        "gds.shortestPath.dijkstra"
+    })
+    void shouldNormalizeInput(String input) {
         assertThat(CanonicalProcedureName.parse(input).getNormalisedForm()).isEqualTo("gds.shortestpath.dijkstra");
     }
+
+    @ParameterizedTest
+    @ValueSource(strings={"gds.shortestpath.dijkstra",
+        "gds.shortestPath.dijkstra.mutate",
+        "GDS.SHORTESTPATH.DiJkStRa",
+        "shortestPath.dijkstra",
+        "gds.shortestPath.dijkstra",
+        "gds.beta.foo",
+        "gds.alpha.foo"
+    })
+    void shouldRetainRawInput(String input) {
+        assertThat(CanonicalProcedureName.parse(input).getRawForm()).isEqualTo(input);
+    }
+
+    @Test
+    void shouldIgnoreBetaTier() {
+        assertThat(CanonicalProcedureName.parse("gds.beta.foo").getNormalisedForm()).isEqualTo("gds.foo");
+    }
+    @Test
+    void shouldIgnoreAlphaTier() {
+        assertThat(CanonicalProcedureName.parse("gds.alpha.foo").getNormalisedForm()).isEqualTo("gds.foo");
+    }
+
 }
