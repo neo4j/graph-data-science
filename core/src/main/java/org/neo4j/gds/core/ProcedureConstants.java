@@ -20,10 +20,6 @@
 package org.neo4j.gds.core;
 
 public final class ProcedureConstants {
-
-    // used in graph.load and algos
-    public static final String RELATIONSHIP_TYPES = "relationshipTypes";
-
     // algos specific
     public static final double TOLERANCE_DEFAULT = 0.0001D;
 

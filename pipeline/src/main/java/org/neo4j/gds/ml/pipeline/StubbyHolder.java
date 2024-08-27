@@ -39,6 +39,7 @@ import org.neo4j.gds.ml.pipeline.stubs.FilteredNodeSimilarityStub;
 import org.neo4j.gds.ml.pipeline.stubs.GraphSageStub;
 import org.neo4j.gds.ml.pipeline.stubs.HarmonicCentralityStub;
 import org.neo4j.gds.ml.pipeline.stubs.HashGnnStub;
+import org.neo4j.gds.ml.pipeline.stubs.IndexInverseStub;
 import org.neo4j.gds.ml.pipeline.stubs.K1ColoringStub;
 import org.neo4j.gds.ml.pipeline.stubs.KCoreStub;
 import org.neo4j.gds.ml.pipeline.stubs.KMeansStub;
@@ -100,6 +101,7 @@ class StubbyHolder {
             case GraphSageTrain -> null;
             case HarmonicCentrality -> new HarmonicCentralityStub();
             case HashGNN -> new HashGnnStub();
+            case IndexInverse -> new IndexInverseStub();
             case K1Coloring -> new K1ColoringStub();
             case KCore -> new KCoreStub();
             case KMeans -> new KMeansStub();

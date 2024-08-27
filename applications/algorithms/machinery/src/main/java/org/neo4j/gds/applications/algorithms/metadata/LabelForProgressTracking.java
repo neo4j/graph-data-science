@@ -46,6 +46,7 @@ public enum LabelForProgressTracking {
     GraphSageTrain("GraphSageTrain"),
     HarmonicCentrality("HarmonicCentrality"),
     HashGNN("HashGNN"),
+    IndexInverse("IndexInverse"),
     K1Coloring("K1Coloring"),
     KCore("KCoreDecomposition"),
     KMeans("K-Means"),
@@ -105,6 +106,7 @@ public enum LabelForProgressTracking {
             case GraphSageTrain -> GraphSageTrain;
             case HarmonicCentrality -> HarmonicCentrality;
             case HashGNN -> HashGNN;
+            case IndexInverse -> IndexInverse;
             case K1Coloring -> K1Coloring;
             case KCore -> KCore;
             case KMeans -> KMeans;

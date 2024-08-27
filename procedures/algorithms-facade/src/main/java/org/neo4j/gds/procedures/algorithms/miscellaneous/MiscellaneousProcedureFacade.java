@@ -27,6 +27,7 @@ import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicat
 import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsWriteModeBusinessFacade;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.stubs.CollapsePathMutateStub;
+import org.neo4j.gds.procedures.algorithms.miscellaneous.stubs.IndexInverseMutateStub;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.stubs.ScalePropertiesMutateStub;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.stubs.ToUndirectedMutateStub;
 import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
@@ -47,6 +48,7 @@ public final class MiscellaneousProcedureFacade {
 
     private final ScalePropertiesMutateStub alphaScalePropertiesMutateStub;
     private final CollapsePathMutateStub collapsePathMutateStub;
+    private final IndexInverseMutateStub indexInverseMutateStub;
     private final ScalePropertiesMutateStub scalePropertiesMutateStub;
     private final ToUndirectedMutateStub toUndirectedMutateStub;
 
@@ -59,6 +61,7 @@ public final class MiscellaneousProcedureFacade {
         ProcedureReturnColumns procedureReturnColumns,
         ScalePropertiesMutateStub alphaScalePropertiesMutateStub,
         CollapsePathMutateStub collapsePathMutateStub,
+        IndexInverseMutateStub indexInverseMutateStub,
         ScalePropertiesMutateStub scalePropertiesMutateStub,
         ToUndirectedMutateStub toUndirectedMutateStub,
         ApplicationsFacade applicationsFacade,
@@ -68,6 +71,7 @@ public final class MiscellaneousProcedureFacade {
         this.procedureReturnColumns = procedureReturnColumns;
         this.alphaScalePropertiesMutateStub = alphaScalePropertiesMutateStub;
         this.collapsePathMutateStub = collapsePathMutateStub;
+        this.indexInverseMutateStub = indexInverseMutateStub;
         this.scalePropertiesMutateStub = scalePropertiesMutateStub;
         this.toUndirectedMutateStub = toUndirectedMutateStub;
         this.applicationsFacade = applicationsFacade;
@@ -89,6 +93,7 @@ public final class MiscellaneousProcedureFacade {
             AlphaScalePropertiesMutateConfig::of
         );
         var collapsePathMutateStub = new CollapsePathMutateStub(genericStub, applicationsFacade);
+        var indexInverseMutateStub = new IndexInverseMutateStub(genericStub, applicationsFacade);
         var scalePropertiesMutateStub = new ScalePropertiesMutateStub(
             genericStub,
             applicationsFacade,
@@ -101,6 +106,7 @@ public final class MiscellaneousProcedureFacade {
             procedureReturnColumns,
             alphaScalePropertiesMutateStub,
             collapsePathMutateStub,
+            indexInverseMutateStub,
             scalePropertiesMutateStub,
             toUndirectedMutateStub,
             applicationsFacade,
@@ -130,6 +136,10 @@ public final class MiscellaneousProcedureFacade {
 
     public CollapsePathMutateStub collapsePathMutateStub() {
         return collapsePathMutateStub;
+    }
+
+    public IndexInverseMutateStub indexInverseMutateStub() {
+        return indexInverseMutateStub;
     }
 
     public ScalePropertiesMutateStub scalePropertiesMutateStub() {

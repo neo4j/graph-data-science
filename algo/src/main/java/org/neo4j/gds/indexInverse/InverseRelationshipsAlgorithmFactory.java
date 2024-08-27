@@ -27,6 +27,7 @@ import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Collection;
 import java.util.List;
@@ -41,7 +42,7 @@ public class InverseRelationshipsAlgorithmFactory extends GraphStoreAlgorithmFac
         InverseRelationshipsParameters parameters,
         ProgressTracker progressTracker
     ) {
-        return new InverseRelationships(graphStore, parameters, progressTracker, DefaultPool.INSTANCE);
+        return new InverseRelationships(graphStore, parameters, progressTracker, DefaultPool.INSTANCE, TerminationFlag.RUNNING_TRUE);
     }
 
     @Override

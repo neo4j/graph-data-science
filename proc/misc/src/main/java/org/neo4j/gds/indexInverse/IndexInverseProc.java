@@ -19,13 +19,10 @@
  */
 package org.neo4j.gds.indexInverse;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.core.loading.SingleTypeRelationships;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
-import org.neo4j.gds.executor.ProcedureExecutorSpec;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.algorithms.miscellaneous.IndexInverseMutateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -34,42 +31,31 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.indexInverse.Constants.INDEX_INVERSE_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class IndexInverseProc extends BaseProc {
+public class IndexInverseProc {
+    @Context
+    public GraphDataScienceProcedures facade;
 
     @Internal // waiting for PM decision
-    @Procedure(value = IndexInverseSpec.CALLABLE_NAME, mode = READ)
-    @Description(IndexInverseSpec.DESCRIPTION)
-    public Stream<IndexInverseSpec.MutateResult> mutate(
+    @Procedure(value = "gds.graph.relationships.indexInverse", mode = READ)
+    @Description(INDEX_INVERSE_DESCRIPTION)
+    public Stream<IndexInverseMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var mutateSpec = new IndexInverseSpec();
-        var pipelineSpec = new ProcedureExecutorSpec<InverseRelationships, Map<RelationshipType, SingleTypeRelationships>, InverseRelationshipsConfig>();
-
-        return new ProcedureExecutor<>(
-            mutateSpec,
-            pipelineSpec,
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.algorithms().miscellaneous().indexInverseMutateStub().execute(graphName, configuration);
     }
 
     @Internal // waiting for PM decision
-    @Procedure(value = IndexInverseSpec.CALLABLE_NAME + ".estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Procedure(value = "gds.graph.relationships.indexInverse.estimate", mode = READ)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        var mutateSpec = new IndexInverseSpec();
-        var pipelineSpec = new ProcedureExecutorSpec<InverseRelationships, Map<RelationshipType, SingleTypeRelationships>, InverseRelationshipsConfig>();
-
-        return new MemoryEstimationExecutor<>(
-            mutateSpec,
-            pipelineSpec,
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().miscellaneous().indexInverseMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

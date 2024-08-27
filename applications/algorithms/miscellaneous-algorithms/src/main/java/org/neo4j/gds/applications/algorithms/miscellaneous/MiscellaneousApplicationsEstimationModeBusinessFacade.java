@@ -22,6 +22,8 @@ package org.neo4j.gds.applications.algorithms.miscellaneous;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
+import org.neo4j.gds.indexInverse.InverseRelationshipsConfig;
+import org.neo4j.gds.indexInverse.InverseRelationshipsMemoryEstimateDefinition;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.scaleproperties.ScalePropertiesBaseConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesMemoryEstimateDefinition;
@@ -37,6 +39,10 @@ public class MiscellaneousApplicationsEstimationModeBusinessFacade {
 
     public MemoryEstimation collapsePath() {
         throw new MemoryEstimationNotImplementedException();
+    }
+
+    public MemoryEstimation indexInverse(InverseRelationshipsConfig configuration) {
+        return new InverseRelationshipsMemoryEstimateDefinition(configuration.relationshipTypes()).memoryEstimation();
     }
 
     public MemoryEstimation scaleProperties(ScalePropertiesBaseConfig configuration) {

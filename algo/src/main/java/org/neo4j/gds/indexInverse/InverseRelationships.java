@@ -38,6 +38,7 @@ import org.neo4j.gds.core.loading.construction.RelationshipsBuilderBuilder;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.HashMap;
 import java.util.List;
@@ -53,11 +54,12 @@ public class InverseRelationships extends Algorithm<Map<RelationshipType, Single
     private final Concurrency concurrency;
     private final ExecutorService executorService;
 
-    protected InverseRelationships(
+    public InverseRelationships(
         GraphStore graphStore,
         InverseRelationshipsParameters parameters,
         ProgressTracker progressTracker,
-        ExecutorService executorService
+        ExecutorService executorService,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
 
@@ -65,6 +67,8 @@ public class InverseRelationships extends Algorithm<Map<RelationshipType, Single
         this.parameters = parameters;
         this.concurrency = parameters.concurrency();
         this.executorService = executorService;
+
+        this.terminationFlag = terminationFlag;
     }
 
     @Override

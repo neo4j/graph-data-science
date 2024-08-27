@@ -36,6 +36,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Optional;
@@ -78,7 +79,8 @@ class InverseRelationshipsTest {
             graphStore,
             parameters,
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
 
         assertThat(inverseRelationshipsPerType).hasSize(1);
@@ -106,7 +108,8 @@ class InverseRelationshipsTest {
             graphStore,
             parameters,
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
 
         assertThat(inverseRelationshipsPerType).hasSize(internalTypes.size());

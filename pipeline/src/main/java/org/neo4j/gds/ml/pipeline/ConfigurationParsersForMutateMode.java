@@ -33,6 +33,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMutateConfig;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNMutateConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityMutateConfig;
+import org.neo4j.gds.indexInverse.InverseRelationshipsConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationMutateConfig;
 import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
@@ -100,6 +101,7 @@ public class ConfigurationParsersForMutateMode {
             case GraphSageTrain -> null;
             case HarmonicCentrality -> HarmonicCentralityMutateConfig::of;
             case HashGNN -> HashGNNMutateConfig::of;
+            case IndexInverse -> InverseRelationshipsConfig::of;
             case K1Coloring -> K1ColoringMutateConfig::of;
             case KCore -> KCoreDecompositionMutateConfig::of;
             case KMeans -> KmeansMutateConfig::of;

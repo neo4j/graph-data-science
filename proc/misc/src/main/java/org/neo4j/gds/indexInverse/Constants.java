@@ -19,18 +19,6 @@
  */
 package org.neo4j.gds.indexInverse;
 
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.annotation.Parameters;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.ElementTypeValidator;
-import org.neo4j.gds.core.concurrency.Concurrency;
-
-import java.util.Collection;
-import java.util.List;
-
-@Parameters
-public record InverseRelationshipsParameters(Concurrency concurrency, List<String> relationshipTypes) {
-    public Collection<RelationshipType> internalRelationshipTypes(GraphStore graphStore) {
-        return ElementTypeValidator.resolveTypes(graphStore, relationshipTypes);
-    }
+class Constants {
+    static final String INDEX_INVERSE_DESCRIPTION = "The IndexInverse procedure indexes directed relationships to allow an efficient inverse access for other algorithms.";
 }

@@ -23,12 +23,16 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.indexInverse.InverseRelationships;
+import org.neo4j.gds.indexInverse.InverseRelationshipsConfig;
 import org.neo4j.gds.scaleproperties.ScaleProperties;
 import org.neo4j.gds.scaleproperties.ScalePropertiesBaseConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
@@ -40,9 +44,12 @@ import org.neo4j.gds.walking.CollapsePathConfig;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 class MiscellaneousAlgorithms {
     private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
@@ -86,6 +93,34 @@ class MiscellaneousAlgorithms {
         );
 
         return algorithm.compute();
+    }
+
+    Map<RelationshipType, SingleTypeRelationships> indexInverse(
+        IdMap idMap,
+        GraphStore graphStore,
+        InverseRelationshipsConfig configuration
+    ) {
+        var parameters = configuration.toParameters();
+        var relationshipTypes = parameters.internalRelationshipTypes(graphStore);
+        List<Task> tasks = relationshipTypes.stream().flatMap(type -> Stream.of(
+            Tasks.leaf(
+                String.format(Locale.US, "Create inverse relationships of type '%s'", type.name),
+                idMap.nodeCount()
+            ),
+            Tasks.leaf("Build Adjacency list")
+        )).collect(Collectors.toList());
+        var task = Tasks.task(LabelForProgressTracking.IndexInverse.value, tasks);
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var algorithm = new InverseRelationships(
+            graphStore,
+            parameters,
+            progressTracker,
+            DefaultPool.INSTANCE,
+            terminationFlag
+        );
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
     ScalePropertiesResult scaleProperties(Graph graph, ScalePropertiesBaseConfig configuration) {

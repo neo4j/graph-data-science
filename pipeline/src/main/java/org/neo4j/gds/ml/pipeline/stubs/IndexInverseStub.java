@@ -17,20 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.indexInverse;
+package org.neo4j.gds.ml.pipeline.stubs;
 
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.annotation.Parameters;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.ElementTypeValidator;
-import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.indexInverse.InverseRelationshipsConfig;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.miscellaneous.IndexInverseMutateResult;
+import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
-import java.util.Collection;
-import java.util.List;
-
-@Parameters
-public record InverseRelationshipsParameters(Concurrency concurrency, List<String> relationshipTypes) {
-    public Collection<RelationshipType> internalRelationshipTypes(GraphStore graphStore) {
-        return ElementTypeValidator.resolveTypes(graphStore, relationshipTypes);
+public class IndexInverseStub extends AbstractStub<InverseRelationshipsConfig, IndexInverseMutateResult> {
+    protected MutateStub<InverseRelationshipsConfig, IndexInverseMutateResult> stub(AlgorithmsProcedureFacade facade) {
+        return facade.miscellaneous().indexInverseMutateStub();
     }
 }

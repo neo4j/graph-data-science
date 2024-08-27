@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.miscellaneous;
 
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
@@ -26,12 +27,16 @@ import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
+import org.neo4j.gds.indexInverse.InverseRelationshipsConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesMutateConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 import org.neo4j.gds.undirected.ToUndirectedConfig;
 import org.neo4j.gds.walking.CollapsePathConfig;
 
+import java.util.Map;
+
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.CollapsePath;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.IndexInverse;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ScaleProperties;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ToUndirected;
 
@@ -66,6 +71,24 @@ public class MiscellaneousApplicationsMutateModeBusinessFacade {
             CollapsePath,
             estimation::collapsePath,
             (__, graphStore) -> algorithms.collapsePath(graphStore, configuration),
+            mutateStep,
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT indexInverse(
+        GraphName graphName,
+        InverseRelationshipsConfig configuration,
+        ResultBuilder<InverseRelationshipsConfig, Map<RelationshipType, SingleTypeRelationships>, RESULT, Void> resultBuilder
+    ) {
+        var mutateStep = new IndexInverseMutateStep();
+
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+            graphName,
+            configuration,
+            IndexInverse,
+            () -> estimation.indexInverse(configuration),
+            (graph, graphStore) -> algorithms.indexInverse(graph, graphStore, configuration),
             mutateStep,
             resultBuilder
         );
