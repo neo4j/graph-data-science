@@ -23,6 +23,7 @@ import org.neo4j.gds.annotation.CustomProcedure;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.UserFunctionSignatureBuilder;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
@@ -51,7 +52,7 @@ public class AlphaCypherAggregation implements CallableUserAggregationFunction {
     // NOTE: keep in sync with `procedureSyntax`
     @Override
     public UserFunctionSignature signature() {
-        return Neo4jProxy.userFunctionSignature()
+        return UserFunctionSignatureBuilder.builder()
             .name(FUNCTION_NAME)
             .addInputField(inputField("graphName", Neo4jTypes.NTString))
             .addInputField(inputField("sourceNode", Neo4jTypes.NTAny))

@@ -26,8 +26,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
-import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.compat.Write;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
@@ -37,6 +35,7 @@ import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.gds.utils.StatementApi;
+import org.neo4j.internal.kernel.api.Write;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.LongUnaryOperator;
@@ -156,7 +155,7 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
     ) {
         return () -> acceptInTransaction(stmt -> {
             terminationFlag.assertRunning();
-            Write ops = Neo4jProxy.dataWrite(stmt);
+            Write ops = stmt.dataWrite();
 
             RelationshipWithPropertyConsumer writeConsumer = new WriteConsumer(
                 toOriginalId,

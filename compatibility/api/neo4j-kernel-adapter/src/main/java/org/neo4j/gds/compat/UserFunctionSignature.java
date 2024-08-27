@@ -24,9 +24,12 @@ import org.neo4j.gds.annotation.GenerateBuilder;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
 import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
+import org.neo4j.kernel.api.CypherScope;
 
 import java.util.List;
 import java.util.Optional;
+
+import static java.util.function.Predicate.not;
 
 @GenerateBuilder
 public record UserFunctionSignature(
@@ -36,18 +39,27 @@ public record UserFunctionSignature(
     @NotNull String description,
     Optional<String> deprecatedBy,
     boolean internal,
-    boolean threadSafe,
-    @NotNull Neo4jProxyApi compat
+    boolean threadSafe
 ) {
     public org.neo4j.internal.kernel.api.procs.UserFunctionSignature toNeo() {
-        return this.compat.userFunctionSignature(
+        String category = null;      // No predefined category (like temporal or math)
+        var caseInsensitive = false; // case sensitive name match
+        var isBuiltIn = false;       // is built in; never true for GDS
+        var deprecated = deprecatedBy.filter(not(String::isEmpty));
+
+        return new org.neo4j.internal.kernel.api.procs.UserFunctionSignature(
             this.name,
             this.inputField,
             this.returnType,
+            deprecated.isPresent(),
+            deprecated.orElse(null),
             this.description,
-            this.deprecatedBy,
+            category,
+            caseInsensitive,
+            isBuiltIn,
             this.internal,
-            this.threadSafe
+            this.threadSafe,
+            CypherScope.ALL_SCOPES
         );
     }
 }

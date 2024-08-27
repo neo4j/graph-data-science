@@ -52,7 +52,6 @@ import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
 import org.neo4j.internal.kernel.api.connectioninfo.ClientConnectionInfo;
-import org.neo4j.internal.kernel.api.exceptions.InvalidTransactionTypeKernelException;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
@@ -161,14 +160,6 @@ public final class Neo4jProxy {
         };
     }
 
-    public static ProcedureSignatureBuilder procedureSignature() {
-        return ProcedureSignatureBuilder.builder().compat(IMPL);
-    }
-
-    public static UserFunctionSignatureBuilder userFunctionSignature() {
-        return UserFunctionSignatureBuilder.builder().compat(IMPL);
-    }
-
     public static BoltTransactionRunner boltTransactionRunner() {
         return new BoltTransactionRunner();
     }
@@ -189,10 +180,6 @@ public final class Neo4jProxy {
             GlobalProcedures.class
         );
         return globalProcedures.getCurrentView().lookupComponentProvider(component, safe).apply(ctx);
-    }
-
-    public static GlobalProcedureRegistry globalProcedureRegistry(GlobalProcedures globalProcedures) {
-        return IMPL.globalProcedureRegistry(globalProcedures);
     }
 
     public static String validateExternalDatabaseName(String databaseName) {
@@ -237,9 +224,6 @@ public final class Neo4jProxy {
         );
     }
 
-    public static Write dataWrite(KernelTransaction kernelTransaction) throws InvalidTransactionTypeKernelException {
-        return IMPL.dataWrite(kernelTransaction);
-    }
 
     public static PropertyCursor allocatePropertyCursor(KernelTransaction kernelTransaction) {
         return kernelTransaction

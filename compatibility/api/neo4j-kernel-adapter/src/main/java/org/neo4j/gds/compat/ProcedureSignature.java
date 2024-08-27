@@ -24,10 +24,13 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.GenerateBuilder;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
+import org.neo4j.kernel.api.CypherScope;
 import org.neo4j.procedure.Mode;
 
 import java.util.List;
 import java.util.Optional;
+
+import static java.util.function.Predicate.not;
 
 @GenerateBuilder
 public record ProcedureSignature(
@@ -44,17 +47,18 @@ public record ProcedureSignature(
     boolean systemProcedure,
     boolean internal,
     boolean allowExpiredCredentials,
-    boolean threadSafe,
-    @NotNull Neo4jProxyApi compat
+    boolean threadSafe
 ) {
     public org.neo4j.internal.kernel.api.procs.ProcedureSignature toNeo() {
-        return this.compat.procedureSignature(
+        var deprecated = this.deprecatedBy.filter(not(String::isEmpty));
+        return new org.neo4j.internal.kernel.api.procs.ProcedureSignature(
             this.name,
             this.inputField,
             this.outputField,
             this.mode,
             this.admin,
-            this.deprecatedBy,
+            deprecated.isPresent(),
+            deprecated.orElse(null),
             this.description,
             this.warning,
             this.eager,
@@ -62,7 +66,8 @@ public record ProcedureSignature(
             this.systemProcedure,
             this.internal,
             this.allowExpiredCredentials,
-            this.threadSafe
+            this.threadSafe,
+            CypherScope.ALL_SCOPES
         );
     }
 }

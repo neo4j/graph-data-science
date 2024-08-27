@@ -20,16 +20,15 @@
 package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.compat.Write;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.gds.utils.StatementApi;
+import org.neo4j.internal.kernel.api.Write;
 
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
@@ -117,7 +116,7 @@ public class NativeNodeLabelExporter extends StatementApi implements NodeLabelEx
         acceptInTransaction(stmt -> {
             terminationFlag.assertRunning();
             long progress = 0L;
-            Write ops = Neo4jProxy.dataWrite(stmt);
+            Write ops = stmt.dataWrite();
             for (long i = 0L; i < nodeCount; i++) {
                 writer.accept(ops, i);
                 progressTracker.logProgress();
@@ -142,7 +141,7 @@ public class NativeNodeLabelExporter extends StatementApi implements NodeLabelEx
                 acceptInTransaction(stmt -> {
                     terminationFlag.assertRunning();
                     long end = start + len;
-                    Write ops = Neo4jProxy.dataWrite(stmt);;
+                    Write ops = stmt.dataWrite();
                     for (long currentNode = start; currentNode < end; currentNode++) {
                         writer.accept(ops, currentNode);
                         progressTracker.logProgress();
