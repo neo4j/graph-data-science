@@ -21,8 +21,6 @@ package org.neo4j.gds.api.properties.graph;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.Values;
 
 import java.util.stream.Stream;
 
@@ -34,11 +32,6 @@ public interface DoubleArrayGraphPropertyValues extends GraphPropertyValues {
     @Override
     default Stream<double[]> objects() {
         return doubleArrayValues();
-    }
-
-    @Override
-    default Stream<Value> values() {
-        return doubleArrayValues().map(value -> value == null ? null : Values.doubleArray(value));
     }
 
     @Override

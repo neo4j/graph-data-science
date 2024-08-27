@@ -21,7 +21,6 @@ package org.neo4j.gds.api.properties.graph;
 
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.PropertyValues;
-import org.neo4j.values.storable.Value;
 
 import java.util.stream.DoubleStream;
 import java.util.stream.LongStream;
@@ -50,8 +49,6 @@ public interface GraphPropertyValues extends PropertyValues {
     }
 
     Stream<?> objects();
-
-    Stream<Value> values();
 
     long valueCount();
 }

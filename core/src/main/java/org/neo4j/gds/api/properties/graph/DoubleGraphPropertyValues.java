@@ -20,8 +20,6 @@
 package org.neo4j.gds.api.properties.graph;
 
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.Values;
 
 import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
@@ -34,11 +32,6 @@ public interface DoubleGraphPropertyValues extends GraphPropertyValues {
     @Override
     default Stream<Double> objects() {
         return doubleValues().boxed();
-    }
-
-    @Override
-    default Stream<Value> values() {
-        return doubleValues().mapToObj(value -> Double.isNaN(value) ? null : Values.doubleValue(value));
     }
 
     @Override

@@ -22,8 +22,6 @@ package org.neo4j.gds.api.properties.graph;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.ValueConversion;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.Values;
 
 import java.util.stream.DoubleStream;
 import java.util.stream.LongStream;
@@ -37,11 +35,6 @@ public interface LongGraphPropertyValues extends GraphPropertyValues {
     @Override
     default Stream<Long> objects() {
         return longValues().boxed();
-    }
-
-    @Override
-    default Stream<Value> values() {
-        return longValues().mapToObj(Values::longValue);
     }
 
     @Override
