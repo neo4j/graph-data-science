@@ -22,8 +22,6 @@ package org.neo4j.gds.api.properties.nodes;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.ValueConversion;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.Values;
 
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -37,11 +35,6 @@ public interface LongNodePropertyValues extends NodePropertyValues {
     @Override
     default Object getObject(long nodeId) {
         return longValue(nodeId);
-    }
-
-    @Override
-    default Value value(long nodeId) {
-        return Values.longValue(longValue(nodeId));
     }
 
     @Override

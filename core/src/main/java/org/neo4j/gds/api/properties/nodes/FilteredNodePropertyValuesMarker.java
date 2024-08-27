@@ -19,31 +19,5 @@
  */
 package org.neo4j.gds.api.properties.nodes;
 
-import org.neo4j.gds.api.nodeproperties.ValueType;
-
-import java.util.Optional;
-
-public interface LongArrayNodePropertyValues extends NodePropertyValues {
-
-    @Override
-    long[] longArrayValue(long nodeId);
-
-    @Override
-    default Object getObject(long nodeId) {
-        return longArrayValue(nodeId);
-    }
-
-    @Override
-    default ValueType valueType() {
-        return ValueType.LONG_ARRAY;
-    }
-
-    @Override
-    default Optional<Integer> dimension() {
-        var value = longArrayValue(0);
-        if (value == null) {
-            return Optional.empty();
-        }
-        return Optional.of(value.length);
-    }
+public interface FilteredNodePropertyValuesMarker {
 }

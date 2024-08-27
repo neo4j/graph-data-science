@@ -21,15 +21,14 @@ package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.nodes.FilteredNodePropertyValuesMarker;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.Values;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class LongIfChangedNodePropertyValues implements LongNodePropertyValues {
+public final class LongIfChangedNodePropertyValues implements LongNodePropertyValues, FilteredNodePropertyValuesMarker {
 
     private final NodePropertyValues seedProperties;
     private final NodePropertyValues newProperties;
@@ -62,17 +61,20 @@ public final class LongIfChangedNodePropertyValues implements LongNodePropertyVa
         this.newProperties = newProperties;
     }
 
+    /**
+     * Returning Long.MIN_VALUE indicates that the value should not be written to Neo4j.
+     * <p>
+     * The filter is applied in the latest stage before writing to Neo4j.
+     * Since the wrapped node properties may have additional logic in longValue(),
+     * we need to check if they already filtered the value. Only in the case
+     * where the wrapped properties pass on the value, we can apply a filter.
+     */
     @Override
     public long longValue(long nodeId) {
-        return newProperties.longValue(nodeId);
-    }
+        var seedValue = seedProperties.longValue(nodeId);
+        var writeValue = newProperties.longValue(nodeId);
 
-    @Override
-    public Value value(long nodeId) {
-        long seedValue = seedProperties.longValue(nodeId);
-        long writeValue = newProperties.longValue(nodeId);
-
-        return seedValue == Long.MIN_VALUE || (seedValue != writeValue) ? Values.longValue(writeValue) : null;
+        return (seedValue != writeValue) ? writeValue : Long.MIN_VALUE;
     }
 
     @Override
@@ -84,7 +86,7 @@ public final class LongIfChangedNodePropertyValues implements LongNodePropertyVa
     public boolean hasValue(long nodeId) {
         long seedValue = seedProperties.longValue(nodeId);
         long writeValue = newProperties.longValue(nodeId);
-        return seedValue == Long.MIN_VALUE || (seedValue != writeValue) ? true : false;
+        return seedValue == Long.MIN_VALUE || (seedValue != writeValue);
 
     }
 }

@@ -101,9 +101,9 @@ class CommunityCompanionTest {
         );
 
         assertThat(result).isInstanceOf(LongIfChangedNodePropertyValues.class);
+        // properties that have not changed signalled by Long.MIN_VALUE
         for (long i = 0; i < result.nodeCount(); i++) {
-            assertThat(result.longValue(i)).isEqualTo(inputProperties.longValue(i));
-            assertThat(result.value(i)).isNull();
+            assertThat(result.longValue(i)).isEqualTo(Long.MIN_VALUE);
         }
     }
 
@@ -123,11 +123,10 @@ class CommunityCompanionTest {
         for (long i = 0L; i < result.nodeCount(); i++) {
 
             if (i < 5) {
-                assertThat(result.longValue(i)).isEqualTo(inputProperties.longValue(i));
-                assertThat(result.value(i)).isNull();
+                // properties that have not changed signalled by Long.MIN_VALUE
+                assertThat(result.longValue(i)).isEqualTo(Long.MIN_VALUE);
             } else {
                 assertThat(result.longValue(i)).isEqualTo(inputProperties.longValue(i));
-                assertThat(result.value(i).asObject()).isEqualTo(5L);
             }
         }
     }
@@ -153,7 +152,6 @@ class CommunityCompanionTest {
                 assertThat(result.hasValue(i)).isFalse();
             } else {
                 assertThat(result.hasValue(i)).isTrue();
-                assertThat(result.value(i).asObject()).isEqualTo(returnedValues[(int) i]);
             }
 
         }

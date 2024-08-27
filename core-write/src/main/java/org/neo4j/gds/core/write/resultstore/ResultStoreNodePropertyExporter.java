@@ -23,7 +23,6 @@ import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.ResultStoreEntry;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 
@@ -49,7 +48,7 @@ public class ResultStoreNodePropertyExporter implements NodePropertyExporter {
 
     @Override
     public void write(String property, NodePropertyValues properties) {
-        write(ImmutableNodeProperty.of(property, properties));
+        write(NodeProperty.of(property, properties));
     }
 
     @Override
@@ -62,9 +61,9 @@ public class ResultStoreNodePropertyExporter implements NodePropertyExporter {
         var propertyKeys = new ArrayList<String>();
         var propertyValues = new ArrayList<NodePropertyValues>();
         nodeProperties.forEach(nodeProperty -> {
-            propertyKeys.add(nodeProperty.propertyKey());
-            propertyValues.add(nodeProperty.properties());
-            writtenProperties += nodeProperty.properties().nodeCount();
+            propertyKeys.add(nodeProperty.key());
+            propertyValues.add(nodeProperty.values());
+            writtenProperties += nodeProperty.values().nodeCount();
         });
 
         resultStore.add(jobId, new ResultStoreEntry.NodeProperties(nodeLabels, propertyKeys, propertyValues, toOriginalId));

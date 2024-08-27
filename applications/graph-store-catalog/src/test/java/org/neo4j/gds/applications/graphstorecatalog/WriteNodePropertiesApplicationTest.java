@@ -143,8 +143,8 @@ class WriteNodePropertiesApplicationTest {
         verify(nodePropertyExporterMock, times(1)).write(captor.capture());
         verifyNoMoreInteractions(nodePropertyExporterMock);
         assertThat(captor.getValue()).hasSize(2).satisfiesExactlyInAnyOrder(
-            nodeProperty -> assertThat(nodeProperty.propertyKey()).isEqualTo("nodeProp1"),
-            nodeProperty -> assertThat(nodeProperty.propertyKey()).isEqualTo("nodeProp2")
+            nodeProperty -> assertThat(nodeProperty.key()).isEqualTo("nodeProp1"),
+            nodeProperty -> assertThat(nodeProperty.key()).isEqualTo("nodeProp2")
         );
     }
 
@@ -190,8 +190,8 @@ class WriteNodePropertiesApplicationTest {
         verify(nodePropertyExporterMock, times(1)).write(captor.capture());
         verifyNoMoreInteractions(nodePropertyExporterMock);
         assertThat(captor.getValue()).hasSize(2).satisfiesExactlyInAnyOrder(
-            nodeProperty -> assertThat(nodeProperty.propertyKey()).isEqualTo("nodeProp1"),
-            nodeProperty -> assertThat(nodeProperty.propertyKey()).isEqualTo("nodeProp2")
+            nodeProperty -> assertThat(nodeProperty.key()).isEqualTo("nodeProp1"),
+            nodeProperty -> assertThat(nodeProperty.key()).isEqualTo("nodeProp2")
         );
     }
 
@@ -228,8 +228,8 @@ class WriteNodePropertiesApplicationTest {
         verify(nodePropertyExporterMock, times(1)).write(captor.capture());
         verifyNoMoreInteractions(nodePropertyExporterMock);
         assertThat(captor.getValue()).hasSize(2).satisfiesExactlyInAnyOrder(
-            nodeProperty -> assertThat(nodeProperty.propertyKey()).isEqualTo("nodeProp1"),
-            nodeProperty -> assertThat(nodeProperty.propertyKey()).isEqualTo("nodeProp2")
+            nodeProperty -> assertThat(nodeProperty.key()).isEqualTo("nodeProp1"),
+            nodeProperty -> assertThat(nodeProperty.key()).isEqualTo("nodeProp2")
         );
     }
 
@@ -265,7 +265,7 @@ class WriteNodePropertiesApplicationTest {
         verifyNoMoreInteractions(nodePropertyExporterMock);
         assertThat(captor.getValue())
             .hasSize(1)
-            .satisfiesExactly(nodeProperty -> assertThat(nodeProperty.propertyKey()).isEqualTo("foo"));
+            .satisfiesExactly(nodeProperty -> assertThat(nodeProperty.key()).isEqualTo("foo"));
     }
 
     @Test
@@ -303,9 +303,9 @@ class WriteNodePropertiesApplicationTest {
         assertThat(captor.getValue())
             .hasSize(3)
             .satisfiesExactlyInAnyOrder(
-                nodeProperty -> assertThat(nodeProperty.propertyKey()).isEqualTo("foo"),
-                nodeProperty -> assertThat(nodeProperty.propertyKey()).isEqualTo("bar"),
-                nodeProperty -> assertThat(nodeProperty.propertyKey()).isEqualTo("nodeProp1")
+                nodeProperty -> assertThat(nodeProperty.key()).isEqualTo("foo"),
+                nodeProperty -> assertThat(nodeProperty.key()).isEqualTo("bar"),
+                nodeProperty -> assertThat(nodeProperty.key()).isEqualTo("nodeProp1")
             );
     }
 }

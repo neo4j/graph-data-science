@@ -20,8 +20,6 @@
 package org.neo4j.gds.api.properties.nodes;
 
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.Values;
 
 import java.util.Optional;
 
@@ -49,12 +47,6 @@ public interface FloatArrayNodePropertyValues extends NodePropertyValues {
     @Override
     default Object getObject(long nodeId) {
         return floatArrayValue(nodeId);
-    }
-
-    @Override
-    default Value value(long nodeId) {
-        var value = floatArrayValue(nodeId);
-        return value == null ? null : Values.floatArray(value);
     }
 
     @Override

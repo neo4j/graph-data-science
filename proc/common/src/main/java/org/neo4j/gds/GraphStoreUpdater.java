@@ -23,7 +23,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.huge.FilteredNodePropertyValues;
-import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -70,10 +69,10 @@ public final class GraphStoreUpdater {
             .asNodeFilteredGraph()
             .map(filteredGraph -> nodePropertyList
                 .stream()
-                .map(nodeProperty -> ImmutableNodeProperty.of(
-                    nodeProperty.propertyKey(),
+                .map(nodeProperty -> NodeProperty.of(
+                    nodeProperty.key(),
                     FilteredNodePropertyValues.OriginalToFilteredNodePropertyValues.create(
-                        nodeProperty.properties(),
+                        nodeProperty.values(),
                         filteredGraph
                     )
                 ))
@@ -86,8 +85,8 @@ public final class GraphStoreUpdater {
 
         maybeTranslatedProperties.forEach(nodeProperty -> graphStore.addNodeProperty(
             new HashSet<>(labelsToUpdate),
-            nodeProperty.propertyKey(),
-            nodeProperty.properties()
+            nodeProperty.key(),
+            nodeProperty.values()
         ));
 
         resultBuilder.withNodePropertiesWritten(maybeTranslatedProperties.size() * graph.nodeCount());

@@ -22,7 +22,6 @@ package org.neo4j.gds.api.properties.nodes;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.PropertyValues;
-import org.neo4j.values.storable.Value;
 
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -57,8 +56,6 @@ public interface NodePropertyValues extends PropertyValues {
 
     @Nullable
     Object getObject(long nodeId);
-
-    Value value(long nodeId);
 
     long nodeCount();
 

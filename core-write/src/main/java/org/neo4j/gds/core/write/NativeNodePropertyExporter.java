@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.write;
 
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.compat.Neo4jProxy;
@@ -32,6 +31,8 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.gds.utils.StatementApi;
+import org.neo4j.gds.values.Neo4jNodePropertyValues;
+import org.neo4j.gds.values.Neo4jNodePropertyValuesUtil;
 import org.neo4j.values.storable.Value;
 
 import java.util.Collection;
@@ -58,16 +59,13 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
             .withTerminationFlag(terminationFlag);
     }
 
-    @SuppressWarnings("immutables:subtype")
-    @ValueClass
-    public interface ResolvedNodeProperty extends NodeProperty {
-        int propertyToken();
+    record ResolvedNodeProperty(int token, String key, Neo4jNodePropertyValues values) {
 
-        static ResolvedNodeProperty of(NodeProperty nodeProperty, int propertyToken) {
-            return ImmutableResolvedNodeProperty.of(
-                nodeProperty.propertyKey(),
-                nodeProperty.properties(),
-                propertyToken
+        static ResolvedNodeProperty of(NodeProperty nodeProperty, int token) {
+            return new ResolvedNodeProperty(
+                token,
+                nodeProperty.key(),
+                Neo4jNodePropertyValuesUtil.of(nodeProperty.values())
             );
         }
     }
@@ -97,7 +95,7 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
 
     @Override
     public void write(String property, NodePropertyValues properties) {
-        write(ImmutableNodeProperty.of(property, properties));
+        write(NodeProperty.of(property, properties));
     }
 
     @Override
@@ -115,7 +113,7 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
     @Override
     public void write(Collection<NodeProperty> nodeProperties) {
         var resolvedNodeProperties = nodeProperties.stream()
-            .map(desc -> resolveWith(desc, getOrCreatePropertyToken(desc.propertyKey())))
+            .map(desc -> resolveWith(desc, getOrCreatePropertyToken(desc.key())))
             .collect(Collectors.toList());
 
         progressTracker.beginSubTask(nodeCount);
@@ -145,8 +143,8 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
 
     private void doWrite(Iterable<ResolvedNodeProperty> nodeProperties, Write ops, long nodeId) throws Exception {
         for (ResolvedNodeProperty nodeProperty : nodeProperties) {
-            int propertyId = nodeProperty.propertyToken();
-            final Value prop = nodeProperty.properties().value(nodeId);
+            int propertyId = nodeProperty.token();
+            final Value prop = nodeProperty.values().neo4jValue(nodeId);
             if (prop != null) {
                 ops.nodeSetProperty(
                     toOriginalId.applyAsLong(nodeId),

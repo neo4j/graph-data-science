@@ -19,14 +19,13 @@
  */
 package org.neo4j.gds.algorithms.community;
 
+import org.neo4j.gds.api.properties.nodes.FilteredNodePropertyValuesMarker;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
 import org.neo4j.gds.mem.BitUtil;
-import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.Values;
 
-public class ConsecutiveLongNodePropertyValues implements LongNodePropertyValues {
+public class ConsecutiveLongNodePropertyValues implements LongNodePropertyValues, FilteredNodePropertyValuesMarker {
 
     private static final long MAPPING_SIZE_QUOTIENT = 10L;
     private static final long NO_VALUE = -1L;
@@ -59,23 +58,26 @@ public class ConsecutiveLongNodePropertyValues implements LongNodePropertyValues
         }
     }
 
+    /**
+     * Returning Long.MIN_VALUE indicates that the value should not be written to Neo4j.
+     * <p>
+     * The filter is applied in the latest stage before writing to Neo4j.
+     * Since the wrapped node properties may have additional logic in longValue(),
+     * we need to check if they already filtered the value. Only in the case
+     * where the wrapped properties pass on the value, we can apply a filter.
+     */
     @Override
     public long longValue(long nodeId) {
-        return communities.get(nodeId);
+        long l = communities.get(nodeId);
+        if (l == NO_VALUE) {
+            return Long.MIN_VALUE;
+        }
+        return l;
     }
 
     @Override
     public boolean hasValue(long nodeId) {
         return communities.get(nodeId) != NO_VALUE;
-    }
-
-    @Override
-    public Value value(long nodeId) {
-        if (hasValue(nodeId)) {
-            return Values.longValue(communities.get(nodeId));
-        }
-        return null;
-
     }
 
     @Override

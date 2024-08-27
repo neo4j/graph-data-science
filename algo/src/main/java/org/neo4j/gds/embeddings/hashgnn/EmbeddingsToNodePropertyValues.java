@@ -19,15 +19,11 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
-import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.nodes.BinaryArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
-import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.Values;
-
-import java.util.Optional;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 
 public final class EmbeddingsToNodePropertyValues {
     private EmbeddingsToNodePropertyValues() {}
@@ -48,85 +44,5 @@ public final class EmbeddingsToNodePropertyValues {
 
     static NodePropertyValues fromBinary(HugeObjectArray<HugeAtomicBitSet> binaryEmbeddings, int embeddingDimension) {
         return new BinaryArrayNodePropertyValues(binaryEmbeddings, embeddingDimension);
-    }
-
-    private static class BinaryArrayNodePropertyValues implements NodePropertyValues {
-
-        private final HugeObjectArray<HugeAtomicBitSet> binaryEmbeddings;
-        private final int embeddingDimension;
-
-        BinaryArrayNodePropertyValues(
-            HugeObjectArray<HugeAtomicBitSet> binaryEmbeddings,
-            int embeddingDimension
-        ) {
-            this.binaryEmbeddings = binaryEmbeddings;
-            this.embeddingDimension = embeddingDimension;
-        }
-
-        @Override
-        public double[] doubleArrayValue(long nodeId) {
-            return bitSetToDoubleArray(binaryEmbeddings.get(nodeId), embeddingDimension);
-        }
-
-        @Override
-        public float[] floatArrayValue(long nodeId) {
-            return bitSetToFloatArray(binaryEmbeddings.get(nodeId), embeddingDimension);
-        }
-
-        @Override
-        public long[] longArrayValue(long nodeId) {
-            return bitSetToLongArray(binaryEmbeddings.get(nodeId), embeddingDimension);
-        }
-
-        @Override
-        public Object getObject(long nodeId) {
-            return bitSetToDoubleArray(binaryEmbeddings.get(nodeId), embeddingDimension);
-        }
-
-        @Override
-        public Value value(long nodeId) {
-            // as Boolean array is not an official property type in GDS we transform to double[].
-            // We use the same data type as in the dense case.
-            return Values.doubleArray(bitSetToDoubleArray(binaryEmbeddings.get(nodeId), embeddingDimension));
-        }
-
-        @Override
-        public Optional<Integer> dimension() {
-            return Optional.of(embeddingDimension);
-        }
-
-        @Override
-        public ValueType valueType() {
-            return ValueType.DOUBLE_ARRAY;
-        }
-
-        @Override
-        public long nodeCount() {
-            return binaryEmbeddings.size();
-        }
-
-        private static double[] bitSetToDoubleArray(HugeAtomicBitSet bitSet, int dimension) {
-            var array = new double[dimension];
-            bitSet.forEachSetBit(bit -> {
-                array[(int) bit] = 1.0;
-            });
-            return array;
-        }
-
-        private static float[] bitSetToFloatArray(HugeAtomicBitSet bitSet, int dimension) {
-            var array = new float[dimension];
-            bitSet.forEachSetBit(bit -> {
-                array[(int) bit] = 1.0f;
-            });
-            return array;
-        }
-
-        private static long[] bitSetToLongArray(HugeAtomicBitSet bitSet, int dimension) {
-            var array = new long[dimension];
-            bitSet.forEachSetBit(bit -> {
-                array[(int) bit] = 1;
-            });
-            return array;
-        }
     }
 }

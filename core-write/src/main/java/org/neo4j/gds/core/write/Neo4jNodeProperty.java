@@ -17,33 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.api.properties.nodes;
+package org.neo4j.gds.core.write;
 
-import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.values.Neo4jNodePropertyValues;
+import org.neo4j.gds.values.Neo4jNodePropertyValuesUtil;
 
-import java.util.Optional;
-
-public interface LongArrayNodePropertyValues extends NodePropertyValues {
-
-    @Override
-    long[] longArrayValue(long nodeId);
-
-    @Override
-    default Object getObject(long nodeId) {
-        return longArrayValue(nodeId);
+public record Neo4jNodeProperty(
+    String key,
+    Neo4jNodePropertyValues values
+) {
+    public static Neo4jNodeProperty of(NodeProperty nodeProperty) {
+        return new Neo4jNodeProperty(
+            nodeProperty.key(),
+            Neo4jNodePropertyValuesUtil.of(nodeProperty.values())
+        );
     }
-
-    @Override
-    default ValueType valueType() {
-        return ValueType.LONG_ARRAY;
-    }
-
-    @Override
-    default Optional<Integer> dimension() {
-        var value = longArrayValue(0);
-        if (value == null) {
-            return Optional.empty();
-        }
-        return Optional.of(value.length);
+    public static Neo4jNodeProperty of(String key, NodePropertyValues values) {
+        return new Neo4jNodeProperty(key, Neo4jNodePropertyValuesUtil.of(values));
     }
 }

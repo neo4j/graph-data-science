@@ -17,33 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.api.properties.nodes;
+package org.neo4j.gds.values;
 
-import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.values.storable.Value;
 
-import java.util.Optional;
+public interface Neo4jNodePropertyValues extends NodePropertyValues {
+    Value value(long nodeId);
 
-public interface LongArrayNodePropertyValues extends NodePropertyValues {
-
-    @Override
-    long[] longArrayValue(long nodeId);
-
-    @Override
-    default Object getObject(long nodeId) {
-        return longArrayValue(nodeId);
-    }
-
-    @Override
-    default ValueType valueType() {
-        return ValueType.LONG_ARRAY;
-    }
-
-    @Override
-    default Optional<Integer> dimension() {
-        var value = longArrayValue(0);
-        if (value == null) {
-            return Optional.empty();
-        }
-        return Optional.of(value.length);
-    }
+    Value neo4jValue(long nodeId);
 }

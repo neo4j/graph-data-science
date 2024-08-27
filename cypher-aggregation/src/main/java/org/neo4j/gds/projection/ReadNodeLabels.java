@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.projection;
 
-import org.neo4j.gds.core.loading.construction.CypherNodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.NodeLabelToken;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
+import org.neo4j.gds.values.CypherNodeLabelTokens;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.SequenceValue;
 import org.neo4j.values.storable.BooleanValue;
