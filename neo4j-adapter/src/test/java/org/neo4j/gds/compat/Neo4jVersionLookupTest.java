@@ -30,26 +30,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 class Neo4jVersionLookupTest {
     private static final String CUSTOM_VERSION_SETTING = CustomVersionSetting.getConfigKey();
 
-    @ParameterizedTest
-    @CsvSource(
-        {
-        }
-    )
-    void testParse(String input, int major, int minor) {
-        assertThat(Neo4jVersionLookup.parse(input, input))
-            .returns(new Neo4jVersion.MajorMinor(major, minor), Neo4jVersion::semanticVersion)
+    @Test
+    void testParse() {
+        assertThat(Neo4jVersionLookup.parse("5.23.0", "5.23.0"))
+            .returns(new Neo4jVersion.MajorMinor(5, 23), Neo4jVersion::semanticVersion)
             .returns(true, Neo4jVersion::isSupported);
     }
 
-    @ParameterizedTest
-    @CsvSource(
-        {
-            "5.99.0-SNAPSHOT, 5, 99"
-        }
-    )
-    void testParseNext(String input, int major, int minor) {
-        assertThat(Neo4jVersionLookup.parse(input, input))
-            .returns(true, v -> v.matches(major, minor))
+    @Test
+    void testParseNext() {
+        assertThat(Neo4jVersionLookup.parse("5.24.0SNAPSHOT", "5.24.0-SNAPSHOT"))
+            .returns(true, v -> v.matches(5, 24))
             .returns(true, Neo4jVersion::isSupported);
     }
 
@@ -93,15 +84,10 @@ class Neo4jVersionLookupTest {
             .isNotEqualTo(Version.getNeo4jVersion());
     }
 
-    @ParameterizedTest
-    @CsvSource(
-        {
-            "5.99.0, 5, 99",
-        }
-    )
-    void semanticVersion(String input, int expectedMajor, int expectedMinor) {
-        Neo4jVersion version = Neo4jVersionLookup.parse(input, input);
+    @Test
+    void semanticVersion() {
+        Neo4jVersion version = Neo4jVersionLookup.parse("5.13.37", "5.13.37");
 
-        assertThat(version.semanticVersion()).isEqualTo(new Neo4jVersion.MajorMinor(expectedMajor, expectedMinor));
+        assertThat(version.semanticVersion()).isEqualTo(new Neo4jVersion.MajorMinor(5, 13));
     }
 }
