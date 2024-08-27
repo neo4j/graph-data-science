@@ -207,7 +207,8 @@ public final class ApplicationsFacade {
             writeContext,
             algorithmEstimationTemplate,
             algorithmProcessingTemplateConvenience,
-            progressTrackerCreator
+            progressTrackerCreator,
+            mutateNodeProperty
         );
 
         var writeRelationshipService = new WriteRelationshipService(log, requestScopedDependencies, writeContext);

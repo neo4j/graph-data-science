@@ -61,6 +61,7 @@ import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.BellmanFordMutateSt
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.BreadthFirstSearchMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.DeltaSteppingMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.DepthFirstSearchMutateStub;
+import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.RandomWalkMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SinglePairShortestPathAStarMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SinglePairShortestPathDijkstraMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SinglePairShortestPathYensMutateStub;
@@ -107,6 +108,7 @@ public final class PathFindingProcedureFacade {
     private final BreadthFirstSearchMutateStub breadthFirstSearchMutateStub;
     private final DeltaSteppingMutateStub deltaSteppingMutateStub;
     private final DepthFirstSearchMutateStub depthFirstSearchMutateStub;
+    private final RandomWalkMutateStub randomWalkMutateStub;
     private final SinglePairShortestPathAStarMutateStub singlePairShortestPathAStarMutateStub;
     private final SinglePairShortestPathDijkstraMutateStub singlePairShortestPathDijkstraMutateStub;
     private final SinglePairShortestPathYensMutateStub singlePairShortestPathYensMutateStub;
@@ -126,7 +128,7 @@ public final class PathFindingProcedureFacade {
         BellmanFordMutateStub bellmanFordMutateStub,
         BreadthFirstSearchMutateStub breadthFirstSearchMutateStub,
         DeltaSteppingMutateStub deltaSteppingMutateStub,
-        DepthFirstSearchMutateStub depthFirstSearchMutateStub,
+        DepthFirstSearchMutateStub depthFirstSearchMutateStub, RandomWalkMutateStub randomWalkMutateStub,
         SinglePairShortestPathAStarMutateStub singlePairShortestPathAStarMutateStub,
         SinglePairShortestPathDijkstraMutateStub singlePairShortestPathDijkstraMutateStub,
         SinglePairShortestPathYensMutateStub singlePairShortestPathYensMutateStub,
@@ -146,6 +148,7 @@ public final class PathFindingProcedureFacade {
         this.breadthFirstSearchMutateStub = breadthFirstSearchMutateStub;
         this.deltaSteppingMutateStub = deltaSteppingMutateStub;
         this.depthFirstSearchMutateStub = depthFirstSearchMutateStub;
+        this.randomWalkMutateStub = randomWalkMutateStub;
         this.singlePairShortestPathAStarMutateStub = singlePairShortestPathAStarMutateStub;
         this.singlePairShortestPathDijkstraMutateStub = singlePairShortestPathDijkstraMutateStub;
         this.singlePairShortestPathYensMutateStub = singlePairShortestPathYensMutateStub;
@@ -193,6 +196,11 @@ public final class PathFindingProcedureFacade {
             applicationsFacade
         );
 
+        var randomWalkMutateStub = new RandomWalkMutateStub(
+            genericStub,
+            applicationsFacade
+        );
+
         var singlePairDijkstraStub = new SinglePairShortestPathDijkstraMutateStub(
             genericStub,
             applicationsFacade
@@ -227,6 +235,7 @@ public final class PathFindingProcedureFacade {
             breadthFirstSearchMutateStub,
             deltaSteppingMutateStub,
             depthFirstSearchMutateStub,
+            randomWalkMutateStub,
             aStarStub,
             singlePairDijkstraStub,
             yensStub,
@@ -612,6 +621,10 @@ public final class PathFindingProcedureFacade {
         );
 
         return Stream.of(result);
+    }
+
+    public RandomWalkMutateStub randomWalkMutateStub() {
+        return randomWalkMutateStub;
     }
 
     public SinglePairShortestPathAStarMutateStub singlePairShortestPathAStarMutateStub() {

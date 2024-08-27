@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
@@ -59,7 +60,8 @@ public final class PathFindingApplications {
         WriteContext writeContext,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        ProgressTrackerCreator progressTrackerCreator
+        ProgressTrackerCreator progressTrackerCreator,
+        MutateNodeProperty mutateNodeProperty
     ) {
         var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, progressTrackerCreator);
 
@@ -68,7 +70,8 @@ public final class PathFindingApplications {
         var mutateModeFacade = new PathFindingAlgorithmsMutateModeBusinessFacade(
             estimationModeFacade,
             pathFindingAlgorithms,
-            algorithmProcessingTemplateConvenience
+            algorithmProcessingTemplateConvenience,
+            mutateNodeProperty
         );
 
         var statsModeFacade = new PathFindingAlgorithmsStatsModeBusinessFacade(

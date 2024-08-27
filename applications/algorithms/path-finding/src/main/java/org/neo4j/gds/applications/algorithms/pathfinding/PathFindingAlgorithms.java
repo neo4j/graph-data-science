@@ -32,6 +32,7 @@ import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 import org.neo4j.gds.applications.algorithms.pathfinding.traverse.BreadthFirstSearch;
 import org.neo4j.gds.applications.algorithms.pathfinding.traverse.DepthFirstSearch;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -67,6 +68,7 @@ import org.neo4j.gds.steiner.SteinerTreeBaseConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.traversal.RandomWalk;
 import org.neo4j.gds.traversal.RandomWalkBaseConfig;
+import org.neo4j.gds.traversal.RandomWalkCountingNodeVisits;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -239,6 +241,34 @@ public class PathFindingAlgorithms {
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, false);
+    }
+
+    HugeAtomicLongArray randomWalkCountingNodeVisits(Graph graph, RandomWalkBaseConfig configuration) {
+        var tasks = new ArrayList<Task>();
+        if (graph.hasRelationshipProperty()) {
+            tasks.add(DegreeCentralityFactory.degreeCentralityProgressTask(graph));
+        }
+        Task task;
+        if (tasks.isEmpty()) {
+            task = Tasks.leaf(LabelForProgressTracking.RandomWalk.value, graph.nodeCount());
+        } else {
+            task = Tasks.task(LabelForProgressTracking.RandomWalk.value, tasks);
+        }
+
+        var progressTracker = createProgressTracker(configuration, task);
+
+        var algorithm = RandomWalkCountingNodeVisits.create(
+            graph,
+            configuration.concurrency(),
+            configuration.walkParameters(),
+            configuration.sourceNodes(),
+            configuration.randomSeed(),
+            progressTracker,
+            DefaultPool.INSTANCE,
+            requestScopedDependencies.getTerminationFlag()
+        );
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
     PathFindingResult singlePairShortestPathAStar(Graph graph, ShortestPathAStarBaseConfig configuration) {
