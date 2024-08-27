@@ -23,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.values.storable.Value;
 
 import java.util.Optional;
 
@@ -83,13 +82,6 @@ public final class NullCheckingNodePropertyValues implements NodePropertyValues 
     @Override
     public Optional<Integer> dimension() {
         return properties.dimension();
-    }
-
-    @Override
-    public Value value(long nodeId) {
-        var value = properties.value(nodeId);
-        check(nodeId, value);
-        return value;
     }
 
     @Override

@@ -20,8 +20,6 @@
 package org.neo4j.gds.api.properties.nodes;
 
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.Values;
 
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -35,12 +33,6 @@ public interface DoubleNodePropertyValues extends NodePropertyValues {
     @Override
     default Object getObject(long nodeId) {
         return doubleValue(nodeId);
-    }
-
-    @Override
-    default Value value(long nodeId) {
-        var value = doubleValue(nodeId);
-        return Double.isNaN(value) ? null : Values.doubleValue(value);
     }
 
     @Override

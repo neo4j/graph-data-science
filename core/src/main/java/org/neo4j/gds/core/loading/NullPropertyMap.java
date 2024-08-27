@@ -22,8 +22,6 @@ package org.neo4j.gds.core.loading;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.Values;
 
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -56,11 +54,6 @@ public abstract class NullPropertyMap implements NodePropertyValues {
         }
 
         @Override
-        public Value value(long nodeId) {
-            return Values.doubleValue(defaultValue);
-        }
-
-        @Override
         public ValueType valueType() {
             return ValueType.DOUBLE;
         }
@@ -89,11 +82,6 @@ public abstract class NullPropertyMap implements NodePropertyValues {
         @Override
         public Object getObject(long nodeId) {
             return longValue(nodeId);
-        }
-
-        @Override
-        public Value value(long nodeId) {
-            return Values.longValue(defaultValue);
         }
 
         @Override

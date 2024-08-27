@@ -22,10 +22,8 @@ package org.neo4j.gds.embeddings.hashgnn;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
-import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.Values;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 
 import java.util.Optional;
 
@@ -83,12 +81,12 @@ public final class EmbeddingsToNodePropertyValues {
             return bitSetToDoubleArray(binaryEmbeddings.get(nodeId), embeddingDimension);
         }
 
-        @Override
-        public Value value(long nodeId) {
-            // as Boolean array is not an official property type in GDS we transform to double[].
-            // We use the same data type as in the dense case.
-            return Values.doubleArray(bitSetToDoubleArray(binaryEmbeddings.get(nodeId), embeddingDimension));
-        }
+//        @Override
+//        public Value value(long nodeId) {
+//            // as Boolean array is not an official property type in GDS we transform to double[].
+//            // We use the same data type as in the dense case.
+//            return Values.doubleArray(bitSetToDoubleArray(binaryEmbeddings.get(nodeId), embeddingDimension));
+//        }
 
         @Override
         public Optional<Integer> dimension() {

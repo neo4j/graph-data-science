@@ -24,8 +24,6 @@ import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
 import org.neo4j.gds.mem.BitUtil;
-import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.Values;
 
 public class ConsecutiveLongNodePropertyValues implements LongNodePropertyValues, FilteredNodePropertyValuesMarker {
 
@@ -80,14 +78,6 @@ public class ConsecutiveLongNodePropertyValues implements LongNodePropertyValues
     @Override
     public boolean hasValue(long nodeId) {
         return communities.get(nodeId) != NO_VALUE;
-    }
-
-    @Override
-    public Value value(long nodeId) {
-        if (hasValue(nodeId)) {
-            return Values.longValue(communities.get(nodeId));
-        }
-        return null;
     }
 
     @Override

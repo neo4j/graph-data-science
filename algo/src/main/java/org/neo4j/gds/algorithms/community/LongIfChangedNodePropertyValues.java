@@ -25,8 +25,6 @@ import org.neo4j.gds.api.properties.nodes.FilteredNodePropertyValuesMarker;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.Values;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -77,15 +75,6 @@ public final class LongIfChangedNodePropertyValues implements LongNodePropertyVa
         var writeValue = newProperties.longValue(nodeId);
 
         return (seedValue != writeValue) ? writeValue : Long.MIN_VALUE;
-    }
-
-    @Override
-    public Value value(long nodeId) {
-        var value = longValue(nodeId);
-        if (value == Long.MIN_VALUE) {
-            return null;
-        }
-        return Values.longValue(value);
     }
 
     @Override

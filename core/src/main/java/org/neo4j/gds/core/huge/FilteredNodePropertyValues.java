@@ -24,8 +24,6 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.Values;
 
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -70,11 +68,6 @@ public abstract class FilteredNodePropertyValues implements NodePropertyValues {
     @Override
     public Object getObject(long nodeId) {
         return properties.getObject(translateId(nodeId));
-    }
-
-    @Override
-    public Value value(long nodeId) {
-        return properties.value(translateId(nodeId));
     }
 
     @Override
@@ -233,16 +226,6 @@ public abstract class FilteredNodePropertyValues implements NodePropertyValues {
             }
 
             return properties.getObject(translatedId);
-        }
-
-        @Override
-        public Value value(long nodeId) {
-            long translatedId = translateId(nodeId);
-
-            if (translatedId < 0) {
-                return Values.NO_VALUE;
-            }
-            return properties.value(translatedId);
         }
 
         @Override

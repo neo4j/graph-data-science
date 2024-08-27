@@ -31,8 +31,6 @@ import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.result.CommunityStatistics;
-import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.Values;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -201,15 +199,6 @@ public final class CommunityCompanion {
             }
             // apply our own filter
             return isCommunityMinSizeMet(longValue) ? longValue : Long.MIN_VALUE;
-        }
-
-        @Override
-        public Value value(long nodeId) {
-            long value = longValue(nodeId);
-            if (value == Long.MIN_VALUE) {
-                return null;
-            }
-            return Values.longValue(value);
         }
 
         @Override
