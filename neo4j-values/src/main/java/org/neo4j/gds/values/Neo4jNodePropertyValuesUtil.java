@@ -21,6 +21,7 @@ package org.neo4j.gds.values;
 
 import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.FilteredNodePropertyValuesMarker;
 import org.neo4j.gds.api.properties.nodes.FloatArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
@@ -31,7 +32,7 @@ public final class Neo4jNodePropertyValuesUtil {
     public static Neo4jNodePropertyValues of(NodePropertyValues internal) {
         return switch(internal.valueType()) {
             case DOUBLE -> new Neo4jDoubleNodePropertyValues((DoubleNodePropertyValues) internal);
-            case LONG -> new Neo4jLongNodePropertyValues((LongNodePropertyValues) internal);
+            case LONG -> new Neo4jLongNodePropertyValues((LongNodePropertyValues) internal, internal instanceof FilteredNodePropertyValuesMarker);
             case FLOAT_ARRAY -> new Neo4jFloatArrayNodePropertyValues((FloatArrayNodePropertyValues) internal);
             case DOUBLE_ARRAY -> new Neo4jDoubleArrayNodePropertyValues((DoubleArrayNodePropertyValues) internal);
             case LONG_ARRAY -> new Neo4jLongArrayNodePropertyValues((LongArrayNodePropertyValues) internal);

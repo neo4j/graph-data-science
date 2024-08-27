@@ -22,6 +22,7 @@ package org.neo4j.gds.algorithms.community;
 import org.eclipse.collections.api.block.function.primitive.LongToObjectFunction;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.nodes.FilteredNodePropertyValuesMarker;
 import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
@@ -30,8 +31,8 @@ import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.result.CommunityStatistics;
-import org.neo4j.values.storable.LongValue;
 import org.neo4j.values.storable.Value;
+import org.neo4j.values.storable.Values;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,13 +66,13 @@ public final class CommunityCompanion {
         Supplier<NodeProperty> seedPropertySupplier
     ) {
 
+        if (consecutiveIds) {
+            return new ConsecutiveLongNodePropertyValues(nodeProperties);
+        }
         if (isIncremental && resultProperty.equals(seedProperty)) {
             nodeProperties = LongIfChangedNodePropertyValues.of(seedPropertySupplier.get(), nodeProperties);
         }
 
-        if (consecutiveIds) {
-            return new ConsecutiveLongNodePropertyValues(nodeProperties);
-        }
 
         return nodeProperties;
     }
@@ -160,7 +161,7 @@ public final class CommunityCompanion {
         return null;
     }
 
-    private static class CommunitySizeFilter implements LongNodePropertyValues {
+    private static class CommunitySizeFilter implements LongNodePropertyValues, FilteredNodePropertyValuesMarker {
 
         private final LongNodePropertyValues properties;
 
@@ -183,31 +184,32 @@ public final class CommunityCompanion {
             return properties.nodeCount();
         }
 
-        @Override
-        public long longValue(long nodeId) {
-            return properties.longValue(nodeId);
-        }
-
         /**
-         * Returning null indicates that the value is not written to Neo4j.
+         * Returning Long.MIN_VALUE indicates that the value should not be written to Neo4j.
          * <p>
          * The filter is applied in the latest stage before writing to Neo4j.
-         * Since the wrapped node properties may have additional logic in value(),
+         * Since the wrapped node properties may have additional logic in longValue(),
          * we need to check if they already filtered the value. Only in the case
          * where the wrapped properties pass on the value, we can apply a filter.
          */
         @Override
-        public Value value(long nodeId) {
-            var value = properties.value(nodeId);
+        public long longValue(long nodeId) {
+            var longValue = properties.longValue(nodeId);
+            // did the wrapped properties filter out the value?
+            if (longValue == Long.MIN_VALUE) {
+                return Long.MIN_VALUE;
+            }
+            // apply our own filter
+            return isCommunityMinSizeMet(longValue) ? longValue : Long.MIN_VALUE;
+        }
 
-            if (value == null) {
+        @Override
+        public Value value(long nodeId) {
+            long value = longValue(nodeId);
+            if (value == Long.MIN_VALUE) {
                 return null;
             }
-
-            // This cast is safe since we handle LongNodeProperties.
-            var communityId = ((LongValue) value).longValue();
-
-            return isCommunityMinSizeMet(communityId) ? value : null;
+            return Values.longValue(value);
         }
 
         @Override
