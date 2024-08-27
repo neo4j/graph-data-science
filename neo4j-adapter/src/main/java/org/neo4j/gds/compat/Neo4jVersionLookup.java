@@ -55,7 +55,7 @@ final class Neo4jVersionLookup {
     }
 
     private static final int SUPPORTED_MAJOR_VERSION = 5;
-    private static final int MIN_SUPPORTED_MINOR_VERSION = 17;
+    private static final int MIN_SUPPORTED_MINOR_VERSION = 18;
 
     @VisibleForTesting
     static Neo4jVersion parse(CharSequence version, String fullVersion) {
