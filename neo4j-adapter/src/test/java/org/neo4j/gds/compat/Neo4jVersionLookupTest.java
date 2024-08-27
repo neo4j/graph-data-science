@@ -33,7 +33,6 @@ class Neo4jVersionLookupTest {
     @ParameterizedTest
     @CsvSource(
         {
-            "5.19.0, 5, 19",
             "5.20.0, 5, 20",
             "5.21.2, 5, 21",
         }
@@ -100,7 +99,6 @@ class Neo4jVersionLookupTest {
     @ParameterizedTest
     @CsvSource(
         {
-            "5.19.0, 5, 19",
             "5.20.0, 5, 20",
             "5.21.2, 5, 21",
             "5.99.0, 5, 99",
