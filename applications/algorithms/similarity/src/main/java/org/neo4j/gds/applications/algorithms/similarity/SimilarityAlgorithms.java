@@ -36,7 +36,6 @@ import org.neo4j.gds.similarity.knn.ImmutableKnnContext;
 import org.neo4j.gds.similarity.knn.Knn;
 import org.neo4j.gds.similarity.knn.KnnBaseConfig;
 import org.neo4j.gds.similarity.knn.KnnContext;
-import org.neo4j.gds.similarity.knn.KnnFactory;
 import org.neo4j.gds.similarity.knn.KnnNeighborFilterFactory;
 import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
@@ -47,6 +46,7 @@ import org.neo4j.gds.wcc.WccAlgorithmFactory;
 
 import java.util.List;
 
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FilteredKNN;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FilteredNodeSimilarity;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KNN;
 
@@ -65,10 +65,24 @@ public class SimilarityAlgorithms {
     }
 
     FilteredKnnResult filteredKnn(Graph graph, FilteredKnnBaseConfig configuration) {
-        var taskTree = KnnFactory.knnTaskTree(graph.nodeCount(), configuration.maxIterations());
+        long nodeCount = graph.nodeCount();
+
+        Task task = Tasks.task(
+            FilteredKNN.value,
+            Tasks.leaf("Initialize random neighbors", nodeCount),
+            Tasks.iterativeDynamic(
+                "Iteration",
+                () -> List.of(
+                    Tasks.leaf("Split old and new neighbors", nodeCount),
+                    Tasks.leaf("Reverse old and new neighbors", nodeCount),
+                    Tasks.leaf("Join neighbors", nodeCount)
+                ),
+                configuration.maxIterations()
+            )
+        );
         var progressTracker = progressTrackerCreator.createProgressTracker(
             configuration,
-            taskTree
+            task
         );
         var knnContext = ImmutableKnnContext
             .builder()
