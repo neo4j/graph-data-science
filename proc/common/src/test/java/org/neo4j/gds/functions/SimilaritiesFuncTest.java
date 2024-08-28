@@ -160,6 +160,25 @@ class SimilaritiesFuncTest {
         assertEquals(1 / 3.0, new SimilaritiesFunc().jaccardSimilarity(left, right));
     }
 
+    @Test
+    void shouldSortDoublesAndLongs() {
+        var doublesAndLongs = new ArrayList<>(List.of(
+            Double.MIN_VALUE,
+            1L,
+            Long.MAX_VALUE,
+            -1D,
+            0xFFE0_0000_0000_0000L
+        ));
+        doublesAndLongs.sort(new SimilaritiesFunc.NumberComparator());
+        assertThat(doublesAndLongs).containsExactly(
+            0xFFE0_0000_0000_0000L,
+            -1D,
+            Double.MIN_VALUE,
+            1L,
+            Long.MAX_VALUE
+        );
+    }
+
     @ParameterizedTest(name = "{2}")
     @MethodSource("listCollectors")
     void shouldComputeJaccardAtAllCasesOfListInput(

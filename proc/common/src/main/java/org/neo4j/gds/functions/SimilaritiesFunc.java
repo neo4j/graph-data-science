@@ -23,8 +23,8 @@ import org.neo4j.gds.core.utils.Intersections;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.UserFunction;
-import org.neo4j.values.storable.Values;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -212,13 +212,29 @@ public class SimilaritiesFunc {
             }
 
             if (o1 instanceof Long) {
-                return Values.longValue(o1.longValue()).compareTo(Values.doubleValue(o2.doubleValue()));
+                return -compareDoubleAgainstLong(o2.doubleValue(), o1.longValue());
             }
             if (o2 instanceof Long) {
-                return Values.doubleValue(o1.doubleValue()).compareTo(Values.longValue(o2.longValue()));
+                return compareDoubleAgainstLong(o1.doubleValue(), o2.longValue());
             }
 
             return Double.compare(o1.doubleValue(), o2.doubleValue());
         }
+
+        private static final long NON_DOUBLE_LONG = 0xFFE0_0000_0000_0000L; // doubles are exact integers up to 53 bits
+
+        private int compareDoubleAgainstLong(double lhs, long rhs) {
+            if ((NON_DOUBLE_LONG & rhs) != 0L) {
+                if (Double.isNaN(lhs)) {
+                    return +1;
+                }
+                if (Double.isInfinite(lhs)) {
+                    return lhs < 0 ? -1 : +1;
+                }
+                return BigDecimal.valueOf(lhs).compareTo(BigDecimal.valueOf(rhs));
+            }
+            return Double.compare(lhs, rhs);
+        }
+
     }
 }
