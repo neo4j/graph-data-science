@@ -26,19 +26,22 @@ import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies
 public final class MachineLearningApplications {
     private final MachineLearningAlgorithmsEstimationModeBusinessFacade estimation;
     private final MachineLearningAlgorithmsMutateModeBusinessFacade mutation;
+    private final MachineLearningAlgorithmsStreamModeBusinessFacade streaming;
 
     private MachineLearningApplications(
         MachineLearningAlgorithmsEstimationModeBusinessFacade estimation,
-        MachineLearningAlgorithmsMutateModeBusinessFacade mutation
+        MachineLearningAlgorithmsMutateModeBusinessFacade mutation,
+        MachineLearningAlgorithmsStreamModeBusinessFacade streaming
     ) {
         this.estimation = estimation;
         this.mutation = mutation;
+        this.streaming = streaming;
     }
 
     public static MachineLearningApplications create(
         RequestScopedDependencies requestScopedDependencies,
         ProgressTrackerCreator progressTrackerCreator,
-        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience
+        AlgorithmProcessingTemplateConvenience convenience
     ) {
         var algorithms = new MachineLearningAlgorithms(
             progressTrackerCreator,
@@ -50,10 +53,15 @@ public final class MachineLearningApplications {
             requestScopedDependencies,
             estimation,
             algorithms,
-            algorithmProcessingTemplateConvenience
+            convenience
+        );
+        var streaming = new MachineLearningAlgorithmsStreamModeBusinessFacade(
+            convenience,
+            estimation,
+            algorithms
         );
 
-        return new MachineLearningApplications(estimation, mutation);
+        return new MachineLearningApplications(estimation, mutation, streaming);
     }
 
     public MachineLearningAlgorithmsEstimationModeBusinessFacade estimate() {
@@ -62,5 +70,9 @@ public final class MachineLearningApplications {
 
     public MachineLearningAlgorithmsMutateModeBusinessFacade mutate() {
         return mutation;
+    }
+
+    public MachineLearningAlgorithmsStreamModeBusinessFacade stream() {
+        return streaming;
     }
 }

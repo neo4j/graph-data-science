@@ -81,9 +81,9 @@ public final class PathFindingApplications {
         );
 
         var streamModeFacade = new PathFindingAlgorithmsStreamModeBusinessFacade(
-            algorithmProcessingTemplateConvenience,
             estimationModeFacade,
-            pathFindingAlgorithms
+            pathFindingAlgorithms,
+            algorithmProcessingTemplateConvenience
         );
 
         var writeModeFacade = new PathFindingAlgorithmsWriteModeBusinessFacade(

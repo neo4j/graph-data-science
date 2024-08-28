@@ -17,17 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.kge;
+package org.neo4j.gds.procedures.algorithms.machinelearning;
 
-import org.neo4j.gds.algorithms.machinelearning.KGEPredictBaseConfig;
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.core.CypherMapWrapper;
+public class KGEStreamResult {
+    public final long sourceNodeId;
+    public final long targetNodeId;
+    public final double score;
 
-@Configuration
-public interface KGEPredictStreamConfig extends KGEPredictBaseConfig {
-
-    static KGEPredictStreamConfig of(CypherMapWrapper userInput) {
-        return new KGEPredictStreamConfigImpl(userInput);
+    public KGEStreamResult(long sourceNodeId, long targetNodeId, double score) {
+        this.sourceNodeId = sourceNodeId;
+        this.targetNodeId = targetNodeId;
+        this.score = score;
     }
-
 }

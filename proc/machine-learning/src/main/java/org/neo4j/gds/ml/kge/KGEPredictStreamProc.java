@@ -19,8 +19,9 @@
  */
 package org.neo4j.gds.ml.kge;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.algorithms.machinelearning.KGEStreamResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Mode;
@@ -30,7 +31,9 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class KGEPredictStreamProc extends BaseProc {
+public class KGEPredictStreamProc {
+    @Context
+    public GraphDataScienceProcedures facade;
 
     @Procedure(name = "gds.ml.kge.predict.stream", mode = Mode.READ)
     @Description("Predicts new relationships using an existing KGE model.")
@@ -39,9 +42,6 @@ public class KGEPredictStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new KGEPredictStreamSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.algorithms().machineLearning().kgeStream(graphName, configuration);
     }
 }

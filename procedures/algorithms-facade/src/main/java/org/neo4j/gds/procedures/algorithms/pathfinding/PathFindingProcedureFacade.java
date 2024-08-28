@@ -157,7 +157,8 @@ public final class PathFindingProcedureFacade {
         this.steinerTreeMutateStub = steinerTreeMutateStub;
 
         this.estimationMode = estimationMode;
-        this.algorithmExecutionScaffolding = algorithmExecutionScaffolding;}
+        this.algorithmExecutionScaffolding = algorithmExecutionScaffolding;
+    }
 
     /**
      * Encapsulating some of the boring structure stuff
@@ -169,8 +170,8 @@ public final class PathFindingProcedureFacade {
         ApplicationsFacade applicationsFacade,
         GenericStub genericStub,
         EstimationModeRunner estimationModeRunner,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffolding)
-    {
+        AlgorithmExecutionScaffolding algorithmExecutionScaffolding
+    ) {
         var aStarStub = new SinglePairShortestPathAStarMutateStub(
             genericStub,
             applicationsFacade
@@ -252,7 +253,7 @@ public final class PathFindingProcedureFacade {
         Map<String, Object> configuration
     ) {
         StreamResultBuilder<AllShortestPathsConfig, Stream<AllShortestPathsStreamResult>, AllShortestPathsStreamResult> resultBuilder =
-            (g,gs,c, result) -> result.orElse(Stream.empty());
+            (g, gs, c, result) -> result.orElse(Stream.empty());
 
         return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,

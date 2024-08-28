@@ -53,8 +53,8 @@ class AlgorithmProcedureFacadeBuilder {
         ApplicationsFacade applicationsFacade,
         GenericStub genericStub,
         EstimationModeRunner estimationModeRunner,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffolding)
-    {
+        AlgorithmExecutionScaffolding algorithmExecutionScaffolding
+    ) {
         this.requestScopedDependencies = requestScopedDependencies;
         this.closeableResourceRegistry = closeableResourceRegistry;
         this.nodeLookup = nodeLookup;
@@ -87,7 +87,7 @@ class AlgorithmProcedureFacadeBuilder {
     }
 
     MachineLearningProcedureFacade createMachineLearningProcedureFacade() {
-        return MachineLearningProcedureFacade.create(genericStub, applicationsFacade);
+        return MachineLearningProcedureFacade.create(genericStub, applicationsFacade, algorithmExecutionScaffolding);
     }
 
     MiscellaneousProcedureFacade createMiscellaneousProcedureFacade() {

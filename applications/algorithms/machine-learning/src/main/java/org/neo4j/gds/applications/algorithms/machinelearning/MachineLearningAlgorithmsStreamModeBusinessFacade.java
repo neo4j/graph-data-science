@@ -19,50 +19,43 @@
  */
 package org.neo4j.gds.applications.algorithms.machinelearning;
 
-import org.neo4j.gds.algorithms.machinelearning.KGEPredictMutateConfig;
 import org.neo4j.gds.algorithms.machinelearning.KGEPredictResult;
+import org.neo4j.gds.algorithms.machinelearning.KGEPredictStreamConfig;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
-import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
+import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
+
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KGE;
 
-public class MachineLearningAlgorithmsMutateModeBusinessFacade {
-    private final RequestScopedDependencies requestScopedDependencies;
+public class MachineLearningAlgorithmsStreamModeBusinessFacade {
+    private final AlgorithmProcessingTemplateConvenience convenience;
 
     private final MachineLearningAlgorithmsEstimationModeBusinessFacade estimation;
     private final MachineLearningAlgorithms algorithms;
 
-    private final AlgorithmProcessingTemplateConvenience convenience;
-
-    MachineLearningAlgorithmsMutateModeBusinessFacade(
-        RequestScopedDependencies requestScopedDependencies,
+    MachineLearningAlgorithmsStreamModeBusinessFacade(
+        AlgorithmProcessingTemplateConvenience convenience,
         MachineLearningAlgorithmsEstimationModeBusinessFacade estimation,
-        MachineLearningAlgorithms algorithms,
-        AlgorithmProcessingTemplateConvenience convenience
+        MachineLearningAlgorithms algorithms
     ) {
-        this.requestScopedDependencies = requestScopedDependencies;
-        this.estimation = estimation;
-        this.algorithms = algorithms;
         this.convenience = convenience;
+        this.algorithms = algorithms;
+        this.estimation = estimation;
     }
 
-    public <RESULT> RESULT kge(
+    public <RESULT> Stream<RESULT> kge(
         GraphName graphName,
-        KGEPredictMutateConfig configuration,
-        ResultBuilder<KGEPredictMutateConfig, KGEPredictResult, RESULT, RelationshipsWritten> resultBuilder
+        KGEPredictStreamConfig configuration,
+        StreamResultBuilder<KGEPredictStreamConfig, KGEPredictResult, RESULT> resultBuilder
     ) {
-        var mutateStep = new KgeMutateStep(requestScopedDependencies.getTerminationFlag(), configuration);
-
-        return convenience.processRegularAlgorithmInMutateOrWriteMode(
+        return convenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
             KGE,
             estimation::kge,
             (graph, __) -> algorithms.kge(graph, configuration),
-            mutateStep,
             resultBuilder
         );
     }
