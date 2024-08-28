@@ -149,9 +149,17 @@ public final class NodesBuilder {
     }
 
     public void addNodeWithPropertiesAsObjects(long originalId, Map<String, Object> propertiesAsObjects) {
+        this.addNodeWithPropertiesAsObjects(originalId, propertiesAsObjects, NodeLabelTokens.empty());
+    }
+
+    public void addNodeWithPropertiesAsObjects(long originalId, Map<String, Object> propertiesAsObjects, NodeLabel... nodeLabels) {
+        this.addNodeWithPropertiesAsObjects(originalId, propertiesAsObjects, NodeLabelTokens.ofNodeLabels(nodeLabels));
+    }
+
+    public void addNodeWithPropertiesAsObjects(long originalId, Map<String, Object> propertiesAsObjects, NodeLabelToken nodeLabels) {
         var properties = new HashMap<String, Value>(propertiesAsObjects.size());
         propertiesAsObjects.forEach((key, value) -> properties.put(key, Values.of(value)));
-        this.addNode(originalId, properties);
+        this.addNode(originalId, properties, nodeLabels);
     }
 
     public void addNode(long originalId, Map<String, Value> properties) {
