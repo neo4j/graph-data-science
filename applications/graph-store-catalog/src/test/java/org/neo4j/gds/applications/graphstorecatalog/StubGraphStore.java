@@ -108,11 +108,6 @@ class StubGraphStore implements GraphStore {
     }
 
     @Override
-    public ValueType graphPropertyType(String propertyKey) {
-        throw new UnsupportedOperationException("TODO");
-    }
-
-    @Override
     public GraphPropertyValues graphPropertyValues(String propertyKey) {
         throw new UnsupportedOperationException("TODO");
     }

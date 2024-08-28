@@ -156,9 +156,6 @@ public final class NodeLabelTokens {
         INSTANCE;
 
         @Override
-        public boolean isMissing() { return true; }
-
-        @Override
         public boolean isEmpty() { return true; }
 
         @Override
@@ -182,9 +179,6 @@ public final class NodeLabelTokens {
         INSTANCE;
 
         @Override
-        public boolean isMissing() { return false; }
-
-        @Override
         public boolean isEmpty() { return true; }
 
         @Override
@@ -205,9 +199,6 @@ public final class NodeLabelTokens {
     }
 
     public interface ValidNodeLabelToken extends NodeLabelToken {
-        @Override
-        default boolean isMissing() { return false; }
-
         @Override
         default boolean isInvalid() { return false; }
     }

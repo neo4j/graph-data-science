@@ -63,8 +63,6 @@ public interface GraphStore {
 
     GraphProperty graphProperty(String propertyKey);
 
-    ValueType graphPropertyType(String propertyKey);
-
     GraphPropertyValues graphPropertyValues(String propertyKey);
 
     void addGraphProperty(

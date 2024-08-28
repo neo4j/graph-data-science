@@ -85,11 +85,6 @@ public abstract class GraphStoreAdapter implements GraphStore {
     }
 
     @Override
-    public ValueType graphPropertyType(String propertyKey) {
-        return graphStore.graphPropertyType(propertyKey);
-    }
-
-    @Override
     public GraphPropertyValues graphPropertyValues(String propertyKey) {
         return graphStore.graphPropertyValues(propertyKey);
     }

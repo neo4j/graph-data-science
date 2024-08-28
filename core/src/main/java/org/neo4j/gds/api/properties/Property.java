@@ -20,7 +20,6 @@
 package org.neo4j.gds.api.properties;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.PropertySchema;
@@ -38,11 +37,6 @@ public interface Property<VALUE extends PropertyValues> {
     @Configuration.Ignore
     default ValueType valueType() {
         return propertySchema().valueType();
-    }
-
-    @Configuration.Ignore
-    default DefaultValue defaultValue() {
-        return propertySchema().defaultValue();
     }
 
     @Configuration.Ignore

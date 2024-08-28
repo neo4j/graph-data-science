@@ -20,7 +20,6 @@
 package org.neo4j.gds.api.properties.graph;
 
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.Property;
 import org.neo4j.gds.api.schema.PropertySchema;
@@ -36,17 +35,6 @@ public interface GraphProperty extends Property<GraphPropertyValues> {
         return ImmutableGraphProperty.of(
             values,
             PropertySchema.of(key, values.valueType(), values.valueType().fallbackValue(), PropertyState.TRANSIENT)
-        );
-    }
-
-    static GraphProperty of(
-        String key,
-        GraphPropertyValues values,
-        DefaultValue defaultValue
-    ) {
-        return ImmutableGraphProperty.of(
-            values,
-            PropertySchema.of(key, values.valueType(), defaultValue, PropertyState.TRANSIENT)
         );
     }
 }

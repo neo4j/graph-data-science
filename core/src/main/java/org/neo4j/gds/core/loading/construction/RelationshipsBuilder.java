@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.function.LongConsumer;
-import java.util.stream.Stream;
 
 import static org.neo4j.gds.api.IdMap.NOT_FOUND;
 
@@ -79,22 +78,6 @@ public class RelationshipsBuilder {
         ) && !skipDanglingRelationships) {
             throwUnmappedNodeIds(source, target, idMap);
         }
-    }
-
-    public <T extends Relationship> void add(Stream<T> relationshipStream) {
-        relationshipStream.forEach(this::add);
-    }
-
-    public <T extends Relationship> void add(T relationship) {
-        add(relationship.sourceNodeId(), relationship.targetNodeId(), relationship.property());
-    }
-
-    public <T extends Relationship> void addFromInternal(Stream<T> relationshipStream) {
-        relationshipStream.forEach(this::addFromInternal);
-    }
-
-    public <T extends Relationship> void addFromInternal(T relationship) {
-        addFromInternal(relationship.sourceNodeId(), relationship.targetNodeId(), relationship.property());
     }
 
     public boolean addFromInternal(long mappedSourceId, long mappedTargetId) {

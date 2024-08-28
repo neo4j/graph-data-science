@@ -28,11 +28,6 @@ import java.util.stream.Stream;
 public interface NodeLabelToken {
 
     /**
-     * @return `true` iff no label information was provided at all.
-     */
-    boolean isMissing();
-
-    /**
      * @return `true` iff the provided label information could not be mapped to an internal type
      *         because it was provided as a wrong type.
      */
@@ -57,5 +52,3 @@ public interface NodeLabelToken {
         return IntStream.range(0, this.size()).mapToObj(this::get);
     }
 }
-
-

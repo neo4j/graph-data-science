@@ -21,8 +21,6 @@ package org.neo4j.gds.api.properties.graph;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.Values;
 
 import java.util.stream.Stream;
 
@@ -34,11 +32,6 @@ public interface FloatArrayGraphPropertyValues extends GraphPropertyValues {
     @Override
     default Stream<float[]> objects() {
         return floatArrayValues();
-    }
-
-    @Override
-    default Stream<Value> values() {
-        return floatArrayValues().map(value -> value == null ? null : Values.floatArray(value));
     }
 
     @Override

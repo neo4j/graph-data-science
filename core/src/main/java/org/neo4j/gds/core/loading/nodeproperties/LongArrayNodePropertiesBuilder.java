@@ -58,10 +58,6 @@ public class LongArrayNodePropertiesBuilder implements InnerNodePropertiesBuilde
         set(neoNodeId, Neo4jValueConversion.getLongArray(value));
     }
 
-    public void setValue(long nodeId, long[] value) {
-        builder.set(nodeId, value);
-    }
-
     @Override
     public LongArrayNodePropertyValues build(long size, PartialIdMap idMap, long highestOriginalId) {
         var propertiesByNeoIds = builder.build();

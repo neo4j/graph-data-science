@@ -20,8 +20,6 @@
 package org.neo4j.gds.api.properties.graph;
 
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.Values;
 
 import java.util.stream.Stream;
 
@@ -33,11 +31,6 @@ public interface LongArrayGraphPropertyValues extends GraphPropertyValues {
     @Override
     default Stream<long[]> objects() {
         return longArrayValues();
-    }
-
-    @Override
-    default Stream<Value> values() {
-        return longArrayValues().map(value -> value == null ? null : Values.longArray(value));
     }
 
     @Override

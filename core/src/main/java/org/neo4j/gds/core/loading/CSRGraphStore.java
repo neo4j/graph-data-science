@@ -196,11 +196,6 @@ public final class CSRGraphStore implements GraphStore {
     }
 
     @Override
-    public ValueType graphPropertyType(String propertyKey) {
-        return graphProperty(propertyKey).valueType();
-    }
-
-    @Override
     public GraphPropertyValues graphPropertyValues(String propertyKey) {
         return graphProperty(propertyKey).values();
     }
