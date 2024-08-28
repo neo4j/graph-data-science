@@ -86,6 +86,7 @@ final class MutateModeAlgorithmLibrary {
             case IndexInverse -> CanonicalProcedureName.parse("gds.graph.relationships.indexInverse");
             case K1Coloring -> CanonicalProcedureName.parse("gds.k1coloring");
             case KCore -> CanonicalProcedureName.parse("gds.kcore");
+            case KGE -> CanonicalProcedureName.parse("gds.ml.kge.predict");
             case KMeans -> CanonicalProcedureName.parse("gds.kmeans");
             case KNN -> CanonicalProcedureName.parse("gds.knn");
             case KSpanningTree -> null;

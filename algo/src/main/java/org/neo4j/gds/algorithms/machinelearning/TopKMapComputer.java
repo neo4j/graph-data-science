@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.kge;
+package org.neo4j.gds.algorithms.machinelearning;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.DoubleArrayList;
@@ -29,9 +29,8 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.SetBitsIterable;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.ml.kge.scorers.LinkScorer;
-import org.neo4j.gds.ml.kge.scorers.LinkScorerFactory;
 import org.neo4j.gds.similarity.nodesim.TopKMap;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 
@@ -63,7 +62,8 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
         ScoreFunction scoreFunction,
         int topK,
         Concurrency concurrency,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -78,6 +78,8 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
         this.topK = topK;
         this.scoreFunction = scoreFunction;
         this.higherIsBetter = scoreFunction == ScoreFunction.DISTMULT;
+
+        this.terminationFlag = terminationFlag;
     }
 
     public KGEPredictResult compute() {

@@ -25,6 +25,7 @@ import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.embeddings.NodeEmbeddingsProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.machinelearning.MachineLearningProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.MiscellaneousProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade;
@@ -44,6 +45,7 @@ public class GraphDataScienceProceduresBuilder {
     private CentralityProcedureFacade centralityProcedureFacade;
     private GraphCatalogProcedureFacade graphCatalogProcedureFacade;
     private CommunityProcedureFacade communityProcedureFacade;
+    private MachineLearningProcedureFacade machineLearningProcedureFacade;
     private MiscellaneousProcedureFacade miscellaneousProcedureFacade;
     private ModelCatalogProcedureFacade modelCatalogProcedureFacade;
     private NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade;
@@ -69,6 +71,11 @@ public class GraphDataScienceProceduresBuilder {
 
     public GraphDataScienceProceduresBuilder with(GraphCatalogProcedureFacade graphCatalogProcedureFacade) {
         this.graphCatalogProcedureFacade = graphCatalogProcedureFacade;
+        return this;
+    }
+
+    public GraphDataScienceProceduresBuilder with(MachineLearningProcedureFacade machineLearningProcedureFacade) {
+        this.machineLearningProcedureFacade = machineLearningProcedureFacade;
         return this;
     }
 
@@ -116,6 +123,7 @@ public class GraphDataScienceProceduresBuilder {
         var algorithmsProcedureFacade = new AlgorithmsProcedureFacade(
             centralityProcedureFacade,
             communityProcedureFacade,
+            machineLearningProcedureFacade,
             miscellaneousProcedureFacade,
             nodeEmbeddingsProcedureFacade,
             pathFindingProcedureFacade,

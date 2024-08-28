@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.ml.kge;
 
+import org.neo4j.gds.algorithms.machinelearning.KGEPredictResult;
+import org.neo4j.gds.algorithms.machinelearning.TopKMapComputer;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;

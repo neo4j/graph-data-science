@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.kge.scorers;
+package org.neo4j.gds.algorithms.machinelearning;
 
 import com.carrotsearch.hppc.DoubleArrayList;
 import org.junit.jupiter.api.Test;
@@ -25,8 +25,8 @@ import org.neo4j.gds.nodeproperties.DoubleArrayTestPropertyValues;
 import org.neo4j.gds.nodeproperties.FloatArrayTestPropertyValues;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.ml.kge.ScoreFunction.DISTMULT;
-import static org.neo4j.gds.ml.kge.ScoreFunction.TRANSE;
+import static org.neo4j.gds.algorithms.machinelearning.ScoreFunction.DISTMULT;
+import static org.neo4j.gds.algorithms.machinelearning.ScoreFunction.TRANSE;
 
 public class LinkScorerFactoryTest {
 

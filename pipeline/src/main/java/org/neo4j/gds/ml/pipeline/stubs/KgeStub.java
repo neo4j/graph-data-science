@@ -17,24 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.kge;
+package org.neo4j.gds.ml.pipeline.stubs;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.MutateRelationshipConfig;
-import org.neo4j.gds.config.MutateRelationshipPropertyConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.algorithms.machinelearning.KGEPredictMutateConfig;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.machinelearning.KGEMutateResult;
+import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
-@Configuration
-public interface KGEPredictMutateConfig extends KGEPredictBaseConfig, MutateRelationshipConfig,
-    MutateRelationshipPropertyConfig {
-
-    @Override
-    default String mutateProperty() {
-        return "score";
+public class KgeStub extends AbstractStub<KGEPredictMutateConfig, KGEMutateResult> {
+    protected MutateStub<KGEPredictMutateConfig, KGEMutateResult> stub(AlgorithmsProcedureFacade facade) {
+        return facade.machineLearning().kgeMutateStub();
     }
-
-    static KGEPredictMutateConfig of(CypherMapWrapper userInput) {
-        return new KGEPredictMutateConfigImpl(userInput);
-    }
-
 }

@@ -17,24 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.kge;
+package org.neo4j.gds.applications.algorithms.machinelearning;
 
-import org.neo4j.gds.algorithms.machinelearning.KGEPredictBaseConfig;
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.WritePropertyConfig;
-import org.neo4j.gds.config.WriteRelationshipConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
+import org.neo4j.gds.mem.MemoryEstimation;
 
-@Configuration
-public interface KGEPredictWriteConfig extends KGEPredictBaseConfig, WritePropertyConfig, WriteRelationshipConfig {
-
-    @Override
-    default String writeProperty() {
-        return "score";
+public class MachineLearningAlgorithmsEstimationModeBusinessFacade {
+    public MemoryEstimation kge() {
+        throw new MemoryEstimationNotImplementedException();
     }
-
-    static KGEPredictWriteConfig of(CypherMapWrapper userInput) {
-        return new KGEPredictWriteConfigImpl(userInput);
-    }
-
 }

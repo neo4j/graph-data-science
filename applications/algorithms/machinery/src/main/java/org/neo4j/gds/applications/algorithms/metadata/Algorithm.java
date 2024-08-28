@@ -55,6 +55,7 @@ public enum Algorithm {
     IndexInverse,
     K1Coloring,
     KCore,
+    KGE,
     KMeans,
     KNN,
     KSpanningTree,
@@ -79,5 +80,5 @@ public enum Algorithm {
     TriangleCount,
     Triangles,
     WCC,
-    Yens;
+    Yens
 }

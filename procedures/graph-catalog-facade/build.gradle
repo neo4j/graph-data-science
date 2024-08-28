@@ -25,6 +25,7 @@ dependencies {
     implementation project(':graph-store-catalog-applications')
     implementation project(':io-core')
     implementation project(':legacy-cypher-projection')
+    implementation project(':machine-learning-algorithms')
     implementation project(':memory-usage')
     implementation project(':miscellaneous-algorithms')
     implementation project(':model-catalog-applications')

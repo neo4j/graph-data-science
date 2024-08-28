@@ -17,23 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.kge.scorers;
+package org.neo4j.gds.algorithms.machinelearning;
 
 import com.carrotsearch.hppc.DoubleArrayList;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
-public class DoubleDistMultLinkScorer implements LinkScorer {
+public class DoubleEuclideanDistanceLinkScorer implements LinkScorer {
 
     private final NodePropertyValues embeddings;
 
     private final double[] relationshipTypeEmbedding;
 
-    private long currentSourceNode;
-
     private final double[] currentCandidateTarget;
 
+    private long currentSourceNode;
 
-    DoubleDistMultLinkScorer(NodePropertyValues embeddings, DoubleArrayList relationshipTypeEmbedding) {
+    DoubleEuclideanDistanceLinkScorer(NodePropertyValues embeddings, DoubleArrayList relationshipTypeEmbedding) {
         this.embeddings = embeddings;
         this.relationshipTypeEmbedding = relationshipTypeEmbedding.toArray();
         this.currentCandidateTarget = new double[this.relationshipTypeEmbedding.length];
@@ -43,8 +42,8 @@ public class DoubleDistMultLinkScorer implements LinkScorer {
     public void init(long sourceNode) {
         this.currentSourceNode = sourceNode;
         var currentSource = embeddings.doubleArrayValue(currentSourceNode);
-        for(int i = 0; i < relationshipTypeEmbedding.length; i++){
-            this.currentCandidateTarget[i] = currentSource[i] * relationshipTypeEmbedding[i];
+        for (int i = 0; i < relationshipTypeEmbedding.length; i++) {
+            this.currentCandidateTarget[i] = currentSource[i] + relationshipTypeEmbedding[i];
         }
     }
 
@@ -53,9 +52,10 @@ public class DoubleDistMultLinkScorer implements LinkScorer {
         double res = 0.0;
         var targetVector = embeddings.doubleArrayValue(targetNode);
         for (int i = 0; i < currentCandidateTarget.length; i++) {
-            res += currentCandidateTarget[i] * targetVector[i];
+            double elem = currentCandidateTarget[i] - targetVector[i];
+            res += elem * elem;
         }
-        return res;
+        return Math.sqrt(res);
     }
 
     @Override

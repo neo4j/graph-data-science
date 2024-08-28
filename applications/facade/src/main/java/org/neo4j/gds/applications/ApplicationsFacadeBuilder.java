@@ -22,6 +22,7 @@ package org.neo4j.gds.applications;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityApplications;
 import org.neo4j.gds.applications.algorithms.community.CommunityApplications;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingApplications;
+import org.neo4j.gds.applications.algorithms.machinelearning.MachineLearningApplications;
 import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplications;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingApplications;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityApplications;
@@ -36,6 +37,7 @@ public class ApplicationsFacadeBuilder {
     private CentralityApplications centralityApplications;
     private CommunityApplications communityApplications;
     private GraphCatalogApplications graphCatalogApplications;
+    private MachineLearningApplications machineLearningApplications;
     private MiscellaneousApplications miscellaneousApplications;
     private ModelCatalogApplications modelCatalogApplications;
     private NodeEmbeddingApplications nodeEmbeddingApplications;
@@ -55,6 +57,11 @@ public class ApplicationsFacadeBuilder {
 
     public ApplicationsFacadeBuilder with(GraphCatalogApplications graphCatalogApplications) {
         this.graphCatalogApplications = graphCatalogApplications;
+        return this;
+    }
+
+    public ApplicationsFacadeBuilder with(MachineLearningApplications machineLearningApplications) {
+        this.machineLearningApplications = machineLearningApplications;
         return this;
     }
 
@@ -93,6 +100,7 @@ public class ApplicationsFacadeBuilder {
             centralityApplications,
             communityApplications,
             graphCatalogApplications,
+            machineLearningApplications,
             miscellaneousApplications,
             modelCatalogApplications,
             nodeEmbeddingApplications,

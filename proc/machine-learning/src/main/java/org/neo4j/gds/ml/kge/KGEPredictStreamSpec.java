@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.ml.kge;
 
+import org.neo4j.gds.algorithms.machinelearning.KGEPredictResult;
+import org.neo4j.gds.algorithms.machinelearning.TopKMapComputer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;

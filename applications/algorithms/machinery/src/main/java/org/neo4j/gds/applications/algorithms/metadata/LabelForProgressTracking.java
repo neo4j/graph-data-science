@@ -49,6 +49,7 @@ public enum LabelForProgressTracking {
     IndexInverse("IndexInverse"),
     K1Coloring("K1Coloring"),
     KCore("KCoreDecomposition"),
+    KGE("KGE"),
     KMeans("K-Means"),
     KNN("K-Nearest Neighbours"),
     KSpanningTree("K Spanning Tree"),
@@ -109,6 +110,7 @@ public enum LabelForProgressTracking {
             case IndexInverse -> IndexInverse;
             case K1Coloring -> K1Coloring;
             case KCore -> KCore;
+            case KGE -> KGE;
             case KMeans -> KMeans;
             case KNN -> KNN;
             case KSpanningTree -> KSpanningTree;

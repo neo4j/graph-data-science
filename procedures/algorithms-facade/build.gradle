@@ -21,6 +21,7 @@ dependencies {
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':defaults-and-limits-configuration')
+    implementation project(':machine-learning-algorithms')
     implementation project(':memory-estimation')
     implementation project(':memory-usage')
     implementation project(':miscellaneous-algorithms')

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.kge;
+package org.neo4j.gds.algorithms.machinelearning;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
@@ -53,8 +53,8 @@ public interface KGEPredictBaseConfig extends AlgoBaseConfig {
     //Consider using HugeList or double[] if that saves mem
     List<Double> relationshipTypeEmbedding();
 
-    @Configuration.ConvertWith(method = "org.neo4j.gds.ml.kge.ScoreFunction#parse")
-    @Configuration.ToMapValue("org.neo4j.gds.ml.kge.ScoreFunction#toString")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.algorithms.machinelearning.ScoreFunction#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.algorithms.machinelearning.ScoreFunction#toString")
     ScoreFunction scoringFunction();
 
     @Configuration.IntegerRange(min = 1)

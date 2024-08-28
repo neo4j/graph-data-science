@@ -27,6 +27,7 @@ import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.embeddings.NodeEmbeddingsProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.machinelearning.MachineLearningProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.MiscellaneousProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
@@ -83,6 +84,10 @@ class AlgorithmProcedureFacadeBuilder {
             estimationModeRunner,
             algorithmExecutionScaffolding
         );
+    }
+
+    MachineLearningProcedureFacade createMachineLearningProcedureFacade() {
+        return MachineLearningProcedureFacade.create(genericStub, applicationsFacade);
     }
 
     MiscellaneousProcedureFacade createMiscellaneousProcedureFacade() {

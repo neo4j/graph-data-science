@@ -17,42 +17,41 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.kge.scorers;
+package org.neo4j.gds.algorithms.machinelearning;
 
 import com.carrotsearch.hppc.DoubleArrayList;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
-public class FloatDistMultLinkScorer implements LinkScorer {
+public class DoubleDistMultLinkScorer implements LinkScorer {
 
-    NodePropertyValues embeddings;
+    private final NodePropertyValues embeddings;
 
-    double[] relationshipTypeEmbedding;
+    private final double[] relationshipTypeEmbedding;
 
-    long currentSourceNode;
+    private long currentSourceNode;
 
-    float[] currentCandidateTarget;
+    private final double[] currentCandidateTarget;
 
 
-    FloatDistMultLinkScorer(NodePropertyValues embeddings, DoubleArrayList relationshipTypeEmbedding) {
+    DoubleDistMultLinkScorer(NodePropertyValues embeddings, DoubleArrayList relationshipTypeEmbedding) {
         this.embeddings = embeddings;
         this.relationshipTypeEmbedding = relationshipTypeEmbedding.toArray();
-        this.currentCandidateTarget = new float[this.relationshipTypeEmbedding.length];
-
+        this.currentCandidateTarget = new double[this.relationshipTypeEmbedding.length];
     }
 
     @Override
     public void init(long sourceNode) {
         this.currentSourceNode = sourceNode;
-        var currentSource = embeddings.floatArrayValue(currentSourceNode);
-        for (int i = 0; i < relationshipTypeEmbedding.length; i++) {
-            this.currentCandidateTarget[i] = (float) (currentSource[i] * relationshipTypeEmbedding[i]);
+        var currentSource = embeddings.doubleArrayValue(currentSourceNode);
+        for(int i = 0; i < relationshipTypeEmbedding.length; i++){
+            this.currentCandidateTarget[i] = currentSource[i] * relationshipTypeEmbedding[i];
         }
     }
 
     @Override
     public double computeScore(long targetNode) {
         double res = 0.0;
-        var targetVector = embeddings.floatArrayValue(targetNode);
+        var targetVector = embeddings.doubleArrayValue(targetNode);
         for (int i = 0; i < currentCandidateTarget.length; i++) {
             res += currentCandidateTarget[i] * targetVector[i];
         }

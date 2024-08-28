@@ -17,25 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.kge;
+package org.neo4j.gds.algorithms.machinelearning;
 
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.annotation.Parameters;
-import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.similarity.filtering.NodeFilterSpec;
 
-import java.util.Collection;
-import java.util.List;
+public interface LinkScorer extends AutoCloseable {
 
-@Parameters
-public record KGEPredictParameters(
-    Concurrency concurrency,
-    NodeFilterSpec sourceNodeFilter,
-    NodeFilterSpec targetNodeFilter,
-    Collection<RelationshipType> relationshipTypesFilter,
-    List<Double> relationshipTypeEmbedding,
-    String nodeEmbeddingProperty,
-    ScoreFunction scoringFunction,
-    int topK
-) {
+    void init(long sourceNode);
+
+    double computeScore(long targetNode);
 }

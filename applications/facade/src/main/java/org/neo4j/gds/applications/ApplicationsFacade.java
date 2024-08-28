@@ -23,6 +23,7 @@ import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityApplications;
 import org.neo4j.gds.applications.algorithms.community.CommunityApplications;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingApplications;
+import org.neo4j.gds.applications.algorithms.machinelearning.MachineLearningApplications;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
@@ -66,6 +67,7 @@ public final class ApplicationsFacade {
     private final CentralityApplications centralityApplications;
     private final CommunityApplications communityApplications;
     private final GraphCatalogApplications graphCatalogApplications;
+    private final MachineLearningApplications machineLearningApplications;
     private final MiscellaneousApplications miscellaneousApplications;
     private final ModelCatalogApplications modelCatalogApplications;
     private final NodeEmbeddingApplications nodeEmbeddingApplications;
@@ -77,6 +79,7 @@ public final class ApplicationsFacade {
         CentralityApplications centralityApplications,
         CommunityApplications communityApplications,
         GraphCatalogApplications graphCatalogApplications,
+        MachineLearningApplications machineLearningApplications,
         MiscellaneousApplications miscellaneousApplications,
         ModelCatalogApplications modelCatalogApplications,
         NodeEmbeddingApplications nodeEmbeddingApplications,
@@ -87,6 +90,7 @@ public final class ApplicationsFacade {
         this.centralityApplications = centralityApplications;
         this.communityApplications = communityApplications;
         this.graphCatalogApplications = graphCatalogApplications;
+        this.machineLearningApplications = machineLearningApplications;
         this.miscellaneousApplications = miscellaneousApplications;
         this.modelCatalogApplications = modelCatalogApplications;
         this.nodeEmbeddingApplications = nodeEmbeddingApplications;
@@ -171,6 +175,12 @@ public final class ApplicationsFacade {
             graphCatalogApplicationsDecorator
         );
 
+        var machineLearningApplications = MachineLearningApplications.create(
+            requestScopedDependencies,
+            progressTrackerCreator,
+            algorithmProcessingTemplateConvenience
+        );
+
         var miscellaneousApplications = MiscellaneousApplications.create(
             log,
             requestScopedDependencies,
@@ -226,6 +236,7 @@ public final class ApplicationsFacade {
             .with(centralityApplications)
             .with(communityApplications)
             .with(graphCatalogApplications)
+            .with(machineLearningApplications)
             .with(miscellaneousApplications)
             .with(modelCatalogApplications)
             .with(nodeEmbeddingApplications)
@@ -306,6 +317,10 @@ public final class ApplicationsFacade {
 
     public GraphCatalogApplications graphCatalog() {
         return graphCatalogApplications;
+    }
+
+    public MachineLearningApplications machineLearning() {
+        return machineLearningApplications;
     }
 
     public MiscellaneousApplications miscellaneous() {

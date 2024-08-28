@@ -17,35 +17,41 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.kge;
+package org.neo4j.gds.applications.algorithms.machinelearning;
 
 import com.carrotsearch.hppc.BitSet;
-import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.algorithms.machinelearning.KGEPredictBaseConfig;
-import org.neo4j.gds.algorithms.machinelearning.KGEPredictParameters;
+import org.neo4j.gds.algorithms.machinelearning.KGEPredictResult;
 import org.neo4j.gds.algorithms.machinelearning.TopKMapComputer;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.termination.TerminationFlag;
 
-import java.util.Optional;
+class MachineLearningAlgorithms {
+    private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
 
-public class KGEPredictAlgorithmFactory<CONFIG extends KGEPredictBaseConfig> extends GraphStoreAlgorithmFactory<TopKMapComputer, CONFIG> {
+    private final ProgressTrackerCreator progressTrackerCreator;
+    private final TerminationFlag terminationFlag;
 
-    public TopKMapComputer build(
-        GraphStore graphStore,
-        KGEPredictParameters parameters,
-        ProgressTracker progressTracker
-    ) {
-        BitSet sourceNodes = new BitSet(graphStore.nodeCount());
-        BitSet targetNodes = new BitSet(graphStore.nodeCount());
+    MachineLearningAlgorithms(ProgressTrackerCreator progressTrackerCreator, TerminationFlag terminationFlag) {
+        this.progressTrackerCreator = progressTrackerCreator;
+        this.terminationFlag = terminationFlag;
+    }
 
-        Graph graph = graphStore.getGraph(parameters.relationshipTypesFilter(), Optional.empty());
+    KGEPredictResult kge(Graph graph, KGEPredictBaseConfig configuration) {
+        var progressTracker = progressTrackerCreator.createProgressTracker(
+            configuration,
+            Tasks.leaf(LabelForProgressTracking.KGE.value)
+        );
 
+        var sourceNodes = new BitSet(graph.nodeCount());
+        var targetNodes = new BitSet(graph.nodeCount());
+        var parameters = configuration.toParameters();
         var sourceNodeFilter = parameters.sourceNodeFilter().toNodeFilter(graph);
         var targetNodeFilter = parameters.targetNodeFilter().toNodeFilter(graph);
-
         graph.forEachNode(node -> {
             if (sourceNodeFilter.test(node)) {
                 sourceNodes.set(node);
@@ -55,8 +61,7 @@ public class KGEPredictAlgorithmFactory<CONFIG extends KGEPredictBaseConfig> ext
             }
             return true;
         });
-
-        return new TopKMapComputer(
+        var algorithm = new TopKMapComputer(
             graph,
             sourceNodes,
             targetNodes,
@@ -66,22 +71,9 @@ public class KGEPredictAlgorithmFactory<CONFIG extends KGEPredictBaseConfig> ext
             parameters.topK(),
             parameters.concurrency(),
             progressTracker,
-            TerminationFlag.RUNNING_TRUE
+            terminationFlag
         );
-    }
 
-    @Override
-    public TopKMapComputer build(
-        GraphStore graphStore,
-        CONFIG configuration,
-        ProgressTracker progressTracker
-    ) {
-        return build(graphStore, configuration.toParameters(), progressTracker);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
-
-    @Override
-    public String taskName() {
-        return "KGEPredict";
-    }
-
 }

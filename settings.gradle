@@ -113,6 +113,9 @@ project(':centrality-algorithms').projectDir = file('applications/algorithms/cen
 include('community-algorithms')
 project(':community-algorithms').projectDir = file('applications/algorithms/community')
 
+include('machine-learning-algorithms')
+project(':machine-learning-algorithms').projectDir = file('applications/algorithms/machine-learning')
+
 include('miscellaneous-algorithms')
 project(':miscellaneous-algorithms').projectDir = file('applications/algorithms/miscellaneous-algorithms')
 

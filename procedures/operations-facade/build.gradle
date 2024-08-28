@@ -20,6 +20,7 @@ dependencies {
     implementation project(':core')
     implementation project(':core-utils')
     implementation project(':graph-store-catalog-applications')
+    implementation project(':machine-learning-algorithms')
     implementation project(':miscellaneous-algorithms')
     implementation project(':model-catalog-applications')
     implementation project(':operations-applications')

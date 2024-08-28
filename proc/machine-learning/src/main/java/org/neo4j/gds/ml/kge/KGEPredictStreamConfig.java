@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.kge;
 
+import org.neo4j.gds.algorithms.machinelearning.KGEPredictBaseConfig;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
 

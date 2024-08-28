@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
+import org.neo4j.gds.algorithms.machinelearning.KGEPredictMutateConfig;
 import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
 import org.neo4j.gds.articulationpoints.ArticulationPointsMutateConfig;
@@ -104,6 +105,7 @@ public class ConfigurationParsersForMutateMode {
             case IndexInverse -> InverseRelationshipsConfig::of;
             case K1Coloring -> K1ColoringMutateConfig::of;
             case KCore -> KCoreDecompositionMutateConfig::of;
+            case KGE -> KGEPredictMutateConfig::of;
             case KMeans -> KmeansMutateConfig::of;
             case KNN -> KnnMutateConfig::of;
             case KSpanningTree -> null;

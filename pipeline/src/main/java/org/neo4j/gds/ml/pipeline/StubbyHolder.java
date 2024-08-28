@@ -43,6 +43,7 @@ import org.neo4j.gds.ml.pipeline.stubs.IndexInverseStub;
 import org.neo4j.gds.ml.pipeline.stubs.K1ColoringStub;
 import org.neo4j.gds.ml.pipeline.stubs.KCoreStub;
 import org.neo4j.gds.ml.pipeline.stubs.KMeansStub;
+import org.neo4j.gds.ml.pipeline.stubs.KgeStub;
 import org.neo4j.gds.ml.pipeline.stubs.KnnStub;
 import org.neo4j.gds.ml.pipeline.stubs.LabelPropagationStub;
 import org.neo4j.gds.ml.pipeline.stubs.LccStub;
@@ -105,6 +106,7 @@ class StubbyHolder {
             case IndexInverse -> new IndexInverseStub();
             case K1Coloring -> new K1ColoringStub();
             case KCore -> new KCoreStub();
+            case KGE -> new KgeStub();
             case KMeans -> new KMeansStub();
             case KNN -> new KnnStub();
             case KSpanningTree -> null;

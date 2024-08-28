@@ -22,6 +22,7 @@ package org.neo4j.gds.procedures.algorithms;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.embeddings.NodeEmbeddingsProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.machinelearning.MachineLearningProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.MiscellaneousProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade;
@@ -33,6 +34,7 @@ import org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade;
 public class AlgorithmsProcedureFacade {
     private final CentralityProcedureFacade centralityProcedureFacade;
     private final CommunityProcedureFacade communityProcedureFacade;
+    private final MachineLearningProcedureFacade machineLearningProcedureFacade;
     private final MiscellaneousProcedureFacade miscellaneousProcedureFacade;
     private final NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade;
     private final PathFindingProcedureFacade pathFindingProcedureFacade;
@@ -41,6 +43,7 @@ public class AlgorithmsProcedureFacade {
     public AlgorithmsProcedureFacade(
         CentralityProcedureFacade centralityProcedureFacade,
         CommunityProcedureFacade communityProcedureFacade,
+        MachineLearningProcedureFacade machineLearningProcedureFacade,
         MiscellaneousProcedureFacade miscellaneousProcedureFacade,
         NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade,
         PathFindingProcedureFacade pathFindingProcedureFacade,
@@ -48,6 +51,7 @@ public class AlgorithmsProcedureFacade {
     ) {
         this.centralityProcedureFacade = centralityProcedureFacade;
         this.communityProcedureFacade = communityProcedureFacade;
+        this.machineLearningProcedureFacade = machineLearningProcedureFacade;
         this.miscellaneousProcedureFacade = miscellaneousProcedureFacade;
         this.nodeEmbeddingsProcedureFacade = nodeEmbeddingsProcedureFacade;
         this.pathFindingProcedureFacade = pathFindingProcedureFacade;
@@ -60,6 +64,10 @@ public class AlgorithmsProcedureFacade {
 
     public CommunityProcedureFacade community() {
         return communityProcedureFacade;
+    }
+
+    public MachineLearningProcedureFacade machineLearning() {
+        return machineLearningProcedureFacade;
     }
 
     public MiscellaneousProcedureFacade miscellaneous() {

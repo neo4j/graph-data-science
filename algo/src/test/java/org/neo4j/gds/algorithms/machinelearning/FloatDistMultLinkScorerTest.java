@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.kge.scorers;
+package org.neo4j.gds.algorithms.machinelearning;
 
 import com.carrotsearch.hppc.DoubleArrayList;
 import org.assertj.core.data.Offset;
@@ -27,24 +27,21 @@ import org.neo4j.gds.nodeproperties.FloatArrayTestPropertyValues;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-
-class FloatEuclideanDistanceLinkScorerTest {
-
-
+class FloatDistMultLinkScorerTest {
     @Test
     void shouldComputeEuclideanDistanceScore() {
         var propertyBuilder = HugeSparseFloatArrayArray.builder(new float[]{0.0f, 0.0f, 0.0f, 0.0f});
         propertyBuilder.set(0, new float[]{1.0f, 1.0f, 1.0f, 1.0f});
         propertyBuilder.set(1, new float[]{2.0f, 2.0f, 2.0f, 0.0f});
         propertyBuilder.set(2, new float[]{3.0f, 3.0f, 3.0f, 0.0f});
-        var hsdaa = propertyBuilder.build();
-        var ddnpv = new FloatArrayTestPropertyValues(hsdaa::get);
+        var hsfaa = propertyBuilder.build();
+        var ddnpv = new FloatArrayTestPropertyValues(hsfaa::get);
 
-        LinkScorer linkScorer = new FloatEuclideanDistanceLinkScorer(ddnpv, DoubleArrayList.from(-1.0, 0.0, 0.0, 0.0));
+        LinkScorer linkScorer = new FloatDistMultLinkScorer(ddnpv, DoubleArrayList.from(0.1, 0.1, 0.1, 0.1));
         linkScorer.init(0);
 
-        assertThat(linkScorer.computeScore(1)).isCloseTo(2.65, Offset.offset(1e-02));
-        assertThat(linkScorer.computeScore(2)).isCloseTo(4.24, Offset.offset(1e-02));
+        assertThat(linkScorer.computeScore(1)).isCloseTo(0.6, Offset.offset(1e-02));
+        assertThat(linkScorer.computeScore(2)).isCloseTo(0.9, Offset.offset(1e-02));
 
     }
 }

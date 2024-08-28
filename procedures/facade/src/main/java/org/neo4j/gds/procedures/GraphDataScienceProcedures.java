@@ -151,6 +151,7 @@ public class GraphDataScienceProcedures {
 
         var centralityProcedureFacade = algorithmProcedureFacadeBuilder.createCentralityProcedureFacade();
         var communityProcedureFacade = algorithmProcedureFacadeBuilder.createCommunityProcedureFacade();
+        var machineLearningProcedureFacade = algorithmProcedureFacadeBuilder.createMachineLearningProcedureFacade();
         var miscellaneousProcedureFacade = algorithmProcedureFacadeBuilder.createMiscellaneousProcedureFacade();
         var nodeEmbeddingsProcedureFacade = algorithmProcedureFacadeBuilder.createNodeEmbeddingsProcedureFacade();
         var pathFindingProcedureFacade = algorithmProcedureFacadeBuilder.createPathFindingProcedureFacade();
@@ -164,6 +165,7 @@ public class GraphDataScienceProcedures {
             .with(centralityProcedureFacade)
             .with(communityProcedureFacade)
             .with(graphCatalogProcedureFacade)
+            .with(machineLearningProcedureFacade)
             .with(miscellaneousProcedureFacade)
             .with(modelCatalogProcedureFacade)
             .with(nodeEmbeddingsProcedureFacade)

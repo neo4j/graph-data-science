@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.kge;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.algorithms.machinelearning.KGEPredictMutateConfigImpl;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -31,7 +32,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.gds.ml.kge.ScoreFunction.TRANSE;
+import static org.neo4j.gds.algorithms.machinelearning.ScoreFunction.TRANSE;
 
 @GdlExtension
 class KGEPredictMutateConfigTest {

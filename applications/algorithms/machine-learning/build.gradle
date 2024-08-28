@@ -1,0 +1,16 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Machine Learning Applications'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    implementation project(":algo")
+    implementation project(":algo-common")
+    implementation project(":algorithms-machinery")
+    implementation project(":config-api")
+    implementation project(":core")
+    implementation project(":memory-usage")
+    implementation project(":progress-tracking")
+    implementation project(":termination")
+}

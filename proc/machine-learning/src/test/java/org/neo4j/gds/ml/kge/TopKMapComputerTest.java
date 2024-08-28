@@ -21,6 +21,8 @@ package org.neo4j.gds.ml.kge;
 
 import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.algorithms.machinelearning.KGEPredictResult;
+import org.neo4j.gds.algorithms.machinelearning.TopKMapComputer;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -28,14 +30,15 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.ml.kge.ScoreFunction.DISTMULT;
-import static org.neo4j.gds.ml.kge.ScoreFunction.TRANSE;
+import static org.neo4j.gds.algorithms.machinelearning.ScoreFunction.DISTMULT;
+import static org.neo4j.gds.algorithms.machinelearning.ScoreFunction.TRANSE;
 
 @GdlExtension
 class TopKMapComputerTest {
@@ -75,7 +78,8 @@ class TopKMapComputerTest {
             TRANSE,
             topK,
             new Concurrency(concurrency),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         KGEPredictResult result = computer.compute();
@@ -108,7 +112,8 @@ class TopKMapComputerTest {
             DISTMULT,
             topK,
             new Concurrency(concurrency),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         KGEPredictResult result = computer.compute();
@@ -143,7 +148,8 @@ class TopKMapComputerTest {
             TRANSE,
             topK,
             new Concurrency(concurrency),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         KGEPredictResult result = computer.compute();
