@@ -24,7 +24,6 @@ import org.neo4j.gds.core.utils.ClockService;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.values.storable.LocalTimeValue;
 
 import java.time.Instant;
 import java.time.LocalTime;
@@ -37,7 +36,7 @@ public class ProgressResult {
     public String progress;
     public String progressBar;
     public String status;
-    public LocalTimeValue timeStarted;
+    public LocalTime timeStarted;
     public String elapsedTime;
 
     static ProgressResult fromTaskStoreEntry(TaskStore.UserTask userTask) {
@@ -63,18 +62,17 @@ public class ProgressResult {
         this.progress = StructuredOutputHelper.computeProgress(progressContainer);
         this.progressBar = StructuredOutputHelper.progressBar(progressContainer, 10);
         this.status = task.status().name();
-        this.timeStarted = localTimeValue(task);
+        this.timeStarted = startTime(task);
         this.elapsedTime = prettyElapsedTime(task);
     }
 
-    private LocalTimeValue localTimeValue(Task task) {
+    private LocalTime startTime(Task task) {
         if (task.hasNotStarted()) {
             return null;
         }
-        return LocalTimeValue.localTime(LocalTime.ofInstant(
-            Instant.ofEpochMilli(task.startTime()),
-            ZoneId.systemDefault()
-        ));
+        var zoneId = ZoneId.systemDefault();
+        var instant = Instant.ofEpochMilli(task.startTime());
+        return LocalTime.ofInstant(instant, zoneId);
     }
 
     private String prettyElapsedTime(Task task) {
