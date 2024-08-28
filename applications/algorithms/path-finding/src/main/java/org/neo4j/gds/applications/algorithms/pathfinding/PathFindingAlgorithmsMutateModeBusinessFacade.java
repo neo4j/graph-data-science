@@ -22,10 +22,13 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
+import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordMutateConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
@@ -40,6 +43,7 @@ import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeMutateConfig;
 import org.neo4j.gds.steiner.SteinerTreeMutateConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
+import org.neo4j.gds.traversal.RandomWalkMutateConfig;
 
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.AStar;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BFS;
@@ -47,6 +51,7 @@ import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTra
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.DFS;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.DeltaStepping;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Dijkstra;
+import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.RandomWalk;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.SingleSourceDijkstra;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.SteinerTree;
 import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Yens;
@@ -59,15 +64,18 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final PathFindingAlgorithms pathFindingAlgorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
+    private final MutateNodeProperty mutateNodeProperty;
 
     public PathFindingAlgorithmsMutateModeBusinessFacade(
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         PathFindingAlgorithms pathFindingAlgorithms,
-        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience
+        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
+        MutateNodeProperty mutateNodeProperty
     ) {
         this.pathFindingAlgorithms = pathFindingAlgorithms;
         this.estimationFacade = estimationFacade;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
+        this.mutateNodeProperty = mutateNodeProperty;
     }
 
     public <RESULT> RESULT bellmanFord(
@@ -139,6 +147,25 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             DFS,
             estimationFacade::depthFirstSearch,
             (graph, __) -> pathFindingAlgorithms.depthFirstSearch(graph, configuration),
+            mutateStep,
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT randomWalk(
+        GraphName graphName,
+        RandomWalkMutateConfig configuration,
+        ResultBuilder<RandomWalkMutateConfig, HugeAtomicLongArray, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var mutateStep = new RandomWalkCountingNodeVisitsMutateStep(mutateNodeProperty, configuration);
+
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+            graphName,
+            configuration,
+            RandomWalk,
+            // TODO: maybe have different memory estimation
+            () -> estimationFacade.randomWalk(configuration),
+            (graph, __) -> pathFindingAlgorithms.randomWalkCountingNodeVisits(graph, configuration),
             mutateStep,
             resultBuilder
         );

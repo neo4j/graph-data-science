@@ -17,23 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.doc.syntax;
+package org.neo4j.gds.traversal;
 
-import java.util.List;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.config.MutateNodePropertyConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
-class RandomWalkSyntaxTest extends SyntaxTestBase {
+@Configuration
+public interface RandomWalkMutateConfig extends RandomWalkBaseConfig, MutateNodePropertyConfig {
 
-    @Override
-    protected Iterable<SyntaxModeMeta> syntaxModes() {
-        return List.of(
-            SyntaxModeMeta.of(SyntaxMode.MUTATE),
-            SyntaxModeMeta.of(SyntaxMode.STATS),
-            SyntaxModeMeta.of(SyntaxMode.STREAM)
-        );
-    }
-
-    @Override
-    protected String adocFile() {
-        return "pages/algorithms/random-walk.adoc";
+    static RandomWalkMutateConfig of(CypherMapWrapper userInput) {
+        return new RandomWalkMutateConfigImpl(userInput);
     }
 }

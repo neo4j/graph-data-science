@@ -17,23 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.doc.syntax;
+package org.neo4j.gds.ml.pipeline.stubs;
 
-import java.util.List;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.pathfinding.RandomWalkMutateResult;
+import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
+import org.neo4j.gds.traversal.RandomWalkMutateConfig;
 
-class RandomWalkSyntaxTest extends SyntaxTestBase {
-
-    @Override
-    protected Iterable<SyntaxModeMeta> syntaxModes() {
-        return List.of(
-            SyntaxModeMeta.of(SyntaxMode.MUTATE),
-            SyntaxModeMeta.of(SyntaxMode.STATS),
-            SyntaxModeMeta.of(SyntaxMode.STREAM)
-        );
-    }
-
-    @Override
-    protected String adocFile() {
-        return "pages/algorithms/random-walk.adoc";
+public class RandomWalkStub extends AbstractStub<RandomWalkMutateConfig, RandomWalkMutateResult> {
+    protected MutateStub<RandomWalkMutateConfig, RandomWalkMutateResult> stub(AlgorithmsProcedureFacade facade) {
+        return facade.pathFinding().randomWalkMutateStub();
     }
 }

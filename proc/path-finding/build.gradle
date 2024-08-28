@@ -51,6 +51,7 @@ dependencies {
     testCompileOnly openGds.immutables.builder
     testCompileOnly openGds.jetbrains.annotations
 
-
     testImplementation project(':opengds-extension')
+
+    integrationTestImplementation project(':legacy-cypher-projection')
 }
