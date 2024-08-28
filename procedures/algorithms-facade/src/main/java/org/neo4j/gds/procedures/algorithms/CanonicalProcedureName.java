@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.Locale;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -47,8 +49,8 @@ public final class CanonicalProcedureName {
         normalisedInput = !normalisedInput.startsWith("gds.") ? formatWithLocale("gds.%s", normalisedInput) : normalisedInput;
         normalisedInput = !normalisedInput.endsWith(".mutate") ? formatWithLocale("%s.mutate", normalisedInput) : normalisedInput;
 
-        normalisedInput = normalisedInput.replace("beta.", "");
-        normalisedInput= normalisedInput.replace("alpha.", "");
+        normalisedInput= StringUtils.replaceOnceIgnoreCase(normalisedInput, "beta.", "");
+        normalisedInput= StringUtils.replaceOnceIgnoreCase(normalisedInput, "alpha.", "");
 
 
         return new CanonicalProcedureName(normalisedInput.substring(0, normalisedInput.length() - ".mutate".length()), rawInput);

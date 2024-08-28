@@ -51,13 +51,24 @@ class CanonicalProcedureNameTest {
         assertThat(CanonicalProcedureName.parse(input).getRawForm()).isEqualTo(input);
     }
 
+    @ParameterizedTest
+    @ValueSource(strings={"gds.beta.foo", "bEtA.foo"})
+    void shouldIgnoreBetaTier(String betaCall) {
+        assertThat(CanonicalProcedureName.parse(betaCall).getNormalisedForm()).isEqualTo("gds.foo");
+    }
+    @ParameterizedTest
+    @ValueSource(strings={"gds.alpha.foo", "AlpHa.foo"})
+    void shouldIgnoreAlphaTier(String alphaCall) {
+        assertThat(CanonicalProcedureName.parse(alphaCall).getNormalisedForm()).isEqualTo("gds.foo");
+    }
+
     @Test
-    void shouldIgnoreBetaTier() {
-        assertThat(CanonicalProcedureName.parse("gds.beta.foo").getNormalisedForm()).isEqualTo("gds.foo");
+    void shouldNotRemoveAllBetaTiers() {
+        assertThat(CanonicalProcedureName.parse("beta.beta.beta.foo").getNormalisedForm()).isEqualTo("gds.beta.beta.foo");
     }
     @Test
-    void shouldIgnoreAlphaTier() {
-        assertThat(CanonicalProcedureName.parse("gds.alpha.foo").getNormalisedForm()).isEqualTo("gds.foo");
+    void shouldNotRemoveAllAlphaTiers() {
+        assertThat(CanonicalProcedureName.parse("alpha.alpha.alpha.foo").getNormalisedForm()).isEqualTo("gds.alpha.alpha.foo");
     }
 
 }
