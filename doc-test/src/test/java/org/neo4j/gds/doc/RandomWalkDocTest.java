@@ -19,6 +19,9 @@
  */
 package org.neo4j.gds.doc;
 
+import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
+import org.neo4j.gds.functions.AsNodeFunc;
+import org.neo4j.gds.paths.randomwalk.RandomWalkMutateProc;
 import org.neo4j.gds.paths.randomwalk.RandomWalkStatsProc;
 import org.neo4j.gds.paths.randomwalk.RandomWalkStreamProc;
 
@@ -27,10 +30,17 @@ import java.util.List;
 class RandomWalkDocTest extends SingleFileDocTestBase {
 
     @Override
+    protected List<Class<?>> functions() {
+        return List.of(AsNodeFunc.class);
+    }
+
+    @Override
     protected List<Class<?>> procedures() {
         return List.of(
+            RandomWalkMutateProc.class,
+            RandomWalkStatsProc.class,
             RandomWalkStreamProc.class,
-            RandomWalkStatsProc.class
+            GraphStreamNodePropertiesProc.class
         );
     }
 

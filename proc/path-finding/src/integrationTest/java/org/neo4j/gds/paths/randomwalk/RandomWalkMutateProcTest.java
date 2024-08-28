@@ -65,6 +65,7 @@ class RandomWalkMutateProcTest extends BaseProcTest {
             "CALL gds.randomWalk.mutate('graph', {walksPerNode: 3, walkLength: 10, mutateProperty: 'rw'})",
             row -> {
                 assertThat(row.getNumber("preProcessingMillis")).asInstanceOf(LONG).isGreaterThanOrEqualTo(0L);
+                assertThat(row.getNumber("mutateMillis")).asInstanceOf(LONG).isGreaterThanOrEqualTo(0L);
                 assertThat(row.getNumber("computeMillis")).asInstanceOf(LONG).isGreaterThanOrEqualTo(0L);
                 assertThat(row.get("configuration"))
                     .isNotNull()

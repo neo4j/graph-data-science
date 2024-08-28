@@ -108,6 +108,47 @@ include::partial$/algorithms/randomWalk/specific-configuration.adoc[]
 | configuration         | Map       | The configuration used for running the algorithm.
 |===
 ======
+
+[.include-with-mutate]
+======
+.Run RandomWalk in mutate mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.randomWalk.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodePropertiesWritten: Integer,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  mutateMillis: Integer,
+  postProcessingMillis: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name              | Type   | Default | Optional | Description
+| mutateProperty    | String | n/a     | no       | The node property in the GDS graph to which the count of random walk visits is written.
+include::partial$/algorithms/randomWalk/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1m,1,6"]
+|===
+| Name                  | Type      | Description
+| nodePropertiesWritten | Integer   | Number of properties added to the projected graph.
+| preProcessingMillis   | Integer   | Milliseconds for preprocessing the data.
+| computeMillis         | Integer   | Milliseconds for running the algorithm.
+| mutateMillis          | Integer   | Milliseconds for adding properties to the projected graph.
+| postProcessingMillis  | Integer   | Unused.
+| configuration         | Map       | The configuration used for running the algorithm.
+|===
+======
 ====
 
 [[algorithms-random-walk-example]]
@@ -250,5 +291,60 @@ CALL gds.randomWalk.stats(
 |===
 | preProcessingMillis | computeMillis | configuration
 | 0                   | 1             | {randomSeed=42, walkLength=3, jobId=b77f3147-6683-4249-8633-4db7da03f24d, sourceNodes=[], walksPerNode=1, inOutFactor=1.0, nodeLabels=[*], sudo=false, relationshipTypes=[*], walkBufferSize=1000, returnFactor=1.0, concurrency=1}
+|===
+--
+
+=== Mutate
+
+[role=query-example, group=mutate]
+--
+.Run the RandomWalk mutate on `myGraph`
+[source, cypher, role=noplay]
+----
+CALL gds.randomWalk.mutate(
+  'myGraph',
+  {
+    walkLength: 3,
+    walksPerNode: 1,
+    randomSeed: 19,
+    concurrency: 1,
+    mutateProperty: 'randomWalksCount'
+  }
+)
+YIELD nodePropertiesWritten, configuration
+RETURN nodePropertiesWritten, configuration.mutateProperty AS mutateProperty
+----
+
+.Results
+[opts="header"]
+|===
+| nodePropertiesWritten | mutateProperty
+| 8                     | "randomWalksCount"
+|===
+--
+
+[role=query-example, group=mutate]
+--
+Then we can then stream the mutated node property to see on how many RandomWalks it appeared:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.nodeProperty.stream('myGraph', 'randomWalksCount')
+YIELD nodeId, propertyValue
+RETURN gds.util.asNode(nodeId).name AS page, propertyValue AS randomWalksCount
+ORDER BY page ASC
+----
+
+.Results
+[opts="header"]
+|===
+| page      | randomWalksCount
+| "About"   | 1
+| "Home"    | 6
+| "Links"   | 6
+| "Product" | 1
+| "Site A"  | 3
+| "Site B"  | 1
+| "Site C"  | 4
+| "Site D"  | 2
 |===
 --
