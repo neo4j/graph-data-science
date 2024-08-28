@@ -36,8 +36,6 @@ public class SimilaritiesFunc {
 
     private static final Predicate<Number> IS_NULL = Predicate.isEqual(null);
     private static final Comparator<Number> NUMBER_COMPARATOR = new NumberComparator();
-    private static final String CATEGORY_KEY = "category";
-    private static final String WEIGHT_KEY = "weight";
 
     @UserFunction("gds.similarity.jaccard")
     @Description("RETURN gds.similarity.jaccard(vector1, vector2) - Given two collection vectors, calculate Jaccard similarity")
