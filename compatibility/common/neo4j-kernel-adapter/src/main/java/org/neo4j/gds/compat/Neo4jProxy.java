@@ -543,14 +543,32 @@ public final class Neo4jProxy {
         return IMPL.sequenceSizeAsInt(listValue);
     }
 
+    /**
+     * The implementations of this method should look identical and are source-compatible.
+     * However, Since 5.24, Neo4j exceptions implement `HasGqlStatusInfo`, which requires
+     * a new module dependency that doesn't exist in versions before 5.24.
+     * In order to access any methods on exceptions, we need to do so behind the compat layer.
+     */
     public static RuntimeException queryExceptionAsRuntimeException(Throwable e) {
         return IMPL.queryExceptionAsRuntimeException(e);
     }
 
+    /**
+     * The implementations of this method should look identical and are source-compatible.
+     * However, Since 5.24, Neo4j exceptions implement `HasGqlStatusInfo`, which requires
+     * a new module dependency that doesn't exist in versions before 5.24.
+     * In order to access any methods on exceptions, we need to do so behind the compat layer.
+     */
     public static ProcedureException procedureCallFailed(@PrintFormat String message, Object... args) {
         return IMPL.procedureCallFailed(message, args);
     }
 
+    /**
+     * The implementations of this method should look identical and are source-compatible.
+     * However, Since 5.24, Neo4j exceptions implement `HasGqlStatusInfo`, which requires
+     * a new module dependency that doesn't exist in versions before 5.24.
+     * In order to access any methods on exceptions, we need to do so behind the compat layer.
+     */
     public static ProcedureException procedureCallFailed(
         Throwable reason,
         @PrintFormat String message,
@@ -559,10 +577,22 @@ public final class Neo4jProxy {
         return IMPL.procedureCallFailed(reason, message, args);
     }
 
+    /**
+     * The implementations of this method should look identical and are source-compatible.
+     * However, Since 5.24, Neo4j exceptions implement `HasGqlStatusInfo`, which requires
+     * a new module dependency that doesn't exist in versions before 5.24.
+     * In order to access any methods on exceptions, we need to do so behind the compat layer.
+     */
     public static DatabaseNotFoundException databaseNotFoundException(String message) {
         return IMPL.databaseNotFoundException(message);
     }
 
+    /**
+     * The implementations of this method should look identical and are source-compatible.
+     * However, Since 5.24, Neo4j exceptions implement `HasGqlStatusInfo`, which requires
+     * a new module dependency that doesn't exist in versions before 5.24.
+     * In order to access any methods on exceptions, we need to do so behind the compat layer.
+     */
     public static String exceptionMessage(Throwable e) {
         return IMPL.exceptionMessage(e);
     }
@@ -604,6 +634,12 @@ public final class Neo4jProxy {
         transaction.resourceMonitor().registerCloseableResource(autoCloseable);
     }
 
+    /**
+     * The implementations of this method should look identical and are source-compatible.
+     * However, Since 5.24, Neo4j exceptions implement `HasGqlStatusInfo`, which requires
+     * a new module dependency that doesn't exist in versions before 5.24.
+     * In order to access any methods on exceptions, we need to do so behind the compat layer.
+     */
     static void rethrowUnlessDuplicateRegistration(ProcedureException e) throws KernelException {
         IMPL.rethrowUnlessDuplicateRegistration(e);
     }
