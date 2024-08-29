@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.embeddings.stubs;
 
-import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNMutateConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -33,14 +33,17 @@ import java.util.stream.Stream;
 
 public class HashGnnMutateStub implements MutateStub<HashGNNMutateConfig, DefaultNodeEmbeddingMutateResult> {
     private final GenericStub genericStub;
-    private final ApplicationsFacade applicationsFacade;
+    private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
+    private final NodeEmbeddingAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
 
     public HashGnnMutateStub(
         GenericStub genericStub,
-        ApplicationsFacade applicationsFacade
+        NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
+        NodeEmbeddingAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade
     ) {
         this.genericStub = genericStub;
-        this.applicationsFacade = applicationsFacade;
+        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
+        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
     }
 
     @Override
@@ -54,7 +57,7 @@ public class HashGnnMutateStub implements MutateStub<HashGNNMutateConfig, Defaul
             username,
             rawConfiguration,
             HashGNNMutateConfig::of,
-            configuration -> estimationMode().hashGnn(configuration)
+            estimationModeBusinessFacade::hashGnn
         );
     }
 
@@ -64,7 +67,7 @@ public class HashGnnMutateStub implements MutateStub<HashGNNMutateConfig, Defaul
             graphNameAsString,
             rawConfiguration,
             HashGNNMutateConfig::of,
-            configuration -> estimationMode().hashGnn(configuration)
+            estimationModeBusinessFacade::hashGnn
         );
     }
 
@@ -79,12 +82,10 @@ public class HashGnnMutateStub implements MutateStub<HashGNNMutateConfig, Defaul
             graphNameAsString,
             rawConfiguration,
             HashGNNMutateConfig::of,
-            applicationsFacade.nodeEmbeddings().mutate()::hashGnn,
+            mutateModeBusinessFacade::hashGnn,
             resultBuilder
         );
     }
 
-    private NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationMode() {
-        return applicationsFacade.nodeEmbeddings().estimate();
-    }
+
 }

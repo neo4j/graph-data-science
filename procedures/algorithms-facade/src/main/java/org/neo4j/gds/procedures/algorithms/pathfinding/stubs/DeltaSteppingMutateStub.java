@@ -19,29 +19,32 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding.stubs;
 
-import org.neo4j.gds.applications.ApplicationsFacade;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaMutateConfig;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
-import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingResultBuilderForMutateMode;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
+import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
 public class DeltaSteppingMutateStub implements MutateStub<AllShortestPathsDeltaMutateConfig, PathFindingMutateResult> {
     private final GenericStub genericStub;
-    private final ApplicationsFacade applicationsFacade;
+    private final PathFindingAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
+    private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
 
     public DeltaSteppingMutateStub(
         GenericStub genericStub,
-        ApplicationsFacade applicationsFacade
+        PathFindingAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
+        PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade
     ) {
         this.genericStub = genericStub;
-        this.applicationsFacade = applicationsFacade;
+        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
+        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
     }
 
     @Override
@@ -55,7 +58,7 @@ public class DeltaSteppingMutateStub implements MutateStub<AllShortestPathsDelta
             username,
             configuration,
             AllShortestPathsDeltaMutateConfig::of,
-            __ -> estimationMode().deltaStepping()
+            __ -> estimationModeBusinessFacade.deltaStepping()
         );
     }
 
@@ -65,7 +68,7 @@ public class DeltaSteppingMutateStub implements MutateStub<AllShortestPathsDelta
             graphName,
             rawConfiguration,
             AllShortestPathsDeltaMutateConfig::of,
-            __ -> estimationMode().deltaStepping()
+            __ -> estimationModeBusinessFacade.deltaStepping()
         );
     }
 
@@ -75,12 +78,9 @@ public class DeltaSteppingMutateStub implements MutateStub<AllShortestPathsDelta
             graphName,
             configuration,
             AllShortestPathsDeltaMutateConfig::of,
-            applicationsFacade.pathFinding().mutate()::deltaStepping,
+            mutateModeBusinessFacade::deltaStepping,
             new PathFindingResultBuilderForMutateMode<>()
         );
     }
 
-    private PathFindingAlgorithmsEstimationModeBusinessFacade estimationMode() {
-        return applicationsFacade.pathFinding().estimate();
-    }
 }

@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.community.stubs;
 
-import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.community.LocalClusteringCoefficientMutateResult;
@@ -32,15 +32,19 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public class LccMutateStub implements MutateStub<LocalClusteringCoefficientMutateConfig, LocalClusteringCoefficientMutateResult> {
+
     private final GenericStub genericStub;
-    private final ApplicationsFacade applicationsFacade;
+    private final CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
+    private final CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
 
     public LccMutateStub(
         GenericStub genericStub,
-        ApplicationsFacade applicationsFacade
+        CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
+        CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade
     ) {
         this.genericStub = genericStub;
-        this.applicationsFacade = applicationsFacade;
+        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
+        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
     }
 
     @Override
@@ -54,7 +58,7 @@ public class LccMutateStub implements MutateStub<LocalClusteringCoefficientMutat
             username,
             configuration,
             LocalClusteringCoefficientMutateConfig::of,
-            estimationMode()::lcc
+            estimationModeBusinessFacade::lcc
         );
     }
 
@@ -64,7 +68,7 @@ public class LccMutateStub implements MutateStub<LocalClusteringCoefficientMutat
             graphName,
             configuration,
             LocalClusteringCoefficientMutateConfig::of,
-            estimationMode()::lcc
+            estimationModeBusinessFacade::lcc
         );
     }
 
@@ -79,12 +83,9 @@ public class LccMutateStub implements MutateStub<LocalClusteringCoefficientMutat
             graphNameAsString,
             rawConfiguration,
             LocalClusteringCoefficientMutateConfig::of,
-            applicationsFacade.community().mutate()::lcc,
+            mutateModeBusinessFacade::lcc,
             resultBuilder
         );
     }
 
-    private CommunityAlgorithmsEstimationModeBusinessFacade estimationMode() {
-        return applicationsFacade.community().estimate();
-    }
 }

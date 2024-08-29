@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.embeddings.stubs;
 
-import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -32,15 +32,19 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public class Node2VecMutateStub implements MutateStub<Node2VecMutateConfig, Node2VecMutateResult> {
+
     private final GenericStub genericStub;
-    private final ApplicationsFacade applicationsFacade;
+    private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
+    private final NodeEmbeddingAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
 
     public Node2VecMutateStub(
         GenericStub genericStub,
-        ApplicationsFacade applicationsFacade
+        NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
+        NodeEmbeddingAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade
     ) {
         this.genericStub = genericStub;
-        this.applicationsFacade = applicationsFacade;
+        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
+        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
     }
 
     @Override
@@ -54,7 +58,7 @@ public class Node2VecMutateStub implements MutateStub<Node2VecMutateConfig, Node
             username,
             rawConfiguration,
             Node2VecMutateConfig::of,
-            configuration -> estimationMode().node2Vec(configuration)
+            estimationModeBusinessFacade::node2Vec
         );
     }
 
@@ -64,7 +68,7 @@ public class Node2VecMutateStub implements MutateStub<Node2VecMutateConfig, Node
             graphNameAsString,
             rawConfiguration,
             Node2VecMutateConfig::of,
-            configuration -> estimationMode().node2Vec(configuration)
+            estimationModeBusinessFacade::node2Vec
         );
     }
 
@@ -79,12 +83,9 @@ public class Node2VecMutateStub implements MutateStub<Node2VecMutateConfig, Node
             graphNameAsString,
             rawConfiguration,
             Node2VecMutateConfig::of,
-            applicationsFacade.nodeEmbeddings().mutate()::node2Vec,
+            mutateModeBusinessFacade::node2Vec,
             resultBuilder
         );
     }
 
-    private NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationMode() {
-        return applicationsFacade.nodeEmbeddings().estimate();
-    }
 }

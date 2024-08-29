@@ -20,9 +20,9 @@
 package org.neo4j.gds.procedures.algorithms.miscellaneous.stubs;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsMutateModeBusinessFacade;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.ScalePropertiesMutateResult;
@@ -35,19 +35,23 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class ScalePropertiesMutateStub implements MutateStub<ScalePropertiesMutateConfig, ScalePropertiesMutateResult> {
+
     private final GenericStub genericStub;
-    private final ApplicationsFacade applicationsFacade;
+    private final MiscellaneousApplicationsEstimationModeBusinessFacade estimationModeBusinessFacade;
+    private final MiscellaneousApplicationsMutateModeBusinessFacade mutateModeBusinessFacade;
     private final ProcedureReturnColumns procedureReturnColumns;
     private final Function<CypherMapWrapper, ScalePropertiesMutateConfig> configFunction;
 
     public ScalePropertiesMutateStub(
         GenericStub genericStub,
-        ApplicationsFacade applicationsFacade,
+        MiscellaneousApplicationsEstimationModeBusinessFacade estimationModeBusinessFacade,
+        MiscellaneousApplicationsMutateModeBusinessFacade mutateModeBusinessFacade,
         ProcedureReturnColumns procedureReturnColumns,
         Function<CypherMapWrapper, ScalePropertiesMutateConfig> configFunction
     ) {
         this.genericStub = genericStub;
-        this.applicationsFacade = applicationsFacade;
+        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
+        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
         this.procedureReturnColumns = procedureReturnColumns;
         this.configFunction = configFunction;
     }
@@ -63,7 +67,7 @@ public class ScalePropertiesMutateStub implements MutateStub<ScalePropertiesMuta
             username,
             rawConfiguration,
             configFunction,
-            configuration -> estimationMode().scaleProperties(configuration)
+            estimationModeBusinessFacade::scaleProperties
         );
     }
 
@@ -73,7 +77,7 @@ public class ScalePropertiesMutateStub implements MutateStub<ScalePropertiesMuta
             graphNameAsString,
             rawConfiguration,
             configFunction,
-            configuration -> estimationMode().scaleProperties(configuration)
+            estimationModeBusinessFacade::scaleProperties
         );
     }
 
@@ -90,12 +94,9 @@ public class ScalePropertiesMutateStub implements MutateStub<ScalePropertiesMuta
             graphNameAsString,
             rawConfiguration,
             configFunction,
-            applicationsFacade.miscellaneous().mutate()::scaleProperties,
+            mutateModeBusinessFacade::scaleProperties,
             resultBuilder
         );
     }
 
-    private MiscellaneousApplicationsEstimationModeBusinessFacade estimationMode() {
-        return applicationsFacade.miscellaneous().estimate();
-    }
 }

@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality.stubs;
 
-import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.articulationpoints.ArticulationPointsMutateConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -33,14 +33,17 @@ import java.util.stream.Stream;
 
 public class ArticulationPointsMutateStub implements MutateStub<ArticulationPointsMutateConfig, ArticulationPointsMutateResult> {
     private final GenericStub genericStub;
-    private final ApplicationsFacade applicationsFacade;
+    private final CentralityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
+    private final CentralityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
 
     public ArticulationPointsMutateStub(
         GenericStub genericStub,
-        ApplicationsFacade applicationsFacade
+        CentralityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
+        CentralityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade
     ) {
         this.genericStub = genericStub;
-        this.applicationsFacade = applicationsFacade;
+        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
+        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
     }
 
     @Override
@@ -54,7 +57,7 @@ public class ArticulationPointsMutateStub implements MutateStub<ArticulationPoin
             username,
             configuration,
             ArticulationPointsMutateConfig::of,
-            (config) -> estimationMode().articulationPoints()
+            (config) -> estimationModeBusinessFacade.articulationPoints()
         );
     }
 
@@ -64,24 +67,24 @@ public class ArticulationPointsMutateStub implements MutateStub<ArticulationPoin
             graphName,
             configuration,
             ArticulationPointsMutateConfig::of,
-            (config) -> estimationMode().articulationPoints()
+            (config) -> estimationModeBusinessFacade.articulationPoints()
         );
     }
 
     @Override
-    public Stream<ArticulationPointsMutateResult> execute(String graphNameAsString, Map<String, Object> rawConfiguration) {
+    public Stream<ArticulationPointsMutateResult> execute(
+        String graphNameAsString,
+        Map<String, Object> rawConfiguration
+    ) {
         var resultBuilder = new ArticulationPointsResultBuilderForMutateMode();
 
         return genericStub.execute(
             graphNameAsString,
             rawConfiguration,
             ArticulationPointsMutateConfig::of,
-            applicationsFacade.centrality().mutate()::articulationPoints,
+            mutateModeBusinessFacade::articulationPoints,
             resultBuilder
         );
     }
 
-    private CentralityAlgorithmsEstimationModeBusinessFacade estimationMode() {
-        return applicationsFacade.centrality().estimate();
-    }
 }

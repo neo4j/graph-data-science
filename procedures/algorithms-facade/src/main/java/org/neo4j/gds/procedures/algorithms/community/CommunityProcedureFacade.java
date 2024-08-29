@@ -91,6 +91,13 @@ public final class CommunityProcedureFacade {
     private final CloseableResourceRegistry closeableResourceRegistry;
     private final ProcedureReturnColumns procedureReturnColumns;
 
+
+    private final CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
+    private final CommunityAlgorithmsStatsModeBusinessFacade statsModeBusinessFacade;
+    private final CommunityAlgorithmsStreamModeBusinessFacade streamModeBusinessFacade;
+    private final CommunityAlgorithmsWriteModeBusinessFacade writeModeBusinessFacade;
+
+
     private final ApproximateMaximumKCutMutateStub approximateMaximumKCutMutateStub;
     private final K1ColoringMutateStub k1ColoringMutateStub;
     private final KCoreMutateStub kCoreMutateStub;
@@ -104,14 +111,16 @@ public final class CommunityProcedureFacade {
     private final TriangleCountMutateStub triangleCountMutateStub;
     private final WccMutateStub wccMutateStub;
 
-    private final ApplicationsFacade applicationsFacade;
-
     private final EstimationModeRunner estimationMode;
     private final AlgorithmExecutionScaffolding algorithmExecutionScaffolding;
 
     private CommunityProcedureFacade(
         CloseableResourceRegistry closeableResourceRegistry,
         ProcedureReturnColumns procedureReturnColumns,
+        CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
+        CommunityAlgorithmsStatsModeBusinessFacade statsModeBusinessFacade,
+        CommunityAlgorithmsStreamModeBusinessFacade streamModeBusinessFacade,
+        CommunityAlgorithmsWriteModeBusinessFacade writeModeBusinessFacade,
         ApproximateMaximumKCutMutateStub approximateMaximumKCutMutateStub,
         K1ColoringMutateStub k1ColoringMutateStub,
         KCoreMutateStub kCoreMutateStub,
@@ -124,12 +133,15 @@ public final class CommunityProcedureFacade {
         SccMutateStub sccMutateStub,
         TriangleCountMutateStub triangleCountMutateStub,
         WccMutateStub wccMutateStub,
-        ApplicationsFacade applicationsFacade,
         EstimationModeRunner estimationMode,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffolding)
-    {
+        AlgorithmExecutionScaffolding algorithmExecutionScaffolding
+    ) {
         this.closeableResourceRegistry = closeableResourceRegistry;
         this.procedureReturnColumns = procedureReturnColumns;
+        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
+        this.statsModeBusinessFacade = statsModeBusinessFacade;
+        this.streamModeBusinessFacade = streamModeBusinessFacade;
+        this.writeModeBusinessFacade = writeModeBusinessFacade;
         this.approximateMaximumKCutMutateStub = approximateMaximumKCutMutateStub;
         this.k1ColoringMutateStub = k1ColoringMutateStub;
         this.kCoreMutateStub = kCoreMutateStub;
@@ -142,7 +154,6 @@ public final class CommunityProcedureFacade {
         this.lccMutateStub = lccMutateStub;
         this.triangleCountMutateStub = triangleCountMutateStub;
         this.wccMutateStub = wccMutateStub;
-        this.applicationsFacade = applicationsFacade;
         this.estimationMode = estimationMode;
         this.algorithmExecutionScaffolding = algorithmExecutionScaffolding;
     }
@@ -153,35 +164,95 @@ public final class CommunityProcedureFacade {
         CloseableResourceRegistry closeableResourceRegistry,
         ProcedureReturnColumns procedureReturnColumns,
         EstimationModeRunner estimationModeRunner,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffolding) {
+        AlgorithmExecutionScaffolding algorithmExecutionScaffolding
+    ) {
 
-        var approximateMaximumKCutMutateStub = new ApproximateMaximumKCutMutateStub(genericStub, applicationsFacade);
-        var k1ColoringMutateStub = new K1ColoringMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
-        var kCoreMutateStub = new KCoreMutateStub(genericStub, applicationsFacade);
-        var kMeansMutateStub = new KMeansMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
+        var approximateMaximumKCutMutateStub = new ApproximateMaximumKCutMutateStub(
+            genericStub,
+            applicationsFacade.community().mutate(),
+            applicationsFacade.community().estimate()
+        );
+
+        var k1ColoringMutateStub = new K1ColoringMutateStub(
+            genericStub,
+            applicationsFacade.community().mutate(),
+            applicationsFacade.community().estimate(),
+            procedureReturnColumns
+        );
+
+        var kCoreMutateStub = new KCoreMutateStub(
+            genericStub,
+            applicationsFacade.community().mutate(),
+            applicationsFacade.community().estimate()
+        );
+
+        var kMeansMutateStub = new KMeansMutateStub(
+            genericStub,
+            applicationsFacade.community().mutate(),
+            applicationsFacade.community().estimate(),
+            procedureReturnColumns
+        );
+
         var labelPropagationMutateStub = new LabelPropagationMutateStub(
             genericStub,
-            applicationsFacade,
+            applicationsFacade.community().mutate(),
+            applicationsFacade.community().estimate(),
             procedureReturnColumns
         );
-        var lccMutateStub = new LccMutateStub(genericStub, applicationsFacade);
-        var leidenMutateStub = new LeidenMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
-        var louvainMutateStub = new LouvainMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
+        var lccMutateStub = new LccMutateStub(
+            genericStub,
+            applicationsFacade.community().mutate(),
+            applicationsFacade.community().estimate()
+        );
+
+        var leidenMutateStub = new LeidenMutateStub(
+            genericStub,
+            applicationsFacade.community().mutate(),
+            applicationsFacade.community().estimate(),
+            procedureReturnColumns
+        );
+
+        var louvainMutateStub = new LouvainMutateStub(
+            genericStub,
+            applicationsFacade.community().mutate(),
+            applicationsFacade.community().estimate(),
+            procedureReturnColumns
+        );
+
         var modularityOptimizationMutateStub = new ModularityOptimizationMutateStub(
             genericStub,
-            applicationsFacade,
+            applicationsFacade.community().mutate(),
+            applicationsFacade.community().estimate(),
             procedureReturnColumns
         );
-        var sccMutateStub = new SccMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
+
+        var sccMutateStub = new SccMutateStub(
+            genericStub,
+            applicationsFacade.community().mutate(),
+            applicationsFacade.community().estimate(),
+            procedureReturnColumns
+        );
+
         var triangleCountMutateStub = new TriangleCountMutateStub(
             genericStub,
-            applicationsFacade
+            applicationsFacade.community().mutate(),
+            applicationsFacade.community().estimate()
         );
-        var wccMutateStub = new WccMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
+
+        var wccMutateStub = new WccMutateStub(
+            genericStub,
+            applicationsFacade.community().mutate(),
+            applicationsFacade.community().estimate(),
+            procedureReturnColumns
+        );
 
         return new CommunityProcedureFacade(
             closeableResourceRegistry,
             procedureReturnColumns,
+            applicationsFacade.community().estimate(),
+            applicationsFacade.community().stats(),
+            applicationsFacade.community().stream(),
+            applicationsFacade.community().write(),
             approximateMaximumKCutMutateStub,
             k1ColoringMutateStub,
             kCoreMutateStub,
@@ -193,10 +264,7 @@ public final class CommunityProcedureFacade {
             modularityOptimizationMutateStub,
             sccMutateStub,
             triangleCountMutateStub,
-            wccMutateStub,
-            applicationsFacade,
-            estimationModeRunner,
-            algorithmExecutionScaffolding
+            wccMutateStub, estimationModeRunner, algorithmExecutionScaffolding
         );
     }
 
@@ -214,7 +282,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             ApproxMaxKCutStreamConfig::of,
-            streamMode()::approximateMaximumKCut,
+            streamModeBusinessFacade::approximateMaximumKCut,
             resultBuilder
         );
     }
@@ -226,7 +294,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             ApproxMaxKCutStreamConfig::of,
-            configuration -> estimationMode().approximateMaximumKCut(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.approximateMaximumKCut(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -242,7 +310,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             ConductanceStreamConfig::of,
-            streamMode()::conductance,
+            streamModeBusinessFacade::conductance,
             resultBuilder
         );
     }
@@ -261,7 +329,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             K1ColoringStatsConfig::of,
-            statsMode()::k1Coloring,
+            statsModeBusinessFacade::k1Coloring,
             resultBuilder
         );
     }
@@ -273,7 +341,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             K1ColoringStatsConfig::of,
-            configuration -> estimationMode().k1Coloring(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.k1Coloring(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -289,7 +357,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             K1ColoringStreamConfig::of,
-            streamMode()::k1Coloring,
+            streamModeBusinessFacade::k1Coloring,
             resultBuilder
         );
     }
@@ -301,7 +369,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             K1ColoringStreamConfig::of,
-            configuration -> estimationMode().k1Coloring(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.k1Coloring(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -317,7 +385,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             K1ColoringWriteConfig::of,
-            writeMode()::k1Coloring,
+            writeModeBusinessFacade::k1Coloring,
             resultBuilder
         );
     }
@@ -329,7 +397,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             K1ColoringWriteConfig::of,
-            configuration -> estimationMode().k1Coloring(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.k1Coloring(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -349,7 +417,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             KCoreDecompositionStatsConfig::of,
-            statsMode()::kCore,
+            statsModeBusinessFacade::kCore,
             resultBuilder
         );
     }
@@ -361,7 +429,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             KCoreDecompositionStatsConfig::of,
-            configuration -> estimationMode().kCore(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.kCore(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -377,7 +445,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             KCoreDecompositionStreamConfig::of,
-            streamMode()::kCore,
+            streamModeBusinessFacade::kCore,
             resultBuilder
         );
     }
@@ -389,7 +457,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             KCoreDecompositionStreamConfig::of,
-            configuration -> estimationMode().kCore(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.kCore(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -405,7 +473,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             KCoreDecompositionWriteConfig::of,
-            writeMode()::kCore,
+            writeModeBusinessFacade::kCore,
             resultBuilder
         );
     }
@@ -417,7 +485,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             KCoreDecompositionWriteConfig::of,
-            configuration -> estimationMode().kCore(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.kCore(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -440,7 +508,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             KmeansStatsConfig::of,
-            statsMode()::kMeans,
+            statsModeBusinessFacade::kMeans,
             resultBuilder
         );
     }
@@ -452,7 +520,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             KmeansStatsConfig::of,
-            configuration -> estimationMode().kMeans(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.kMeans(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -468,7 +536,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             KmeansStreamConfig::of,
-            streamMode()::kMeans,
+            streamModeBusinessFacade::kMeans,
             resultBuilder
         );
     }
@@ -480,7 +548,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             KmeansStreamConfig::of,
-            configuration -> estimationMode().kMeans(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.kMeans(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -499,7 +567,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             KmeansWriteConfig::of,
-            writeMode()::kMeans,
+            writeModeBusinessFacade::kMeans,
             resultBuilder
         );
     }
@@ -511,7 +579,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             KmeansWriteConfig::of,
-            configuration -> estimationMode().kMeans(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.kMeans(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -533,7 +601,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             LabelPropagationStatsConfig::of,
-            statsMode()::labelPropagation,
+            statsModeBusinessFacade::labelPropagation,
             resultBuilder
         );
     }
@@ -545,7 +613,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             LabelPropagationStatsConfig::of,
-            configuration -> estimationMode().labelPropagation(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.labelPropagation(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -560,7 +628,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             LabelPropagationStreamConfig::of,
-            streamMode()::labelPropagation,
+            streamModeBusinessFacade::labelPropagation,
             resultBuilder
         );
     }
@@ -572,7 +640,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             LabelPropagationStreamConfig::of,
-            configuration -> estimationMode().labelPropagation(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.labelPropagation(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -590,7 +658,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             LabelPropagationWriteConfig::of,
-            writeMode()::labelPropagation,
+            writeModeBusinessFacade::labelPropagation,
             resultBuilder
         );
     }
@@ -602,7 +670,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             LabelPropagationWriteConfig::of,
-            configuration -> estimationMode().labelPropagation(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.labelPropagation(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -622,7 +690,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             LocalClusteringCoefficientStatsConfig::of,
-            statsMode()::lcc,
+            statsModeBusinessFacade::lcc,
             resultBuilder
         );
     }
@@ -634,7 +702,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             LocalClusteringCoefficientStatsConfig::of,
-            configuration -> estimationMode().lcc(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.lcc(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -649,7 +717,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             LocalClusteringCoefficientStreamConfig::of,
-            streamMode()::lcc,
+            streamModeBusinessFacade::lcc,
             resultBuilder
         );
     }
@@ -661,7 +729,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             LocalClusteringCoefficientStreamConfig::of,
-            configuration -> estimationMode().lcc(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.lcc(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -676,7 +744,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             LocalClusteringCoefficientWriteConfig::of,
-            writeMode()::lcc,
+            writeModeBusinessFacade::lcc,
             resultBuilder
         );
     }
@@ -688,7 +756,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             LocalClusteringCoefficientWriteConfig::of,
-            configuration -> estimationMode().lcc(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.lcc(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -707,7 +775,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             LeidenStatsConfig::of,
-            statsMode()::leiden,
+            statsModeBusinessFacade::leiden,
             resultBuilder
         );
     }
@@ -719,7 +787,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             LeidenStatsConfig::of,
-            configuration -> estimationMode().leiden(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.leiden(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -735,7 +803,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             LeidenStreamConfig::of,
-            streamMode()::leiden,
+            streamModeBusinessFacade::leiden,
             resultBuilder
         );
     }
@@ -747,7 +815,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             LeidenStreamConfig::of,
-            configuration -> estimationMode().leiden(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.leiden(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -765,7 +833,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             LeidenWriteConfig::of,
-            writeMode()::leiden,
+            writeModeBusinessFacade::leiden,
             resultBuilder
         );
     }
@@ -777,7 +845,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             LeidenWriteConfig::of,
-            configuration -> estimationMode().leiden(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.leiden(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -796,7 +864,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             LouvainStatsConfig::of,
-            statsMode()::louvain,
+            statsModeBusinessFacade::louvain,
             resultBuilder
         );
     }
@@ -808,7 +876,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             LouvainStatsConfig::of,
-            configuration -> estimationMode().louvain(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.louvain(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -824,7 +892,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             LouvainStreamConfig::of,
-            streamMode()::louvain,
+            streamModeBusinessFacade::louvain,
             resultBuilder
         );
     }
@@ -836,7 +904,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             LouvainStreamConfig::of,
-            configuration -> estimationMode().louvain(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.louvain(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -854,7 +922,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             LouvainWriteConfig::of,
-            writeMode()::louvain,
+            writeModeBusinessFacade::louvain,
             resultBuilder
         );
     }
@@ -866,7 +934,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             LouvainWriteConfig::of,
-            configuration -> estimationMode().louvain(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.louvain(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -882,7 +950,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             ModularityStatsConfig::of,
-            statsMode()::modularity,
+            statsModeBusinessFacade::modularity,
             resultBuilder
         );
     }
@@ -894,7 +962,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             ModularityStatsConfig::of,
-            configuration -> estimationMode().modularity(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.modularity(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -910,7 +978,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             ModularityStreamConfig::of,
-            streamMode()::modularity,
+            streamModeBusinessFacade::modularity,
             resultBuilder
         );
     }
@@ -922,7 +990,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             ModularityStreamConfig::of,
-            configuration -> estimationMode().modularity(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.modularity(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -944,7 +1012,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             ModularityOptimizationStatsConfig::of,
-            statsMode()::modularityOptimization,
+            statsModeBusinessFacade::modularityOptimization,
             resultBuilder
         );
     }
@@ -956,7 +1024,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             ModularityOptimizationStatsConfig::of,
-            configuration -> estimationMode().modularityOptimization(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.modularityOptimization(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -972,7 +1040,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             ModularityOptimizationStreamConfig::of,
-            streamMode()::modularityOptimization,
+            streamModeBusinessFacade::modularityOptimization,
             resultBuilder
         );
     }
@@ -984,7 +1052,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             ModularityOptimizationStreamConfig::of,
-            configuration -> estimationMode().modularityOptimization(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.modularityOptimization(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -1001,7 +1069,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             ModularityOptimizationWriteConfig::of,
-            writeMode()::modularityOptimization,
+            writeModeBusinessFacade::modularityOptimization,
             resultBuilder
         );
     }
@@ -1013,7 +1081,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             ModularityOptimizationWriteConfig::of,
-            configuration -> estimationMode().modularityOptimization(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.modularityOptimization(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -1035,7 +1103,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             SccStatsConfig::of,
-            statsMode()::scc,
+            statsModeBusinessFacade::scc,
             resultBuilder
         );
     }
@@ -1047,7 +1115,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             SccStatsConfig::of,
-            configuration -> estimationMode().scc(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.scc(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -1063,7 +1131,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             SccStreamConfig::of,
-            streamMode()::scc,
+            streamModeBusinessFacade::scc,
             resultBuilder
         );
     }
@@ -1075,7 +1143,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             SccStreamConfig::of,
-            configuration -> estimationMode().scc(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.scc(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -1093,7 +1161,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             SccWriteConfig::of,
-            writeMode()::scc,
+            writeModeBusinessFacade::scc,
             resultBuilder
         );
     }
@@ -1109,7 +1177,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             SccAlphaWriteConfig::of,
-            writeMode()::sccAlpha,
+            writeModeBusinessFacade::sccAlpha,
             resultBuilder
         );
     }
@@ -1121,7 +1189,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             SccWriteConfig::of,
-            configuration -> estimationMode().scc(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.scc(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -1138,7 +1206,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             TriangleCountStatsConfig::of,
-            statsMode()::triangleCount,
+            statsModeBusinessFacade::triangleCount,
             resultBuilder
         );
     }
@@ -1150,7 +1218,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             TriangleCountStatsConfig::of,
-            configuration -> estimationMode().triangleCount(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.triangleCount(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -1166,7 +1234,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             TriangleCountStreamConfig::of,
-            streamMode()::triangleCount,
+            streamModeBusinessFacade::triangleCount,
             resultBuilder
         );
     }
@@ -1178,7 +1246,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             TriangleCountStreamConfig::of,
-            configuration -> estimationMode().triangleCount(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.triangleCount(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -1194,7 +1262,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             TriangleCountWriteConfig::of,
-            writeMode()::triangleCount,
+            writeModeBusinessFacade::triangleCount,
             resultBuilder
         );
     }
@@ -1206,7 +1274,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             TriangleCountWriteConfig::of,
-            configuration -> estimationMode().triangleCount(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.triangleCount(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -1219,7 +1287,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             TriangleCountBaseConfig::of,
-            streamMode()::triangles,
+            streamModeBusinessFacade::triangles,
             resultBuilder
         );
     }
@@ -1237,7 +1305,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             WccStatsConfig::of,
-            statsMode()::wcc,
+            statsModeBusinessFacade::wcc,
             resultBuilder
         );
     }
@@ -1249,7 +1317,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             WccStatsConfig::of,
-            configuration -> estimationMode().wcc(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.wcc(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -1262,7 +1330,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             WccStreamConfig::of,
-            streamMode()::wcc,
+            streamModeBusinessFacade::wcc,
             resultBuilder
         );
     }
@@ -1274,7 +1342,7 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             WccStreamConfig::of,
-            configuration -> estimationMode().wcc(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.wcc(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -1289,7 +1357,7 @@ public final class CommunityProcedureFacade {
             graphName,
             configuration,
             WccWriteConfig::of,
-            writeMode()::wcc,
+            writeModeBusinessFacade::wcc,
             resultBuilder
         );
     }
@@ -1301,25 +1369,10 @@ public final class CommunityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             WccWriteConfig::of,
-            configuration -> estimationMode().wcc(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.wcc(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
     }
 
-    private CommunityAlgorithmsEstimationModeBusinessFacade estimationMode() {
-        return applicationsFacade.community().estimate();
-    }
-
-    private CommunityAlgorithmsStatsModeBusinessFacade statsMode() {
-        return applicationsFacade.community().stats();
-    }
-
-    private CommunityAlgorithmsStreamModeBusinessFacade streamMode() {
-        return applicationsFacade.community().stream();
-    }
-
-    private CommunityAlgorithmsWriteModeBusinessFacade writeMode() {
-        return applicationsFacade.community().write();
-    }
 }

@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality.stubs;
 
-import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationMutateConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -33,14 +33,17 @@ import java.util.stream.Stream;
 
 public class CelfMutateStub implements MutateStub<InfluenceMaximizationMutateConfig, CELFMutateResult> {
     private final GenericStub genericStub;
-    private final ApplicationsFacade applicationsFacade;
+    private final CentralityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
+    private final CentralityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
 
     public CelfMutateStub(
         GenericStub genericStub,
-        ApplicationsFacade applicationsFacade
+        CentralityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
+        CentralityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade
     ) {
         this.genericStub = genericStub;
-        this.applicationsFacade = applicationsFacade;
+        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
+        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
     }
 
     @Override
@@ -54,7 +57,7 @@ public class CelfMutateStub implements MutateStub<InfluenceMaximizationMutateCon
             username,
             configuration,
             InfluenceMaximizationMutateConfig::of,
-            estimationMode()::celf
+            estimationModeBusinessFacade::celf
         );
     }
 
@@ -64,7 +67,7 @@ public class CelfMutateStub implements MutateStub<InfluenceMaximizationMutateCon
             graphName,
             configuration,
             InfluenceMaximizationMutateConfig::of,
-            estimationMode()::celf
+            estimationModeBusinessFacade::celf
         );
     }
 
@@ -76,12 +79,9 @@ public class CelfMutateStub implements MutateStub<InfluenceMaximizationMutateCon
             graphNameAsString,
             rawConfiguration,
             InfluenceMaximizationMutateConfig::of,
-            applicationsFacade.centrality().mutate()::celf,
+            mutateModeBusinessFacade::celf,
             resultBuilder
         );
     }
 
-    private CentralityAlgorithmsEstimationModeBusinessFacade estimationMode() {
-        return applicationsFacade.centrality().estimate();
-    }
 }

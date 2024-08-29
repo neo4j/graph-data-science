@@ -20,9 +20,9 @@
 package org.neo4j.gds.procedures.algorithms.similarity;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
@@ -32,17 +32,21 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public class FilteredNodeSimilarityMutateStub implements MutateStub<FilteredNodeSimilarityMutateConfig, SimilarityMutateResult> {
+
     private final GenericStub genericStub;
-    private final ApplicationsFacade applicationsFacade;
+    private final SimilarityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
+    private final SimilarityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
     private final ProcedureReturnColumns procedureReturnColumns;
 
     FilteredNodeSimilarityMutateStub(
         GenericStub genericStub,
-        ApplicationsFacade applicationsFacade,
+        SimilarityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
+        SimilarityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
         ProcedureReturnColumns procedureReturnColumns
     ) {
         this.genericStub = genericStub;
-        this.applicationsFacade = applicationsFacade;
+        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
+        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
         this.procedureReturnColumns = procedureReturnColumns;
     }
 
@@ -57,7 +61,7 @@ public class FilteredNodeSimilarityMutateStub implements MutateStub<FilteredNode
             username,
             configuration,
             FilteredNodeSimilarityMutateConfig::of,
-            estimationMode()::filteredNodeSimilarity
+            estimationModeBusinessFacade::filteredNodeSimilarity
         );
     }
 
@@ -67,7 +71,7 @@ public class FilteredNodeSimilarityMutateStub implements MutateStub<FilteredNode
             graphName,
             configuration,
             FilteredNodeSimilarityMutateConfig::of,
-            estimationMode()::filteredNodeSimilarity
+            estimationModeBusinessFacade::filteredNodeSimilarity
         );
     }
 
@@ -79,7 +83,7 @@ public class FilteredNodeSimilarityMutateStub implements MutateStub<FilteredNode
             graphNameAsString,
             rawConfiguration,
             FilteredNodeSimilarityMutateConfig::of,
-            (graphName, configuration, __) -> applicationsFacade.similarity().mutate().filteredNodeSimilarity(
+            (graphName, configuration, __) -> mutateModeBusinessFacade.filteredNodeSimilarity(
                 graphName,
                 configuration,
                 resultBuilder,
@@ -89,7 +93,5 @@ public class FilteredNodeSimilarityMutateStub implements MutateStub<FilteredNode
         );
     }
 
-    private SimilarityAlgorithmsEstimationModeBusinessFacade estimationMode() {
-        return applicationsFacade.similarity().estimate();
-    }
+
 }

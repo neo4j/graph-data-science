@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding.stubs;
 
-import org.neo4j.gds.applications.ApplicationsFacade;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeMutateResult;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
-import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeMutateResult;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.spanningtree.SpanningTreeMutateConfig;
 
 import java.util.Map;
@@ -33,16 +33,18 @@ import java.util.stream.Stream;
 
 public class SpanningTreeMutateStub implements MutateStub<SpanningTreeMutateConfig, SpanningTreeMutateResult> {
     private final GenericStub genericStub;
-    private final ApplicationsFacade applicationsFacade;
+    private final PathFindingAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
+    private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
 
     public SpanningTreeMutateStub(
         GenericStub genericStub,
-        ApplicationsFacade applicationsFacade
+        PathFindingAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
+        PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade
     ) {
         this.genericStub = genericStub;
-        this.applicationsFacade = applicationsFacade;
+        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
+        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
     }
-
     @Override
     public SpanningTreeMutateConfig parseConfiguration(Map<String, Object> configuration) {
         return genericStub.parseConfiguration(SpanningTreeMutateConfig::of, configuration);
@@ -54,7 +56,7 @@ public class SpanningTreeMutateStub implements MutateStub<SpanningTreeMutateConf
             username,
             configuration,
             SpanningTreeMutateConfig::of,
-            __ -> estimationMode().spanningTree()
+            __ -> estimationModeBusinessFacade.spanningTree()
         );
     }
 
@@ -64,7 +66,7 @@ public class SpanningTreeMutateStub implements MutateStub<SpanningTreeMutateConf
             graphName,
             configuration,
             SpanningTreeMutateConfig::of,
-            __ -> estimationMode().spanningTree()
+            __ -> estimationModeBusinessFacade.spanningTree()
         );
     }
 
@@ -76,12 +78,9 @@ public class SpanningTreeMutateStub implements MutateStub<SpanningTreeMutateConf
             graphName,
             configuration,
             SpanningTreeMutateConfig::of,
-            applicationsFacade.pathFinding().mutate()::spanningTree,
+            mutateModeBusinessFacade::spanningTree,
             resultBuilder
         );
     }
 
-    private PathFindingAlgorithmsEstimationModeBusinessFacade estimationMode() {
-        return applicationsFacade.pathFinding().estimate();
-    }
 }

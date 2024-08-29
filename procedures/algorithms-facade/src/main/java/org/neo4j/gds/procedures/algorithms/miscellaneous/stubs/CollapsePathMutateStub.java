@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.procedures.algorithms.miscellaneous.stubs;
 
-import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsMutateModeBusinessFacade;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.CollapsePathMutateResult;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
@@ -33,11 +33,17 @@ import java.util.stream.Stream;
 
 public class CollapsePathMutateStub implements MutateStub<CollapsePathConfig, CollapsePathMutateResult> {
     private final GenericStub genericStub;
-    private final ApplicationsFacade applicationsFacade;
+    private final MiscellaneousApplicationsEstimationModeBusinessFacade estimationModeBusinessFacade;
+    private final MiscellaneousApplicationsMutateModeBusinessFacade mutateModeBusinessFacade;
 
-    public CollapsePathMutateStub(GenericStub genericStub, ApplicationsFacade applicationsFacade) {
+    public CollapsePathMutateStub(
+        GenericStub genericStub,
+        MiscellaneousApplicationsEstimationModeBusinessFacade estimationModeBusinessFacade,
+        MiscellaneousApplicationsMutateModeBusinessFacade mutateModeBusinessFacade
+    ) {
         this.genericStub = genericStub;
-        this.applicationsFacade = applicationsFacade;
+        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
+        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
     }
 
     @Override
@@ -51,7 +57,7 @@ public class CollapsePathMutateStub implements MutateStub<CollapsePathConfig, Co
             username,
             rawConfiguration,
             CollapsePathConfig::of,
-            __ -> estimationMode().collapsePath()
+            __ -> estimationModeBusinessFacade.collapsePath()
         );
     }
 
@@ -61,7 +67,7 @@ public class CollapsePathMutateStub implements MutateStub<CollapsePathConfig, Co
             graphNameAsString,
             rawConfiguration,
             CollapsePathConfig::of,
-            __ -> estimationMode().collapsePath()
+            __ -> estimationModeBusinessFacade.collapsePath()
         );
     }
 
@@ -76,12 +82,9 @@ public class CollapsePathMutateStub implements MutateStub<CollapsePathConfig, Co
             graphNameAsString,
             rawConfiguration,
             CollapsePathConfig::of,
-            applicationsFacade.miscellaneous().mutate()::collapsePath,
+            mutateModeBusinessFacade::collapsePath,
             resultBuilder
         );
     }
 
-    private MiscellaneousApplicationsEstimationModeBusinessFacade estimationMode() {
-        return applicationsFacade.miscellaneous().estimate();
-    }
 }

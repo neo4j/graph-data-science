@@ -20,8 +20,8 @@
 package org.neo4j.gds.procedures.algorithms.community.stubs;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -33,17 +33,21 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public class K1ColoringMutateStub implements MutateStub<K1ColoringMutateConfig, K1ColoringMutateResult> {
+
     private final GenericStub genericStub;
-    private final ApplicationsFacade applicationsFacade;
+    private final CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
+    private final CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
     private final ProcedureReturnColumns procedureReturnColumns;
 
     public K1ColoringMutateStub(
         GenericStub genericStub,
-        ApplicationsFacade applicationsFacade,
+        CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
+        CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
         ProcedureReturnColumns procedureReturnColumns
     ) {
         this.genericStub = genericStub;
-        this.applicationsFacade = applicationsFacade;
+        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
+        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
         this.procedureReturnColumns = procedureReturnColumns;
     }
 
@@ -58,7 +62,7 @@ public class K1ColoringMutateStub implements MutateStub<K1ColoringMutateConfig, 
             username,
             configuration,
             K1ColoringMutateConfig::of,
-            __ -> estimationMode().k1Coloring()
+            __ -> estimationModeBusinessFacade.k1Coloring()
         );
     }
 
@@ -68,7 +72,7 @@ public class K1ColoringMutateStub implements MutateStub<K1ColoringMutateConfig, 
             graphName,
             configuration,
             K1ColoringMutateConfig::of,
-            __ -> estimationMode().k1Coloring()
+            __ -> estimationModeBusinessFacade.k1Coloring()
         );
     }
 
@@ -80,12 +84,10 @@ public class K1ColoringMutateStub implements MutateStub<K1ColoringMutateConfig, 
             graphNameAsString,
             rawConfiguration,
             K1ColoringMutateConfig::of,
-            applicationsFacade.community().mutate()::k1Coloring,
+           mutateModeBusinessFacade::k1Coloring,
             resultBuilder
         );
     }
 
-    private CommunityAlgorithmsEstimationModeBusinessFacade estimationMode() {
-        return applicationsFacade.community().estimate();
-    }
+
 }

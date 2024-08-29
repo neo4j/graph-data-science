@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.embeddings.stubs;
 
-import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.embeddings.fastrp.FastRPMutateConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -32,15 +32,19 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public class FastRPMutateStub implements MutateStub<FastRPMutateConfig, DefaultNodeEmbeddingMutateResult> {
+
     private final GenericStub genericStub;
-    private final ApplicationsFacade applicationsFacade;
+    private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
+    private final NodeEmbeddingAlgorithmsMutateModeBusinessFacade  mutateModeBusinessFacade;
 
     public FastRPMutateStub(
         GenericStub genericStub,
-        ApplicationsFacade applicationsFacade
+        NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
+        NodeEmbeddingAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade
     ) {
         this.genericStub = genericStub;
-        this.applicationsFacade = applicationsFacade;
+        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
+        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
     }
 
     @Override
@@ -54,7 +58,7 @@ public class FastRPMutateStub implements MutateStub<FastRPMutateConfig, DefaultN
             username,
             rawConfiguration,
             FastRPMutateConfig::of,
-            configuration -> estimationMode().fastRP(configuration)
+            estimationModeBusinessFacade::fastRP
         );
     }
 
@@ -64,7 +68,7 @@ public class FastRPMutateStub implements MutateStub<FastRPMutateConfig, DefaultN
             graphNameAsString,
             rawConfiguration,
             FastRPMutateConfig::of,
-            configuration -> estimationMode().fastRP(configuration)
+            estimationModeBusinessFacade::fastRP
         );
     }
 
@@ -79,12 +83,10 @@ public class FastRPMutateStub implements MutateStub<FastRPMutateConfig, DefaultN
             graphNameAsString,
             rawConfiguration,
             FastRPMutateConfig::of,
-            applicationsFacade.nodeEmbeddings().mutate()::fastRP,
+            mutateModeBusinessFacade::fastRP,
             resultBuilder
         );
     }
 
-    private NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationMode() {
-        return applicationsFacade.nodeEmbeddings().estimate();
-    }
+
 }

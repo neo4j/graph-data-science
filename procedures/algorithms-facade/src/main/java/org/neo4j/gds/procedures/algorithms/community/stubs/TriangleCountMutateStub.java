@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.community.stubs;
 
-import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.community.TriangleCountMutateResult;
@@ -32,15 +32,19 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public class TriangleCountMutateStub implements MutateStub<TriangleCountMutateConfig, TriangleCountMutateResult> {
+
     private final GenericStub genericStub;
-    private final ApplicationsFacade applicationsFacade;
+    private final CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
+    private final CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
 
     public TriangleCountMutateStub(
         GenericStub genericStub,
-        ApplicationsFacade applicationsFacade
+        CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
+        CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade
     ) {
         this.genericStub = genericStub;
-        this.applicationsFacade = applicationsFacade;
+        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
+        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
     }
 
     @Override
@@ -54,7 +58,7 @@ public class TriangleCountMutateStub implements MutateStub<TriangleCountMutateCo
             username,
             configuration,
             TriangleCountMutateConfig::of,
-            __ -> estimationMode().triangleCount()
+            __ -> estimationModeBusinessFacade.triangleCount()
         );
     }
 
@@ -64,7 +68,7 @@ public class TriangleCountMutateStub implements MutateStub<TriangleCountMutateCo
             graphName,
             configuration,
             TriangleCountMutateConfig::of,
-            __ -> estimationMode().triangleCount()
+            __ -> estimationModeBusinessFacade.triangleCount()
         );
     }
 
@@ -76,12 +80,9 @@ public class TriangleCountMutateStub implements MutateStub<TriangleCountMutateCo
             graphNameAsString,
             rawConfiguration,
             TriangleCountMutateConfig::of,
-            applicationsFacade.community().mutate()::triangleCount,
+            mutateModeBusinessFacade::triangleCount,
             resultBuilder
         );
     }
 
-    private CommunityAlgorithmsEstimationModeBusinessFacade estimationMode() {
-        return applicationsFacade.community().estimate();
-    }
 }

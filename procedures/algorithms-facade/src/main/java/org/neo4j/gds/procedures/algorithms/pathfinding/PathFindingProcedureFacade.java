@@ -101,7 +101,10 @@ public final class PathFindingProcedureFacade {
     private final ProcedureReturnColumns procedureReturnColumns;
 
     // delegate
-    private final ApplicationsFacade applicationsFacade;
+    private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
+    private final PathFindingAlgorithmsStatsModeBusinessFacade statsModeBusinessFacade;
+    private final PathFindingAlgorithmsStreamModeBusinessFacade streamModeBusinessFacade;
+    private final PathFindingAlgorithmsWriteModeBusinessFacade writeModeBusinessFacade;
 
     // applications
     private final BellmanFordMutateStub bellmanFordMutateStub;
@@ -124,7 +127,10 @@ public final class PathFindingProcedureFacade {
         CloseableResourceRegistry closeableResourceRegistry,
         NodeLookup nodeLookup,
         ProcedureReturnColumns procedureReturnColumns,
-        ApplicationsFacade applicationsFacade,
+        PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
+        PathFindingAlgorithmsStatsModeBusinessFacade statsModeBusinessFacade,
+        PathFindingAlgorithmsStreamModeBusinessFacade streamModeBusinessFacade,
+        PathFindingAlgorithmsWriteModeBusinessFacade writeModeBusinessFacade,
         BellmanFordMutateStub bellmanFordMutateStub,
         BreadthFirstSearchMutateStub breadthFirstSearchMutateStub,
         DeltaSteppingMutateStub deltaSteppingMutateStub,
@@ -142,7 +148,10 @@ public final class PathFindingProcedureFacade {
         this.nodeLookup = nodeLookup;
         this.procedureReturnColumns = procedureReturnColumns;
 
-        this.applicationsFacade = applicationsFacade;
+        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
+        this.statsModeBusinessFacade = statsModeBusinessFacade;
+        this.streamModeBusinessFacade = streamModeBusinessFacade;
+        this.writeModeBusinessFacade = writeModeBusinessFacade;
 
         this.bellmanFordMutateStub = bellmanFordMutateStub;
         this.breadthFirstSearchMutateStub = breadthFirstSearchMutateStub;
@@ -172,66 +181,82 @@ public final class PathFindingProcedureFacade {
         EstimationModeRunner estimationModeRunner,
         AlgorithmExecutionScaffolding algorithmExecutionScaffolding
     ) {
+        var mutateModeBusinessFacade = applicationsFacade.pathFinding().mutate();
+        var estimationModeBusinessFacade = applicationsFacade.pathFinding().estimate();
         var aStarStub = new SinglePairShortestPathAStarMutateStub(
             genericStub,
-            applicationsFacade
+            mutateModeBusinessFacade,
+            estimationModeBusinessFacade
         );
 
         var bellmanFordMutateStub = new BellmanFordMutateStub(
             genericStub,
-            applicationsFacade
+            mutateModeBusinessFacade,
+            estimationModeBusinessFacade
         );
 
         var breadthFirstSearchMutateStub = new BreadthFirstSearchMutateStub(
             genericStub,
-            applicationsFacade
+            mutateModeBusinessFacade,
+            estimationModeBusinessFacade
         );
 
         var deltaSteppingMutateStub = new DeltaSteppingMutateStub(
             genericStub,
-            applicationsFacade
+            mutateModeBusinessFacade,
+            estimationModeBusinessFacade
         );
 
         var depthFirstSearchMutateStub = new DepthFirstSearchMutateStub(
             genericStub,
-            applicationsFacade
+            mutateModeBusinessFacade,
+            estimationModeBusinessFacade
         );
 
         var randomWalkMutateStub = new RandomWalkMutateStub(
             genericStub,
-            applicationsFacade
+            mutateModeBusinessFacade,
+            estimationModeBusinessFacade
         );
 
         var singlePairDijkstraStub = new SinglePairShortestPathDijkstraMutateStub(
             genericStub,
-            applicationsFacade
+            mutateModeBusinessFacade,
+            estimationModeBusinessFacade
         );
 
         var yensStub = new SinglePairShortestPathYensMutateStub(
             genericStub,
-            applicationsFacade
+            mutateModeBusinessFacade,
+            estimationModeBusinessFacade
         );
 
         var singleSourceDijkstraStub = new SingleSourceShortestPathDijkstraMutateStub(
             genericStub,
-            applicationsFacade
+            mutateModeBusinessFacade,
+            estimationModeBusinessFacade
         );
 
         var spanningTreeMutateStub = new SpanningTreeMutateStub(
             genericStub,
-            applicationsFacade
+            mutateModeBusinessFacade,
+            estimationModeBusinessFacade
         );
 
         var steinerTreeMutateStub = new SteinerTreeMutateStub(
             genericStub,
-            applicationsFacade
+            mutateModeBusinessFacade,
+            estimationModeBusinessFacade
         );
 
         return new PathFindingProcedureFacade(
             closeableResourceRegistry,
             nodeLookup,
             procedureReturnColumns,
-            applicationsFacade,
+            estimationModeBusinessFacade,
+            applicationsFacade.pathFinding().stats(),
+            applicationsFacade.pathFinding().stream(),
+            applicationsFacade.pathFinding().write(),
             bellmanFordMutateStub,
             breadthFirstSearchMutateStub,
             deltaSteppingMutateStub,
@@ -241,10 +266,7 @@ public final class PathFindingProcedureFacade {
             singlePairDijkstraStub,
             yensStub,
             singleSourceDijkstraStub,
-            spanningTreeMutateStub,
-            steinerTreeMutateStub,
-            estimationModeRunner,
-            algorithmExecutionScaffolding
+            spanningTreeMutateStub, steinerTreeMutateStub, estimationModeRunner, algorithmExecutionScaffolding
         );
     }
 
@@ -259,7 +281,7 @@ public final class PathFindingProcedureFacade {
             graphName,
             configuration,
             AllShortestPathsConfig::of,
-            streamMode()::allShortestPaths,
+            streamModeBusinessFacade::allShortestPaths,
             resultBuilder
         );
     }
@@ -280,7 +302,7 @@ public final class PathFindingProcedureFacade {
             graphName,
             configuration,
             AllShortestPathsBellmanFordStreamConfig::of,
-            streamMode()::bellmanFord,
+            streamModeBusinessFacade::bellmanFord,
             resultBuilder
         );
     }
@@ -292,7 +314,7 @@ public final class PathFindingProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             AllShortestPathsBellmanFordStreamConfig::of,
-            configuration -> estimationMode().bellmanFord(
+            configuration -> estimationModeBusinessFacade.bellmanFord(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -308,7 +330,7 @@ public final class PathFindingProcedureFacade {
             graphName,
             configuration,
             AllShortestPathsBellmanFordStatsConfig::of,
-            statsMode()::bellmanFord,
+            statsModeBusinessFacade::bellmanFord,
             resultBuilder
         );
     }
@@ -320,7 +342,7 @@ public final class PathFindingProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             AllShortestPathsBellmanFordStatsConfig::of,
-            configuration -> estimationMode().bellmanFord(
+            configuration -> estimationModeBusinessFacade.bellmanFord(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -340,7 +362,7 @@ public final class PathFindingProcedureFacade {
                 graphName,
                 configuration,
                 AllShortestPathsBellmanFordWriteConfig::of,
-                writeMode()::bellmanFord,
+                writeModeBusinessFacade::bellmanFord,
                 resultBuilder
             )
         );
@@ -353,7 +375,7 @@ public final class PathFindingProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             AllShortestPathsBellmanFordWriteConfig::of,
-            configuration -> estimationMode().bellmanFord(
+            configuration -> estimationModeBusinessFacade.bellmanFord(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -373,7 +395,7 @@ public final class PathFindingProcedureFacade {
             graphName,
             configuration,
             BfsStatsConfig::of,
-            statsMode()::breadthFirstSearch,
+            statsModeBusinessFacade::breadthFirstSearch,
             resultBuilder
         );
     }
@@ -385,7 +407,7 @@ public final class PathFindingProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             BfsStatsConfig::of,
-            configuration -> estimationMode().breadthFirstSearch(
+            configuration -> estimationModeBusinessFacade.breadthFirstSearch(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -401,7 +423,7 @@ public final class PathFindingProcedureFacade {
             graphName,
             configuration,
             BfsStreamConfig::of,
-            streamMode()::breadthFirstSearch,
+            streamModeBusinessFacade::breadthFirstSearch,
             resultBuilder
         );
     }
@@ -413,7 +435,7 @@ public final class PathFindingProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             BfsStreamConfig::of,
-            configuration -> estimationMode().breadthFirstSearch(
+            configuration -> estimationModeBusinessFacade.breadthFirstSearch(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -433,7 +455,7 @@ public final class PathFindingProcedureFacade {
             graphName,
             configuration,
             AllShortestPathsDeltaStatsConfig::of,
-            statsMode()::deltaStepping,
+            statsModeBusinessFacade::deltaStepping,
             resultBuilder
         );
     }
@@ -445,7 +467,7 @@ public final class PathFindingProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             AllShortestPathsDeltaStatsConfig::of,
-            configuration -> estimationMode().deltaStepping(
+            configuration -> estimationModeBusinessFacade.deltaStepping(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -459,7 +481,7 @@ public final class PathFindingProcedureFacade {
             graphName,
             configuration,
             AllShortestPathsDeltaStreamConfig::of,
-            streamMode()::deltaStepping
+            streamModeBusinessFacade::deltaStepping
         );
     }
 
@@ -470,7 +492,7 @@ public final class PathFindingProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             AllShortestPathsDeltaStreamConfig::of,
-            configuration -> estimationMode().deltaStepping(
+            configuration -> estimationModeBusinessFacade.deltaStepping(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -488,7 +510,7 @@ public final class PathFindingProcedureFacade {
                 graphName,
                 configuration,
                 AllShortestPathsDeltaWriteConfig::of,
-                writeMode()::deltaStepping
+                writeModeBusinessFacade::deltaStepping
             )
         );
     }
@@ -500,7 +522,7 @@ public final class PathFindingProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             AllShortestPathsDeltaWriteConfig::of,
-            configuration -> estimationMode().deltaStepping(
+            configuration -> estimationModeBusinessFacade.deltaStepping(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -520,7 +542,7 @@ public final class PathFindingProcedureFacade {
             graphName,
             configuration,
             DfsStreamConfig::of,
-            streamMode()::depthFirstSearch,
+            streamModeBusinessFacade::depthFirstSearch,
             resultBuilder
         );
     }
@@ -532,7 +554,7 @@ public final class PathFindingProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             DfsStreamConfig::of,
-            configuration -> estimationMode().depthFirstSearch(
+            configuration -> estimationModeBusinessFacade.depthFirstSearch(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -549,7 +571,7 @@ public final class PathFindingProcedureFacade {
                 graphName,
                 configuration,
                 KSpanningTreeWriteConfig::of,
-                writeMode()::kSpanningTree,
+                writeModeBusinessFacade::kSpanningTree,
                 resultBuilder
             )
         );
@@ -560,7 +582,7 @@ public final class PathFindingProcedureFacade {
             graphName,
             configuration,
             DagLongestPathStreamConfig::of,
-            streamMode()::longestPath
+            streamModeBusinessFacade::longestPath
         );
     }
 
@@ -571,7 +593,7 @@ public final class PathFindingProcedureFacade {
             graphName,
             configuration,
             RandomWalkStatsConfig::of,
-            statsMode()::randomWalk,
+            statsModeBusinessFacade::randomWalk,
             resultBuilder
         );
     }
@@ -583,7 +605,7 @@ public final class PathFindingProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             RandomWalkStatsConfig::of,
-            configuration -> estimationMode().randomWalk(
+            configuration -> estimationModeBusinessFacade.randomWalk(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -603,7 +625,7 @@ public final class PathFindingProcedureFacade {
             graphName,
             configuration,
             RandomWalkStreamConfig::of,
-            streamMode()::randomWalk,
+            streamModeBusinessFacade::randomWalk,
             resultBuilder
         );
     }
@@ -615,7 +637,7 @@ public final class PathFindingProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             RandomWalkStreamConfig::of,
-            configuration -> estimationMode().randomWalk(
+            configuration -> estimationModeBusinessFacade.randomWalk(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -640,7 +662,7 @@ public final class PathFindingProcedureFacade {
             graphName,
             configuration,
             ShortestPathAStarStreamConfig::of,
-            streamMode()::singlePairShortestPathAStar
+            streamModeBusinessFacade::singlePairShortestPathAStar
         );
     }
 
@@ -651,7 +673,7 @@ public final class PathFindingProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             ShortestPathAStarStreamConfig::of,
-            configuration -> estimationMode().singlePairShortestPathAStar(
+            configuration -> estimationModeBusinessFacade.singlePairShortestPathAStar(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -669,7 +691,7 @@ public final class PathFindingProcedureFacade {
                 graphName,
                 configuration,
                 ShortestPathAStarWriteConfig::of,
-                writeMode()::singlePairShortestPathAStar
+                writeModeBusinessFacade::singlePairShortestPathAStar
             )
         );
     }
@@ -681,7 +703,7 @@ public final class PathFindingProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             ShortestPathAStarWriteConfig::of,
-            configuration -> estimationMode().singlePairShortestPathAStar(
+            configuration -> estimationModeBusinessFacade.singlePairShortestPathAStar(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -702,7 +724,7 @@ public final class PathFindingProcedureFacade {
             graphName,
             configuration,
             ShortestPathDijkstraStreamConfig::of,
-            streamMode()::singlePairShortestPathDijkstra
+            streamModeBusinessFacade::singlePairShortestPathDijkstra
         );
     }
 
@@ -713,7 +735,7 @@ public final class PathFindingProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             ShortestPathDijkstraStreamConfig::of,
-            configuration -> estimationMode().singlePairShortestPathDijkstra(
+            configuration -> estimationModeBusinessFacade.singlePairShortestPathDijkstra(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -731,7 +753,7 @@ public final class PathFindingProcedureFacade {
                 graphName,
                 configuration,
                 ShortestPathDijkstraWriteConfig::of,
-                writeMode()::singlePairShortestPathDijkstra
+                writeModeBusinessFacade::singlePairShortestPathDijkstra
             )
         );
     }
@@ -743,7 +765,7 @@ public final class PathFindingProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             ShortestPathDijkstraWriteConfig::of,
-            configuration -> estimationMode().singlePairShortestPathDijkstra(
+            configuration -> estimationModeBusinessFacade.singlePairShortestPathDijkstra(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -764,7 +786,7 @@ public final class PathFindingProcedureFacade {
             graphName,
             configuration,
             ShortestPathYensStreamConfig::of,
-            streamMode()::singlePairShortestPathYens
+            streamModeBusinessFacade::singlePairShortestPathYens
         );
     }
 
@@ -775,7 +797,7 @@ public final class PathFindingProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             ShortestPathYensStreamConfig::of,
-            configuration -> estimationMode().singlePairShortestPathYens(
+            configuration -> estimationModeBusinessFacade.singlePairShortestPathYens(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -793,7 +815,7 @@ public final class PathFindingProcedureFacade {
                 graphName,
                 configuration,
                 ShortestPathYensWriteConfig::of,
-                writeMode()::singlePairShortestPathYens
+                writeModeBusinessFacade::singlePairShortestPathYens
             )
         );
     }
@@ -805,7 +827,7 @@ public final class PathFindingProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             ShortestPathYensWriteConfig::of,
-            configuration -> estimationMode().singlePairShortestPathYens(
+            configuration -> estimationModeBusinessFacade.singlePairShortestPathYens(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -826,7 +848,7 @@ public final class PathFindingProcedureFacade {
             graphName,
             configuration,
             AllShortestPathsDijkstraStreamConfig::of,
-            streamMode()::singleSourceShortestPathDijkstra
+            streamModeBusinessFacade::singleSourceShortestPathDijkstra
         );
     }
 
@@ -837,7 +859,7 @@ public final class PathFindingProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             AllShortestPathsDijkstraStreamConfig::of,
-            configuration -> estimationMode().singleSourceShortestPathDijkstra(
+            configuration -> estimationModeBusinessFacade.singleSourceShortestPathDijkstra(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -855,7 +877,7 @@ public final class PathFindingProcedureFacade {
                 graphName,
                 configuration,
                 AllShortestPathsDijkstraWriteConfig::of,
-                writeMode()::singleSourceShortestPathDijkstra
+                writeModeBusinessFacade::singleSourceShortestPathDijkstra
             )
         );
     }
@@ -867,7 +889,7 @@ public final class PathFindingProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             AllShortestPathsDijkstraWriteConfig::of,
-            configuration -> estimationMode().singleSourceShortestPathDijkstra(
+            configuration -> estimationModeBusinessFacade.singleSourceShortestPathDijkstra(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -890,7 +912,7 @@ public final class PathFindingProcedureFacade {
             graphName,
             configuration,
             SpanningTreeStatsConfig::of,
-            statsMode()::spanningTree,
+            statsModeBusinessFacade::spanningTree,
             resultBuilder
         );
     }
@@ -902,7 +924,7 @@ public final class PathFindingProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             SpanningTreeStatsConfig::of,
-            configuration -> estimationMode().spanningTree(
+            configuration -> estimationModeBusinessFacade.spanningTree(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -918,7 +940,7 @@ public final class PathFindingProcedureFacade {
             graphName,
             configuration,
             SpanningTreeStreamConfig::of,
-            streamMode()::spanningTree,
+            streamModeBusinessFacade::spanningTree,
             resultBuilder
         );
     }
@@ -930,7 +952,7 @@ public final class PathFindingProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             SpanningTreeStreamConfig::of,
-            configuration -> estimationMode().spanningTree(
+            configuration -> estimationModeBusinessFacade.spanningTree(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -947,7 +969,7 @@ public final class PathFindingProcedureFacade {
                 graphName,
                 configuration,
                 SpanningTreeWriteConfig::of,
-                writeMode()::spanningTree,
+                writeModeBusinessFacade::spanningTree,
                 resultBuilder
             )
         );
@@ -960,7 +982,7 @@ public final class PathFindingProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             SpanningTreeWriteConfig::of,
-            configuration -> estimationMode().spanningTree(
+            configuration -> estimationModeBusinessFacade.spanningTree(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -980,7 +1002,7 @@ public final class PathFindingProcedureFacade {
             graphName,
             configuration,
             SteinerTreeStatsConfig::of,
-            statsMode()::steinerTree,
+            statsModeBusinessFacade::steinerTree,
             resultBuilder
         );
     }
@@ -992,7 +1014,7 @@ public final class PathFindingProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             SteinerTreeStatsConfig::of,
-            configuration -> estimationMode().steinerTree(
+            configuration -> estimationModeBusinessFacade.steinerTree(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -1008,7 +1030,7 @@ public final class PathFindingProcedureFacade {
             graphName,
             configuration,
             SteinerTreeStreamConfig::of,
-            streamMode()::steinerTree,
+            streamModeBusinessFacade::steinerTree,
             resultBuilder
         );
     }
@@ -1020,7 +1042,7 @@ public final class PathFindingProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             SteinerTreeStreamConfig::of,
-            configuration -> estimationMode().steinerTree(
+            configuration -> estimationModeBusinessFacade.steinerTree(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -1037,7 +1059,7 @@ public final class PathFindingProcedureFacade {
                 graphName,
                 configuration,
                 SteinerTreeWriteConfig::of,
-                writeMode()::steinerTree,
+                writeModeBusinessFacade::steinerTree,
                 resultBuilder
             )
         );
@@ -1050,7 +1072,7 @@ public final class PathFindingProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             SteinerTreeWriteConfig::of,
-            configuration -> estimationMode().steinerTree(
+            configuration -> estimationModeBusinessFacade.steinerTree(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -1069,7 +1091,7 @@ public final class PathFindingProcedureFacade {
             graphName,
             configuration,
             TopologicalSortStreamConfig::of,
-            streamMode()::topologicalSort,
+            streamModeBusinessFacade::topologicalSort,
             resultBuilder
         );
     }
@@ -1116,21 +1138,5 @@ public final class PathFindingProcedureFacade {
             algorithm,
             resultBuilder
         );
-    }
-
-    private PathFindingAlgorithmsEstimationModeBusinessFacade estimationMode() {
-        return applicationsFacade.pathFinding().estimate();
-    }
-
-    private PathFindingAlgorithmsStatsModeBusinessFacade statsMode() {
-        return applicationsFacade.pathFinding().stats();
-    }
-
-    private PathFindingAlgorithmsStreamModeBusinessFacade streamMode() {
-        return applicationsFacade.pathFinding().stream();
-    }
-
-    private PathFindingAlgorithmsWriteModeBusinessFacade writeMode() {
-        return applicationsFacade.pathFinding().write();
     }
 }

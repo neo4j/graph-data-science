@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.procedures.algorithms.miscellaneous.stubs;
 
-import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsMutateModeBusinessFacade;
 import org.neo4j.gds.indexInverse.InverseRelationshipsConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.IndexInverseMutateResult;
@@ -33,11 +33,17 @@ import java.util.stream.Stream;
 
 public class IndexInverseMutateStub implements MutateStub<InverseRelationshipsConfig, IndexInverseMutateResult> {
     private final GenericStub genericStub;
-    private final ApplicationsFacade applicationsFacade;
+    private final MiscellaneousApplicationsEstimationModeBusinessFacade estimationModeBusinessFacade;
+    private final MiscellaneousApplicationsMutateModeBusinessFacade mutateModeBusinessFacade;
 
-    public IndexInverseMutateStub(GenericStub genericStub, ApplicationsFacade applicationsFacade) {
+    public IndexInverseMutateStub(
+        GenericStub genericStub,
+        MiscellaneousApplicationsEstimationModeBusinessFacade estimationModeBusinessFacade,
+        MiscellaneousApplicationsMutateModeBusinessFacade mutateModeBusinessFacade
+    ) {
         this.genericStub = genericStub;
-        this.applicationsFacade = applicationsFacade;
+        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
+        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
     }
 
     @Override
@@ -51,7 +57,7 @@ public class IndexInverseMutateStub implements MutateStub<InverseRelationshipsCo
             username,
             rawConfiguration,
             InverseRelationshipsConfig::of,
-            configuration -> estimationMode().indexInverse(configuration)
+            estimationModeBusinessFacade::indexInverse
         );
     }
 
@@ -61,7 +67,7 @@ public class IndexInverseMutateStub implements MutateStub<InverseRelationshipsCo
             graphNameAsString,
             rawConfiguration,
             InverseRelationshipsConfig::of,
-            configuration -> estimationMode().indexInverse(configuration)
+            estimationModeBusinessFacade::indexInverse
         );
     }
 
@@ -76,12 +82,9 @@ public class IndexInverseMutateStub implements MutateStub<InverseRelationshipsCo
             graphNameAsString,
             rawConfiguration,
             InverseRelationshipsConfig::of,
-            applicationsFacade.miscellaneous().mutate()::indexInverse,
+            mutateModeBusinessFacade::indexInverse,
             resultBuilder
         );
     }
 
-    private MiscellaneousApplicationsEstimationModeBusinessFacade estimationMode() {
-        return applicationsFacade.miscellaneous().estimate();
-    }
 }

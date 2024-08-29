@@ -20,8 +20,8 @@
 package org.neo4j.gds.procedures.algorithms.community.stubs;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.labelpropagation.LabelPropagationMutateConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -35,16 +35,19 @@ import java.util.stream.Stream;
 
 public class LabelPropagationMutateStub implements MutateStub<LabelPropagationMutateConfig, LabelPropagationMutateResult> {
     private final GenericStub genericStub;
-    private final ApplicationsFacade applicationsFacade;
+    private final CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
+    private final CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
     private final ProcedureReturnColumns procedureReturnColumns;
 
     public LabelPropagationMutateStub(
         GenericStub genericStub,
-        ApplicationsFacade applicationsFacade,
+        CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
+        CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
         ProcedureReturnColumns procedureReturnColumns
     ) {
         this.genericStub = genericStub;
-        this.applicationsFacade = applicationsFacade;
+        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
+        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
         this.procedureReturnColumns = procedureReturnColumns;
     }
 
@@ -59,7 +62,7 @@ public class LabelPropagationMutateStub implements MutateStub<LabelPropagationMu
             username,
             rawConfiguration,
             LabelPropagationMutateConfig::of,
-            __ -> estimationMode().labelPropagation()
+            __ -> estimationModeBusinessFacade.labelPropagation()
         );
     }
 
@@ -69,7 +72,7 @@ public class LabelPropagationMutateStub implements MutateStub<LabelPropagationMu
             graphName,
             rawConfiguration,
             LabelPropagationMutateConfig::of,
-            __ -> estimationMode().labelPropagation()
+            __ -> estimationModeBusinessFacade.labelPropagation()
         );
     }
 
@@ -86,12 +89,9 @@ public class LabelPropagationMutateStub implements MutateStub<LabelPropagationMu
             graphNameAsString,
             rawConfiguration,
             LabelPropagationMutateConfig::of,
-            applicationsFacade.community().mutate()::labelPropagation,
+            mutateModeBusinessFacade::labelPropagation,
             resultBuilder
         );
     }
 
-    private CommunityAlgorithmsEstimationModeBusinessFacade estimationMode() {
-        return applicationsFacade.community().estimate();
-    }
 }
