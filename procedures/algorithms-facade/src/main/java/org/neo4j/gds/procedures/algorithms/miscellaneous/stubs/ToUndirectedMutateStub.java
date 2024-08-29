@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.procedures.algorithms.miscellaneous.stubs;
 
-import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsMutateModeBusinessFacade;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.ToUndirectedMutateResult;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
@@ -32,12 +32,19 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public class ToUndirectedMutateStub implements MutateStub<ToUndirectedConfig, ToUndirectedMutateResult> {
-    private final GenericStub genericStub;
-    private final ApplicationsFacade applicationsFacade;
 
-    public ToUndirectedMutateStub(GenericStub genericStub, ApplicationsFacade applicationsFacade) {
+    private final GenericStub genericStub;
+    private final MiscellaneousApplicationsEstimationModeBusinessFacade estimationModeBusinessFacade;
+    private final MiscellaneousApplicationsMutateModeBusinessFacade mutateModeBusinessFacade;
+
+    public ToUndirectedMutateStub(
+        GenericStub genericStub,
+        MiscellaneousApplicationsEstimationModeBusinessFacade estimationModeBusinessFacade,
+        MiscellaneousApplicationsMutateModeBusinessFacade mutateModeBusinessFacade) {
+
         this.genericStub = genericStub;
-        this.applicationsFacade = applicationsFacade;
+        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
+        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
     }
 
     @Override
@@ -51,7 +58,7 @@ public class ToUndirectedMutateStub implements MutateStub<ToUndirectedConfig, To
             username,
             rawConfiguration,
             ToUndirectedConfig::of,
-            configuration -> estimationMode().toUndirected(configuration)
+            estimationModeBusinessFacade::toUndirected
         );
     }
 
@@ -61,7 +68,7 @@ public class ToUndirectedMutateStub implements MutateStub<ToUndirectedConfig, To
             graphNameAsString,
             rawConfiguration,
             ToUndirectedConfig::of,
-            configuration -> estimationMode().toUndirected(configuration)
+            estimationModeBusinessFacade::toUndirected
         );
     }
 
@@ -76,12 +83,10 @@ public class ToUndirectedMutateStub implements MutateStub<ToUndirectedConfig, To
             graphNameAsString,
             rawConfiguration,
             ToUndirectedConfig::of,
-            applicationsFacade.miscellaneous().mutate()::toUndirected,
+            mutateModeBusinessFacade::toUndirected,
             resultBuilder
         );
     }
 
-    private MiscellaneousApplicationsEstimationModeBusinessFacade estimationMode() {
-        return applicationsFacade.miscellaneous().estimate();
-    }
+
 }

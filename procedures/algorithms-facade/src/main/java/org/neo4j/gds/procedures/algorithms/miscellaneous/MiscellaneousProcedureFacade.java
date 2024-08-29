@@ -46,13 +46,18 @@ import java.util.stream.Stream;
 public final class MiscellaneousProcedureFacade {
     private final ProcedureReturnColumns procedureReturnColumns;
 
+    //stubs
     private final ScalePropertiesMutateStub alphaScalePropertiesMutateStub;
     private final CollapsePathMutateStub collapsePathMutateStub;
     private final IndexInverseMutateStub indexInverseMutateStub;
     private final ScalePropertiesMutateStub scalePropertiesMutateStub;
     private final ToUndirectedMutateStub toUndirectedMutateStub;
 
-    private final ApplicationsFacade applicationsFacade;
+    //
+    private final MiscellaneousApplicationsEstimationModeBusinessFacade estimationModeBusinessFacade;
+    private final MiscellaneousApplicationsStatsModeBusinessFacade statsModeBusinessFacade;
+    private final MiscellaneousApplicationsStreamModeBusinessFacade streamModeBusinessFacade;
+    private final MiscellaneousApplicationsWriteModeBusinessFacade writeModeBusinessFacade;
 
     private final EstimationModeRunner estimationMode;
     private final AlgorithmExecutionScaffolding algorithmExecutionScaffolding;
@@ -64,7 +69,10 @@ public final class MiscellaneousProcedureFacade {
         IndexInverseMutateStub indexInverseMutateStub,
         ScalePropertiesMutateStub scalePropertiesMutateStub,
         ToUndirectedMutateStub toUndirectedMutateStub,
-        ApplicationsFacade applicationsFacade,
+        MiscellaneousApplicationsEstimationModeBusinessFacade estimationModeBusinessFacade,
+        MiscellaneousApplicationsStatsModeBusinessFacade statsModeBusinessFacade,
+        MiscellaneousApplicationsStreamModeBusinessFacade streamModeBusinessFacade,
+        MiscellaneousApplicationsWriteModeBusinessFacade writeModeBusinessFacade,
         EstimationModeRunner estimationMode,
         AlgorithmExecutionScaffolding algorithmExecutionScaffolding
     ) {
@@ -74,7 +82,10 @@ public final class MiscellaneousProcedureFacade {
         this.indexInverseMutateStub = indexInverseMutateStub;
         this.scalePropertiesMutateStub = scalePropertiesMutateStub;
         this.toUndirectedMutateStub = toUndirectedMutateStub;
-        this.applicationsFacade = applicationsFacade;
+        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
+        this.statsModeBusinessFacade = statsModeBusinessFacade;
+        this.streamModeBusinessFacade = streamModeBusinessFacade;
+        this.writeModeBusinessFacade = writeModeBusinessFacade;
         this.estimationMode = estimationMode;
         this.algorithmExecutionScaffolding = algorithmExecutionScaffolding;
     }
@@ -88,19 +99,33 @@ public final class MiscellaneousProcedureFacade {
     ) {
         var alphaScalePropertiesMutateStub = new ScalePropertiesMutateStub(
             genericStub,
-            applicationsFacade,
+            applicationsFacade.miscellaneous().estimate(),
+            applicationsFacade.miscellaneous().mutate(),
             procedureReturnColumns,
             AlphaScalePropertiesMutateConfig::of
         );
-        var collapsePathMutateStub = new CollapsePathMutateStub(genericStub, applicationsFacade);
-        var indexInverseMutateStub = new IndexInverseMutateStub(genericStub, applicationsFacade);
+        var collapsePathMutateStub = new CollapsePathMutateStub(
+            genericStub,
+            applicationsFacade.miscellaneous().estimate(),
+            applicationsFacade.miscellaneous().mutate()
+        );
+        var indexInverseMutateStub = new IndexInverseMutateStub(
+            genericStub,
+            applicationsFacade.miscellaneous().estimate(),
+            applicationsFacade.miscellaneous().mutate()
+        );
         var scalePropertiesMutateStub = new ScalePropertiesMutateStub(
             genericStub,
-            applicationsFacade,
+            applicationsFacade.miscellaneous().estimate(),
+            applicationsFacade.miscellaneous().mutate(),
             procedureReturnColumns,
             ScalePropertiesMutateConfig::of
         );
-        var toUndirectedMutateStub = new ToUndirectedMutateStub(genericStub, applicationsFacade);
+        var toUndirectedMutateStub = new ToUndirectedMutateStub(
+            genericStub,
+            applicationsFacade.miscellaneous().estimate(),
+            applicationsFacade.miscellaneous().mutate()
+        );
 
         return new MiscellaneousProcedureFacade(
             procedureReturnColumns,
@@ -109,7 +134,10 @@ public final class MiscellaneousProcedureFacade {
             indexInverseMutateStub,
             scalePropertiesMutateStub,
             toUndirectedMutateStub,
-            applicationsFacade,
+            applicationsFacade.miscellaneous().estimate(),
+            applicationsFacade.miscellaneous().stats(),
+            applicationsFacade.miscellaneous().stream(),
+            applicationsFacade.miscellaneous().write(),
             estimationModeRunner,
             algorithmExecutionScaffolding
         );
@@ -129,7 +157,7 @@ public final class MiscellaneousProcedureFacade {
             graphName,
             configuration,
             AlphaScalePropertiesStreamConfig::of,
-            streamMode()::scaleProperties,
+            streamModeBusinessFacade::scaleProperties,
             resultBuilder
         );
     }
@@ -158,7 +186,7 @@ public final class MiscellaneousProcedureFacade {
             graphName,
             configuration,
             ScalePropertiesStatsConfig::of,
-            statsMode()::scaleProperties,
+            statsModeBusinessFacade::scaleProperties,
             resultBuilder
         );
     }
@@ -170,7 +198,7 @@ public final class MiscellaneousProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             ScalePropertiesStatsConfig::of,
-            configuration -> estimationMode().scaleProperties(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.scaleProperties(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -186,7 +214,7 @@ public final class MiscellaneousProcedureFacade {
             graphName,
             configuration,
             ScalePropertiesStreamConfig::of,
-            streamMode()::scaleProperties,
+            streamModeBusinessFacade::scaleProperties,
             resultBuilder
         );
     }
@@ -198,7 +226,7 @@ public final class MiscellaneousProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             ScalePropertiesStreamConfig::of,
-            configuration -> estimationMode().scaleProperties(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.scaleProperties(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -216,7 +244,7 @@ public final class MiscellaneousProcedureFacade {
             graphName,
             configuration,
             ScalePropertiesWriteConfig::of,
-            writeMode()::scaleProperties,
+            writeModeBusinessFacade::scaleProperties,
             resultBuilder
         );
     }
@@ -228,7 +256,7 @@ public final class MiscellaneousProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             ScalePropertiesWriteConfig::of,
-            configuration -> estimationMode().scaleProperties(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.scaleProperties(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -238,19 +266,4 @@ public final class MiscellaneousProcedureFacade {
         return toUndirectedMutateStub;
     }
 
-    private MiscellaneousApplicationsEstimationModeBusinessFacade estimationMode() {
-        return applicationsFacade.miscellaneous().estimate();
-    }
-
-    private MiscellaneousApplicationsStatsModeBusinessFacade statsMode() {
-        return applicationsFacade.miscellaneous().stats();
-    }
-
-    private MiscellaneousApplicationsStreamModeBusinessFacade streamMode() {
-        return applicationsFacade.miscellaneous().stream();
-    }
-
-    private MiscellaneousApplicationsWriteModeBusinessFacade writeMode() {
-        return applicationsFacade.miscellaneous().write();
-    }
 }
