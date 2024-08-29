@@ -48,30 +48,43 @@ import java.util.stream.Stream;
 
 public final class SimilarityProcedureFacade {
     private final ProcedureReturnColumns procedureReturnColumns;
+
+    private final SimilarityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
+    private final SimilarityAlgorithmsStatsModeBusinessFacade statsModeBusinessFacade;
+    private final SimilarityAlgorithmsStreamModeBusinessFacade streamModeBusinessFacade;
+    private final SimilarityAlgorithmsWriteModeBusinessFacade writeModeBusinessFacade;
+
+   //stubs
     private final FilteredKnnMutateStub filteredKnnMutateStub;
     private final FilteredNodeSimilarityMutateStub filteredNodeSimilarityMutateStub;
     private final KnnMutateStub knnMutateStub;
     private final NodeSimilarityMutateStub nodeSimilarityMutateStub;
-    private final ApplicationsFacade applicationsFacade;
+
     private final EstimationModeRunner estimationMode;
     private final AlgorithmExecutionScaffolding algorithmExecutionScaffolding;
 
     private SimilarityProcedureFacade(
         ProcedureReturnColumns procedureReturnColumns,
+        SimilarityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
+        SimilarityAlgorithmsStatsModeBusinessFacade statsModeBusinessFacade,
+        SimilarityAlgorithmsStreamModeBusinessFacade streamModeBusinessFacade,
+        SimilarityAlgorithmsWriteModeBusinessFacade writeModeBusinessFacade,
         FilteredKnnMutateStub filteredKnnMutateStub,
         FilteredNodeSimilarityMutateStub filteredNodeSimilarityMutateStub,
         KnnMutateStub knnMutateStub,
         NodeSimilarityMutateStub nodeSimilarityMutateStub,
-        ApplicationsFacade applicationsFacade,
         EstimationModeRunner estimationMode,
         AlgorithmExecutionScaffolding algorithmExecutionScaffolding
     ) {
         this.procedureReturnColumns = procedureReturnColumns;
+        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
+        this.statsModeBusinessFacade = statsModeBusinessFacade;
+        this.streamModeBusinessFacade = streamModeBusinessFacade;
+        this.writeModeBusinessFacade = writeModeBusinessFacade;
         this.filteredKnnMutateStub = filteredKnnMutateStub;
         this.filteredNodeSimilarityMutateStub = filteredNodeSimilarityMutateStub;
         this.knnMutateStub = knnMutateStub;
         this.nodeSimilarityMutateStub = nodeSimilarityMutateStub;
-        this.applicationsFacade = applicationsFacade;
         this.estimationMode = estimationMode;
         this.algorithmExecutionScaffolding = algorithmExecutionScaffolding;
     }
@@ -83,26 +96,44 @@ public final class SimilarityProcedureFacade {
         EstimationModeRunner estimationModeRunner,
         AlgorithmExecutionScaffolding algorithmExecutionScaffolding)
     {
-        var filteredKnnMutateStub = new FilteredKnnMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
-        var filteredNodeSimilarityMutateStub = new FilteredNodeSimilarityMutateStub(
+        var filteredKnnMutateStub = new FilteredKnnMutateStub(
             genericStub,
-            applicationsFacade,
+            applicationsFacade.similarity().estimate(),
+            applicationsFacade.similarity().mutate(),
             procedureReturnColumns
         );
-        var knnMutateStub = new KnnMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
+
+        var filteredNodeSimilarityMutateStub = new FilteredNodeSimilarityMutateStub(
+            genericStub,
+            applicationsFacade.similarity().estimate(),
+            applicationsFacade.similarity().mutate(),
+            procedureReturnColumns
+        );
+
+        var knnMutateStub = new KnnMutateStub(
+            genericStub,
+            applicationsFacade.similarity().estimate(),
+            applicationsFacade.similarity().mutate(),
+            procedureReturnColumns
+        );
+
         var nodeSimilarityMutateStub = new NodeSimilarityMutateStub(
             genericStub,
-            applicationsFacade,
+            applicationsFacade.similarity().estimate(),
+            applicationsFacade.similarity().mutate(),
             procedureReturnColumns
         );
 
         return new SimilarityProcedureFacade(
             procedureReturnColumns,
+            applicationsFacade.similarity().estimate(),
+            applicationsFacade.similarity().stats(),
+            applicationsFacade.similarity().stream(),
+            applicationsFacade.similarity().write(),
             filteredKnnMutateStub,
             filteredNodeSimilarityMutateStub,
             knnMutateStub,
             nodeSimilarityMutateStub,
-            applicationsFacade,
             estimationModeRunner,
             algorithmExecutionScaffolding
         );
@@ -120,7 +151,7 @@ public final class SimilarityProcedureFacade {
             graphName,
             configuration,
             FilteredKnnStatsConfig::of,
-            statsMode()::filteredKnn,
+            statsModeBusinessFacade::filteredKnn,
             resultBuilder
         );
     }
@@ -132,7 +163,7 @@ public final class SimilarityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             FilteredKnnStatsConfig::of,
-            configuration -> estimationMode().filteredKnn(
+            configuration -> estimationModeBusinessFacade.filteredKnn(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -148,7 +179,7 @@ public final class SimilarityProcedureFacade {
             graphName,
             configuration,
             FilteredKnnStreamConfig::of,
-            streamMode()::filteredKnn,
+            streamModeBusinessFacade::filteredKnn,
             resultBuilder
         );
     }
@@ -160,7 +191,7 @@ public final class SimilarityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             FilteredKnnStreamConfig::of,
-            configuration -> estimationMode().filteredKnn(
+            configuration -> estimationModeBusinessFacade.filteredKnn(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -178,7 +209,7 @@ public final class SimilarityProcedureFacade {
             graphNameAsString,
             rawConfiguration,
             FilteredKnnWriteConfig::of,
-            (graphName, configuration, __) -> writeMode().filteredKnn(
+            (graphName, configuration, __) -> writeModeBusinessFacade.filteredKnn(
                 graphName,
                 configuration,
                 resultBuilder,
@@ -195,7 +226,7 @@ public final class SimilarityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             FilteredKnnWriteConfig::of,
-            configuration -> estimationMode().filteredKnn(
+            configuration -> estimationModeBusinessFacade.filteredKnn(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -219,7 +250,7 @@ public final class SimilarityProcedureFacade {
             graphName,
             configuration,
             FilteredNodeSimilarityStatsConfig::of,
-            statsMode()::filteredNodeSimilarity,
+            statsModeBusinessFacade::filteredNodeSimilarity,
             resultBuilder
         );
     }
@@ -231,7 +262,7 @@ public final class SimilarityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             FilteredNodeSimilarityStatsConfig::of,
-            configuration -> estimationMode().filteredNodeSimilarity(
+            configuration -> estimationModeBusinessFacade.filteredNodeSimilarity(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -247,7 +278,7 @@ public final class SimilarityProcedureFacade {
             graphName,
             configuration,
             FilteredNodeSimilarityStreamConfig::of,
-            streamMode()::filteredNodeSimilarity,
+            streamModeBusinessFacade::filteredNodeSimilarity,
             resultBuilder
         );
     }
@@ -259,7 +290,7 @@ public final class SimilarityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             FilteredNodeSimilarityStreamConfig::of,
-            configuration -> estimationMode().filteredNodeSimilarity(
+            configuration -> estimationModeBusinessFacade.filteredNodeSimilarity(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -280,7 +311,7 @@ public final class SimilarityProcedureFacade {
             graphNameAsString,
             rawConfiguration,
             FilteredNodeSimilarityWriteConfig::of,
-            (graphName, configuration, __) -> writeMode().filteredNodeSimilarity(
+            (graphName, configuration, __) -> writeModeBusinessFacade.filteredNodeSimilarity(
                 graphName,
                 configuration,
                 resultBuilder,
@@ -297,7 +328,7 @@ public final class SimilarityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             FilteredNodeSimilarityWriteConfig::of,
-            configuration -> estimationMode().filteredNodeSimilarity(
+            configuration -> estimationModeBusinessFacade.filteredNodeSimilarity(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -321,7 +352,7 @@ public final class SimilarityProcedureFacade {
             graphName,
             configuration,
             KnnStatsConfig::of,
-            statsMode()::knn,
+            statsModeBusinessFacade::knn,
             resultBuilder
         );
     }
@@ -333,7 +364,7 @@ public final class SimilarityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             KnnStatsConfig::of,
-            configuration -> estimationMode().knn(
+            configuration -> estimationModeBusinessFacade.knn(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -352,7 +383,7 @@ public final class SimilarityProcedureFacade {
             graphName,
             configuration,
             KnnStreamConfig::of,
-            streamMode()::knn,
+            streamModeBusinessFacade::knn,
             resultBuilder
         );
     }
@@ -364,7 +395,7 @@ public final class SimilarityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             KnnStreamConfig::of,
-            configuration -> estimationMode().knn(
+            configuration -> estimationModeBusinessFacade.knn(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -385,7 +416,7 @@ public final class SimilarityProcedureFacade {
             graphNameAsString,
             rawConfiguration,
             KnnWriteConfig::of,
-            (graphName, configuration, __) -> writeMode().knn(
+            (graphName, configuration, __) -> writeModeBusinessFacade.knn(
                 graphName,
                 configuration,
                 resultBuilder,
@@ -402,7 +433,7 @@ public final class SimilarityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             KnnWriteConfig::of,
-            configuration -> estimationMode().knn(
+            configuration -> estimationModeBusinessFacade.knn(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -423,7 +454,7 @@ public final class SimilarityProcedureFacade {
             graphName,
             configuration,
             NodeSimilarityStatsConfig::of,
-            statsMode()::nodeSimilarity,
+            statsModeBusinessFacade::nodeSimilarity,
             resultBuilder
         );
     }
@@ -435,7 +466,7 @@ public final class SimilarityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             NodeSimilarityStatsConfig::of,
-            configuration -> estimationMode().nodeSimilarity(
+            configuration -> estimationModeBusinessFacade.nodeSimilarity(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -451,7 +482,7 @@ public final class SimilarityProcedureFacade {
             graphName,
             configuration,
             NodeSimilarityStreamConfig::of,
-            streamMode()::nodeSimilarity,
+            streamModeBusinessFacade::nodeSimilarity,
             resultBuilder
         );
     }
@@ -463,7 +494,7 @@ public final class SimilarityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             NodeSimilarityStreamConfig::of,
-            configuration -> estimationMode().nodeSimilarity(
+            configuration -> estimationModeBusinessFacade.nodeSimilarity(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -484,7 +515,7 @@ public final class SimilarityProcedureFacade {
             graphNameAsString,
             rawConfiguration,
             NodeSimilarityWriteConfig::of,
-            (graphName, configuration, __) -> writeMode().nodeSimilarity(
+            (graphName, configuration, __) -> writeModeBusinessFacade.nodeSimilarity(
                 graphName,
                 configuration,
                 resultBuilder,
@@ -501,7 +532,7 @@ public final class SimilarityProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             NodeSimilarityWriteConfig::of,
-            configuration -> estimationMode().nodeSimilarity(
+            configuration -> estimationModeBusinessFacade.nodeSimilarity(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -510,19 +541,5 @@ public final class SimilarityProcedureFacade {
         return Stream.of(result);
     }
 
-    private SimilarityAlgorithmsEstimationModeBusinessFacade estimationMode() {
-        return applicationsFacade.similarity().estimate();
-    }
-
-    private SimilarityAlgorithmsStatsModeBusinessFacade statsMode() {
-        return applicationsFacade.similarity().stats();
-    }
-
-    private SimilarityAlgorithmsStreamModeBusinessFacade streamMode() {
-        return applicationsFacade.similarity().stream();
-    }
-
-    private SimilarityAlgorithmsWriteModeBusinessFacade writeMode() {
-        return applicationsFacade.similarity().write();
-    }
+   
 }
