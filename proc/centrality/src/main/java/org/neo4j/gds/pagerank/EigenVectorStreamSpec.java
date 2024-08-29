@@ -41,11 +41,6 @@ public class EigenVectorStreamSpec extends  PageRankStreamSpec {
 
     @Override
     public NewConfigFunction<PageRankStreamConfig> newConfigFunction() {
-        return (___, config) -> {
-            if (config.containsKey("dampingFactor")) {
-                throw new IllegalArgumentException("Unexpected configuration key: dampingFactor");
-            }
-            return PageRankStreamConfig.of(config);
-        };
+        return (___, config) -> PageRankStreamConfig.configWithoutDampingFactor(config);
     }
 }

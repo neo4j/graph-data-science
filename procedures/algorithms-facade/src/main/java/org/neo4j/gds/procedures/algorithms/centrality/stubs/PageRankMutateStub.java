@@ -23,6 +23,7 @@ import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.pagerank.PageRankMutateConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
@@ -32,6 +33,7 @@ import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class PageRankMutateStub implements MutateStub<PageRankMutateConfig, PageRankMutateResult> {
@@ -39,22 +41,25 @@ public class PageRankMutateStub implements MutateStub<PageRankMutateConfig, Page
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
     private final ProcedureReturnColumns procedureReturnColumns;
     private final AlgorithmHandle<PageRankMutateConfig, PageRankResult, PageRankMutateResult, NodePropertiesWritten> handle;
+    private final Function<CypherMapWrapper,PageRankMutateConfig> configProducer;
 
     public PageRankMutateStub(
         GenericStub genericStub,
         CentralityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
         ProcedureReturnColumns procedureReturnColumns,
-        AlgorithmHandle<PageRankMutateConfig, PageRankResult, PageRankMutateResult, NodePropertiesWritten> handle
+        AlgorithmHandle<PageRankMutateConfig, PageRankResult, PageRankMutateResult, NodePropertiesWritten> handle,
+        Function<CypherMapWrapper, PageRankMutateConfig> configProducer
     ) {
         this.genericStub = genericStub;
         this.estimationModeBusinessFacade = estimationModeBusinessFacade;
         this.procedureReturnColumns = procedureReturnColumns;
         this.handle = handle;
+        this.configProducer = configProducer;
     }
 
     @Override
     public PageRankMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(PageRankMutateConfig::of, configuration);
+        return genericStub.parseConfiguration(configProducer, configuration);
     }
 
     @Override
@@ -62,7 +67,7 @@ public class PageRankMutateStub implements MutateStub<PageRankMutateConfig, Page
         return genericStub.getMemoryEstimation(
             username,
             configuration,
-            PageRankMutateConfig::of,
+            configProducer,
             __ -> estimationModeBusinessFacade.pageRank()
         );
     }
@@ -72,7 +77,7 @@ public class PageRankMutateStub implements MutateStub<PageRankMutateConfig, Page
         return genericStub.estimate(
             graphName,
             configuration,
-            PageRankMutateConfig::of,
+            configProducer,
             __ -> estimationModeBusinessFacade.pageRank()
         );
     }
@@ -88,7 +93,7 @@ public class PageRankMutateStub implements MutateStub<PageRankMutateConfig, Page
         return genericStub.execute(
             graphNameAsString,
             rawConfiguration,
-            PageRankMutateConfig::of,
+            configProducer,
             handle,
             resultBuilder
         );

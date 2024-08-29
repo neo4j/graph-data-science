@@ -47,7 +47,7 @@ public class PageRankMutateSpec implements AlgorithmSpec<PageRankAlgorithm, Page
 
     @Override
     public NewConfigFunction<PageRankMutateConfig> newConfigFunction() {
-        return (___,config) -> PageRankMutateConfig.of(config);
+        return (___,config) -> PageRankMutateConfig.configWithDampingFactor(config);
     }
 
     @Override

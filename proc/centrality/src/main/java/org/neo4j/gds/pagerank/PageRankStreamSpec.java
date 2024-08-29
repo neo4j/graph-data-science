@@ -24,8 +24,8 @@ import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityStreamResult;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 
 import java.util.stream.Stream;
 
@@ -47,7 +47,7 @@ public class PageRankStreamSpec implements AlgorithmSpec<PageRankAlgorithm, Page
 
     @Override
     public NewConfigFunction<PageRankStreamConfig> newConfigFunction() {
-        return (___,config) -> PageRankStreamConfig.of(config);
+        return (___,config) -> PageRankStreamConfig.configWithDampingFactor(config);
     }
 
     @Override

@@ -79,7 +79,7 @@ public class ConfigurationParsersForMutateMode {
         return switch (algorithm) {
             case AllShortestPaths -> null;
             case ApproximateMaximumKCut -> ApproxMaxKCutMutateConfig::of;
-            case ArticleRank -> PageRankMutateConfig::of;
+            case ArticleRank -> PageRankMutateConfig::configWithDampingFactor;
             case ArticulationPoints -> ArticulationPointsMutateConfig::of;
             case AStar -> ShortestPathAStarMutateConfig::of;
             case BellmanFord -> AllShortestPathsBellmanFordMutateConfig::of;
@@ -94,7 +94,7 @@ public class ConfigurationParsersForMutateMode {
             case DeltaStepping -> AllShortestPathsDeltaMutateConfig::of;
             case DFS -> DfsMutateConfig::of;
             case Dijkstra -> ShortestPathDijkstraMutateConfig::of;
-            case EigenVector -> PageRankMutateConfig::of;
+            case EigenVector -> PageRankMutateConfig::configWithoutDampingFactor;
             case FastRP -> FastRPMutateConfig::of;
             case FilteredKNN -> FilteredKnnMutateConfig::of;
             case FilteredNodeSimilarity -> FilteredNodeSimilarityMutateConfig::of;
@@ -118,7 +118,7 @@ public class ConfigurationParsersForMutateMode {
             case ModularityOptimization -> ModularityOptimizationMutateConfig::of;
             case NodeSimilarity -> NodeSimilarityMutateConfig::of;
             case Node2Vec -> Node2VecMutateConfig::of;
-            case PageRank -> PageRankMutateConfig::of;
+            case PageRank -> PageRankMutateConfig::configWithDampingFactor;
             case RandomWalk -> null;
             case ScaleProperties -> ScalePropertiesMutateConfig::of;
             case SCC -> SccMutateConfig::of;

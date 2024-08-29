@@ -40,12 +40,7 @@ public class EigenVectorMutateSpec extends PageRankMutateSpec {
     }
     @Override
     public NewConfigFunction<PageRankMutateConfig> newConfigFunction() {
-        return (___, config) -> {
-            if (config.containsKey("dampingFactor")) {
-                throw new IllegalArgumentException("Unexpected configuration key: dampingFactor");
-            }
-            return PageRankMutateConfig.of(config);
-        };
+        return (___, config) -> PageRankMutateConfig.configWithoutDampingFactor(config);
     }
 
 

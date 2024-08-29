@@ -26,7 +26,18 @@ import org.neo4j.gds.core.CypherMapWrapper;
 @Configuration
 public interface PageRankWriteConfig extends PageRankConfig, WritePropertyConfig {
 
-    static PageRankWriteConfig of(CypherMapWrapper userInput) {
+   private  static PageRankWriteConfig of(CypherMapWrapper userInput, boolean checkDampingFactor) {
+        if (checkDampingFactor && userInput.containsKey("dampingFactor")) {
+            throw new IllegalArgumentException("Unexpected configuration key: dampingFactor");
+        }
         return new PageRankWriteConfigImpl(userInput);
+    }
+
+    static PageRankWriteConfig configWithDampingFactor(CypherMapWrapper userInput) {
+        return of(userInput, false);
+    }
+
+    static PageRankWriteConfig configWithoutDampingFactor(CypherMapWrapper userInput) {
+        return of(userInput, true);
     }
 }

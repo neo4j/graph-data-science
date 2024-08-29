@@ -40,12 +40,7 @@ public class EigenVectorStatsSpec extends  PageRankStatsSpec {
     }
     @Override
     public NewConfigFunction<PageRankStatsConfig> newConfigFunction() {
-        return (___, config) -> {
-            if (config.containsKey("dampingFactor")) {
-                throw new IllegalArgumentException("Unexpected configuration key: dampingFactor");
-            }
-            return PageRankStatsConfig.of(config);
-        };
+        return (___, config) -> PageRankStatsConfig.configWithoutDampingFactor(config);
     }
 
 

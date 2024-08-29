@@ -41,12 +41,7 @@ public class EigenVectorWriteSpec extends  PageRankWriteSpec {
 
     @Override
     public NewConfigFunction<PageRankWriteConfig> newConfigFunction() {
-        return (___, config) -> {
-            if (config.containsKey("dampingFactor")) {
-                throw new IllegalArgumentException("Unexpected configuration key: dampingFactor");
-            }
-            return PageRankWriteConfig.of(config);
-        };
+        return (___, config) -> PageRankWriteConfig.configWithoutDampingFactor(config);
     }
 
 }

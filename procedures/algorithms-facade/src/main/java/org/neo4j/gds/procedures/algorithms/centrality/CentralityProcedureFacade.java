@@ -143,7 +143,8 @@ public final class CentralityProcedureFacade {
             genericStub,
             estimationModeBusinessFacade,
             procedureReturnColumns,
-            mutateModeBusinessFacade::articleRank
+            mutateModeBusinessFacade::articleRank,
+            PageRankMutateConfig::configWithDampingFactor
         );
 
         var betaClosenessCentralityMutateStub = new BetaClosenessCentralityMutateStub(
@@ -180,14 +181,12 @@ public final class CentralityProcedureFacade {
             procedureReturnColumns
         );
 
-        var eigenVectorMutateStub = new MutateStubConfigurationValidationDecorator<>(
-            new PageRankMutateStub(
+        var eigenVectorMutateStub = new PageRankMutateStub(
                 genericStub,
                 estimationModeBusinessFacade,
                 procedureReturnColumns,
-                mutateModeBusinessFacade::eigenVector
-            ),
-            "dampingFactor"
+                mutateModeBusinessFacade::eigenVector,
+                PageRankMutateConfig::configWithoutDampingFactor
         );
 
         var harmonicCentralityMutateStub = new HarmonicCentralityMutateStub(
@@ -201,7 +200,9 @@ public final class CentralityProcedureFacade {
             genericStub,
             estimationModeBusinessFacade,
             procedureReturnColumns,
-            mutateModeBusinessFacade::pageRank
+            mutateModeBusinessFacade::pageRank,
+            PageRankMutateConfig::configWithDampingFactor
+
         );
 
         var articulationPointsMutateStub  = new ArticulationPointsMutateStub(
@@ -273,7 +274,7 @@ public final class CentralityProcedureFacade {
         return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
-            PageRankStatsConfig::of,
+            PageRankStatsConfig::configWithDampingFactor,
             statsModeBusinessFacade::articleRank,
             resultBuilder
         );
@@ -285,7 +286,7 @@ public final class CentralityProcedureFacade {
     ) {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
-            PageRankStatsConfig::of,
+            PageRankStatsConfig::configWithDampingFactor,
             configuration -> estimationModeBusinessFacade.pageRank(configuration, graphNameOrConfiguration)
         );
 
@@ -298,7 +299,7 @@ public final class CentralityProcedureFacade {
         return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
-            PageRankStreamConfig::of,
+            PageRankStreamConfig::configWithDampingFactor,
             streamModeBusinessFacade::articleRank,
             resultBuilder
         );
@@ -309,7 +310,7 @@ public final class CentralityProcedureFacade {
     ) {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
-            PageRankStreamConfig::of,
+            PageRankStreamConfig::configWithDampingFactor,
             configuration -> estimationModeBusinessFacade.pageRank(configuration, graphNameOrConfiguration)
         );
 
@@ -326,7 +327,7 @@ public final class CentralityProcedureFacade {
         return algorithmExecutionScaffolding.runAlgorithm(
             graphName,
             configuration,
-            PageRankWriteConfig::of,
+            PageRankWriteConfig::configWithDampingFactor,
             writeModeBusinessFacade::articleRank,
             resultBuilder
         );
@@ -338,7 +339,7 @@ public final class CentralityProcedureFacade {
     ) {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
-            PageRankWriteConfig::of,
+            PageRankWriteConfig::configWithDampingFactor,
             configuration -> estimationModeBusinessFacade.pageRank(configuration, graphNameOrConfiguration)
         );
 
@@ -853,7 +854,7 @@ public final class CentralityProcedureFacade {
         return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
-            PageRankStatsConfig::of,
+            PageRankStatsConfig::configWithoutDampingFactor,
             statsModeBusinessFacade::eigenVector,
             resultBuilder
         );
@@ -867,7 +868,7 @@ public final class CentralityProcedureFacade {
 
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
-            PageRankStatsConfig::of,
+            PageRankStatsConfig::configWithoutDampingFactor,
             configuration -> estimationModeBusinessFacade.pageRank(configuration, graphNameOrConfiguration)
         );
 
@@ -882,7 +883,7 @@ public final class CentralityProcedureFacade {
         return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
-            PageRankStreamConfig::of,
+            PageRankStreamConfig::configWithoutDampingFactor,
             streamModeBusinessFacade::eigenvector,
             resultBuilder
         );
@@ -896,7 +897,7 @@ public final class CentralityProcedureFacade {
 
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
-            PageRankStreamConfig::of,
+            PageRankStreamConfig::configWithoutDampingFactor,
             configuration -> estimationModeBusinessFacade.pageRank(configuration, graphNameOrConfiguration)
         );
 
@@ -912,7 +913,7 @@ public final class CentralityProcedureFacade {
         return algorithmExecutionScaffolding.runAlgorithm(
             graphName,
             configuration,
-            PageRankWriteConfig::of,
+            PageRankWriteConfig::configWithoutDampingFactor,
             writeModeBusinessFacade::eigenvector,
             resultBuilder
         );
@@ -926,7 +927,7 @@ public final class CentralityProcedureFacade {
 
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
-            PageRankWriteConfig::of,
+            PageRankWriteConfig::configWithoutDampingFactor,
             configuration -> estimationModeBusinessFacade.pageRank(configuration, graphNameOrConfiguration)
         );
 
@@ -989,7 +990,7 @@ public final class CentralityProcedureFacade {
         return algorithmExecutionScaffolding.runStatsAlgorithm(
             graphName,
             configuration,
-            PageRankStatsConfig::of,
+            PageRankStatsConfig::configWithDampingFactor,
             statsModeBusinessFacade::pageRank,
             resultBuilder
         );
@@ -1001,7 +1002,7 @@ public final class CentralityProcedureFacade {
     ) {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
-            PageRankStatsConfig::of,
+            PageRankStatsConfig::configWithDampingFactor,
             configuration -> estimationModeBusinessFacade.pageRank(configuration, graphNameOrConfiguration)
         );
 
@@ -1014,7 +1015,7 @@ public final class CentralityProcedureFacade {
         return algorithmExecutionScaffolding.runStreamAlgorithm(
             graphName,
             configuration,
-            PageRankStreamConfig::of,
+            PageRankStreamConfig::configWithDampingFactor,
             streamModeBusinessFacade::pageRank,
             resultBuilder
         );
@@ -1026,7 +1027,7 @@ public final class CentralityProcedureFacade {
     ) {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
-            PageRankStreamConfig::of,
+            PageRankStreamConfig::configWithDampingFactor,
             configuration -> estimationModeBusinessFacade.pageRank(configuration, graphNameOrConfiguration)
         );
 
@@ -1040,7 +1041,7 @@ public final class CentralityProcedureFacade {
         return algorithmExecutionScaffolding.runAlgorithm(
             graphName,
             configuration,
-            PageRankWriteConfig::of,
+            PageRankWriteConfig::configWithDampingFactor,
             writeModeBusinessFacade::pageRank,
             resultBuilder
         );
@@ -1052,7 +1053,7 @@ public final class CentralityProcedureFacade {
     ) {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
-            PageRankWriteConfig::of,
+            PageRankWriteConfig::configWithDampingFactor,
             configuration -> estimationModeBusinessFacade.pageRank(configuration, graphNameOrConfiguration)
         );
 
