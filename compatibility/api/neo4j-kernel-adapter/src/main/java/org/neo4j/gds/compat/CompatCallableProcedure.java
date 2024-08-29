@@ -19,14 +19,15 @@
  */
 package org.neo4j.gds.compat;
 
-import org.neo4j.collection.RawIterator;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.values.AnyValue;
 
+import java.util.stream.Stream;
+
 public interface CompatCallableProcedure {
     ProcedureSignature signature();
 
-    RawIterator<AnyValue[], ProcedureException> apply(Context ctx, AnyValue[] input) throws ProcedureException;
+    Stream<AnyValue[]> apply(Context ctx, AnyValue[] input) throws ProcedureException;
 }

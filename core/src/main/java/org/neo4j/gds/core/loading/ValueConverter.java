@@ -21,6 +21,7 @@ package org.neo4j.gds.core.loading;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.ArrayValue;
 import org.neo4j.values.storable.DoubleArray;
@@ -105,17 +106,18 @@ public final class ValueConverter {
 
         var firstValue = listValue.head();
         try {
+            int size = Neo4jProxy.sequenceSizeAsInt(listValue);
             if (firstValue instanceof LongValue) {
-                var longArray = new long[listValue.size()];
+                var longArray = new long[size];
                 var iterator = listValue.iterator();
-                for (int i = 0; i < listValue.size() && iterator.hasNext(); i++) {
+                for (int i = 0; i < size && iterator.hasNext(); i++) {
                     longArray[i] = ((LongValue) iterator.next()).longValue();
                 }
                 return Values.longArray(longArray);
             } else if (firstValue instanceof DoubleValue) {
-                var doubleArray = new double[listValue.size()];
+                var doubleArray = new double[size];
                 var iterator = listValue.iterator();
-                for (int i = 0; i < listValue.size() && iterator.hasNext(); i++) {
+                for (int i = 0; i < size && iterator.hasNext(); i++) {
                     doubleArray[i] = ((DoubleValue) iterator.next()).doubleValue();
                 }
                 return Values.doubleArray(doubleArray);

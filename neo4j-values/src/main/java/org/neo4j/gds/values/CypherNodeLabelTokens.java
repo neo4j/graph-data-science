@@ -22,6 +22,7 @@ package org.neo4j.gds.values;
 import org.eclipse.collections.api.block.function.primitive.ObjectIntToObjectFunction;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.construction.NodeLabelToken;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.values.SequenceValue;
@@ -58,7 +59,7 @@ public class CypherNodeLabelTokens {
 
         @Override
         public int size() {
-            return sequence.length();
+            return Neo4jProxy.sequenceSizeAsInt(sequence);
         }
 
         @Override
@@ -68,7 +69,7 @@ public class CypherNodeLabelTokens {
 
         @Override
         public String[] getStrings() {
-            var result = new String[sequence.length()];
+            var result = new String[size()];
             Arrays.setAll(result, i -> toString.valueOf(sequence, i));
             return result;
         }

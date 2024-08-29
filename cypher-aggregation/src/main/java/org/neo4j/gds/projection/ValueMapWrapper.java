@@ -21,6 +21,7 @@ package org.neo4j.gds.projection;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.SequenceValue;
@@ -163,7 +164,7 @@ public final class ValueMapWrapper implements CypherMapAccess {
         @Override
         public T mapSequence(SequenceValue value) {
             if (List.class.isAssignableFrom(expectedType)) {
-                var length = value.length();
+                var length = Neo4jProxy.sequenceSizeAsInt(value);
                 var list = new ArrayList<>(length);
                 for (var i = 0; i < length; i++) {
                     list.add(value.value(i).map(AsJavaObject.instance()));

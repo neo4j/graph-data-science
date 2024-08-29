@@ -19,7 +19,10 @@
  */
 package org.neo4j.gds.compat;
 
+import org.intellij.lang.annotations.PrintFormat;
 import org.neo4j.configuration.Config;
+import org.neo4j.dbms.api.DatabaseNotFoundException;
+import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.compat.batchimport.BatchImporter;
 import org.neo4j.gds.compat.batchimport.ExecutionMonitor;
 import org.neo4j.gds.compat.batchimport.ImportConfig;
@@ -27,10 +30,13 @@ import org.neo4j.gds.compat.batchimport.Monitor;
 import org.neo4j.gds.compat.batchimport.input.Collector;
 import org.neo4j.gds.compat.batchimport.input.Estimates;
 import org.neo4j.gds.compat.batchimport.input.ReadableGroups;
+import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
+import org.neo4j.kernel.api.procedure.CallableProcedure;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.scheduler.JobScheduler;
+import org.neo4j.values.SequenceValue;
 
 import java.io.OutputStream;
 import java.util.function.LongConsumer;
@@ -95,4 +101,28 @@ public interface Neo4jProxyApi {
         long sizeOfRelationshipProperties,
         long numberOfNodeLabels
     );
+
+    @CompatSince(minor = 24)
+    void rethrowUnlessDuplicateRegistration(ProcedureException e) throws KernelException;
+
+    @CompatSince(minor = 24)
+    CallableProcedure callableProcedure(CompatCallableProcedure procedure);
+
+    @CompatSince(minor = 24)
+    int sequenceSizeAsInt(SequenceValue sequenceValue);
+
+    @CompatSince(minor = 24)
+    RuntimeException queryExceptionAsRuntimeException(Throwable e);
+
+    @CompatSince(minor = 24)
+    ProcedureException procedureCallFailed(@PrintFormat String message, Object... args);
+
+    @CompatSince(minor = 24)
+    ProcedureException procedureCallFailed(Throwable reason, @PrintFormat String message, Object... args);
+
+    @CompatSince(minor = 24)
+    String exceptionMessage(Throwable e);
+
+    @CompatSince(minor = 24)
+    DatabaseNotFoundException databaseNotFoundException(String message);
 }

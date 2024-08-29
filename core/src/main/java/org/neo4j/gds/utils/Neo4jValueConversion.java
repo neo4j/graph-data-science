@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.utils;
 
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.values.storable.ByteArray;
 import org.neo4j.values.storable.DoubleArray;
 import org.neo4j.values.storable.FloatArray;
@@ -98,12 +99,13 @@ public final class Neo4jValueConversion {
     }
 
     private static double[] integralToDoubleArray(IntegralArray intArray) {
-        var result = new double[intArray.length()];
+        var length = Neo4jProxy.sequenceSizeAsInt(intArray);
+        var result = new double[length];
 
         IntToLongFunction longValueProvider = resolvelongValueProvider(intArray);
 
         try {
-            for (int idx = 0; idx < intArray.length(); idx++) {
+            for (int idx = 0; idx < length; idx++) {
                 result[idx] = exactLongToDouble(longValueProvider.applyAsLong(idx));
             }
         } catch (UnsupportedOperationException e) {
@@ -114,9 +116,10 @@ public final class Neo4jValueConversion {
     }
 
     private static double[] floatToDoubleArray(FloatArray floatArray) {
-        var result = new double[floatArray.length()];
+        var length = Neo4jProxy.sequenceSizeAsInt(floatArray);
+        var result = new double[length];
 
-        for (int idx = 0; idx < floatArray.length(); idx++) {
+        for (int idx = 0; idx < length; idx++) {
             result[idx] = floatArray.doubleValue(idx);
         }
 
@@ -124,10 +127,11 @@ public final class Neo4jValueConversion {
     }
 
     private static float[] doubleToFloatArray(DoubleArray doubleArray) {
-        var result = new float[doubleArray.length()];
+        var length = Neo4jProxy.sequenceSizeAsInt(doubleArray);
+        var result = new float[length];
 
         try {
-            for (int idx = 0; idx < doubleArray.length(); idx++) {
+            for (int idx = 0; idx < length; idx++) {
                 result[idx] = notOverflowingDoubleToFloat(doubleArray.doubleValue(idx));
             }
         } catch (UnsupportedOperationException e) {
@@ -138,12 +142,13 @@ public final class Neo4jValueConversion {
     }
 
     private static float[] longToFloatArray(IntegralArray integralArray) {
-        var result = new float[integralArray.length()];
+        var length = Neo4jProxy.sequenceSizeAsInt(integralArray);
+        var result = new float[length];
 
         IntToLongFunction longValueProvider = resolvelongValueProvider(integralArray);
 
         try {
-            for (int idx = 0; idx < integralArray.length(); idx++) {
+            for (int idx = 0; idx < length; idx++) {
                 result[idx] = exactLongToFloat(longValueProvider.applyAsLong(idx));
             }
         } catch (UnsupportedOperationException e) {
@@ -172,10 +177,11 @@ public final class Neo4jValueConversion {
     }
 
     private static long[] floatToLongArray(FloatingPointArray floatArray) {
-        var result = new long[floatArray.length()];
+        var length = Neo4jProxy.sequenceSizeAsInt(floatArray);
+        var result = new long[length];
 
         try {
-            for (int idx = 0; idx < floatArray.length(); idx++) {
+            for (int idx = 0; idx < length; idx++) {
                 result[idx] = exactDoubleToLong(floatArray.doubleValue(idx));
             }
         } catch (UnsupportedOperationException e) {
