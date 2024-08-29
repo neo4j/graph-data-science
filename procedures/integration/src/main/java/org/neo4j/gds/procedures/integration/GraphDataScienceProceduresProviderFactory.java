@@ -39,6 +39,7 @@ import org.neo4j.gds.procedures.ExporterBuildersProviderService;
 import org.neo4j.gds.procedures.GraphCatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.UserLogServices;
+import org.neo4j.gds.procedures.pipelines.PipelineRepository;
 import org.neo4j.graphdb.config.Configuration;
 
 import java.util.Optional;
@@ -57,8 +58,9 @@ final class GraphDataScienceProceduresProviderFactory {
     private final DefaultsConfiguration defaultsConfiguration = DefaultsConfiguration.Instance;
     private final LimitsConfiguration limitsConfiguration = LimitsConfiguration.Instance;
 
-    // Graph catalog state initialised here, currently just a front for a big shared singleton
+    // Graph catalog and pipeline repository state initialised here, currently just fronts for big shared singletons
     private final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
+    private final PipelineRepository pipelineRepository = new PipelineRepository();
 
     private final Log log;
 
@@ -132,6 +134,7 @@ final class GraphDataScienceProceduresProviderFactory {
             memoryGuard,
             modelCatalog,
             modelRepository,
+            pipelineRepository,
             metricsFacade.projectionMetrics(),
             taskRegistryFactoryService,
             taskStoreService,

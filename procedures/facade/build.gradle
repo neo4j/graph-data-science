@@ -49,6 +49,7 @@ dependencies {
     implementation project(':operations-procedure-facade')
     implementation project(':path-finding-algorithms')
     implementation project(':pipeline')
+    implementation project(':pipelines-procedure-facade')
     implementation project(':progress-tracking')
     implementation project(':similarity-algorithms')
     implementation project(':string-formatting')

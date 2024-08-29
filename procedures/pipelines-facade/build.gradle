@@ -1,0 +1,14 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Pipelines Procedure Facade'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    implementation project(':annotations')
+    implementation project(':config-api')
+    implementation project(':core')
+    implementation project(':ml-algo')
+    implementation project(':ml-api')
+    implementation project(':pipeline')
+}

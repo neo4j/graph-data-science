@@ -17,23 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.pipeline.catalog;
+package org.neo4j.gds.procedures.pipelines;
 
+import org.neo4j.gds.api.User;
+import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 
-import java.time.ZonedDateTime;
-import java.util.Map;
+/**
+ * One day we can replace the big singleton with local state, and manage things better.
+ * For now this is the groundwork, rolling out this half way house.
+ */
+public class PipelineRepository {
+    /**
+     * Underlying catalog throws exception if pipeline does not exist
+     */
+    TrainingPipeline<?> drop(User user, PipelineName pipelineName) {
+        return PipelineCatalog.drop(user.getUsername(), pipelineName.value);
+    }
 
-public class PipelineCatalogResult {
-    public final Map<String, Object> pipelineInfo;
-    public final String pipelineName;
-    public final String pipelineType;
-    public final ZonedDateTime creationTime;
-
-    public PipelineCatalogResult(TrainingPipeline<?> pipeline, String pipelineName) {
-        this.pipelineName = pipelineName;
-        pipelineInfo = pipeline.toMap();
-        pipelineType = pipeline.type();
-        creationTime = pipeline.creationTime();
+    boolean exists(User user, PipelineName pipelineName) {
+        return PipelineCatalog.exists(user.getUsername(), pipelineName.value);
     }
 }

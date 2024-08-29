@@ -22,6 +22,7 @@ package org.neo4j.gds.pipeline.catalog;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.procedures.pipelines.PipelineCatalogResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -41,12 +42,12 @@ public class PipelineListProc extends BaseProc {
     public Stream<PipelineCatalogResult> list(@Name(value = "pipelineName", defaultValue = NO_VALUE) String pipelineName) {
         if (pipelineName == null || pipelineName.equals(NO_VALUE)) {
             var pipelines = PipelineCatalog.getAllPipelines(username());
-            return pipelines.map(pipe -> new PipelineCatalogResult(pipe.pipeline(), pipe.pipelineName()));
+            return pipelines.map(pipe -> PipelineCatalogResult.create(pipe.pipeline(), pipe.pipelineName()));
         } else {
             CypherMapAccess.failOnBlank("pipelineName", pipelineName);
             if (PipelineCatalog.exists(username(), pipelineName)) {
                 var pipeline = PipelineCatalog.get(username(), pipelineName);
-                return Stream.of(new PipelineCatalogResult(pipeline, pipelineName));
+                return Stream.of(PipelineCatalogResult.create(pipeline, pipelineName));
             } else {
                 return Stream.empty();
             }

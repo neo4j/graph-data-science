@@ -38,6 +38,7 @@ dependencies {
     implementation project(':node-embedding-algorithms')
     implementation project(':opengds-procedure-facade')
     implementation project(':operations-applications')
+    implementation project(':pipelines-procedure-facade')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':termination')

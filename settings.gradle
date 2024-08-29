@@ -284,6 +284,9 @@ project(':graph-catalog-procedure-facade').projectDir = file('procedures/graph-c
 include 'model-catalog-procedure-facade'
 project(':model-catalog-procedure-facade').projectDir = file('procedures/model-catalog-facade')
 
+include 'pipelines-procedure-facade'
+project(':pipelines-procedure-facade').projectDir = file('procedures/pipelines-facade')
+
 include('progress-tracking')
 project(':progress-tracking').projectDir = file('progress-tracking')
 

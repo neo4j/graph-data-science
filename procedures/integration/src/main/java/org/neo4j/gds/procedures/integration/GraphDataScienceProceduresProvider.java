@@ -51,6 +51,7 @@ import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.TerminationFlagAccessor;
 import org.neo4j.gds.procedures.UserAccessor;
 import org.neo4j.gds.procedures.UserLogServices;
+import org.neo4j.gds.procedures.pipelines.PipelineRepository;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.config.Configuration;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
@@ -86,6 +87,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
     private final MemoryGuard memoryGuard;
     private final ModelCatalog modelCatalog;
     private final ModelRepository modelRepository;
+    private final PipelineRepository pipelineRepository;
     private final ProjectionMetricsService projectionMetricsService;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
     private final TaskStoreService taskStoreService;
@@ -111,6 +113,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         MemoryGuard memoryGuard,
         ModelCatalog modelCatalog,
         ModelRepository modelRepository,
+        PipelineRepository pipelineRepository,
         ProjectionMetricsService projectionMetricsService,
         TaskRegistryFactoryService taskRegistryFactoryService,
         TaskStoreService taskStoreService,
@@ -135,6 +138,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         this.memoryGuard = memoryGuard;
         this.modelCatalog = modelCatalog;
         this.modelRepository = modelRepository;
+        this.pipelineRepository = pipelineRepository;
         this.projectionMetricsService = projectionMetricsService;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.taskStoreService = taskStoreService;
@@ -200,6 +204,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
             memoryGuard,
             modelCatalog,
             modelRepository,
+            pipelineRepository,
             projectionMetricsService,
             graphDatabaseService,
             kernelTransaction,

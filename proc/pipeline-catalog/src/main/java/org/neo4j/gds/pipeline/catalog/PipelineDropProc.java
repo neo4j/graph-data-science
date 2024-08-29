@@ -19,10 +19,9 @@
  */
 package org.neo4j.gds.pipeline.catalog;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.CypherMapAccess;
-import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-import org.neo4j.gds.ml.pipeline.TrainingPipeline;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.pipelines.PipelineCatalogResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -32,9 +31,11 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class PipelineDropProc extends BaseProc {
-
+public class PipelineDropProc {
     private static final String DESCRIPTION = "Drops a pipeline and frees up the resources it occupies.";
+
+    @Context
+    public GraphDataScienceProcedures facade;
 
     @Procedure(name = "gds.pipeline.drop", mode = READ)
     @Description(DESCRIPTION)
@@ -42,19 +43,7 @@ public class PipelineDropProc extends BaseProc {
         @Name(value = "pipelineName") String pipelineName,
         @Name(value = "failIfMissing", defaultValue = "true") boolean failIfMissing
     ) {
-        CypherMapAccess.failOnBlank("pipelineName", pipelineName);
-
-        TrainingPipeline<?> pipeline = null;
-
-        if (failIfMissing) {
-            pipeline = PipelineCatalog.drop(username(), pipelineName);
-        } else {
-            if (PipelineCatalog.exists(username(), pipelineName)) {
-                pipeline = PipelineCatalog.drop(username(), pipelineName);
-            }
-        }
-
-        return Stream.ofNullable(pipeline).map(pipe -> new PipelineCatalogResult(pipe, pipelineName));
+        return facade.pipelines().drop(pipelineName, failIfMissing);
     }
 
     @Procedure(name = "gds.beta.pipeline.drop", mode = READ, deprecatedBy = "gds.pipeline.drop")
@@ -65,10 +54,8 @@ public class PipelineDropProc extends BaseProc {
         @Name(value = "pipelineName") String pipelineName,
         @Name(value = "failIfMissing", defaultValue = "true") boolean failIfMissing
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.beta.pipeline.drop");
-        executionContext()
+        facade.deprecatedProcedures().called("gds.beta.pipeline.drop");
+        facade
             .log()
             .warn("Procedure `gds.beta.pipeline.drop` has been deprecated, please use `gds.pipeline.drop`.");
 

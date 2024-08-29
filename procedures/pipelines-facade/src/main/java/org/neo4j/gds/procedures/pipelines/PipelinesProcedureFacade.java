@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
@@ -28,13 +29,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.ml.pipeline.NodePropertyStepFactory.createNodePropertyStep;
-
-public class PipelinesProcedureFacade {
+public final class PipelinesProcedureFacade {
+    private final PipelineApplications pipelineApplications;
     private final User user;
 
-    public PipelinesProcedureFacade(User user) {
+    private PipelinesProcedureFacade(PipelineApplications pipelineApplications, User user) {
+        this.pipelineApplications = pipelineApplications;
         this.user = user;
+    }
+
+    public static PipelinesProcedureFacade create(PipelineRepository pipelineRepository, User user) {
+        var pipelineApplications = new PipelineApplications(pipelineRepository, user);
+
+        return new PipelinesProcedureFacade(pipelineApplications, user);
     }
 
     public Stream<NodePipelineInfoResult> addNodeProperty(
@@ -48,11 +55,28 @@ public class PipelinesProcedureFacade {
             NodeClassificationTrainingPipeline.class
         );
 
-        var nodePropertyStep = createNodePropertyStep(taskName, procedureConfig);
+        var nodePropertyStep = NodePropertyStepFactory.createNodePropertyStep(taskName, procedureConfig);
 
         pipeline.addNodePropertyStep(nodePropertyStep);
 
         return Stream.of(new NodePipelineInfoResult(pipelineName, pipeline));
+    }
+
+    public Stream<PipelineCatalogResult> drop(
+        String pipelineNameAsString,
+        boolean failIfMissing
+    ) {
+        var pipelineName = PipelineName.parse(pipelineNameAsString);
+
+        if (failIfMissing) {
+            var result = pipelineApplications.dropAcceptingFailure(pipelineName);
+
+            return Stream.of(PipelineCatalogResult.create(result, pipelineName.value));
+        }
+
+        var result = pipelineApplications.dropSilencingFailure(pipelineName);
+
+        return Stream.ofNullable(result).map(pipeline -> PipelineCatalogResult.create(pipeline, pipelineName.value));
     }
 
     public Stream<NodePipelineInfoResult> selectFeatures(String pipelineName, Object nodeProperties) {

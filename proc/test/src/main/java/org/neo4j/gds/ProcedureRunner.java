@@ -189,6 +189,7 @@ public final class ProcedureRunner {
             MemoryGuard.DISABLED,
             modelCatalog,
             null,
+            null,
             MetricsFacade.PASSTHROUGH_METRICS_FACADE.projectionMetrics(),
             graphDatabaseService,
             kernelTransaction,

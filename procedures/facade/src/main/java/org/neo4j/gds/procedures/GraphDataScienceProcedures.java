@@ -43,6 +43,7 @@ import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 import org.neo4j.gds.procedures.catalog.GraphCatalogProcedureFacade;
 import org.neo4j.gds.procedures.modelcatalog.ModelCatalogProcedureFacade;
 import org.neo4j.gds.procedures.operations.OperationsProcedureFacade;
+import org.neo4j.gds.procedures.pipelines.PipelineRepository;
 import org.neo4j.gds.procedures.pipelines.PipelinesProcedureFacade;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -97,6 +98,7 @@ public class GraphDataScienceProcedures {
         MemoryGuard memoryGuard,
         ModelCatalog modelCatalog,
         ModelRepository modelRepository,
+        PipelineRepository pipelineRepository,
         ProjectionMetricsService projectionMetricsService,
         GraphDatabaseService graphDatabaseService,
         KernelTransaction kernelTransaction,
@@ -159,7 +161,7 @@ public class GraphDataScienceProcedures {
 
         var operationsProcedureFacade = new OperationsProcedureFacade(applicationsFacade);
 
-        var pipelinesProcedureFacade = new PipelinesProcedureFacade(requestScopedDependencies.getUser());
+        var pipelinesProcedureFacade = PipelinesProcedureFacade.create(pipelineRepository, requestScopedDependencies.getUser());
 
         return new GraphDataScienceProceduresBuilder(log)
             .with(centralityProcedureFacade)

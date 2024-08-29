@@ -22,6 +22,7 @@ dependencies {
     implementation project(':executor')
     implementation project(':opengds-procedure-facade')
     implementation project(':pipeline')
+    implementation project(':pipelines-procedure-facade')
     implementation project(':string-formatting')
 
     compileOnly openGds.immutables.value.annotations

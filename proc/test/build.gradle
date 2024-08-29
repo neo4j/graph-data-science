@@ -39,6 +39,7 @@ dependencies {
     implementation project(':open-licensing')
     implementation project(':open-model-catalog')
     implementation project(':operations-applications')
+    implementation project(':pipelines-procedure-facade')
     implementation project(':pregel')
     implementation project(':procedure-integration')
     implementation project(':progress-tracking')
