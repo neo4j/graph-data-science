@@ -20,7 +20,6 @@
 package org.neo4j.gds.procedures.algorithms.centrality.stubs;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
@@ -37,18 +36,18 @@ import java.util.stream.Stream;
 
 public class PageRankMutateStub implements MutateStub<PageRankMutateConfig, PageRankMutateResult> {
     private final GenericStub genericStub;
-    private final ApplicationsFacade applicationsFacade;
+    private final CentralityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
     private final ProcedureReturnColumns procedureReturnColumns;
     private final AlgorithmHandle<PageRankMutateConfig, PageRankResult, PageRankMutateResult, NodePropertiesWritten> handle;
 
     public PageRankMutateStub(
         GenericStub genericStub,
-        ApplicationsFacade applicationsFacade,
+        CentralityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
         ProcedureReturnColumns procedureReturnColumns,
         AlgorithmHandle<PageRankMutateConfig, PageRankResult, PageRankMutateResult, NodePropertiesWritten> handle
     ) {
         this.genericStub = genericStub;
-        this.applicationsFacade = applicationsFacade;
+        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
         this.procedureReturnColumns = procedureReturnColumns;
         this.handle = handle;
     }
@@ -64,7 +63,7 @@ public class PageRankMutateStub implements MutateStub<PageRankMutateConfig, Page
             username,
             configuration,
             PageRankMutateConfig::of,
-            __ -> estimationMode().pageRank()
+            __ -> estimationModeBusinessFacade.pageRank()
         );
     }
 
@@ -74,7 +73,7 @@ public class PageRankMutateStub implements MutateStub<PageRankMutateConfig, Page
             graphName,
             configuration,
             PageRankMutateConfig::of,
-            __ -> estimationMode().pageRank()
+            __ -> estimationModeBusinessFacade.pageRank()
         );
     }
 
@@ -93,9 +92,5 @@ public class PageRankMutateStub implements MutateStub<PageRankMutateConfig, Page
             handle,
             resultBuilder
         );
-    }
-
-    private CentralityAlgorithmsEstimationModeBusinessFacade estimationMode() {
-        return applicationsFacade.centrality().estimate();
     }
 }

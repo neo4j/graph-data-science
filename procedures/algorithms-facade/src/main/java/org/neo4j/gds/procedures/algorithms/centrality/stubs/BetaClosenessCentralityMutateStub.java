@@ -20,8 +20,8 @@
 package org.neo4j.gds.procedures.algorithms.centrality.stubs;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -34,16 +34,19 @@ import java.util.stream.Stream;
 
 public class BetaClosenessCentralityMutateStub implements MutateStub<ClosenessCentralityMutateConfig, BetaClosenessCentralityMutateResult> {
     private final GenericStub genericStub;
-    private final ApplicationsFacade applicationsFacade;
+    private final CentralityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
+    private final CentralityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
     private final ProcedureReturnColumns procedureReturnColumns;
 
     public BetaClosenessCentralityMutateStub(
         GenericStub genericStub,
-        ApplicationsFacade applicationsFacade,
+        CentralityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
+        CentralityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
         ProcedureReturnColumns procedureReturnColumns
     ) {
         this.genericStub = genericStub;
-        this.applicationsFacade = applicationsFacade;
+        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
+        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
         this.procedureReturnColumns = procedureReturnColumns;
     }
 
@@ -58,7 +61,7 @@ public class BetaClosenessCentralityMutateStub implements MutateStub<ClosenessCe
             username,
             configuration,
             ClosenessCentralityMutateConfig::of,
-            estimationMode()::closenessCentrality
+            estimationModeBusinessFacade::closenessCentrality
         );
     }
 
@@ -68,7 +71,7 @@ public class BetaClosenessCentralityMutateStub implements MutateStub<ClosenessCe
             graphName,
             configuration,
             ClosenessCentralityMutateConfig::of,
-            estimationMode()::closenessCentrality
+            estimationModeBusinessFacade::closenessCentrality
         );
     }
 
@@ -84,12 +87,9 @@ public class BetaClosenessCentralityMutateStub implements MutateStub<ClosenessCe
             graphNameAsString,
             rawConfiguration,
             ClosenessCentralityMutateConfig::of,
-            applicationsFacade.centrality().mutate()::closenessCentrality,
+            mutateModeBusinessFacade::closenessCentrality,
             resultBuilder
         );
     }
 
-    private CentralityAlgorithmsEstimationModeBusinessFacade estimationMode() {
-        return applicationsFacade.centrality().estimate();
-    }
 }

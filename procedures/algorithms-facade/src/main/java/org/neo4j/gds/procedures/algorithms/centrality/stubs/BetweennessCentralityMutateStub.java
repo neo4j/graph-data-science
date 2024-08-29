@@ -20,8 +20,8 @@
 package org.neo4j.gds.procedures.algorithms.centrality.stubs;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -34,16 +34,19 @@ import java.util.stream.Stream;
 
 public class BetweennessCentralityMutateStub implements MutateStub<BetweennessCentralityMutateConfig, CentralityMutateResult> {
     private final GenericStub genericStub;
-    private final ApplicationsFacade applicationsFacade;
+    private final CentralityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
+    private final CentralityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
     private final ProcedureReturnColumns procedureReturnColumns;
 
     public BetweennessCentralityMutateStub(
         GenericStub genericStub,
-        ApplicationsFacade applicationsFacade,
+        CentralityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
+        CentralityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
         ProcedureReturnColumns procedureReturnColumns
     ) {
         this.genericStub = genericStub;
-        this.applicationsFacade = applicationsFacade;
+        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
+        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
         this.procedureReturnColumns = procedureReturnColumns;
     }
 
@@ -58,7 +61,7 @@ public class BetweennessCentralityMutateStub implements MutateStub<BetweennessCe
             username,
             configuration,
             BetweennessCentralityMutateConfig::of,
-            estimationMode()::betweennessCentrality
+            estimationModeBusinessFacade::betweennessCentrality
         );
     }
 
@@ -68,7 +71,7 @@ public class BetweennessCentralityMutateStub implements MutateStub<BetweennessCe
             graphName,
             configuration,
             BetweennessCentralityMutateConfig::of,
-            estimationMode()::betweennessCentrality
+            estimationModeBusinessFacade::betweennessCentrality
         );
     }
 
@@ -81,12 +84,9 @@ public class BetweennessCentralityMutateStub implements MutateStub<BetweennessCe
             graphNameAsString,
             rawConfiguration,
             BetweennessCentralityMutateConfig::of,
-            applicationsFacade.centrality().mutate()::betweennessCentrality,
+            mutateModeBusinessFacade::betweennessCentrality,
             resultBuilder
         );
     }
 
-    private CentralityAlgorithmsEstimationModeBusinessFacade estimationMode() {
-        return applicationsFacade.centrality().estimate();
-    }
 }

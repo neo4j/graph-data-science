@@ -20,8 +20,8 @@
 package org.neo4j.gds.procedures.algorithms.centrality.stubs;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.harmonic.HarmonicCentralityMutateConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -34,16 +34,19 @@ import java.util.stream.Stream;
 
 public class HarmonicCentralityMutateStub implements MutateStub<HarmonicCentralityMutateConfig, CentralityMutateResult> {
     private final GenericStub genericStub;
-    private final ApplicationsFacade applicationsFacade;
+    private final CentralityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
+    private final CentralityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
     private final ProcedureReturnColumns procedureReturnColumns;
 
     public HarmonicCentralityMutateStub(
         GenericStub genericStub,
-        ApplicationsFacade applicationsFacade,
+        CentralityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
+        CentralityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
         ProcedureReturnColumns procedureReturnColumns
     ) {
         this.genericStub = genericStub;
-        this.applicationsFacade = applicationsFacade;
+        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
+        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
         this.procedureReturnColumns = procedureReturnColumns;
     }
 
@@ -58,7 +61,7 @@ public class HarmonicCentralityMutateStub implements MutateStub<HarmonicCentrali
             username,
             configuration,
             HarmonicCentralityMutateConfig::of,
-            __ -> estimationMode().harmonicCentrality()
+            __ -> estimationModeBusinessFacade.harmonicCentrality()
         );
     }
 
@@ -68,7 +71,7 @@ public class HarmonicCentralityMutateStub implements MutateStub<HarmonicCentrali
             graphName,
             configuration,
             HarmonicCentralityMutateConfig::of,
-            __ -> estimationMode().harmonicCentrality()
+            __ -> estimationModeBusinessFacade.harmonicCentrality()
         );
     }
 
@@ -81,12 +84,9 @@ public class HarmonicCentralityMutateStub implements MutateStub<HarmonicCentrali
             graphNameAsString,
             rawConfiguration,
             HarmonicCentralityMutateConfig::of,
-            applicationsFacade.centrality().mutate()::harmonicCentrality,
+            mutateModeBusinessFacade::harmonicCentrality,
             resultBuilder
         );
     }
 
-    private CentralityAlgorithmsEstimationModeBusinessFacade estimationMode() {
-        return applicationsFacade.centrality().estimate();
-    }
 }
