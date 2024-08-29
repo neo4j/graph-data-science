@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding.stubs;
 
-import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.pathfinding.RandomWalkMutateResult;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
@@ -33,16 +33,18 @@ import java.util.stream.Stream;
 
 public class RandomWalkMutateStub implements MutateStub<RandomWalkMutateConfig, RandomWalkMutateResult> {
     private final GenericStub genericStub;
-    private final ApplicationsFacade applicationsFacade;
+    private final PathFindingAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
+    private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
 
     public RandomWalkMutateStub(
         GenericStub genericStub,
-        ApplicationsFacade applicationsFacade
+        PathFindingAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
+        PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade
     ) {
         this.genericStub = genericStub;
-        this.applicationsFacade = applicationsFacade;
+        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
+        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
     }
-
     @Override
     public RandomWalkMutateConfig parseConfiguration(Map<String, Object> configuration) {
         return genericStub.parseConfiguration(RandomWalkMutateConfig::of, configuration);
@@ -54,7 +56,7 @@ public class RandomWalkMutateStub implements MutateStub<RandomWalkMutateConfig, 
             username,
             configuration,
             RandomWalkMutateConfig::of,
-            config -> estimationMode().randomWalk(config)
+            estimationModeBusinessFacade::randomWalkCountingVisits
         );
     }
 
@@ -64,7 +66,7 @@ public class RandomWalkMutateStub implements MutateStub<RandomWalkMutateConfig, 
             graphName,
             configuration,
             RandomWalkMutateConfig::of,
-            config -> estimationMode().randomWalkCountingVisits(config)
+            estimationModeBusinessFacade::randomWalkCountingVisits
         );
     }
 
@@ -76,12 +78,9 @@ public class RandomWalkMutateStub implements MutateStub<RandomWalkMutateConfig, 
             graphName,
             configuration,
             RandomWalkMutateConfig::of,
-            applicationsFacade.pathFinding().mutate()::randomWalk,
+            mutateModeBusinessFacade::randomWalk,
             resultBuilder
         );
     }
 
-    private PathFindingAlgorithmsEstimationModeBusinessFacade estimationMode() {
-        return applicationsFacade.pathFinding().estimate();
-    }
 }

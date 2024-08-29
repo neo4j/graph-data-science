@@ -19,30 +19,32 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding.stubs;
 
-import org.neo4j.gds.applications.ApplicationsFacade;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.paths.traverse.BfsMutateConfig;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
 public class BreadthFirstSearchMutateStub implements MutateStub<BfsMutateConfig, PathFindingMutateResult> {
     private final GenericStub genericStub;
-    private final ApplicationsFacade applicationsFacade;
+    private final PathFindingAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
+    private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
 
     public BreadthFirstSearchMutateStub(
         GenericStub genericStub,
-        ApplicationsFacade applicationsFacade
+        PathFindingAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
+        PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade
     ) {
         this.genericStub = genericStub;
-        this.applicationsFacade = applicationsFacade;
+        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
+        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
     }
-
     @Override
     public BfsMutateConfig parseConfiguration(Map<String, Object> configuration) {
         return genericStub.parseConfiguration(BfsMutateConfig::of, configuration);
@@ -54,7 +56,7 @@ public class BreadthFirstSearchMutateStub implements MutateStub<BfsMutateConfig,
             username,
             configuration,
             BfsMutateConfig::of,
-            __ -> estimationMode().breadthFirstSearch()
+            __ -> estimationModeBusinessFacade.breadthFirstSearch()
         );
     }
 
@@ -64,7 +66,7 @@ public class BreadthFirstSearchMutateStub implements MutateStub<BfsMutateConfig,
             graphName,
             configuration,
             BfsMutateConfig::of,
-            __ -> estimationMode().breadthFirstSearch()
+            __ -> estimationModeBusinessFacade.breadthFirstSearch()
         );
     }
 
@@ -76,12 +78,9 @@ public class BreadthFirstSearchMutateStub implements MutateStub<BfsMutateConfig,
             graphName,
             configuration,
             BfsMutateConfig::of,
-            applicationsFacade.pathFinding().mutate()::breadthFirstSearch,
+            mutateModeBusinessFacade::breadthFirstSearch,
             resultBuilder
         );
     }
 
-    private PathFindingAlgorithmsEstimationModeBusinessFacade estimationMode() {
-        return applicationsFacade.pathFinding().estimate();
-    }
 }
