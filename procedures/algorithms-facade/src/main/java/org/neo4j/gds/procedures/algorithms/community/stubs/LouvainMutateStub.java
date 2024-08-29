@@ -20,8 +20,8 @@
 package org.neo4j.gds.procedures.algorithms.community.stubs;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -34,17 +34,21 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public class LouvainMutateStub implements MutateStub<LouvainMutateConfig, LouvainMutateResult> {
+
     private final GenericStub genericStub;
-    private final ApplicationsFacade applicationsFacade;
+    private final CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
+    private final CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
     private final ProcedureReturnColumns procedureReturnColumns;
 
     public LouvainMutateStub(
         GenericStub genericStub,
-        ApplicationsFacade applicationsFacade,
+        CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
+        CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
         ProcedureReturnColumns procedureReturnColumns
     ) {
         this.genericStub = genericStub;
-        this.applicationsFacade = applicationsFacade;
+        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
+        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
         this.procedureReturnColumns = procedureReturnColumns;
     }
 
@@ -59,7 +63,7 @@ public class LouvainMutateStub implements MutateStub<LouvainMutateConfig, Louvai
             username,
             configuration,
             LouvainMutateConfig::of,
-            estimationMode()::louvain
+            estimationModeBusinessFacade::louvain
         );
     }
 
@@ -69,7 +73,7 @@ public class LouvainMutateStub implements MutateStub<LouvainMutateConfig, Louvai
             graphName,
             configuration,
             LouvainMutateConfig::of,
-            estimationMode()::louvain
+            estimationModeBusinessFacade::louvain
         );
     }
 
@@ -83,12 +87,9 @@ public class LouvainMutateStub implements MutateStub<LouvainMutateConfig, Louvai
             graphNameAsString,
             rawConfiguration,
             LouvainMutateConfig::of,
-            applicationsFacade.community().mutate()::louvain,
+            mutateModeBusinessFacade::louvain,
             resultBuilder
         );
     }
 
-    private CommunityAlgorithmsEstimationModeBusinessFacade estimationMode() {
-        return applicationsFacade.community().estimate();
-    }
 }

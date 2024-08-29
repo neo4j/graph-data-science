@@ -20,8 +20,8 @@
 package org.neo4j.gds.procedures.algorithms.community.stubs;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.kmeans.KmeansMutateConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -34,17 +34,21 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public class KMeansMutateStub implements MutateStub<KmeansMutateConfig, KmeansMutateResult> {
+
     private final GenericStub genericStub;
-    private final ApplicationsFacade applicationsFacade;
+    private final CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
+    private final CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
     private final ProcedureReturnColumns procedureReturnColumns;
 
     public KMeansMutateStub(
         GenericStub genericStub,
-        ApplicationsFacade applicationsFacade,
+        CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
+        CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
         ProcedureReturnColumns procedureReturnColumns
     ) {
         this.genericStub = genericStub;
-        this.applicationsFacade = applicationsFacade;
+        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
+        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
         this.procedureReturnColumns = procedureReturnColumns;
     }
 
@@ -59,7 +63,7 @@ public class KMeansMutateStub implements MutateStub<KmeansMutateConfig, KmeansMu
             username,
             rawConfiguration,
             KmeansMutateConfig::of,
-            configuration -> estimationMode().kMeans(configuration)
+            estimationModeBusinessFacade::kMeans
         );
     }
 
@@ -69,7 +73,7 @@ public class KMeansMutateStub implements MutateStub<KmeansMutateConfig, KmeansMu
             graphName,
             rawConfiguration,
             KmeansMutateConfig::of,
-            configuration -> estimationMode().kMeans(configuration)
+            estimationModeBusinessFacade::kMeans
         );
     }
 
@@ -87,12 +91,9 @@ public class KMeansMutateStub implements MutateStub<KmeansMutateConfig, KmeansMu
             graphNameAsString,
             rawConfiguration,
             KmeansMutateConfig::of,
-            applicationsFacade.community().mutate()::kMeans,
+            mutateModeBusinessFacade::kMeans,
             resultBuilder
         );
     }
 
-    private CommunityAlgorithmsEstimationModeBusinessFacade estimationMode() {
-        return applicationsFacade.community().estimate();
-    }
 }

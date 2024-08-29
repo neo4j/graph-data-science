@@ -20,8 +20,8 @@
 package org.neo4j.gds.procedures.algorithms.community.stubs;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.community.ProcedureStatisticsComputationInstructions;
@@ -34,17 +34,21 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public class SccMutateStub implements MutateStub<SccMutateConfig, SccMutateResult> {
+
     private final GenericStub genericStub;
-    private final ApplicationsFacade applicationsFacade;
+    private final CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
+    private final CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
     private final ProcedureReturnColumns procedureReturnColumns;
 
     public SccMutateStub(
         GenericStub genericStub,
-        ApplicationsFacade applicationsFacade,
+        CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
+        CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
         ProcedureReturnColumns procedureReturnColumns
     ) {
         this.genericStub = genericStub;
-        this.applicationsFacade = applicationsFacade;
+        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
+        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
         this.procedureReturnColumns = procedureReturnColumns;
     }
 
@@ -59,7 +63,7 @@ public class SccMutateStub implements MutateStub<SccMutateConfig, SccMutateResul
             username,
             configuration,
             SccMutateConfig::of,
-            __ -> estimationMode().scc()
+            __ -> estimationModeBusinessFacade.scc()
         );
     }
 
@@ -69,7 +73,7 @@ public class SccMutateStub implements MutateStub<SccMutateConfig, SccMutateResul
             graphName,
             configuration,
             SccMutateConfig::of,
-            __ -> estimationMode().scc()
+            __ -> estimationModeBusinessFacade.scc()
         );
     }
 
@@ -82,12 +86,11 @@ public class SccMutateStub implements MutateStub<SccMutateConfig, SccMutateResul
             graphNameAsString,
             rawConfiguration,
             SccMutateConfig::of,
-            applicationsFacade.community().mutate()::scc,
+            mutateModeBusinessFacade::scc,
             resultBuilder
         );
     }
 
-    private CommunityAlgorithmsEstimationModeBusinessFacade estimationMode() {
-        return applicationsFacade.community().estimate();
-    }
+
+
 }

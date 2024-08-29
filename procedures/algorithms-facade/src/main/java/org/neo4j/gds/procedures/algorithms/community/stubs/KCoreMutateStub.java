@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.community.stubs;
 
-import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -32,15 +32,19 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public class KCoreMutateStub implements MutateStub<KCoreDecompositionMutateConfig, KCoreDecompositionMutateResult> {
+
     private final GenericStub genericStub;
-    private final ApplicationsFacade applicationsFacade;
+    private final CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
+    private final CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
 
     public KCoreMutateStub(
         GenericStub genericStub,
-        ApplicationsFacade applicationsFacade
+        CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
+        CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade
     ) {
         this.genericStub = genericStub;
-        this.applicationsFacade = applicationsFacade;
+        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
+        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
     }
 
     @Override
@@ -54,7 +58,7 @@ public class KCoreMutateStub implements MutateStub<KCoreDecompositionMutateConfi
             username,
             configuration,
             KCoreDecompositionMutateConfig::of,
-            __ -> estimationMode().kCore()
+            __ -> estimationModeBusinessFacade.kCore()
         );
     }
 
@@ -64,7 +68,7 @@ public class KCoreMutateStub implements MutateStub<KCoreDecompositionMutateConfi
             graphName,
             configuration,
             KCoreDecompositionMutateConfig::of,
-            __ -> estimationMode().kCore()
+            __ -> estimationModeBusinessFacade.kCore()
         );
     }
 
@@ -79,12 +83,9 @@ public class KCoreMutateStub implements MutateStub<KCoreDecompositionMutateConfi
             graphNameAsString,
             rawConfiguration,
             KCoreDecompositionMutateConfig::of,
-            applicationsFacade.community().mutate()::kCore,
+            mutateModeBusinessFacade::kCore,
             resultBuilder
         );
     }
 
-    private CommunityAlgorithmsEstimationModeBusinessFacade estimationMode() {
-        return applicationsFacade.community().estimate();
-    }
 }
