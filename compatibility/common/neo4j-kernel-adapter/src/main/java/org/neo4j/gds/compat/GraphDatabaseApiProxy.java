@@ -22,7 +22,6 @@ package org.neo4j.gds.compat;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.exceptions.KernelException;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.NotFoundException;
@@ -32,7 +31,6 @@ import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.security.LoginContext;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.api.procedure.CallableProcedure;
 import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
 import org.neo4j.kernel.api.procedure.CallableUserFunction;
@@ -221,19 +219,14 @@ public final class GraphDatabaseApiProxy {
     @TestOnly
     public static Transactions newKernelTransaction(GraphDatabaseService db) {
         Transaction tx = db.beginTx();
-        return ImmutableTransactions.of(tx, kernelTransaction(tx));
+        return new Transactions(tx, kernelTransaction(tx));
     }
 
-    @ValueClass
-    public interface Transactions extends AutoCloseable {
-        Transaction tx();
-
-        KernelTransaction ktx();
-
+    public record Transactions(Transaction tx, KernelTransaction ktx) implements AutoCloseable {
         @Override
-        default void close() {
-            tx().commit();
-            tx().close();
+        public void close() {
+            this.tx.commit();
+            this.tx.close();
         }
     }
 
@@ -246,9 +239,6 @@ public final class GraphDatabaseApiProxy {
     }
 
     private static void rethrowUnlessDuplicateRegistration(ProcedureException e) throws KernelException {
-        if (e.status() == Status.Procedure.ProcedureRegistrationFailed && e.getMessage().contains("already in use")) {
-            return;
-        }
-        throw e;
+        Neo4jProxy.rethrowUnlessDuplicateRegistration(e);
     }
 }

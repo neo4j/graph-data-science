@@ -20,8 +20,8 @@
 package org.neo4j.gds.legacycypherprojection;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.graphdb.QueryStatistics;
-import org.neo4j.kernel.impl.query.QueryExecutionKernelException;
 import org.neo4j.kernel.impl.query.QuerySubscriber;
 import org.neo4j.values.AnyValue;
 
@@ -37,13 +37,7 @@ public abstract class ErrorCachingQuerySubscriber implements QuerySubscriber {
     }
 
     public void onError(Throwable throwable) {
-        if (throwable instanceof RuntimeException) {
-            this.error = (RuntimeException) throwable;
-        } else if (throwable instanceof QueryExecutionKernelException) {
-            this.error = ((QueryExecutionKernelException) throwable).asUserException();
-        } else {
-            this.error = new RuntimeException(throwable);
-        }
+        this.error = Neo4jProxy.queryExceptionAsRuntimeException(throwable);
     }
 
     public static final class DoNothingSubscriber extends ErrorCachingQuerySubscriber {

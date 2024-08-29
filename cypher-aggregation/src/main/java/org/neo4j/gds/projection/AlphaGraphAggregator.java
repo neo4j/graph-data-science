@@ -20,10 +20,10 @@
 package org.neo4j.gds.projection;
 
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
-import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.NoValue;
 import org.neo4j.values.storable.TextValue;
@@ -60,8 +60,7 @@ public class AlphaGraphAggregator extends GraphAggregator {
                 NoValue.NO_VALUE
             );
         } catch (Exception e) {
-            throw new ProcedureException(
-                Status.Procedure.ProcedureCallFailed,
+            throw Neo4jProxy.procedureCallFailed(
                 e,
                 "Failed to invoke function `%s`: Caused by: %s",
                 AlphaCypherAggregation.FUNCTION_NAME,

@@ -173,7 +173,7 @@ public final class ProxyUtil {
 
     private static Neo4jVersionInfo loadNeo4jVersion() {
         try {
-            var neo4jVersion = GraphDatabaseApiProxy.neo4jVersion();
+            var neo4jVersion = Neo4jVersion.findNeo4jVersion();
             var error =
                 neo4jVersion.isSupported()
                     ? Optional.<ErrorInfo>empty()
