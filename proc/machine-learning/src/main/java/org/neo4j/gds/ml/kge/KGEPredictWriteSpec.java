@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.kge;
 
 import org.neo4j.gds.algorithms.machinelearning.KGEPredictResult;
+import org.neo4j.gds.algorithms.machinelearning.KGEPredictWriteConfig;
 import org.neo4j.gds.algorithms.machinelearning.TopKMapComputer;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -30,6 +31,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.machinelearning.KGEWriteResult;
 import org.neo4j.gds.similarity.nodesim.TopKGraph;
 
 import java.util.stream.Stream;

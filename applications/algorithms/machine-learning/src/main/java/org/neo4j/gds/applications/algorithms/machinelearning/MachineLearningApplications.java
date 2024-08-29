@@ -22,24 +22,31 @@ package org.neo4j.gds.applications.algorithms.machinelearning;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
+import org.neo4j.gds.logging.Log;
 
 public final class MachineLearningApplications {
     private final MachineLearningAlgorithmsEstimationModeBusinessFacade estimation;
     private final MachineLearningAlgorithmsMutateModeBusinessFacade mutation;
     private final MachineLearningAlgorithmsStreamModeBusinessFacade streaming;
+    private final MachineLearningAlgorithmsWriteModeBusinessFacade writing;
 
     private MachineLearningApplications(
         MachineLearningAlgorithmsEstimationModeBusinessFacade estimation,
         MachineLearningAlgorithmsMutateModeBusinessFacade mutation,
-        MachineLearningAlgorithmsStreamModeBusinessFacade streaming
+        MachineLearningAlgorithmsStreamModeBusinessFacade streaming,
+        MachineLearningAlgorithmsWriteModeBusinessFacade writing
     ) {
         this.estimation = estimation;
         this.mutation = mutation;
         this.streaming = streaming;
+        this.writing = writing;
     }
 
     public static MachineLearningApplications create(
+        Log log,
         RequestScopedDependencies requestScopedDependencies,
+        WriteContext writeContext,
         ProgressTrackerCreator progressTrackerCreator,
         AlgorithmProcessingTemplateConvenience convenience
     ) {
@@ -60,8 +67,16 @@ public final class MachineLearningApplications {
             estimation,
             algorithms
         );
+        var writing = new MachineLearningAlgorithmsWriteModeBusinessFacade(
+            log,
+            requestScopedDependencies,
+            estimation,
+            algorithms,
+            convenience,
+            writeContext
+        );
 
-        return new MachineLearningApplications(estimation, mutation, streaming);
+        return new MachineLearningApplications(estimation, mutation, streaming, writing);
     }
 
     public MachineLearningAlgorithmsEstimationModeBusinessFacade estimate() {
@@ -74,5 +89,9 @@ public final class MachineLearningApplications {
 
     public MachineLearningAlgorithmsStreamModeBusinessFacade stream() {
         return streaming;
+    }
+
+    public MachineLearningAlgorithmsWriteModeBusinessFacade write() {
+        return writing;
     }
 }

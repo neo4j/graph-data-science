@@ -20,8 +20,10 @@
 package org.neo4j.gds.procedures.algorithms.machinelearning;
 
 import org.neo4j.gds.algorithms.machinelearning.KGEPredictStreamConfig;
+import org.neo4j.gds.algorithms.machinelearning.KGEPredictWriteConfig;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinelearning.MachineLearningAlgorithmsStreamModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.machinelearning.MachineLearningAlgorithmsWriteModeBusinessFacade;
 import org.neo4j.gds.procedures.algorithms.machinelearning.stubs.KgeMutateStub;
 import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
@@ -72,7 +74,27 @@ public final class MachineLearningProcedureFacade {
         );
     }
 
+    public Stream<KGEWriteResult> kgeWrite(String graphNameAsString, Map<String, Object> rawConfiguration) {
+        var resultBuilder = new KgeResultBuilderForWriteMode();
+
+        return algorithmExecutionScaffolding.runAlgorithm(
+            graphNameAsString,
+            rawConfiguration,
+            KGEPredictWriteConfig::of,
+            (graphName, configuration, __) -> writeMode().kge(
+                graphName,
+                configuration,
+                resultBuilder
+            ),
+            resultBuilder
+        );
+    }
+
     private MachineLearningAlgorithmsStreamModeBusinessFacade streamMode() {
         return applicationsFacade.machineLearning().stream();
+    }
+
+    private MachineLearningAlgorithmsWriteModeBusinessFacade writeMode() {
+        return applicationsFacade.machineLearning().write();
     }
 }

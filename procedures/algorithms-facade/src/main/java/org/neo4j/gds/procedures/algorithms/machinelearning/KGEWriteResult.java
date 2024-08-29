@@ -17,20 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.kge;
+package org.neo4j.gds.procedures.algorithms.machinelearning;
 
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
 public final class KGEWriteResult {
-
     public final long preProcessingMillis;
     public final long computeMillis;
     public final long writeMillis;
     public final long relationshipsWritten;
     public final Map<String, Object> configuration;
-    private KGEWriteResult(
+
+    KGEWriteResult(
         long preProcessingMillis,
         long computeMillis,
         long writeMillis,
@@ -44,9 +45,17 @@ public final class KGEWriteResult {
         this.configuration = configuration;
     }
 
-//    @SuppressWarnings("unused")
-    public static class Builder extends AbstractResultBuilder<KGEWriteResult> {
+    static KGEWriteResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+        return new KGEWriteResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.mutateOrWriteMillis,
+            0,
+            configurationMap
+        );
+    }
 
+    public static class Builder extends AbstractResultBuilder<KGEWriteResult> {
         @Override
         public KGEWriteResult build() {
             return new KGEWriteResult(

@@ -176,7 +176,9 @@ public final class ApplicationsFacade {
         );
 
         var machineLearningApplications = MachineLearningApplications.create(
+            log,
             requestScopedDependencies,
+            writeContext,
             progressTrackerCreator,
             algorithmProcessingTemplateConvenience
         );
