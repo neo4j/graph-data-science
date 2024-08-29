@@ -48,13 +48,18 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public final class NodeEmbeddingsProcedureFacade {
+
     private final RequestScopedDependencies requestScopedDependencies;
     private final FastRPMutateStub fastRPMutateStub;
     private final GraphSageMutateStub graphSageMutateStub;
     private final HashGnnMutateStub hashGnnMutateStub;
     private final Node2VecMutateStub node2VecMutateStub;
 
-    private final ApplicationsFacade applicationsFacade;
+    private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
+    private final NodeEmbeddingAlgorithmsStatsModeBusinessFacade statsModeBusinessFacade;
+    private final NodeEmbeddingAlgorithmsStreamModeBusinessFacade streamModeBusinessFacade;
+    private final NodeEmbeddingAlgorithmsTrainModeBusinessFacade trainModeBusinessFacade;
+    private final NodeEmbeddingAlgorithmsWriteModeBusinessFacade writeModeBusinessFacade;
 
     private final EstimationModeRunner estimationMode;
     private final AlgorithmExecutionScaffolding algorithmExecutionScaffolding;
@@ -65,7 +70,11 @@ public final class NodeEmbeddingsProcedureFacade {
         GraphSageMutateStub graphSageMutateStub,
         HashGnnMutateStub hashGnnMutateStub,
         Node2VecMutateStub node2VecMutateStub,
-        ApplicationsFacade applicationsFacade,
+        NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
+        NodeEmbeddingAlgorithmsStatsModeBusinessFacade statsModeBusinessFacade,
+        NodeEmbeddingAlgorithmsStreamModeBusinessFacade streamModeBusinessFacade,
+        NodeEmbeddingAlgorithmsTrainModeBusinessFacade trainModeBusinessFacade,
+        NodeEmbeddingAlgorithmsWriteModeBusinessFacade writeModeBusinessFacade,
         EstimationModeRunner estimationMode,
         AlgorithmExecutionScaffolding algorithmExecutionScaffolding
     ) {
@@ -74,7 +83,11 @@ public final class NodeEmbeddingsProcedureFacade {
         this.graphSageMutateStub = graphSageMutateStub;
         this.hashGnnMutateStub = hashGnnMutateStub;
         this.node2VecMutateStub = node2VecMutateStub;
-        this.applicationsFacade = applicationsFacade;
+        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
+        this.statsModeBusinessFacade = statsModeBusinessFacade;
+        this.streamModeBusinessFacade = streamModeBusinessFacade;
+        this.trainModeBusinessFacade = trainModeBusinessFacade;
+        this.writeModeBusinessFacade = writeModeBusinessFacade;
         this.estimationMode = estimationMode;
         this.algorithmExecutionScaffolding = algorithmExecutionScaffolding;
     }
@@ -86,10 +99,30 @@ public final class NodeEmbeddingsProcedureFacade {
         EstimationModeRunner estimationModeRunner,
         AlgorithmExecutionScaffolding algorithmExecutionScaffolding
     ) {
-        var fastRPMutateStub = new FastRPMutateStub(genericStub, applicationsFacade);
-        var graphSageMutateStub = new GraphSageMutateStub(requestScopedDependencies, genericStub, applicationsFacade);
-        var hashGnnMutateStub = new HashGnnMutateStub(genericStub, applicationsFacade);
-        var node2VecMutateStub = new Node2VecMutateStub(genericStub, applicationsFacade);
+        var fastRPMutateStub = new FastRPMutateStub(
+            genericStub,
+            applicationsFacade.nodeEmbeddings().estimate(),
+            applicationsFacade.nodeEmbeddings().mutate()
+        );
+
+        var graphSageMutateStub = new GraphSageMutateStub(
+            requestScopedDependencies.getUser(),
+            genericStub,
+            applicationsFacade.nodeEmbeddings().estimate(),
+            applicationsFacade.nodeEmbeddings().mutate()
+        );
+
+        var hashGnnMutateStub = new HashGnnMutateStub(
+            genericStub,
+            applicationsFacade.nodeEmbeddings().estimate(),
+            applicationsFacade.nodeEmbeddings().mutate()
+        );
+
+        var node2VecMutateStub = new Node2VecMutateStub(
+            genericStub,
+            applicationsFacade.nodeEmbeddings().estimate(),
+            applicationsFacade.nodeEmbeddings().mutate()
+        );
 
         return new NodeEmbeddingsProcedureFacade(
             requestScopedDependencies,
@@ -97,7 +130,11 @@ public final class NodeEmbeddingsProcedureFacade {
             graphSageMutateStub,
             hashGnnMutateStub,
             node2VecMutateStub,
-            applicationsFacade,
+            applicationsFacade.nodeEmbeddings().estimate(),
+            applicationsFacade.nodeEmbeddings().stats(),
+            applicationsFacade.nodeEmbeddings().stream(),
+            applicationsFacade.nodeEmbeddings().train(),
+            applicationsFacade.nodeEmbeddings().write(),
             estimationModeRunner,
             algorithmExecutionScaffolding
         );
@@ -117,7 +154,7 @@ public final class NodeEmbeddingsProcedureFacade {
             graphName,
             configuration,
             FastRPStatsConfig::of,
-            statsMode()::fastRP,
+            statsModeBusinessFacade::fastRP,
             resultBuilder
         );
     }
@@ -129,7 +166,7 @@ public final class NodeEmbeddingsProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             FastRPStatsConfig::of,
-            configuration -> estimationMode().fastRP(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.fastRP(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -145,7 +182,7 @@ public final class NodeEmbeddingsProcedureFacade {
             graphName,
             configuration,
             FastRPStreamConfig::of,
-            streamMode()::fastRP,
+            streamModeBusinessFacade::fastRP,
             resultBuilder
         );
     }
@@ -157,7 +194,7 @@ public final class NodeEmbeddingsProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             FastRPStreamConfig::of,
-            configuration -> estimationMode().fastRP(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.fastRP(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -173,7 +210,7 @@ public final class NodeEmbeddingsProcedureFacade {
             graphName,
             configuration,
             FastRPWriteConfig::of,
-            writeMode()::fastRP,
+            writeModeBusinessFacade::fastRP,
             resultBuilder
         );
     }
@@ -185,7 +222,7 @@ public final class NodeEmbeddingsProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             FastRPWriteConfig::of,
-            configuration -> estimationMode().fastRP(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.fastRP(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -208,7 +245,7 @@ public final class NodeEmbeddingsProcedureFacade {
                 requestScopedDependencies.getUser().getUsername(),
                 cypherMapWrapper
             ),
-            streamMode()::graphSage,
+            streamModeBusinessFacade::graphSage,
             resultBuilder
         );
     }
@@ -223,7 +260,7 @@ public final class NodeEmbeddingsProcedureFacade {
                 requestScopedDependencies.getUser().getUsername(),
                 cypherMapWrapper
             ),
-            configuration -> estimationMode().graphSage(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.graphSage(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -242,7 +279,7 @@ public final class NodeEmbeddingsProcedureFacade {
                 requestScopedDependencies.getUser().getUsername(),
                 cypherMapWrapper
             ),
-            trainMode()::graphSage,
+            trainModeBusinessFacade::graphSage,
             resultBuilder
         );
     }
@@ -257,7 +294,7 @@ public final class NodeEmbeddingsProcedureFacade {
                 requestScopedDependencies.getUser().getUsername(),
                 cypherMapWrapper
             ),
-            configuration -> estimationMode().graphSageTrain(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.graphSageTrain(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -276,7 +313,7 @@ public final class NodeEmbeddingsProcedureFacade {
                 requestScopedDependencies.getUser().getUsername(),
                 cypherMapWrapper
             ),
-            writeMode()::graphSage,
+            writeModeBusinessFacade::graphSage,
             resultBuilder
         );
     }
@@ -291,7 +328,7 @@ public final class NodeEmbeddingsProcedureFacade {
                 requestScopedDependencies.getUser().getUsername(),
                 cypherMapWrapper
             ),
-            configuration -> estimationMode().graphSage(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.graphSage(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -311,7 +348,7 @@ public final class NodeEmbeddingsProcedureFacade {
             graphName,
             configuration,
             HashGNNStreamConfig::of,
-            streamMode()::hashGnn,
+            streamModeBusinessFacade::hashGnn,
             resultBuilder
         );
     }
@@ -323,7 +360,7 @@ public final class NodeEmbeddingsProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             HashGNNStreamConfig::of,
-            configuration -> estimationMode().hashGnn(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.hashGnn(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -343,7 +380,7 @@ public final class NodeEmbeddingsProcedureFacade {
             graphName,
             configuration,
             Node2VecStreamConfig::of,
-            streamMode()::node2Vec,
+            streamModeBusinessFacade::node2Vec,
             resultBuilder
         );
     }
@@ -355,7 +392,7 @@ public final class NodeEmbeddingsProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             Node2VecStreamConfig::of,
-            configuration -> estimationMode().node2Vec(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.node2Vec(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
@@ -371,7 +408,7 @@ public final class NodeEmbeddingsProcedureFacade {
             graphName,
             configuration,
             Node2VecWriteConfig::of,
-            writeMode()::node2Vec,
+            writeModeBusinessFacade::node2Vec,
             resultBuilder
         );
     }
@@ -383,29 +420,11 @@ public final class NodeEmbeddingsProcedureFacade {
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
             Node2VecWriteConfig::of,
-            configuration -> estimationMode().node2Vec(configuration, graphNameOrConfiguration)
+            configuration -> estimationModeBusinessFacade.node2Vec(configuration, graphNameOrConfiguration)
         );
 
         return Stream.of(result);
     }
 
-    private NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationMode() {
-        return applicationsFacade.nodeEmbeddings().estimate();
-    }
-
-    private NodeEmbeddingAlgorithmsStatsModeBusinessFacade statsMode() {
-        return applicationsFacade.nodeEmbeddings().stats();
-    }
-
-    private NodeEmbeddingAlgorithmsStreamModeBusinessFacade streamMode() {
-        return applicationsFacade.nodeEmbeddings().stream();
-    }
-
-    private NodeEmbeddingAlgorithmsTrainModeBusinessFacade trainMode() {
-        return applicationsFacade.nodeEmbeddings().train();
-    }
-
-    private NodeEmbeddingAlgorithmsWriteModeBusinessFacade writeMode() {
-        return applicationsFacade.nodeEmbeddings().write();
-    }
+  
 }
