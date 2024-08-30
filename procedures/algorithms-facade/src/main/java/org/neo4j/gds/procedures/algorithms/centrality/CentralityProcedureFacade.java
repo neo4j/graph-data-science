@@ -846,7 +846,6 @@ public final class CentralityProcedureFacade {
     }
 
     public Stream<PageRankStatsResult> eigenvectorStats(String graphName, Map<String, Object> configuration) {
-        validateKeyNotPresent(configuration, "dampingFactor");
 
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("centralityDistribution");
         var resultBuilder = new PageRankResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
@@ -864,7 +863,6 @@ public final class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        validateKeyNotPresent(algorithmConfiguration, "dampingFactor");
 
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
@@ -876,7 +874,6 @@ public final class CentralityProcedureFacade {
     }
 
     public Stream<CentralityStreamResult> eigenvectorStream(String graphName, Map<String, Object> configuration) {
-        validateKeyNotPresent(configuration, "dampingFactor");
 
         var resultBuilder = new PageRankResultBuilderForStreamMode();
 
@@ -893,7 +890,6 @@ public final class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        validateKeyNotPresent(algorithmConfiguration, "dampingFactor");
 
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
@@ -905,7 +901,6 @@ public final class CentralityProcedureFacade {
     }
 
     public Stream<PageRankWriteResult> eigenvectorWrite(String graphName, Map<String, Object> configuration) {
-        validateKeyNotPresent(configuration, "dampingFactor");
 
         var shouldComputeCentralityDistribution = procedureReturnColumns.contains("centralityDistribution");
         var resultBuilder = new PageRankResultBuilderForWriteMode(shouldComputeCentralityDistribution);
@@ -923,7 +918,6 @@ public final class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        validateKeyNotPresent(algorithmConfiguration, "dampingFactor");
 
         var result = estimationMode.runEstimation(
             algorithmConfiguration,
@@ -1060,9 +1054,4 @@ public final class CentralityProcedureFacade {
         return Stream.of(result);
     }
 
-    private void validateKeyNotPresent(Map<String, Object> configuration, String key) {
-        if (configuration.containsKey(key)) {
-            throw new IllegalArgumentException("Unexpected configuration key: " + key);
-        }
-    }
 }
