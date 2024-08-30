@@ -75,6 +75,7 @@ public enum Algorithm {
     SCC("SCC"),
     SingleSourceDijkstra("All Shortest Paths"),
     SpanningTree("SpanningTree"),
+    SplitRelationships("SplitRelationships"),
     SteinerTree("SteinerTree"),
     TopologicalSort("TopologicalSort"),
     ToUndirected("ToUndirected"),

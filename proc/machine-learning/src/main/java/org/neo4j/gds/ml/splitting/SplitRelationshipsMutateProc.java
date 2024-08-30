@@ -19,8 +19,9 @@
  */
 package org.neo4j.gds.ml.splitting;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.algorithms.machinelearning.SplitRelationshipsMutateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -30,19 +31,16 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class SplitRelationshipsMutateProc extends BaseProc {
+public class SplitRelationshipsMutateProc {
+    @Context
+    public GraphDataScienceProcedures facade;
 
     @Procedure(name = "gds.alpha.ml.splitRelationships.mutate", mode = READ)
     @Description("Splits a graph into holdout and remaining relationship types and adds them to the graph.")
-    public Stream<MutateResult> mutate(
+    public Stream<SplitRelationshipsMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new SplitRelationshipsMutateSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.algorithms().machineLearning().splitRelationshipsMutateStub().execute(graphName, configuration);
     }
-
-
 }

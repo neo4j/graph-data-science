@@ -25,6 +25,7 @@ import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinelearning.MachineLearningAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinelearning.MachineLearningAlgorithmsWriteModeBusinessFacade;
 import org.neo4j.gds.procedures.algorithms.machinelearning.stubs.KgeMutateStub;
+import org.neo4j.gds.procedures.algorithms.machinelearning.stubs.SplitRelationshipsMutateStub;
 import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 
@@ -35,16 +36,19 @@ public final class MachineLearningProcedureFacade {
     private final ApplicationsFacade applicationsFacade;
 
     private final KgeMutateStub kgeMutateStub;
+    private final SplitRelationshipsMutateStub splitRelationshipsMutateStub;
 
     private final AlgorithmExecutionScaffolding algorithmExecutionScaffolding;
 
     private MachineLearningProcedureFacade(
         ApplicationsFacade applicationsFacade,
         KgeMutateStub kgeMutateStub,
+        SplitRelationshipsMutateStub splitRelationshipsMutateStub,
         AlgorithmExecutionScaffolding algorithmExecutionScaffolding
     ) {
         this.applicationsFacade = applicationsFacade;
         this.kgeMutateStub = kgeMutateStub;
+        this.splitRelationshipsMutateStub = splitRelationshipsMutateStub;
         this.algorithmExecutionScaffolding = algorithmExecutionScaffolding;
     }
 
@@ -54,8 +58,14 @@ public final class MachineLearningProcedureFacade {
         AlgorithmExecutionScaffolding algorithmExecutionScaffolding
     ) {
         var kgeMutateStub = new KgeMutateStub(genericStub, applicationsFacade);
+        var splitRelationshipsMutateStub = new SplitRelationshipsMutateStub(genericStub, applicationsFacade);
 
-        return new MachineLearningProcedureFacade(applicationsFacade, kgeMutateStub, algorithmExecutionScaffolding);
+        return new MachineLearningProcedureFacade(
+            applicationsFacade,
+            kgeMutateStub,
+            splitRelationshipsMutateStub,
+            algorithmExecutionScaffolding
+        );
     }
 
     public KgeMutateStub kgeMutateStub() {
@@ -88,6 +98,10 @@ public final class MachineLearningProcedureFacade {
             ),
             resultBuilder
         );
+    }
+
+    public SplitRelationshipsMutateStub splitRelationshipsMutateStub() {
+        return splitRelationshipsMutateStub;
     }
 
     private MachineLearningAlgorithmsStreamModeBusinessFacade streamMode() {

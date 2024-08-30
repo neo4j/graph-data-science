@@ -13,6 +13,7 @@ dependencies {
     implementation project(":core-write")
     implementation project(":logging")
     implementation project(":memory-usage")
+    implementation project(":ml-algo")
     implementation project(":progress-tracking")
     implementation project(":termination")
 }

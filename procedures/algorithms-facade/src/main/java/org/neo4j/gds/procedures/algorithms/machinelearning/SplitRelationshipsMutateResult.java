@@ -17,23 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.splitting;
+package org.neo4j.gds.procedures.algorithms.machinelearning;
 
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
-@SuppressWarnings("unused")
-public class MutateResult {
-
+public class SplitRelationshipsMutateResult {
     public final long preProcessingMillis;
     public final long computeMillis;
     public final long mutateMillis;
     public final long relationshipsWritten;
-
     public final Map<String, Object> configuration;
 
-    public MutateResult(
+    public SplitRelationshipsMutateResult(
         long preProcessingMillis,
         long computeMillis,
         long mutateMillis,
@@ -47,11 +45,23 @@ public class MutateResult {
         this.configuration = configuration;
     }
 
-    static class Builder extends AbstractResultBuilder<MutateResult> {
+    public static SplitRelationshipsMutateResult emptyFrom(
+        AlgorithmProcessingTimings timings,
+        Map<String, Object> configurationMap
+    ) {
+        return new SplitRelationshipsMutateResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.mutateOrWriteMillis,
+            0,
+            configurationMap
+        );
+    }
 
+    public static class Builder extends AbstractResultBuilder<SplitRelationshipsMutateResult> {
         @Override
-        public MutateResult build() {
-            return new MutateResult(
+        public SplitRelationshipsMutateResult build() {
+            return new SplitRelationshipsMutateResult(
                 preProcessingMillis,
                 computeMillis,
                 mutateMillis,
