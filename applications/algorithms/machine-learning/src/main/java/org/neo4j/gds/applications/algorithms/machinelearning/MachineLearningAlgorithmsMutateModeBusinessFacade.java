@@ -26,8 +26,11 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTempla
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
+import org.neo4j.gds.ml.splitting.EdgeSplitter;
+import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateConfig;
 
 import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.KGE;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.SplitRelationships;
 
 public class MachineLearningAlgorithmsMutateModeBusinessFacade {
     private final RequestScopedDependencies requestScopedDependencies;
@@ -62,6 +65,24 @@ public class MachineLearningAlgorithmsMutateModeBusinessFacade {
             KGE,
             estimation::kge,
             (graph, __) -> algorithms.kge(graph, configuration),
+            mutateStep,
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT splitRelationships(
+        GraphName graphName,
+        SplitRelationshipsMutateConfig configuration,
+        ResultBuilder<SplitRelationshipsMutateConfig, EdgeSplitter.SplitResult, RESULT, RelationshipsWritten> resultBuilder
+    ) {
+        var mutateStep = new SplitRelationshipsMutateStep();
+
+        return convenience.processRegularAlgorithmInMutateOrWriteMode(
+            graphName,
+            configuration,
+            SplitRelationships,
+            () -> estimation.splitRelationships(configuration),
+            (__, graphStore) -> algorithms.splitRelationships(graphStore, configuration),
             mutateStep,
             resultBuilder
         );

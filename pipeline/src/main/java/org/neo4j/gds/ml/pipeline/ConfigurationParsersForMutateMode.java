@@ -42,6 +42,7 @@ import org.neo4j.gds.kmeans.KmeansMutateConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationMutateConfig;
 import org.neo4j.gds.leiden.LeidenMutateConfig;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
+import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
 import org.neo4j.gds.pagerank.PageRankMutateConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
@@ -125,6 +126,7 @@ public class ConfigurationParsersForMutateMode {
             case SCC -> SccMutateConfig::of;
             case SingleSourceDijkstra -> AllShortestPathsDijkstraMutateConfig::of;
             case SpanningTree -> SpanningTreeMutateConfig::of;
+            case SplitRelationships -> SplitRelationshipsMutateConfig::of;
             case SteinerTree -> SteinerTreeMutateConfig::of;
             case TopologicalSort -> null;
             case ToUndirected -> ToUndirectedConfig::of;

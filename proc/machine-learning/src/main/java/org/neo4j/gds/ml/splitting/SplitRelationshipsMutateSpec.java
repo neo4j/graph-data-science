@@ -26,6 +26,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.machinelearning.SplitRelationshipsMutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.stream.Stream;
@@ -33,7 +34,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
 
 @GdsCallable(name = "gds.alpha.ml.splitRelationships.mutate", description = "Splits a graph into holdout and remaining relationship types and adds them to the graph.", executionMode = MUTATE_RELATIONSHIP)
-public class SplitRelationshipsMutateSpec implements AlgorithmSpec<SplitRelationships, EdgeSplitter.SplitResult,SplitRelationshipsMutateConfig, Stream<MutateResult>,SplitRelationshipsAlgorithmFactory> {
+public class SplitRelationshipsMutateSpec implements AlgorithmSpec<SplitRelationships, EdgeSplitter.SplitResult,SplitRelationshipsMutateConfig, Stream<SplitRelationshipsMutateResult>,SplitRelationshipsAlgorithmFactory> {
 
     @Override
     public String name() {
@@ -51,7 +52,7 @@ public class SplitRelationshipsMutateSpec implements AlgorithmSpec<SplitRelation
     }
 
     @Override
-    public ComputationResultConsumer<SplitRelationships, EdgeSplitter.SplitResult, SplitRelationshipsMutateConfig, Stream<MutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<SplitRelationships, EdgeSplitter.SplitResult, SplitRelationshipsMutateConfig, Stream<SplitRelationshipsMutateResult>> computationResultConsumer() {
         return new MutateComputationResultConsumer<>(this::resultBuilder) {
             @Override
             protected void updateGraphStore(
@@ -75,11 +76,11 @@ public class SplitRelationshipsMutateSpec implements AlgorithmSpec<SplitRelation
         };
     }
 
-    private  AbstractResultBuilder<MutateResult> resultBuilder(
+    private  AbstractResultBuilder<SplitRelationshipsMutateResult> resultBuilder(
         ComputationResult<SplitRelationships, EdgeSplitter.SplitResult, SplitRelationshipsMutateConfig> computeResult,
         ExecutionContext executionContext
     ) {
-        return new MutateResult.Builder();
+        return new SplitRelationshipsMutateResult.Builder();
     }
 
 }
