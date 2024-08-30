@@ -22,14 +22,18 @@ package org.neo4j.gds.procedures.pipelines;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public final class PipelinesProcedureFacade {
+    public static final String NO_VALUE = "__NO_VALUE";
+
     private final PipelineApplications pipelineApplications;
     private final User user;
 
@@ -77,6 +81,43 @@ public final class PipelinesProcedureFacade {
         var result = pipelineApplications.dropSilencingFailure(pipelineName);
 
         return Stream.ofNullable(result).map(pipeline -> PipelineCatalogResult.create(pipeline, pipelineName.value));
+    }
+
+    public Stream<PipelineExistsResult> exists(String pipelineNameAsString) {
+        var pipelineName = PipelineName.parse(pipelineNameAsString);
+
+        var pipelineType = pipelineApplications.exists(pipelineName);
+
+        //noinspection OptionalIsPresent
+        if (pipelineType.isEmpty()) return Stream.of(PipelineExistsResult.empty(pipelineName));
+
+        var result = new PipelineExistsResult(pipelineName.value, pipelineType.get(), true);
+
+        return Stream.of(result);
+    }
+
+    public Stream<PipelineCatalogResult> list(String pipelineNameAsString) {
+        if (pipelineNameAsString == null || pipelineNameAsString.equals(NO_VALUE)) {
+            var pipelineEntries = pipelineApplications.getAll();
+
+            return pipelineEntries.map(
+                entry -> PipelineCatalogResult.create(
+                    entry.pipeline(),
+                    entry.pipelineName()
+                )
+            );
+        }
+
+        var pipelineName = PipelineName.parse(pipelineNameAsString);
+
+        Optional<TrainingPipeline<?>> pipeline = pipelineApplications.getSingle(pipelineName);
+
+        //noinspection OptionalIsPresent
+        if (pipeline.isEmpty()) return Stream.empty();
+
+        var result = PipelineCatalogResult.create(pipeline.get(), pipelineName.value);
+
+        return Stream.of(result);
     }
 
     public Stream<NodePipelineInfoResult> selectFeatures(String pipelineName, Object nodeProperties) {

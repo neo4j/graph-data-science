@@ -23,6 +23,9 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 
+import java.util.Optional;
+import java.util.stream.Stream;
+
 /**
  * One day we can replace the big singleton with local state, and manage things better.
  * For now this is the groundwork, rolling out this half way house.
@@ -37,5 +40,27 @@ public class PipelineRepository {
 
     boolean exists(User user, PipelineName pipelineName) {
         return PipelineCatalog.exists(user.getUsername(), pipelineName.value);
+    }
+
+    Stream<PipelineCatalog.PipelineCatalogEntry> getAll(User user) {
+        return PipelineCatalog.getAllPipelines(user.getUsername());
+    }
+
+    Optional<TrainingPipeline<?>> getSingle(User user, PipelineName pipelineName) {
+        if (!exists(user, pipelineName)) return Optional.empty();
+
+        var pipeline = get(user, pipelineName);
+
+        return Optional.of(pipeline);
+    }
+
+    String getType(User user, PipelineName pipelineName) {
+        var pipeline = get(user, pipelineName);
+
+        return pipeline.type();
+    }
+
+    private TrainingPipeline<?> get(User user, PipelineName pipelineName) {
+        return PipelineCatalog.get(user.getUsername(), pipelineName.value);
     }
 }

@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.pipeline.catalog;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.CypherMapAccess;
-import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.pipelines.PipelineCatalogResult;
+import org.neo4j.gds.procedures.pipelines.PipelinesProcedureFacade;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -32,37 +32,25 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class PipelineListProc extends BaseProc {
-
-    private static final String NO_VALUE = "__NO_VALUE";
+public class PipelineListProc {
     private static final String DESCRIPTION = "Lists all pipelines contained in the pipeline catalog.";
+
+    @Context
+    public GraphDataScienceProcedures facade;
 
     @Procedure(name = "gds.pipeline.list", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<PipelineCatalogResult> list(@Name(value = "pipelineName", defaultValue = NO_VALUE) String pipelineName) {
-        if (pipelineName == null || pipelineName.equals(NO_VALUE)) {
-            var pipelines = PipelineCatalog.getAllPipelines(username());
-            return pipelines.map(pipe -> PipelineCatalogResult.create(pipe.pipeline(), pipe.pipelineName()));
-        } else {
-            CypherMapAccess.failOnBlank("pipelineName", pipelineName);
-            if (PipelineCatalog.exists(username(), pipelineName)) {
-                var pipeline = PipelineCatalog.get(username(), pipelineName);
-                return Stream.of(PipelineCatalogResult.create(pipeline, pipelineName));
-            } else {
-                return Stream.empty();
-            }
-        }
+    public Stream<PipelineCatalogResult> list(@Name(value = "pipelineName", defaultValue = PipelinesProcedureFacade.NO_VALUE) String pipelineName) {
+        return facade.pipelines().list(pipelineName);
     }
 
     @Procedure(name = "gds.beta.pipeline.list", mode = READ, deprecatedBy = "gds.pipeline.list")
     @Description(DESCRIPTION)
     @Internal
     @Deprecated(forRemoval = true)
-    public Stream<PipelineCatalogResult> betaList(@Name(value = "pipelineName", defaultValue = NO_VALUE) String pipelineName) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.beta.pipeline.list");
-        executionContext()
+    public Stream<PipelineCatalogResult> betaList(@Name(value = "pipelineName", defaultValue = PipelinesProcedureFacade.NO_VALUE) String pipelineName) {
+        facade.deprecatedProcedures().called("gds.beta.pipeline.list");
+        facade
             .log()
             .warn("The procedure `gds.beta.pipeline.list` is deprecated and will be removed in a future release. Please use `gds.pipeline.list` instead.");
 

@@ -20,7 +20,11 @@
 package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
+
+import java.util.Optional;
+import java.util.stream.Stream;
 
 class PipelineApplications {
     private final PipelineRepository pipelineRepository;
@@ -45,5 +49,26 @@ class PipelineApplications {
         if (!pipelineRepository.exists(user, pipelineName)) return null;
 
         return pipelineRepository.drop(user, pipelineName);
+    }
+
+    /**
+     * @return the pipeline type, if the pipeline exists. Bit of an overload :)
+     */
+    Optional<String> exists(PipelineName pipelineName) {
+        var pipelineExists = pipelineRepository.exists(user, pipelineName);
+
+        if (!pipelineExists) return Optional.empty();
+
+        var pipelineType = pipelineRepository.getType(user, pipelineName);
+
+        return Optional.of(pipelineType);
+    }
+
+    Stream<PipelineCatalog.PipelineCatalogEntry> getAll() {
+        return pipelineRepository.getAll(user);
+    }
+
+    Optional<TrainingPipeline<?>> getSingle(PipelineName pipelineName) {
+        return pipelineRepository.getSingle(user, pipelineName);
     }
 }

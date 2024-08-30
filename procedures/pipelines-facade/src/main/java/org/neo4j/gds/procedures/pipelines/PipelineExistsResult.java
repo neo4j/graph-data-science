@@ -17,9 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.pipeline.catalog;
+package org.neo4j.gds.procedures.pipelines;
 
-@SuppressWarnings("unused")
 public class PipelineExistsResult {
     public final String pipelineName;
     public final String pipelineType;
@@ -29,5 +28,9 @@ public class PipelineExistsResult {
         this.pipelineName = pipelineName;
         this.pipelineType = pipelineType;
         this.exists = exists;
+    }
+
+    static PipelineExistsResult empty(PipelineName pipelineName) {
+        return new PipelineExistsResult(pipelineName.value, "n/a", false);
     }
 }

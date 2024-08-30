@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.pipeline.catalog;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.CypherMapAccess;
-import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.pipelines.PipelineExistsResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -31,30 +31,16 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class PipelineExistsProc extends BaseProc {
-
+public class PipelineExistsProc {
     private static final String DESCRIPTION = "Checks if a given pipeline exists in the pipeline catalog.";
+
+    @Context
+    public GraphDataScienceProcedures facade;
 
     @Procedure(name = "gds.pipeline.exists", mode = READ)
     @Description(DESCRIPTION)
     public Stream<PipelineExistsResult> exists(@Name(value = "pipelineName") String pipelineName) {
-        CypherMapAccess.failOnBlank("pipelineName", pipelineName);
-
-        String type;
-        boolean exists;
-
-        if (PipelineCatalog.exists(username(), pipelineName)) {
-            exists = true;
-            type = PipelineCatalog.get(username(), pipelineName).type();
-        } else {
-            exists = false;
-            type = "n/a";
-        }
-        return Stream.of(new PipelineExistsResult(
-            pipelineName,
-            type,
-            exists
-        ));
+        return facade.pipelines().exists(pipelineName);
     }
 
     @Procedure(name = "gds.beta.pipeline.exists", mode = READ, deprecatedBy = "gds.pipeline.exists")
@@ -62,10 +48,8 @@ public class PipelineExistsProc extends BaseProc {
     @Internal
     @Deprecated(forRemoval = true)
     public Stream<PipelineExistsResult> betaExists(@Name(value = "pipelineName") String pipelineName) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.beta.pipeline.exists");
-        executionContext()
+        facade.deprecatedProcedures().called("gds.beta.pipeline.exists");
+        facade
             .log()
             .warn("The procedure `gds.beta.pipeline.exists` is deprecated and will be removed in a future release. Please use `gds.pipeline.exists` instead.");
 
