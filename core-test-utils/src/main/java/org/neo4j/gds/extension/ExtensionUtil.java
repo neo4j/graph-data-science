@@ -41,7 +41,7 @@ public final class ExtensionUtil {
         }
     }
 
-    static String getStringValueOfField(Field field) {
+    public static String getStringValueOfField(Field field) {
         if (field.getType() != String.class) {
             throw new ExtensionConfigurationException(String.format(
                 Locale.ENGLISH,
@@ -73,7 +73,7 @@ public final class ExtensionUtil {
         return value;
     }
 
-    static <T> void injectInstance(Object testInstance, T instance, Class<T> clazz) {
+    public static <T> void injectInstance(Object testInstance, T instance, Class<T> clazz) {
         Class<?> testClass = testInstance.getClass();
         do {
             stream(testClass.getDeclaredFields())
