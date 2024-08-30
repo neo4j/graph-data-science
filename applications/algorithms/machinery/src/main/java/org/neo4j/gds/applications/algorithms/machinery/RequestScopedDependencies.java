@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 
-import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.User;
@@ -34,7 +33,6 @@ import org.neo4j.gds.termination.TerminationFlag;
  * And especially useful when that list grows or shrinks - fewer sites to edit innit.
  */
 public final class RequestScopedDependencies {
-    private final AlgorithmMetaDataSetter algorithmMetaDataSetter;
     private final DatabaseId databaseId;
     private final GraphLoaderContext graphLoaderContext;
     private final TaskRegistryFactory taskRegistryFactory;
@@ -50,7 +48,6 @@ public final class RequestScopedDependencies {
      * I just really like the <code>RequestScopedDependencies.builder().build()</code> form
      */
     private RequestScopedDependencies(
-        AlgorithmMetaDataSetter algorithmMetaDataSetter,
         DatabaseId databaseId,
         GraphLoaderContext graphLoaderContext,
         TaskRegistryFactory taskRegistryFactory,
@@ -60,7 +57,6 @@ public final class RequestScopedDependencies {
         UserLogRegistryFactory userLogRegistryFactory,
         UserLogStore userLogStore
     ) {
-        this.algorithmMetaDataSetter = algorithmMetaDataSetter;
         this.databaseId = databaseId;
         this.graphLoaderContext = graphLoaderContext;
         this.taskRegistryFactory = taskRegistryFactory;
@@ -73,10 +69,6 @@ public final class RequestScopedDependencies {
 
     public static RequestScopedDependenciesBuilder builder() {
         return new RequestScopedDependenciesBuilder();
-    }
-
-    public AlgorithmMetaDataSetter getAlgorithmMetaDataSetter() {
-        return algorithmMetaDataSetter;
     }
 
     public DatabaseId getDatabaseId() {
@@ -117,7 +109,6 @@ public final class RequestScopedDependencies {
      * because trying to reconcile convenience across all usages is an error-prone form of coupling.
      */
     public static class RequestScopedDependenciesBuilder {
-        private AlgorithmMetaDataSetter algorithmMetaDataSetter;
         private DatabaseId databaseId;
         private GraphLoaderContext graphLoaderContext;
         private TerminationFlag terminationFlag;
@@ -126,11 +117,6 @@ public final class RequestScopedDependencies {
         private User user;
         private UserLogRegistryFactory userLogRegistryFactory;
         private UserLogStore userLogStore;
-
-        public RequestScopedDependenciesBuilder with(AlgorithmMetaDataSetter algorithmMetaDataSetter) {
-            this.algorithmMetaDataSetter = algorithmMetaDataSetter;
-            return this;
-        }
 
         public RequestScopedDependenciesBuilder with(DatabaseId databaseId) {
             this.databaseId = databaseId;
@@ -174,7 +160,6 @@ public final class RequestScopedDependencies {
 
         public RequestScopedDependencies build() {
             return new RequestScopedDependencies(
-                algorithmMetaDataSetter,
                 databaseId,
                 graphLoaderContext,
                 taskRegistryFactory,

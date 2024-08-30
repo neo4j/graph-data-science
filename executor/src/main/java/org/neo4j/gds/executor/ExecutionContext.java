@@ -22,7 +22,6 @@ package org.neo4j.gds.executor;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.NodeLookup;
@@ -55,8 +54,6 @@ public interface ExecutionContext {
     TerminationMonitor terminationMonitor();
 
     CloseableResourceRegistry closeableResourceRegistry();
-
-    AlgorithmMetaDataSetter algorithmMetaDataSetter();
 
     NodeLookup nodeLookup();
 
@@ -125,11 +122,6 @@ public interface ExecutionContext {
         @Override
         public Log log() {
             return Log.noOpLog();
-        }
-
-        @Override
-        public AlgorithmMetaDataSetter algorithmMetaDataSetter() {
-            return AlgorithmMetaDataSetter.EMPTY;
         }
 
         @Override

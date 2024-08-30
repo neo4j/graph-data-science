@@ -79,8 +79,6 @@ public class ProcedureExecutor<
         algoSpec.preProcessConfig(configuration, executionContext);
         CONFIG config = executorSpec.configParser(algoSpec.newConfigFunction(), executionContext).processInput(configuration);
 
-        executionContext.algorithmMetaDataSetter().set(config);
-
         var graphCreation = executorSpec.graphCreationFactory(executionContext).create(config, graphName);
 
         var memoryEstimationInBytes = graphCreation.validateMemoryEstimation(algoSpec.algorithmFactory(executionContext));

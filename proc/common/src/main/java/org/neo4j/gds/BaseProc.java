@@ -35,7 +35,6 @@ import org.neo4j.gds.procedures.TransactionNodeLookup;
 import org.neo4j.gds.procedures.integration.TransactionTerminationMonitor;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.gds.transaction.EmptyTransactionContext;
-import org.neo4j.gds.transaction.TransactionAlgorithmMetaDataSetter;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -107,7 +106,6 @@ public abstract class BaseProc {
                 .username(username())
                 .terminationMonitor(new TransactionTerminationMonitor(transaction))
                 .closeableResourceRegistry(new TransactionCloseableResourceRegistry(transaction))
-                .algorithmMetaDataSetter(new TransactionAlgorithmMetaDataSetter(transaction))
                 .nodeLookup(new TransactionNodeLookup(transaction))
                 .isGdsAdmin(transactionContext().isGdsAdmin())
                 .metricsFacade(metricsFacade)

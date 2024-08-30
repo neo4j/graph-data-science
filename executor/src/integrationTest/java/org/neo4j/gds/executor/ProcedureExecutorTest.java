@@ -22,7 +22,6 @@ package org.neo4j.gds.executor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
@@ -142,7 +141,6 @@ class ProcedureExecutorTest {
             .dependencyResolver(Neo4jProxy.emptyDependencyResolver())
             .modelCatalog(ModelCatalog.EMPTY)
             .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
-            .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
             .nodeLookup(NodeLookup.EMPTY)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .metricsFacade(MetricsFacade.PASSTHROUGH_METRICS_FACADE)

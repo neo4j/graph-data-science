@@ -64,7 +64,6 @@ import java.util.function.Function;
  * We use this at request time to construct the facade that the procedures call.
  */
 public class GraphDataScienceProceduresProvider implements ThrowingFunction<Context, GraphDataScienceProcedures, ProcedureException> {
-    private final AlgorithmMetaDataSetterService algorithmMetaDataSetterService = new AlgorithmMetaDataSetterService();
     private final DatabaseIdAccessor databaseIdAccessor = new DatabaseIdAccessor();
     private final KernelTransactionAccessor kernelTransactionAccessor = new KernelTransactionAccessor();
     private final ProcedureTransactionAccessor procedureTransactionAccessor = new ProcedureTransactionAccessor();
@@ -157,7 +156,6 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         var procedureCallContext = context.procedureCallContext();
         var procedureTransaction = procedureTransactionAccessor.getProcedureTransaction(context);
 
-        var algorithmMetaDataSetter = algorithmMetaDataSetterService.getAlgorithmMetaDataSetter(kernelTransaction);
         var databaseId = databaseIdAccessor.getDatabaseId(graphDatabaseService);
         var procedureReturnColumns = new ProcedureCallContextReturnColumns(procedureCallContext);
         var terminationFlag = terminationFlagAccessor.createTerminationFlag(kernelTransaction);
@@ -179,7 +177,6 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         );
 
         var requestScopedDependencies = RequestScopedDependencies.builder()
-            .with(algorithmMetaDataSetter)
             .with(databaseId)
             .with(graphLoaderContext)
             .with(taskRegistryFactory)

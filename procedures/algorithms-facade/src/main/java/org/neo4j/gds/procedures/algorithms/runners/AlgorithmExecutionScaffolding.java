@@ -97,8 +97,6 @@ public class AlgorithmExecutionScaffolding {
             requestScopedDependencies.getUser()
         );
 
-        requestScopedDependencies.getAlgorithmMetaDataSetter().set(configuration);
-
         return algorithm.compute(graphName, configuration, resultBuilder);
     }
 }

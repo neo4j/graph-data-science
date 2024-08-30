@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.NodeLookup;
@@ -190,7 +189,6 @@ class LinkPredictionTrainingPipelineTest {
             .username("")
             .terminationMonitor(TerminationMonitor.EMPTY)
             .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
-            .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
             .nodeLookup(NodeLookup.EMPTY)
             .returnColumns(ProcedureReturnColumns.EMPTY)
             .modelCatalog(ModelCatalog.EMPTY)
@@ -236,7 +234,6 @@ class LinkPredictionTrainingPipelineTest {
             .modelCatalog(modelCatalog)
             .terminationMonitor(TerminationMonitor.EMPTY)
             .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
-            .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
             .nodeLookup(NodeLookup.EMPTY)
             .returnColumns(ProcedureReturnColumns.EMPTY)
             .isGdsAdmin(false)
@@ -281,7 +278,6 @@ class LinkPredictionTrainingPipelineTest {
             .modelCatalog(modelCatalog)
             .terminationMonitor(TerminationMonitor.EMPTY)
             .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
-            .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
             .nodeLookup(NodeLookup.EMPTY)
             .returnColumns(ProcedureReturnColumns.EMPTY)
             .isGdsAdmin(false)

@@ -20,7 +20,6 @@
 package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.NodeLookup;
@@ -121,7 +120,6 @@ class WriteProcCancellationTest extends BaseTest {
                 .log(Log.noOpLog())
                 .terminationMonitor(TerminationMonitor.EMPTY)
                 .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
-                .algorithmMetaDataSetter(AlgorithmMetaDataSetter.EMPTY)
                 .nodeLookup(NodeLookup.EMPTY)
                 .returnColumns(ProcedureReturnColumns.EMPTY)
                 .modelCatalog(ModelCatalog.EMPTY)
