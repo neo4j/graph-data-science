@@ -19,16 +19,4 @@
  */
 package org.neo4j.gds.modularity;
 
-import org.neo4j.gds.annotation.ValueClass;
-
-@ValueClass
-public interface CommunityModularity {
-
-    long communityId();
-    double modularity();
-
-    static CommunityModularity of(long communityId, double modularity) {
-        return ImmutableCommunityModularity.of(communityId, modularity);
-    }
-    
-}
+public record CommunityModularity(long communityId, double modularity){}

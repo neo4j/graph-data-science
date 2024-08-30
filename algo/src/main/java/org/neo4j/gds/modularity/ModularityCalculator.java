@@ -111,7 +111,7 @@ public final class ModularityCalculator extends Algorithm<ModularityResult> {
             var Kc = totalCommunityRelationships.get(mappedCommunityId);
             var modularity = (ec - Kc * Kc * (1.0 / totalRelWeight)) / totalRelWeight;
             totalModularity.add(modularity);
-            communityModularities.set(resultIndex++, CommunityModularity.of(communityId, modularity));
+            communityModularities.set(resultIndex++, new CommunityModularity(communityId, modularity));
         }
 
         return new ModularityResult(

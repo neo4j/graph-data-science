@@ -77,8 +77,8 @@ class ModularityCalculatorTest {
 
         assertThat(modularities)
             .containsExactlyInAnyOrder(
-                CommunityModularity.of(startingId, community_0_score),
-                CommunityModularity.of(startingId + 5L, community_5_score)
+                new CommunityModularity(startingId, community_0_score),
+                new CommunityModularity(startingId + 5L, community_5_score)
             );
     }
 
