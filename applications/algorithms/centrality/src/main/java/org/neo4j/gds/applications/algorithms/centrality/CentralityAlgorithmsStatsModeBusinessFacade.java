@@ -34,15 +34,15 @@ import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankStatsConfig;
 
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ArticleRank;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ArticulationPoints;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BetweennessCentrality;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.CELF;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ClosenessCentrality;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.DegreeCentrality;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.EigenVector;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.HarmonicCentrality;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.PageRank;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.ArticleRank;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.ArticulationPoints;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.BetweennessCentrality;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.CELF;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.ClosenessCentrality;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.DegreeCentrality;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.EigenVector;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.HarmonicCentrality;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.PageRank;
 
 public class CentralityAlgorithmsStatsModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;

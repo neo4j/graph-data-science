@@ -23,7 +23,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
+import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.loading.GraphResources;
@@ -66,7 +66,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         GraphName graphName,
         CONFIGURATION configuration,
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
-        LabelForProgressTracking label,
+        Algorithm algorithmMetadata,
         Supplier<MemoryEstimation> estimationFactory,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
         MutateOrWriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> mutateOrWriteStep,
@@ -87,7 +87,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             configuration,
             graphResources.graph(),
             graphResources.graphStore(),
-            label,
+            algorithmMetadata,
             estimationFactory,
             algorithmComputation,
             timingsBuilder
@@ -120,7 +120,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         GraphName graphName,
         CONFIGURATION configuration,
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
-        LabelForProgressTracking label,
+        Algorithm algorithmMetadata,
         Supplier<MemoryEstimation> estimationFactory,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
         StreamResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
@@ -139,7 +139,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             configuration,
             graphResources.graph(),
             graphResources.graphStore(),
-            label,
+            algorithmMetadata,
             estimationFactory,
             algorithmComputation,
             timingsBuilder
@@ -160,7 +160,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         GraphName graphName,
         CONFIGURATION configuration,
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
-        LabelForProgressTracking label,
+        Algorithm algorithmMetadata,
         Supplier<MemoryEstimation> estimationFactory,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
         StatsResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
@@ -178,7 +178,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             configuration,
             graphResources.graph(),
             graphResources.graphStore(),
-            label,
+            algorithmMetadata,
             estimationFactory,
             algorithmComputation,
             timingsBuilder
@@ -197,7 +197,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         CONFIGURATION configuration,
         Graph graph,
         GraphStore graphStore,
-        LabelForProgressTracking label,
+        Algorithm algorithmMetadata,
         Supplier<MemoryEstimation> estimationFactory,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
         AlgorithmProcessingTimingsBuilder timingsBuilder
@@ -207,11 +207,11 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             return Optional.empty();
         }
 
-        memoryGuard.assertAlgorithmCanRun(label, configuration, graph, estimationFactory);
+        memoryGuard.assertAlgorithmCanRun(algorithmMetadata, configuration, graph, estimationFactory);
         // do the actual computation
         var result = computeWithTiming(
             timingsBuilder,
-            label,
+            algorithmMetadata,
             algorithmComputation,
             graph,
             graphStore
@@ -262,23 +262,23 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
 
     <RESULT_FROM_ALGORITHM> RESULT_FROM_ALGORITHM computeWithTiming(
         AlgorithmProcessingTimingsBuilder timingsBuilder,
-        LabelForProgressTracking label,
+        Algorithm algorithmMetadata,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
         Graph graph,
         GraphStore graphStore
     ) {
         try (ProgressTimer ignored = ProgressTimer.start(timingsBuilder::withComputeMillis)) {
-            return computeWithMetric(label, algorithmComputation, graph, graphStore);
+            return computeWithMetric(algorithmMetadata, algorithmComputation, graph, graphStore);
         }
     }
 
     private <RESULT_FROM_ALGORITHM> RESULT_FROM_ALGORITHM computeWithMetric(
-        LabelForProgressTracking label,
+        Algorithm algorithmMetadata,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
         Graph graph,
         GraphStore graphStore
     ) {
-        var executionMetric = algorithmMetricsService.create(label.value);
+        var executionMetric = algorithmMetricsService.create(algorithmMetadata.labelForProgressTracking);
 
         try (executionMetric) {
             executionMetric.start();

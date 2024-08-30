@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
 import org.neo4j.gds.k1coloring.K1ColoringWriteConfig;
 
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.K1Coloring;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.K1Coloring;
 
 class K1ColoringWriteStep implements MutateOrWriteStep<K1ColoringResult, Void> {
     private final WriteToDatabase writeToDatabase;

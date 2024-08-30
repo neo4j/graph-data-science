@@ -30,7 +30,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.scc.SccAlphaWriteConfig;
 
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.SCC;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.SCC;
 
 class SccAlphaWriteStep implements MutateOrWriteStep<HugeLongArray, NodePropertiesWritten> {
     private final WriteToDatabase writeToDatabase;

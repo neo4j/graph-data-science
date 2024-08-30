@@ -30,10 +30,10 @@ import org.neo4j.gds.similarity.knn.KnnStatsConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
 
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FilteredKNN;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FilteredNodeSimilarity;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KNN;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.NodeSimilarity;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.FilteredKNN;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.FilteredNodeSimilarity;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.KNN;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.NodeSimilarity;
 
 public class SimilarityAlgorithmsStatsModeBusinessFacade {
     private final SimilarityAlgorithmsEstimationModeBusinessFacade estimationFacade;

@@ -24,7 +24,7 @@ import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
-import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
+import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.dag.longestPath.DagLongestPathStreamConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
@@ -47,19 +47,19 @@ import org.neo4j.gds.traversal.RandomWalkStreamConfig;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.AStar;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.AllShortestPaths;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BFS;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BellmanFord;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.DFS;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.DeltaStepping;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Dijkstra;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.LongestPath;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.RandomWalk;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.SingleSourceDijkstra;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.SteinerTree;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.TopologicalSort;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Yens;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.AStar;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.AllShortestPaths;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.BFS;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.BellmanFord;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.DFS;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.DeltaStepping;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.Dijkstra;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.LongestPath;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.RandomWalk;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.SingleSourceDijkstra;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.SteinerTree;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.TopologicalSort;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.Yens;
 
 /**
  * Here is the top level business facade for all your path finding stream needs.
@@ -255,7 +255,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         return convenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
-            LabelForProgressTracking.SpanningTree,
+            Algorithm.SpanningTree,
             estimation::spanningTree,
             (graph, __) -> algorithms.spanningTree(graph, configuration),
             resultBuilder

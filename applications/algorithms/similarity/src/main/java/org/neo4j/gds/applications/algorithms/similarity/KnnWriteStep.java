@@ -32,7 +32,7 @@ import org.neo4j.gds.similarity.knn.KnnWriteConfig;
 
 import java.util.Map;
 
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KNN;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.KNN;
 
 final class KnnWriteStep implements MutateOrWriteStep<KnnResult, Pair<RelationshipsWritten, Map<String, Object>>> {
     private final KnnWriteConfig configuration;

@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
 
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.GraphSage;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.GraphSage;
 
 class Node2VecWriteStep implements MutateOrWriteStep<Node2VecResult, NodePropertiesWritten> {
     private final WriteToDatabase writeToDatabase;

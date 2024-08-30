@@ -33,8 +33,8 @@ import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
 import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FastRP;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.HashGNN;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.FastRP;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.HashGNN;
 
 public class NodeEmbeddingAlgorithmsMutateModeBusinessFacade {
     private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimation;

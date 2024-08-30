@@ -35,10 +35,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FastRP;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.GraphSage;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.HashGNN;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Node2Vec;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.FastRP;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.GraphSage;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.HashGNN;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.Node2Vec;
 
 public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
     private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade;

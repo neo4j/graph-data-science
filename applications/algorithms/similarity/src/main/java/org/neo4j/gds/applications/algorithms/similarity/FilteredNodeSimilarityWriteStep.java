@@ -32,7 +32,7 @@ import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
 import java.util.Map;
 
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FilteredNodeSimilarity;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.FilteredNodeSimilarity;
 
 final class FilteredNodeSimilarityWriteStep implements MutateOrWriteStep<NodeSimilarityResult, Pair<RelationshipsWritten, Map<String, Object>>> {
     private final SimilarityWrite similarityWrite;

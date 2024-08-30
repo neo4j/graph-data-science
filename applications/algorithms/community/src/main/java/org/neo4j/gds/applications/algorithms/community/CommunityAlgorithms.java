@@ -23,7 +23,7 @@ import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
-import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
+import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCut;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
@@ -100,7 +100,7 @@ public class CommunityAlgorithms {
 
     ApproxMaxKCutResult approximateMaximumKCut(Graph graph, ApproxMaxKCutBaseConfig configuration) {
         var task = Tasks.iterativeFixed(
-            LabelForProgressTracking.ApproximateMaximumKCut.value,
+            Algorithm.ApproximateMaximumKCut.labelForProgressTracking,
             () -> List.of(
                 Tasks.leaf("place nodes randomly", graph.nodeCount()),
                 searchTask(graph.nodeCount(), configuration.vnsMaxNeighborhoodOrder())
@@ -122,7 +122,7 @@ public class CommunityAlgorithms {
 
     ConductanceResult conductance(Graph graph, ConductanceBaseConfig configuration) {
         var task = Tasks.task(
-            LabelForProgressTracking.Conductance.value,
+            Algorithm.Conductance.labelForProgressTracking,
             Tasks.leaf("count relationships", graph.nodeCount()),
             Tasks.leaf("accumulate counts"),
             Tasks.leaf("perform conductance computations")
@@ -146,7 +146,7 @@ public class CommunityAlgorithms {
 
     K1ColoringResult k1Coloring(Graph graph, K1ColoringBaseConfig configuration) {
         var task = Tasks.iterativeDynamic(
-            LabelForProgressTracking.K1Coloring.value,
+            Algorithm.K1Coloring.labelForProgressTracking,
             () -> List.of(
                 Tasks.leaf("color nodes", graph.nodeCount()),
                 Tasks.leaf("validate nodes", graph.nodeCount())
@@ -171,7 +171,7 @@ public class CommunityAlgorithms {
     }
 
     KCoreDecompositionResult kCore(Graph graph, AlgoBaseConfig configuration) {
-        var task = Tasks.leaf(LabelForProgressTracking.KCore.value, graph.nodeCount());
+        var task = Tasks.leaf(Algorithm.KCore.labelForProgressTracking, graph.nodeCount());
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
         var algorithm = new KCoreDecomposition(graph, configuration.concurrency(), progressTracker, terminationFlag);
@@ -202,7 +202,7 @@ public class CommunityAlgorithms {
 
     LabelPropagationResult labelPropagation(Graph graph, LabelPropagationBaseConfig configuration) {
         var task = Tasks.task(
-            LabelForProgressTracking.LabelPropagation.value,
+            Algorithm.LabelPropagation.labelForProgressTracking,
             Tasks.leaf("Initialization", graph.relationshipCount()),
             Tasks.iterativeDynamic(
                 "Assign labels",
@@ -229,7 +229,7 @@ public class CommunityAlgorithms {
             tasks.add(IntersectingTriangleCountFactory.triangleCountProgressTask(graph));
         }
         tasks.add(Tasks.leaf("Calculate Local Clustering Coefficient", graph.nodeCount()));
-        var task = Tasks.task(LabelForProgressTracking.LCC.value, tasks);
+        var task = Tasks.task(Algorithm.LCC.labelForProgressTracking, tasks);
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
         var parameters = configuration.toParameters();
@@ -265,7 +265,7 @@ public class CommunityAlgorithms {
             iterations
         );
         var initializationTask = Tasks.leaf("Initialization", graph.nodeCount());
-        var task = Tasks.task(LabelForProgressTracking.Leiden.value, initializationTask, iterativeTasks);
+        var task = Tasks.task(Algorithm.Leiden.labelForProgressTracking, initializationTask, iterativeTasks);
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
         var parameters = configuration.toParameters();
@@ -291,7 +291,7 @@ public class CommunityAlgorithms {
 
     LouvainResult louvain(Graph graph, LouvainBaseConfig configuration) {
         var task = Tasks.iterativeDynamic(
-            LabelForProgressTracking.Louvain.value,
+            Algorithm.Louvain.labelForProgressTracking,
             () -> List.of(ModularityOptimizationFactory.progressTask(graph, configuration.maxIterations())),
             configuration.maxLevels()
         );
@@ -326,7 +326,7 @@ public class CommunityAlgorithms {
 
     ModularityOptimizationResult modularityOptimization(Graph graph, ModularityOptimizationBaseConfig configuration) {
         var task = Tasks.task(
-            LabelForProgressTracking.ModularityOptimization.value,
+            Algorithm.ModularityOptimization.labelForProgressTracking,
             Tasks.task(
                 "initialization",
                 K1ColoringAlgorithmFactory.k1ColoringProgressTask(graph, createModularityConfig())
@@ -365,7 +365,7 @@ public class CommunityAlgorithms {
     HugeLongArray scc(Graph graph, SccCommonBaseConfig configuration) {
         var progressTracker = progressTrackerCreator.createProgressTracker(
             configuration,
-            Tasks.leaf(LabelForProgressTracking.SCC.value, graph.nodeCount())
+            Tasks.leaf(Algorithm.SCC.labelForProgressTracking, graph.nodeCount())
         );
 
         var algorithm = new Scc(graph, progressTracker, terminationFlag);
@@ -374,7 +374,7 @@ public class CommunityAlgorithms {
     }
 
     TriangleCountResult triangleCount(Graph graph, TriangleCountBaseConfig configuration) {
-        var task = Tasks.leaf(LabelForProgressTracking.TriangleCount.value, graph.nodeCount());
+        var task = Tasks.leaf(Algorithm.TriangleCount.labelForProgressTracking, graph.nodeCount());
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
         var parameters = configuration.toParameters();
@@ -403,7 +403,7 @@ public class CommunityAlgorithms {
     }
 
     DisjointSetStruct wcc(Graph graph, WccBaseConfig configuration) {
-        var task = Tasks.leaf(LabelForProgressTracking.WCC.value, graph.relationshipCount());
+        var task = Tasks.leaf(Algorithm.WCC.labelForProgressTracking, graph.relationshipCount());
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
         if (configuration.hasRelationshipWeightProperty() && configuration.threshold() == 0) {
@@ -424,15 +424,15 @@ public class CommunityAlgorithms {
     }
 
     private Task constructKMeansProgressTask(Graph graph, KmeansBaseConfig configuration) {
-        var label = LabelForProgressTracking.KMeans;
+        var label = Algorithm.KMeans.labelForProgressTracking;
 
         var iterations = configuration.numberOfRestarts();
         if (iterations == 1) {
-            return kMeansTask(graph, label.value, configuration);
+            return kMeansTask(graph, label, configuration);
         }
 
         return Tasks.iterativeFixed(
-            label.value,
+            label,
             () -> List.of(kMeansTask(graph, "KMeans Iteration", configuration)),
             iterations
         );

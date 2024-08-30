@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientWriteConfig;
 
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Leiden;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.Leiden;
 
 class LccWriteStep implements MutateOrWriteStep<LocalClusteringCoefficientResult, NodePropertiesWritten> {
     private final WriteToDatabase writeToDatabase;

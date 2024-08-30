@@ -27,7 +27,7 @@ import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 import org.neo4j.gds.scaleproperties.ScalePropertiesWriteConfig;
 
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ScaleProperties;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.ScaleProperties;
 
 public class MiscellaneousApplicationsWriteModeBusinessFacade {
     private final MiscellaneousApplicationsEstimationModeBusinessFacade estimationFacade;

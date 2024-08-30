@@ -26,7 +26,7 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
+import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -43,8 +43,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Dijkstra;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KNN;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.Dijkstra;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.KNN;
 
 /**
  * Pinky promise: next time we add or change functionality here,
@@ -80,7 +80,7 @@ class DefaultAlgorithmProcessingTemplateTest {
         )).thenReturn(new GraphResources(graphStore, graph, ResultStore.EMPTY));
 
         // We need it to not be null :shrug:
-        when(algorithmMetricsService.create(Dijkstra.value)).thenReturn(mock(ExecutionMetric.class));
+        when(algorithmMetricsService.create(Dijkstra.labelForProgressTracking)).thenReturn(mock(ExecutionMetric.class));
 
         //noinspection unchecked
         AlgorithmComputation<ExampleResult> computation = mock(AlgorithmComputation.class);
@@ -175,7 +175,7 @@ class DefaultAlgorithmProcessingTemplateTest {
         };
 
         // We need it to not be null :shrug:
-        when(algorithmMetricsService.create(KNN.value)).thenReturn(mock(ExecutionMetric.class));
+        when(algorithmMetricsService.create(KNN.labelForProgressTracking)).thenReturn(mock(ExecutionMetric.class));
 
         //noinspection unchecked
         AlgorithmComputation<ExampleResult> computation = mock(AlgorithmComputation.class);
@@ -233,7 +233,7 @@ class DefaultAlgorithmProcessingTemplateTest {
             @Override
             <RESULT_FROM_ALGORITHM> RESULT_FROM_ALGORITHM computeWithTiming(
                 AlgorithmProcessingTimingsBuilder timingsBuilder,
-                LabelForProgressTracking label,
+                Algorithm algorithmMetadata,
                 AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
                 Graph graph,
                 GraphStore graphStore

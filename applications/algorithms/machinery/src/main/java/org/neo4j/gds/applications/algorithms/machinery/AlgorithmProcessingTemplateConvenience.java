@@ -20,7 +20,7 @@
 package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
+import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.loading.PostLoadValidationHook;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -44,7 +44,7 @@ public class AlgorithmProcessingTemplateConvenience {
         GraphName graphName,
         CONFIGURATION configuration,
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
-        LabelForProgressTracking label,
+        Algorithm algorithmMetadata,
         Supplier<MemoryEstimation> estimationFactory,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
         MutateOrWriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> mutateOrWriteStep,
@@ -55,7 +55,7 @@ public class AlgorithmProcessingTemplateConvenience {
             graphName,
             configuration,
             postGraphStoreLoadValidationHooks,
-            label,
+            algorithmMetadata,
             estimationFactory,
             algorithmComputation,
             mutateOrWriteStep,
@@ -69,7 +69,7 @@ public class AlgorithmProcessingTemplateConvenience {
     public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER processRegularAlgorithmInMutateOrWriteMode(
         GraphName graphName,
         CONFIGURATION configuration,
-        LabelForProgressTracking label,
+        Algorithm algorithmMetadata,
         Supplier<MemoryEstimation> estimationFactory,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
         MutateOrWriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> mutateStep,
@@ -80,7 +80,7 @@ public class AlgorithmProcessingTemplateConvenience {
             graphName,
             configuration,
             Optional.empty(),
-            label,
+            algorithmMetadata,
             estimationFactory,
             algorithmComputation,
             mutateStep,
@@ -94,7 +94,7 @@ public class AlgorithmProcessingTemplateConvenience {
     public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM> RESULT_TO_CALLER processRegularAlgorithmInStatsMode(
         GraphName graphName,
         CONFIGURATION configuration,
-        LabelForProgressTracking label,
+        Algorithm algorithmMetadata,
         Supplier<MemoryEstimation> estimationFactory,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
         StatsResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
@@ -104,7 +104,7 @@ public class AlgorithmProcessingTemplateConvenience {
             graphName,
             configuration,
             Optional.empty(),
-            label,
+            algorithmMetadata,
             estimationFactory,
             algorithmComputation,
             resultBuilder
@@ -114,7 +114,7 @@ public class AlgorithmProcessingTemplateConvenience {
     public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM> Stream<RESULT_TO_CALLER> processAlgorithmInStreamMode(
         GraphName graphName,
         CONFIGURATION configuration,
-        LabelForProgressTracking label,
+        Algorithm algorithmMetadata,
         Supplier<MemoryEstimation> estimationFactory,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
         StreamResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder,
@@ -126,7 +126,7 @@ public class AlgorithmProcessingTemplateConvenience {
             graphName,
             configuration,
             postGraphStoreLoadValidationHooks,
-            label,
+            algorithmMetadata,
             estimationFactory,
             algorithmComputation,
             resultBuilder
@@ -135,7 +135,7 @@ public class AlgorithmProcessingTemplateConvenience {
     public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM> Stream<RESULT_TO_CALLER> processRegularAlgorithmInStreamMode(
         GraphName graphName,
         CONFIGURATION configuration,
-        LabelForProgressTracking label,
+        Algorithm algorithmMetadata,
         Supplier<MemoryEstimation> estimationFactory,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
         StreamResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
@@ -143,7 +143,7 @@ public class AlgorithmProcessingTemplateConvenience {
         return processAlgorithmInStreamMode(
             graphName,
             configuration,
-            label,
+            algorithmMetadata,
             estimationFactory,
             algorithmComputation,
             resultBuilder,

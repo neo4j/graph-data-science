@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Dijkstra;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.Dijkstra;
 
 /**
  * This is a saga of mocks. In my defense,

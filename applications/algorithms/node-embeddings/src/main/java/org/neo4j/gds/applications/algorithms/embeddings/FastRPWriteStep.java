@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 import org.neo4j.gds.embeddings.fastrp.FastRPWriteConfig;
 
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.FastRP;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.FastRP;
 
 class FastRPWriteStep implements MutateOrWriteStep<FastRPResult, NodePropertiesWritten> {
     private final WriteToDatabase writeToDatabase;

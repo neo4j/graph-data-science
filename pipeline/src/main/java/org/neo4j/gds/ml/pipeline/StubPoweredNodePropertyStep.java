@@ -22,16 +22,16 @@ package org.neo4j.gds.ml.pipeline;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
-import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
-import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.CanonicalProcedureName;
-import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -50,20 +50,20 @@ class StubPoweredNodePropertyStep implements ExecutableNodePropertyStep {
     private final Map<String, Object> configuration;
     private final List<String> contextNodeLabels;
     private final List<String> contextRelationshipTypes;
-    private final LabelForProgressTracking labelForProgressTracking;
+    private final Algorithm algorithmMetadata;
 
     StubPoweredNodePropertyStep(
         CanonicalProcedureName canonicalProcedureName,
         Map<String, Object> configuration,
         List<String> contextNodeLabels,
         List<String> contextRelationshipTypes,
-        LabelForProgressTracking labelForProgressTracking
+        Algorithm algorithmMetadata
     ) {
         this.canonicalProcedureName = canonicalProcedureName;
         this.configuration = configuration;
         this.contextNodeLabels = contextNodeLabels;
         this.contextRelationshipTypes = contextRelationshipTypes;
-        this.labelForProgressTracking = labelForProgressTracking;
+        this.algorithmMetadata = algorithmMetadata;
     }
 
     @Override
@@ -146,7 +146,7 @@ class StubPoweredNodePropertyStep implements ExecutableNodePropertyStep {
 
     @Override
     public String rootTaskName() {
-        return labelForProgressTracking.value;
+        return algorithmMetadata.labelForProgressTracking;
     }
 
     @Override

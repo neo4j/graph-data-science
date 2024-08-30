@@ -29,7 +29,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 import java.util.List;
 import java.util.Optional;
 
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.GraphSage;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.GraphSage;
 
 public class GraphSageAlgorithmProcessing {
     private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade;

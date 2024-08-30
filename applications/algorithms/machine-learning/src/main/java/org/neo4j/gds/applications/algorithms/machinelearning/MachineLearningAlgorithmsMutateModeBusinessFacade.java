@@ -27,7 +27,7 @@ import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KGE;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.KGE;
 
 public class MachineLearningAlgorithmsMutateModeBusinessFacade {
     private final RequestScopedDependencies requestScopedDependencies;

@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 import org.neo4j.gds.scaleproperties.ScalePropertiesWriteConfig;
 
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ScaleProperties;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.ScaleProperties;
 
 class ScalePropertiesWriteStep implements MutateOrWriteStep<ScalePropertiesResult, NodePropertiesWritten> {
     private final WriteToDatabase writeToDatabase;

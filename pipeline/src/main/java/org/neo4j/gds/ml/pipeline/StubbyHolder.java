@@ -87,6 +87,7 @@ class StubbyHolder {
             case BetaClosenessCentrality -> new BetaClosenessCentralityStub();
             case BetweennessCentrality -> new BetweennessCentralityStub();
             case BFS -> new BreadthFirstSearchStub();
+            case Bridges -> null;
             case CELF -> new CelfStub();
             case ClosenessCentrality -> new ClosenessCentralityStub();
             case CollapsePath -> new CollapsePathStub();

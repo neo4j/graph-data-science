@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.triangle.TriangleCountWriteConfig;
 
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.TriangleCount;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.TriangleCount;
 
 class TriangleCountWriteStep implements MutateOrWriteStep<TriangleCountResult, NodePropertiesWritten> {
     private final WriteToDatabase writeToDatabase;

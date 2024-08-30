@@ -24,7 +24,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
 import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
-import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
+import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.pagerank.PageRankResult;
@@ -33,16 +33,16 @@ import org.neo4j.gds.pagerank.PageRankWriteConfig;
 class PageRankWriteStep implements MutateOrWriteStep<PageRankResult, NodePropertiesWritten> {
     private final WriteToDatabase writeToDatabase;
     private final PageRankWriteConfig configuration;
-    private final LabelForProgressTracking label;
+    private final Algorithm algorithmMetadata;
 
     PageRankWriteStep(
         WriteToDatabase writeToDatabase,
         PageRankWriteConfig configuration,
-        LabelForProgressTracking label
+        Algorithm algorithmMetadata
     ) {
         this.writeToDatabase = writeToDatabase;
         this.configuration = configuration;
-        this.label = label;
+        this.algorithmMetadata = algorithmMetadata;
     }
 
     @Override
@@ -59,7 +59,7 @@ class PageRankWriteStep implements MutateOrWriteStep<PageRankResult, NodePropert
             resultStore,
             configuration,
             configuration,
-            label,
+            algorithmMetadata,
             jobId,
             result.nodePropertyValues()
         );

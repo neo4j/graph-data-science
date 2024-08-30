@@ -32,7 +32,7 @@ import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.louvain.LouvainWriteConfig;
 
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Louvain;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.Louvain;
 
 class LouvainWriteStep implements MutateOrWriteStep<LouvainResult, NodePropertiesWritten> {
     private final WriteToDatabase writeToDatabase;

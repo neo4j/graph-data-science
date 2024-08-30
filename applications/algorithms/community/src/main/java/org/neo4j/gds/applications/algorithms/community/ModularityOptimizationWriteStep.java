@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
 
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ModularityOptimization;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.ModularityOptimization;
 
 class ModularityOptimizationWriteStep implements MutateOrWriteStep<ModularityOptimizationResult, NodePropertiesWritten> {
     private final WriteToDatabase writeToDatabase;

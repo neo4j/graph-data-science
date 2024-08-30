@@ -86,6 +86,7 @@ public class ConfigurationParsersForMutateMode {
             case BetaClosenessCentrality -> ClosenessCentralityMutateConfig::of;
             case BetweennessCentrality -> BetweennessCentralityMutateConfig::of;
             case BFS -> BfsMutateConfig::of;
+            case Bridges -> null;
             case CELF -> InfluenceMaximizationMutateConfig::of;
             case ClosenessCentrality -> ClosenessCentralityMutateConfig::of;
             case CollapsePath -> CollapsePathConfig::of;

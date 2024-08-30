@@ -26,7 +26,7 @@ import org.neo4j.gds.algorithms.machinelearning.TopKMapComputer;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
-import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
+import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -44,7 +44,7 @@ class MachineLearningAlgorithms {
     KGEPredictResult kge(Graph graph, KGEPredictBaseConfig configuration) {
         var progressTracker = progressTrackerCreator.createProgressTracker(
             configuration,
-            Tasks.leaf(LabelForProgressTracking.KGE.value)
+            Tasks.leaf(Algorithm.KGE.labelForProgressTracking)
         );
 
         var sourceNodes = new BitSet(graph.nodeCount());

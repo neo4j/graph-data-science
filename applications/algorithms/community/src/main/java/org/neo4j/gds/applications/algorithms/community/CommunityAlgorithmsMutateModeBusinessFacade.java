@@ -51,18 +51,18 @@ import org.neo4j.gds.triangle.TriangleCountMutateConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.wcc.WccMutateConfig;
 
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ApproximateMaximumKCut;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.K1Coloring;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KCore;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KMeans;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.LCC;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.LabelPropagation;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Leiden;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Louvain;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ModularityOptimization;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.SCC;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.TriangleCount;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.ApproximateMaximumKCut;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.K1Coloring;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.KCore;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.KMeans;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.LCC;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.LabelPropagation;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.Leiden;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.Louvain;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.ModularityOptimization;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.SCC;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.TriangleCount;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.WCC;
 
 public class CommunityAlgorithmsMutateModeBusinessFacade {
     private final CommunityAlgorithmsEstimationModeBusinessFacade estimation;

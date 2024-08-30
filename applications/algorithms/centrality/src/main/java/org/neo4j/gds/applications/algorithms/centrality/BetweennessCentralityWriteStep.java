@@ -29,7 +29,7 @@ import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
 import org.neo4j.gds.core.utils.progress.JobId;
 
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BetweennessCentrality;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.BetweennessCentrality;
 
 class BetweennessCentralityWriteStep implements MutateOrWriteStep<CentralityAlgorithmResult, NodePropertiesWritten> {
     private final WriteToDatabase writeToDatabase;

@@ -29,7 +29,7 @@ import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
 
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.DegreeCentrality;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.DegreeCentrality;
 
 class DegreeCentralityWriteStep implements MutateOrWriteStep<CentralityAlgorithmResult, NodePropertiesWritten> {
     private final WriteToDatabase writeToDatabase;

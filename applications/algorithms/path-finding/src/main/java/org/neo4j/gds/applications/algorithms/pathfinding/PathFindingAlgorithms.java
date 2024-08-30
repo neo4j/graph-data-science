@@ -28,7 +28,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
-import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
+import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.applications.algorithms.pathfinding.traverse.BreadthFirstSearch;
 import org.neo4j.gds.applications.algorithms.pathfinding.traverse.DepthFirstSearch;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -107,7 +107,7 @@ public class PathFindingAlgorithms {
 
     BellmanFordResult bellmanFord(Graph graph, AllShortestPathsBellmanFordBaseConfig configuration) {
         var task = Tasks.iterativeOpen(
-            LabelForProgressTracking.BellmanFord.value,
+            Algorithm.BellmanFord.labelForProgressTracking,
             () -> List.of(
                 Tasks.leaf("Relax"),
                 Tasks.leaf("Sync")
@@ -134,7 +134,7 @@ public class PathFindingAlgorithms {
      * But it is not great innit.
      */
     HugeLongArray breadthFirstSearch(Graph graph, BfsBaseConfig configuration) {
-        var progressTracker = createProgressTracker(configuration, Tasks.leaf(LabelForProgressTracking.BFS.value));
+        var progressTracker = createProgressTracker(configuration, Tasks.leaf(Algorithm.BFS.labelForProgressTracking));
 
         var algorithm = new BreadthFirstSearch();
 
@@ -148,7 +148,7 @@ public class PathFindingAlgorithms {
 
     PathFindingResult deltaStepping(Graph graph, AllShortestPathsDeltaBaseConfig configuration) {
         var iterativeTask = Tasks.iterativeOpen(
-            LabelForProgressTracking.DeltaStepping.value,
+            Algorithm.DeltaStepping.labelForProgressTracking,
             () -> List.of(
                 Tasks.leaf(DeltaStepping.Phase.RELAX.name()),
                 Tasks.leaf(DeltaStepping.Phase.SYNC.name())
@@ -166,7 +166,7 @@ public class PathFindingAlgorithms {
      * @see #breadthFirstSearch(org.neo4j.gds.api.Graph, org.neo4j.gds.paths.traverse.BfsBaseConfig)
      */
     HugeLongArray depthFirstSearch(Graph graph, DfsBaseConfig configuration) {
-        var progressTracker = createProgressTracker(configuration, Tasks.leaf(LabelForProgressTracking.DFS.value));
+        var progressTracker = createProgressTracker(configuration, Tasks.leaf(Algorithm.DFS.labelForProgressTracking));
 
         var algorithm = new DepthFirstSearch();
 
@@ -186,8 +186,8 @@ public class PathFindingAlgorithms {
         var parameters = configuration.toKSpanningTreeParameters();
 
         var progressTracker = createProgressTracker(configuration, Tasks.task(
-            LabelForProgressTracking.KSpanningTree.value,
-            Tasks.leaf(LabelForProgressTracking.SpanningTree.value, graph.relationshipCount()),
+            Algorithm.KSpanningTree.labelForProgressTracking,
+            Tasks.leaf(Algorithm.SpanningTree.labelForProgressTracking, graph.relationshipCount()),
             Tasks.leaf("Remove relationships")
         ));
 
@@ -206,7 +206,7 @@ public class PathFindingAlgorithms {
     PathFindingResult longestPath(Graph graph, AlgoBaseConfig configuration) {
         var initializationTask = Tasks.leaf("Initialization", graph.nodeCount());
         var traversalTask = Tasks.leaf("Traversal", graph.nodeCount());
-        var task = Tasks.task(LabelForProgressTracking.LongestPath.value, List.of(initializationTask, traversalTask));
+        var task = Tasks.task(Algorithm.LongestPath.labelForProgressTracking, List.of(initializationTask, traversalTask));
         var progressTracker = createProgressTracker(configuration, task);
 
         var algorithm = new DagLongestPath(
@@ -225,7 +225,7 @@ public class PathFindingAlgorithms {
             tasks.add(DegreeCentralityFactory.degreeCentralityProgressTask(graph));
         }
         tasks.add(Tasks.leaf("create walks", graph.nodeCount()));
-        var task = Tasks.task(LabelForProgressTracking.RandomWalk.value, tasks);
+        var task = Tasks.task(Algorithm.RandomWalk.labelForProgressTracking, tasks);
         var progressTracker = createProgressTracker(configuration, task);
 
         var algorithm = RandomWalk.create(
@@ -250,9 +250,9 @@ public class PathFindingAlgorithms {
         }
         Task task;
         if (tasks.isEmpty()) {
-            task = Tasks.leaf(LabelForProgressTracking.RandomWalk.value, graph.nodeCount());
+            task = Tasks.leaf(Algorithm.RandomWalk.labelForProgressTracking, graph.nodeCount());
         } else {
-            task = Tasks.task(LabelForProgressTracking.RandomWalk.value, tasks);
+            task = Tasks.task(Algorithm.RandomWalk.labelForProgressTracking, tasks);
         }
 
         var progressTracker = createProgressTracker(configuration, task);
@@ -274,7 +274,7 @@ public class PathFindingAlgorithms {
     PathFindingResult singlePairShortestPathAStar(Graph graph, ShortestPathAStarBaseConfig configuration) {
         var progressTracker = createProgressTracker(
             configuration,
-            Tasks.leaf(LabelForProgressTracking.AStar.value, graph.relationshipCount())
+            Tasks.leaf(Algorithm.AStar.labelForProgressTracking, graph.relationshipCount())
         );
 
         var algorithm = AStar.sourceTarget(
@@ -296,7 +296,7 @@ public class PathFindingAlgorithms {
     PathFindingResult singlePairShortestPathDijkstra(Graph graph, DijkstraSourceTargetsBaseConfig configuration) {
         var progressTracker = createProgressTracker(
             configuration,
-            Tasks.leaf(LabelForProgressTracking.Dijkstra.value, graph.relationshipCount())
+            Tasks.leaf(Algorithm.Dijkstra.labelForProgressTracking, graph.relationshipCount())
         );
 
         var algorithm = Dijkstra.sourceTarget(
@@ -313,9 +313,9 @@ public class PathFindingAlgorithms {
     }
 
     PathFindingResult singlePairShortestPathYens(Graph graph, ShortestPathYensBaseConfig configuration) {
-        var initialTask = Tasks.leaf(LabelForProgressTracking.Dijkstra.value, graph.relationshipCount());
+        var initialTask = Tasks.leaf(Algorithm.Dijkstra.labelForProgressTracking, graph.relationshipCount());
         var pathGrowingTask = Tasks.leaf("Path growing", configuration.k() - 1);
-        var yensTask = Tasks.task(LabelForProgressTracking.Yens.value, initialTask, pathGrowingTask);
+        var yensTask = Tasks.task(Algorithm.Yens.labelForProgressTracking, initialTask, pathGrowingTask);
 
         var progressTracker = createProgressTracker(
             configuration,
@@ -336,7 +336,7 @@ public class PathFindingAlgorithms {
     PathFindingResult singleSourceShortestPathDijkstra(Graph graph, DijkstraBaseConfig configuration) {
         var progressTracker = createProgressTracker(
             configuration,
-            Tasks.leaf(LabelForProgressTracking.SingleSourceDijkstra.value, graph.relationshipCount())
+            Tasks.leaf(Algorithm.SingleSourceDijkstra.labelForProgressTracking, graph.relationshipCount())
         );
 
         var algorithm = Dijkstra.singleSource(
@@ -360,7 +360,7 @@ public class PathFindingAlgorithms {
         var parameters = configuration.toParameters();
         var progressTracker = createProgressTracker(
             configuration,
-            Tasks.leaf(LabelForProgressTracking.SpanningTree.value)
+            Tasks.leaf(Algorithm.SpanningTree.labelForProgressTracking)
         );
 
         var algorithm = new Prim(
@@ -389,7 +389,7 @@ public class PathFindingAlgorithms {
         }
         var progressTracker = createProgressTracker(
             configuration,
-            Tasks.task(LabelForProgressTracking.SteinerTree.value, subtasks)
+            Tasks.task(Algorithm.SteinerTree.labelForProgressTracking, subtasks)
         );
 
         var algorithm = new ShortestPathsSteinerAlgorithm(
@@ -411,7 +411,7 @@ public class PathFindingAlgorithms {
         var initializationTask = Tasks.leaf("Initialization", graph.nodeCount());
         var traversalTask = Tasks.leaf("Traversal", graph.nodeCount());
         var task = Tasks.task(
-            LabelForProgressTracking.TopologicalSort.value,
+            Algorithm.TopologicalSort.labelForProgressTracking,
             List.of(initializationTask, traversalTask)
         );
         var progressTracker = createProgressTracker(configuration, task);

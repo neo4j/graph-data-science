@@ -39,16 +39,16 @@ import org.neo4j.gds.pagerank.PageRankStreamConfig;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ArticleRank;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ArticulationPoints;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BRIDGES;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.BetweennessCentrality;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.CELF;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.ClosenessCentrality;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.DegreeCentrality;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.EigenVector;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.HarmonicCentrality;
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.PageRank;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.ArticleRank;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.ArticulationPoints;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.Bridges;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.BetweennessCentrality;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.CELF;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.ClosenessCentrality;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.DegreeCentrality;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.EigenVector;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.HarmonicCentrality;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.PageRank;
 
 public class CentralityAlgorithmsStreamModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
@@ -116,7 +116,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
             configuration,
-            BRIDGES,
+            Bridges,
             estimationFacade::bridges,
             (graph, __) -> centralityAlgorithms.bridges(graph, configuration),
             streamResultBuilder

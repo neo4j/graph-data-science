@@ -33,7 +33,7 @@ import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 import org.neo4j.gds.labelpropagation.LabelPropagationWriteConfig;
 
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.WCC;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.WCC;
 
 class LabelPropagationWriteStep implements MutateOrWriteStep<LabelPropagationResult, Pair<NodePropertiesWritten, NodePropertyValues>> {
     private final WriteToDatabase writeToDatabase;

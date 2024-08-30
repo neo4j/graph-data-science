@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import org.neo4j.gds.kcore.KCoreDecompositionWriteConfig;
 
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.KCore;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.KCore;
 
 class KCoreWriteStep implements MutateOrWriteStep<KCoreDecompositionResult, NodePropertiesWritten> {
     private final WriteToDatabase writeToDatabase;

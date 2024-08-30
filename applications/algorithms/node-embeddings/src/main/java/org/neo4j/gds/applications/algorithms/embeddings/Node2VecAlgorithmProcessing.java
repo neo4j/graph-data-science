@@ -29,7 +29,7 @@ import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 import java.util.List;
 import java.util.Optional;
 
-import static org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking.Node2Vec;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.Node2Vec;
 
 /**
  * This encapsulates applying the validation hook, which we need to do across modes

@@ -26,7 +26,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
-import org.neo4j.gds.applications.algorithms.metadata.LabelForProgressTracking;
+import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -109,7 +109,7 @@ class MiscellaneousAlgorithms {
             ),
             Tasks.leaf("Build Adjacency list")
         )).collect(Collectors.toList());
-        var task = Tasks.task(LabelForProgressTracking.IndexInverse.value, tasks);
+        var task = Tasks.task(Algorithm.IndexInverse.labelForProgressTracking, tasks);
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
         var algorithm = new InverseRelationships(
@@ -131,7 +131,7 @@ class MiscellaneousAlgorithms {
             .mapToInt(p -> p.dimension().orElseThrow(/* already validated in config */))
             .sum();
         var task = Tasks.task(
-            LabelForProgressTracking.ScaleProperties.value,
+            Algorithm.ScaleProperties.labelForProgressTracking,
             Tasks.leaf("Prepare scalers", graph.nodeCount() * totalPropertyDimension),
             Tasks.leaf("Scale properties", graph.nodeCount() * totalPropertyDimension)
         );
@@ -149,7 +149,7 @@ class MiscellaneousAlgorithms {
 
     SingleTypeRelationships toUndirected(GraphStore graphStore, ToUndirectedConfig configuration) {
         var task = Tasks.task(
-            LabelForProgressTracking.ToUndirected.value,
+            Algorithm.ToUndirected.labelForProgressTracking,
             Tasks.leaf("Create Undirected Relationships", graphStore.nodeCount()),
             Tasks.leaf("Build undirected Adjacency list")
         );
