@@ -29,6 +29,8 @@ import org.neo4j.gds.core.loading.HighLimitIdMap;
 import org.neo4j.gds.core.loading.ValueConverter;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.values.GdsNoValue;
+import org.neo4j.gds.values.GdsValue;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -83,6 +85,15 @@ public final class NodePropertiesFromStoreBuilder {
         }
     }
 
+    public void set(long neoNodeId, GdsValue value) {
+        if (value != null && value != GdsNoValue.NO_VALUE) {
+            if (innerBuilder.get() == null) {
+                initializeWithType(value);
+            }
+            innerBuilder.get().setValue(neoNodeId, value);
+        }
+    }
+
     public NodePropertyValues build(IdMap idMap) {
         if (innerBuilder.get() == null) {
             if (defaultValue.getObject() != null) {
@@ -106,6 +117,14 @@ public final class NodePropertiesFromStoreBuilder {
         if (innerBuilder.get() == null) {
             var valueType = ValueConverter.valueType(value);
             var newBuilder = newInnerBuilder(valueType);
+            innerBuilder.compareAndSet(null, newBuilder);
+        }
+    }
+
+    // This is synchronized as we want to prevent the creation of multiple InnerNodePropertiesBuilders of which only once survives.
+    private synchronized void initializeWithType(GdsValue value) {
+        if (innerBuilder.get() == null) {
+            var newBuilder = newInnerBuilder(value.type());
             innerBuilder.compareAndSet(null, newBuilder);
         }
     }

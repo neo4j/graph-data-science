@@ -21,11 +21,14 @@ package org.neo4j.gds.core.loading.nodeproperties;
 
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.values.GdsValue;
 import org.neo4j.values.storable.Value;
 
 public interface InnerNodePropertiesBuilder {
 
     void setValue(long neoNodeId, Value value);
+
+    void setValue(long neoNodeId, GdsValue value);
 
     /**
      * Builds the underlying node properties and performs a remapping

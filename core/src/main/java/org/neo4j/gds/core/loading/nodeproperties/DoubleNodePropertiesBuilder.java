@@ -27,7 +27,9 @@ import org.neo4j.gds.collections.hsa.HugeSparseDoubleArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.utils.GdsNeo4jValueConversion;
 import org.neo4j.gds.utils.Neo4jValueConversion;
+import org.neo4j.gds.values.GdsValue;
 import org.neo4j.values.storable.Value;
 
 import java.lang.invoke.MethodHandles;
@@ -81,6 +83,12 @@ public class DoubleNodePropertiesBuilder implements InnerNodePropertiesBuilder {
     @Override
     public void setValue(long neoNodeId, Value value) {
         double doubleValue = Neo4jValueConversion.getDoubleValue(value);
+        set(neoNodeId, doubleValue);
+    }
+
+    @Override
+    public void setValue(long neoNodeId, GdsValue value) {
+        double doubleValue = GdsNeo4jValueConversion.getDoubleValue(value);
         set(neoNodeId, doubleValue);
     }
 

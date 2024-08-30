@@ -27,7 +27,9 @@ import org.neo4j.gds.collections.hsa.HugeSparseLongArrayArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.utils.GdsNeo4jValueConversion;
 import org.neo4j.gds.utils.Neo4jValueConversion;
+import org.neo4j.gds.values.GdsValue;
 import org.neo4j.values.storable.Value;
 
 import java.util.Arrays;
@@ -56,6 +58,11 @@ public class LongArrayNodePropertiesBuilder implements InnerNodePropertiesBuilde
     @Override
     public void setValue(long neoNodeId, Value value) {
         set(neoNodeId, Neo4jValueConversion.getLongArray(value));
+    }
+
+    @Override
+    public void setValue(long neoNodeId, GdsValue value) {
+        set(neoNodeId, GdsNeo4jValueConversion.getLongArray(value));
     }
 
     @Override

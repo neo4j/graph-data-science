@@ -275,7 +275,8 @@ final class NodePropertiesFromStoreBuilderTest {
             new Concurrency(1)
         );
 
-        builder.set(0, null);
+        Value value = null;
+        builder.set(0, value);
         builder.set(1, Values.longValue(42L));
 
         var properties = builder.build(idMap(nodeCount));
