@@ -454,6 +454,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             applicationsFacade,
             null,
             null,
+            null,
             null
         );
         return new AlgorithmsProcedureFacade(centralityProcedureFacade, null, null, null, null, null, null);

@@ -26,6 +26,7 @@ import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.community.CommunityProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.embeddings.NodeEmbeddingsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.machinelearning.MachineLearningProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.MiscellaneousProcedureFacade;
@@ -44,6 +45,7 @@ class AlgorithmProcedureFacadeBuilder {
     private final GenericStub genericStub;
     private final EstimationModeRunner estimationModeRunner;
     private final AlgorithmExecutionScaffolding algorithmExecutionScaffolding;
+    private final ConfigurationParser configurationParser;
 
     AlgorithmProcedureFacadeBuilder(
         RequestScopedDependencies requestScopedDependencies,
@@ -53,7 +55,7 @@ class AlgorithmProcedureFacadeBuilder {
         ApplicationsFacade applicationsFacade,
         GenericStub genericStub,
         EstimationModeRunner estimationModeRunner,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffolding
+        AlgorithmExecutionScaffolding algorithmExecutionScaffolding, ConfigurationParser configurationParser
     ) {
         this.requestScopedDependencies = requestScopedDependencies;
         this.closeableResourceRegistry = closeableResourceRegistry;
@@ -63,6 +65,7 @@ class AlgorithmProcedureFacadeBuilder {
         this.genericStub = genericStub;
         this.estimationModeRunner = estimationModeRunner;
         this.algorithmExecutionScaffolding = algorithmExecutionScaffolding;
+        this.configurationParser = configurationParser;
     }
 
     CentralityProcedureFacade createCentralityProcedureFacade() {
@@ -71,7 +74,8 @@ class AlgorithmProcedureFacadeBuilder {
             applicationsFacade,
             procedureReturnColumns,
             estimationModeRunner,
-            algorithmExecutionScaffolding
+            configurationParser,
+            requestScopedDependencies.getUser()
         );
     }
 

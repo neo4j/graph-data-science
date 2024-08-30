@@ -79,7 +79,8 @@ public class AlgorithmProcedureFacadeBuilderFactory {
             applicationsFacade,
             genericStub,
             estimationModeRunner,
-            algorithmExecutionScaffolding
+            algorithmExecutionScaffolding,
+            configurationParser
         );
     }
 }
