@@ -105,11 +105,10 @@ class AlgorithmProcedureFacadeBuilder {
 
     NodeEmbeddingsProcedureFacade createNodeEmbeddingsProcedureFacade() {
         return NodeEmbeddingsProcedureFacade.create(
-            requestScopedDependencies,
             genericStub,
             applicationsFacade,
-            estimationModeRunner,
-            algorithmExecutionScaffolding
+            configurationParser,
+            requestScopedDependencies.getUser()
         );
     }
 
