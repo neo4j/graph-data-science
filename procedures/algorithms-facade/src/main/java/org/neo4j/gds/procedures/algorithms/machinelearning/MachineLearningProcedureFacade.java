@@ -21,50 +21,65 @@ package org.neo4j.gds.procedures.algorithms.machinelearning;
 
 import org.neo4j.gds.algorithms.machinelearning.KGEPredictStreamConfig;
 import org.neo4j.gds.algorithms.machinelearning.KGEPredictWriteConfig;
+import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinelearning.MachineLearningAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinelearning.MachineLearningAlgorithmsWriteModeBusinessFacade;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.machinelearning.stubs.KgeMutateStub;
 import org.neo4j.gds.procedures.algorithms.machinelearning.stubs.SplitRelationshipsMutateStub;
-import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 public final class MachineLearningProcedureFacade {
-    private final ApplicationsFacade applicationsFacade;
+
+    private MachineLearningAlgorithmsStreamModeBusinessFacade streamModeBusinessFacade;
+    private MachineLearningAlgorithmsWriteModeBusinessFacade writeModeBusinessFacade;
 
     private final KgeMutateStub kgeMutateStub;
     private final SplitRelationshipsMutateStub splitRelationshipsMutateStub;
 
-    private final AlgorithmExecutionScaffolding algorithmExecutionScaffolding;
+    private final ConfigurationParser configurationParser;
+    private final User user;
 
     private MachineLearningProcedureFacade(
-        ApplicationsFacade applicationsFacade,
         KgeMutateStub kgeMutateStub,
         SplitRelationshipsMutateStub splitRelationshipsMutateStub,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffolding
+        MachineLearningAlgorithmsStreamModeBusinessFacade streamModeBusinessFacade,
+        MachineLearningAlgorithmsWriteModeBusinessFacade writeModeBusinessFacade,
+        ConfigurationParser configurationParser,
+        User user
     ) {
-        this.applicationsFacade = applicationsFacade;
+        this.streamModeBusinessFacade = streamModeBusinessFacade;
+        this.writeModeBusinessFacade = writeModeBusinessFacade;
+        this.configurationParser = configurationParser;
+        this.user = user;
         this.kgeMutateStub = kgeMutateStub;
         this.splitRelationshipsMutateStub = splitRelationshipsMutateStub;
-        this.algorithmExecutionScaffolding = algorithmExecutionScaffolding;
     }
 
     public static MachineLearningProcedureFacade create(
         GenericStub genericStub,
         ApplicationsFacade applicationsFacade,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffolding
+        ConfigurationParser configurationParser,
+        User user
     ) {
-        var kgeMutateStub = new KgeMutateStub(genericStub, applicationsFacade);
-        var splitRelationshipsMutateStub = new SplitRelationshipsMutateStub(genericStub, applicationsFacade);
+        var kgeMutateStub = new KgeMutateStub(genericStub, applicationsFacade.machineLearning().mutate(), applicationsFacade.machineLearning().estimate());
+        var splitRelationshipsMutateStub = new SplitRelationshipsMutateStub(genericStub, applicationsFacade.machineLearning().mutate(), applicationsFacade.machineLearning().estimate());
 
         return new MachineLearningProcedureFacade(
-            applicationsFacade,
             kgeMutateStub,
             splitRelationshipsMutateStub,
-            algorithmExecutionScaffolding
+            applicationsFacade.machineLearning().stream(),
+            applicationsFacade.machineLearning().write(),
+            configurationParser,
+            user
         );
     }
 
@@ -75,27 +90,19 @@ public final class MachineLearningProcedureFacade {
     public Stream<KGEStreamResult> kgeStream(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new KgeResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffolding.runStreamAlgorithm(
-            graphName,
-            configuration,
-            KGEPredictStreamConfig::of,
-            streamMode()::kge,
+        return streamModeBusinessFacade.kge(
+            GraphName.parse(graphName),
+            parseConfiguration(configuration, KGEPredictStreamConfig::of),
             resultBuilder
         );
     }
 
-    public Stream<KGEWriteResult> kgeWrite(String graphNameAsString, Map<String, Object> rawConfiguration) {
+    public Stream<KGEWriteResult> kgeWrite(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new KgeResultBuilderForWriteMode();
 
-        return algorithmExecutionScaffolding.runAlgorithm(
-            graphNameAsString,
-            rawConfiguration,
-            KGEPredictWriteConfig::of,
-            (graphName, configuration, __) -> writeMode().kge(
-                graphName,
-                configuration,
-                resultBuilder
-            ),
+        return writeModeBusinessFacade.kge(
+            GraphName.parse(graphName),
+            parseConfiguration(configuration, KGEPredictWriteConfig::of),
             resultBuilder
         );
     }
@@ -104,11 +111,15 @@ public final class MachineLearningProcedureFacade {
         return splitRelationshipsMutateStub;
     }
 
-    private MachineLearningAlgorithmsStreamModeBusinessFacade streamMode() {
-        return applicationsFacade.machineLearning().stream();
-    }
 
-    private MachineLearningAlgorithmsWriteModeBusinessFacade writeMode() {
-        return applicationsFacade.machineLearning().write();
+    private <C extends AlgoBaseConfig> C parseConfiguration(
+        Map<String, Object> configuration,
+        Function<CypherMapWrapper, C> configurationMapper
+    ) {
+        return configurationParser.parseConfiguration(
+            configuration,
+            configurationMapper,
+            user
+        );
     }
 }

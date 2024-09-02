@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.machinelearning.stubs;
 
-import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinelearning.MachineLearningAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.machinelearning.MachineLearningAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateConfig;
@@ -33,14 +33,17 @@ import java.util.stream.Stream;
 
 public class SplitRelationshipsMutateStub implements MutateStub<SplitRelationshipsMutateConfig, SplitRelationshipsMutateResult> {
     private final GenericStub genericStub;
-    private final ApplicationsFacade applicationsFacade;
+    private final MachineLearningAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
+    private final MachineLearningAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
 
     public SplitRelationshipsMutateStub(
         GenericStub genericStub,
-        ApplicationsFacade applicationsFacade
+        MachineLearningAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
+        MachineLearningAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade
     ) {
         this.genericStub = genericStub;
-        this.applicationsFacade = applicationsFacade;
+        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
+        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
     }
 
     @Override
@@ -54,7 +57,7 @@ public class SplitRelationshipsMutateStub implements MutateStub<SplitRelationshi
             username,
             rawConfiguration,
             SplitRelationshipsMutateConfig::of,
-            configuration -> estimationMode().splitRelationships(configuration)
+            estimationModeBusinessFacade::splitRelationships
         );
     }
 
@@ -64,7 +67,7 @@ public class SplitRelationshipsMutateStub implements MutateStub<SplitRelationshi
             graphName,
             rawConfiguration,
             SplitRelationshipsMutateConfig::of,
-            configuration -> estimationMode().splitRelationships(configuration)
+            estimationModeBusinessFacade::splitRelationships
         );
     }
 
@@ -79,7 +82,7 @@ public class SplitRelationshipsMutateStub implements MutateStub<SplitRelationshi
             graphNameAsString,
             rawConfiguration,
             SplitRelationshipsMutateConfig::of,
-            (graphName, configuration, __) -> applicationsFacade.machineLearning().mutate().splitRelationships(
+            (graphName, configuration, __) -> mutateModeBusinessFacade.splitRelationships(
                 graphName,
                 configuration,
                 resultBuilder
@@ -88,7 +91,5 @@ public class SplitRelationshipsMutateStub implements MutateStub<SplitRelationshi
         );
     }
 
-    private MachineLearningAlgorithmsEstimationModeBusinessFacade estimationMode() {
-        return applicationsFacade.machineLearning().estimate();
-    }
+
 }

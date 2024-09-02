@@ -31,8 +31,6 @@ import org.neo4j.gds.procedures.algorithms.embeddings.NodeEmbeddingsProcedureFac
 import org.neo4j.gds.procedures.algorithms.machinelearning.MachineLearningProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.MiscellaneousProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
-import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 
@@ -43,8 +41,7 @@ class AlgorithmProcedureFacadeBuilder {
     private final ProcedureReturnColumns procedureReturnColumns;
     private final ApplicationsFacade applicationsFacade;
     private final GenericStub genericStub;
-    private final EstimationModeRunner estimationModeRunner;
-    private final AlgorithmExecutionScaffolding algorithmExecutionScaffolding;
+
     private final ConfigurationParser configurationParser;
 
     AlgorithmProcedureFacadeBuilder(
@@ -54,8 +51,7 @@ class AlgorithmProcedureFacadeBuilder {
         ProcedureReturnColumns procedureReturnColumns,
         ApplicationsFacade applicationsFacade,
         GenericStub genericStub,
-        EstimationModeRunner estimationModeRunner,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffolding, ConfigurationParser configurationParser
+         ConfigurationParser configurationParser
     ) {
         this.requestScopedDependencies = requestScopedDependencies;
         this.closeableResourceRegistry = closeableResourceRegistry;
@@ -63,8 +59,6 @@ class AlgorithmProcedureFacadeBuilder {
         this.procedureReturnColumns = procedureReturnColumns;
         this.applicationsFacade = applicationsFacade;
         this.genericStub = genericStub;
-        this.estimationModeRunner = estimationModeRunner;
-        this.algorithmExecutionScaffolding = algorithmExecutionScaffolding;
         this.configurationParser = configurationParser;
     }
 
@@ -90,7 +84,12 @@ class AlgorithmProcedureFacadeBuilder {
     }
 
     MachineLearningProcedureFacade createMachineLearningProcedureFacade() {
-        return MachineLearningProcedureFacade.create(genericStub, applicationsFacade, algorithmExecutionScaffolding);
+        return MachineLearningProcedureFacade.create(
+            genericStub,
+            applicationsFacade,
+            configurationParser,
+            requestScopedDependencies.getUser()
+        );
     }
 
     MiscellaneousProcedureFacade createMiscellaneousProcedureFacade() {
