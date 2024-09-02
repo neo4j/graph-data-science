@@ -22,7 +22,6 @@ package org.neo4j.gds.procedures.algorithms.community;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsStatsModeBusinessFacade;
@@ -31,8 +30,6 @@ import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsWriteM
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
 import org.neo4j.gds.conductance.ConductanceStreamConfig;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.k1coloring.K1ColoringStatsConfig;
 import org.neo4j.gds.k1coloring.K1ColoringStreamConfig;
 import org.neo4j.gds.k1coloring.K1ColoringWriteConfig;
@@ -68,7 +65,7 @@ import org.neo4j.gds.procedures.algorithms.community.stubs.ModularityOptimizatio
 import org.neo4j.gds.procedures.algorithms.community.stubs.SccMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.TriangleCountMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.WccMutateStub;
-import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
+import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
 import org.neo4j.gds.scc.SccAlphaWriteConfig;
@@ -88,7 +85,6 @@ import org.neo4j.gds.wcc.WccStreamConfig;
 import org.neo4j.gds.wcc.WccWriteConfig;
 
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 public final class CommunityProcedureFacade {
@@ -115,8 +111,7 @@ public final class CommunityProcedureFacade {
     private final TriangleCountMutateStub triangleCountMutateStub;
     private final WccMutateStub wccMutateStub;
 
-    private final ConfigurationParser configurationParser;
-    private final User user;
+    private final UserSpecificConfigurationParser configurationParser;
 
 
     private CommunityProcedureFacade(
@@ -138,8 +133,7 @@ public final class CommunityProcedureFacade {
         SccMutateStub sccMutateStub,
         TriangleCountMutateStub triangleCountMutateStub,
         WccMutateStub wccMutateStub,
-        ConfigurationParser configurationParser,
-        User user
+        UserSpecificConfigurationParser configurationParser
     ) {
         this.closeableResourceRegistry = closeableResourceRegistry;
         this.procedureReturnColumns = procedureReturnColumns;
@@ -160,7 +154,6 @@ public final class CommunityProcedureFacade {
         this.triangleCountMutateStub = triangleCountMutateStub;
         this.wccMutateStub = wccMutateStub;
         this.configurationParser = configurationParser;
-        this.user = user;
     }
 
     public static CommunityProcedureFacade create(
@@ -168,8 +161,7 @@ public final class CommunityProcedureFacade {
         ApplicationsFacade applicationsFacade,
         CloseableResourceRegistry closeableResourceRegistry,
         ProcedureReturnColumns procedureReturnColumns,
-        ConfigurationParser configurationParser,
-        User user
+        UserSpecificConfigurationParser configurationParser
     ) {
 
         var approximateMaximumKCutMutateStub = new ApproximateMaximumKCutMutateStub(
@@ -270,8 +262,7 @@ public final class CommunityProcedureFacade {
             sccMutateStub,
             triangleCountMutateStub,
             wccMutateStub,
-            configurationParser,
-            user
+            configurationParser
         );
     }
 
@@ -285,15 +276,18 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new ApproxMaxKCutResultBuilderForStreamMode();
 
-        var parsedConfig = parseConfiguration(configuration,ApproxMaxKCutStreamConfig::of);
-        return streamModeBusinessFacade.approximateMaximumKCut(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, ApproxMaxKCutStreamConfig::of);
+        return streamModeBusinessFacade.approximateMaximumKCut(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> approxMaxKCutStreamEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var configuration = parseConfiguration(algorithmConfiguration, ApproxMaxKCutStreamConfig::of);
+        var configuration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            ApproxMaxKCutStreamConfig::of
+        );
         return Stream.of(estimationModeBusinessFacade.approximateMaximumKCut(configuration, graphNameOrConfiguration));
     }
 
@@ -303,8 +297,8 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new ConductanceResultBuilderForStreamMode();
 
-        var parsedConfig = parseConfiguration(configuration,ConductanceStreamConfig::of);
-        return streamModeBusinessFacade.conductance(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, ConductanceStreamConfig::of);
+        return streamModeBusinessFacade.conductance(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public K1ColoringMutateStub k1ColoringMutateStub() {
@@ -317,8 +311,8 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new K1ColoringResultBuilderForStatsMode(procedureReturnColumns.contains("colorCount"));
 
-        var parsedConfig = parseConfiguration(configuration,K1ColoringStatsConfig::of);
-        return statsModeBusinessFacade.k1Coloring(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, K1ColoringStatsConfig::of);
+        return statsModeBusinessFacade.k1Coloring(GraphName.parse(graphName), parsedConfig, resultBuilder);
 
     }
 
@@ -326,7 +320,7 @@ public final class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var configuration = parseConfiguration(algorithmConfiguration, K1ColoringStatsConfig::of);
+        var configuration = configurationParser.parseConfiguration(algorithmConfiguration, K1ColoringStatsConfig::of);
         return Stream.of(estimationModeBusinessFacade.k1Coloring(configuration, graphNameOrConfiguration));
     }
 
@@ -336,15 +330,15 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new K1ColoringResultBuilderForStreamMode();
 
-        var parsedConfig = parseConfiguration(configuration,K1ColoringStreamConfig::of);
-        return streamModeBusinessFacade.k1Coloring(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, K1ColoringStreamConfig::of);
+        return streamModeBusinessFacade.k1Coloring(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> k1ColoringStreamEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var configuration = parseConfiguration(algorithmConfiguration, K1ColoringStreamConfig::of);
+        var configuration = configurationParser.parseConfiguration(algorithmConfiguration, K1ColoringStreamConfig::of);
         return Stream.of(estimationModeBusinessFacade.k1Coloring(configuration, graphNameOrConfiguration));
     }
 
@@ -354,15 +348,15 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new K1ColoringResultBuilderForWriteMode(procedureReturnColumns.contains("colorCount"));
 
-        var parsedConfig = parseConfiguration(configuration,K1ColoringWriteConfig::of);
-        return writeModeBusinessFacade.k1Coloring(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, K1ColoringWriteConfig::of);
+        return writeModeBusinessFacade.k1Coloring(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> k1ColoringWriteEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var configuration = parseConfiguration(algorithmConfiguration, K1ColoringWriteConfig::of);
+        var configuration = configurationParser.parseConfiguration(algorithmConfiguration, K1ColoringWriteConfig::of);
         return Stream.of(estimationModeBusinessFacade.k1Coloring(configuration, graphNameOrConfiguration));
     }
 
@@ -376,15 +370,18 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new KCoreResultBuilderForStatsMode();
 
-        var parsedConfig = parseConfiguration(configuration,KCoreDecompositionStatsConfig::of);
-        return  statsModeBusinessFacade.kCore(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, KCoreDecompositionStatsConfig::of);
+        return statsModeBusinessFacade.kCore(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> kCoreStatsEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var configuration = parseConfiguration(algorithmConfiguration, KCoreDecompositionStatsConfig::of);
+        var configuration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            KCoreDecompositionStatsConfig::of
+        );
         return Stream.of(estimationModeBusinessFacade.kCore(configuration, graphNameOrConfiguration));
     }
 
@@ -394,15 +391,18 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new KCoreResultBuilderForStreamMode();
 
-        var parsedConfig = parseConfiguration(configuration,KCoreDecompositionStreamConfig::of);
-        return  streamModeBusinessFacade.kCore(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, KCoreDecompositionStreamConfig::of);
+        return streamModeBusinessFacade.kCore(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> kCoreStreamEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var configuration = parseConfiguration(algorithmConfiguration, KCoreDecompositionStreamConfig::of);
+        var configuration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            KCoreDecompositionStreamConfig::of
+        );
         return Stream.of(estimationModeBusinessFacade.kCore(configuration, graphNameOrConfiguration));
     }
 
@@ -412,15 +412,18 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new KCoreResultBuilderForWriteMode();
 
-        var parsedConfig = parseConfiguration(configuration,KCoreDecompositionWriteConfig::of);
-        return  writeModeBusinessFacade.kCore(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, KCoreDecompositionWriteConfig::of);
+        return writeModeBusinessFacade.kCore(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> kCoreWriteEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var configuration = parseConfiguration(algorithmConfiguration, KCoreDecompositionWriteConfig::of);
+        var configuration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            KCoreDecompositionWriteConfig::of
+        );
         return Stream.of(estimationModeBusinessFacade.kCore(configuration, graphNameOrConfiguration));
     }
 
@@ -437,15 +440,15 @@ public final class CommunityProcedureFacade {
             shouldComputeListOfCentroids
         );
 
-        var parsedConfig = parseConfiguration(configuration,KmeansStatsConfig::of);
-        return  statsModeBusinessFacade.kMeans(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, KmeansStatsConfig::of);
+        return statsModeBusinessFacade.kMeans(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> kmeansStatsEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var configuration = parseConfiguration(algorithmConfiguration, KmeansStatsConfig::of);
+        var configuration = configurationParser.parseConfiguration(algorithmConfiguration, KmeansStatsConfig::of);
         return Stream.of(estimationModeBusinessFacade.kMeans(configuration, graphNameOrConfiguration));
     }
 
@@ -455,15 +458,15 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new KMeansResultBuilderForStreamMode();
 
-        var parsedConfig = parseConfiguration(configuration,KmeansStreamConfig::of);
-        return  streamModeBusinessFacade.kMeans(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, KmeansStreamConfig::of);
+        return streamModeBusinessFacade.kMeans(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> kmeansStreamEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var configuration = parseConfiguration(algorithmConfiguration, KmeansStreamConfig::of);
+        var configuration = configurationParser.parseConfiguration(algorithmConfiguration, KmeansStreamConfig::of);
         return Stream.of(estimationModeBusinessFacade.kMeans(configuration, graphNameOrConfiguration));
     }
 
@@ -476,15 +479,15 @@ public final class CommunityProcedureFacade {
             shouldComputeListOfCentroids
         );
 
-        var parsedConfig = parseConfiguration(configuration,KmeansWriteConfig::of);
-        return  writeModeBusinessFacade.kMeans(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, KmeansWriteConfig::of);
+        return writeModeBusinessFacade.kMeans(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> kmeansWriteEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var configuration = parseConfiguration(algorithmConfiguration, KmeansWriteConfig::of);
+        var configuration = configurationParser.parseConfiguration(algorithmConfiguration, KmeansWriteConfig::of);
         return Stream.of(estimationModeBusinessFacade.kMeans(configuration, graphNameOrConfiguration));
     }
 
@@ -500,15 +503,18 @@ public final class CommunityProcedureFacade {
             procedureReturnColumns);
         var resultBuilder = new LabelPropagationResultBuilderForStatsMode(statisticsComputationInstructions);
 
-        var parsedConfig = parseConfiguration(configuration,LabelPropagationStatsConfig::of);
-        return  statsModeBusinessFacade.labelPropagation(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, LabelPropagationStatsConfig::of);
+        return statsModeBusinessFacade.labelPropagation(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> labelPropagationStatsEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var configuration = parseConfiguration(algorithmConfiguration, LabelPropagationStatsConfig::of);
+        var configuration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            LabelPropagationStatsConfig::of
+        );
         return Stream.of(estimationModeBusinessFacade.labelPropagation(configuration, graphNameOrConfiguration));
     }
 
@@ -517,15 +523,18 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new LabelPropagationResultBuilderForStreamMode();
 
-        var parsedConfig = parseConfiguration(configuration,LabelPropagationStreamConfig::of);
-        return streamModeBusinessFacade.labelPropagation(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, LabelPropagationStreamConfig::of);
+        return streamModeBusinessFacade.labelPropagation(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> labelPropagationStreamEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var configuration = parseConfiguration(algorithmConfiguration, LabelPropagationStreamConfig::of);
+        var configuration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            LabelPropagationStreamConfig::of
+        );
         return Stream.of(estimationModeBusinessFacade.labelPropagation(configuration, graphNameOrConfiguration));
     }
 
@@ -537,15 +546,18 @@ public final class CommunityProcedureFacade {
             procedureReturnColumns);
         var resultBuilder = new LabelPropagationResultBuilderForWriteMode(statisticsComputationInstructions);
 
-        var parsedConfig = parseConfiguration(configuration,LabelPropagationWriteConfig::of);
-        return writeModeBusinessFacade.labelPropagation(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, LabelPropagationWriteConfig::of);
+        return writeModeBusinessFacade.labelPropagation(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> labelPropagationWriteEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var configuration = parseConfiguration(algorithmConfiguration, LabelPropagationWriteConfig::of);
+        var configuration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            LabelPropagationWriteConfig::of
+        );
         return Stream.of(estimationModeBusinessFacade.labelPropagation(configuration, graphNameOrConfiguration));
     }
 
@@ -559,15 +571,19 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new LccResultBuilderForStatsMode();
 
-        var parsedConfig = parseConfiguration(configuration,LocalClusteringCoefficientStatsConfig::of);
-        return statsModeBusinessFacade.lcc(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration,
+            LocalClusteringCoefficientStatsConfig::of);
+        return statsModeBusinessFacade.lcc(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> localClusteringCoefficientStatsEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var configuration = parseConfiguration(algorithmConfiguration, LocalClusteringCoefficientStatsConfig::of);
+        var configuration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            LocalClusteringCoefficientStatsConfig::of
+        );
         return Stream.of(estimationModeBusinessFacade.lcc(configuration, graphNameOrConfiguration));
     }
 
@@ -576,15 +592,19 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new LccResultBuilderForStreamMode();
 
-        var parsedConfig = parseConfiguration(configuration,LocalClusteringCoefficientStreamConfig::of);
-        return streamModeBusinessFacade.lcc(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration,
+            LocalClusteringCoefficientStreamConfig::of);
+        return streamModeBusinessFacade.lcc(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> localClusteringCoefficientStreamEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var configuration = parseConfiguration(algorithmConfiguration, LocalClusteringCoefficientStreamConfig::of);
+        var configuration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            LocalClusteringCoefficientStreamConfig::of
+        );
         return Stream.of(estimationModeBusinessFacade.lcc(configuration, graphNameOrConfiguration));
     }
 
@@ -593,15 +613,19 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new LccResultBuilderForWriteMode();
 
-        var parsedConfig = parseConfiguration(configuration,LocalClusteringCoefficientWriteConfig::of);
-        return writeModeBusinessFacade.lcc(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration,
+            LocalClusteringCoefficientWriteConfig::of);
+        return writeModeBusinessFacade.lcc(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> localClusteringCoefficientWriteEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var configuration = parseConfiguration(algorithmConfiguration, LocalClusteringCoefficientWriteConfig::of);
+        var configuration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            LocalClusteringCoefficientWriteConfig::of
+        );
         return Stream.of(estimationModeBusinessFacade.lcc(configuration, graphNameOrConfiguration));
     }
 
@@ -614,15 +638,15 @@ public final class CommunityProcedureFacade {
             procedureReturnColumns);
         var resultBuilder = new LeidenResultBuilderForStatsMode(statisticsComputationInstructions);
 
-        var parsedConfig = parseConfiguration(configuration,LeidenStatsConfig::of);
-        return statsModeBusinessFacade.leiden(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, LeidenStatsConfig::of);
+        return statsModeBusinessFacade.leiden(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> leidenStatsEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var configuration = parseConfiguration(algorithmConfiguration, LeidenStatsConfig::of);
+        var configuration = configurationParser.parseConfiguration(algorithmConfiguration, LeidenStatsConfig::of);
         return Stream.of(estimationModeBusinessFacade.leiden(configuration, graphNameOrConfiguration));
     }
 
@@ -632,15 +656,15 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new LeidenResultBuilderForStreamMode();
 
-        var parsedConfig = parseConfiguration(configuration,LeidenStreamConfig::of);
-        return streamModeBusinessFacade.leiden(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, LeidenStreamConfig::of);
+        return streamModeBusinessFacade.leiden(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> leidenStreamEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var configuration = parseConfiguration(algorithmConfiguration, LeidenStreamConfig::of);
+        var configuration = configurationParser.parseConfiguration(algorithmConfiguration, LeidenStreamConfig::of);
         return Stream.of(estimationModeBusinessFacade.leiden(configuration, graphNameOrConfiguration));
     }
 
@@ -652,15 +676,15 @@ public final class CommunityProcedureFacade {
             procedureReturnColumns);
         var resultBuilder = new LeidenResultBuilderForWriteMode(statisticsComputationInstructions);
 
-        var parsedConfig = parseConfiguration(configuration,LeidenWriteConfig::of);
-        return writeModeBusinessFacade.leiden(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, LeidenWriteConfig::of);
+        return writeModeBusinessFacade.leiden(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> leidenWriteEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var configuration = parseConfiguration(algorithmConfiguration, LeidenWriteConfig::of);
+        var configuration = configurationParser.parseConfiguration(algorithmConfiguration, LeidenWriteConfig::of);
         return Stream.of(estimationModeBusinessFacade.leiden(configuration, graphNameOrConfiguration));
     }
 
@@ -673,15 +697,15 @@ public final class CommunityProcedureFacade {
             procedureReturnColumns);
         var resultBuilder = new LouvainResultBuilderForStatsMode(statisticsComputationInstructions);
 
-        var parsedConfig = parseConfiguration(configuration,LouvainStatsConfig::of);
-        return statsModeBusinessFacade.louvain(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, LouvainStatsConfig::of);
+        return statsModeBusinessFacade.louvain(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> louvainStatsEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var configuration = parseConfiguration(algorithmConfiguration, LouvainStatsConfig::of);
+        var configuration = configurationParser.parseConfiguration(algorithmConfiguration, LouvainStatsConfig::of);
         return Stream.of(estimationModeBusinessFacade.louvain(configuration, graphNameOrConfiguration));
     }
 
@@ -691,15 +715,15 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new LouvainResultBuilderForStreamMode();
 
-        var parsedConfig = parseConfiguration(configuration,LouvainStreamConfig::of);
-        return streamModeBusinessFacade.louvain(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, LouvainStreamConfig::of);
+        return streamModeBusinessFacade.louvain(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> louvainStreamEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var configuration = parseConfiguration(algorithmConfiguration, LouvainStreamConfig::of);
+        var configuration = configurationParser.parseConfiguration(algorithmConfiguration, LouvainStreamConfig::of);
         return Stream.of(estimationModeBusinessFacade.louvain(configuration, graphNameOrConfiguration));
     }
 
@@ -711,15 +735,15 @@ public final class CommunityProcedureFacade {
             procedureReturnColumns);
         var resultBuilder = new LouvainResultBuilderForWriteMode(statisticsComputationInstructions);
 
-        var parsedConfig = parseConfiguration(configuration,LouvainWriteConfig::of);
-        return writeModeBusinessFacade.louvain(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, LouvainWriteConfig::of);
+        return writeModeBusinessFacade.louvain(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> louvainWriteEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var configuration = parseConfiguration(algorithmConfiguration, LouvainWriteConfig::of);
+        var configuration = configurationParser.parseConfiguration(algorithmConfiguration, LouvainWriteConfig::of);
         return Stream.of(estimationModeBusinessFacade.louvain(configuration, graphNameOrConfiguration));
     }
 
@@ -729,15 +753,15 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new ModularityResultBuilderForStatsMode();
 
-        var parsedConfig = parseConfiguration(configuration,ModularityStatsConfig::of);
-        return statsModeBusinessFacade.modularity(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, ModularityStatsConfig::of);
+        return statsModeBusinessFacade.modularity(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> modularityStatsEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var configuration = parseConfiguration(algorithmConfiguration, ModularityStatsConfig::of);
+        var configuration = configurationParser.parseConfiguration(algorithmConfiguration, ModularityStatsConfig::of);
         return Stream.of(estimationModeBusinessFacade.modularity(configuration, graphNameOrConfiguration));
     }
 
@@ -747,15 +771,15 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new ModularityResultBuilderForStreamMode();
 
-        var parsedConfig = parseConfiguration(configuration,ModularityStreamConfig::of);
-        return streamModeBusinessFacade.modularity(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, ModularityStreamConfig::of);
+        return streamModeBusinessFacade.modularity(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> modularityStreamEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var configuration = parseConfiguration(algorithmConfiguration, ModularityStreamConfig::of);
+        var configuration = configurationParser.parseConfiguration(algorithmConfiguration, ModularityStreamConfig::of);
         return Stream.of(estimationModeBusinessFacade.modularity(configuration, graphNameOrConfiguration));
     }
 
@@ -771,15 +795,18 @@ public final class CommunityProcedureFacade {
             procedureReturnColumns);
         var resultBuilder = new ModularityOptimizationResultBuilderForStatsMode(statisticsComputationInstructions);
 
-        var parsedConfig = parseConfiguration(configuration,ModularityOptimizationStatsConfig::of);
-        return statsModeBusinessFacade.modularityOptimization(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, ModularityOptimizationStatsConfig::of);
+        return statsModeBusinessFacade.modularityOptimization(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> modularityOptimizationStatsEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var configuration = parseConfiguration(algorithmConfiguration, ModularityOptimizationStatsConfig::of);
+        var configuration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            ModularityOptimizationStatsConfig::of
+        );
         return Stream.of(estimationModeBusinessFacade.modularityOptimization(configuration, graphNameOrConfiguration));
     }
 
@@ -789,15 +816,19 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new ModularityOptimizationResultBuilderForStreamMode();
 
-        var parsedConfig = parseConfiguration(configuration,ModularityOptimizationStreamConfig::of);
-        return streamModeBusinessFacade.modularityOptimization(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration,
+            ModularityOptimizationStreamConfig::of);
+        return streamModeBusinessFacade.modularityOptimization(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> modularityOptimizationStreamEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var configuration = parseConfiguration(algorithmConfiguration, ModularityOptimizationStreamConfig::of);
+        var configuration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            ModularityOptimizationStreamConfig::of
+        );
         return Stream.of(estimationModeBusinessFacade.modularityOptimization(configuration, graphNameOrConfiguration));
     }
 
@@ -809,15 +840,18 @@ public final class CommunityProcedureFacade {
         var resultBuilder = new ModularityOptimizationResultBuilderForWriteMode(statisticsComputationInstructions);
 
 
-        var parsedConfig = parseConfiguration(configuration,ModularityOptimizationWriteConfig::of);
-        return writeModeBusinessFacade.modularityOptimization(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, ModularityOptimizationWriteConfig::of);
+        return writeModeBusinessFacade.modularityOptimization(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> modularityOptimizationWriteEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var configuration = parseConfiguration(algorithmConfiguration, ModularityOptimizationWriteConfig::of);
+        var configuration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            ModularityOptimizationWriteConfig::of
+        );
         return Stream.of(estimationModeBusinessFacade.modularityOptimization(configuration, graphNameOrConfiguration));
     }
 
@@ -833,15 +867,15 @@ public final class CommunityProcedureFacade {
             procedureReturnColumns);
         var resultBuilder = new SccResultBuilderForStatsMode(statisticsComputationInstructions);
 
-        var parsedConfig = parseConfiguration(configuration,SccStatsConfig::of);
-        return statsModeBusinessFacade.scc(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, SccStatsConfig::of);
+        return statsModeBusinessFacade.scc(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> sccStatsEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var configuration = parseConfiguration(algorithmConfiguration, SccStatsConfig::of);
+        var configuration = configurationParser.parseConfiguration(algorithmConfiguration, SccStatsConfig::of);
         return Stream.of(estimationModeBusinessFacade.scc(configuration, graphNameOrConfiguration));
     }
 
@@ -851,15 +885,15 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new SccResultBuilderForStreamMode();
 
-        var parsedConfig = parseConfiguration(configuration,SccStreamConfig::of);
-        return streamModeBusinessFacade.scc(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, SccStreamConfig::of);
+        return streamModeBusinessFacade.scc(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> sccStreamEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var configuration = parseConfiguration(algorithmConfiguration, SccStreamConfig::of);
+        var configuration = configurationParser.parseConfiguration(algorithmConfiguration, SccStreamConfig::of);
         return Stream.of(estimationModeBusinessFacade.scc(configuration, graphNameOrConfiguration));
     }
 
@@ -871,8 +905,8 @@ public final class CommunityProcedureFacade {
             procedureReturnColumns);
         var resultBuilder = new SccResultBuilderForWriteMode(statisticsComputationInstructions);
 
-        var parsedConfig = parseConfiguration(configuration,SccWriteConfig::of);
-        return writeModeBusinessFacade.scc(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, SccWriteConfig::of);
+        return writeModeBusinessFacade.scc(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<AlphaSccWriteResult> sccWriteAlpha(
@@ -882,8 +916,8 @@ public final class CommunityProcedureFacade {
         var statisticsComputationInstructions = new ProcedureStatisticsComputationInstructions(true, true);
         var resultBuilder = new SccAlphaResultBuilderForWriteMode(statisticsComputationInstructions);
 
-        var parsedConfig = parseConfiguration(configuration,SccAlphaWriteConfig::of);
-        return writeModeBusinessFacade.sccAlpha(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, SccAlphaWriteConfig::of);
+        return writeModeBusinessFacade.sccAlpha(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> sccWriteEstimate(
@@ -891,7 +925,7 @@ public final class CommunityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     ) {
 
-        var configuration = parseConfiguration(algorithmConfiguration, SccWriteConfig::of);
+        var configuration = configurationParser.parseConfiguration(algorithmConfiguration, SccWriteConfig::of);
         return Stream.of(estimationModeBusinessFacade.scc(configuration, graphNameOrConfiguration));
     }
 
@@ -902,15 +936,18 @@ public final class CommunityProcedureFacade {
     public Stream<TriangleCountStatsResult> triangleCountStats(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new TriangleCountResultBuilderForStatsMode();
 
-        var parsedConfig = parseConfiguration(configuration,TriangleCountStatsConfig::of);
-        return  statsModeBusinessFacade.triangleCount(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, TriangleCountStatsConfig::of);
+        return statsModeBusinessFacade.triangleCount(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> triangleCountStatsEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var configuration = parseConfiguration(algorithmConfiguration, TriangleCountStatsConfig::of);
+        var configuration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            TriangleCountStatsConfig::of
+        );
         return Stream.of(estimationModeBusinessFacade.triangleCount(configuration, graphNameOrConfiguration));
     }
 
@@ -920,15 +957,18 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new TriangleCountResultBuilderForStreamMode();
 
-        var parsedConfig = parseConfiguration(configuration,TriangleCountStreamConfig::of);
-        return  streamModeBusinessFacade.triangleCount(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, TriangleCountStreamConfig::of);
+        return streamModeBusinessFacade.triangleCount(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> triangleCountStreamEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var configuration = parseConfiguration(algorithmConfiguration, TriangleCountStreamConfig::of);
+        var configuration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            TriangleCountStreamConfig::of
+        );
         return Stream.of(estimationModeBusinessFacade.triangleCount(configuration, graphNameOrConfiguration));
     }
 
@@ -938,23 +978,26 @@ public final class CommunityProcedureFacade {
     ) {
         var resultBuilder = new TriangleCountResultBuilderForWriteMode();
 
-        var parsedConfig = parseConfiguration(configuration,TriangleCountWriteConfig::of);
-        return  writeModeBusinessFacade.triangleCount(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, TriangleCountWriteConfig::of);
+        return writeModeBusinessFacade.triangleCount(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> triangleCountWriteEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var configuration = parseConfiguration(algorithmConfiguration, TriangleCountWriteConfig::of);
+        var configuration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            TriangleCountWriteConfig::of
+        );
         return Stream.of(estimationModeBusinessFacade.triangleCount(configuration, graphNameOrConfiguration));
     }
 
     public Stream<TriangleStreamResult> trianglesStream(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new TrianglesResultBuilderForStreamMode(closeableResourceRegistry);
 
-        var parsedConfig = parseConfiguration(configuration,TriangleCountBaseConfig::of);
-        return  streamModeBusinessFacade.triangles(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, TriangleCountBaseConfig::of);
+        return streamModeBusinessFacade.triangles(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public WccMutateStub wccMutateStub() {
@@ -966,23 +1009,23 @@ public final class CommunityProcedureFacade {
             procedureReturnColumns);
         var resultBuilder = new WccResultBuilderForStatsMode(statisticsComputationInstructions);
 
-        var parsedConfig = parseConfiguration(configuration,WccStatsConfig::of);
-        return  statsModeBusinessFacade.wcc(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, WccStatsConfig::of);
+        return statsModeBusinessFacade.wcc(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> wccStatsEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var config = parseConfiguration(algorithmConfiguration, WccStatsConfig::of);
-        return Stream.of(estimationModeBusinessFacade.wcc(config,graphNameOrConfiguration));
+        var config = configurationParser.parseConfiguration(algorithmConfiguration, WccStatsConfig::of);
+        return Stream.of(estimationModeBusinessFacade.wcc(config, graphNameOrConfiguration));
     }
 
     public Stream<WccStreamResult> wccStream(String graphName, Map<String, Object> configuration) {
 
         var resultBuilder = new WccResultBuilderForStreamMode();
-        var parsedConfig = parseConfiguration(configuration,WccStreamConfig::of);
-        return  streamModeBusinessFacade.wcc(GraphName.parse(graphName),parsedConfig,resultBuilder);
+        var parsedConfig = configurationParser.parseConfiguration(configuration, WccStreamConfig::of);
+        return streamModeBusinessFacade.wcc(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> wccStreamEstimate(
@@ -990,8 +1033,8 @@ public final class CommunityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     ) {
 
-        var config = parseConfiguration(algorithmConfiguration, WccStreamConfig::of);
-        return Stream.of(estimationModeBusinessFacade.wcc(config,graphNameOrConfiguration));
+        var config = configurationParser.parseConfiguration(algorithmConfiguration, WccStreamConfig::of);
+        return Stream.of(estimationModeBusinessFacade.wcc(config, graphNameOrConfiguration));
 
     }
 
@@ -1001,9 +1044,9 @@ public final class CommunityProcedureFacade {
             .forComponents(procedureReturnColumns);
 
         var resultBuilder = new WccResultBuilderForWriteMode(statisticsComputationInstructions);
-        var writeConfig = parseConfiguration(configuration, WccWriteConfig::of);
+        var writeConfig = configurationParser.parseConfiguration(configuration, WccWriteConfig::of);
 
-        return writeModeBusinessFacade.wcc(GraphName.parse(graphName),writeConfig, resultBuilder);
+        return writeModeBusinessFacade.wcc(GraphName.parse(graphName), writeConfig, resultBuilder);
     }
 
     public Stream<MemoryEstimateResult> wccWriteEstimate(
@@ -1011,20 +1054,7 @@ public final class CommunityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     ) {
 
-        var configuration = parseConfiguration(algorithmConfiguration, WccWriteConfig::of);
+        var configuration = configurationParser.parseConfiguration(algorithmConfiguration, WccWriteConfig::of);
         return Stream.of(estimationModeBusinessFacade.wcc(configuration, graphNameOrConfiguration));
     }
-
-    private <C extends AlgoBaseConfig> C parseConfiguration(
-        Map<String, Object> configuration,
-        Function<CypherMapWrapper, C> configurationMapper
-    ) {
-        return configurationParser.parseConfiguration(
-            configuration,
-            configurationMapper,
-            user
-        );
-    }
-
-
 }

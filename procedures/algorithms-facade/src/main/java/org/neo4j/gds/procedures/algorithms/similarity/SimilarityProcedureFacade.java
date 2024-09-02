@@ -21,16 +21,13 @@ package org.neo4j.gds.procedures.algorithms.similarity;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsStatsModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsWriteModeBusinessFacade;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
+import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnStatsConfig;
@@ -47,7 +44,6 @@ import org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteConfig;
 
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 public final class SimilarityProcedureFacade {
@@ -64,8 +60,7 @@ public final class SimilarityProcedureFacade {
     private final KnnMutateStub knnMutateStub;
     private final NodeSimilarityMutateStub nodeSimilarityMutateStub;
 
-    private final ConfigurationParser configurationParser;
-    private final User user;
+    private final UserSpecificConfigurationParser configurationParser;
 
     private SimilarityProcedureFacade(
         ProcedureReturnColumns procedureReturnColumns,
@@ -77,8 +72,7 @@ public final class SimilarityProcedureFacade {
         FilteredNodeSimilarityMutateStub filteredNodeSimilarityMutateStub,
         KnnMutateStub knnMutateStub,
         NodeSimilarityMutateStub nodeSimilarityMutateStub,
-        ConfigurationParser configurationParser,
-        User user
+        UserSpecificConfigurationParser configurationParser
     ) {
         this.procedureReturnColumns = procedureReturnColumns;
         this.estimationModeBusinessFacade = estimationModeBusinessFacade;
@@ -90,15 +84,13 @@ public final class SimilarityProcedureFacade {
         this.knnMutateStub = knnMutateStub;
         this.nodeSimilarityMutateStub = nodeSimilarityMutateStub;
         this.configurationParser = configurationParser;
-        this.user = user;
     }
 
     public static SimilarityProcedureFacade create(
         ApplicationsFacade applicationsFacade,
         GenericStub genericStub,
         ProcedureReturnColumns procedureReturnColumns,
-        ConfigurationParser configurationParser,
-        User user
+        UserSpecificConfigurationParser configurationParser
     ) {
         var filteredKnnMutateStub = new FilteredKnnMutateStub(
             genericStub,
@@ -138,8 +130,7 @@ public final class SimilarityProcedureFacade {
             filteredNodeSimilarityMutateStub,
             knnMutateStub,
             nodeSimilarityMutateStub,
-            configurationParser,
-            user
+            configurationParser
         );
     }
 
@@ -153,7 +144,7 @@ public final class SimilarityProcedureFacade {
 
         return statsModeBusinessFacade.filteredKnn(
             GraphName.parse(graphName),
-            parseConfiguration(configuration, FilteredKnnStatsConfig::of),
+            configurationParser.parseConfiguration(configuration, FilteredKnnStatsConfig::of),
             resultBuilder
         );
     }
@@ -163,7 +154,7 @@ public final class SimilarityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     ) {
         var result = estimationModeBusinessFacade.filteredKnn(
-            parseConfiguration(algorithmConfiguration, FilteredKnnStatsConfig::of),
+            configurationParser.parseConfiguration(algorithmConfiguration, FilteredKnnStatsConfig::of),
             graphNameOrConfiguration
         );
 
@@ -175,7 +166,7 @@ public final class SimilarityProcedureFacade {
 
         return streamModeBusinessFacade.filteredKnn(
             GraphName.parse(graphName),
-            parseConfiguration(configuration, FilteredKnnStreamConfig::of),
+            configurationParser.parseConfiguration(configuration, FilteredKnnStreamConfig::of),
             resultBuilder
         );
 
@@ -186,7 +177,7 @@ public final class SimilarityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     ) {
         var result = estimationModeBusinessFacade.filteredKnn(
-            parseConfiguration(algorithmConfiguration, FilteredKnnStreamConfig::of),
+            configurationParser.parseConfiguration(algorithmConfiguration, FilteredKnnStreamConfig::of),
             graphNameOrConfiguration
         );
 
@@ -199,7 +190,7 @@ public final class SimilarityProcedureFacade {
 
         return writeModeBusinessFacade.filteredKnn(
             GraphName.parse(graphNameAsString),
-            parseConfiguration(rawConfiguration, FilteredKnnWriteConfig::of),
+            configurationParser.parseConfiguration(rawConfiguration, FilteredKnnWriteConfig::of),
             resultBuilder,
             shouldComputeSimilarityDistribution
         );
@@ -210,7 +201,7 @@ public final class SimilarityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     ) {
         var result = estimationModeBusinessFacade.filteredKnn(
-            parseConfiguration(algorithmConfiguration, FilteredKnnWriteConfig::of),
+            configurationParser.parseConfiguration(algorithmConfiguration, FilteredKnnWriteConfig::of),
             graphNameOrConfiguration
         );
 
@@ -230,7 +221,7 @@ public final class SimilarityProcedureFacade {
 
         return statsModeBusinessFacade.filteredNodeSimilarity(
             GraphName.parse(graphName),
-            parseConfiguration(configuration, FilteredNodeSimilarityStatsConfig::of),
+            configurationParser.parseConfiguration(configuration, FilteredNodeSimilarityStatsConfig::of),
             resultBuilder
         );
     }
@@ -240,7 +231,7 @@ public final class SimilarityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     ) {
         var result = estimationModeBusinessFacade.filteredNodeSimilarity(
-            parseConfiguration(algorithmConfiguration, FilteredNodeSimilarityStatsConfig::of),
+            configurationParser.parseConfiguration(algorithmConfiguration, FilteredNodeSimilarityStatsConfig::of),
             graphNameOrConfiguration
         );
 
@@ -252,7 +243,7 @@ public final class SimilarityProcedureFacade {
 
         return streamModeBusinessFacade.filteredNodeSimilarity(
             GraphName.parse(graphName),
-            parseConfiguration(configuration, FilteredNodeSimilarityStreamConfig::of),
+            configurationParser.parseConfiguration(configuration, FilteredNodeSimilarityStreamConfig::of),
             resultBuilder
         );
     }
@@ -262,7 +253,7 @@ public final class SimilarityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     ) {
         var result = estimationModeBusinessFacade.filteredNodeSimilarity(
-            parseConfiguration(algorithmConfiguration, FilteredNodeSimilarityStreamConfig::of),
+            configurationParser.parseConfiguration(algorithmConfiguration, FilteredNodeSimilarityStreamConfig::of),
             graphNameOrConfiguration
         );
 
@@ -279,7 +270,7 @@ public final class SimilarityProcedureFacade {
 
         return writeModeBusinessFacade.filteredNodeSimilarity(
             GraphName.parse(graphNameAsString),
-            parseConfiguration(rawConfiguration, FilteredNodeSimilarityWriteConfig::of),
+            configurationParser.parseConfiguration(rawConfiguration, FilteredNodeSimilarityWriteConfig::of),
             resultBuilder,
             shouldComputeSimilarityDistribution
         );
@@ -290,7 +281,7 @@ public final class SimilarityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     ) {
         var result = estimationModeBusinessFacade.filteredNodeSimilarity(
-            parseConfiguration(algorithmConfiguration, FilteredNodeSimilarityWriteConfig::of),
+            configurationParser.parseConfiguration(algorithmConfiguration, FilteredNodeSimilarityWriteConfig::of),
             graphNameOrConfiguration
         );
 
@@ -310,7 +301,7 @@ public final class SimilarityProcedureFacade {
 
         return statsModeBusinessFacade.knn(
             GraphName.parse(graphName),
-            parseConfiguration(configuration, KnnStatsConfig::of),
+            configurationParser.parseConfiguration(configuration, KnnStatsConfig::of),
             resultBuilder
         );
     }
@@ -320,7 +311,7 @@ public final class SimilarityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     ) {
         var result = estimationModeBusinessFacade.knn(
-            parseConfiguration(algorithmConfiguration, KnnStatsConfig::of),
+            configurationParser.parseConfiguration(algorithmConfiguration, KnnStatsConfig::of),
             graphNameOrConfiguration
         );
 
@@ -335,7 +326,7 @@ public final class SimilarityProcedureFacade {
 
         return streamModeBusinessFacade.knn(
             GraphName.parse(graphName),
-            parseConfiguration(configuration, KnnStreamConfig::of),
+            configurationParser.parseConfiguration(configuration, KnnStreamConfig::of),
             resultBuilder
         );
     }
@@ -345,7 +336,7 @@ public final class SimilarityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     ) {
         var result = estimationModeBusinessFacade.knn(
-            parseConfiguration(algorithmConfiguration, KnnStreamConfig::of),
+            configurationParser.parseConfiguration(algorithmConfiguration, KnnStreamConfig::of),
             graphNameOrConfiguration
         );
 
@@ -362,7 +353,7 @@ public final class SimilarityProcedureFacade {
 
         return writeModeBusinessFacade.knn(
             GraphName.parse(graphNameAsString),
-            parseConfiguration(rawConfiguration, KnnWriteConfig::of),
+            configurationParser.parseConfiguration(rawConfiguration, KnnWriteConfig::of),
             resultBuilder,
             shouldComputeSimilarityDistribution
         );
@@ -373,7 +364,7 @@ public final class SimilarityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     ) {
         var result = estimationModeBusinessFacade.knn(
-            parseConfiguration(algorithmConfiguration, KnnWriteConfig::of),
+            configurationParser.parseConfiguration(algorithmConfiguration, KnnWriteConfig::of),
             graphNameOrConfiguration
         );
 
@@ -389,7 +380,7 @@ public final class SimilarityProcedureFacade {
         var resultBuilder = new NodeSimilarityResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
         return statsModeBusinessFacade.nodeSimilarity(
             GraphName.parse(graphName),
-            parseConfiguration(configuration, NodeSimilarityStatsConfig::of),
+            configurationParser.parseConfiguration(configuration, NodeSimilarityStatsConfig::of),
             resultBuilder
         );
     }
@@ -399,7 +390,7 @@ public final class SimilarityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     ) {
         var result = estimationModeBusinessFacade.nodeSimilarity(
-            parseConfiguration(algorithmConfiguration, NodeSimilarityStatsConfig::of),
+            configurationParser.parseConfiguration(algorithmConfiguration, NodeSimilarityStatsConfig::of),
             graphNameOrConfiguration
         );
 
@@ -411,7 +402,7 @@ public final class SimilarityProcedureFacade {
 
         return streamModeBusinessFacade.nodeSimilarity(
             GraphName.parse(graphName),
-            parseConfiguration(configuration, NodeSimilarityStreamConfig::of),
+            configurationParser.parseConfiguration(configuration, NodeSimilarityStreamConfig::of),
             resultBuilder
         );
     }
@@ -421,7 +412,7 @@ public final class SimilarityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     ) {
         var result = estimationModeBusinessFacade.nodeSimilarity(
-            parseConfiguration(algorithmConfiguration, NodeSimilarityStreamConfig::of),
+            configurationParser.parseConfiguration(algorithmConfiguration, NodeSimilarityStreamConfig::of),
             graphNameOrConfiguration
         );
 
@@ -435,7 +426,10 @@ public final class SimilarityProcedureFacade {
         var resultBuilder = new NodeSimilarityResultBuilderForWriteMode();
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("similarityDistribution");
 
-        var parsedConfiguration = parseConfiguration(rawConfiguration, NodeSimilarityWriteConfig::of);
+        var parsedConfiguration = configurationParser.parseConfiguration(
+            rawConfiguration,
+            NodeSimilarityWriteConfig::of
+        );
 
         return writeModeBusinessFacade.nodeSimilarity(
             GraphName.parse(graphNameAsString),
@@ -450,7 +444,10 @@ public final class SimilarityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     ) {
 
-        var parsedConfiguration = parseConfiguration(algorithmConfiguration, NodeSimilarityWriteConfig::of);
+        var parsedConfiguration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            NodeSimilarityWriteConfig::of
+        );
 
         var memoryEstimateResult = estimationModeBusinessFacade.nodeSimilarity(
             parsedConfiguration,
@@ -458,16 +455,5 @@ public final class SimilarityProcedureFacade {
         );
 
         return Stream.of(memoryEstimateResult);
-    }
-
-    private <C extends AlgoBaseConfig> C parseConfiguration(
-        Map<String, Object> configuration,
-        Function<CypherMapWrapper, C> configurationMapper
-    ) {
-        return configurationParser.parseConfiguration(
-            configuration,
-            configurationMapper,
-            user
-        );
     }
 }

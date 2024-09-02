@@ -21,16 +21,13 @@ package org.neo4j.gds.procedures.algorithms.miscellaneous;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsStatsModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsWriteModeBusinessFacade;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
+import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.stubs.CollapsePathMutateStub;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.stubs.IndexInverseMutateStub;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.stubs.ScalePropertiesMutateStub;
@@ -44,7 +41,6 @@ import org.neo4j.gds.scaleproperties.ScalePropertiesStreamConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesWriteConfig;
 
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 public final class MiscellaneousProcedureFacade {
@@ -63,8 +59,7 @@ public final class MiscellaneousProcedureFacade {
     private final MiscellaneousApplicationsStreamModeBusinessFacade streamModeBusinessFacade;
     private final MiscellaneousApplicationsWriteModeBusinessFacade writeModeBusinessFacade;
 
-    private final ConfigurationParser configurationParser;
-    private final User user;
+    private final UserSpecificConfigurationParser configurationParser;
 
 
     private MiscellaneousProcedureFacade(
@@ -78,8 +73,7 @@ public final class MiscellaneousProcedureFacade {
         MiscellaneousApplicationsStatsModeBusinessFacade statsModeBusinessFacade,
         MiscellaneousApplicationsStreamModeBusinessFacade streamModeBusinessFacade,
         MiscellaneousApplicationsWriteModeBusinessFacade writeModeBusinessFacade,
-        ConfigurationParser configurationParser,
-        User user
+        UserSpecificConfigurationParser configurationParser
     ) {
         this.procedureReturnColumns = procedureReturnColumns;
         this.alphaScalePropertiesMutateStub = alphaScalePropertiesMutateStub;
@@ -93,15 +87,13 @@ public final class MiscellaneousProcedureFacade {
         this.writeModeBusinessFacade = writeModeBusinessFacade;
 
         this.configurationParser = configurationParser;
-        this.user = user;
     }
 
     public static MiscellaneousProcedureFacade create(
         GenericStub genericStub,
         ApplicationsFacade applicationsFacade,
         ProcedureReturnColumns procedureReturnColumns,
-        ConfigurationParser configurationParser,
-         User user
+        UserSpecificConfigurationParser configurationParser
     ) {
         var alphaScalePropertiesMutateStub = new ScalePropertiesMutateStub(
             genericStub,
@@ -144,8 +136,7 @@ public final class MiscellaneousProcedureFacade {
             applicationsFacade.miscellaneous().stats(),
             applicationsFacade.miscellaneous().stream(),
             applicationsFacade.miscellaneous().write(),
-            configurationParser,
-            user
+            configurationParser
         );
     }
 
@@ -161,7 +152,7 @@ public final class MiscellaneousProcedureFacade {
 
         return streamModeBusinessFacade.scaleProperties(
             GraphName.parse(graphName),
-            parseConfiguration(configuration, AlphaScalePropertiesStreamConfig::of),
+            configurationParser.parseConfiguration(configuration, AlphaScalePropertiesStreamConfig::of),
             resultBuilder
         );
     }
@@ -188,7 +179,7 @@ public final class MiscellaneousProcedureFacade {
 
         return statsModeBusinessFacade.scaleProperties(
             GraphName.parse(graphName),
-            parseConfiguration(configuration, ScalePropertiesStatsConfig::of),
+            configurationParser.parseConfiguration(configuration, ScalePropertiesStatsConfig::of),
             resultBuilder
         );
     }
@@ -199,7 +190,7 @@ public final class MiscellaneousProcedureFacade {
     ) {
 
         var result = estimationModeBusinessFacade.scaleProperties(
-            parseConfiguration(algorithmConfiguration, ScalePropertiesStatsConfig::of),
+            configurationParser.parseConfiguration(algorithmConfiguration, ScalePropertiesStatsConfig::of),
             graphNameOrConfiguration
         );
         return Stream.of(result);
@@ -214,7 +205,7 @@ public final class MiscellaneousProcedureFacade {
 
         return streamModeBusinessFacade.scaleProperties(
             GraphName.parse(graphName),
-            parseConfiguration(configuration, ScalePropertiesStreamConfig::of),
+            configurationParser.parseConfiguration(configuration, ScalePropertiesStreamConfig::of),
             resultBuilder
         );
     }
@@ -224,7 +215,7 @@ public final class MiscellaneousProcedureFacade {
         Map<String, Object> algorithmConfiguration
     ) {
         var result = estimationModeBusinessFacade.scaleProperties(
-            parseConfiguration(algorithmConfiguration, ScalePropertiesStreamConfig::of),
+            configurationParser.parseConfiguration(algorithmConfiguration, ScalePropertiesStreamConfig::of),
             graphNameOrConfiguration
         );
         return Stream.of(result);
@@ -240,7 +231,7 @@ public final class MiscellaneousProcedureFacade {
 
         return writeModeBusinessFacade.scaleProperties(
             GraphName.parse(graphName),
-            parseConfiguration(configuration, ScalePropertiesWriteConfig::of),
+            configurationParser.parseConfiguration(configuration, ScalePropertiesWriteConfig::of),
             resultBuilder
         );
     }
@@ -250,7 +241,7 @@ public final class MiscellaneousProcedureFacade {
         Map<String, Object> algorithmConfiguration
     ) {
         var result = estimationModeBusinessFacade.scaleProperties(
-            parseConfiguration(algorithmConfiguration, ScalePropertiesWriteConfig::of),
+            configurationParser.parseConfiguration(algorithmConfiguration, ScalePropertiesWriteConfig::of),
             graphNameOrConfiguration
         );
         return Stream.of(result);
@@ -259,16 +250,4 @@ public final class MiscellaneousProcedureFacade {
     public ToUndirectedMutateStub toUndirectedMutateStub() {
         return toUndirectedMutateStub;
     }
-
-    private <C extends AlgoBaseConfig> C parseConfiguration(
-        Map<String, Object> configuration,
-        Function<CypherMapWrapper, C> configurationMapper
-    ) {
-        return configurationParser.parseConfiguration(
-            configuration,
-            configurationMapper,
-            user
-        );
-    }
-
 }

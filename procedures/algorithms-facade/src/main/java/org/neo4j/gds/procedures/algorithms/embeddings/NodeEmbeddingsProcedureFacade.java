@@ -28,7 +28,6 @@ import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsS
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsTrainModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsWriteModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.embeddings.fastrp.FastRPStatsConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
@@ -39,7 +38,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNStreamConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
-import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
+import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.embeddings.stubs.FastRPMutateStub;
 import org.neo4j.gds.procedures.algorithms.embeddings.stubs.GraphSageMutateStub;
 import org.neo4j.gds.procedures.algorithms.embeddings.stubs.HashGnnMutateStub;
@@ -63,7 +62,7 @@ public final class NodeEmbeddingsProcedureFacade {
     private final NodeEmbeddingAlgorithmsTrainModeBusinessFacade trainModeBusinessFacade;
     private final NodeEmbeddingAlgorithmsWriteModeBusinessFacade writeModeBusinessFacade;
 
-    private final ConfigurationParser configurationParser;
+    private final UserSpecificConfigurationParser configurationParser;
     private final User user;
 
     private NodeEmbeddingsProcedureFacade(
@@ -76,7 +75,7 @@ public final class NodeEmbeddingsProcedureFacade {
         NodeEmbeddingAlgorithmsStreamModeBusinessFacade streamModeBusinessFacade,
         NodeEmbeddingAlgorithmsTrainModeBusinessFacade trainModeBusinessFacade,
         NodeEmbeddingAlgorithmsWriteModeBusinessFacade writeModeBusinessFacade,
-        ConfigurationParser configurationParser,
+        UserSpecificConfigurationParser configurationParser,
         User user
     ) {
         this.fastRPMutateStub = fastRPMutateStub;
@@ -95,7 +94,7 @@ public final class NodeEmbeddingsProcedureFacade {
     public static NodeEmbeddingsProcedureFacade create(
         GenericStub genericStub,
         ApplicationsFacade applicationsFacade,
-        ConfigurationParser configurationParser,
+        UserSpecificConfigurationParser configurationParser,
         User user
     ) {
         var fastRPMutateStub = new FastRPMutateStub(
@@ -150,7 +149,7 @@ public final class NodeEmbeddingsProcedureFacade {
 
         return statsModeBusinessFacade.fastRP(
             GraphName.parse(graphName),
-            parseConfiguration(configuration, FastRPStatsConfig::of),
+            configurationParser.parseConfiguration(configuration, FastRPStatsConfig::of),
             resultBuilder
         );
 
@@ -161,7 +160,7 @@ public final class NodeEmbeddingsProcedureFacade {
         Map<String, Object> algorithmConfiguration
     ) {
         var result = estimationModeBusinessFacade.fastRP(
-            parseConfiguration(algorithmConfiguration, FastRPStatsConfig::of),
+            configurationParser.parseConfiguration(algorithmConfiguration, FastRPStatsConfig::of),
             graphNameOrConfiguration
         );
         return Stream.of(result);
@@ -175,7 +174,7 @@ public final class NodeEmbeddingsProcedureFacade {
 
         return streamModeBusinessFacade.fastRP(
             GraphName.parse(graphName),
-            parseConfiguration(configuration, FastRPStreamConfig::of),
+            configurationParser.parseConfiguration(configuration, FastRPStreamConfig::of),
             resultBuilder
         );
     }
@@ -185,7 +184,7 @@ public final class NodeEmbeddingsProcedureFacade {
         Map<String, Object> algorithmConfiguration
     ) {
         var result = estimationModeBusinessFacade.fastRP(
-            parseConfiguration(algorithmConfiguration, FastRPStreamConfig::of),
+            configurationParser.parseConfiguration(algorithmConfiguration, FastRPStreamConfig::of),
             graphNameOrConfiguration
         );
         return Stream.of(result);
@@ -199,7 +198,7 @@ public final class NodeEmbeddingsProcedureFacade {
 
         return writeModeBusinessFacade.fastRP(
             GraphName.parse(graphName),
-            parseConfiguration(configuration, FastRPWriteConfig::of),
+            configurationParser.parseConfiguration(configuration, FastRPWriteConfig::of),
             resultBuilder
         );
     }
@@ -209,7 +208,7 @@ public final class NodeEmbeddingsProcedureFacade {
         Map<String, Object> algorithmConfiguration
     ) {
         var result = estimationModeBusinessFacade.fastRP(
-            parseConfiguration(algorithmConfiguration, FastRPWriteConfig::of),
+            configurationParser.parseConfiguration(algorithmConfiguration, FastRPWriteConfig::of),
             graphNameOrConfiguration
         );
         return Stream.of(result);
@@ -225,10 +224,13 @@ public final class NodeEmbeddingsProcedureFacade {
     ) {
         var resultBuilder = new GraphSageResultBuilderForStreamMode();
 
-        Function<CypherMapWrapper,GraphSageStreamConfig>   configFunction  =  (cypherMapWrapper) -> GraphSageStreamConfig.of(user.getUsername(), cypherMapWrapper);
-        return  streamModeBusinessFacade.graphSage(
+        Function<CypherMapWrapper, GraphSageStreamConfig> configFunction = (cypherMapWrapper) -> GraphSageStreamConfig.of(
+            user.getUsername(),
+            cypherMapWrapper
+        );
+        return streamModeBusinessFacade.graphSage(
             GraphName.parse(graphName),
-            parseConfiguration(configuration, configFunction),
+            configurationParser.parseConfiguration(configuration, configFunction),
             resultBuilder
         );
 
@@ -239,9 +241,12 @@ public final class NodeEmbeddingsProcedureFacade {
         Map<String, Object> algorithmConfiguration
     ) {
 
-        Function<CypherMapWrapper,GraphSageStreamConfig>   configFunction  =  (cypherMapWrapper) -> GraphSageStreamConfig.of(user.getUsername(), cypherMapWrapper);
+        Function<CypherMapWrapper, GraphSageStreamConfig> configFunction = (cypherMapWrapper) -> GraphSageStreamConfig.of(
+            user.getUsername(),
+            cypherMapWrapper
+        );
         var result = estimationModeBusinessFacade.graphSage(
-            parseConfiguration(algorithmConfiguration, configFunction),
+            configurationParser.parseConfiguration(algorithmConfiguration, configFunction),
             graphNameOrConfiguration
         );
         return Stream.of(result);
@@ -253,10 +258,13 @@ public final class NodeEmbeddingsProcedureFacade {
     ) {
         var resultBuilder = new GraphSageResultBuilderForTrainMode();
 
-        Function<CypherMapWrapper,GraphSageTrainConfig>   configFunction  =  (cypherMapWrapper) -> GraphSageTrainConfig.of(user.getUsername(), cypherMapWrapper);
-        return  trainModeBusinessFacade.graphSage(
+        Function<CypherMapWrapper, GraphSageTrainConfig> configFunction = (cypherMapWrapper) -> GraphSageTrainConfig.of(
+            user.getUsername(),
+            cypherMapWrapper
+        );
+        return trainModeBusinessFacade.graphSage(
             GraphName.parse(graphName),
-            parseConfiguration(configuration, configFunction),
+            configurationParser.parseConfiguration(configuration, configFunction),
             resultBuilder
         );
 
@@ -266,9 +274,12 @@ public final class NodeEmbeddingsProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        Function<CypherMapWrapper,GraphSageTrainConfig>   configFunction  =  (cypherMapWrapper) -> GraphSageTrainConfig.of(user.getUsername(), cypherMapWrapper);
+        Function<CypherMapWrapper, GraphSageTrainConfig> configFunction = (cypherMapWrapper) -> GraphSageTrainConfig.of(
+            user.getUsername(),
+            cypherMapWrapper
+        );
         var result = estimationModeBusinessFacade.graphSageTrain(
-            parseConfiguration(algorithmConfiguration, configFunction),
+            configurationParser.parseConfiguration(algorithmConfiguration, configFunction),
             graphNameOrConfiguration
         );
         return Stream.of(result);
@@ -280,10 +291,13 @@ public final class NodeEmbeddingsProcedureFacade {
     ) {
         var resultBuilder = new GraphSageResultBuilderForWriteMode();
 
-        Function<CypherMapWrapper,GraphSageWriteConfig>   configFunction  =  (cypherMapWrapper) -> GraphSageWriteConfig.of(user.getUsername(), cypherMapWrapper);
-        return  writeModeBusinessFacade.graphSage(
+        Function<CypherMapWrapper, GraphSageWriteConfig> configFunction = (cypherMapWrapper) -> GraphSageWriteConfig.of(
+            user.getUsername(),
+            cypherMapWrapper
+        );
+        return writeModeBusinessFacade.graphSage(
             GraphName.parse(graphName),
-            parseConfiguration(configuration, configFunction),
+            configurationParser.parseConfiguration(configuration, configFunction),
             resultBuilder
         );
     }
@@ -292,9 +306,12 @@ public final class NodeEmbeddingsProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        Function<CypherMapWrapper,GraphSageWriteConfig>  configFunction  =  (cypherMapWrapper) -> GraphSageWriteConfig.of(user.getUsername(), cypherMapWrapper);
+        Function<CypherMapWrapper, GraphSageWriteConfig> configFunction = (cypherMapWrapper) -> GraphSageWriteConfig.of(
+            user.getUsername(),
+            cypherMapWrapper
+        );
         var result = estimationModeBusinessFacade.graphSage(
-            parseConfiguration(algorithmConfiguration, configFunction),
+            configurationParser.parseConfiguration(algorithmConfiguration, configFunction),
             graphNameOrConfiguration
         );
         return Stream.of(result);
@@ -310,9 +327,9 @@ public final class NodeEmbeddingsProcedureFacade {
     ) {
         var resultBuilder = new HashGnnResultBuilderForStreamMode();
 
-        return  streamModeBusinessFacade.hashGnn(
+        return streamModeBusinessFacade.hashGnn(
             GraphName.parse(graphName),
-            parseConfiguration(configuration,  HashGNNStreamConfig::of),
+            configurationParser.parseConfiguration(configuration, HashGNNStreamConfig::of),
             resultBuilder
         );
 
@@ -323,7 +340,7 @@ public final class NodeEmbeddingsProcedureFacade {
         Map<String, Object> algorithmConfiguration
     ) {
         var result = estimationModeBusinessFacade.hashGnn(
-            parseConfiguration(algorithmConfiguration, HashGNNStreamConfig::of),
+            configurationParser.parseConfiguration(algorithmConfiguration, HashGNNStreamConfig::of),
             graphNameOrConfiguration
         );
         return Stream.of(result);
@@ -339,9 +356,9 @@ public final class NodeEmbeddingsProcedureFacade {
     ) {
         var resultBuilder = new Node2VecResultBuilderForStreamMode();
 
-        return  streamModeBusinessFacade.node2Vec(
+        return streamModeBusinessFacade.node2Vec(
             GraphName.parse(graphName),
-            parseConfiguration(configuration,  Node2VecStreamConfig::of),
+            configurationParser.parseConfiguration(configuration, Node2VecStreamConfig::of),
             resultBuilder
         );
     }
@@ -351,7 +368,7 @@ public final class NodeEmbeddingsProcedureFacade {
         Map<String, Object> algorithmConfiguration
     ) {
         var result = estimationModeBusinessFacade.node2Vec(
-            parseConfiguration(algorithmConfiguration, Node2VecStreamConfig::of),
+            configurationParser.parseConfiguration(algorithmConfiguration, Node2VecStreamConfig::of),
             graphNameOrConfiguration
         );
         return Stream.of(result);
@@ -363,9 +380,9 @@ public final class NodeEmbeddingsProcedureFacade {
     ) {
         var resultBuilder = new Node2VecResultBuilderForWriteMode();
 
-        return  writeModeBusinessFacade.node2Vec(
+        return writeModeBusinessFacade.node2Vec(
             GraphName.parse(graphName),
-            parseConfiguration(configuration,  Node2VecWriteConfig::of),
+            configurationParser.parseConfiguration(configuration, Node2VecWriteConfig::of),
             resultBuilder
         );
     }
@@ -375,20 +392,9 @@ public final class NodeEmbeddingsProcedureFacade {
         Map<String, Object> algorithmConfiguration
     ) {
         var result = estimationModeBusinessFacade.node2Vec(
-            parseConfiguration(algorithmConfiguration, Node2VecWriteConfig::of),
+            configurationParser.parseConfiguration(algorithmConfiguration, Node2VecWriteConfig::of),
             graphNameOrConfiguration
         );
         return Stream.of(result);
-    }
-
-    private <C extends AlgoBaseConfig> C parseConfiguration(
-        Map<String, Object> configuration,
-        Function<CypherMapWrapper, C> configurationMapper
-    ) {
-        return configurationParser.parseConfiguration(
-            configuration,
-            configurationMapper,
-            user
-        );
     }
 }
