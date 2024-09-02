@@ -84,8 +84,8 @@ class AlgorithmProcedureFacadeBuilder {
             applicationsFacade,
             closeableResourceRegistry,
             procedureReturnColumns,
-            estimationModeRunner,
-            algorithmExecutionScaffolding
+            configurationParser,
+            requestScopedDependencies.getUser()
         );
     }
 
