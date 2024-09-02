@@ -614,8 +614,8 @@ class WccMutateProcTest extends BaseProcTest {
             applicationsFacade,
             null,
             ProcedureReturnColumns.EMPTY,
-            null,
-            null
+            new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance),
+            User.DEFAULT
         );
 
         return new GraphDataScienceProceduresBuilder(Log.noOpLog())
