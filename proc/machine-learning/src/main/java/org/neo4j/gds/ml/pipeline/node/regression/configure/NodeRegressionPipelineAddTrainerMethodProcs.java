@@ -52,7 +52,7 @@ public class NodeRegressionPipelineAddTrainerMethodProcs extends BaseProc {
 
         pipeline.addTrainerConfig(TunableTrainerConfig.of(configuration, TrainingMethod.LinearRegression));
 
-        return Stream.of(new NodePipelineInfoResult(pipelineName, pipeline));
+        return Stream.of(NodePipelineInfoResult.create(pipelineName, pipeline));
     }
 
     @Procedure(name = "gds.alpha.pipeline.nodeRegression.addRandomForest", mode = READ)
@@ -68,6 +68,6 @@ public class NodeRegressionPipelineAddTrainerMethodProcs extends BaseProc {
 
         pipeline.addTrainerConfig(TunableTrainerConfig.of(configuration, TrainingMethod.RandomForestRegression));
 
-        return Stream.of(new NodePipelineInfoResult(pipelineName, pipeline));
+        return Stream.of(NodePipelineInfoResult.create(pipelineName, pipeline));
     }
 }

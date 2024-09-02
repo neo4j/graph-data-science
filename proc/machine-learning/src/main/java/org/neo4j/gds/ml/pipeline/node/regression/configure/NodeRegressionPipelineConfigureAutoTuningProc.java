@@ -43,7 +43,7 @@ public class NodeRegressionPipelineConfigureAutoTuningProc extends BaseProc {
             username(),
             pipelineName,
             configMap,
-            pipeline -> new NodePipelineInfoResult(pipelineName, (NodeRegressionTrainingPipeline) pipeline)
+            pipeline -> NodePipelineInfoResult.create(pipelineName, (NodeRegressionTrainingPipeline) pipeline)
         );
     }
 

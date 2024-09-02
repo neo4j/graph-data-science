@@ -20,50 +20,100 @@
 package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
-import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public final class PipelinesProcedureFacade {
     public static final String NO_VALUE = "__NO_VALUE";
 
-    private final PipelineApplications pipelineApplications;
-    private final User user;
+    private final PipelineConfigurationParser pipelineConfigurationParser = new PipelineConfigurationParser();
 
-    private PipelinesProcedureFacade(PipelineApplications pipelineApplications, User user) {
+    private final PipelineApplications pipelineApplications;
+
+    PipelinesProcedureFacade(PipelineApplications pipelineApplications) {
         this.pipelineApplications = pipelineApplications;
-        this.user = user;
     }
 
     public static PipelinesProcedureFacade create(PipelineRepository pipelineRepository, User user) {
         var pipelineApplications = new PipelineApplications(pipelineRepository, user);
 
-        return new PipelinesProcedureFacade(pipelineApplications, user);
+        return new PipelinesProcedureFacade(pipelineApplications);
+    }
+
+    public Stream<NodePipelineInfoResult> addLogisticRegression(
+        String pipelineName,
+        Map<String, Object> configuration
+    ) {
+        return configure(
+            pipelineName,
+            () -> pipelineConfigurationParser.parseLogisticRegressionTrainerConfig(configuration),
+            pipelineApplications::addTrainerConfiguration
+        );
+    }
+
+    public Stream<NodePipelineInfoResult> addMLP(String pipelineName, Map<String, Object> configuration) {
+        return configure(
+            pipelineName,
+            () -> pipelineConfigurationParser.parseMLPClassifierTrainConfig(configuration),
+            pipelineApplications::addTrainerConfiguration
+        );
     }
 
     public Stream<NodePipelineInfoResult> addNodeProperty(
-        String pipelineName,
+        String pipelineNameAsString,
         String taskName,
         Map<String, Object> procedureConfig
     ) {
-        var pipeline = PipelineCatalog.getTyped(
-            user.getUsername(),
+        var pipelineName = PipelineName.parse(pipelineNameAsString);
+
+        var pipeline = pipelineApplications.addNodeProperty(pipelineName, taskName, procedureConfig);
+
+        var result = NodePipelineInfoResult.create(pipelineName, pipeline);
+
+        return Stream.of(result);
+    }
+
+    public Stream<NodePipelineInfoResult> addRandomForest(String pipelineName, Map<String, Object> configuration) {
+        return configure(
             pipelineName,
-            NodeClassificationTrainingPipeline.class
+            () -> pipelineConfigurationParser.parseRandomForestClassifierTrainerConfig(configuration),
+            pipelineApplications::addTrainerConfiguration
         );
+    }
 
-        var nodePropertyStep = NodePropertyStepFactory.createNodePropertyStep(taskName, procedureConfig);
+    public Stream<NodePipelineInfoResult> configureAutoTuning(String pipelineName, Map<String, Object> configuration) {
+        return configure(
+            pipelineName,
+            () -> pipelineConfigurationParser.parseAutoTuningConfig(configuration),
+            pipelineApplications::configureAutoTuning
+        );
+    }
 
-        pipeline.addNodePropertyStep(nodePropertyStep);
+    public Stream<NodePipelineInfoResult> configureSplit(String pipelineName, Map<String, Object> configuration) {
+        return configure(
+            pipelineName,
+            () -> pipelineConfigurationParser.parseNodePropertyPredictionSplitConfig(configuration),
+            pipelineApplications::configureSplit
+        );
+    }
 
-        return Stream.of(new NodePipelineInfoResult(pipelineName, pipeline));
+    public Stream<NodePipelineInfoResult> createPipeline(String pipelineNameAsString) {
+        var pipelineName = PipelineName.parse(pipelineNameAsString);
+
+        var pipeline = pipelineApplications.createNodeClassificationTrainingPipeline(pipelineName);
+
+        var result = NodePipelineInfoResult.create(pipelineName, pipeline);
+
+        return Stream.of(result);
     }
 
     public Stream<PipelineCatalogResult> drop(
@@ -88,7 +138,6 @@ public final class PipelinesProcedureFacade {
 
         var pipelineType = pipelineApplications.exists(pipelineName);
 
-        //noinspection OptionalIsPresent
         if (pipelineType.isEmpty()) return Stream.of(PipelineExistsResult.empty(pipelineName));
 
         var result = new PipelineExistsResult(pipelineName.value, pipelineType.get(), true);
@@ -112,7 +161,6 @@ public final class PipelinesProcedureFacade {
 
         Optional<TrainingPipeline<?>> pipeline = pipelineApplications.getSingle(pipelineName);
 
-        //noinspection OptionalIsPresent
         if (pipeline.isEmpty()) return Stream.empty();
 
         var result = PipelineCatalogResult.create(pipeline.get(), pipelineName.value);
@@ -120,38 +168,53 @@ public final class PipelinesProcedureFacade {
         return Stream.of(result);
     }
 
-    public Stream<NodePipelineInfoResult> selectFeatures(String pipelineName, Object nodeProperties) {
-        var result = selectFeatures(
-            user.getUsername(),
-            pipelineName,
-            nodeProperties
-        );
+    public Stream<NodePipelineInfoResult> selectFeatures(String pipelineNameAsString, Object nodeFeatureStepsAsObject) {
+        var pipelineName = PipelineName.parse(pipelineNameAsString);
+
+        var nodeFeatureSteps = parseNodeProperties(nodeFeatureStepsAsObject);
+
+        var pipeline = pipelineApplications.selectFeatures(pipelineName, nodeFeatureSteps);
+
+        var result = NodePipelineInfoResult.create(pipelineName, pipeline);
 
         return Stream.of(result);
     }
 
-    private NodePipelineInfoResult selectFeatures(
-        String username,
-        String pipelineName,
-        Object nodeProperties
+    private <CONFIGURATION> Stream<NodePipelineInfoResult> configure(
+        String pipelineNameAsString,
+        Supplier<CONFIGURATION> configurationSupplier,
+        BiFunction<PipelineName, CONFIGURATION, NodeClassificationTrainingPipeline> configurationAction
     ) {
-        var pipeline = PipelineCatalog.getTyped(username, pipelineName, NodeClassificationTrainingPipeline.class);
+        var pipelineName = PipelineName.parse(pipelineNameAsString);
 
-        if (nodeProperties instanceof String) {
-            pipeline.addFeatureStep(NodeFeatureStep.of((String) nodeProperties));
-        } else if (nodeProperties instanceof List) {
+        var configuration = configurationSupplier.get();
+
+        var pipeline = configurationAction.apply(pipelineName, configuration);
+
+        var result = NodePipelineInfoResult.create(pipelineName, pipeline);
+
+        return Stream.of(result);
+    }
+
+    private List<NodeFeatureStep> parseNodeProperties(Object nodeProperties) {
+        if (nodeProperties instanceof String) return List.of(NodeFeatureStep.of((String) nodeProperties));
+
+        if (nodeProperties instanceof List) {
+            //noinspection rawtypes
             var propertiesList = (List) nodeProperties;
-            for (Object o : propertiesList) {
-                if (!(o instanceof String)) {
-                    throw new IllegalArgumentException("The list `nodeProperties` is required to contain only strings.");
-                }
 
-                pipeline.addFeatureStep(NodeFeatureStep.of((String) o));
+            var nodeFeatureSteps = new ArrayList<NodeFeatureStep>(propertiesList.size());
+
+            for (Object o : propertiesList) {
+                if (o instanceof String)
+                    nodeFeatureSteps.add(NodeFeatureStep.of((String) o));
+                else
+                    throw new IllegalArgumentException("The list `nodeProperties` is required to contain only strings.");
             }
-        } else {
-            throw new IllegalArgumentException("The value of `nodeProperties` is required to be a list of strings.");
+
+            return nodeFeatureSteps;
         }
 
-        return new NodePipelineInfoResult(pipelineName, pipeline);
+        throw new IllegalArgumentException("The value of `nodeProperties` is required to be a list of strings.");
     }
 }

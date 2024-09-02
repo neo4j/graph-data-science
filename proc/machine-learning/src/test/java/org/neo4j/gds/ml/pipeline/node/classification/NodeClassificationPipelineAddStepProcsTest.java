@@ -28,6 +28,8 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.procedures.GraphDataScienceProceduresBuilder;
+import org.neo4j.gds.procedures.pipelines.NodeClassificationPipelineCompanion;
+import org.neo4j.gds.procedures.pipelines.PipelineRepository;
 import org.neo4j.gds.procedures.pipelines.PipelinesProcedureFacade;
 
 import java.util.List;
@@ -42,7 +44,7 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() {
-        NodeClassificationPipelineCreateProc.create(getUsername(), "myPipeline");
+        PipelinesProcedureFacade.create(new PipelineRepository(), new User(getUsername(), false)).createPipeline("myPipeline");
     }
 
     @AfterEach
@@ -53,7 +55,7 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
     @Test
     void shouldAddNodePropertyStep() {
         var facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
-            .with(PipelinesProcedureFacade.create(null, new User(getUsername(), false)))
+            .with(PipelinesProcedureFacade.create(new PipelineRepository(), new User(getUsername(), false)))
             .build();
         var procedure = new NodeClassificationPipelineAddStepProcs();
         procedure.facade = facade;
@@ -77,7 +79,7 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
     @Test
     void shouldSelectFeatures() {
         var facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
-            .with(PipelinesProcedureFacade.create(null, new User(getUsername(), false)))
+            .with(PipelinesProcedureFacade.create(new PipelineRepository(), new User(getUsername(), false)))
             .build();
         var procedure = new NodeClassificationPipelineAddStepProcs();
         procedure.facade = facade;
@@ -96,7 +98,7 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
     @Test
     void failOnIncompleteNodePropertyStepConfig() {
         var facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
-            .with(PipelinesProcedureFacade.create(null, new User(getUsername(), false)))
+            .with(PipelinesProcedureFacade.create(new PipelineRepository(), new User(getUsername(), false)))
             .build();
         var procedure = new NodeClassificationPipelineAddStepProcs();
         procedure.facade = facade;
@@ -111,7 +113,7 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
     @Test
     void failOnDuplicateMutateProperty() {
         var facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
-            .with(PipelinesProcedureFacade.create(null, new User(getUsername(), false)))
+            .with(PipelinesProcedureFacade.create(new PipelineRepository(), new User(getUsername(), false)))
             .build();
         var procedure = new NodeClassificationPipelineAddStepProcs();
         procedure.facade = facade;
@@ -134,7 +136,7 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
     @Test
     void failOnUnexpectedConfigKeysInNodePropertyStepConfig() {
         var facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
-            .with(PipelinesProcedureFacade.create(null, new User(getUsername(), false)))
+            .with(PipelinesProcedureFacade.create(new PipelineRepository(), new User(getUsername(), false)))
             .build();
         var procedure = new NodeClassificationPipelineAddStepProcs();
         procedure.facade = facade;
@@ -151,7 +153,7 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
     @Test
     void shouldAddNodeAndSelectFeatureProperties() {
         var facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
-            .with(PipelinesProcedureFacade.create(null, new User(getUsername(), false)))
+            .with(PipelinesProcedureFacade.create(new PipelineRepository(), new User(getUsername(), false)))
             .build();
         var procedure = new NodeClassificationPipelineAddStepProcs();
         procedure.facade = facade;
@@ -183,7 +185,7 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
     @Test
     void shouldAddTwoNodePropertySteps() {
         var facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
-            .with(PipelinesProcedureFacade.create(null, new User(getUsername(), false)))
+            .with(PipelinesProcedureFacade.create(new PipelineRepository(), new User(getUsername(), false)))
             .build();
         var procedure = new NodeClassificationPipelineAddStepProcs();
         procedure.facade = facade;
@@ -218,7 +220,7 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
     @Test
     void shouldThrowIfPipelineDoesntExistForNodePropertyStep() {
         var facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
-            .with(PipelinesProcedureFacade.create(null, new User(getUsername(), false)))
+            .with(PipelinesProcedureFacade.create(new PipelineRepository(), new User(getUsername(), false)))
             .build();
         var procedure = new NodeClassificationPipelineAddStepProcs();
         procedure.facade = facade;
@@ -235,7 +237,7 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
     @Test
     void shouldThrowIfPipelineDoesntExistForFeatureStep() {
         var facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
-            .with(PipelinesProcedureFacade.create(null, new User(getUsername(), false)))
+            .with(PipelinesProcedureFacade.create(new PipelineRepository(), new User(getUsername(), false)))
             .build();
         var procedure = new NodeClassificationPipelineAddStepProcs();
         procedure.facade = facade;
@@ -251,7 +253,7 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
     @Test
     void shouldThrowInvalidNodePropertyStepName() {
         var facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
-            .with(PipelinesProcedureFacade.create(null, new User(getUsername(), false)))
+            .with(PipelinesProcedureFacade.create(new PipelineRepository(), new User(getUsername(), false)))
             .build();
         var procedure = new NodeClassificationPipelineAddStepProcs();
         procedure.facade = facade;
@@ -268,7 +270,7 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
     @Test
     void failOnConfiguringReservedConfigFields() {
         var facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
-            .with(PipelinesProcedureFacade.create(null, new User(getUsername(), false)))
+            .with(PipelinesProcedureFacade.create(new PipelineRepository(), new User(getUsername(), false)))
             .build();
         var procedure = new NodeClassificationPipelineAddStepProcs();
         procedure.facade = facade;
@@ -288,7 +290,7 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
     void shouldThrowIfAddingNodePropertyToANonPipeline() {
         PipelineCatalog.set(getUsername(), "testPipe", new LinkPredictionTrainingPipeline());
         var facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
-            .with(PipelinesProcedureFacade.create(null, new User(getUsername(), false)))
+            .with(PipelinesProcedureFacade.create(new PipelineRepository(), new User(getUsername(), false)))
             .build();
         var procedure = new NodeClassificationPipelineAddStepProcs();
         procedure.facade = facade;
@@ -308,7 +310,7 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
     void shouldThrowIfAddingFeatureToANonPipeline() {
         PipelineCatalog.set(getUsername(), "testPipe", new LinkPredictionTrainingPipeline());
         var facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
-            .with(PipelinesProcedureFacade.create(null, new User(getUsername(), false)))
+            .with(PipelinesProcedureFacade.create(new PipelineRepository(), new User(getUsername(), false)))
             .build();
         var procedure = new NodeClassificationPipelineAddStepProcs();
         procedure.facade = facade;

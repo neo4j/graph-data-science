@@ -19,12 +19,9 @@
  */
 package org.neo4j.gds.ml.pipeline.node.classification;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.pipelines.NodePipelineInfoResult;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -34,20 +31,13 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class NodeClassificationPipelineConfigureSplitProc extends BaseProc {
+public class NodeClassificationPipelineConfigureSplitProc {
+    @Context
+    public GraphDataScienceProcedures facade;
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.configureSplit", mode = READ)
     @Description("Configures the split of the node classification training pipeline.")
     public Stream<NodePipelineInfoResult> configureSplit(@Name("pipelineName") String pipelineName, @Name("configuration") Map<String, Object> configMap) {
-        var pipeline = PipelineCatalog.getTyped(username(), pipelineName, NodeClassificationTrainingPipeline.class);
-
-        var cypherConfig = CypherMapWrapper.create(configMap);
-        var config = NodePropertyPredictionSplitConfig.of(cypherConfig);
-
-        cypherConfig.requireOnlyKeysFrom(config.configKeys());
-
-        pipeline.setSplitConfig(config);
-
-        return Stream.of(new NodePipelineInfoResult(pipelineName, pipeline));
+        return facade.pipelines().configureSplit(pipelineName, configMap);
     }
 }

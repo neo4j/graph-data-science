@@ -5,10 +5,26 @@ description = 'Neo4j Graph Data Science :: Pipelines Procedure Facade'
 group = 'org.neo4j.gds'
 
 dependencies {
+    neodeps().each {
+        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
+            transitive = false
+        }
+
+        testImplementation(group: 'org.neo4j', name: it, version: ver.'neo4j')
+    }
+
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':ml-algo')
     implementation project(':ml-api')
     implementation project(':pipeline')
+
+    testImplementation platform(openGds.junit5bom)
+    testImplementation openGds.junit5.jupiter.api
+    testImplementation openGds.junit5.jupiter.params
+    testImplementation openGds.assertj.core
+    testImplementation openGds.mockito.junit.jupiter
+
+    testRuntimeOnly openGds.junit5.jupiter.engine
 }

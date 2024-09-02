@@ -43,6 +43,6 @@ public class NodeRegressionPipelineCreateProc extends BaseProc {
 
         PipelineCatalog.set(username(), pipelineName, pipeline);
 
-        return Stream.of(new NodePipelineInfoResult(pipelineName, pipeline));
+        return Stream.of(NodePipelineInfoResult.create(pipelineName, pipeline));
     }
 }

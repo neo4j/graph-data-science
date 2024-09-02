@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.core.CypherMapAccess;
+import org.neo4j.gds.core.StringIdentifierValidations;
 
 final class PipelineName {
     final String value;
@@ -31,6 +32,8 @@ final class PipelineName {
     static PipelineName parse(String pipelineNameAsString) {
         CypherMapAccess.failOnBlank("pipelineName", pipelineNameAsString);
 
-        return new PipelineName(pipelineNameAsString.trim());
+        StringIdentifierValidations.validateNoWhiteCharacter(pipelineNameAsString, "pipelineName");
+
+        return new PipelineName(pipelineNameAsString);
     }
 }

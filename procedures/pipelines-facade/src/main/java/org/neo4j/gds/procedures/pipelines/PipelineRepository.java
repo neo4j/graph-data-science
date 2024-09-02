@@ -22,6 +22,7 @@ package org.neo4j.gds.procedures.pipelines;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -31,6 +32,14 @@ import java.util.stream.Stream;
  * For now this is the groundwork, rolling out this half way house.
  */
 public class PipelineRepository {
+    NodeClassificationTrainingPipeline createNodeClassificationTrainingPipeline(User user, PipelineName pipelineName) {
+        var pipeline = new NodeClassificationTrainingPipeline();
+
+        PipelineCatalog.set(user.getUsername(), pipelineName.value, pipeline);
+
+        return pipeline;
+    }
+
     /**
      * Underlying catalog throws exception if pipeline does not exist
      */
@@ -44,6 +53,14 @@ public class PipelineRepository {
 
     Stream<PipelineCatalog.PipelineCatalogEntry> getAll(User user) {
         return PipelineCatalog.getAllPipelines(user.getUsername());
+    }
+
+    NodeClassificationTrainingPipeline getNodeClassificationTrainingPipeline(User user, PipelineName pipelineName) {
+        return PipelineCatalog.getTyped(
+            user.getUsername(),
+            pipelineName.value,
+            NodeClassificationTrainingPipeline.class
+        );
     }
 
     Optional<TrainingPipeline<?>> getSingle(User user, PipelineName pipelineName) {
