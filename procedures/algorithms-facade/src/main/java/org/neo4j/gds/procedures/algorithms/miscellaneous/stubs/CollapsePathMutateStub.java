@@ -54,7 +54,6 @@ public class CollapsePathMutateStub implements MutateStub<CollapsePathConfig, Co
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> rawConfiguration) {
         return genericStub.getMemoryEstimation(
-            username,
             rawConfiguration,
             CollapsePathConfig::of,
             __ -> estimationModeBusinessFacade.collapsePath()

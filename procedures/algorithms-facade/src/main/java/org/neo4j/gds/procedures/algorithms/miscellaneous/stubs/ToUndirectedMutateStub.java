@@ -55,7 +55,6 @@ public class ToUndirectedMutateStub implements MutateStub<ToUndirectedConfig, To
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> rawConfiguration) {
         return genericStub.getMemoryEstimation(
-            username,
             rawConfiguration,
             ToUndirectedConfig::of,
             estimationModeBusinessFacade::toUndirected

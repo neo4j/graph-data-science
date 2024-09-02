@@ -55,7 +55,6 @@ public class Node2VecMutateStub implements MutateStub<Node2VecMutateConfig, Node
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> rawConfiguration) {
         return genericStub.getMemoryEstimation(
-            username,
             rawConfiguration,
             Node2VecMutateConfig::of,
             estimationModeBusinessFacade::node2Vec

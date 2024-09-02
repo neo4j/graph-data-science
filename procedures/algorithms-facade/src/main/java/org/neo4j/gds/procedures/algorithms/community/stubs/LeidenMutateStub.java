@@ -60,7 +60,6 @@ public class LeidenMutateStub implements MutateStub<LeidenMutateConfig, LeidenMu
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
-            username,
             configuration,
             LeidenMutateConfig::of,
             estimationModeBusinessFacade::leiden

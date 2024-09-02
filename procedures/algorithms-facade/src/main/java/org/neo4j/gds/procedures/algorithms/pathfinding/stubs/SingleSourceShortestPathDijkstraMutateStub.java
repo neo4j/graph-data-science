@@ -54,7 +54,6 @@ public class SingleSourceShortestPathDijkstraMutateStub implements MutateStub<Al
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
-            username,
             configuration,
             AllShortestPathsDijkstraMutateConfig::of,
             estimationModeBusinessFacade::singleSourceShortestPathDijkstra

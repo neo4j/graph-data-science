@@ -55,7 +55,6 @@ public class TriangleCountMutateStub implements MutateStub<TriangleCountMutateCo
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
-            username,
             configuration,
             TriangleCountMutateConfig::of,
             __ -> estimationModeBusinessFacade.triangleCount()

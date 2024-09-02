@@ -58,7 +58,6 @@ public class HarmonicCentralityMutateStub implements MutateStub<HarmonicCentrali
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
-            username,
             configuration,
             HarmonicCentralityMutateConfig::of,
             __ -> estimationModeBusinessFacade.harmonicCentrality()

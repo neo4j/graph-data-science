@@ -60,7 +60,6 @@ public class KMeansMutateStub implements MutateStub<KmeansMutateConfig, KmeansMu
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> rawConfiguration) {
         return genericStub.getMemoryEstimation(
-            username,
             rawConfiguration,
             KmeansMutateConfig::of,
             estimationModeBusinessFacade::kMeans

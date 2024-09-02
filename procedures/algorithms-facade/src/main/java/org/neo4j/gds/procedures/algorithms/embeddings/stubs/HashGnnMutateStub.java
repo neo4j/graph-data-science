@@ -54,7 +54,6 @@ public class HashGnnMutateStub implements MutateStub<HashGNNMutateConfig, Defaul
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> rawConfiguration) {
         return genericStub.getMemoryEstimation(
-            username,
             rawConfiguration,
             HashGNNMutateConfig::of,
             estimationModeBusinessFacade::hashGnn

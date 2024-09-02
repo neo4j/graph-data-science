@@ -54,7 +54,6 @@ public class SteinerTreeMutateStub implements MutateStub<SteinerTreeMutateConfig
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
-            username,
             configuration,
             SteinerTreeMutateConfig::of,
             estimationModeBusinessFacade::steinerTree

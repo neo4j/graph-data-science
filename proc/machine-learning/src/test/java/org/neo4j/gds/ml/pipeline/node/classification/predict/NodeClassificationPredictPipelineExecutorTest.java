@@ -32,6 +32,7 @@ import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -63,6 +64,7 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassific
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
+import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.test.TestProc;
@@ -428,7 +430,9 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
     private static AlgorithmsProcedureFacade createAlgorithmsProcedureFacade() {
         var requestScopedDependencies = RequestScopedDependencies.builder()
             .with(TerminationFlag.RUNNING_TRUE)
+            .with(User.DEFAULT)
             .build();
+
         var applicationsFacade = ApplicationsFacade.create(
             null,
             null,
@@ -447,8 +451,8 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             null,
             null
         );
-        var configurationParser = new ConfigurationParser(null, null);
-        var genericStub = GenericStub.create(null, null, null, configurationParser, requestScopedDependencies);
+        var configurationParser = new UserSpecificConfigurationParser(new  ConfigurationParser(null, null),requestScopedDependencies.getUser());
+        var genericStub = GenericStub.create(null,  configurationParser, requestScopedDependencies);
         var centralityProcedureFacade = CentralityProcedureFacade.create(
             genericStub,
             applicationsFacade,

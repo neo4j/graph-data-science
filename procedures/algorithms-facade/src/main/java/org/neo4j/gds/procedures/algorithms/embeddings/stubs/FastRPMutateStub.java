@@ -55,7 +55,6 @@ public class FastRPMutateStub implements MutateStub<FastRPMutateConfig, DefaultN
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> rawConfiguration) {
         return genericStub.getMemoryEstimation(
-            username,
             rawConfiguration,
             FastRPMutateConfig::of,
             estimationModeBusinessFacade::fastRP

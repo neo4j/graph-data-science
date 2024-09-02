@@ -59,7 +59,6 @@ public class WccMutateStub implements MutateStub<WccMutateConfig, WccMutateResul
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
-            username,
             configuration,
             WccMutateConfig::of,
             estimationModeBusinessFacade::wcc

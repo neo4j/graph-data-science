@@ -63,7 +63,6 @@ public class GraphSageMutateStub implements MutateStub<GraphSageMutateConfig, De
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> rawConfiguration) {
         return genericStub.getMemoryEstimation(
-            username,
             rawConfiguration,
             cypherMapWrapper -> GraphSageMutateConfig.of(username, cypherMapWrapper),
             configuration -> estimationModeBusinessFacade.graphSage(configuration, true)

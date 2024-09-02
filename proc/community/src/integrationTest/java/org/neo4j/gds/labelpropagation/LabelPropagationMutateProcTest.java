@@ -500,11 +500,9 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
             .build();
 
 
-        var configurationParser = new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance);
+        var configurationParser = new UserSpecificConfigurationParser(new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance),requestScopedDependencies.getUser());
 
         var genericStub = GenericStub.create(
-            DefaultsConfiguration.Instance,
-            LimitsConfiguration.Instance,
             graphStoreCatalogService,
             configurationParser,
             requestScopedDependencies

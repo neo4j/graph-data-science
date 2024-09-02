@@ -58,7 +58,6 @@ public class KnnMutateStub implements MutateStub<KnnMutateConfig, KnnMutateResul
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
-            username,
             configuration,
             KnnMutateConfig::of,
             estimationModeBusinessFacade::knn

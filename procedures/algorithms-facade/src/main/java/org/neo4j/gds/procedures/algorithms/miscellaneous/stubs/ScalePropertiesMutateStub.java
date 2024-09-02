@@ -64,7 +64,6 @@ public class ScalePropertiesMutateStub implements MutateStub<ScalePropertiesMuta
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> rawConfiguration) {
         return genericStub.getMemoryEstimation(
-            username,
             rawConfiguration,
             configFunction,
             estimationModeBusinessFacade::scaleProperties

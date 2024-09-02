@@ -58,7 +58,6 @@ public class BetweennessCentralityMutateStub implements MutateStub<BetweennessCe
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
-            username,
             configuration,
             BetweennessCentralityMutateConfig::of,
             estimationModeBusinessFacade::betweennessCentrality

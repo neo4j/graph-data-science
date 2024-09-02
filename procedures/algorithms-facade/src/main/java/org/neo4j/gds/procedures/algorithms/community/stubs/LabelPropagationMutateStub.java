@@ -59,7 +59,6 @@ public class LabelPropagationMutateStub implements MutateStub<LabelPropagationMu
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> rawConfiguration) {
         return genericStub.getMemoryEstimation(
-            username,
             rawConfiguration,
             LabelPropagationMutateConfig::of,
             __ -> estimationModeBusinessFacade.labelPropagation()

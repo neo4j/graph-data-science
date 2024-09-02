@@ -59,7 +59,6 @@ public class K1ColoringMutateStub implements MutateStub<K1ColoringMutateConfig, 
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
-            username,
             configuration,
             K1ColoringMutateConfig::of,
             __ -> estimationModeBusinessFacade.k1Coloring()

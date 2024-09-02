@@ -60,7 +60,6 @@ public class SccMutateStub implements MutateStub<SccMutateConfig, SccMutateResul
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
-            username,
             configuration,
             SccMutateConfig::of,
             __ -> estimationModeBusinessFacade.scc()

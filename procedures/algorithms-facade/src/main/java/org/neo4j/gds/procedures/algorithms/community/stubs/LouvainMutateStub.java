@@ -60,7 +60,6 @@ public class LouvainMutateStub implements MutateStub<LouvainMutateConfig, Louvai
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
-            username,
             configuration,
             LouvainMutateConfig::of,
             estimationModeBusinessFacade::louvain

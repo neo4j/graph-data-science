@@ -19,10 +19,9 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.configuration.DefaultsConfiguration;
-import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
@@ -33,17 +32,12 @@ import java.util.function.Function;
 class ValidationService {
     private final ConfigurationParsersForMutateMode configurationParsersForMutateMode = new ConfigurationParsersForMutateMode();
 
-    private final DefaultsConfiguration defaultsConfiguration;
-    private final LimitsConfiguration limitsConfiguration;
     private final ConfigurationParser configurationParser;
 
     ValidationService(
-        DefaultsConfiguration defaultsConfiguration,
-        LimitsConfiguration limitsConfiguration,
         ConfigurationParser configurationParser
     ) {
-        this.defaultsConfiguration = defaultsConfiguration;
-        this.limitsConfiguration = limitsConfiguration;
+
         this.configurationParser = configurationParser;
     }
 
@@ -67,11 +61,9 @@ class ValidationService {
         Map<String, Object> configuration
     ) {
         configurationParser.parseConfiguration(
-            defaultsConfiguration,
-            limitsConfiguration,
-            Username.EMPTY_USERNAME.username(),
             configuration,
-            (__, cmw) -> parser.apply(cmw)
+            parser,
+            new User(Username.EMPTY_USERNAME.username(),false)
         );
     }
 }

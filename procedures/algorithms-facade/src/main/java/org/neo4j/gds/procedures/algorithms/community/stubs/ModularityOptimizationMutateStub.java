@@ -60,7 +60,6 @@ public class ModularityOptimizationMutateStub implements MutateStub<ModularityOp
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
-            username,
             configuration,
             ModularityOptimizationMutateConfig::of,
             __ -> estimationModeBusinessFacade.modularityOptimization()

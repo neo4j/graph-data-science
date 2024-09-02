@@ -54,7 +54,6 @@ public class CelfMutateStub implements MutateStub<InfluenceMaximizationMutateCon
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
-            username,
             configuration,
             InfluenceMaximizationMutateConfig::of,
             estimationModeBusinessFacade::celf

@@ -54,7 +54,6 @@ public class KgeMutateStub implements MutateStub<KGEPredictMutateConfig, KGEMuta
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
-            username,
             configuration,
             KGEPredictMutateConfig::of,
             __ -> estimationModeBusinessFacade.kge()

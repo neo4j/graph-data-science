@@ -57,7 +57,6 @@ public class NodeSimilarityMutateStub implements MutateStub<NodeSimilarityMutate
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
-            username,
             configuration,
             NodeSimilarityMutateConfig::of,
             estimationModeBusinessFacade::nodeSimilarity

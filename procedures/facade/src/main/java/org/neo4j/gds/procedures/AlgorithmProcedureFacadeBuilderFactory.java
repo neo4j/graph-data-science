@@ -22,30 +22,24 @@ package org.neo4j.gds.procedures;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
-import org.neo4j.gds.configuration.DefaultsConfiguration;
-import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
+import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.kernel.api.KernelTransaction;
 
 public class AlgorithmProcedureFacadeBuilderFactory {
-    private final DefaultsConfiguration defaultsConfiguration;
-    private final LimitsConfiguration limitsConfiguration;
+
     private final GraphStoreCatalogService graphStoreCatalogService;
 
     public AlgorithmProcedureFacadeBuilderFactory(
-        DefaultsConfiguration defaultsConfiguration,
-        LimitsConfiguration limitsConfiguration,
         GraphStoreCatalogService graphStoreCatalogService
     ) {
-        this.defaultsConfiguration = defaultsConfiguration;
-        this.limitsConfiguration = limitsConfiguration;
+
         this.graphStoreCatalogService = graphStoreCatalogService;
     }
 
     AlgorithmProcedureFacadeBuilder create(
-        ConfigurationParser configurationParser,
+        UserSpecificConfigurationParser configurationParser,
         RequestScopedDependencies requestScopedDependencies,
         KernelTransaction kernelTransaction,
         ApplicationsFacade applicationsFacade,
@@ -55,8 +49,6 @@ public class AlgorithmProcedureFacadeBuilderFactory {
         var closeableResourceRegistry = new TransactionCloseableResourceRegistry(kernelTransaction);
 
         var genericStub = GenericStub.create(
-            defaultsConfiguration,
-            limitsConfiguration,
             graphStoreCatalogService,
             configurationParser,
             requestScopedDependencies
@@ -70,7 +62,6 @@ public class AlgorithmProcedureFacadeBuilderFactory {
             procedureReturnColumns,
             applicationsFacade,
             genericStub,
-
             configurationParser
         );
     }

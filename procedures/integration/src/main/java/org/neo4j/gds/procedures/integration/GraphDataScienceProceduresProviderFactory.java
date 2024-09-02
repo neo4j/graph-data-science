@@ -147,8 +147,6 @@ final class GraphDataScienceProceduresProviderFactory {
 
     private AlgorithmProcedureFacadeBuilderFactory createAlgorithmFacadeBuilderFactory(GraphStoreCatalogService graphStoreCatalogService) {
         return new AlgorithmProcedureFacadeBuilderFactory(
-            defaultsConfiguration,
-            limitsConfiguration,
             graphStoreCatalogService
         );
     }

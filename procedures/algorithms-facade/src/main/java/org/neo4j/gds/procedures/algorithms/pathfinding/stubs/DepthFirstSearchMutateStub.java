@@ -53,7 +53,6 @@ public class DepthFirstSearchMutateStub implements MutateStub<DfsMutateConfig, P
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
-            username,
             configuration,
             DfsMutateConfig::of,
             __ -> estimationModeBusinessFacade.depthFirstSearch()

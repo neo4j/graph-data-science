@@ -46,4 +46,15 @@ public class UserSpecificConfigurationParser {
             user
         );
     }
+
+    public <CONFIG extends AlgoBaseConfig> CONFIG parseConfigurationWithoutDefaultsAndLimits(
+        Map<String, Object> configuration,
+        Function<CypherMapWrapper, CONFIG> lexer
+    ) {
+        return configurationParser.parseConfigurationWithoutDefaultsAndLimits(
+            configuration,
+            (__, cypherMapWrapper) -> lexer.apply(cypherMapWrapper),
+            user.getUsername()
+        );
+    }
 }

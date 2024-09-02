@@ -54,7 +54,6 @@ public class BellmanFordMutateStub implements MutateStub<AllShortestPathsBellman
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
-            username,
             configuration,
             AllShortestPathsBellmanFordMutateConfig::of,
             estimationModeBusinessFacade::bellmanFord

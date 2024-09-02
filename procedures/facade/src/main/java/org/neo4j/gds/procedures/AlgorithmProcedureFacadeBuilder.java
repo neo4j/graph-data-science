@@ -26,7 +26,6 @@ import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.community.CommunityProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.embeddings.NodeEmbeddingsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.machinelearning.MachineLearningProcedureFacade;
@@ -43,7 +42,7 @@ class AlgorithmProcedureFacadeBuilder {
     private final ApplicationsFacade applicationsFacade;
     private final GenericStub genericStub;
 
-    private final ConfigurationParser configurationParser;
+    private final UserSpecificConfigurationParser configurationParser;
 
     AlgorithmProcedureFacadeBuilder(
         RequestScopedDependencies requestScopedDependencies,
@@ -52,7 +51,7 @@ class AlgorithmProcedureFacadeBuilder {
         ProcedureReturnColumns procedureReturnColumns,
         ApplicationsFacade applicationsFacade,
         GenericStub genericStub,
-        ConfigurationParser configurationParser
+        UserSpecificConfigurationParser configurationParser
     ) {
         this.requestScopedDependencies = requestScopedDependencies;
         this.closeableResourceRegistry = closeableResourceRegistry;
@@ -68,7 +67,7 @@ class AlgorithmProcedureFacadeBuilder {
             genericStub,
             applicationsFacade,
             procedureReturnColumns,
-            new UserSpecificConfigurationParser(configurationParser, requestScopedDependencies.getUser())
+            configurationParser
         );
     }
 
@@ -78,7 +77,7 @@ class AlgorithmProcedureFacadeBuilder {
             applicationsFacade,
             closeableResourceRegistry,
             procedureReturnColumns,
-            new UserSpecificConfigurationParser(configurationParser, requestScopedDependencies.getUser())
+            configurationParser
         );
     }
 
@@ -86,8 +85,7 @@ class AlgorithmProcedureFacadeBuilder {
         return MachineLearningProcedureFacade.create(
             genericStub,
             applicationsFacade,
-            configurationParser,
-            requestScopedDependencies.getUser()
+            configurationParser
         );
     }
 
@@ -96,7 +94,7 @@ class AlgorithmProcedureFacadeBuilder {
             genericStub,
             applicationsFacade,
             procedureReturnColumns,
-            new UserSpecificConfigurationParser(configurationParser, requestScopedDependencies.getUser())
+            configurationParser
         );
     }
 
@@ -104,7 +102,7 @@ class AlgorithmProcedureFacadeBuilder {
         return NodeEmbeddingsProcedureFacade.create(
             genericStub,
             applicationsFacade,
-            new UserSpecificConfigurationParser(configurationParser, requestScopedDependencies.getUser()),
+            configurationParser,
             requestScopedDependencies.getUser()
         );
     }
@@ -116,7 +114,7 @@ class AlgorithmProcedureFacadeBuilder {
             procedureReturnColumns,
             applicationsFacade,
             genericStub,
-            new UserSpecificConfigurationParser(configurationParser, requestScopedDependencies.getUser())
+            configurationParser
         );
     }
 
@@ -125,7 +123,7 @@ class AlgorithmProcedureFacadeBuilder {
             applicationsFacade,
             genericStub,
             procedureReturnColumns,
-            new UserSpecificConfigurationParser(configurationParser, requestScopedDependencies.getUser())
+            configurationParser
         );
     }
 }

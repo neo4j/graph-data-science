@@ -69,8 +69,6 @@ final class NodePropertyStepFactoryUsingStubs {
         // not great, one day these should be injected
         var configurationParser = new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance);
         var validationService = new ValidationService(
-            DefaultsConfiguration.Instance,
-            LimitsConfiguration.Instance,
             configurationParser
         );
 

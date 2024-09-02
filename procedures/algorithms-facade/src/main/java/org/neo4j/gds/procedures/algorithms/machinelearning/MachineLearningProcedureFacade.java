@@ -22,13 +22,12 @@ package org.neo4j.gds.procedures.algorithms.machinelearning;
 import org.neo4j.gds.algorithms.machinelearning.KGEPredictStreamConfig;
 import org.neo4j.gds.algorithms.machinelearning.KGEPredictWriteConfig;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinelearning.MachineLearningAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinelearning.MachineLearningAlgorithmsWriteModeBusinessFacade;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
+import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.machinelearning.stubs.KgeMutateStub;
 import org.neo4j.gds.procedures.algorithms.machinelearning.stubs.SplitRelationshipsMutateStub;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
@@ -45,21 +44,18 @@ public final class MachineLearningProcedureFacade {
     private final KgeMutateStub kgeMutateStub;
     private final SplitRelationshipsMutateStub splitRelationshipsMutateStub;
 
-    private final ConfigurationParser configurationParser;
-    private final User user;
+    private final UserSpecificConfigurationParser configurationParser;
 
     private MachineLearningProcedureFacade(
         KgeMutateStub kgeMutateStub,
         SplitRelationshipsMutateStub splitRelationshipsMutateStub,
         MachineLearningAlgorithmsStreamModeBusinessFacade streamModeBusinessFacade,
         MachineLearningAlgorithmsWriteModeBusinessFacade writeModeBusinessFacade,
-        ConfigurationParser configurationParser,
-        User user
+        UserSpecificConfigurationParser configurationParser
     ) {
         this.streamModeBusinessFacade = streamModeBusinessFacade;
         this.writeModeBusinessFacade = writeModeBusinessFacade;
         this.configurationParser = configurationParser;
-        this.user = user;
         this.kgeMutateStub = kgeMutateStub;
         this.splitRelationshipsMutateStub = splitRelationshipsMutateStub;
     }
@@ -67,8 +63,7 @@ public final class MachineLearningProcedureFacade {
     public static MachineLearningProcedureFacade create(
         GenericStub genericStub,
         ApplicationsFacade applicationsFacade,
-        ConfigurationParser configurationParser,
-        User user
+        UserSpecificConfigurationParser configurationParser
     ) {
         var kgeMutateStub = new KgeMutateStub(genericStub, applicationsFacade.machineLearning().mutate(), applicationsFacade.machineLearning().estimate());
         var splitRelationshipsMutateStub = new SplitRelationshipsMutateStub(genericStub, applicationsFacade.machineLearning().mutate(), applicationsFacade.machineLearning().estimate());
@@ -78,8 +73,7 @@ public final class MachineLearningProcedureFacade {
             splitRelationshipsMutateStub,
             applicationsFacade.machineLearning().stream(),
             applicationsFacade.machineLearning().write(),
-            configurationParser,
-            user
+            configurationParser
         );
     }
 
@@ -118,8 +112,7 @@ public final class MachineLearningProcedureFacade {
     ) {
         return configurationParser.parseConfiguration(
             configuration,
-            configurationMapper,
-            user
+            configurationMapper
         );
     }
 }

@@ -54,7 +54,6 @@ public class SplitRelationshipsMutateStub implements MutateStub<SplitRelationshi
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> rawConfiguration) {
         return genericStub.getMemoryEstimation(
-            username,
             rawConfiguration,
             SplitRelationshipsMutateConfig::of,
             estimationModeBusinessFacade::splitRelationships

@@ -55,7 +55,6 @@ public class LccMutateStub implements MutateStub<LocalClusteringCoefficientMutat
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
-            username,
             configuration,
             LocalClusteringCoefficientMutateConfig::of,
             estimationModeBusinessFacade::lcc

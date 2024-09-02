@@ -58,7 +58,6 @@ public class BetaClosenessCentralityMutateStub implements MutateStub<ClosenessCe
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
-            username,
             configuration,
             ClosenessCentralityMutateConfig::of,
             estimationModeBusinessFacade::closenessCentrality

@@ -58,7 +58,6 @@ public class DegreeCentralityMutateStub implements MutateStub<DegreeCentralityMu
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
-            username,
             configuration,
             DegreeCentralityMutateConfig::of,
             estimationModeBusinessFacade::degreeCentrality

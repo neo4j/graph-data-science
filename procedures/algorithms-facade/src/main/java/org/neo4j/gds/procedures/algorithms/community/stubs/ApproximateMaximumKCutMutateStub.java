@@ -55,7 +55,6 @@ public class ApproximateMaximumKCutMutateStub implements MutateStub<ApproxMaxKCu
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
-            username,
             configuration,
             ApproxMaxKCutMutateConfig::of,
             estimationModeBusinessFacade::approximateMaximumKCut

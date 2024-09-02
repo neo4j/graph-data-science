@@ -54,7 +54,6 @@ public class IndexInverseMutateStub implements MutateStub<InverseRelationshipsCo
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> rawConfiguration) {
         return genericStub.getMemoryEstimation(
-            username,
             rawConfiguration,
             InverseRelationshipsConfig::of,
             estimationModeBusinessFacade::indexInverse

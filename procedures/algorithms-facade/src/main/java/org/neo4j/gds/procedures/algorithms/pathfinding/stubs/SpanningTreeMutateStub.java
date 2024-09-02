@@ -53,7 +53,6 @@ public class SpanningTreeMutateStub implements MutateStub<SpanningTreeMutateConf
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
-            username,
             configuration,
             SpanningTreeMutateConfig::of,
             __ -> estimationModeBusinessFacade.spanningTree()

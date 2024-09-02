@@ -40,6 +40,7 @@ import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
+import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.catalog.GraphCatalogProcedureFacade;
 import org.neo4j.gds.procedures.modelcatalog.ModelCatalogProcedureFacade;
 import org.neo4j.gds.procedures.operations.OperationsProcedureFacade;
@@ -143,8 +144,9 @@ public class GraphDataScienceProcedures {
 
         var configurationParser = new ConfigurationParser(defaultsConfiguration, limitsConfiguration);
 
+
         var algorithmProcedureFacadeBuilder = algorithmProcedureFacadeBuilderFactory.create(
-            configurationParser,
+            new UserSpecificConfigurationParser(configurationParser,requestScopedDependencies.getUser()),
             requestScopedDependencies,
             kernelTransaction,
             applicationsFacade,

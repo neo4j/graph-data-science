@@ -55,7 +55,6 @@ public class DeltaSteppingMutateStub implements MutateStub<AllShortestPathsDelta
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
-            username,
             configuration,
             AllShortestPathsDeltaMutateConfig::of,
             __ -> estimationModeBusinessFacade.deltaStepping()

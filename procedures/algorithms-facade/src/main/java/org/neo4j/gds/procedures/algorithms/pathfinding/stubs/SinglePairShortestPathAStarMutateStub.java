@@ -55,7 +55,6 @@ public class SinglePairShortestPathAStarMutateStub implements MutateStub<Shortes
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
-            username,
             configuration,
             ShortestPathAStarMutateConfig::of,
             __ -> estimationModeBusinessFacade.singlePairShortestPathAStar()

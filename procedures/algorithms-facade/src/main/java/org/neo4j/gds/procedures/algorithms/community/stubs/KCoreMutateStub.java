@@ -55,7 +55,6 @@ public class KCoreMutateStub implements MutateStub<KCoreDecompositionMutateConfi
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
-            username,
             configuration,
             KCoreDecompositionMutateConfig::of,
             __ -> estimationModeBusinessFacade.kCore()

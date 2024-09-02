@@ -65,7 +65,6 @@ public class PageRankMutateStub implements MutateStub<PageRankMutateConfig, Page
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
-            username,
             configuration,
             configProducer,
             __ -> estimationModeBusinessFacade.pageRank()

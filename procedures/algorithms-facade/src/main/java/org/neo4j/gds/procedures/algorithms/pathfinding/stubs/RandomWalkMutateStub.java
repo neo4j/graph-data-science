@@ -53,7 +53,6 @@ public class RandomWalkMutateStub implements MutateStub<RandomWalkMutateConfig, 
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
-            username,
             configuration,
             RandomWalkMutateConfig::of,
             estimationModeBusinessFacade::randomWalkCountingVisits

@@ -499,7 +499,6 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
         var logMock = mock(org.neo4j.gds.logging.Log.class);
 
         final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
-        var configurationParser = new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance);
         var requestScopedDependencies = RequestScopedDependencies.builder()
             .with(DatabaseId.of(db.databaseName()))
             .with(TaskRegistryFactory.empty())
@@ -507,9 +506,10 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
             .with(new User(getUsername(), false))
             .with(EmptyUserLogRegistryFactory.INSTANCE)
             .build();
+
+        var configurationParser = new UserSpecificConfigurationParser(new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance),requestScopedDependencies.getUser());
+
         var genericStub = GenericStub.create(
-            DefaultsConfiguration.Instance,
-            LimitsConfiguration.Instance,
             graphStoreCatalogService,
             configurationParser,
             requestScopedDependencies

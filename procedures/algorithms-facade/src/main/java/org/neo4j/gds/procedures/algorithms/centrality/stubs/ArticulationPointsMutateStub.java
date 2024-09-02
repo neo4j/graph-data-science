@@ -54,7 +54,6 @@ public class ArticulationPointsMutateStub implements MutateStub<ArticulationPoin
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
-            username,
             configuration,
             ArticulationPointsMutateConfig::of,
             (config) -> estimationModeBusinessFacade.articulationPoints()

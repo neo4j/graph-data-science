@@ -65,10 +65,18 @@ public class ConfigurationParser {
         return parseConfiguration(defaults, limits, user.getUsername(), configuration, lexer);
     }
 
+   public  <CONFIG extends AlgoBaseConfig> CONFIG parseConfigurationWithoutDefaultsAndLimits(
+        Map<String, Object> configuration,
+        BiFunction<String, CypherMapWrapper, CONFIG> lexer,
+        String username
+    ) {
+        return parseConfiguration(DefaultsConfiguration.Empty, LimitsConfiguration.Empty, username, configuration, lexer);
+    }
+
     /**
      * Configuration parsing using directly configured defaults and limits
      */
-    public <CONFIG extends AlgoBaseConfig> CONFIG parseConfiguration(
+    private  <CONFIG extends AlgoBaseConfig> CONFIG parseConfiguration(
         DefaultsConfiguration defaultsConfiguration,
         LimitsConfiguration limitsConfiguration,
         String username,

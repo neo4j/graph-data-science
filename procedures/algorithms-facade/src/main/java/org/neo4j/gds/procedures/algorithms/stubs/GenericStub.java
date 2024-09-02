@@ -20,51 +20,39 @@
 package org.neo4j.gds.procedures.algorithms.stubs;
 
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.configuration.DefaultsConfiguration;
-import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.procedures.algorithms.AlgorithmHandle;
-import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
+import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 public final class GenericStub {
-    private final DefaultsConfiguration defaultsConfiguration;
-    private final LimitsConfiguration limitsConfiguration;
-    private final ConfigurationParser configurationParser;
-    private final User user;
+
+    private final UserSpecificConfigurationParser configurationParser;
     private final AlgorithmEstimationTemplate algorithmEstimationTemplate;
 
     private GenericStub(
-        DefaultsConfiguration defaultsConfiguration,
-        LimitsConfiguration limitsConfiguration,
-        ConfigurationParser configurationParser,
-        User user,
+        UserSpecificConfigurationParser configurationParser,
         AlgorithmEstimationTemplate algorithmEstimationTemplate
     ) {
-        this.defaultsConfiguration = defaultsConfiguration;
-        this.limitsConfiguration = limitsConfiguration;
+
         this.configurationParser = configurationParser;
-        this.user = user;
         this.algorithmEstimationTemplate = algorithmEstimationTemplate;
     }
 
     public static GenericStub create(
-        DefaultsConfiguration defaultsConfiguration,
-        LimitsConfiguration limitsConfiguration,
         GraphStoreCatalogService graphStoreCatalogService,
-        ConfigurationParser configurationParser,
+        UserSpecificConfigurationParser configurationParser,
         RequestScopedDependencies requestScopedDependencies
     ) {
         var databaseGraphStoreEstimationService = new DatabaseGraphStoreEstimationService(
@@ -78,10 +66,7 @@ public final class GenericStub {
         );
 
         return new GenericStub(
-            defaultsConfiguration,
-            limitsConfiguration,
             configurationParser,
-            requestScopedDependencies.getUser(),
             algorithmEstimationTemplate
         );
     }
@@ -94,11 +79,8 @@ public final class GenericStub {
         Map<String, Object> configuration
     ) {
         return configurationParser.parseConfiguration(
-            defaultsConfiguration,
-            limitsConfiguration,
-            user.getUsername(),
             configuration,
-            (__, cmw) -> configurationLexer.apply(cmw)
+            configurationLexer
         );
     }
 
@@ -106,17 +88,13 @@ public final class GenericStub {
      * @see org.neo4j.gds.procedures.algorithms.stubs.MutateStub#getMemoryEstimation(String, java.util.Map)
      */
     public <CONFIGURATION extends AlgoBaseConfig> MemoryEstimation getMemoryEstimation(
-        String username,
         Map<String, Object> rawConfiguration,
         Function<CypherMapWrapper, CONFIGURATION> configurationLexer,
         Function<CONFIGURATION, MemoryEstimation> estimator
     ) {
-        var configuration = configurationParser.parseConfiguration(
-            DefaultsConfiguration.Empty,
-            LimitsConfiguration.Empty,
-            username,
+        var configuration = configurationParser.parseConfigurationWithoutDefaultsAndLimits(
             rawConfiguration,
-            (__, cmw) -> configurationLexer.apply(cmw)
+            configurationLexer
         );
 
         return estimator.apply(configuration);
@@ -131,7 +109,7 @@ public final class GenericStub {
         Function<CypherMapWrapper, CONFIGURATION> configurationLexer,
         Function<CONFIGURATION, MemoryEstimation> estimator
     ) {
-        var memoryEstimation = getMemoryEstimation(user.getUsername(), rawConfiguration, configurationLexer, estimator);
+        var memoryEstimation = getMemoryEstimation(rawConfiguration, configurationLexer, estimator);
 
         var configuration = parseConfiguration(configurationLexer, rawConfiguration);
 
@@ -157,8 +135,7 @@ public final class GenericStub {
         var graphName = GraphName.parse(graphNameAsString);
         var configuration = configurationParser.parseConfiguration(
             rawConfiguration,
-            configurationLexer,
-            user
+            configurationLexer
         );
 
         var result = executor.compute(graphName, configuration, resultBuilder);
