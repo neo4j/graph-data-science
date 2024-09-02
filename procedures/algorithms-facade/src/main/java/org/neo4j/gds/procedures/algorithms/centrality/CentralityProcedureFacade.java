@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
+import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsEstimationModeBusinessFacade;
@@ -60,8 +61,7 @@ import org.neo4j.gds.procedures.algorithms.centrality.stubs.ClosenessCentralityM
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.DegreeCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.HarmonicCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.PageRankMutateStub;
-import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
-import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
+import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
@@ -87,8 +87,7 @@ public final class CentralityProcedureFacade {
     private final CentralityAlgorithmsStreamModeBusinessFacade streamModeBusinessFacade;
     private final CentralityAlgorithmsWriteModeBusinessFacade writeModeBusinessFacade;
 
-    private final EstimationModeRunner estimationMode;
-    private final AlgorithmExecutionScaffolding algorithmExecutionScaffolding;
+    private final UserSpecificConfigurationParser configurationParser;
 
     private CentralityProcedureFacade(
         ProcedureReturnColumns procedureReturnColumns,
@@ -106,8 +105,7 @@ public final class CentralityProcedureFacade {
         CentralityAlgorithmsStatsModeBusinessFacade statsModeBusinessFacade,
         CentralityAlgorithmsStreamModeBusinessFacade streamModeBusinessFacade,
         CentralityAlgorithmsWriteModeBusinessFacade writeModeBusinessFacade,
-        EstimationModeRunner estimationMode,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffolding
+        UserSpecificConfigurationParser configurationParser
     ) {
         this.procedureReturnColumns = procedureReturnColumns;
         this.articleRankMutateStub = articleRankMutateStub;
@@ -124,16 +122,14 @@ public final class CentralityProcedureFacade {
         this.statsModeBusinessFacade = statsModeBusinessFacade;
         this.streamModeBusinessFacade = streamModeBusinessFacade;
         this.writeModeBusinessFacade = writeModeBusinessFacade;
-        this.estimationMode = estimationMode;
-        this.algorithmExecutionScaffolding = algorithmExecutionScaffolding;
+        this.configurationParser = configurationParser;
     }
 
     public static CentralityProcedureFacade create(
         GenericStub genericStub,
         ApplicationsFacade applicationsFacade,
         ProcedureReturnColumns procedureReturnColumns,
-        EstimationModeRunner estimationModeRunner,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffolding
+        UserSpecificConfigurationParser configurationParser
     ) {
         var centralityApplications = applicationsFacade.centrality();
         var mutateModeBusinessFacade = centralityApplications.mutate();
@@ -182,11 +178,11 @@ public final class CentralityProcedureFacade {
         );
 
         var eigenVectorMutateStub = new PageRankMutateStub(
-                genericStub,
-                estimationModeBusinessFacade,
-                procedureReturnColumns,
-                mutateModeBusinessFacade::eigenVector,
-                PageRankMutateConfig::configWithoutDampingFactor
+            genericStub,
+            estimationModeBusinessFacade,
+            procedureReturnColumns,
+            mutateModeBusinessFacade::eigenVector,
+            PageRankMutateConfig::configWithoutDampingFactor
         );
 
         var harmonicCentralityMutateStub = new HarmonicCentralityMutateStub(
@@ -205,7 +201,7 @@ public final class CentralityProcedureFacade {
 
         );
 
-        var articulationPointsMutateStub  = new ArticulationPointsMutateStub(
+        var articulationPointsMutateStub = new ArticulationPointsMutateStub(
             genericStub,
             mutateModeBusinessFacade,
             estimationModeBusinessFacade
@@ -227,8 +223,7 @@ public final class CentralityProcedureFacade {
             centralityApplications.stats(),
             centralityApplications.stream(),
             centralityApplications.write(),
-            estimationModeRunner,
-            algorithmExecutionScaffolding
+            configurationParser
         );
     }
 
@@ -238,11 +233,14 @@ public final class CentralityProcedureFacade {
     ) {
         var resultBuilder = new AlphaHarmonicCentralityResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffolding.runStreamAlgorithm(
-            graphName,
+        var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            HarmonicCentralityStreamConfig::of,
-            streamModeBusinessFacade::harmonicCentrality,
+            HarmonicCentralityStreamConfig::of
+        );
+
+        return streamModeBusinessFacade.harmonicCentrality(
+            GraphName.parse(graphName),
+            parsedConfiguration,
             resultBuilder
         );
     }
@@ -254,11 +252,14 @@ public final class CentralityProcedureFacade {
         var shouldComputeCentralityDistribution = procedureReturnColumns.contains("centralityDistribution");
         var resultBuilder = new AlphaHarmonicCentralityResultBuilderForWriteMode(shouldComputeCentralityDistribution);
 
-        return algorithmExecutionScaffolding.runAlgorithm(
-            graphName,
+        var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            DeprecatedTieredHarmonicCentralityWriteConfig::of,
-            writeModeBusinessFacade::harmonicCentrality,
+            DeprecatedTieredHarmonicCentralityWriteConfig::of
+        );
+
+        return writeModeBusinessFacade.harmonicCentrality(
+            GraphName.parse(graphName),
+            parsedConfiguration,
             resultBuilder
         );
     }
@@ -271,11 +272,14 @@ public final class CentralityProcedureFacade {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("centralityDistribution");
         var resultBuilder = new PageRankResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
 
-        return algorithmExecutionScaffolding.runStatsAlgorithm(
-            graphName,
+        var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            PageRankStatsConfig::configWithDampingFactor,
-            statsModeBusinessFacade::articleRank,
+            PageRankStatsConfig::configWithDampingFactor
+        );
+
+        return statsModeBusinessFacade.articleRank(
+            GraphName.parse(graphName),
+            parsedConfiguration,
             resultBuilder
         );
     }
@@ -284,23 +288,25 @@ public final class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
+        var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
-            PageRankStatsConfig::configWithDampingFactor,
-            configuration -> estimationModeBusinessFacade.pageRank(configuration, graphNameOrConfiguration)
+            PageRankStatsConfig::configWithDampingFactor
         );
 
-        return Stream.of(result);
+        return Stream.of(estimationModeBusinessFacade.pageRank(parsedConfiguration, graphNameOrConfiguration));
     }
 
     public Stream<CentralityStreamResult> articleRankStream(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new PageRankResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffolding.runStreamAlgorithm(
-            graphName,
+        var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            PageRankStreamConfig::configWithDampingFactor,
-            streamModeBusinessFacade::articleRank,
+            PageRankStreamConfig::configWithoutDampingFactor
+        );
+
+        return streamModeBusinessFacade.articleRank(
+            GraphName.parse(graphName),
+            parsedConfiguration,
             resultBuilder
         );
     }
@@ -308,13 +314,12 @@ public final class CentralityProcedureFacade {
     public Stream<MemoryEstimateResult> articleRankStreamEstimate(
         Object graphNameOrConfiguration, Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
+        var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
-            PageRankStreamConfig::configWithDampingFactor,
-            configuration -> estimationModeBusinessFacade.pageRank(configuration, graphNameOrConfiguration)
+            PageRankStreamConfig::configWithoutDampingFactor
         );
 
-        return Stream.of(result);
+        return Stream.of(estimationModeBusinessFacade.pageRank(parsedConfiguration, graphNameOrConfiguration));
     }
 
     public Stream<PageRankWriteResult> articleRankWrite(
@@ -324,11 +329,14 @@ public final class CentralityProcedureFacade {
         var shouldComputeCentralityDistribution = procedureReturnColumns.contains("centralityDistribution");
         var resultBuilder = new PageRankResultBuilderForWriteMode(shouldComputeCentralityDistribution);
 
-        return algorithmExecutionScaffolding.runAlgorithm(
-            graphName,
+        var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            PageRankWriteConfig::configWithDampingFactor,
-            writeModeBusinessFacade::articleRank,
+            PageRankWriteConfig::configWithDampingFactor
+        );
+
+        return writeModeBusinessFacade.articleRank(
+            GraphName.parse(graphName),
+            parsedConfiguration,
             resultBuilder
         );
     }
@@ -337,13 +345,12 @@ public final class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
+        var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
-            PageRankWriteConfig::configWithDampingFactor,
-            configuration -> estimationModeBusinessFacade.pageRank(configuration, graphNameOrConfiguration)
+            PageRankWriteConfig::configWithoutDampingFactor
         );
 
-        return Stream.of(result);
+        return Stream.of(estimationModeBusinessFacade.pageRank(parsedConfiguration, graphNameOrConfiguration));
     }
 
     public BetaClosenessCentralityMutateStub betaClosenessCentralityMutateStub() {
@@ -357,11 +364,14 @@ public final class CentralityProcedureFacade {
         var shouldComputeCentralityDistribution = procedureReturnColumns.contains("centralityDistribution");
         var resultBuilder = new BetaClosenessCentralityResultBuilderForWriteMode(shouldComputeCentralityDistribution);
 
-        return algorithmExecutionScaffolding.runAlgorithm(
-            graphName,
+        var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            ClosenessCentralityWriteConfig::of,
-            writeModeBusinessFacade::closenessCentrality,
+            ClosenessCentralityWriteConfig::of
+        );
+
+        return writeModeBusinessFacade.closenessCentrality(
+            GraphName.parse(graphName),
+            parsedConfiguration,
             resultBuilder
         );
     }
@@ -377,29 +387,32 @@ public final class CentralityProcedureFacade {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("centralityDistribution");
         var resultBuilder = new BetweennessCentralityResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
 
-        return algorithmExecutionScaffolding.runStatsAlgorithm(
-            graphName,
+        var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            BetweennessCentralityStatsConfig::of,
-            statsModeBusinessFacade::betweennessCentrality,
+            BetweennessCentralityStatsConfig::of
+        );
+
+        return statsModeBusinessFacade.betweennessCentrality(
+            GraphName.parse(graphName),
+            parsedConfiguration,
             resultBuilder
         );
+
     }
 
     public Stream<MemoryEstimateResult> betweennessCentralityStatsEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
+        var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
-            BetweennessCentralityStatsConfig::of,
-            configuration -> estimationModeBusinessFacade.betweennessCentrality(
-                configuration,
-                graphNameOrConfiguration
-            )
+            BetweennessCentralityStatsConfig::of
         );
 
-        return Stream.of(result);
+        return Stream.of(estimationModeBusinessFacade.betweennessCentrality(
+            parsedConfiguration,
+            graphNameOrConfiguration
+        ));
     }
 
     public Stream<CentralityStreamResult> betweennessCentralityStream(
@@ -408,11 +421,14 @@ public final class CentralityProcedureFacade {
     ) {
         var resultBuilder = new BetweennessCentralityResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffolding.runStreamAlgorithm(
-            graphName,
+        var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            BetweennessCentralityStreamConfig::of,
-            streamModeBusinessFacade::betweennessCentrality,
+            BetweennessCentralityStreamConfig::of
+        );
+
+        return streamModeBusinessFacade.betweennessCentrality(
+            GraphName.parse(graphName),
+            parsedConfiguration,
             resultBuilder
         );
     }
@@ -421,50 +437,51 @@ public final class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
+        var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
-            BetweennessCentralityStreamConfig::of,
-            configuration -> estimationModeBusinessFacade.betweennessCentrality(
-                configuration,
-                graphNameOrConfiguration
-            )
+            BetweennessCentralityStreamConfig::of
         );
 
-        return Stream.of(result);
+        return Stream.of(estimationModeBusinessFacade.betweennessCentrality(
+            parsedConfiguration,
+            graphNameOrConfiguration
+        ));
     }
 
 
-
     public Stream<CentralityWriteResult> betweennessCentralityWrite(
-        String graphNameAsString,
-        Map<String, Object> rawConfiguration
+        String graphName,
+        Map<String, Object> configuration
     ) {
         var shouldComputeCentralityDistribution = procedureReturnColumns.contains("centralityDistribution");
         var resultBuilder = new BetweennessCentralityResultBuilderForWriteMode(shouldComputeCentralityDistribution);
 
-        return algorithmExecutionScaffolding.runAlgorithm(
-            graphNameAsString,
-            rawConfiguration,
-            BetweennessCentralityWriteConfig::of,
-            writeModeBusinessFacade::betweennessCentrality,
+        var parsedConfiguration = configurationParser.parseConfiguration(
+            configuration,
+            BetweennessCentralityWriteConfig::of
+        );
+
+        return writeModeBusinessFacade.betweennessCentrality(
+            GraphName.parse(graphName),
+            parsedConfiguration,
             resultBuilder
         );
+
     }
 
     public Stream<MemoryEstimateResult> betweennessCentralityWriteEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
+        var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
-            BetweennessCentralityWriteConfig::of,
-            configuration -> estimationModeBusinessFacade.betweennessCentrality(
-                configuration,
-                graphNameOrConfiguration
-            )
+            BetweennessCentralityWriteConfig::of
         );
 
-        return Stream.of(result);
+        return Stream.of(estimationModeBusinessFacade.betweennessCentrality(
+            parsedConfiguration,
+            graphNameOrConfiguration
+        ));
     }
 
 
@@ -474,11 +491,14 @@ public final class CentralityProcedureFacade {
     ) {
         var resultBuilder = new ArticulationPointsResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffolding.runStreamAlgorithm(
-            graphName,
+        var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            ArticulationPointsStreamConfig::of,
-            streamModeBusinessFacade::articulationPoints,
+            ArticulationPointsStreamConfig::of
+        );
+
+        return streamModeBusinessFacade.articulationPoints(
+            GraphName.parse(graphName),
+            parsedConfiguration,
             resultBuilder
         );
     }
@@ -487,44 +507,46 @@ public final class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
+        var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
-            ArticulationPointsStreamConfig::of,
-            configuration -> estimationModeBusinessFacade.articulationPoints(
-                configuration,
-                graphNameOrConfiguration
-            )
+            ArticulationPointsStreamConfig::of
         );
 
-        return Stream.of(result);
+        return Stream.of(estimationModeBusinessFacade.articulationPoints(
+            parsedConfiguration,
+            graphNameOrConfiguration
+        ));
     }
-    public ArticulationPointsMutateStub articulationPointsMutateStub(){return articulationPointsMutateStub;}
+
+    public ArticulationPointsMutateStub articulationPointsMutateStub() {return articulationPointsMutateStub;}
 
     public Stream<MemoryEstimateResult> articulationPointsMutateEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
+        var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
-            ArticulationPointsMutateConfig::of,
-            configuration -> estimationModeBusinessFacade.articulationPoints(
-                configuration,
-                graphNameOrConfiguration
-            )
+            ArticulationPointsMutateConfig::of
         );
 
-        return Stream.of(result);
+        return Stream.of(estimationModeBusinessFacade.articulationPoints(
+            parsedConfiguration,
+            graphNameOrConfiguration
+        ));
     }
 
     public Stream<ArticulationPointsStatsResult> articulationPointsStats(
-        String graphNameAsString,
-        Map<String, Object> rawConfiguration
+        String graphName,
+        Map<String, Object> configuration
     ) {
-        return algorithmExecutionScaffolding.runStatsAlgorithm(
-            graphNameAsString,
-            rawConfiguration,
-            ArticulationPointsStatsConfig::of,
-            statsModeBusinessFacade::articulationPoints,
+        var parsedConfiguration = configurationParser.parseConfiguration(
+            configuration,
+            ArticulationPointsStatsConfig::of
+        );
+
+        return statsModeBusinessFacade.articulationPoints(
+            GraphName.parse(graphName),
+            parsedConfiguration,
             new ArticulationPointsResultBuilderForStatsMode()
         );
     }
@@ -533,27 +555,29 @@ public final class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
+        var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
-            ArticulationPointsStatsConfig::of,
-            configuration -> estimationModeBusinessFacade.articulationPoints(
-                configuration,
-                graphNameOrConfiguration
-            )
+            ArticulationPointsStatsConfig::of
         );
 
-        return Stream.of(result);
+        return Stream.of(estimationModeBusinessFacade.articulationPoints(
+            parsedConfiguration,
+            graphNameOrConfiguration
+        ));
     }
 
     public Stream<ArticulationPointsWriteResult> articulationPointsWrite(
-        String graphNameAsString,
-        Map<String, Object> rawConfiguration
+        String graphName,
+        Map<String, Object> configuration
     ) {
-        return algorithmExecutionScaffolding.runAlgorithm(
-            graphNameAsString,
-            rawConfiguration,
-            ArticulationPointsWriteConfig::of,
-            writeModeBusinessFacade::articulationPoints,
+        var parsedConfiguration = configurationParser.parseConfiguration(
+            configuration,
+            ArticulationPointsWriteConfig::of
+        );
+
+        return writeModeBusinessFacade.articulationPoints(
+            GraphName.parse(graphName),
+            parsedConfiguration,
             new ArticulationPointsResultBuilderForWriteMode()
         );
     }
@@ -562,16 +586,15 @@ public final class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
+        var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
-            ArticulationPointsWriteConfig::of,
-            configuration -> estimationModeBusinessFacade.articulationPoints(
-                configuration,
-                graphNameOrConfiguration
-            )
+            ArticulationPointsWriteConfig::of
         );
 
-        return Stream.of(result);
+        return Stream.of(estimationModeBusinessFacade.articulationPoints(
+            parsedConfiguration,
+            graphNameOrConfiguration
+        ));
     }
 
 
@@ -580,12 +603,14 @@ public final class CentralityProcedureFacade {
         Map<String, Object> configuration
     ) {
         var resultBuilder = new BridgesResultBuilderForStreamMode();
-
-        return algorithmExecutionScaffolding.runStreamAlgorithm(
-            graphName,
+        var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            BridgesStreamConfig::of,
-            streamModeBusinessFacade::bridges,
+            BridgesStreamConfig::of
+        );
+
+        return streamModeBusinessFacade.bridges(
+            GraphName.parse(graphName),
+            parsedConfiguration,
             resultBuilder
         );
     }
@@ -594,16 +619,16 @@ public final class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
+        var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
-            BridgesStreamConfig::of,
-            configuration -> estimationModeBusinessFacade.bridges(
-                configuration,
-                graphNameOrConfiguration
-            )
+            BridgesStreamConfig::of
         );
 
-        return Stream.of(result);
+        return Stream.of(estimationModeBusinessFacade.bridges(
+            parsedConfiguration,
+            graphNameOrConfiguration
+        ));
+
     }
 
     public CelfMutateStub celfMutateStub() {
@@ -615,12 +640,14 @@ public final class CentralityProcedureFacade {
         Map<String, Object> configuration
     ) {
         var resultBuilder = new CelfResultBuilderForStatsMode();
-
-        return algorithmExecutionScaffolding.runStatsAlgorithm(
-            graphName,
+        var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            InfluenceMaximizationStatsConfig::of,
-            statsModeBusinessFacade::celf,
+            InfluenceMaximizationStatsConfig::of
+        );
+
+        return statsModeBusinessFacade.celf(
+            GraphName.parse(graphName),
+            parsedConfiguration,
             resultBuilder
         );
     }
@@ -629,16 +656,15 @@ public final class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
+        var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
-            InfluenceMaximizationStatsConfig::of,
-            configuration -> estimationModeBusinessFacade.celf(
-                configuration,
-                graphNameOrConfiguration
-            )
+            InfluenceMaximizationStatsConfig::of
         );
 
-        return Stream.of(result);
+        return Stream.of(estimationModeBusinessFacade.celf(
+            parsedConfiguration,
+            graphNameOrConfiguration
+        ));
     }
 
     public Stream<CELFStreamResult> celfStream(
@@ -647,11 +673,14 @@ public final class CentralityProcedureFacade {
     ) {
         var resultBuilder = new CelfResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffolding.runStreamAlgorithm(
-            graphName,
+        var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            InfluenceMaximizationStreamConfig::of,
-            streamModeBusinessFacade::celf,
+            InfluenceMaximizationStreamConfig::of
+        );
+
+        return streamModeBusinessFacade.celf(
+            GraphName.parse(graphName),
+            parsedConfiguration,
             resultBuilder
         );
     }
@@ -660,16 +689,15 @@ public final class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
+        var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
-            InfluenceMaximizationStreamConfig::of,
-            configuration -> estimationModeBusinessFacade.celf(
-                configuration,
-                graphNameOrConfiguration
-            )
+            InfluenceMaximizationStreamConfig::of
         );
 
-        return Stream.of(result);
+        return Stream.of(estimationModeBusinessFacade.celf(
+            parsedConfiguration,
+            graphNameOrConfiguration
+        ));
     }
 
     public Stream<CELFWriteResult> celfWrite(
@@ -678,11 +706,14 @@ public final class CentralityProcedureFacade {
     ) {
         var resultBuilder = new CelfResultBuilderForWriteMode();
 
-        return algorithmExecutionScaffolding.runAlgorithm(
-            graphName,
+        var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            InfluenceMaximizationWriteConfig::of,
-            writeModeBusinessFacade::celf,
+            InfluenceMaximizationWriteConfig::of
+        );
+
+        return writeModeBusinessFacade.celf(
+            GraphName.parse(graphName),
+            parsedConfiguration,
             resultBuilder
         );
     }
@@ -691,16 +722,15 @@ public final class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
+        var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
-            InfluenceMaximizationWriteConfig::of,
-            configuration -> estimationModeBusinessFacade.celf(
-                configuration,
-                graphNameOrConfiguration
-            )
+            InfluenceMaximizationWriteConfig::of
         );
 
-        return Stream.of(result);
+        return Stream.of(estimationModeBusinessFacade.celf(
+            parsedConfiguration,
+            graphNameOrConfiguration
+        ));
     }
 
     public ClosenessCentralityMutateStub closenessCentralityMutateStub() {
@@ -711,11 +741,14 @@ public final class CentralityProcedureFacade {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("centralityDistribution");
         var resultBuilder = new ClosenessCentralityResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
 
-        return algorithmExecutionScaffolding.runStatsAlgorithm(
-            graphName,
+        var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            ClosenessCentralityStatsConfig::of,
-            statsModeBusinessFacade::closenessCentrality,
+            ClosenessCentralityStatsConfig::of
+        );
+
+        return statsModeBusinessFacade.closenessCentrality(
+            GraphName.parse(graphName),
+            parsedConfiguration,
             resultBuilder
         );
     }
@@ -726,11 +759,14 @@ public final class CentralityProcedureFacade {
     ) {
         var resultBuilder = new ClosenessCentralityResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffolding.runStreamAlgorithm(
-            graphName,
+        var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            ClosenessCentralityStreamConfig::of,
-            streamModeBusinessFacade::closenessCentrality,
+            ClosenessCentralityStreamConfig::of
+        );
+
+        return streamModeBusinessFacade.closenessCentrality(
+            GraphName.parse(graphName),
+            parsedConfiguration,
             resultBuilder
         );
     }
@@ -739,11 +775,14 @@ public final class CentralityProcedureFacade {
         var shouldComputeCentralityDistribution = procedureReturnColumns.contains("centralityDistribution");
         var resultBuilder = new ClosenessCentralityResultBuilderForWriteMode(shouldComputeCentralityDistribution);
 
-        return algorithmExecutionScaffolding.runAlgorithm(
-            graphName,
+        var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            ClosenessCentralityWriteConfig::of,
-            writeModeBusinessFacade::closenessCentrality,
+            ClosenessCentralityWriteConfig::of
+        );
+
+        return writeModeBusinessFacade.closenessCentrality(
+            GraphName.parse(graphName),
+            parsedConfiguration,
             resultBuilder
         );
     }
@@ -756,11 +795,14 @@ public final class CentralityProcedureFacade {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("centralityDistribution");
         var resultBuilder = new DegreeCentralityResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
 
-        return algorithmExecutionScaffolding.runStatsAlgorithm(
-            graphName,
+        var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            DegreeCentralityStatsConfig::of,
-            statsModeBusinessFacade::degreeCentrality,
+            DegreeCentralityStatsConfig::of
+        );
+
+        return statsModeBusinessFacade.degreeCentrality(
+            GraphName.parse(graphName),
+            parsedConfiguration,
             resultBuilder
         );
     }
@@ -769,16 +811,15 @@ public final class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
+        var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
-            DegreeCentralityStatsConfig::of,
-            configuration -> estimationModeBusinessFacade.degreeCentrality(
-                configuration,
-                graphNameOrConfiguration
-            )
+            DegreeCentralityStatsConfig::of
         );
 
-        return Stream.of(result);
+        return Stream.of(estimationModeBusinessFacade.degreeCentrality(
+            parsedConfiguration,
+            graphNameOrConfiguration
+        ));
     }
 
     public Stream<CentralityStreamResult> degreeCentralityStream(
@@ -787,11 +828,14 @@ public final class CentralityProcedureFacade {
     ) {
         var resultBuilder = new DegreeCentralityResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffolding.runStreamAlgorithm(
-            graphName,
+        var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            DegreeCentralityStreamConfig::of,
-            streamModeBusinessFacade::degreeCentrality,
+            DegreeCentralityStreamConfig::of
+        );
+
+        return streamModeBusinessFacade.degreeCentrality(
+            GraphName.parse(graphName),
+            parsedConfiguration,
             resultBuilder
         );
     }
@@ -800,27 +844,29 @@ public final class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
+        var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
-            DegreeCentralityStreamConfig::of,
-            configuration -> estimationModeBusinessFacade.degreeCentrality(
-                configuration,
-                graphNameOrConfiguration
-            )
+            DegreeCentralityStreamConfig::of
         );
 
-        return Stream.of(result);
+        return Stream.of(estimationModeBusinessFacade.degreeCentrality(
+            parsedConfiguration,
+            graphNameOrConfiguration
+        ));
     }
 
     public Stream<CentralityWriteResult> degreeCentralityWrite(String graphName, Map<String, Object> configuration) {
         var shouldComputeCentralityDistribution = procedureReturnColumns.contains("centralityDistribution");
         var resultBuilder = new DegreeCentralityResultBuilderForWriteMode(shouldComputeCentralityDistribution);
 
-        return algorithmExecutionScaffolding.runAlgorithm(
-            graphName,
+        var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            DegreeCentralityWriteConfig::of,
-            writeModeBusinessFacade::degreeCentrality,
+            DegreeCentralityWriteConfig::of
+        );
+
+        return writeModeBusinessFacade.degreeCentrality(
+            GraphName.parse(graphName),
+            parsedConfiguration,
             resultBuilder
         );
     }
@@ -829,16 +875,15 @@ public final class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
+        var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
-            DegreeCentralityWriteConfig::of,
-            configuration -> estimationModeBusinessFacade.degreeCentrality(
-                configuration,
-                graphNameOrConfiguration
-            )
+            DegreeCentralityWriteConfig::of
         );
 
-        return Stream.of(result);
+        return Stream.of(estimationModeBusinessFacade.degreeCentrality(
+            parsedConfiguration,
+            graphNameOrConfiguration
+        ));
     }
 
     public MutateStub<PageRankMutateConfig, PageRankMutateResult> eigenVectorMutateStub() {
@@ -846,15 +891,18 @@ public final class CentralityProcedureFacade {
     }
 
     public Stream<PageRankStatsResult> eigenvectorStats(String graphName, Map<String, Object> configuration) {
-
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("centralityDistribution");
         var resultBuilder = new PageRankResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
 
-        return algorithmExecutionScaffolding.runStatsAlgorithm(
-            graphName,
+
+        var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            PageRankStatsConfig::configWithoutDampingFactor,
-            statsModeBusinessFacade::eigenVector,
+            PageRankStatsConfig::configWithoutDampingFactor
+        );
+
+        return statsModeBusinessFacade.eigenVector(
+            GraphName.parse(graphName),
+            parsedConfiguration,
             resultBuilder
         );
     }
@@ -863,25 +911,25 @@ public final class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-
-        var result = estimationMode.runEstimation(
+        var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
-            PageRankStatsConfig::configWithoutDampingFactor,
-            configuration -> estimationModeBusinessFacade.pageRank(configuration, graphNameOrConfiguration)
+            PageRankStatsConfig::configWithoutDampingFactor
         );
 
-        return Stream.of(result);
+        return Stream.of(estimationModeBusinessFacade.pageRank(parsedConfiguration, graphNameOrConfiguration));
     }
 
     public Stream<CentralityStreamResult> eigenvectorStream(String graphName, Map<String, Object> configuration) {
-
         var resultBuilder = new PageRankResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffolding.runStreamAlgorithm(
-            graphName,
+        var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            PageRankStreamConfig::configWithoutDampingFactor,
-            streamModeBusinessFacade::eigenvector,
+            PageRankStreamConfig::configWithoutDampingFactor
+        );
+
+        return streamModeBusinessFacade.eigenvector(
+            GraphName.parse(graphName),
+            parsedConfiguration,
             resultBuilder
         );
     }
@@ -890,26 +938,26 @@ public final class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-
-        var result = estimationMode.runEstimation(
+        var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
-            PageRankStreamConfig::configWithoutDampingFactor,
-            configuration -> estimationModeBusinessFacade.pageRank(configuration, graphNameOrConfiguration)
+            PageRankStreamConfig::configWithoutDampingFactor
         );
 
-        return Stream.of(result);
+        return Stream.of(estimationModeBusinessFacade.pageRank(parsedConfiguration, graphNameOrConfiguration));
     }
 
     public Stream<PageRankWriteResult> eigenvectorWrite(String graphName, Map<String, Object> configuration) {
-
         var shouldComputeCentralityDistribution = procedureReturnColumns.contains("centralityDistribution");
         var resultBuilder = new PageRankResultBuilderForWriteMode(shouldComputeCentralityDistribution);
 
-        return algorithmExecutionScaffolding.runAlgorithm(
-            graphName,
+        var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            PageRankWriteConfig::configWithoutDampingFactor,
-            writeModeBusinessFacade::eigenvector,
+            PageRankWriteConfig::configWithoutDampingFactor
+        );
+
+        return writeModeBusinessFacade.eigenvector(
+            GraphName.parse(graphName),
+            parsedConfiguration,
             resultBuilder
         );
     }
@@ -918,14 +966,12 @@ public final class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-
-        var result = estimationMode.runEstimation(
+        var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
-            PageRankWriteConfig::configWithoutDampingFactor,
-            configuration -> estimationModeBusinessFacade.pageRank(configuration, graphNameOrConfiguration)
+            PageRankWriteConfig::configWithoutDampingFactor
         );
 
-        return Stream.of(result);
+        return Stream.of(estimationModeBusinessFacade.pageRank(parsedConfiguration, graphNameOrConfiguration));
     }
 
     public HarmonicCentralityMutateStub harmonicCentralityMutateStub() {
@@ -936,11 +982,14 @@ public final class CentralityProcedureFacade {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("centralityDistribution");
         var resultBuilder = new HarmonicCentralityResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
 
-        return algorithmExecutionScaffolding.runStatsAlgorithm(
-            graphName,
+        var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            HarmonicCentralityStatsConfig::of,
-            statsModeBusinessFacade::harmonicCentrality,
+            HarmonicCentralityStatsConfig::of
+        );
+
+        return statsModeBusinessFacade.harmonicCentrality(
+            GraphName.parse(graphName),
+            parsedConfiguration,
             resultBuilder
         );
     }
@@ -951,11 +1000,14 @@ public final class CentralityProcedureFacade {
     ) {
         var resultBuilder = new HarmonicCentralityResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffolding.runStreamAlgorithm(
-            graphName,
+        var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            HarmonicCentralityStreamConfig::of,
-            streamModeBusinessFacade::harmonicCentrality,
+            HarmonicCentralityStreamConfig::of
+        );
+
+        return streamModeBusinessFacade.harmonicCentrality(
+            GraphName.parse(graphName),
+            parsedConfiguration,
             resultBuilder
         );
     }
@@ -964,11 +1016,14 @@ public final class CentralityProcedureFacade {
         var shouldComputeCentralityDistribution = procedureReturnColumns.contains("centralityDistribution");
         var resultBuilder = new HarmonicCentralityResultBuilderForWriteMode(shouldComputeCentralityDistribution);
 
-        return algorithmExecutionScaffolding.runAlgorithm(
-            graphName,
+        var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            HarmonicCentralityWriteConfig::of,
-            writeModeBusinessFacade::harmonicCentrality,
+            HarmonicCentralityWriteConfig::of
+        );
+
+        return writeModeBusinessFacade.harmonicCentrality(
+            GraphName.parse(graphName),
+            parsedConfiguration,
             resultBuilder
         );
     }
@@ -981,11 +1036,14 @@ public final class CentralityProcedureFacade {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("centralityDistribution");
         var resultBuilder = new PageRankResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
 
-        return algorithmExecutionScaffolding.runStatsAlgorithm(
-            graphName,
+        var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            PageRankStatsConfig::configWithDampingFactor,
-            statsModeBusinessFacade::pageRank,
+            PageRankStatsConfig::configWithDampingFactor
+        );
+
+        return statsModeBusinessFacade.pageRank(
+            GraphName.parse(graphName),
+            parsedConfiguration,
             resultBuilder
         );
     }
@@ -994,23 +1052,25 @@ public final class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
+        var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
-            PageRankStatsConfig::configWithDampingFactor,
-            configuration -> estimationModeBusinessFacade.pageRank(configuration, graphNameOrConfiguration)
+            PageRankStatsConfig::configWithDampingFactor
         );
 
-        return Stream.of(result);
+        return Stream.of(estimationModeBusinessFacade.pageRank(parsedConfiguration, graphNameOrConfiguration));
     }
 
     public Stream<CentralityStreamResult> pageRankStream(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new PageRankResultBuilderForStreamMode();
 
-        return algorithmExecutionScaffolding.runStreamAlgorithm(
-            graphName,
+        var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            PageRankStreamConfig::configWithDampingFactor,
-            streamModeBusinessFacade::pageRank,
+            PageRankStreamConfig::configWithDampingFactor
+        );
+
+        return streamModeBusinessFacade.pageRank(
+            GraphName.parse(graphName),
+            parsedConfiguration,
             resultBuilder
         );
     }
@@ -1019,24 +1079,27 @@ public final class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
+        var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
-            PageRankStreamConfig::configWithDampingFactor,
-            configuration -> estimationModeBusinessFacade.pageRank(configuration, graphNameOrConfiguration)
+            PageRankStreamConfig::configWithDampingFactor
         );
 
-        return Stream.of(result);
+        return Stream.of(estimationModeBusinessFacade.pageRank(parsedConfiguration, graphNameOrConfiguration));
     }
 
     public Stream<PageRankWriteResult> pageRankWrite(String graphName, Map<String, Object> configuration) {
         var shouldComputeCentralityDistribution = procedureReturnColumns.contains("centralityDistribution");
         var resultBuilder = new PageRankResultBuilderForWriteMode(shouldComputeCentralityDistribution);
 
-        return algorithmExecutionScaffolding.runAlgorithm(
-            graphName,
+
+        var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            PageRankWriteConfig::configWithDampingFactor,
-            writeModeBusinessFacade::pageRank,
+            PageRankWriteConfig::configWithDampingFactor
+        );
+
+        return writeModeBusinessFacade.pageRank(
+            GraphName.parse(graphName),
+            parsedConfiguration,
             resultBuilder
         );
     }
@@ -1045,13 +1108,12 @@ public final class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
+        var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
-            PageRankWriteConfig::configWithDampingFactor,
-            configuration -> estimationModeBusinessFacade.pageRank(configuration, graphNameOrConfiguration)
+            PageRankWriteConfig::configWithDampingFactor
         );
 
-        return Stream.of(result);
+        return Stream.of(estimationModeBusinessFacade.pageRank(parsedConfiguration, graphNameOrConfiguration));
     }
 
 }

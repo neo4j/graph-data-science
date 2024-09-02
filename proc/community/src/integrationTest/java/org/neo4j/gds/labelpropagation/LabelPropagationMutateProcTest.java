@@ -75,6 +75,7 @@ import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.GraphDataScienceProceduresBuilder;
 import org.neo4j.gds.procedures.algorithms.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
+import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfigImpl;
@@ -531,8 +532,10 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
             applicationsFacade,
             null,
             ProcedureReturnColumns.EMPTY,
-            null,
-            null
+            new UserSpecificConfigurationParser(
+                new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance),
+                User.DEFAULT
+            )
         );
 
         return new GraphDataScienceProceduresBuilder(Log.noOpLog())

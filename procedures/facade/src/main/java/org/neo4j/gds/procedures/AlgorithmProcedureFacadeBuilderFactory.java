@@ -26,8 +26,6 @@ import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
-import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
-import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.kernel.api.KernelTransaction;
 
@@ -64,12 +62,6 @@ public class AlgorithmProcedureFacadeBuilderFactory {
             requestScopedDependencies
         );
 
-        var estimationModeRunner = new EstimationModeRunner(configurationParser, requestScopedDependencies.getUser());
-
-        var algorithmExecutionScaffolding = new AlgorithmExecutionScaffolding(
-            configurationParser,
-            requestScopedDependencies
-        );
 
         return new AlgorithmProcedureFacadeBuilder(
             requestScopedDependencies,
@@ -78,8 +70,8 @@ public class AlgorithmProcedureFacadeBuilderFactory {
             procedureReturnColumns,
             applicationsFacade,
             genericStub,
-            estimationModeRunner,
-            algorithmExecutionScaffolding
+
+            configurationParser
         );
     }
 }

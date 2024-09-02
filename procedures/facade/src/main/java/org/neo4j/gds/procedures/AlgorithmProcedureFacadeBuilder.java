@@ -26,12 +26,12 @@ import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.community.CommunityProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
+import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.embeddings.NodeEmbeddingsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.machinelearning.MachineLearningProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.MiscellaneousProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
-import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 
@@ -42,8 +42,8 @@ class AlgorithmProcedureFacadeBuilder {
     private final ProcedureReturnColumns procedureReturnColumns;
     private final ApplicationsFacade applicationsFacade;
     private final GenericStub genericStub;
-    private final EstimationModeRunner estimationModeRunner;
-    private final AlgorithmExecutionScaffolding algorithmExecutionScaffolding;
+
+    private final ConfigurationParser configurationParser;
 
     AlgorithmProcedureFacadeBuilder(
         RequestScopedDependencies requestScopedDependencies,
@@ -52,8 +52,7 @@ class AlgorithmProcedureFacadeBuilder {
         ProcedureReturnColumns procedureReturnColumns,
         ApplicationsFacade applicationsFacade,
         GenericStub genericStub,
-        EstimationModeRunner estimationModeRunner,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffolding
+        ConfigurationParser configurationParser
     ) {
         this.requestScopedDependencies = requestScopedDependencies;
         this.closeableResourceRegistry = closeableResourceRegistry;
@@ -61,8 +60,7 @@ class AlgorithmProcedureFacadeBuilder {
         this.procedureReturnColumns = procedureReturnColumns;
         this.applicationsFacade = applicationsFacade;
         this.genericStub = genericStub;
-        this.estimationModeRunner = estimationModeRunner;
-        this.algorithmExecutionScaffolding = algorithmExecutionScaffolding;
+        this.configurationParser = configurationParser;
     }
 
     CentralityProcedureFacade createCentralityProcedureFacade() {
@@ -70,8 +68,7 @@ class AlgorithmProcedureFacadeBuilder {
             genericStub,
             applicationsFacade,
             procedureReturnColumns,
-            estimationModeRunner,
-            algorithmExecutionScaffolding
+            new UserSpecificConfigurationParser(configurationParser, requestScopedDependencies.getUser())
         );
     }
 
@@ -81,13 +78,17 @@ class AlgorithmProcedureFacadeBuilder {
             applicationsFacade,
             closeableResourceRegistry,
             procedureReturnColumns,
-            estimationModeRunner,
-            algorithmExecutionScaffolding
+            new UserSpecificConfigurationParser(configurationParser, requestScopedDependencies.getUser())
         );
     }
 
     MachineLearningProcedureFacade createMachineLearningProcedureFacade() {
-        return MachineLearningProcedureFacade.create(genericStub, applicationsFacade, algorithmExecutionScaffolding);
+        return MachineLearningProcedureFacade.create(
+            genericStub,
+            applicationsFacade,
+            configurationParser,
+            requestScopedDependencies.getUser()
+        );
     }
 
     MiscellaneousProcedureFacade createMiscellaneousProcedureFacade() {
@@ -95,18 +96,16 @@ class AlgorithmProcedureFacadeBuilder {
             genericStub,
             applicationsFacade,
             procedureReturnColumns,
-            estimationModeRunner,
-            algorithmExecutionScaffolding
+            new UserSpecificConfigurationParser(configurationParser, requestScopedDependencies.getUser())
         );
     }
 
     NodeEmbeddingsProcedureFacade createNodeEmbeddingsProcedureFacade() {
         return NodeEmbeddingsProcedureFacade.create(
-            requestScopedDependencies,
             genericStub,
             applicationsFacade,
-            estimationModeRunner,
-            algorithmExecutionScaffolding
+            new UserSpecificConfigurationParser(configurationParser, requestScopedDependencies.getUser()),
+            requestScopedDependencies.getUser()
         );
     }
 
@@ -117,8 +116,7 @@ class AlgorithmProcedureFacadeBuilder {
             procedureReturnColumns,
             applicationsFacade,
             genericStub,
-            estimationModeRunner,
-            algorithmExecutionScaffolding
+            new UserSpecificConfigurationParser(configurationParser, requestScopedDependencies.getUser())
         );
     }
 
@@ -127,8 +125,7 @@ class AlgorithmProcedureFacadeBuilder {
             applicationsFacade,
             genericStub,
             procedureReturnColumns,
-            estimationModeRunner,
-            algorithmExecutionScaffolding
+            new UserSpecificConfigurationParser(configurationParser, requestScopedDependencies.getUser())
         );
     }
 }

@@ -20,8 +20,8 @@
 package org.neo4j.gds.procedures.algorithms.machinelearning.stubs;
 
 import org.neo4j.gds.algorithms.machinelearning.KGEPredictMutateConfig;
-import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinelearning.MachineLearningAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.machinelearning.MachineLearningAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.machinelearning.KGEMutateResult;
@@ -33,14 +33,17 @@ import java.util.stream.Stream;
 
 public class KgeMutateStub implements MutateStub<KGEPredictMutateConfig, KGEMutateResult> {
     private final GenericStub genericStub;
-    private final ApplicationsFacade applicationsFacade;
+    private final MachineLearningAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
+    private final MachineLearningAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
 
     public KgeMutateStub(
         GenericStub genericStub,
-        ApplicationsFacade applicationsFacade
+        MachineLearningAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
+        MachineLearningAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade
     ) {
         this.genericStub = genericStub;
-        this.applicationsFacade = applicationsFacade;
+        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
+        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
     }
 
     @Override
@@ -54,7 +57,7 @@ public class KgeMutateStub implements MutateStub<KGEPredictMutateConfig, KGEMuta
             username,
             configuration,
             KGEPredictMutateConfig::of,
-            __ -> estimationMode().kge()
+            __ -> estimationModeBusinessFacade.kge()
         );
     }
 
@@ -64,7 +67,7 @@ public class KgeMutateStub implements MutateStub<KGEPredictMutateConfig, KGEMuta
             graphName,
             configuration,
             KGEPredictMutateConfig::of,
-            __ -> estimationMode().kge()
+            __ -> estimationModeBusinessFacade.kge()
         );
     }
 
@@ -76,7 +79,7 @@ public class KgeMutateStub implements MutateStub<KGEPredictMutateConfig, KGEMuta
             graphNameAsString,
             rawConfiguration,
             KGEPredictMutateConfig::of,
-            (graphName, configuration, __) -> applicationsFacade.machineLearning().mutate().kge(
+            (graphName, configuration, __) -> mutateModeBusinessFacade.kge(
                 graphName,
                 configuration,
                 resultBuilder
@@ -85,7 +88,5 @@ public class KgeMutateStub implements MutateStub<KGEPredictMutateConfig, KGEMuta
         );
     }
 
-    private MachineLearningAlgorithmsEstimationModeBusinessFacade estimationMode() {
-        return applicationsFacade.machineLearning().estimate();
-    }
+
 }

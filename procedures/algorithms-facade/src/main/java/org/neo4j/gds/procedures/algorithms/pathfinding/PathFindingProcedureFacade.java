@@ -22,18 +22,15 @@ package org.neo4j.gds.procedures.algorithms.pathfinding;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.api.CloseableResourceRegistry;
+import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
-import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStatsModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsWriteModeBusinessFacade;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.dag.longestPath.DagLongestPathStreamConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
 import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
@@ -45,7 +42,6 @@ import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordWriteConfig;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStatsConfig;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStreamConfig;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaWriteConfig;
-import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraWriteConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
@@ -55,8 +51,7 @@ import org.neo4j.gds.paths.traverse.BfsStreamConfig;
 import org.neo4j.gds.paths.traverse.DfsStreamConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensWriteConfig;
-import org.neo4j.gds.procedures.algorithms.AlgorithmHandle;
-import org.neo4j.gds.procedures.algorithms.StreamAlgorithmHandle;
+import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.BellmanFordMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.BreadthFirstSearchMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.DeltaSteppingMutateStub;
@@ -71,8 +66,6 @@ import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SteinerTreeMutateSt
 import org.neo4j.gds.procedures.algorithms.results.StandardModeResult;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 import org.neo4j.gds.procedures.algorithms.results.StandardWriteRelationshipsResult;
-import org.neo4j.gds.procedures.algorithms.runners.AlgorithmExecutionScaffolding;
-import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.spanningtree.SpanningTreeStatsConfig;
 import org.neo4j.gds.spanningtree.SpanningTreeStreamConfig;
@@ -84,7 +77,6 @@ import org.neo4j.gds.traversal.RandomWalkStatsConfig;
 import org.neo4j.gds.traversal.RandomWalkStreamConfig;
 
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
@@ -120,8 +112,7 @@ public final class PathFindingProcedureFacade {
     private final SteinerTreeMutateStub steinerTreeMutateStub;
 
     // infrastructure
-    private final EstimationModeRunner estimationMode;
-    private final AlgorithmExecutionScaffolding algorithmExecutionScaffolding;
+    private final UserSpecificConfigurationParser configurationParser;
 
     private PathFindingProcedureFacade(
         CloseableResourceRegistry closeableResourceRegistry,
@@ -134,15 +125,15 @@ public final class PathFindingProcedureFacade {
         BellmanFordMutateStub bellmanFordMutateStub,
         BreadthFirstSearchMutateStub breadthFirstSearchMutateStub,
         DeltaSteppingMutateStub deltaSteppingMutateStub,
-        DepthFirstSearchMutateStub depthFirstSearchMutateStub, RandomWalkMutateStub randomWalkMutateStub,
+        DepthFirstSearchMutateStub depthFirstSearchMutateStub,
+        RandomWalkMutateStub randomWalkMutateStub,
         SinglePairShortestPathAStarMutateStub singlePairShortestPathAStarMutateStub,
         SinglePairShortestPathDijkstraMutateStub singlePairShortestPathDijkstraMutateStub,
         SinglePairShortestPathYensMutateStub singlePairShortestPathYensMutateStub,
         SingleSourceShortestPathDijkstraMutateStub singleSourceShortestPathDijkstraMutateStub,
         SpanningTreeMutateStub spanningTreeMutateStub,
         SteinerTreeMutateStub steinerTreeMutateStub,
-        EstimationModeRunner estimationMode,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffolding
+        UserSpecificConfigurationParser configurationParser
     ) {
         this.closeableResourceRegistry = closeableResourceRegistry;
         this.nodeLookup = nodeLookup;
@@ -165,8 +156,7 @@ public final class PathFindingProcedureFacade {
         this.spanningTreeMutateStub = spanningTreeMutateStub;
         this.steinerTreeMutateStub = steinerTreeMutateStub;
 
-        this.estimationMode = estimationMode;
-        this.algorithmExecutionScaffolding = algorithmExecutionScaffolding;
+        this.configurationParser = configurationParser;
     }
 
     /**
@@ -178,8 +168,7 @@ public final class PathFindingProcedureFacade {
         ProcedureReturnColumns procedureReturnColumns,
         ApplicationsFacade applicationsFacade,
         GenericStub genericStub,
-        EstimationModeRunner estimationModeRunner,
-        AlgorithmExecutionScaffolding algorithmExecutionScaffolding
+        UserSpecificConfigurationParser configurationParser
     ) {
         var mutateModeBusinessFacade = applicationsFacade.pathFinding().mutate();
         var estimationModeBusinessFacade = applicationsFacade.pathFinding().estimate();
@@ -266,7 +255,9 @@ public final class PathFindingProcedureFacade {
             singlePairDijkstraStub,
             yensStub,
             singleSourceDijkstraStub,
-            spanningTreeMutateStub, steinerTreeMutateStub, estimationModeRunner, algorithmExecutionScaffolding
+            spanningTreeMutateStub,
+            steinerTreeMutateStub,
+            configurationParser
         );
     }
 
@@ -274,15 +265,10 @@ public final class PathFindingProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        StreamResultBuilder<AllShortestPathsConfig, Stream<AllShortestPathsStreamResult>, AllShortestPathsStreamResult> resultBuilder =
-            (g, gs, c, result) -> result.orElse(Stream.empty());
-
-        return algorithmExecutionScaffolding.runStreamAlgorithm(
-            graphName,
-            configuration,
-            AllShortestPathsConfig::of,
-            streamModeBusinessFacade::allShortestPaths,
-            resultBuilder
+        return streamModeBusinessFacade.allShortestPaths(
+            GraphName.parse(graphName),
+            configurationParser.parseConfiguration(configuration, AllShortestPathsConfig::of),
+            (g, gs, c, result) -> result.orElse(Stream.empty())
         );
     }
 
@@ -298,11 +284,9 @@ public final class PathFindingProcedureFacade {
             routeRequested
         );
 
-        return algorithmExecutionScaffolding.runStreamAlgorithm(
-            graphName,
-            configuration,
-            AllShortestPathsBellmanFordStreamConfig::of,
-            streamModeBusinessFacade::bellmanFord,
+        return streamModeBusinessFacade.bellmanFord(
+            GraphName.parse(graphName),
+            configurationParser.parseConfiguration(configuration, AllShortestPathsBellmanFordStreamConfig::of),
             resultBuilder
         );
     }
@@ -311,27 +295,22 @@ public final class PathFindingProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
-            algorithmConfiguration,
-            AllShortestPathsBellmanFordStreamConfig::of,
-            configuration -> estimationModeBusinessFacade.bellmanFord(
-                configuration,
+        return Stream.of(
+            estimationModeBusinessFacade.bellmanFord(
+                configurationParser.parseConfiguration(
+                    algorithmConfiguration,
+                    AllShortestPathsBellmanFordStreamConfig::of
+                ),
                 graphNameOrConfiguration
             )
         );
-
-        return Stream.of(result);
     }
 
     public Stream<BellmanFordStatsResult> bellmanFordStats(String graphName, Map<String, Object> configuration) {
-        var resultBuilder = new BellmanFordResultBuilderForStatsMode();
-
-        return algorithmExecutionScaffolding.runStatsAlgorithm(
-            graphName,
-            configuration,
-            AllShortestPathsBellmanFordStatsConfig::of,
-            statsModeBusinessFacade::bellmanFord,
-            resultBuilder
+        return statsModeBusinessFacade.bellmanFord(
+            GraphName.parse(graphName),
+            configurationParser.parseConfiguration(configuration, AllShortestPathsBellmanFordStatsConfig::of),
+            new BellmanFordResultBuilderForStatsMode()
         );
     }
 
@@ -339,31 +318,26 @@ public final class PathFindingProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
-            algorithmConfiguration,
-            AllShortestPathsBellmanFordStatsConfig::of,
-            configuration -> estimationModeBusinessFacade.bellmanFord(
-                configuration,
+        return Stream.of(
+            estimationModeBusinessFacade.bellmanFord(
+                configurationParser.parseConfiguration(
+                    algorithmConfiguration,
+                    AllShortestPathsBellmanFordStatsConfig::of
+                ),
                 graphNameOrConfiguration
             )
         );
-
-        return Stream.of(result);
     }
 
     public Stream<BellmanFordWriteResult> bellmanFordWrite(
         String graphName,
         Map<String, Object> configuration
     ) {
-        var resultBuilder = new BellmanFordResultBuilderForWriteMode();
-
         return Stream.of(
-            algorithmExecutionScaffolding.runAlgorithm(
-                graphName,
-                configuration,
-                AllShortestPathsBellmanFordWriteConfig::of,
-                writeModeBusinessFacade::bellmanFord,
-                resultBuilder
+            writeModeBusinessFacade.bellmanFord(
+                GraphName.parse(graphName),
+                configurationParser.parseConfiguration(configuration, AllShortestPathsBellmanFordWriteConfig::of),
+                new BellmanFordResultBuilderForWriteMode()
             )
         );
     }
@@ -372,16 +346,15 @@ public final class PathFindingProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
-            algorithmConfiguration,
-            AllShortestPathsBellmanFordWriteConfig::of,
-            configuration -> estimationModeBusinessFacade.bellmanFord(
-                configuration,
+        return Stream.of(
+            estimationModeBusinessFacade.bellmanFord(
+                configurationParser.parseConfiguration(
+                    algorithmConfiguration,
+                    AllShortestPathsBellmanFordWriteConfig::of
+                ),
                 graphNameOrConfiguration
             )
         );
-
-        return Stream.of(result);
     }
 
     public BreadthFirstSearchMutateStub breadthFirstSearchMutateStub() {
@@ -389,14 +362,10 @@ public final class PathFindingProcedureFacade {
     }
 
     public Stream<StandardStatsResult> breadthFirstSearchStats(String graphName, Map<String, Object> configuration) {
-        var resultBuilder = new BfsStatsResultBuilder();
-
-        return algorithmExecutionScaffolding.runStatsAlgorithm(
-            graphName,
-            configuration,
-            BfsStatsConfig::of,
-            statsModeBusinessFacade::breadthFirstSearch,
-            resultBuilder
+        return statsModeBusinessFacade.breadthFirstSearch(
+            GraphName.parse(graphName),
+            configurationParser.parseConfiguration(configuration, BfsStatsConfig::of),
+            new BfsStatsResultBuilder()
         );
     }
 
@@ -404,27 +373,19 @@ public final class PathFindingProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
-            algorithmConfiguration,
-            BfsStatsConfig::of,
-            configuration -> estimationModeBusinessFacade.breadthFirstSearch(
-                configuration,
+        return Stream.of(
+            estimationModeBusinessFacade.breadthFirstSearch(
+                configurationParser.parseConfiguration(algorithmConfiguration, BfsStatsConfig::of),
                 graphNameOrConfiguration
             )
         );
-
-        return Stream.of(result);
     }
 
     public Stream<BfsStreamResult> breadthFirstSearchStream(String graphName, Map<String, Object> configuration) {
-        var resultBuilder = new BfsStreamResultBuilder(nodeLookup, procedureReturnColumns.contains("path"));
-
-        return algorithmExecutionScaffolding.runStreamAlgorithm(
-            graphName,
-            configuration,
-            BfsStreamConfig::of,
-            streamModeBusinessFacade::breadthFirstSearch,
-            resultBuilder
+        return streamModeBusinessFacade.breadthFirstSearch(
+            GraphName.parse(graphName),
+            configurationParser.parseConfiguration(configuration, BfsStreamConfig::of),
+            new BfsStreamResultBuilder(nodeLookup, procedureReturnColumns.contains("path"))
         );
     }
 
@@ -432,16 +393,12 @@ public final class PathFindingProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
-            algorithmConfiguration,
-            BfsStreamConfig::of,
-            configuration -> estimationModeBusinessFacade.breadthFirstSearch(
-                configuration,
+        return Stream.of(
+            estimationModeBusinessFacade.breadthFirstSearch(
+                configurationParser.parseConfiguration(algorithmConfiguration, BfsStreamConfig::of),
                 graphNameOrConfiguration
             )
         );
-
-        return Stream.of(result);
     }
 
     public DeltaSteppingMutateStub deltaSteppingMutateStub() {
@@ -449,14 +406,10 @@ public final class PathFindingProcedureFacade {
     }
 
     public Stream<StandardStatsResult> deltaSteppingStats(String graphName, Map<String, Object> configuration) {
-        var resultBuilder = new DeltaSteppingResultBuilderForStatsMode();
-
-        return algorithmExecutionScaffolding.runStatsAlgorithm(
-            graphName,
-            configuration,
-            AllShortestPathsDeltaStatsConfig::of,
-            statsModeBusinessFacade::deltaStepping,
-            resultBuilder
+        return statsModeBusinessFacade.deltaStepping(
+            GraphName.parse(graphName),
+            configurationParser.parseConfiguration(configuration, AllShortestPathsDeltaStatsConfig::of),
+            new DeltaSteppingResultBuilderForStatsMode()
         );
     }
 
@@ -464,24 +417,26 @@ public final class PathFindingProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
-            algorithmConfiguration,
-            AllShortestPathsDeltaStatsConfig::of,
-            configuration -> estimationModeBusinessFacade.deltaStepping(
-                configuration,
+
+        return Stream.of(
+            estimationModeBusinessFacade.deltaStepping(
+                configurationParser.parseConfiguration(algorithmConfiguration, AllShortestPathsDeltaStatsConfig::of),
                 graphNameOrConfiguration
             )
         );
-
-        return Stream.of(result);
     }
 
     public Stream<PathFindingStreamResult> deltaSteppingStream(String graphName, Map<String, Object> configuration) {
-        return runPathOrientedAlgorithmInStreamMode(
-            graphName,
-            configuration,
-            AllShortestPathsDeltaStreamConfig::of,
-            streamModeBusinessFacade::deltaStepping
+        var resultBuilder = new PathFindingResultBuilderForStreamMode<AllShortestPathsDeltaStreamConfig>(
+            closeableResourceRegistry,
+            nodeLookup,
+            procedureReturnColumns.contains("path")
+        );
+
+        return streamModeBusinessFacade.deltaStepping(
+            GraphName.parse(graphName),
+            configurationParser.parseConfiguration(configuration, AllShortestPathsDeltaStreamConfig::of),
+            resultBuilder
         );
     }
 
@@ -489,16 +444,12 @@ public final class PathFindingProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
-            algorithmConfiguration,
-            AllShortestPathsDeltaStreamConfig::of,
-            configuration -> estimationModeBusinessFacade.deltaStepping(
-                configuration,
+        return Stream.of(
+            estimationModeBusinessFacade.deltaStepping(
+                configurationParser.parseConfiguration(algorithmConfiguration, AllShortestPathsDeltaStreamConfig::of),
                 graphNameOrConfiguration
             )
         );
-
-        return Stream.of(result);
     }
 
     public Stream<StandardWriteRelationshipsResult> deltaSteppingWrite(
@@ -506,11 +457,10 @@ public final class PathFindingProcedureFacade {
         Map<String, Object> configuration
     ) {
         return Stream.of(
-            runWriteAlgorithm(
-                graphName,
-                configuration,
-                AllShortestPathsDeltaWriteConfig::of,
-                writeModeBusinessFacade::deltaStepping
+            writeModeBusinessFacade.deltaStepping(
+                GraphName.parse(graphName),
+                configurationParser.parseConfiguration(configuration, AllShortestPathsDeltaWriteConfig::of),
+                new PathFindingResultBuilderForWriteMode<>()
             )
         );
     }
@@ -519,16 +469,12 @@ public final class PathFindingProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
-            algorithmConfiguration,
-            AllShortestPathsDeltaWriteConfig::of,
-            configuration -> estimationModeBusinessFacade.deltaStepping(
-                configuration,
+        return Stream.of(
+            estimationModeBusinessFacade.deltaStepping(
+                configurationParser.parseConfiguration(algorithmConfiguration, AllShortestPathsDeltaWriteConfig::of),
                 graphNameOrConfiguration
             )
         );
-
-        return Stream.of(result);
     }
 
     public DepthFirstSearchMutateStub depthFirstSearchMutateStub() {
@@ -536,14 +482,10 @@ public final class PathFindingProcedureFacade {
     }
 
     public Stream<DfsStreamResult> depthFirstSearchStream(String graphName, Map<String, Object> configuration) {
-        var resultBuilder = new DfsStreamResultBuilder(nodeLookup, procedureReturnColumns.contains("path"));
-
-        return algorithmExecutionScaffolding.runStreamAlgorithm(
-            graphName,
-            configuration,
-            DfsStreamConfig::of,
-            streamModeBusinessFacade::depthFirstSearch,
-            resultBuilder
+        return streamModeBusinessFacade.depthFirstSearch(
+            GraphName.parse(graphName),
+            configurationParser.parseConfiguration(configuration, DfsStreamConfig::of),
+            new DfsStreamResultBuilder(nodeLookup, procedureReturnColumns.contains("path"))
         );
     }
 
@@ -551,50 +493,43 @@ public final class PathFindingProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
-            algorithmConfiguration,
-            DfsStreamConfig::of,
-            configuration -> estimationModeBusinessFacade.depthFirstSearch(
-                configuration,
+        return Stream.of(
+            estimationModeBusinessFacade.depthFirstSearch(
+                configurationParser.parseConfiguration(algorithmConfiguration, DfsStreamConfig::of),
                 graphNameOrConfiguration
             )
         );
-
-        return Stream.of(result);
     }
 
     public Stream<KSpanningTreeWriteResult> kSpanningTreeWrite(String graphName, Map<String, Object> configuration) {
-        var resultBuilder = new KSpanningTreeResultBuilderForWriteMode();
-
         return Stream.of(
-            algorithmExecutionScaffolding.runAlgorithm(
-                graphName,
-                configuration,
-                KSpanningTreeWriteConfig::of,
-                writeModeBusinessFacade::kSpanningTree,
-                resultBuilder
+            writeModeBusinessFacade.kSpanningTree(
+                GraphName.parse(graphName),
+                configurationParser.parseConfiguration(configuration, KSpanningTreeWriteConfig::of),
+                new KSpanningTreeResultBuilderForWriteMode()
             )
         );
     }
 
     public Stream<PathFindingStreamResult> longestPathStream(String graphName, Map<String, Object> configuration) {
-        return runPathOrientedAlgorithmInStreamMode(
-            graphName,
-            configuration,
-            DagLongestPathStreamConfig::of,
-            streamModeBusinessFacade::longestPath
+        var resultBuilder = new PathFindingResultBuilderForStreamMode<DagLongestPathStreamConfig>(
+            closeableResourceRegistry,
+            nodeLookup,
+            procedureReturnColumns.contains("path")
+        );
+
+        return streamModeBusinessFacade.longestPath(
+            GraphName.parse(graphName),
+            configurationParser.parseConfiguration(configuration, DagLongestPathStreamConfig::of),
+            resultBuilder
         );
     }
 
     public Stream<StandardModeResult> randomWalkStats(String graphName, Map<String, Object> configuration) {
-        var resultBuilder = new RandomWalkResultBuilderForStatsMode();
-
-        return algorithmExecutionScaffolding.runStatsAlgorithm(
-            graphName,
-            configuration,
-            RandomWalkStatsConfig::of,
-            statsModeBusinessFacade::randomWalk,
-            resultBuilder
+        return statsModeBusinessFacade.randomWalk(
+            GraphName.parse(graphName),
+            configurationParser.parseConfiguration(configuration, RandomWalkStatsConfig::of),
+            new RandomWalkResultBuilderForStatsMode()
         );
     }
 
@@ -602,16 +537,12 @@ public final class PathFindingProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
-            algorithmConfiguration,
-            RandomWalkStatsConfig::of,
-            configuration -> estimationModeBusinessFacade.randomWalk(
-                configuration,
+        return Stream.of(
+            estimationModeBusinessFacade.randomWalk(
+                configurationParser.parseConfiguration(algorithmConfiguration, RandomWalkStatsConfig::of),
                 graphNameOrConfiguration
             )
         );
-
-        return Stream.of(result);
     }
 
     public Stream<RandomWalkStreamResult> randomWalkStream(String graphName, Map<String, Object> configuration) {
@@ -621,11 +552,9 @@ public final class PathFindingProcedureFacade {
             procedureReturnColumns.contains("path")
         );
 
-        return algorithmExecutionScaffolding.runStreamAlgorithm(
-            graphName,
-            configuration,
-            RandomWalkStreamConfig::of,
-            streamModeBusinessFacade::randomWalk,
+        return streamModeBusinessFacade.randomWalk(
+            GraphName.parse(graphName),
+            configurationParser.parseConfiguration(configuration, RandomWalkStreamConfig::of),
             resultBuilder
         );
     }
@@ -634,16 +563,13 @@ public final class PathFindingProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
-            algorithmConfiguration,
-            RandomWalkStreamConfig::of,
-            configuration -> estimationModeBusinessFacade.randomWalk(
-                configuration,
+
+        return Stream.of(
+            estimationModeBusinessFacade.randomWalk(
+                configurationParser.parseConfiguration(algorithmConfiguration, RandomWalkStreamConfig::of),
                 graphNameOrConfiguration
             )
         );
-
-        return Stream.of(result);
     }
 
     public RandomWalkMutateStub randomWalkMutateStub() {
@@ -658,11 +584,16 @@ public final class PathFindingProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        return runPathOrientedAlgorithmInStreamMode(
-            graphName,
-            configuration,
-            ShortestPathAStarStreamConfig::of,
-            streamModeBusinessFacade::singlePairShortestPathAStar
+        var resultBuilder = new PathFindingResultBuilderForStreamMode<ShortestPathAStarStreamConfig>(
+            closeableResourceRegistry,
+            nodeLookup,
+            procedureReturnColumns.contains("path")
+        );
+
+        return streamModeBusinessFacade.singlePairShortestPathAStar(
+            GraphName.parse(graphName),
+            configurationParser.parseConfiguration(configuration, ShortestPathAStarStreamConfig::of),
+            resultBuilder
         );
     }
 
@@ -670,16 +601,13 @@ public final class PathFindingProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
-            algorithmConfiguration,
-            ShortestPathAStarStreamConfig::of,
-            configuration -> estimationModeBusinessFacade.singlePairShortestPathAStar(
-                configuration,
+
+        return Stream.of(
+            estimationModeBusinessFacade.singlePairShortestPathAStar(
+                configurationParser.parseConfiguration(algorithmConfiguration, ShortestPathAStarStreamConfig::of),
                 graphNameOrConfiguration
             )
         );
-
-        return Stream.of(result);
     }
 
     public Stream<StandardWriteRelationshipsResult> singlePairShortestPathAStarWrite(
@@ -687,11 +615,10 @@ public final class PathFindingProcedureFacade {
         Map<String, Object> configuration
     ) {
         return Stream.of(
-            runWriteAlgorithm(
-                graphName,
-                configuration,
-                ShortestPathAStarWriteConfig::of,
-                writeModeBusinessFacade::singlePairShortestPathAStar
+            writeModeBusinessFacade.singlePairShortestPathAStar(
+                GraphName.parse(graphName),
+                configurationParser.parseConfiguration(configuration, ShortestPathAStarWriteConfig::of),
+                new PathFindingResultBuilderForWriteMode<>()
             )
         );
     }
@@ -700,16 +627,12 @@ public final class PathFindingProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
-            algorithmConfiguration,
-            ShortestPathAStarWriteConfig::of,
-            configuration -> estimationModeBusinessFacade.singlePairShortestPathAStar(
-                configuration,
+        return Stream.of(
+            estimationModeBusinessFacade.singlePairShortestPathAStar(
+                configurationParser.parseConfiguration(algorithmConfiguration, ShortestPathAStarWriteConfig::of),
                 graphNameOrConfiguration
             )
         );
-
-        return Stream.of(result);
     }
 
     public SinglePairShortestPathDijkstraMutateStub singlePairShortestPathDijkstraMutateStub() {
@@ -720,11 +643,16 @@ public final class PathFindingProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        return runPathOrientedAlgorithmInStreamMode(
-            graphName,
-            configuration,
-            ShortestPathDijkstraStreamConfig::of,
-            streamModeBusinessFacade::singlePairShortestPathDijkstra
+        var resultBuilder = new PathFindingResultBuilderForStreamMode<ShortestPathDijkstraStreamConfig>(
+            closeableResourceRegistry,
+            nodeLookup,
+            procedureReturnColumns.contains("path")
+        );
+
+        return streamModeBusinessFacade.singlePairShortestPathDijkstra(
+            GraphName.parse(graphName),
+            configurationParser.parseConfiguration(configuration, ShortestPathDijkstraStreamConfig::of),
+            resultBuilder
         );
     }
 
@@ -732,16 +660,12 @@ public final class PathFindingProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
-            algorithmConfiguration,
-            ShortestPathDijkstraStreamConfig::of,
-            configuration -> estimationModeBusinessFacade.singlePairShortestPathDijkstra(
-                configuration,
+        return Stream.of(
+            estimationModeBusinessFacade.singlePairShortestPathDijkstra(
+                configurationParser.parseConfiguration(algorithmConfiguration, ShortestPathDijkstraStreamConfig::of),
                 graphNameOrConfiguration
             )
         );
-
-        return Stream.of(result);
     }
 
     public Stream<StandardWriteRelationshipsResult> singlePairShortestPathDijkstraWrite(
@@ -749,11 +673,10 @@ public final class PathFindingProcedureFacade {
         Map<String, Object> configuration
     ) {
         return Stream.of(
-            runWriteAlgorithm(
-                graphName,
-                configuration,
-                ShortestPathDijkstraWriteConfig::of,
-                writeModeBusinessFacade::singlePairShortestPathDijkstra
+            writeModeBusinessFacade.singlePairShortestPathDijkstra(
+                GraphName.parse(graphName),
+                configurationParser.parseConfiguration(configuration, ShortestPathDijkstraWriteConfig::of),
+                new PathFindingResultBuilderForWriteMode<>()
             )
         );
     }
@@ -762,16 +685,13 @@ public final class PathFindingProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
-            algorithmConfiguration,
-            ShortestPathDijkstraWriteConfig::of,
-            configuration -> estimationModeBusinessFacade.singlePairShortestPathDijkstra(
-                configuration,
+
+        return Stream.of(
+            estimationModeBusinessFacade.singlePairShortestPathDijkstra(
+                configurationParser.parseConfiguration(algorithmConfiguration, ShortestPathDijkstraWriteConfig::of),
                 graphNameOrConfiguration
             )
         );
-
-        return Stream.of(result);
     }
 
     public SinglePairShortestPathYensMutateStub singlePairShortestPathYensMutateStub() {
@@ -782,11 +702,16 @@ public final class PathFindingProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        return runPathOrientedAlgorithmInStreamMode(
-            graphName,
-            configuration,
-            ShortestPathYensStreamConfig::of,
-            streamModeBusinessFacade::singlePairShortestPathYens
+        var resultBuilder = new PathFindingResultBuilderForStreamMode<ShortestPathYensStreamConfig>(
+            closeableResourceRegistry,
+            nodeLookup,
+            procedureReturnColumns.contains("path")
+        );
+
+        return streamModeBusinessFacade.singlePairShortestPathYens(
+            GraphName.parse(graphName),
+            configurationParser.parseConfiguration(configuration, ShortestPathYensStreamConfig::of),
+            resultBuilder
         );
     }
 
@@ -794,16 +719,13 @@ public final class PathFindingProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
-            algorithmConfiguration,
-            ShortestPathYensStreamConfig::of,
-            configuration -> estimationModeBusinessFacade.singlePairShortestPathYens(
-                configuration,
+
+        return Stream.of(
+            estimationModeBusinessFacade.singlePairShortestPathYens(
+                configurationParser.parseConfiguration(algorithmConfiguration, ShortestPathYensStreamConfig::of),
                 graphNameOrConfiguration
             )
         );
-
-        return Stream.of(result);
     }
 
     public Stream<StandardWriteRelationshipsResult> singlePairShortestPathYensWrite(
@@ -811,11 +733,10 @@ public final class PathFindingProcedureFacade {
         Map<String, Object> configuration
     ) {
         return Stream.of(
-            runWriteAlgorithm(
-                graphName,
-                configuration,
-                ShortestPathYensWriteConfig::of,
-                writeModeBusinessFacade::singlePairShortestPathYens
+            writeModeBusinessFacade.singlePairShortestPathYens(
+                GraphName.parse(graphName),
+                configurationParser.parseConfiguration(configuration, ShortestPathYensWriteConfig::of),
+                new PathFindingResultBuilderForWriteMode<>()
             )
         );
     }
@@ -824,16 +745,12 @@ public final class PathFindingProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
-            algorithmConfiguration,
-            ShortestPathYensWriteConfig::of,
-            configuration -> estimationModeBusinessFacade.singlePairShortestPathYens(
-                configuration,
+        return Stream.of(
+            estimationModeBusinessFacade.singlePairShortestPathYens(
+                configurationParser.parseConfiguration(algorithmConfiguration, ShortestPathYensWriteConfig::of),
                 graphNameOrConfiguration
             )
         );
-
-        return Stream.of(result);
     }
 
     public SingleSourceShortestPathDijkstraMutateStub singleSourceShortestPathDijkstraMutateStub() {
@@ -844,11 +761,15 @@ public final class PathFindingProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        return runPathOrientedAlgorithmInStreamMode(
-            graphName,
-            configuration,
-            AllShortestPathsDijkstraStreamConfig::of,
-            streamModeBusinessFacade::singleSourceShortestPathDijkstra
+        var resultBuilder = new PathFindingResultBuilderForStreamMode<AllShortestPathsDijkstraStreamConfig>(
+            closeableResourceRegistry,
+            nodeLookup,
+            procedureReturnColumns.contains("path")
+        );
+        return streamModeBusinessFacade.singleSourceShortestPathDijkstra(
+            GraphName.parse(graphName),
+            configurationParser.parseConfiguration(configuration, AllShortestPathsDijkstraStreamConfig::of),
+            resultBuilder
         );
     }
 
@@ -856,16 +777,15 @@ public final class PathFindingProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
-            algorithmConfiguration,
-            AllShortestPathsDijkstraStreamConfig::of,
-            configuration -> estimationModeBusinessFacade.singleSourceShortestPathDijkstra(
-                configuration,
+        return Stream.of(
+            estimationModeBusinessFacade.singleSourceShortestPathDijkstra(
+                configurationParser.parseConfiguration(
+                    algorithmConfiguration,
+                    AllShortestPathsDijkstraStreamConfig::of
+                ),
                 graphNameOrConfiguration
             )
         );
-
-        return Stream.of(result);
     }
 
     public Stream<StandardWriteRelationshipsResult> singleSourceShortestPathDijkstraWrite(
@@ -873,11 +793,10 @@ public final class PathFindingProcedureFacade {
         Map<String, Object> configuration
     ) {
         return Stream.of(
-            runWriteAlgorithm(
-                graphName,
-                configuration,
-                AllShortestPathsDijkstraWriteConfig::of,
-                writeModeBusinessFacade::singleSourceShortestPathDijkstra
+            writeModeBusinessFacade.singleSourceShortestPathDijkstra(
+                GraphName.parse(graphName),
+                configurationParser.parseConfiguration(configuration, AllShortestPathsDijkstraWriteConfig::of),
+                new PathFindingResultBuilderForWriteMode<>()
             )
         );
     }
@@ -886,16 +805,12 @@ public final class PathFindingProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
-            algorithmConfiguration,
-            AllShortestPathsDijkstraWriteConfig::of,
-            configuration -> estimationModeBusinessFacade.singleSourceShortestPathDijkstra(
-                configuration,
+        return Stream.of(
+            estimationModeBusinessFacade.singleSourceShortestPathDijkstra(
+                configurationParser.parseConfiguration(algorithmConfiguration, AllShortestPathsDijkstraWriteConfig::of),
                 graphNameOrConfiguration
             )
         );
-
-        return Stream.of(result);
     }
 
     public SpanningTreeMutateStub spanningTreeMutateStub() {
@@ -906,14 +821,10 @@ public final class PathFindingProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var resultBuilder = new SpanningTreeResultBuilderForStatsMode();
-
-        return algorithmExecutionScaffolding.runStatsAlgorithm(
-            graphName,
-            configuration,
-            SpanningTreeStatsConfig::of,
-            statsModeBusinessFacade::spanningTree,
-            resultBuilder
+        return statsModeBusinessFacade.spanningTree(
+            GraphName.parse(graphName),
+            configurationParser.parseConfiguration(configuration, SpanningTreeStatsConfig::of),
+            new SpanningTreeResultBuilderForStatsMode()
         );
     }
 
@@ -921,27 +832,19 @@ public final class PathFindingProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
-            algorithmConfiguration,
-            SpanningTreeStatsConfig::of,
-            configuration -> estimationModeBusinessFacade.spanningTree(
-                configuration,
+        return Stream.of(
+            estimationModeBusinessFacade.spanningTree(
+                configurationParser.parseConfiguration(algorithmConfiguration, SpanningTreeStatsConfig::of),
                 graphNameOrConfiguration
             )
         );
-
-        return Stream.of(result);
     }
 
     public Stream<SpanningTreeStreamResult> spanningTreeStream(String graphName, Map<String, Object> configuration) {
-        var resultBuilder = new SpanningTreeResultBuilderForStreamMode();
-
-        return algorithmExecutionScaffolding.runStreamAlgorithm(
-            graphName,
-            configuration,
-            SpanningTreeStreamConfig::of,
-            streamModeBusinessFacade::spanningTree,
-            resultBuilder
+        return streamModeBusinessFacade.spanningTree(
+            GraphName.parse(graphName),
+            configurationParser.parseConfiguration(configuration, SpanningTreeStreamConfig::of),
+            new SpanningTreeResultBuilderForStreamMode()
         );
     }
 
@@ -949,28 +852,20 @@ public final class PathFindingProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
-            algorithmConfiguration,
-            SpanningTreeStreamConfig::of,
-            configuration -> estimationModeBusinessFacade.spanningTree(
-                configuration,
+        return Stream.of(
+            estimationModeBusinessFacade.spanningTree(
+                configurationParser.parseConfiguration(algorithmConfiguration, SpanningTreeStreamConfig::of),
                 graphNameOrConfiguration
             )
         );
-
-        return Stream.of(result);
     }
 
     public Stream<SpanningTreeWriteResult> spanningTreeWrite(String graphName, Map<String, Object> configuration) {
-        var resultBuilder = new SpanningTreeResultBuilderForWriteMode();
-
         return Stream.of(
-            algorithmExecutionScaffolding.runAlgorithm(
-                graphName,
-                configuration,
-                SpanningTreeWriteConfig::of,
-                writeModeBusinessFacade::spanningTree,
-                resultBuilder
+            writeModeBusinessFacade.spanningTree(
+                GraphName.parse(graphName),
+                configurationParser.parseConfiguration(configuration, SpanningTreeWriteConfig::of),
+                new SpanningTreeResultBuilderForWriteMode()
             )
         );
     }
@@ -979,16 +874,12 @@ public final class PathFindingProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
-            algorithmConfiguration,
-            SpanningTreeWriteConfig::of,
-            configuration -> estimationModeBusinessFacade.spanningTree(
-                configuration,
+        return Stream.of(
+            estimationModeBusinessFacade.spanningTree(
+                configurationParser.parseConfiguration(algorithmConfiguration, SpanningTreeWriteConfig::of),
                 graphNameOrConfiguration
             )
         );
-
-        return Stream.of(result);
     }
 
     public SteinerTreeMutateStub steinerTreeMutateStub() {
@@ -996,14 +887,10 @@ public final class PathFindingProcedureFacade {
     }
 
     public Stream<SteinerStatsResult> steinerTreeStats(String graphName, Map<String, Object> configuration) {
-        var resultBuilder = new SteinerTreeResultBuilderForStatsMode();
-
-        return algorithmExecutionScaffolding.runStatsAlgorithm(
-            graphName,
-            configuration,
-            SteinerTreeStatsConfig::of,
-            statsModeBusinessFacade::steinerTree,
-            resultBuilder
+        return statsModeBusinessFacade.steinerTree(
+            GraphName.parse(graphName),
+            configurationParser.parseConfiguration(configuration, SteinerTreeStatsConfig::of),
+            new SteinerTreeResultBuilderForStatsMode()
         );
     }
 
@@ -1011,27 +898,19 @@ public final class PathFindingProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
-            algorithmConfiguration,
-            SteinerTreeStatsConfig::of,
-            configuration -> estimationModeBusinessFacade.steinerTree(
-                configuration,
+        return Stream.of(
+            estimationModeBusinessFacade.steinerTree(
+                configurationParser.parseConfiguration(algorithmConfiguration, SteinerTreeStatsConfig::of),
                 graphNameOrConfiguration
             )
         );
-
-        return Stream.of(result);
     }
 
     public Stream<SteinerTreeStreamResult> steinerTreeStream(String graphName, Map<String, Object> configuration) {
-        var resultBuilder = new SteinerTreeResultBuilderForStreamMode();
-
-        return algorithmExecutionScaffolding.runStreamAlgorithm(
-            graphName,
-            configuration,
-            SteinerTreeStreamConfig::of,
-            streamModeBusinessFacade::steinerTree,
-            resultBuilder
+        return streamModeBusinessFacade.steinerTree(
+            GraphName.parse(graphName),
+            configurationParser.parseConfiguration(configuration, SteinerTreeStreamConfig::of),
+            new SteinerTreeResultBuilderForStreamMode()
         );
     }
 
@@ -1039,28 +918,20 @@ public final class PathFindingProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
-            algorithmConfiguration,
-            SteinerTreeStreamConfig::of,
-            configuration -> estimationModeBusinessFacade.steinerTree(
-                configuration,
+        return Stream.of(
+            estimationModeBusinessFacade.steinerTree(
+                configurationParser.parseConfiguration(algorithmConfiguration, SteinerTreeStreamConfig::of),
                 graphNameOrConfiguration
             )
         );
-
-        return Stream.of(result);
     }
 
     public Stream<SteinerWriteResult> steinerTreeWrite(String graphName, Map<String, Object> configuration) {
-        var resultBuilder = new SteinerTreeResultBuilderForWriteMode();
-
         return Stream.of(
-            algorithmExecutionScaffolding.runAlgorithm(
-                graphName,
-                configuration,
-                SteinerTreeWriteConfig::of,
-                writeModeBusinessFacade::steinerTree,
-                resultBuilder
+            writeModeBusinessFacade.steinerTree(
+                GraphName.parse(graphName),
+                configurationParser.parseConfiguration(configuration, SteinerTreeWriteConfig::of),
+                new SteinerTreeResultBuilderForWriteMode()
             )
         );
     }
@@ -1069,74 +940,22 @@ public final class PathFindingProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
-        var result = estimationMode.runEstimation(
-            algorithmConfiguration,
-            SteinerTreeWriteConfig::of,
-            configuration -> estimationModeBusinessFacade.steinerTree(
-                configuration,
+        return Stream.of(
+            estimationModeBusinessFacade.steinerTree(
+                configurationParser.parseConfiguration(algorithmConfiguration, SteinerTreeWriteConfig::of),
                 graphNameOrConfiguration
             )
         );
-
-        return Stream.of(result);
     }
 
     public Stream<TopologicalSortStreamResult> topologicalSortStream(
         String graphName,
         Map<String, Object> configuration
     ) {
-        var resultBuilder = new TopologicalSortResultBuilderForStreamMode();
-
-        return algorithmExecutionScaffolding.runStreamAlgorithm(
-            graphName,
-            configuration,
-            TopologicalSortStreamConfig::of,
-            streamModeBusinessFacade::topologicalSort,
-            resultBuilder
-        );
-    }
-
-    /**
-     * A*, Dijkstra, Yens all share the same result builder
-     */
-    private <CONFIGURATION extends AlgoBaseConfig> Stream<PathFindingStreamResult> runPathOrientedAlgorithmInStreamMode(
-        String graphNameAsString,
-        Map<String, Object> rawConfiguration,
-        Function<CypherMapWrapper, CONFIGURATION> configurationSupplier,
-        StreamAlgorithmHandle<CONFIGURATION, PathFindingResult, PathFindingStreamResult> algorithm
-    ) {
-        var resultBuilder = new PathFindingResultBuilderForStreamMode<CONFIGURATION>(
-            closeableResourceRegistry,
-            nodeLookup,
-            procedureReturnColumns.contains("path")
-        );
-
-        return algorithmExecutionScaffolding.runStreamAlgorithm(
-            graphNameAsString,
-            rawConfiguration,
-            configurationSupplier,
-            algorithm,
-            resultBuilder
-        );
-    }
-
-    /**
-     * A*, Dijkstra and Yens use the same variant of result builder
-     */
-    private <CONFIGURATION extends AlgoBaseConfig> StandardWriteRelationshipsResult runWriteAlgorithm(
-        String graphNameAsString,
-        Map<String, Object> rawConfiguration,
-        Function<CypherMapWrapper, CONFIGURATION> configurationSupplier,
-        AlgorithmHandle<CONFIGURATION, PathFindingResult, StandardWriteRelationshipsResult, RelationshipsWritten> algorithm
-    ) {
-        var resultBuilder = new PathFindingResultBuilderForWriteMode<CONFIGURATION>();
-
-        return algorithmExecutionScaffolding.runAlgorithm(
-            graphNameAsString,
-            rawConfiguration,
-            configurationSupplier,
-            algorithm,
-            resultBuilder
+        return streamModeBusinessFacade.topologicalSort(
+            GraphName.parse(graphName),
+            configurationParser.parseConfiguration(configuration, TopologicalSortStreamConfig::of),
+            new TopologicalSortResultBuilderForStreamMode()
         );
     }
 }

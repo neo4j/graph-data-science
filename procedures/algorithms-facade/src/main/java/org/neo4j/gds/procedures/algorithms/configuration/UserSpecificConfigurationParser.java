@@ -17,37 +17,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.runners;
+package org.neo4j.gds.procedures.algorithms.configuration;
 
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 
 import java.util.Map;
 import java.util.function.Function;
 
-public class EstimationModeRunner {
+public class UserSpecificConfigurationParser {
+
     private final ConfigurationParser configurationParser;
     private final User user;
 
-    public EstimationModeRunner(ConfigurationParser configurationParser, User user) {
+    public UserSpecificConfigurationParser(ConfigurationParser configurationParser, User user) {
         this.configurationParser = configurationParser;
         this.user = user;
     }
 
-    public <CONFIGURATION extends AlgoBaseConfig> MemoryEstimateResult runEstimation(
-        Map<String, Object> rawConfiguration,
-        Function<CypherMapWrapper, CONFIGURATION> configurationLexer,
-        Function<CONFIGURATION, MemoryEstimateResult> supplier
+    public <CONFIG extends AlgoBaseConfig> CONFIG parseConfiguration(
+        Map<String, Object> configuration,
+        Function<CypherMapWrapper, CONFIG> lexer
     ) {
-        var configuration = configurationParser.parseConfiguration(
-            rawConfiguration,
-            configurationLexer,
+        return configurationParser.parseConfiguration(
+            configuration,
+            (__, cypherMapWrapper) -> lexer.apply(cypherMapWrapper),
             user
         );
-
-        return supplier.apply(configuration);
     }
 }
