@@ -130,8 +130,8 @@ class AlgorithmProcedureFacadeBuilder {
             applicationsFacade,
             genericStub,
             procedureReturnColumns,
-            estimationModeRunner,
-            algorithmExecutionScaffolding
+            configurationParser,
+            requestScopedDependencies.getUser()
         );
     }
 }
