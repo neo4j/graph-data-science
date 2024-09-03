@@ -25,14 +25,7 @@ import org.neo4j.gds.api.GraphStore;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-/**
- * This builder supports any type of result you could want to build - famous last words.
- * The idea is, you specialise it for use cases, and the wide parameter lists functions like a union type
- * , so not every implementation will make use of every parameter, but the abstraction covers all.
- * In-layer generic usage includes injecting the Graph, hence it is a parameter to the build method.
- * Out-layer would be injecting custom dependencies as part of a constructor in the implementing class.
- * An example could be a boolean determined at runtime, governing which bits of data to output.
- */
+
 public interface StreamResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> {
     /**
      * You implement this and use as much or as little of the gathered data as is appropriate.
