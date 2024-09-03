@@ -55,7 +55,7 @@ class DfsStreamResultBuilder implements StreamResultBuilder<HugeLongArray, DfsSt
             result.get(),
             graph::toOriginalNodeId,
             DfsStreamResult::new,
-            pathRequested,
+            pathRequested && graphStore.capabilities().canWriteToLocalDatabase(),
             new PathFactoryFacade(),
             RelationshipType.withName("NEXT"),
             nodeLookup

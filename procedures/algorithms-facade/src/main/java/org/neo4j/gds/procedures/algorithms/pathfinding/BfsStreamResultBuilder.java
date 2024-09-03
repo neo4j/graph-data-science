@@ -55,7 +55,7 @@ class BfsStreamResultBuilder implements StreamResultBuilder<HugeLongArray, BfsSt
             result.get(),
             graph::toOriginalNodeId,
             BfsStreamResult::new,
-            pathRequested,
+            pathRequested && graphStore.capabilities().canWriteToLocalDatabase(),
             new PathFactoryFacade(),
             RelationshipType.withName("NEXT"),
             nodeLookup

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.paths.traverse;
 
-import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFactoryFacade;
@@ -87,15 +86,6 @@ class TraverseStreamComputationResultConsumerTest {
             });
     }
 
-    private static class TestResult {
-        public final Long sourceNode;
-        public final List<Long> nodeIds;
-        public final Path path;
+    private static record TestResult(long sourceNode,List<Long> nodeIds, Path path){}
 
-        TestResult(long sourceNode, @Nullable List<Long> nodes, @Nullable Path path) {
-            this.sourceNode = sourceNode;
-            this.nodeIds = nodes;
-            this.path = path;
-        }
-    }
 }
