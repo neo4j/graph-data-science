@@ -47,7 +47,7 @@ public class MiscellaneousApplicationsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> scaleProperties(
         GraphName graphName,
         ScalePropertiesStreamConfig configuration,
-        StreamResultBuilder<ScalePropertiesStreamConfig, ScalePropertiesResult, RESULT> resultBuilder
+        StreamResultBuilder<ScalePropertiesResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,

@@ -41,8 +41,8 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.ArticleRank;
 import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.ArticulationPoints;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.Bridges;
 import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.BetweennessCentrality;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.Bridges;
 import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.CELF;
 import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.ClosenessCentrality;
 import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.DegreeCentrality;
@@ -68,7 +68,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> articleRank(
         GraphName graphName,
         PageRankStreamConfig configuration,
-        StreamResultBuilder<PageRankStreamConfig, PageRankResult, RESULT> streamResultBuilder
+        StreamResultBuilder<PageRankResult, RESULT> streamResultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -83,7 +83,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> betweennessCentrality(
         GraphName graphName,
         BetweennessCentralityStreamConfig configuration,
-        StreamResultBuilder<BetweennessCentralityStreamConfig, CentralityAlgorithmResult, RESULT> streamResultBuilder
+        StreamResultBuilder<CentralityAlgorithmResult, RESULT> streamResultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -97,7 +97,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> articulationPoints(
         GraphName graphName,
         ArticulationPointsStreamConfig configuration,
-        StreamResultBuilder<ArticulationPointsStreamConfig, BitSet, RESULT> streamResultBuilder
+        StreamResultBuilder<BitSet, RESULT> streamResultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -111,7 +111,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> bridges(
         GraphName graphName,
         BridgesStreamConfig configuration,
-        StreamResultBuilder<BridgesStreamConfig, BridgeResult, RESULT> streamResultBuilder
+        StreamResultBuilder<BridgeResult, RESULT> streamResultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -126,7 +126,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> celf(
         GraphName graphName,
         InfluenceMaximizationStreamConfig configuration,
-        StreamResultBuilder<InfluenceMaximizationStreamConfig, CELFResult, RESULT> streamResultBuilder
+        StreamResultBuilder<CELFResult, RESULT> streamResultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -141,7 +141,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> closenessCentrality(
         GraphName graphName,
         ClosenessCentralityStreamConfig configuration,
-        StreamResultBuilder<ClosenessCentralityStreamConfig, CentralityAlgorithmResult, RESULT> streamResultBuilder
+        StreamResultBuilder<CentralityAlgorithmResult, RESULT> streamResultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -156,7 +156,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> degreeCentrality(
         GraphName graphName,
         DegreeCentralityStreamConfig configuration,
-        StreamResultBuilder<DegreeCentralityStreamConfig, CentralityAlgorithmResult, RESULT> streamResultBuilder
+        StreamResultBuilder<CentralityAlgorithmResult, RESULT> streamResultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -171,7 +171,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> eigenvector(
         GraphName graphName,
         PageRankStreamConfig configuration,
-        StreamResultBuilder<PageRankStreamConfig, PageRankResult, RESULT> streamResultBuilder
+        StreamResultBuilder<PageRankResult, RESULT> streamResultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -186,7 +186,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> harmonicCentrality(
         GraphName graphName,
         HarmonicCentralityStreamConfig configuration,
-        StreamResultBuilder<HarmonicCentralityStreamConfig, HarmonicResult, RESULT> streamResultBuilder
+        StreamResultBuilder<HarmonicResult, RESULT> streamResultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -201,7 +201,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> pageRank(
         GraphName graphName,
         PageRankStreamConfig configuration,
-        StreamResultBuilder<PageRankStreamConfig, PageRankResult, RESULT> streamResultBuilder
+        StreamResultBuilder<PageRankResult, RESULT> streamResultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,

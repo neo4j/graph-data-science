@@ -23,19 +23,17 @@ import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
-import org.neo4j.gds.degree.DegreeCentralityStreamConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class DegreeCentralityResultBuilderForStreamMode implements StreamResultBuilder<DegreeCentralityStreamConfig, CentralityAlgorithmResult, CentralityStreamResult> {
+class DegreeCentralityResultBuilderForStreamMode implements StreamResultBuilder<CentralityAlgorithmResult, CentralityStreamResult> {
     private final CentralityAlgorithmResultTransformer transformer = new CentralityAlgorithmResultTransformer();
 
     @Override
     public Stream<CentralityStreamResult> build(
         Graph graph,
         GraphStore graphStore,
-        DegreeCentralityStreamConfig configuration,
         Optional<CentralityAlgorithmResult> result
     ) {
         return transformer.transform(graph, result);

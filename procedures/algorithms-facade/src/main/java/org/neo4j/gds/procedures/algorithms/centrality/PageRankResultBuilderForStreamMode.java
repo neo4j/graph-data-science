@@ -23,19 +23,17 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.pagerank.PageRankResult;
-import org.neo4j.gds.pagerank.PageRankStreamConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class PageRankResultBuilderForStreamMode implements StreamResultBuilder<PageRankStreamConfig, PageRankResult, CentralityStreamResult> {
+class PageRankResultBuilderForStreamMode implements StreamResultBuilder<PageRankResult, CentralityStreamResult> {
     private final CentralityAlgorithmResultTransformer transformer = new CentralityAlgorithmResultTransformer();
 
     @Override
     public Stream<CentralityStreamResult> build(
         Graph graph,
         GraphStore graphStore,
-        PageRankStreamConfig configuration,
         Optional<PageRankResult> result
     ) {
         return transformer.transform(graph, result);

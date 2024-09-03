@@ -24,19 +24,17 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
-import org.neo4j.gds.embeddings.hashgnn.HashGNNStreamConfig;
 
 import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class HashGnnResultBuilderForStreamMode implements StreamResultBuilder<HashGNNStreamConfig, HashGNNResult, HashGNNStreamResult> {
+class HashGnnResultBuilderForStreamMode implements StreamResultBuilder<HashGNNResult, HashGNNStreamResult> {
 
     @Override
     public Stream<HashGNNStreamResult> build(
         Graph graph,
         GraphStore graphStore,
-        HashGNNStreamConfig configuration,
         Optional<HashGNNResult> result
     ) {
         if (result.isEmpty()) return Stream.empty();

@@ -268,7 +268,7 @@ public final class PathFindingProcedureFacade {
         return streamModeBusinessFacade.allShortestPaths(
             GraphName.parse(graphName),
             configurationParser.parseConfiguration(configuration, AllShortestPathsConfig::of),
-            (g, gs, c, result) -> result.orElse(Stream.empty())
+            (g, gs, result) -> result.orElse(Stream.empty())
         );
     }
 
@@ -382,10 +382,11 @@ public final class PathFindingProcedureFacade {
     }
 
     public Stream<BfsStreamResult> breadthFirstSearchStream(String graphName, Map<String, Object> configuration) {
+        var parsedConfig = configurationParser.parseConfiguration(configuration, BfsStreamConfig::of);
         return streamModeBusinessFacade.breadthFirstSearch(
             GraphName.parse(graphName),
-            configurationParser.parseConfiguration(configuration, BfsStreamConfig::of),
-            new BfsStreamResultBuilder(nodeLookup, procedureReturnColumns.contains("path"))
+            parsedConfig,
+            new BfsStreamResultBuilder(nodeLookup, procedureReturnColumns.contains("path"),parsedConfig)
         );
     }
 
@@ -482,10 +483,11 @@ public final class PathFindingProcedureFacade {
     }
 
     public Stream<DfsStreamResult> depthFirstSearchStream(String graphName, Map<String, Object> configuration) {
+        var parsedConfig = configurationParser.parseConfiguration(configuration, DfsStreamConfig::of);
         return streamModeBusinessFacade.depthFirstSearch(
             GraphName.parse(graphName),
-            configurationParser.parseConfiguration(configuration, DfsStreamConfig::of),
-            new DfsStreamResultBuilder(nodeLookup, procedureReturnColumns.contains("path"))
+            parsedConfig,
+            new DfsStreamResultBuilder(nodeLookup, procedureReturnColumns.contains("path"),parsedConfig)
         );
     }
 
@@ -841,10 +843,14 @@ public final class PathFindingProcedureFacade {
     }
 
     public Stream<SpanningTreeStreamResult> spanningTreeStream(String graphName, Map<String, Object> configuration) {
+        var parsedConfig = configurationParser.parseConfiguration(
+            configuration,
+            SpanningTreeStreamConfig::of
+        );
         return streamModeBusinessFacade.spanningTree(
             GraphName.parse(graphName),
-            configurationParser.parseConfiguration(configuration, SpanningTreeStreamConfig::of),
-            new SpanningTreeResultBuilderForStreamMode()
+            parsedConfig,
+            new SpanningTreeResultBuilderForStreamMode(parsedConfig)
         );
     }
 
@@ -907,10 +913,14 @@ public final class PathFindingProcedureFacade {
     }
 
     public Stream<SteinerTreeStreamResult> steinerTreeStream(String graphName, Map<String, Object> configuration) {
+        var parsedConfig = configurationParser.parseConfiguration(
+            configuration,
+            SteinerTreeStreamConfig::of
+        );
         return streamModeBusinessFacade.steinerTree(
             GraphName.parse(graphName),
-            configurationParser.parseConfiguration(configuration, SteinerTreeStreamConfig::of),
-            new SteinerTreeResultBuilderForStreamMode()
+            parsedConfig,
+            new SteinerTreeResultBuilderForStreamMode(parsedConfig)
         );
     }
 

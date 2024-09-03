@@ -24,20 +24,18 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
-import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
 
 import java.util.Optional;
 import java.util.function.LongFunction;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class TopologicalSortResultBuilderForStreamMode implements StreamResultBuilder<TopologicalSortStreamConfig, TopologicalSortResult, TopologicalSortStreamResult> {
+class TopologicalSortResultBuilderForStreamMode implements StreamResultBuilder<TopologicalSortResult, TopologicalSortStreamResult> {
 
     @Override
     public Stream<TopologicalSortStreamResult> build(
         Graph graph,
         GraphStore graphStore,
-        TopologicalSortStreamConfig topologicalSortStreamConfig,
         Optional<TopologicalSortResult> result
     ) {
         if (result.isEmpty()) return Stream.empty();

@@ -23,13 +23,12 @@ import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
-import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleStreamResult;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class TrianglesResultBuilderForStreamMode implements StreamResultBuilder<TriangleCountBaseConfig, Stream<TriangleStreamResult>, TriangleStreamResult> {
+class TrianglesResultBuilderForStreamMode implements StreamResultBuilder<Stream<TriangleStreamResult>, TriangleStreamResult> {
     private final CloseableResourceRegistry closeableResourceRegistry;
 
     TrianglesResultBuilderForStreamMode(CloseableResourceRegistry closeableResourceRegistry) {
@@ -40,7 +39,6 @@ class TrianglesResultBuilderForStreamMode implements StreamResultBuilder<Triangl
     public Stream<TriangleStreamResult> build(
         Graph graph,
         GraphStore graphStore,
-        TriangleCountBaseConfig configuration,
         Optional<Stream<TriangleStreamResult>> result
     ) {
         if (result.isEmpty()) return Stream.empty();

@@ -31,12 +31,18 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class LeidenResultBuilderForStreamMode implements StreamResultBuilder<LeidenStreamConfig, LeidenResult, LeidenStreamResult> {
+class LeidenResultBuilderForStreamMode implements StreamResultBuilder<LeidenResult, LeidenStreamResult> {
+
+    private final LeidenStreamConfig configuration;
+
+    LeidenResultBuilderForStreamMode(LeidenStreamConfig configuration) {
+        this.configuration = configuration;
+    }
+
     @Override
     public Stream<LeidenStreamResult> build(
         Graph graph,
         GraphStore graphStore,
-        LeidenStreamConfig configuration,
         Optional<LeidenResult> result
     ) {
         if (result.isEmpty()) return Stream.empty();

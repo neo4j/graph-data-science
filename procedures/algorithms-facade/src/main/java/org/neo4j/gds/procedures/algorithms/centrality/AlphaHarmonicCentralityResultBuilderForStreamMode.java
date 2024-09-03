@@ -22,20 +22,18 @@ package org.neo4j.gds.procedures.algorithms.centrality;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
-import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class AlphaHarmonicCentralityResultBuilderForStreamMode implements StreamResultBuilder<HarmonicCentralityStreamConfig, HarmonicResult, AlphaHarmonicStreamResult> {
+class AlphaHarmonicCentralityResultBuilderForStreamMode implements StreamResultBuilder<HarmonicResult, AlphaHarmonicStreamResult> {
     private final AlphaHarmonicResultTransformer transformer = new AlphaHarmonicResultTransformer();
 
     @Override
     public Stream<AlphaHarmonicStreamResult> build(
         Graph graph,
         GraphStore graphStore,
-        HarmonicCentralityStreamConfig harmonicCentralityStreamConfig,
         Optional<HarmonicResult> result
     ) {
         return transformer.transform(graph, result);

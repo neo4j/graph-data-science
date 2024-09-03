@@ -23,19 +23,17 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.influenceMaximization.CELFResult;
-import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStreamConfig;
 
 import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class CelfResultBuilderForStreamMode implements StreamResultBuilder<InfluenceMaximizationStreamConfig, CELFResult, CELFStreamResult> {
+class CelfResultBuilderForStreamMode implements StreamResultBuilder<CELFResult, CELFStreamResult> {
 
     @Override
     public Stream<CELFStreamResult> build(
         Graph graph,
         GraphStore graphStore,
-        InfluenceMaximizationStreamConfig configuration,
         Optional<CELFResult> result
     ) {
         if (result.isEmpty()) return Stream.empty();

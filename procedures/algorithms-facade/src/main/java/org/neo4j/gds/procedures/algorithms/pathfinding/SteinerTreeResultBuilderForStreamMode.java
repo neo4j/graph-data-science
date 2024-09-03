@@ -31,12 +31,18 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class SteinerTreeResultBuilderForStreamMode implements StreamResultBuilder<SteinerTreeStreamConfig, SteinerTreeResult, SteinerTreeStreamResult> {
+class SteinerTreeResultBuilderForStreamMode implements StreamResultBuilder<SteinerTreeResult, SteinerTreeStreamResult> {
+
+    private final SteinerTreeStreamConfig configuration;
+
+    SteinerTreeResultBuilderForStreamMode(SteinerTreeStreamConfig configuration) {
+        this.configuration = configuration;
+    }
+
     @Override
     public Stream<SteinerTreeStreamResult> build(
         Graph graph,
         GraphStore graphStore,
-        SteinerTreeStreamConfig configuration,
         Optional<SteinerTreeResult> result
     ) {
         if (result.isEmpty()) return Stream.of();

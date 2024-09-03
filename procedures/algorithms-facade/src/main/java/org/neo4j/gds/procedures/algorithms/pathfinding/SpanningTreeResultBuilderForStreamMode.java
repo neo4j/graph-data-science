@@ -30,12 +30,18 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class SpanningTreeResultBuilderForStreamMode implements StreamResultBuilder<SpanningTreeStreamConfig, SpanningTree, SpanningTreeStreamResult> {
+class SpanningTreeResultBuilderForStreamMode implements StreamResultBuilder<SpanningTree, SpanningTreeStreamResult> {
+
+    private final SpanningTreeStreamConfig configuration;
+
+    SpanningTreeResultBuilderForStreamMode(SpanningTreeStreamConfig configuration) {
+        this.configuration = configuration;
+    }
+
     @Override
     public Stream<SpanningTreeStreamResult> build(
         Graph graph,
         GraphStore graphStore,
-        SpanningTreeStreamConfig configuration,
         Optional<SpanningTree> result
     ) {
         if (result.isEmpty()) return Stream.empty();

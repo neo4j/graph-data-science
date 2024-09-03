@@ -24,18 +24,16 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.kmeans.KmeansResult;
-import org.neo4j.gds.kmeans.KmeansStreamConfig;
 
 import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class KMeansResultBuilderForStreamMode implements StreamResultBuilder<KmeansStreamConfig, KmeansResult, KmeansStreamResult> {
+class KMeansResultBuilderForStreamMode implements StreamResultBuilder<KmeansResult, KmeansStreamResult> {
     @Override
     public Stream<KmeansStreamResult> build(
         Graph graph,
         GraphStore graphStore,
-        KmeansStreamConfig configuration,
         Optional<KmeansResult> result
     ) {
         if (result.isEmpty()) return Stream.empty();

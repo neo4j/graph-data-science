@@ -31,13 +31,18 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class WccResultBuilderForStreamMode implements StreamResultBuilder<WccStreamConfig, DisjointSetStruct, WccStreamResult> {
+class WccResultBuilderForStreamMode implements StreamResultBuilder<DisjointSetStruct, WccStreamResult> {
+
+    private final WccStreamConfig configuration;
+
+    WccResultBuilderForStreamMode(WccStreamConfig configuration) {
+        this.configuration = configuration;
+    }
 
     @Override
     public Stream<WccStreamResult> build(
         Graph graph,
         GraphStore graphStore,
-        WccStreamConfig configuration,
         Optional<DisjointSetStruct> result
     ) {
         if (result.isEmpty()) return Stream.empty();

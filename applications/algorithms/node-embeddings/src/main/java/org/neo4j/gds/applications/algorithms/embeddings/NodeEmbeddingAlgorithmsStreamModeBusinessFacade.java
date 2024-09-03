@@ -61,7 +61,7 @@ public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> fastRP(
         GraphName graphName,
         FastRPStreamConfig configuration,
-        StreamResultBuilder<FastRPStreamConfig, FastRPResult, RESULT> resultBuilder
+        StreamResultBuilder<FastRPResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -76,7 +76,7 @@ public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> graphSage(
         GraphName graphName,
         GraphSageStreamConfig configuration,
-        StreamResultBuilder<GraphSageStreamConfig, GraphSageResult, RESULT> resultBuilder
+        StreamResultBuilder<GraphSageResult, RESULT> resultBuilder
     ) {
 
         var graphSageProcessParameters = graphSageAlgorithmProcessing.graphSageValidationHook(configuration);
@@ -95,7 +95,7 @@ public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> hashGnn(
         GraphName graphName,
         HashGNNStreamConfig configuration,
-        StreamResultBuilder<HashGNNStreamConfig, HashGNNResult, RESULT> resultBuilder
+        StreamResultBuilder<HashGNNResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -110,7 +110,7 @@ public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> node2Vec(
         GraphName graphName,
         Node2VecStreamConfig configuration,
-        StreamResultBuilder<Node2VecStreamConfig, Node2VecResult, RESULT> resultBuilder
+        StreamResultBuilder<Node2VecResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processAlgorithmInStreamMode(
             graphName,

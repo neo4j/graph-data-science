@@ -87,12 +87,11 @@ class DefaultAlgorithmProcessingTemplateTest {
         var pathFindingResult = mock(ExampleResult.class);
         when(computation.compute(graph, graphStore)).thenReturn(pathFindingResult);
 
-        var resultBuilder = new StreamResultBuilder<ExampleConfiguration, ExampleResult, String>() {
+        var resultBuilder = new StreamResultBuilder<ExampleResult, String>() {
             @Override
             public Stream<String> build(
                 Graph graph,
                 GraphStore graphStore,
-                ExampleConfiguration configuration,
                 Optional<ExampleResult> pathFindingResult
             ) {
 

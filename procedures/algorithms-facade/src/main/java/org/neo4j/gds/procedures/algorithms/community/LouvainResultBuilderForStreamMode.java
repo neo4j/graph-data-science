@@ -31,13 +31,18 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class LouvainResultBuilderForStreamMode implements StreamResultBuilder<LouvainStreamConfig, LouvainResult, LouvainStreamResult> {
+class LouvainResultBuilderForStreamMode implements StreamResultBuilder<LouvainResult, LouvainStreamResult> {
+
+    private final LouvainStreamConfig configuration;
+
+    LouvainResultBuilderForStreamMode(LouvainStreamConfig configuration) {
+        this.configuration = configuration;
+    }
 
     @Override
     public Stream<LouvainStreamResult> build(
         Graph graph,
         GraphStore graphStore,
-        LouvainStreamConfig configuration,
         Optional<LouvainResult> result
     ) {
         if (result.isEmpty()) return Stream.empty();

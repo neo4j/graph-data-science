@@ -23,19 +23,17 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.conductance.ConductanceResult;
-import org.neo4j.gds.conductance.ConductanceStreamConfig;
 
 import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class ConductanceResultBuilderForStreamMode implements StreamResultBuilder<ConductanceStreamConfig, ConductanceResult, ConductanceStreamResult> {
+class ConductanceResultBuilderForStreamMode implements StreamResultBuilder<ConductanceResult, ConductanceStreamResult> {
 
     @Override
     public Stream<ConductanceStreamResult> build(
         Graph graph,
         GraphStore graphStore,
-        ConductanceStreamConfig configuration,
         Optional<ConductanceResult> result
     ) {
         if (result.isEmpty()) return Stream.empty();

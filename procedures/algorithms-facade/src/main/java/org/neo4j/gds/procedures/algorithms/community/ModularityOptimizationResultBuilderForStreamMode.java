@@ -31,13 +31,18 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class ModularityOptimizationResultBuilderForStreamMode implements StreamResultBuilder<ModularityOptimizationStreamConfig, ModularityOptimizationResult, ModularityOptimizationStreamResult> {
+class ModularityOptimizationResultBuilderForStreamMode implements StreamResultBuilder<ModularityOptimizationResult, ModularityOptimizationStreamResult> {
+
+    private final ModularityOptimizationStreamConfig configuration;
+
+    ModularityOptimizationResultBuilderForStreamMode(ModularityOptimizationStreamConfig configuration) {
+        this.configuration = configuration;
+    }
 
     @Override
     public Stream<ModularityOptimizationStreamResult> build(
         Graph graph,
         GraphStore graphStore,
-        ModularityOptimizationStreamConfig configuration,
         Optional<ModularityOptimizationResult> result
     ) {
         if (result.isEmpty()) return Stream.empty();

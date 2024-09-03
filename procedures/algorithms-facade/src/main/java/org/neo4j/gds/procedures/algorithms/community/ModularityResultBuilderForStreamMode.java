@@ -23,18 +23,16 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.modularity.ModularityResult;
-import org.neo4j.gds.modularity.ModularityStreamConfig;
 
 import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class ModularityResultBuilderForStreamMode implements StreamResultBuilder<ModularityStreamConfig, ModularityResult, ModularityStreamResult> {
+class ModularityResultBuilderForStreamMode implements StreamResultBuilder<ModularityResult, ModularityStreamResult> {
     @Override
     public Stream<ModularityStreamResult> build(
         Graph graph,
         GraphStore graphStore,
-        ModularityStreamConfig configuration,
         Optional<ModularityResult> result
     ) {
         if (result.isEmpty()) return Stream.empty();

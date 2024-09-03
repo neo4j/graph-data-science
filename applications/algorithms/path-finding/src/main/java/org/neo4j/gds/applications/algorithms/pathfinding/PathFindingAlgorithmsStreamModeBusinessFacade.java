@@ -84,7 +84,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> allShortestPaths(
         GraphName graphName,
         AllShortestPathsConfig configuration,
-        StreamResultBuilder<AllShortestPathsConfig, Stream<AllShortestPathsStreamResult>, RESULT> resultBuilder
+        StreamResultBuilder<Stream<AllShortestPathsStreamResult>, RESULT> resultBuilder
     ) {
         return convenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -99,7 +99,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> bellmanFord(
         GraphName graphName,
         AllShortestPathsBellmanFordStreamConfig configuration,
-        StreamResultBuilder<AllShortestPathsBellmanFordStreamConfig, BellmanFordResult, RESULT> resultBuilder
+        StreamResultBuilder<BellmanFordResult, RESULT> resultBuilder
     ) {
         return convenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -114,7 +114,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> breadthFirstSearch(
         GraphName graphName,
         BfsStreamConfig configuration,
-        StreamResultBuilder<BfsStreamConfig, HugeLongArray, RESULT> resultBuilder
+        StreamResultBuilder<HugeLongArray, RESULT> resultBuilder
     ) {
         return convenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -129,7 +129,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> deltaStepping(
         GraphName graphName,
         AllShortestPathsDeltaStreamConfig configuration,
-        StreamResultBuilder<AllShortestPathsDeltaStreamConfig, PathFindingResult, RESULT> resultBuilder
+        StreamResultBuilder<PathFindingResult, RESULT> resultBuilder
     ) {
         return convenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -144,7 +144,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> depthFirstSearch(
         GraphName graphName,
         DfsStreamConfig configuration,
-        StreamResultBuilder<DfsStreamConfig, HugeLongArray, RESULT> resultBuilder
+        StreamResultBuilder<HugeLongArray, RESULT> resultBuilder
     ) {
         return convenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -159,7 +159,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> longestPath(
         GraphName graphName,
         DagLongestPathStreamConfig configuration,
-        StreamResultBuilder<DagLongestPathStreamConfig, PathFindingResult, RESULT> resultBuilder
+        StreamResultBuilder<PathFindingResult, RESULT> resultBuilder
     ) {
         return convenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -174,7 +174,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> randomWalk(
         GraphName graphName,
         RandomWalkStreamConfig configuration,
-        StreamResultBuilder<RandomWalkStreamConfig, Stream<long[]>, RESULT> resultBuilder
+        StreamResultBuilder<Stream<long[]>, RESULT> resultBuilder
     ) {
         return convenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -189,7 +189,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> singlePairShortestPathAStar(
         GraphName graphName,
         ShortestPathAStarStreamConfig configuration,
-        StreamResultBuilder<ShortestPathAStarStreamConfig, PathFindingResult, RESULT> resultBuilder
+        StreamResultBuilder<PathFindingResult, RESULT> resultBuilder
     ) {
         return convenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -204,7 +204,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> singlePairShortestPathDijkstra(
         GraphName graphName,
         ShortestPathDijkstraStreamConfig configuration,
-        StreamResultBuilder<ShortestPathDijkstraStreamConfig, PathFindingResult, RESULT> resultBuilder
+        StreamResultBuilder<PathFindingResult, RESULT> resultBuilder
     ) {
         return convenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -219,7 +219,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> singlePairShortestPathYens(
         GraphName graphName,
         ShortestPathYensStreamConfig configuration,
-        StreamResultBuilder<ShortestPathYensStreamConfig, PathFindingResult, RESULT> resultBuilder
+        StreamResultBuilder<PathFindingResult, RESULT> resultBuilder
     ) {
         return convenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -235,7 +235,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> singleSourceShortestPathDijkstra(
         GraphName graphName,
         AllShortestPathsDijkstraStreamConfig configuration,
-        StreamResultBuilder<AllShortestPathsDijkstraStreamConfig, PathFindingResult, RESULT> resultBuilder
+        StreamResultBuilder<PathFindingResult, RESULT> resultBuilder
     ) {
         return convenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -250,7 +250,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> spanningTree(
         GraphName graphName,
         SpanningTreeStreamConfig configuration,
-        StreamResultBuilder<SpanningTreeStreamConfig, SpanningTree, RESULT> resultBuilder
+        StreamResultBuilder<SpanningTree, RESULT> resultBuilder
     ) {
         return convenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -265,7 +265,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> steinerTree(
         GraphName graphName,
         SteinerTreeStreamConfig configuration,
-        StreamResultBuilder<SteinerTreeStreamConfig, SteinerTreeResult, RESULT> resultBuilder
+        StreamResultBuilder<SteinerTreeResult, RESULT> resultBuilder
     ) {
         return convenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -280,7 +280,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> topologicalSort(
         GraphName graphName,
         TopologicalSortStreamConfig configuration,
-        StreamResultBuilder<TopologicalSortStreamConfig, TopologicalSortResult, RESULT> resultBuilder
+        StreamResultBuilder<TopologicalSortResult, RESULT> resultBuilder
     ) {
         return convenience.processRegularAlgorithmInStreamMode(
             graphName,

@@ -23,20 +23,18 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.similarity.SimilarityResult;
-import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class FilteredNodeSimilarityResultBuilderForStreamMode implements StreamResultBuilder<FilteredNodeSimilarityStreamConfig, NodeSimilarityResult, SimilarityResult> {
+class FilteredNodeSimilarityResultBuilderForStreamMode implements StreamResultBuilder<NodeSimilarityResult, SimilarityResult> {
     private final SimilarityResultStreamMapper similarityResultStreamMapper = new SimilarityResultStreamMapper();
 
     @Override
     public Stream<SimilarityResult> build(
         Graph graph,
         GraphStore graphStore,
-        FilteredNodeSimilarityStreamConfig configuration,
         Optional<NodeSimilarityResult> result
     ) {
         return similarityResultStreamMapper.process(graph, result);

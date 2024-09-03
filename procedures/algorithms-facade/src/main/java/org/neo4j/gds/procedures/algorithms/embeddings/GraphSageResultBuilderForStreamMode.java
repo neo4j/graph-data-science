@@ -24,19 +24,17 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageStreamConfig;
 
 import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class GraphSageResultBuilderForStreamMode implements StreamResultBuilder<GraphSageStreamConfig, GraphSageResult, GraphSageStreamResult> {
+class GraphSageResultBuilderForStreamMode implements StreamResultBuilder<GraphSageResult, GraphSageStreamResult> {
 
     @Override
     public Stream<GraphSageStreamResult> build(
         Graph graph,
         GraphStore graphStore,
-        GraphSageStreamConfig configuration,
         Optional<GraphSageResult> result
     ) {
         if (result.isEmpty()) return Stream.empty();

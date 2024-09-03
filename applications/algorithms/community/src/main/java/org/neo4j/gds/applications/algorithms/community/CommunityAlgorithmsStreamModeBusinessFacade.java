@@ -89,7 +89,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> approximateMaximumKCut(
         GraphName graphName,
         ApproxMaxKCutStreamConfig configuration,
-        StreamResultBuilder<ApproxMaxKCutStreamConfig, ApproxMaxKCutResult, RESULT> streamResultBuilder
+        StreamResultBuilder<ApproxMaxKCutResult, RESULT> streamResultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -104,7 +104,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> conductance(
         GraphName graphName,
         ConductanceStreamConfig configuration,
-        StreamResultBuilder<ConductanceStreamConfig, ConductanceResult, RESULT> streamResultBuilder
+        StreamResultBuilder<ConductanceResult, RESULT> streamResultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -119,7 +119,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> k1Coloring(
         GraphName graphName,
         K1ColoringStreamConfig configuration,
-        StreamResultBuilder<K1ColoringStreamConfig, K1ColoringResult, RESULT> streamResultBuilder
+        StreamResultBuilder<K1ColoringResult, RESULT> streamResultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -134,7 +134,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> kCore(
         GraphName graphName,
         KCoreDecompositionStreamConfig configuration,
-        StreamResultBuilder<KCoreDecompositionStreamConfig, KCoreDecompositionResult, RESULT> streamResultBuilder
+        StreamResultBuilder<KCoreDecompositionResult, RESULT> streamResultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -149,7 +149,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> kMeans(
         GraphName graphName,
         KmeansStreamConfig configuration,
-        StreamResultBuilder<KmeansStreamConfig, KmeansResult, RESULT> streamResultBuilder
+        StreamResultBuilder<KmeansResult, RESULT> streamResultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -164,7 +164,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> labelPropagation(
         GraphName graphName,
         LabelPropagationStreamConfig configuration,
-        StreamResultBuilder<LabelPropagationStreamConfig, LabelPropagationResult, RESULT> streamResultBuilder
+        StreamResultBuilder<LabelPropagationResult, RESULT> streamResultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -179,7 +179,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> lcc(
         GraphName graphName,
         LocalClusteringCoefficientStreamConfig configuration,
-        StreamResultBuilder<LocalClusteringCoefficientStreamConfig, LocalClusteringCoefficientResult, RESULT> streamResultBuilder
+        StreamResultBuilder<LocalClusteringCoefficientResult, RESULT> streamResultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -194,7 +194,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> leiden(
         GraphName graphName,
         LeidenStreamConfig configuration,
-        StreamResultBuilder<LeidenStreamConfig, LeidenResult, RESULT> streamResultBuilder
+        StreamResultBuilder<LeidenResult, RESULT> streamResultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -209,7 +209,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> louvain(
         GraphName graphName,
         LouvainStreamConfig configuration,
-        StreamResultBuilder<LouvainStreamConfig, LouvainResult, RESULT> streamResultBuilder
+        StreamResultBuilder<LouvainResult, RESULT> streamResultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -224,7 +224,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> modularity(
         GraphName graphName,
         ModularityStreamConfig configuration,
-        StreamResultBuilder<ModularityStreamConfig, ModularityResult, RESULT> streamResultBuilder
+        StreamResultBuilder<ModularityResult, RESULT> streamResultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -239,7 +239,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> modularityOptimization(
         GraphName graphName,
         ModularityOptimizationStreamConfig configuration,
-        StreamResultBuilder<ModularityOptimizationStreamConfig, ModularityOptimizationResult, RESULT> streamResultBuilder
+        StreamResultBuilder<ModularityOptimizationResult, RESULT> streamResultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -254,7 +254,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> scc(
         GraphName graphName,
         SccStreamConfig configuration,
-        StreamResultBuilder<SccStreamConfig, HugeLongArray, RESULT> streamResultBuilder
+        StreamResultBuilder<HugeLongArray, RESULT> streamResultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -269,7 +269,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> triangleCount(
         GraphName graphName,
         TriangleCountStreamConfig configuration,
-        StreamResultBuilder<TriangleCountStreamConfig, TriangleCountResult, RESULT> streamResultBuilder
+        StreamResultBuilder<TriangleCountResult, RESULT> streamResultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -284,7 +284,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> triangles(
         GraphName graphName,
         TriangleCountBaseConfig configuration,
-        StreamResultBuilder<TriangleCountBaseConfig, Stream<TriangleStreamResult>, RESULT> streamResultBuilder
+        StreamResultBuilder<Stream<TriangleStreamResult>, RESULT> streamResultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -299,7 +299,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> wcc(
         GraphName graphName,
         WccStreamConfig configuration,
-        StreamResultBuilder<WccStreamConfig, DisjointSetStruct, RESULT> streamResultBuilder
+        StreamResultBuilder<DisjointSetStruct, RESULT> streamResultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,

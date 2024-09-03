@@ -24,19 +24,17 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.bridges.Bridge;
 import org.neo4j.gds.bridges.BridgeResult;
-import org.neo4j.gds.bridges.BridgesStreamConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class BridgesResultBuilderForStreamMode implements StreamResultBuilder<BridgesStreamConfig, BridgeResult,Bridge> {
+class BridgesResultBuilderForStreamMode implements StreamResultBuilder<BridgeResult,Bridge> {
 
 
     @Override
     public Stream<Bridge> build(
         Graph graph,
         GraphStore graphStore,
-        BridgesStreamConfig bridgesStreamConfig,
         Optional<BridgeResult> result
     ) {
         if (result.isEmpty()) return Stream.empty();

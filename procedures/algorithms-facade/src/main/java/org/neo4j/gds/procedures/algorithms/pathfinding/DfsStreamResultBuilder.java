@@ -30,27 +30,28 @@ import org.neo4j.graphdb.RelationshipType;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class DfsStreamResultBuilder implements StreamResultBuilder<DfsStreamConfig, HugeLongArray, DfsStreamResult> {
+class DfsStreamResultBuilder implements StreamResultBuilder<HugeLongArray, DfsStreamResult> {
     private final NodeLookup nodeLookup;
     private final boolean pathRequested;
+    private final DfsStreamConfig configuration;
 
-    DfsStreamResultBuilder(NodeLookup nodeLookup, boolean pathRequested) {
+    DfsStreamResultBuilder(NodeLookup nodeLookup, boolean pathRequested, DfsStreamConfig configuration) {
         this.nodeLookup = nodeLookup;
         this.pathRequested = pathRequested;
+        this.configuration = configuration;
     }
 
     @Override
     public Stream<DfsStreamResult> build(
         Graph graph,
         GraphStore graphStore,
-        DfsStreamConfig dfsStreamConfig,
         Optional<HugeLongArray> result
     ) {
         //noinspection OptionalIsPresent
         if (result.isEmpty()) return Stream.empty();
 
         return TraverseStreamComputationResultConsumer.consume(
-            dfsStreamConfig.sourceNode(),
+            configuration.sourceNode(),
             result.get(),
             graph::toOriginalNodeId,
             DfsStreamResult::new,

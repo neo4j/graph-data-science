@@ -24,18 +24,16 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
-import org.neo4j.gds.similarity.filteredknn.FilteredKnnStreamConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class FilteredKnnResultBuilderForStreamMode implements StreamResultBuilder<FilteredKnnStreamConfig, FilteredKnnResult, SimilarityResult> {
+class FilteredKnnResultBuilderForStreamMode implements StreamResultBuilder<FilteredKnnResult, SimilarityResult> {
 
     @Override
     public Stream<SimilarityResult> build(
         Graph graph,
         GraphStore graphStore,
-        FilteredKnnStreamConfig configuration,
         Optional<FilteredKnnResult> result
     ) {
         if (result.isEmpty()) return Stream.empty();

@@ -24,19 +24,17 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
-import org.neo4j.gds.kcore.KCoreDecompositionStreamConfig;
 
 import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class KCoreResultBuilderForStreamMode implements StreamResultBuilder<KCoreDecompositionStreamConfig, KCoreDecompositionResult, KCoreDecompositionStreamResult> {
+class KCoreResultBuilderForStreamMode implements StreamResultBuilder<KCoreDecompositionResult, KCoreDecompositionStreamResult> {
 
     @Override
     public Stream<KCoreDecompositionStreamResult> build(
         Graph graph,
         GraphStore graphStore,
-        KCoreDecompositionStreamConfig configuration,
         Optional<KCoreDecompositionResult> result
     ) {
         if (result.isEmpty()) return Stream.empty();

@@ -25,19 +25,17 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
-import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
 
 import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class FastRPResultBuilderForStreamMode implements StreamResultBuilder<FastRPStreamConfig, FastRPResult, FastRPStreamResult> {
+class FastRPResultBuilderForStreamMode implements StreamResultBuilder<FastRPResult, FastRPStreamResult> {
 
     @Override
     public Stream<FastRPStreamResult> build(
         Graph graph,
         GraphStore graphStore,
-        FastRPStreamConfig configuration,
         Optional<FastRPResult> result
     ) {
         if (result.isEmpty()) return Stream.empty();

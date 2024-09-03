@@ -32,12 +32,18 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class SccResultBuilderForStreamMode implements StreamResultBuilder<SccStreamConfig, HugeLongArray, SccStreamResult> {
+class SccResultBuilderForStreamMode implements StreamResultBuilder<HugeLongArray, SccStreamResult> {
+
+   private final SccStreamConfig configuration;
+
+    SccResultBuilderForStreamMode(SccStreamConfig configuration) {
+        this.configuration = configuration;
+    }
+
     @Override
     public Stream<SccStreamResult> build(
         Graph graph,
         GraphStore graphStore,
-        SccStreamConfig configuration,
         Optional<HugeLongArray> result
     ) {
         if (result.isEmpty()) return Stream.empty();

@@ -23,19 +23,17 @@ import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
-import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class BetweennessCentralityResultBuilderForStreamMode implements StreamResultBuilder<BetweennessCentralityStreamConfig, CentralityAlgorithmResult, CentralityStreamResult> {
+class BetweennessCentralityResultBuilderForStreamMode implements StreamResultBuilder<CentralityAlgorithmResult, CentralityStreamResult> {
     private final CentralityAlgorithmResultTransformer transformer = new CentralityAlgorithmResultTransformer();
 
     @Override
     public Stream<CentralityStreamResult> build(
         Graph graph,
         GraphStore graphStore,
-        BetweennessCentralityStreamConfig betweennessCentralityStreamConfig,
         Optional<CentralityAlgorithmResult> result
     ) {
         return transformer.transform(graph, result);

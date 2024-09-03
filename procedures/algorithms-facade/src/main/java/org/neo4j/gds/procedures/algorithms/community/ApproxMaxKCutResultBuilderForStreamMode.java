@@ -32,13 +32,18 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class ApproxMaxKCutResultBuilderForStreamMode implements StreamResultBuilder<ApproxMaxKCutStreamConfig, ApproxMaxKCutResult, ApproxMaxKCutStreamResult> {
+class ApproxMaxKCutResultBuilderForStreamMode implements StreamResultBuilder<ApproxMaxKCutResult, ApproxMaxKCutStreamResult> {
+
+    private final ApproxMaxKCutStreamConfig configuration;
+
+    ApproxMaxKCutResultBuilderForStreamMode(ApproxMaxKCutStreamConfig configuration) {
+        this.configuration = configuration;
+    }
 
     @Override
     public Stream<ApproxMaxKCutStreamResult> build(
         Graph graph,
         GraphStore graphStore,
-        ApproxMaxKCutStreamConfig configuration,
         Optional<ApproxMaxKCutResult> result
     ) {
         if (result.isEmpty()) return Stream.empty();

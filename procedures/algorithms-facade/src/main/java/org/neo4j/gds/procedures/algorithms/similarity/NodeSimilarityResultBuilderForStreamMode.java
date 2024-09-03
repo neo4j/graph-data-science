@@ -24,19 +24,17 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class NodeSimilarityResultBuilderForStreamMode implements StreamResultBuilder<NodeSimilarityStreamConfig, NodeSimilarityResult, SimilarityResult> {
+class NodeSimilarityResultBuilderForStreamMode implements StreamResultBuilder<NodeSimilarityResult, SimilarityResult> {
     private final SimilarityResultStreamMapper similarityResultStreamMapper = new SimilarityResultStreamMapper();
 
     @Override
     public Stream<SimilarityResult> build(
         Graph graph,
         GraphStore graphStore,
-        NodeSimilarityStreamConfig configuration,
         Optional<NodeSimilarityResult> result
     ) {
         return similarityResultStreamMapper.process(graph, result);

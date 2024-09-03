@@ -123,7 +123,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         Algorithm algorithmMetadata,
         Supplier<MemoryEstimation> estimationFactory,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
-        StreamResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
+        StreamResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
     ) {
 
         var timingsBuilder = new AlgorithmProcessingTimingsBuilder();
@@ -149,7 +149,6 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         return resultBuilder.build(
             graphResources.graph(),
             graphResources.graphStore(),
-            configuration,
             result
         );
     }

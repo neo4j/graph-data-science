@@ -55,7 +55,7 @@ public class SimilarityAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> filteredKnn(
         GraphName graphName,
         FilteredKnnStreamConfig configuration,
-        StreamResultBuilder<FilteredKnnStreamConfig, FilteredKnnResult, RESULT> resultBuilder
+        StreamResultBuilder<FilteredKnnResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -70,7 +70,7 @@ public class SimilarityAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> filteredNodeSimilarity(
         GraphName graphName,
         FilteredNodeSimilarityStreamConfig configuration,
-        StreamResultBuilder<FilteredNodeSimilarityStreamConfig, NodeSimilarityResult, RESULT> resultBuilder
+        StreamResultBuilder<NodeSimilarityResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -85,7 +85,7 @@ public class SimilarityAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> knn(
         GraphName graphName,
         KnnStreamConfig configuration,
-        StreamResultBuilder<KnnStreamConfig, KnnResult, RESULT> resultBuilder
+        StreamResultBuilder<KnnResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,
@@ -100,7 +100,7 @@ public class SimilarityAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> nodeSimilarity(
         GraphName graphName,
         NodeSimilarityStreamConfig configuration,
-        StreamResultBuilder<NodeSimilarityStreamConfig, NodeSimilarityResult, RESULT> resultBuilder
+        StreamResultBuilder<NodeSimilarityResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,

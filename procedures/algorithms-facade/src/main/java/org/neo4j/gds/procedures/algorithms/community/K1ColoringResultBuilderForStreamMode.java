@@ -32,13 +32,18 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class K1ColoringResultBuilderForStreamMode implements StreamResultBuilder<K1ColoringStreamConfig, K1ColoringResult, K1ColoringStreamResult> {
+class K1ColoringResultBuilderForStreamMode implements StreamResultBuilder<K1ColoringResult, K1ColoringStreamResult> {
+
+    private final K1ColoringStreamConfig configuration;
+
+    K1ColoringResultBuilderForStreamMode(K1ColoringStreamConfig configuration) {
+        this.configuration = configuration;
+    }
 
     @Override
     public Stream<K1ColoringStreamResult> build(
         Graph graph,
         GraphStore graphStore,
-        K1ColoringStreamConfig configuration,
         Optional<K1ColoringResult> result
     ) {
         if (result.isEmpty()) return Stream.empty();

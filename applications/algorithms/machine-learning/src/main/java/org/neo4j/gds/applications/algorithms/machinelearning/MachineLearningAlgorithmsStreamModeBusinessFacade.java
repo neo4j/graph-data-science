@@ -48,7 +48,7 @@ public class MachineLearningAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> kge(
         GraphName graphName,
         KGEPredictStreamConfig configuration,
-        StreamResultBuilder<KGEPredictStreamConfig, KGEPredictResult, RESULT> resultBuilder
+        StreamResultBuilder<KGEPredictResult, RESULT> resultBuilder
     ) {
         return convenience.processRegularAlgorithmInStreamMode(
             graphName,

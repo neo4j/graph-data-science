@@ -274,9 +274,10 @@ public final class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var resultBuilder = new ApproxMaxKCutResultBuilderForStreamMode();
 
         var parsedConfig = configurationParser.parseConfiguration(configuration, ApproxMaxKCutStreamConfig::of);
+        var resultBuilder = new ApproxMaxKCutResultBuilderForStreamMode(parsedConfig);
+
         return streamModeBusinessFacade.approximateMaximumKCut(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
@@ -328,9 +329,10 @@ public final class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var resultBuilder = new K1ColoringResultBuilderForStreamMode();
 
         var parsedConfig = configurationParser.parseConfiguration(configuration, K1ColoringStreamConfig::of);
+        var resultBuilder = new K1ColoringResultBuilderForStreamMode(parsedConfig);
+
         return streamModeBusinessFacade.k1Coloring(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
@@ -521,9 +523,10 @@ public final class CommunityProcedureFacade {
     public Stream<LabelPropagationStreamResult> labelPropagationStream(
         String graphName, Map<String, Object> configuration
     ) {
-        var resultBuilder = new LabelPropagationResultBuilderForStreamMode();
 
         var parsedConfig = configurationParser.parseConfiguration(configuration, LabelPropagationStreamConfig::of);
+        var resultBuilder = new LabelPropagationResultBuilderForStreamMode(parsedConfig);
+
         return streamModeBusinessFacade.labelPropagation(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
@@ -654,9 +657,10 @@ public final class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var resultBuilder = new LeidenResultBuilderForStreamMode();
 
         var parsedConfig = configurationParser.parseConfiguration(configuration, LeidenStreamConfig::of);
+        var resultBuilder = new LeidenResultBuilderForStreamMode(parsedConfig);
+
         return streamModeBusinessFacade.leiden(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
@@ -713,9 +717,10 @@ public final class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var resultBuilder = new LouvainResultBuilderForStreamMode();
 
         var parsedConfig = configurationParser.parseConfiguration(configuration, LouvainStreamConfig::of);
+        var resultBuilder = new LouvainResultBuilderForStreamMode(parsedConfig);
+
         return streamModeBusinessFacade.louvain(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
@@ -814,10 +819,12 @@ public final class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var resultBuilder = new ModularityOptimizationResultBuilderForStreamMode();
 
         var parsedConfig = configurationParser.parseConfiguration(configuration,
             ModularityOptimizationStreamConfig::of);
+
+        var resultBuilder = new ModularityOptimizationResultBuilderForStreamMode(parsedConfig);
+
         return streamModeBusinessFacade.modularityOptimization(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
@@ -883,9 +890,9 @@ public final class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var resultBuilder = new SccResultBuilderForStreamMode();
-
         var parsedConfig = configurationParser.parseConfiguration(configuration, SccStreamConfig::of);
+        var resultBuilder = new SccResultBuilderForStreamMode(parsedConfig);
+
         return streamModeBusinessFacade.scc(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
@@ -1022,9 +1029,9 @@ public final class CommunityProcedureFacade {
     }
 
     public Stream<WccStreamResult> wccStream(String graphName, Map<String, Object> configuration) {
-
-        var resultBuilder = new WccResultBuilderForStreamMode();
         var parsedConfig = configurationParser.parseConfiguration(configuration, WccStreamConfig::of);
+        var resultBuilder = new WccResultBuilderForStreamMode(parsedConfig);
+
         return streamModeBusinessFacade.wcc(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 

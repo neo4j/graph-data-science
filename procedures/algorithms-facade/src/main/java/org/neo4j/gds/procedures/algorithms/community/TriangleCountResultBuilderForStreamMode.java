@@ -23,18 +23,16 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.triangle.TriangleCountResult;
-import org.neo4j.gds.triangle.TriangleCountStreamConfig;
 
 import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class TriangleCountResultBuilderForStreamMode implements StreamResultBuilder<TriangleCountStreamConfig, TriangleCountResult, TriangleCountStreamResult> {
+class TriangleCountResultBuilderForStreamMode implements StreamResultBuilder<TriangleCountResult, TriangleCountStreamResult> {
     @Override
     public Stream<TriangleCountStreamResult> build(
         Graph graph,
         GraphStore graphStore,
-        TriangleCountStreamConfig configuration,
         Optional<TriangleCountResult> result
     ) {
         if (result.isEmpty()) return Stream.empty();

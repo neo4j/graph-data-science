@@ -24,19 +24,17 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
-import org.neo4j.gds.scaleproperties.ScalePropertiesStreamConfig;
 
 import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class ScalePropertiesResultBuilderForStreamMode implements StreamResultBuilder<ScalePropertiesStreamConfig, ScalePropertiesResult, ScalePropertiesStreamResult> {
+class ScalePropertiesResultBuilderForStreamMode implements StreamResultBuilder<ScalePropertiesResult, ScalePropertiesStreamResult> {
 
     @Override
     public Stream<ScalePropertiesStreamResult> build(
         Graph graph,
         GraphStore graphStore,
-        ScalePropertiesStreamConfig configuration,
         Optional<ScalePropertiesResult> result
     ) {
         if (result.isEmpty()) return Stream.empty();

@@ -23,19 +23,17 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
-import org.neo4j.gds.articulationpoints.ArticulationPointsStreamConfig;
 
 import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class ArticulationPointsResultBuilderForStreamMode implements StreamResultBuilder<ArticulationPointsStreamConfig, BitSet, ArticulationPoint> {
+class ArticulationPointsResultBuilderForStreamMode implements StreamResultBuilder<BitSet, ArticulationPoint> {
 
     @Override
     public Stream<ArticulationPoint> build(
         Graph graph,
         GraphStore graphStore,
-        ArticulationPointsStreamConfig articulationPointsStreamConfig,
         Optional<BitSet> result
     ) {
         if (result.isEmpty()) return Stream.empty();

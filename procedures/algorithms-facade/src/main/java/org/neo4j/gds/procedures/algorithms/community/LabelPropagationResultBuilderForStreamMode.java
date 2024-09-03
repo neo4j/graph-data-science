@@ -32,13 +32,18 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class LabelPropagationResultBuilderForStreamMode implements StreamResultBuilder<LabelPropagationStreamConfig, LabelPropagationResult, LabelPropagationStreamResult> {
+class LabelPropagationResultBuilderForStreamMode implements StreamResultBuilder<LabelPropagationResult, LabelPropagationStreamResult> {
+
+    private final LabelPropagationStreamConfig configuration;
+
+    LabelPropagationResultBuilderForStreamMode(LabelPropagationStreamConfig configuration) {
+        this.configuration = configuration;
+    }
 
     @Override
     public Stream<LabelPropagationStreamResult> build(
         Graph graph,
         GraphStore graphStore,
-        LabelPropagationStreamConfig configuration,
         Optional<LabelPropagationResult> result
     ) {
         if (result.isEmpty()) return Stream.empty();
