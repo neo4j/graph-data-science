@@ -50,6 +50,6 @@ public class NodeRegressionPipelineConfigureSplitProc extends BaseProc {
 
         pipeline.setSplitConfig(config);
 
-        return Stream.of(new NodePipelineInfoResult(pipelineName, pipeline));
+        return Stream.of(NodePipelineInfoResult.create(pipelineName, pipeline));
     }
 }

@@ -48,7 +48,7 @@ public class NodeRegressionPipelineAddStepProcs extends BaseProc {
 
         pipeline.addNodePropertyStep(createNodePropertyStep(taskName, procedureConfig));
 
-        return Stream.of(new NodePipelineInfoResult(pipelineName, pipeline));
+        return Stream.of(NodePipelineInfoResult.create(pipelineName, pipeline));
     }
 
     @Procedure(name = "gds.alpha.pipeline.nodeRegression.selectFeatures", mode = READ)
@@ -74,6 +74,6 @@ public class NodeRegressionPipelineAddStepProcs extends BaseProc {
             throw new IllegalArgumentException("The value of `featureProperties` is required to be a list of strings.");
         }
 
-        return Stream.of(new NodePipelineInfoResult(pipelineName, pipeline));
+        return Stream.of(NodePipelineInfoResult.create(pipelineName, pipeline));
     }
 }

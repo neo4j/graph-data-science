@@ -20,10 +20,18 @@
 package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
+import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
+import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
+import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 class PipelineApplications {
@@ -33,6 +41,41 @@ class PipelineApplications {
     PipelineApplications(PipelineRepository pipelineRepository, User user) {
         this.pipelineRepository = pipelineRepository;
         this.user = user;
+    }
+
+    NodeClassificationTrainingPipeline addNodeProperty(
+        PipelineName pipelineName,
+        String taskName,
+        Map<String, Object> procedureConfig
+    ) {
+        var pipeline = pipelineRepository.getNodeClassificationTrainingPipeline(user, pipelineName);
+
+        var nodePropertyStep = NodePropertyStepFactory.createNodePropertyStep(taskName, procedureConfig);
+
+        pipeline.addNodePropertyStep(nodePropertyStep);
+
+        return pipeline;
+    }
+
+    NodeClassificationTrainingPipeline addTrainerConfiguration(
+        PipelineName pipelineName,
+        TunableTrainerConfig configuration
+    ) {
+        return configure(pipelineName, pipeline -> pipeline.addTrainerConfig(configuration));
+    }
+
+    NodeClassificationTrainingPipeline configureAutoTuning(PipelineName pipelineName, AutoTuningConfig configuration) {
+        return configure(pipelineName, pipeline -> pipeline.setAutoTuningConfig(configuration));
+    }
+
+    NodeClassificationTrainingPipeline configureSplit(
+        PipelineName pipelineName, NodePropertyPredictionSplitConfig configuration
+    ) {
+        return configure(pipelineName, pipeline -> pipeline.setSplitConfig(configuration));
+    }
+
+    NodeClassificationTrainingPipeline createNodeClassificationTrainingPipeline(PipelineName pipelineName) {
+        return pipelineRepository.createNodeClassificationTrainingPipeline(user, pipelineName);
     }
 
     /**
@@ -70,5 +113,32 @@ class PipelineApplications {
 
     Optional<TrainingPipeline<?>> getSingle(PipelineName pipelineName) {
         return pipelineRepository.getSingle(user, pipelineName);
+    }
+
+    NodeClassificationTrainingPipeline selectFeatures(
+        PipelineName pipelineName,
+        Iterable<NodeFeatureStep> nodeFeatureSteps
+    ) {
+        var pipeline = pipelineRepository.getNodeClassificationTrainingPipeline(user, pipelineName);
+
+        for (NodeFeatureStep nodeFeatureStep : nodeFeatureSteps) {
+            pipeline.addFeatureStep(nodeFeatureStep);
+        }
+
+        return pipeline;
+    }
+
+    private NodeClassificationTrainingPipeline configure(
+        PipelineName pipelineName,
+        Consumer<NodeClassificationTrainingPipeline> configurationAction
+    ) {
+        var pipeline = pipelineRepository.getNodeClassificationTrainingPipeline(
+            user,
+            pipelineName
+        );
+
+        configurationAction.accept(pipeline);
+
+        return pipeline;
     }
 }

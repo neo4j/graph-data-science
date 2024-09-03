@@ -22,12 +22,13 @@ package org.neo4j.gds.procedures.pipelines;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyTrainingPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class NodePipelineInfoResult {
+public final class NodePipelineInfoResult {
     public final String name;
     public final List<Map<String, Object>> nodePropertySteps;
     public final List<String> featureProperties;
@@ -35,16 +36,44 @@ public class NodePipelineInfoResult {
     public final Map<String, Object> autoTuningConfig;
     public final Object parameterSpace;
 
-    public NodePipelineInfoResult(String pipelineName, NodePropertyTrainingPipeline pipeline) {
-        this.name = pipelineName;
-        this.nodePropertySteps = pipeline
+    private NodePipelineInfoResult(
+        String name,
+        List<Map<String, Object>> nodePropertySteps,
+        List<String> featureProperties,
+        Map<String, Object> splitConfig,
+        Map<String, Object> autoTuningConfig,
+        Map<String, List<Map<String, Object>>> parameterSpace
+    ) {
+        this.name = name;
+        this.nodePropertySteps = nodePropertySteps;
+        this.featureProperties = featureProperties;
+        this.splitConfig = splitConfig;
+        this.autoTuningConfig = autoTuningConfig;
+        this.parameterSpace = parameterSpace;
+    }
+
+    static NodePipelineInfoResult create(PipelineName pipelineName, NodeClassificationTrainingPipeline pipeline) {
+        return create(pipelineName.value, pipeline);
+    }
+
+    /**
+     * @deprecated This can go soon
+     */
+    @Deprecated
+    public static NodePipelineInfoResult create(String pipelineName, NodePropertyTrainingPipeline pipeline) {
+        var nodePropertySteps = pipeline
             .nodePropertySteps()
             .stream()
             .map(ExecutableNodePropertyStep::toMap)
             .collect(Collectors.toList());
-        this.featureProperties = pipeline.featureProperties();
-        this.splitConfig = pipeline.splitConfig().toMap();
-        this.autoTuningConfig = pipeline.autoTuningConfig().toMap();
-        this.parameterSpace = TrainingPipeline.toMapParameterSpace(pipeline.trainingParameterSpace());
+
+        return new NodePipelineInfoResult(
+            pipelineName,
+            nodePropertySteps,
+            pipeline.featureProperties(),
+            pipeline.splitConfig().toMap(),
+            pipeline.autoTuningConfig().toMap(),
+            TrainingPipeline.toMapParameterSpace(pipeline.trainingParameterSpace())
+        );
     }
 }
