@@ -21,16 +21,14 @@ package org.neo4j.gds.applications.algorithms.centrality;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.influenceMaximization.CELFNodeProperties;
 import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationMutateConfig;
 
-class CelfMutateStep implements MutateOrWriteStep<CELFResult, NodePropertiesWritten> {
+class CelfMutateStep implements MutateStep<CELFResult, NodePropertiesWritten> {
     private final MutateNodeProperty mutateNodeProperty;
     private final InfluenceMaximizationMutateConfig configuration;
 
@@ -43,9 +41,7 @@ class CelfMutateStep implements MutateOrWriteStep<CELFResult, NodePropertiesWrit
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        ResultStore resultStore,
-        CELFResult result,
-        JobId jobId
+        CELFResult result
     ) {
         var nodeProperties = new CELFNodeProperties(result.seedSetNodes(), graph.nodeCount());
 

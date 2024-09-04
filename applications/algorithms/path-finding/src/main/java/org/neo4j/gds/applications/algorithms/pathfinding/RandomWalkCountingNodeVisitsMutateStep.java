@@ -21,16 +21,14 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
-import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.traversal.RandomWalkMutateConfig;
 
-class RandomWalkCountingNodeVisitsMutateStep implements MutateOrWriteStep<HugeAtomicLongArray, NodePropertiesWritten> {
+class RandomWalkCountingNodeVisitsMutateStep implements MutateStep<HugeAtomicLongArray, NodePropertiesWritten> {
     private final MutateNodeProperty mutateNodeProperty;
     private final RandomWalkMutateConfig configuration;
 
@@ -46,9 +44,7 @@ class RandomWalkCountingNodeVisitsMutateStep implements MutateOrWriteStep<HugeAt
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        ResultStore resultStore,
-        HugeAtomicLongArray result,
-        JobId jobId
+        HugeAtomicLongArray result
     ) {
         var nodePropertyValues = NodePropertyValuesAdapter.adapt(result);
 

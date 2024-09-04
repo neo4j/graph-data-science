@@ -21,15 +21,13 @@ package org.neo4j.gds.applications.algorithms.centrality;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.pagerank.PageRankMutateConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 
-class PageRankMutateStep implements MutateOrWriteStep<PageRankResult, NodePropertiesWritten> {
+class PageRankMutateStep implements MutateStep<PageRankResult, NodePropertiesWritten> {
     private final MutateNodeProperty mutateNodeProperty;
     private final PageRankMutateConfig configuration;
 
@@ -45,9 +43,7 @@ class PageRankMutateStep implements MutateOrWriteStep<PageRankResult, NodeProper
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        ResultStore resultStore,
-        PageRankResult result,
-        JobId jobId
+        PageRankResult result
     ) {
         return mutateNodeProperty.mutateNodeProperties(
             graph,

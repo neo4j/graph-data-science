@@ -21,15 +21,13 @@ package org.neo4j.gds.applications.algorithms.embeddings;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNMutateConfig;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
 
-class HashGnnMutateStep implements MutateOrWriteStep<HashGNNResult, NodePropertiesWritten> {
+class HashGnnMutateStep implements MutateStep<HashGNNResult, NodePropertiesWritten> {
     private final MutateNodeProperty mutateNodeProperty;
     private final HashGNNMutateConfig configuration;
 
@@ -42,9 +40,7 @@ class HashGnnMutateStep implements MutateOrWriteStep<HashGNNResult, NodeProperti
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        ResultStore resultStore,
-        HashGNNResult result,
-        JobId jobId
+        HashGNNResult result
     ) {
         var nodePropertyValues = result.embeddings();
 

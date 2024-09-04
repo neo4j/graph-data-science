@@ -23,16 +23,14 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.spanningtree.SpanningGraph;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeMutateConfig;
 
-class SpanningTreeMutateStep implements MutateOrWriteStep<SpanningTree, RelationshipsWritten> {
+class SpanningTreeMutateStep implements MutateStep<SpanningTree, RelationshipsWritten> {
     private final SpanningTreeMutateConfig configuration;
 
     SpanningTreeMutateStep(SpanningTreeMutateConfig configuration) {this.configuration = configuration;}
@@ -41,8 +39,7 @@ class SpanningTreeMutateStep implements MutateOrWriteStep<SpanningTree, Relation
     public RelationshipsWritten execute(
         Graph graph,
         GraphStore graphStore,
-        ResultStore resultStore, SpanningTree result,
-        JobId jobId
+        SpanningTree result
     ) {
         var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
         var relationshipsBuilder = GraphFactory

@@ -21,16 +21,14 @@ package org.neo4j.gds.applications.algorithms.embeddings;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.embeddings.fastrp.FastRPMutateConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 
-class FastRPMutateStep implements MutateOrWriteStep<FastRPResult, NodePropertiesWritten> {
+class FastRPMutateStep implements MutateStep<FastRPResult, NodePropertiesWritten> {
     private final MutateNodeProperty mutateNodeProperty;
     private final FastRPMutateConfig configuration;
 
@@ -43,9 +41,7 @@ class FastRPMutateStep implements MutateOrWriteStep<FastRPResult, NodeProperties
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        ResultStore resultStore,
-        FastRPResult result,
-        JobId jobId
+        FastRPResult result
     ) {
         var nodePropertyValues = NodePropertyValuesAdapter.adapt(result.embeddings());
 

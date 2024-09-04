@@ -21,16 +21,14 @@ package org.neo4j.gds.applications.algorithms.community;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
 
-class KCoreMutateStep implements MutateOrWriteStep<KCoreDecompositionResult, NodePropertiesWritten> {
+class KCoreMutateStep implements MutateStep<KCoreDecompositionResult, NodePropertiesWritten> {
     private final MutateNodeProperty mutateNodeProperty;
     private final KCoreDecompositionMutateConfig configuration;
 
@@ -43,9 +41,7 @@ class KCoreMutateStep implements MutateOrWriteStep<KCoreDecompositionResult, Nod
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        ResultStore resultStore,
-        KCoreDecompositionResult result,
-        JobId jobId
+        KCoreDecompositionResult result
     ) {
         return mutateNodeProperty.mutateNodeProperties(
             graph,

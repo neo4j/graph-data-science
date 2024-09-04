@@ -22,16 +22,14 @@ package org.neo4j.gds.applications.algorithms.community;
 import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.scc.SccMutateConfig;
 
-class SccMutateStep implements MutateOrWriteStep<HugeLongArray, NodePropertiesWritten> {
+class SccMutateStep implements MutateStep<HugeLongArray, NodePropertiesWritten> {
     private final MutateNodeProperty mutateNodeProperty;
     private final SccMutateConfig configuration;
 
@@ -44,9 +42,7 @@ class SccMutateStep implements MutateOrWriteStep<HugeLongArray, NodePropertiesWr
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        ResultStore resultStore,
-        HugeLongArray result,
-        JobId jobId
+        HugeLongArray result
     ) {
         var nodePropertyValues = CommunityCompanion.nodePropertyValues(
             configuration.consecutiveIds(),

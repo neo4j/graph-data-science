@@ -23,17 +23,15 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.leiden.LeidenMutateConfig;
 import org.neo4j.gds.leiden.LeidenResult;
 
-class LeidenMutateStep implements MutateOrWriteStep<LeidenResult, Pair<NodePropertiesWritten, NodePropertyValues>> {
+class LeidenMutateStep implements MutateStep<LeidenResult, Pair<NodePropertiesWritten, NodePropertyValues>> {
     private final MutateNodeProperty mutateNodeProperty;
     private final LeidenMutateConfig configuration;
 
@@ -46,9 +44,7 @@ class LeidenMutateStep implements MutateOrWriteStep<LeidenResult, Pair<NodePrope
     public Pair<NodePropertiesWritten, NodePropertyValues> execute(
         Graph graph,
         GraphStore graphStore,
-        ResultStore resultStore,
-        LeidenResult result,
-        JobId jobId
+        LeidenResult result
     ) {
         var nodePropertyValues = calculateNodePropertyValues(graphStore, result);
 

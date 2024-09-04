@@ -23,7 +23,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.core.utils.progress.JobId;
@@ -32,7 +32,7 @@ import org.neo4j.gds.triangle.TriangleCountWriteConfig;
 
 import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.TriangleCount;
 
-class TriangleCountWriteStep implements MutateOrWriteStep<TriangleCountResult, NodePropertiesWritten> {
+class TriangleCountWriteStep implements WriteStep<TriangleCountResult, NodePropertiesWritten> {
     private final WriteToDatabase writeToDatabase;
     private final TriangleCountWriteConfig configuration;
 

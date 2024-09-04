@@ -17,22 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.miscellaneous;
+package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
-import org.neo4j.gds.core.loading.SingleTypeRelationships;
 
-class CollapsePathMutateStep implements MutateStep<SingleTypeRelationships, Void> {
-    @Override
-    public Void execute(
+public interface MutateStep<RESULT_FROM_ALGORITHM, MUTATE_METADATA> {
+    /**
+     * Timings belong on the outside.
+     *
+     * @return metadata for reporting, for example number of relationships written
+     */
+    MUTATE_METADATA execute(
         Graph graph,
         GraphStore graphStore,
-        SingleTypeRelationships result
-    ) {
-        graphStore.addRelationshipType(result);
-
-        return null;
-    }
+        RESULT_FROM_ALGORITHM result
+    );
 }

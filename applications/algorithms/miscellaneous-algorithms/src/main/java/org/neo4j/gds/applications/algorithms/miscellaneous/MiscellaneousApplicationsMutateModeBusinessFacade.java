@@ -65,7 +65,7 @@ public class MiscellaneousApplicationsMutateModeBusinessFacade {
     ) {
         var mutateStep = new CollapsePathMutateStep();
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
             configuration,
             CollapsePath,
@@ -83,7 +83,7 @@ public class MiscellaneousApplicationsMutateModeBusinessFacade {
     ) {
         var mutateStep = new IndexInverseMutateStep();
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
             configuration,
             IndexInverse,
@@ -101,7 +101,7 @@ public class MiscellaneousApplicationsMutateModeBusinessFacade {
     ) {
         var mutateStep = new ScalePropertiesMutateStep(mutateNodeProperty, configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
             configuration,
             ScaleProperties,
@@ -119,7 +119,7 @@ public class MiscellaneousApplicationsMutateModeBusinessFacade {
     ) {
         var mutateStep = new ToUndirectedMutateStep();
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
             configuration,
             ToUndirected,

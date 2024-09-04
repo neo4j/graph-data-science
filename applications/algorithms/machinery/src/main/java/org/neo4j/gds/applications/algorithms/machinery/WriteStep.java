@@ -24,13 +24,13 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.core.utils.progress.JobId;
 
-public interface MutateOrWriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> {
+public interface WriteStep<RESULT_FROM_ALGORITHM, WRITE_METADATA> {
     /**
      * Timings belong on the outside.
      *
      * @return metadata for reporting, for example number of relationships written
      */
-    MUTATE_OR_WRITE_METADATA execute(
+    WRITE_METADATA execute(
         Graph graph,
         GraphStore graphStore,
         ResultStore resultStore,

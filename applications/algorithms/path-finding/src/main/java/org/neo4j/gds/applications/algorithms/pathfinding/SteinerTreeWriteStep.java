@@ -22,9 +22,9 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
+import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -33,7 +33,7 @@ import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.steiner.SteinerTreeWriteConfig;
 
-class SteinerTreeWriteStep implements MutateOrWriteStep<SteinerTreeResult, RelationshipsWritten> {
+class SteinerTreeWriteStep implements WriteStep<SteinerTreeResult, RelationshipsWritten> {
     private final RequestScopedDependencies requestScopedDependencies;
     private final SteinerTreeWriteConfig configuration;
     private final WriteContext writeContext;

@@ -26,7 +26,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.core.utils.progress.JobId;
@@ -35,7 +35,7 @@ import org.neo4j.gds.labelpropagation.LabelPropagationWriteConfig;
 
 import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.WCC;
 
-class LabelPropagationWriteStep implements MutateOrWriteStep<LabelPropagationResult, Pair<NodePropertiesWritten, NodePropertyValues>> {
+class LabelPropagationWriteStep implements WriteStep<LabelPropagationResult, Pair<NodePropertiesWritten, NodePropertyValues>> {
     private final WriteToDatabase writeToDatabase;
     private final LabelPropagationWriteConfig configuration;
 

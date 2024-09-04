@@ -23,18 +23,16 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm;
 import org.neo4j.gds.steiner.SteinerTreeMutateConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 
 import java.util.stream.LongStream;
 
-class SteinerTreeMutateStep implements MutateOrWriteStep<SteinerTreeResult, RelationshipsWritten> {
+class SteinerTreeMutateStep implements MutateStep<SteinerTreeResult, RelationshipsWritten> {
     private final SteinerTreeMutateConfig configuration;
 
     SteinerTreeMutateStep(SteinerTreeMutateConfig configuration) {
@@ -45,8 +43,7 @@ class SteinerTreeMutateStep implements MutateOrWriteStep<SteinerTreeResult, Rela
     public RelationshipsWritten execute(
         Graph graph,
         GraphStore graphStore,
-        ResultStore resultStore, SteinerTreeResult steinerTreeResult,
-        JobId jobId
+        SteinerTreeResult steinerTreeResult
     ) {
         var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
 

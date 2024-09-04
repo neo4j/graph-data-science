@@ -126,7 +126,7 @@ class DefaultAlgorithmProcessingTemplateTest {
      * So that's the example we go with.
      */
     @Test
-    void shouldProcessMutateOrWriteAlgorithm() {
+    void shouldProcessWriteAlgorithm() {
         var databaseId = DatabaseId.of("some database");
         var user = new User("some user", false);
         var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
@@ -180,7 +180,7 @@ class DefaultAlgorithmProcessingTemplateTest {
         AlgorithmComputation<ExampleResult> computation = mock(AlgorithmComputation.class);
         when(computation.compute(graph, graphStore)).thenReturn(pathFindingResult);
 
-        var mutateOrWriteStep = new MutateOrWriteStep<ExampleResult, Long>() {
+        var writeStep = new WriteStep<ExampleResult, Long>() {
             @Override
             public Long execute(
                 Graph graph,
@@ -193,7 +193,7 @@ class DefaultAlgorithmProcessingTemplateTest {
             }
         };
 
-        var relationshipsWritten = algorithmProcessingTemplate.processAlgorithm(
+        var relationshipsWritten = algorithmProcessingTemplate.processAlgorithmForWrite(
             Optional.empty(),
             graphName,
             configuration,
@@ -201,7 +201,7 @@ class DefaultAlgorithmProcessingTemplateTest {
             KNN,
             null,
             computation,
-            mutateOrWriteStep,
+            writeStep,
             resultBuilder
         );
 
@@ -242,8 +242,8 @@ class DefaultAlgorithmProcessingTemplateTest {
             }
 
             @Override
-            <RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> Optional<MUTATE_OR_WRITE_METADATA> mutateOrWriteWithTiming(
-                MutateOrWriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> mutateOrWriteStep,
+            <RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> Optional<MUTATE_OR_WRITE_METADATA> writeWithTiming(
+                WriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> mutateOrWriteStep,
                 AlgorithmProcessingTimingsBuilder timingsBuilder,
                 Graph graph,
                 GraphStore graphStore,
@@ -283,7 +283,7 @@ class DefaultAlgorithmProcessingTemplateTest {
             }
         };
 
-        var resultMap = algorithmProcessingTemplate.processAlgorithm(
+        var resultMap = algorithmProcessingTemplate.processAlgorithmForWrite(
             Optional.empty(),
             null,
             new ExampleConfiguration(),

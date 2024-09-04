@@ -24,7 +24,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
@@ -32,7 +32,7 @@ import org.neo4j.gds.k1coloring.K1ColoringWriteConfig;
 
 import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.K1Coloring;
 
-class K1ColoringWriteStep implements MutateOrWriteStep<K1ColoringResult, Void> {
+class K1ColoringWriteStep implements WriteStep<K1ColoringResult, Void> {
     private final WriteToDatabase writeToDatabase;
     private final K1ColoringWriteConfig configuration;
 

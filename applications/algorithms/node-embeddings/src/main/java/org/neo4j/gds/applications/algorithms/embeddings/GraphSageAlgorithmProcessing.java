@@ -19,60 +19,19 @@
  */
 package org.neo4j.gds.applications.algorithms.embeddings;
 
-import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 
-import java.util.List;
 import java.util.Optional;
 
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.GraphSage;
-
 public class GraphSageAlgorithmProcessing {
-    private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade;
-    private final NodeEmbeddingAlgorithms algorithms;
-    private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final GraphSageModelCatalog graphSageModelCatalog;
 
     public GraphSageAlgorithmProcessing(
-        NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        NodeEmbeddingAlgorithms algorithms,
-        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         GraphSageModelCatalog graphSageModelCatalog
     ) {
-        this.estimationFacade = estimationFacade;
-        this.algorithms = algorithms;
-        this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.graphSageModelCatalog = graphSageModelCatalog;
     }
 
-    <CONFIGURATION extends GraphSageBaseConfig, RESULT, MUTATE_OR_WRITE_METADATA> RESULT process(
-        GraphName graphName,
-        CONFIGURATION configuration,
-        MutateOrWriteStep<GraphSageResult, MUTATE_OR_WRITE_METADATA> mutateOrWriteStep,
-        ResultBuilder<CONFIGURATION, GraphSageResult, RESULT, MUTATE_OR_WRITE_METADATA> resultBuilder,
-        boolean mutating
-    ) {
-        var model = graphSageModelCatalog.get(configuration);
-        var relationshipWeightPropertyFromTrainConfiguration = model.trainConfig().relationshipWeightProperty();
-
-        var validationHook = new GraphSageValidationHook(configuration, model);
-
-        return algorithmProcessingTemplateConvenience.processAlgorithm(
-            relationshipWeightPropertyFromTrainConfiguration,
-            graphName,
-            configuration,
-            Optional.of(List.of(validationHook)),
-            GraphSage,
-            () -> estimationFacade.graphSage(configuration, mutating),
-            (graph, __) -> algorithms.graphSage(graph, configuration),
-            mutateOrWriteStep,
-            resultBuilder
-        );
-    }
 
    <CONFIGURATION extends GraphSageBaseConfig> GraphSageProcessParameters graphSageValidationHook( CONFIGURATION configuration){
        var model = graphSageModelCatalog.get(configuration);

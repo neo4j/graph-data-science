@@ -23,17 +23,15 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordMutateConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 
 import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.TOTAL_COST_KEY;
 
-class BellmanFordMutateStep implements MutateOrWriteStep<BellmanFordResult, RelationshipsWritten> {
+class BellmanFordMutateStep implements MutateStep<BellmanFordResult, RelationshipsWritten> {
     private final AllShortestPathsBellmanFordMutateConfig configuration;
 
     BellmanFordMutateStep(AllShortestPathsBellmanFordMutateConfig configuration) {
@@ -44,9 +42,7 @@ class BellmanFordMutateStep implements MutateOrWriteStep<BellmanFordResult, Rela
     public RelationshipsWritten execute(
         Graph graph,
         GraphStore graphStore,
-        ResultStore resultStore,
-        BellmanFordResult result,
-        JobId jobId
+        BellmanFordResult result
     ) {
         var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
 

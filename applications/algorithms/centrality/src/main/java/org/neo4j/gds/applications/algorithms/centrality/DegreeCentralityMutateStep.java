@@ -21,15 +21,13 @@ package org.neo4j.gds.applications.algorithms.centrality;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
 import org.neo4j.gds.degree.DegreeCentralityResult;
 
-class DegreeCentralityMutateStep implements MutateOrWriteStep<DegreeCentralityResult, NodePropertiesWritten> {
+class DegreeCentralityMutateStep implements MutateStep<DegreeCentralityResult, NodePropertiesWritten> {
     private final MutateNodeProperty mutateNodeProperty;
     private final DegreeCentralityMutateConfig configuration;
 
@@ -45,9 +43,7 @@ class DegreeCentralityMutateStep implements MutateOrWriteStep<DegreeCentralityRe
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        ResultStore resultStore,
-        DegreeCentralityResult result,
-        JobId jobId
+        DegreeCentralityResult result
     ) {
         return mutateNodeProperty.mutateNodeProperties(
             graph,

@@ -22,16 +22,14 @@ package org.neo4j.gds.applications.algorithms.community;
 import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.labelpropagation.LabelPropagationMutateConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationResult;
 
-class LabelPropagationMutateStep implements MutateOrWriteStep<LabelPropagationResult, NodePropertiesWritten> {
+class LabelPropagationMutateStep implements MutateStep<LabelPropagationResult, NodePropertiesWritten> {
     private final MutateNodeProperty mutateNodeProperty;
     private final LabelPropagationMutateConfig configuration;
 
@@ -44,9 +42,7 @@ class LabelPropagationMutateStep implements MutateOrWriteStep<LabelPropagationRe
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        ResultStore resultStore,
-        LabelPropagationResult result,
-        JobId jobId
+        LabelPropagationResult result
     ) {
         var nodePropertyValues = CommunityCompanion.nodePropertyValues(
             configuration.isIncremental(),

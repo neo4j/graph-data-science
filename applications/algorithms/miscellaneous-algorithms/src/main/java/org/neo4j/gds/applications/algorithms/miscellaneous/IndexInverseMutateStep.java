@@ -22,21 +22,17 @@ package org.neo4j.gds.applications.algorithms.miscellaneous;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
-import org.neo4j.gds.core.utils.progress.JobId;
 
 import java.util.Map;
 
-class IndexInverseMutateStep implements MutateOrWriteStep<Map<RelationshipType, SingleTypeRelationships>, Void> {
+class IndexInverseMutateStep implements MutateStep<Map<RelationshipType, SingleTypeRelationships>, Void> {
     @Override
     public Void execute(
         Graph graph,
         GraphStore graphStore,
-        ResultStore resultStore,
-        Map<RelationshipType, SingleTypeRelationships> result,
-        JobId jobId
+        Map<RelationshipType, SingleTypeRelationships> result
     ) {
         result.forEach((type, inverseRelationships) -> graphStore.addInverseIndex(
             type,
