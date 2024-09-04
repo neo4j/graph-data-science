@@ -59,7 +59,7 @@ public class MachineLearningAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new KgeMutateStep(requestScopedDependencies.getTerminationFlag(), configuration);
 
-        return convenience.processRegularAlgorithmInMutateOrWriteMode(
+        return convenience.processRegularAlgorithmInMutateMode(
             graphName,
             configuration,
             KGE,
@@ -77,7 +77,7 @@ public class MachineLearningAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new SplitRelationshipsMutateStep();
 
-        return convenience.processRegularAlgorithmInMutateOrWriteMode(
+        return convenience.processRegularAlgorithmInMutateMode(
             graphName,
             configuration,
             SplitRelationships,

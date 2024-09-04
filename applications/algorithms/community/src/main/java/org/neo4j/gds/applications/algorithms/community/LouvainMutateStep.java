@@ -21,15 +21,13 @@ package org.neo4j.gds.applications.algorithms.community;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.louvain.LouvainResult;
 
-class LouvainMutateStep implements MutateOrWriteStep<LouvainResult, NodePropertiesWritten> {
+class LouvainMutateStep implements MutateStep<LouvainResult, NodePropertiesWritten> {
     private final LouvainNodePropertyValuesComputer louvainNodePropertyValuesComputer = new LouvainNodePropertyValuesComputer();
 
     private final MutateNodeProperty mutateNodeProperty;
@@ -44,9 +42,7 @@ class LouvainMutateStep implements MutateOrWriteStep<LouvainResult, NodeProperti
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        ResultStore resultStore,
-        LouvainResult result,
-        JobId jobId
+        LouvainResult result
     ) {
         var nodePropertyValues = louvainNodePropertyValuesComputer.compute(
             graphStore,

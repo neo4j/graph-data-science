@@ -93,7 +93,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new PageRankWriteStep(writeToDatabase, configuration, ArticleRank);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
             configuration,
             ArticleRank,
@@ -111,7 +111,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new BetweennessCentralityWriteStep(writeToDatabase, configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
             configuration,
             BetweennessCentrality,
@@ -127,7 +127,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         ArticulationPointsWriteConfig configuration,
         ResultBuilder<ArticulationPointsWriteConfig, BitSet, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
             configuration,
             ArticulationPoints,
@@ -145,7 +145,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new CelfWriteStep(writeToDatabase, configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
             configuration,
             CELF,
@@ -163,7 +163,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new ClosenessCentralityWriteStep(writeToDatabase, configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
             configuration,
             ClosenessCentrality,
@@ -181,7 +181,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new DegreeCentralityWriteStep(writeToDatabase, configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
             configuration,
             DegreeCentrality,
@@ -199,7 +199,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new PageRankWriteStep(writeToDatabase, configuration, EigenVector);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
             configuration,
             EigenVector,
@@ -217,7 +217,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new HarmonicCentralityWriteStep(writeToDatabase, configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
             configuration,
             HarmonicCentrality,
@@ -235,7 +235,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new PageRankWriteStep(writeToDatabase, configuration, ArticleRank);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
             configuration,
             PageRank,

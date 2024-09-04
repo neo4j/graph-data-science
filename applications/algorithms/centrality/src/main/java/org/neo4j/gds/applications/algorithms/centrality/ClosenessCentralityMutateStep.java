@@ -21,15 +21,13 @@ package org.neo4j.gds.applications.algorithms.centrality;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
-import org.neo4j.gds.core.utils.progress.JobId;
 
-class ClosenessCentralityMutateStep implements MutateOrWriteStep<ClosenessCentralityResult, NodePropertiesWritten> {
+class ClosenessCentralityMutateStep implements MutateStep<ClosenessCentralityResult, NodePropertiesWritten> {
     private final MutateNodeProperty mutateNodeProperty;
     private final ClosenessCentralityMutateConfig configuration;
 
@@ -45,9 +43,7 @@ class ClosenessCentralityMutateStep implements MutateOrWriteStep<ClosenessCentra
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        ResultStore resultStore,
-        ClosenessCentralityResult result,
-        JobId jobId
+        ClosenessCentralityResult result
     ) {
         return mutateNodeProperty.mutateNodeProperties(
             graph,

@@ -21,15 +21,13 @@ package org.neo4j.gds.applications.algorithms.community;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
-import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
 
-class K1ColoringMutateStep implements MutateOrWriteStep<K1ColoringResult, Void> {
+class K1ColoringMutateStep implements MutateStep<K1ColoringResult, Void> {
     private final MutateNodeProperty mutateNodeProperty;
     private final K1ColoringMutateConfig configuration;
 
@@ -42,9 +40,7 @@ class K1ColoringMutateStep implements MutateOrWriteStep<K1ColoringResult, Void> 
     public Void execute(
         Graph graph,
         GraphStore graphStore,
-        ResultStore resultStore,
-        K1ColoringResult result,
-        JobId jobId
+        K1ColoringResult result
     ) {
         var nodePropertyValues = NodePropertyValuesAdapter.adapt(result.colors());
 

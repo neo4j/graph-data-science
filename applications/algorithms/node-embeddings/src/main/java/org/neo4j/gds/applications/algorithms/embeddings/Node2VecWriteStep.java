@@ -23,7 +23,7 @@ import org.neo4j.gds.algorithms.embeddings.FloatEmbeddingNodePropertyValues;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.core.utils.progress.JobId;
@@ -32,7 +32,7 @@ import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
 
 import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.GraphSage;
 
-class Node2VecWriteStep implements MutateOrWriteStep<Node2VecResult, NodePropertiesWritten> {
+class Node2VecWriteStep implements WriteStep<Node2VecResult, NodePropertiesWritten> {
     private final WriteToDatabase writeToDatabase;
     private final Node2VecWriteConfig configuration;
 

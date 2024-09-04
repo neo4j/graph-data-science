@@ -22,15 +22,13 @@ package org.neo4j.gds.applications.algorithms.community;
 import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 
-class ModularityOptimizationMutateStep implements MutateOrWriteStep<ModularityOptimizationResult, NodePropertiesWritten> {
+class ModularityOptimizationMutateStep implements MutateStep<ModularityOptimizationResult, NodePropertiesWritten> {
     private final MutateNodeProperty mutateNodeProperty;
     private final ModularityOptimizationMutateConfig configuration;
 
@@ -46,9 +44,7 @@ class ModularityOptimizationMutateStep implements MutateOrWriteStep<ModularityOp
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        ResultStore resultStore,
-        ModularityOptimizationResult result,
-        JobId jobId
+        ModularityOptimizationResult result
     ) {
         var nodePropertyValues = CommunityCompanion.nodePropertyValues(
             configuration.isIncremental(),

@@ -21,16 +21,14 @@ package org.neo4j.gds.applications.algorithms.embeddings;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMutateConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 
-class GraphSageMutateStep implements MutateOrWriteStep<GraphSageResult, NodePropertiesWritten> {
+class GraphSageMutateStep implements MutateStep<GraphSageResult, NodePropertiesWritten> {
     private final MutateNodeProperty mutateNodeProperty;
     private final GraphSageMutateConfig configuration;
 
@@ -43,9 +41,7 @@ class GraphSageMutateStep implements MutateOrWriteStep<GraphSageResult, NodeProp
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        ResultStore resultStore,
-        GraphSageResult result,
-        JobId jobId
+        GraphSageResult result
     ) {
         var nodePropertyValues = NodePropertyValuesAdapter.adapt(result.embeddings());
 

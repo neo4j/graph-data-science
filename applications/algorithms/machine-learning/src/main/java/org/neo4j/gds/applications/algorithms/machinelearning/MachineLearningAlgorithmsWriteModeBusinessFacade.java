@@ -64,7 +64,7 @@ public class MachineLearningAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new KgeWriteStep(log, requestScopedDependencies, configuration, writeContext);
 
-        return convenience.processRegularAlgorithmInMutateOrWriteMode(
+        return convenience.processRegularAlgorithmInWriteMode(
             graphName,
             configuration,
             KGE,

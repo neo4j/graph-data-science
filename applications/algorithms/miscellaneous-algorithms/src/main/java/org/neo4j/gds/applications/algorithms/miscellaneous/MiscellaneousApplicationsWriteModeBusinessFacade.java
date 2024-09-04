@@ -54,7 +54,7 @@ public class MiscellaneousApplicationsWriteModeBusinessFacade {
     ) {
         var writeStep = new ScalePropertiesWriteStep(writeToDatabase, configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
             configuration,
             ScaleProperties,

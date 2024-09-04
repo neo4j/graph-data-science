@@ -85,7 +85,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new BellmanFordMutateStep(configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
             configuration,
             BellmanFord,
@@ -104,7 +104,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
         var mutateStep = new SearchMutateStep(mutateRelationshipType);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
             configuration,
             BFS,
@@ -122,7 +122,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new ShortestPathMutateStep(configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
             configuration,
             DeltaStepping,
@@ -141,7 +141,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
         var mutateStep = new SearchMutateStep(mutateRelationshipType);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
             configuration,
             DFS,
@@ -159,7 +159,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new RandomWalkCountingNodeVisitsMutateStep(mutateNodeProperty, configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
             configuration,
             RandomWalk,
@@ -178,7 +178,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new ShortestPathMutateStep(configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
             configuration,
             AStar,
@@ -196,7 +196,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new ShortestPathMutateStep(configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
             configuration,
             Dijkstra,
@@ -214,7 +214,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new ShortestPathMutateStep(configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
             configuration,
             Yens,
@@ -232,7 +232,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new ShortestPathMutateStep(configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
             configuration,
             SingleSourceDijkstra,
@@ -250,7 +250,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new SpanningTreeMutateStep(configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
             configuration,
             Algorithm.SpanningTree,
@@ -268,7 +268,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new SteinerTreeMutateStep(configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
             configuration,
             SteinerTree,

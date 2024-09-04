@@ -21,16 +21,14 @@ package org.neo4j.gds.applications.algorithms.community;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.triangle.TriangleCountMutateConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
 
-class TriangleCountMutateStep implements MutateOrWriteStep<TriangleCountResult, NodePropertiesWritten> {
+class TriangleCountMutateStep implements MutateStep<TriangleCountResult, NodePropertiesWritten> {
     private final MutateNodeProperty mutateNodeProperty;
     private final TriangleCountMutateConfig configuration;
 
@@ -43,9 +41,7 @@ class TriangleCountMutateStep implements MutateOrWriteStep<TriangleCountResult, 
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        ResultStore resultStore,
-        TriangleCountResult result,
-        JobId jobId
+        TriangleCountResult result
     ) {
         return mutateNodeProperty.mutateNodeProperties(
             graph,

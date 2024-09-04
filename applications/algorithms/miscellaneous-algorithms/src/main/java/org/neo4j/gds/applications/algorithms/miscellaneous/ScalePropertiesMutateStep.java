@@ -22,15 +22,13 @@ package org.neo4j.gds.applications.algorithms.miscellaneous;
 import org.neo4j.gds.algorithms.misc.ScaledPropertiesNodePropertyValues;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.scaleproperties.ScalePropertiesMutateConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 
-class ScalePropertiesMutateStep implements MutateOrWriteStep<ScalePropertiesResult, NodePropertiesWritten> {
+class ScalePropertiesMutateStep implements MutateStep<ScalePropertiesResult, NodePropertiesWritten> {
     private final MutateNodeProperty mutateNodeProperty;
     private final ScalePropertiesMutateConfig configuration;
 
@@ -43,9 +41,7 @@ class ScalePropertiesMutateStep implements MutateOrWriteStep<ScalePropertiesResu
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        ResultStore resultStore,
-        ScalePropertiesResult result,
-        JobId jobId
+        ScalePropertiesResult result
     ) {
         var nodePropertyValues = new ScaledPropertiesNodePropertyValues(graph.nodeCount(), result.scaledProperties());
 

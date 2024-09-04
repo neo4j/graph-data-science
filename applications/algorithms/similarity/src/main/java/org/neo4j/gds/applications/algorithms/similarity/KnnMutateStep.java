@@ -23,17 +23,15 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
-import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.similarity.knn.KnnMutateConfig;
 import org.neo4j.gds.similarity.knn.KnnResult;
 
 import java.util.Map;
 
-final class KnnMutateStep implements MutateOrWriteStep<KnnResult, Pair<RelationshipsWritten, Map<String, Object>>> {
+final class KnnMutateStep implements MutateStep<KnnResult, Pair<RelationshipsWritten, Map<String, Object>>> {
     private final SimilarityMutation similarityMutation;
     private final KnnMutateConfig configuration;
     private final boolean shouldComputeSimilarityDistribution;
@@ -59,8 +57,7 @@ final class KnnMutateStep implements MutateOrWriteStep<KnnResult, Pair<Relations
     public Pair<RelationshipsWritten, Map<String, Object>> execute(
         Graph graph,
         GraphStore graphStore,
-        ResultStore resultStore, KnnResult result,
-        JobId jobId
+        KnnResult result
     ) {
         return similarityMutation.execute(
             graph,

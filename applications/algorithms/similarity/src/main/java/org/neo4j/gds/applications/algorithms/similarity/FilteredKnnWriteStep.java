@@ -24,7 +24,7 @@ import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
@@ -34,7 +34,7 @@ import java.util.Map;
 
 import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.FilteredKNN;
 
-final class FilteredKnnWriteStep implements MutateOrWriteStep<FilteredKnnResult, Pair<RelationshipsWritten, Map<String, Object>>> {
+final class FilteredKnnWriteStep implements WriteStep<FilteredKnnResult, Pair<RelationshipsWritten, Map<String, Object>>> {
     private final FilteredKnnWriteConfig configuration;
     private final boolean shouldComputeSimilarityDistribution;
     private final SimilarityWrite similarityWrite;

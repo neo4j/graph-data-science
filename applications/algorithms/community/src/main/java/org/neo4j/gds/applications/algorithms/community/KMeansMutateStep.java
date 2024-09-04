@@ -21,16 +21,14 @@ package org.neo4j.gds.applications.algorithms.community;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.kmeans.KmeansMutateConfig;
 import org.neo4j.gds.kmeans.KmeansResult;
 
-class KMeansMutateStep implements MutateOrWriteStep<KmeansResult, NodePropertiesWritten> {
+class KMeansMutateStep implements MutateStep<KmeansResult, NodePropertiesWritten> {
     private final MutateNodeProperty mutateNodeProperty;
     private final KmeansMutateConfig configuration;
 
@@ -43,9 +41,7 @@ class KMeansMutateStep implements MutateOrWriteStep<KmeansResult, NodeProperties
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        ResultStore resultStore,
-        KmeansResult result,
-        JobId jobId
+        KmeansResult result
     ) {
         return mutateNodeProperty.mutateNodeProperties(
             graph,

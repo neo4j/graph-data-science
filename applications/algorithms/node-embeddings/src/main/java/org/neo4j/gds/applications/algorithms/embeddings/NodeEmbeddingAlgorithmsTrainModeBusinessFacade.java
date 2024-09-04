@@ -67,7 +67,7 @@ public class NodeEmbeddingAlgorithmsTrainModeBusinessFacade {
             configuration
         );
 
-        return algorithmProcessingTemplateConvenience.processAlgorithm(
+        return algorithmProcessingTemplateConvenience.processAlgorithmInWriteMode(
             Optional.empty(),
             graphName,
             configuration,

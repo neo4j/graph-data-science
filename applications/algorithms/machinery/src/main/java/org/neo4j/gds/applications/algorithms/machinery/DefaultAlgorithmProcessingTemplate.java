@@ -61,7 +61,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
     }
 
     @Override
-    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER processAlgorithm(
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM, WRITE_METADATA> RESULT_TO_CALLER processAlgorithmForWrite(
         Optional<String> relationshipWeightOverride,
         GraphName graphName,
         CONFIGURATION configuration,
@@ -69,8 +69,8 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         Algorithm algorithmMetadata,
         Supplier<MemoryEstimation> estimationFactory,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
-        MutateOrWriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> mutateOrWriteStep,
-        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
+        WriteStep<RESULT_FROM_ALGORITHM, WRITE_METADATA> mutateOrWriteStep,
+        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, WRITE_METADATA> resultBuilder
     ) {
         // as we progress through the steps we gather timings
         var timingsBuilder = new AlgorithmProcessingTimingsBuilder();
@@ -93,7 +93,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             timingsBuilder
         );
 
-        var metadata = mutateOrWriteWithTiming(
+        var metadata = writeWithTiming(
             mutateOrWriteStep,
             timingsBuilder,
             graphResources.graph(),
@@ -101,6 +101,58 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             graphResources.resultStore(),
             result,
             configuration.jobId()
+        );
+
+        // inject dependencies to render results
+        return resultBuilder.build(
+            graphResources.graph(),
+            graphResources.graphStore(),
+            configuration,
+            result,
+            timingsBuilder.build(),
+            metadata
+        );
+    }
+
+
+    @Override
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM, MUTATE_METADATA> RESULT_TO_CALLER processAlgorithmForMutate(
+        Optional<String> relationshipWeightOverride,
+        GraphName graphName,
+        CONFIGURATION configuration,
+        Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
+        Algorithm algorithmMetadata,
+        Supplier<MemoryEstimation> estimationFactory,
+        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
+        MutateStep<RESULT_FROM_ALGORITHM, MUTATE_METADATA> mutateStep,
+        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_METADATA> resultBuilder
+    ) {
+        var timingsBuilder = new AlgorithmProcessingTimingsBuilder();
+
+        var graphResources = graphLoadAndValidationWithTiming(
+            timingsBuilder,
+            relationshipWeightOverride,
+            graphName,
+            configuration,
+            postGraphStoreLoadValidationHooks
+        );
+
+        var result = runComputation(
+            configuration,
+            graphResources.graph(),
+            graphResources.graphStore(),
+            algorithmMetadata,
+            estimationFactory,
+            algorithmComputation,
+            timingsBuilder
+        );
+
+        var metadata = mutateWithTiming(
+            mutateStep,
+            timingsBuilder,
+            graphResources.graph(),
+            graphResources.graphStore(),
+            result
         );
 
         // inject dependencies to render results
@@ -293,8 +345,8 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
     /**
      * @return null if we are not in mutate or write mode; appropriate metadata otherwise
      */
-    <RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> Optional<MUTATE_OR_WRITE_METADATA> mutateOrWriteWithTiming(
-        MutateOrWriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> mutateOrWriteStep,
+    <RESULT_FROM_ALGORITHM, WRITE_METADATA> Optional<WRITE_METADATA> writeWithTiming(
+        WriteStep<RESULT_FROM_ALGORITHM, WRITE_METADATA> mutateOrWriteStep,
         AlgorithmProcessingTimingsBuilder timingsBuilder,
         Graph graph,
         GraphStore graphStore,
@@ -306,6 +358,20 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
 
         try (ProgressTimer ignored = ProgressTimer.start(timingsBuilder::withMutateOrWriteMillis)) {
             return Optional.ofNullable(mutateOrWriteStep.execute(graph, graphStore, resultStore, result.get(), jobId));
+        }
+    }
+
+    <RESULT_FROM_ALGORITHM, MUTATE_METADATA> Optional<MUTATE_METADATA> mutateWithTiming(
+        MutateStep<RESULT_FROM_ALGORITHM, MUTATE_METADATA> mutateOrWriteStep,
+        AlgorithmProcessingTimingsBuilder timingsBuilder,
+        Graph graph,
+        GraphStore graphStore,
+        Optional<RESULT_FROM_ALGORITHM> result
+    ) {
+        if (result.isEmpty()) return Optional.empty();
+
+        try (ProgressTimer ignored = ProgressTimer.start(timingsBuilder::withMutateOrWriteMillis)) {
+            return Optional.ofNullable(mutateOrWriteStep.execute(graph, graphStore, result.get()));
         }
     }
 

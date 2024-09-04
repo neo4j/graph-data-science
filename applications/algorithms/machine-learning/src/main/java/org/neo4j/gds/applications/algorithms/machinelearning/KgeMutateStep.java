@@ -25,17 +25,15 @@ import org.neo4j.gds.algorithms.machinelearning.KGEPredictMutateConfig;
 import org.neo4j.gds.algorithms.machinelearning.KGEPredictResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.termination.TerminationFlag;
 
-class KgeMutateStep implements MutateOrWriteStep<KGEPredictResult, RelationshipsWritten> {
+class KgeMutateStep implements MutateStep<KGEPredictResult, RelationshipsWritten> {
     private final TerminationFlag terminationFlag;
     private final KGEPredictMutateConfig configuration;
 
@@ -48,9 +46,7 @@ class KgeMutateStep implements MutateOrWriteStep<KGEPredictResult, Relationships
     public RelationshipsWritten execute(
         Graph graph,
         GraphStore graphStore,
-        ResultStore resultStore,
-        KGEPredictResult result,
-        JobId jobId
+        KGEPredictResult result
     ) {
         var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
 

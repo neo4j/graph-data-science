@@ -23,7 +23,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -32,7 +32,7 @@ import org.neo4j.gds.scc.SccAlphaWriteConfig;
 
 import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.SCC;
 
-class SccAlphaWriteStep implements MutateOrWriteStep<HugeLongArray, NodePropertiesWritten> {
+class SccAlphaWriteStep implements WriteStep<HugeLongArray, NodePropertiesWritten> {
     private final WriteToDatabase writeToDatabase;
     private final SccAlphaWriteConfig configuration;
 

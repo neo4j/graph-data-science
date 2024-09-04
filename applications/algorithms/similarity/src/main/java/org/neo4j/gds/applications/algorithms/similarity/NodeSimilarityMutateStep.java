@@ -23,17 +23,15 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
-import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
 import java.util.Map;
 
-final class NodeSimilarityMutateStep implements MutateOrWriteStep<NodeSimilarityResult, Pair<RelationshipsWritten, Map<String, Object>>> {
+final class NodeSimilarityMutateStep implements MutateStep<NodeSimilarityResult, Pair<RelationshipsWritten, Map<String, Object>>> {
     private final SimilarityMutation similarityMutation;
     private final NodeSimilarityMutateConfig configuration;
     private final boolean shouldComputeSimilarityDistribution;
@@ -63,9 +61,7 @@ final class NodeSimilarityMutateStep implements MutateOrWriteStep<NodeSimilarity
     public Pair<RelationshipsWritten, Map<String, Object>> execute(
         Graph graph,
         GraphStore graphStore,
-        ResultStore resultStore,
-        NodeSimilarityResult result,
-        JobId jobId
+        NodeSimilarityResult result
     ) {
         return similarityMutation.execute(
             graph,

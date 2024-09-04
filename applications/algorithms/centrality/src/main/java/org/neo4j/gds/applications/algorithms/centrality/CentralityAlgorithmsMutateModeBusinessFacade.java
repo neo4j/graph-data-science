@@ -74,7 +74,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new PageRankMutateStep(mutateNodeProperty, configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
             configuration,
             ArticleRank,
@@ -92,7 +92,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new ArticulationPointsMutateStep(mutateNodeProperty, configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
             configuration,
             ArticulationPoints,
@@ -111,7 +111,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new BetweennessCentralityMutateStep(mutateNodeProperty, configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
             configuration,
             BetweennessCentrality,
@@ -129,7 +129,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new CelfMutateStep(mutateNodeProperty, configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
             configuration,
             CELF,
@@ -147,7 +147,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new ClosenessCentralityMutateStep(mutateNodeProperty, configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
             configuration,
             ClosenessCentrality,
@@ -165,7 +165,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new DegreeCentralityMutateStep(mutateNodeProperty, configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
             configuration,
             DegreeCentrality,
@@ -183,7 +183,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new PageRankMutateStep(mutateNodeProperty, configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
             configuration,
             EigenVector,
@@ -201,7 +201,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new HarmonicCentralityMutateStep(mutateNodeProperty, configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
             configuration,
             HarmonicCentrality,
@@ -219,7 +219,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
     ) {
         var mutateStep = new PageRankMutateStep(mutateNodeProperty, configuration);
 
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateOrWriteMode(
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
             configuration,
             PageRank,

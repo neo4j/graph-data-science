@@ -35,11 +35,11 @@ public class AlgorithmProcessingTemplateConvenience {
     public AlgorithmProcessingTemplateConvenience(AlgorithmProcessingTemplate algorithmProcessingTemplate) {
         this.algorithmProcessingTemplate = algorithmProcessingTemplate;
     }
-
+    //WRITE
     /**
      * With all bells and whistles
      */
-    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER processAlgorithm(
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM, WRITE_METADATA> RESULT_TO_CALLER processAlgorithmInWriteMode(
         Optional<String> relationshipWeightOverride,
         GraphName graphName,
         CONFIGURATION configuration,
@@ -47,10 +47,10 @@ public class AlgorithmProcessingTemplateConvenience {
         Algorithm algorithmMetadata,
         Supplier<MemoryEstimation> estimationFactory,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
-        MutateOrWriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> mutateOrWriteStep,
-        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
+        WriteStep<RESULT_FROM_ALGORITHM, WRITE_METADATA> writeStep,
+        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, WRITE_METADATA> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
+        return algorithmProcessingTemplate.processAlgorithmForWrite(
             relationshipWeightOverride,
             graphName,
             configuration,
@@ -58,7 +58,7 @@ public class AlgorithmProcessingTemplateConvenience {
             algorithmMetadata,
             estimationFactory,
             algorithmComputation,
-            mutateOrWriteStep,
+            writeStep,
             resultBuilder
         );
     }
@@ -66,16 +66,66 @@ public class AlgorithmProcessingTemplateConvenience {
     /**
      * No relationship weight override, no validation hooks
      */
-    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER processRegularAlgorithmInMutateOrWriteMode(
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM, WRITE_METADATA> RESULT_TO_CALLER processRegularAlgorithmInWriteMode(
         GraphName graphName,
         CONFIGURATION configuration,
         Algorithm algorithmMetadata,
         Supplier<MemoryEstimation> estimationFactory,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
-        MutateOrWriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> mutateStep,
-        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
+        WriteStep<RESULT_FROM_ALGORITHM, WRITE_METADATA> writeStep,
+        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, WRITE_METADATA> resultBuilder
     ) {
-        return algorithmProcessingTemplate.processAlgorithm(
+        return algorithmProcessingTemplate.processAlgorithmForWrite(
+            Optional.empty(),
+            graphName,
+            configuration,
+            Optional.empty(),
+            algorithmMetadata,
+            estimationFactory,
+            algorithmComputation,
+            writeStep,
+            resultBuilder
+        );
+    }
+
+    //MUTATE
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM, MUTATE_METADATA> RESULT_TO_CALLER processAlgorithmInMutateMode(
+        Optional<String> relationshipWeightOverride,
+        GraphName graphName,
+        CONFIGURATION configuration,
+        Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
+        Algorithm algorithmMetadata,
+        Supplier<MemoryEstimation> estimationFactory,
+        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
+        MutateStep<RESULT_FROM_ALGORITHM, MUTATE_METADATA> mutateStep,
+        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_METADATA> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithmForMutate(
+            relationshipWeightOverride,
+            graphName,
+            configuration,
+            postGraphStoreLoadValidationHooks,
+            algorithmMetadata,
+            estimationFactory,
+            algorithmComputation,
+            mutateStep,
+            resultBuilder
+        );
+    }
+
+    /**
+     * No relationship weight override, no validation hooks
+     */
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM, MUTATE_METADATA> RESULT_TO_CALLER processRegularAlgorithmInMutateMode(
+        GraphName graphName,
+        CONFIGURATION configuration,
+        Algorithm algorithmMetadata,
+        Supplier<MemoryEstimation> estimationFactory,
+        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
+        MutateStep<RESULT_FROM_ALGORITHM, MUTATE_METADATA> mutateStep,
+        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_METADATA> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithmForMutate(
             Optional.empty(),
             graphName,
             configuration,
@@ -87,6 +137,9 @@ public class AlgorithmProcessingTemplateConvenience {
             resultBuilder
         );
     }
+
+
+        //STATS
 
     /**
      * No relationship weight override, no validation hooks, no mutate or write step
