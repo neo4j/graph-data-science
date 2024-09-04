@@ -41,5 +41,5 @@ public class GraphSageAlgorithmProcessing {
         return new GraphSageProcessParameters(validationHook,relationshipWeightPropertyFromTrainConfiguration);
     }
 
-    public record GraphSageProcessParameters(GraphSageValidationHook validationHook, Optional<String> relationshipWeightPropertyFromTrainConfiguration){}
+    record GraphSageProcessParameters(GraphSageValidationHook validationHook, Optional<String> relationshipWeightPropertyFromTrainConfiguration){}
 }
