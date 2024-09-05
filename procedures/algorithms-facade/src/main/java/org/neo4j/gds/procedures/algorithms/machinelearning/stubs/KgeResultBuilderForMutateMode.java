@@ -22,7 +22,6 @@ package org.neo4j.gds.procedures.algorithms.machinelearning.stubs;
 import org.neo4j.gds.algorithms.machinelearning.KGEPredictMutateConfig;
 import org.neo4j.gds.algorithms.machinelearning.KGEPredictResult;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
@@ -34,7 +33,6 @@ class KgeResultBuilderForMutateMode implements ResultBuilder<KGEPredictMutateCon
     @Override
     public KGEMutateResult build(
         Graph graph,
-        GraphStore graphStore,
         KGEPredictMutateConfig configuration,
         Optional<KGEPredictResult> result,
         AlgorithmProcessingTimings timings,

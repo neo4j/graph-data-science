@@ -20,7 +20,6 @@
 package org.neo4j.gds.procedures.algorithms.pathfinding.stubs;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
@@ -34,7 +33,6 @@ public class SpanningTreeResultBuilderForMutateMode implements ResultBuilder<Spa
     @Override
     public SpanningTreeMutateResult build(
         Graph graph,
-        GraphStore graphStore,
         SpanningTreeMutateConfig configuration,
         Optional<SpanningTree> result,
         AlgorithmProcessingTimings timings,

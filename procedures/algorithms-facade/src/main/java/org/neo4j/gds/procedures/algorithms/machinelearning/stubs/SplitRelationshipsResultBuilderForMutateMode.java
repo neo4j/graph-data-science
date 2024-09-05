@@ -20,7 +20,6 @@
 package org.neo4j.gds.procedures.algorithms.machinelearning.stubs;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
@@ -34,7 +33,6 @@ class SplitRelationshipsResultBuilderForMutateMode implements ResultBuilder<Spli
     @Override
     public SplitRelationshipsMutateResult build(
         Graph graph,
-        GraphStore graphStore,
         SplitRelationshipsMutateConfig configuration,
         Optional<EdgeSplitter.SplitResult> result,
         AlgorithmProcessingTimings timings,

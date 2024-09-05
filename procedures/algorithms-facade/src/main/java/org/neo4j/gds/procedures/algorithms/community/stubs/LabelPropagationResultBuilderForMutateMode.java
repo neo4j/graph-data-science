@@ -19,10 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms.community.stubs;
 
-import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
@@ -46,7 +43,6 @@ public class LabelPropagationResultBuilderForMutateMode implements ResultBuilder
     @Override
     public LabelPropagationMutateResult build(
         Graph graph,
-        GraphStore graphStore,
         LabelPropagationMutateConfig configuration,
         Optional<LabelPropagationResult> result,
         AlgorithmProcessingTimings timings,
@@ -56,19 +52,12 @@ public class LabelPropagationResultBuilderForMutateMode implements ResultBuilder
 
         var labelPropagationResult = result.get();
 
-        var nodePropertyValues = CommunityCompanion.nodePropertyValues(
-            configuration.isIncremental(),
-            configuration.mutateProperty(),
-            configuration.seedProperty(),
-            configuration.consecutiveIds(),
-            NodePropertyValuesAdapter.adapt(labelPropagationResult.labels()),
-            () -> graphStore.nodeProperty(configuration.seedProperty())
-        );
+
 
         var communityStatisticsWithTiming = communityStatisticsWithTimingComputer.compute(
             configuration,
             statisticsComputationInstructions,
-            nodePropertyValues.nodeCount(),
+            labelPropagationResult.labels().size(),
             labelPropagationResult.labels()::get
         );
 

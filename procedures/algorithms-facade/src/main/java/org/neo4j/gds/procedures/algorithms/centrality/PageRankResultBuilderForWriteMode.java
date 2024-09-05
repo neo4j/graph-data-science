@@ -21,7 +21,6 @@ package org.neo4j.gds.procedures.algorithms.centrality;
 
 import org.neo4j.gds.algorithms.centrality.PageRankDistributionComputer;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
@@ -41,7 +40,6 @@ class PageRankResultBuilderForWriteMode implements ResultBuilder<PageRankWriteCo
     @Override
     public Stream<PageRankWriteResult> build(
         Graph graph,
-        GraphStore graphStore,
         PageRankWriteConfig configuration,
         Optional<PageRankResult> result,
         AlgorithmProcessingTimings timings,

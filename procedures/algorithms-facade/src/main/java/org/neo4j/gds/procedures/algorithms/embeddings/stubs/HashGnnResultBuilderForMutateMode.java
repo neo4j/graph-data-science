@@ -20,7 +20,6 @@
 package org.neo4j.gds.procedures.algorithms.embeddings.stubs;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
@@ -34,7 +33,6 @@ public class HashGnnResultBuilderForMutateMode implements ResultBuilder<HashGNNM
     @Override
     public DefaultNodeEmbeddingMutateResult build(
         Graph graph,
-        GraphStore graphStore,
         HashGNNMutateConfig configuration,
         Optional<HashGNNResult> result,
         AlgorithmProcessingTimings timings,

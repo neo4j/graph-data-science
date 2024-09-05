@@ -20,7 +20,6 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
@@ -37,7 +36,6 @@ class K1ColoringResultBuilderForWriteMode implements ResultBuilder<K1ColoringWri
     @Override
     public Stream<K1ColoringWriteResult> build(
         Graph graph,
-        GraphStore graphStore,
         K1ColoringWriteConfig configuration,
         Optional<K1ColoringResult> result,
         AlgorithmProcessingTimings timings,

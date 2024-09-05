@@ -157,14 +157,12 @@ class DefaultAlgorithmProcessingTemplateTest {
             @Override
             public String build(
                 Graph actualGraph,
-                GraphStore actualGraphStore,
                 ExampleConfiguration configuration,
                 Optional<ExampleResult> actualResult,
                 AlgorithmProcessingTimings timings,
                 Optional<Long> metadata
             ) {
                 assertThat(actualGraph).isEqualTo(graph);
-                assertThat(actualGraphStore).isEqualTo(graphStore);
                 assertThat(actualResult).hasValue(pathFindingResult);
 
                 assertThat(metadata.orElseThrow()).isEqualTo(42L);
@@ -268,7 +266,6 @@ class DefaultAlgorithmProcessingTemplateTest {
             @Override
             public Map<String, Long> build(
                 Graph graph,
-                GraphStore graphStore,
                 ExampleConfiguration configuration,
                 Optional<Void> unused,
                 AlgorithmProcessingTimings timings,

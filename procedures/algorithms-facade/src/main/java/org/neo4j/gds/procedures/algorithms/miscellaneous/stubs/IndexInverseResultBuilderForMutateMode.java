@@ -21,7 +21,6 @@ package org.neo4j.gds.procedures.algorithms.miscellaneous.stubs;
 
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
@@ -35,7 +34,6 @@ class IndexInverseResultBuilderForMutateMode implements ResultBuilder<InverseRel
     @Override
     public IndexInverseMutateResult build(
         Graph graph,
-        GraphStore graphStore,
         InverseRelationshipsConfig configuration,
         Optional<Map<RelationshipType, SingleTypeRelationships>> result,
         AlgorithmProcessingTimings timings,

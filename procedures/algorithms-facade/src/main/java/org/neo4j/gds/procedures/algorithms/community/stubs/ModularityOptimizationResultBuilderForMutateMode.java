@@ -19,9 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms.community.stubs;
 
-import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
@@ -45,7 +43,6 @@ public class ModularityOptimizationResultBuilderForMutateMode implements ResultB
     @Override
     public ModularityOptimizationMutateResult build(
         Graph graph,
-        GraphStore graphStore,
         ModularityOptimizationMutateConfig configuration,
         Optional<ModularityOptimizationResult> result,
         AlgorithmProcessingTimings timings,
@@ -55,19 +52,12 @@ public class ModularityOptimizationResultBuilderForMutateMode implements ResultB
 
         var modularityOptimizationResult = result.get();
 
-        var nodePropertyValues = CommunityCompanion.nodePropertyValues(
-            configuration.isIncremental(),
-            configuration.mutateProperty(),
-            configuration.seedProperty(),
-            configuration.consecutiveIds(),
-            modularityOptimizationResult.asNodeProperties(),
-            () -> graphStore.nodeProperty(configuration.seedProperty())
-        );
+      var nodeCount= modularityOptimizationResult.asNodeProperties().nodeCount();
 
         var communityStatisticsWithTiming = communityStatisticsWithTimingComputer.compute(
             configuration,
             statisticsComputationInstructions,
-            nodePropertyValues.nodeCount(),
+            nodeCount,
             modularityOptimizationResult::communityId
         );
 

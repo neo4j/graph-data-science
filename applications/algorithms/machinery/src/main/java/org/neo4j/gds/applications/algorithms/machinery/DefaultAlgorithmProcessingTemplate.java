@@ -106,7 +106,6 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         // inject dependencies to render results
         return resultBuilder.build(
             graphResources.graph(),
-            graphResources.graphStore(),
             configuration,
             result,
             timingsBuilder.build(),
@@ -158,7 +157,6 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         // inject dependencies to render results
         return resultBuilder.build(
             graphResources.graph(),
-            graphResources.graphStore(),
             configuration,
             result,
             timingsBuilder.build(),

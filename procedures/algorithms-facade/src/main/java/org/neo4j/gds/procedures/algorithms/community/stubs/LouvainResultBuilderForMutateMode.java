@@ -20,8 +20,6 @@
 package org.neo4j.gds.procedures.algorithms.community.stubs;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.algorithms.community.LouvainNodePropertyValuesComputer;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
@@ -45,7 +43,6 @@ public class LouvainResultBuilderForMutateMode implements ResultBuilder<LouvainM
     @Override
     public LouvainMutateResult build(
         Graph graph,
-        GraphStore graphStore,
         LouvainMutateConfig configuration,
         Optional<LouvainResult> result,
         AlgorithmProcessingTimings timings,
@@ -55,17 +52,12 @@ public class LouvainResultBuilderForMutateMode implements ResultBuilder<LouvainM
 
         var louvainResult = result.get();
 
-        var nodePropertyValues = new LouvainNodePropertyValuesComputer().compute(
-            graphStore,
-            configuration,
-            configuration.mutateProperty(),
-            louvainResult
-        );
+
 
         var communityStatisticsWithTiming = communityStatisticsWithTimingComputer.compute(
             configuration,
             statisticsComputationInstructions,
-            nodePropertyValues.nodeCount(),
+            louvainResult.communities().size(),
             louvainResult::community
         );
 

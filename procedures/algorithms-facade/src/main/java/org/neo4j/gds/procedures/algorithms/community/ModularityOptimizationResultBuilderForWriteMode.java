@@ -19,9 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
@@ -44,7 +42,6 @@ class ModularityOptimizationResultBuilderForWriteMode implements ResultBuilder<M
     @Override
     public Stream<ModularityOptimizationWriteResult> build(
         Graph graph,
-        GraphStore graphStore,
         ModularityOptimizationWriteConfig configuration,
         Optional<ModularityOptimizationResult> result,
         AlgorithmProcessingTimings timings,
@@ -57,19 +54,8 @@ class ModularityOptimizationResultBuilderForWriteMode implements ResultBuilder<M
 
         var modularityOptimizationResult = result.get();
 
-        var nodePropertyValues = CommunityCompanion.nodePropertyValues(
-            configuration.isIncremental(),
-            configuration.writeProperty(),
-            configuration.seedProperty(),
-            configuration.consecutiveIds(),
-            modularityOptimizationResult.asNodeProperties(),
-            configuration.minCommunitySize(),
-            configuration.concurrency(),
-            () -> graphStore.nodeProperty(configuration.seedProperty())
-        );
-
         var communityStatistics = CommunityStatistics.communityStats(
-            nodePropertyValues.nodeCount(),
+            modularityOptimizationResult.asNodeProperties().nodeCount(),
             modularityOptimizationResult::communityId,
             DefaultPool.INSTANCE,
             configuration.concurrency(),

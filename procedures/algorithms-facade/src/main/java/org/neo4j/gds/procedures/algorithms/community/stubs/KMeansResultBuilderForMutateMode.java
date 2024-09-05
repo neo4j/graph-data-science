@@ -20,7 +20,6 @@
 package org.neo4j.gds.procedures.algorithms.community.stubs;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
@@ -51,7 +50,6 @@ public class KMeansResultBuilderForMutateMode implements ResultBuilder<KmeansMut
     @Override
     public KmeansMutateResult build(
         Graph graph,
-        GraphStore graphStore,
         KmeansMutateConfig configuration,
         Optional<KmeansResult> result,
         AlgorithmProcessingTimings timings,

@@ -21,7 +21,6 @@ package org.neo4j.gds.procedures.algorithms.community;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
@@ -45,7 +44,6 @@ class LabelPropagationResultBuilderForWriteMode implements ResultBuilder<LabelPr
     @Override
     public Stream<LabelPropagationWriteResult> build(
         Graph graph,
-        GraphStore graphStore,
         LabelPropagationWriteConfig configuration,
         Optional<LabelPropagationResult> result,
         AlgorithmProcessingTimings timings,

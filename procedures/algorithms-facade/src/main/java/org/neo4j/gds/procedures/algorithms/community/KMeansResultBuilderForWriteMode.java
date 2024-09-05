@@ -20,7 +20,6 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
@@ -49,7 +48,6 @@ class KMeansResultBuilderForWriteMode implements ResultBuilder<KmeansWriteConfig
     @Override
     public Stream<KmeansWriteResult> build(
         Graph graph,
-        GraphStore graphStore,
         KmeansWriteConfig configuration,
         Optional<KmeansResult> result,
         AlgorithmProcessingTimings timings,

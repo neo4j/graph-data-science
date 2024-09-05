@@ -21,7 +21,6 @@ package org.neo4j.gds.procedures.algorithms.centrality;
 
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
@@ -42,7 +41,6 @@ class BetaClosenessCentralityResultBuilderForWriteMode implements ResultBuilder<
     @Override
     public Stream<BetaClosenessCentralityWriteResult> build(
         Graph graph,
-        GraphStore graphStore,
         ClosenessCentralityWriteConfig configuration,
         Optional<CentralityAlgorithmResult> result,
         AlgorithmProcessingTimings timings,

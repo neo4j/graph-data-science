@@ -20,7 +20,6 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
@@ -44,7 +43,6 @@ class SccAlphaResultBuilderForWriteMode implements ResultBuilder<SccAlphaWriteCo
     @Override
     public Stream<AlphaSccWriteResult> build(
         Graph graph,
-        GraphStore graphStore,
         SccAlphaWriteConfig configuration,
         Optional<HugeLongArray> result,
         AlgorithmProcessingTimings timings,

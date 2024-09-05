@@ -20,7 +20,6 @@
 package org.neo4j.gds.procedures.algorithms.embeddings;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
@@ -34,7 +33,6 @@ class Node2VecResultBuilderForWriteMode implements ResultBuilder<Node2VecWriteCo
     @Override
     public Stream<Node2VecWriteResult> build(
         Graph graph,
-        GraphStore graphStore,
         Node2VecWriteConfig configuration,
         Optional<Node2VecResult> result,
         AlgorithmProcessingTimings timings,

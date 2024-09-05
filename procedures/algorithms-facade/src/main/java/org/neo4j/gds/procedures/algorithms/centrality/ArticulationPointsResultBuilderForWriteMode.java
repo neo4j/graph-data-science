@@ -21,7 +21,6 @@ package org.neo4j.gds.procedures.algorithms.centrality;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
@@ -35,7 +34,6 @@ class ArticulationPointsResultBuilderForWriteMode implements ResultBuilder<Artic
     @Override
     public Stream<ArticulationPointsWriteResult> build(
         Graph graph,
-        GraphStore graphStore,
         ArticulationPointsWriteConfig configuration,
         Optional<BitSet> result,
         AlgorithmProcessingTimings timings,

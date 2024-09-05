@@ -20,7 +20,6 @@
 package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 
 import java.util.Optional;
 
@@ -42,7 +41,6 @@ public interface ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_C
      */
     RESULT_TO_CALLER build(
         Graph graph,
-        GraphStore graphStore,
         CONFIGURATION configuration,
         Optional<RESULT_FROM_ALGORITHM> result,
         AlgorithmProcessingTimings timings,

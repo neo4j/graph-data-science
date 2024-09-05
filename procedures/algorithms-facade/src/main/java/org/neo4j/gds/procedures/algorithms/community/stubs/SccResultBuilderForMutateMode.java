@@ -21,7 +21,6 @@ package org.neo4j.gds.procedures.algorithms.community.stubs;
 
 import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
@@ -46,7 +45,6 @@ public class SccResultBuilderForMutateMode implements ResultBuilder<SccMutateCon
     @Override
     public SccMutateResult build(
         Graph graph,
-        GraphStore graphStore,
         SccMutateConfig configuration,
         Optional<HugeLongArray> result,
         AlgorithmProcessingTimings timings,

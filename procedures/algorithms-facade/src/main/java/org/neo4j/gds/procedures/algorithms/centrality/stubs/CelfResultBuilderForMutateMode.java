@@ -20,7 +20,6 @@
 package org.neo4j.gds.procedures.algorithms.centrality.stubs;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
@@ -34,7 +33,6 @@ public class CelfResultBuilderForMutateMode implements ResultBuilder<InfluenceMa
     @Override
     public CELFMutateResult build(
         Graph graph,
-        GraphStore graphStore,
         InfluenceMaximizationMutateConfig configuration,
         Optional<CELFResult> result,
         AlgorithmProcessingTimings timings,

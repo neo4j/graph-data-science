@@ -20,7 +20,6 @@
 package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.community.LouvainNodePropertyValuesComputer;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
@@ -47,7 +46,6 @@ class LouvainResultBuilderForWriteMode implements ResultBuilder<LouvainWriteConf
     @Override
     public Stream<LouvainWriteResult> build(
         Graph graph,
-        GraphStore graphStore,
         LouvainWriteConfig configuration,
         Optional<LouvainResult> result,
         AlgorithmProcessingTimings timings,
@@ -57,15 +55,9 @@ class LouvainResultBuilderForWriteMode implements ResultBuilder<LouvainWriteConf
 
         var louvainResult = result.get();
 
-        var nodePropertyValues = louvainNodePropertyValuesComputer.compute(
-            graphStore,
-            configuration,
-            configuration.writeProperty(),
-            louvainResult
-        );
 
         var communityStatistics = CommunityStatistics.communityStats(
-            nodePropertyValues.nodeCount(),
+            louvainResult.communities().size(),
             louvainResult::community,
             DefaultPool.INSTANCE,
             configuration.concurrency(),

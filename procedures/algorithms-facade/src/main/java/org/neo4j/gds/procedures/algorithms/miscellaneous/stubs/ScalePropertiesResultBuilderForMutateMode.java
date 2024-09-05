@@ -20,7 +20,6 @@
 package org.neo4j.gds.procedures.algorithms.miscellaneous.stubs;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
@@ -40,7 +39,6 @@ class ScalePropertiesResultBuilderForMutateMode implements ResultBuilder<ScalePr
     @Override
     public ScalePropertiesMutateResult build(
         Graph graph,
-        GraphStore graphStore,
         ScalePropertiesMutateConfig configuration,
         Optional<ScalePropertiesResult> result,
         AlgorithmProcessingTimings timings,
