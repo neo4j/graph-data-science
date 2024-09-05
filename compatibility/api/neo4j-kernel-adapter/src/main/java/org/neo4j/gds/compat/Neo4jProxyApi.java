@@ -24,7 +24,6 @@ import org.neo4j.configuration.Config;
 import org.neo4j.dbms.api.DatabaseNotFoundException;
 import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.compat.batchimport.BatchImporter;
-import org.neo4j.gds.compat.batchimport.ExecutionMonitor;
 import org.neo4j.gds.compat.batchimport.ImportConfig;
 import org.neo4j.gds.compat.batchimport.Monitor;
 import org.neo4j.gds.compat.batchimport.input.Collector;
@@ -39,12 +38,11 @@ import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.values.SequenceValue;
 
 import java.io.OutputStream;
-import java.util.function.LongConsumer;
 
 public interface Neo4jProxyApi {
 
     @CompatSince(minor = 23)
-    BatchImporter instantiateBlockBatchImporter(
+    BatchImporter instantiateBatchImporter(
         DatabaseLayout dbLayout,
         FileSystemAbstraction fileSystem,
         ImportConfig config,
@@ -54,30 +52,6 @@ public interface Neo4jProxyApi {
         JobScheduler jobScheduler,
         Collector badCollector
     );
-
-    @CompatSince(minor = 23)
-    BatchImporter instantiateRecordBatchImporter(
-        DatabaseLayout directoryStructure,
-        FileSystemAbstraction fileSystem,
-        ImportConfig config,
-        ExecutionMonitor executionMonitor,
-        LogService logService,
-        Config dbConfig,
-        JobScheduler jobScheduler,
-        Collector badCollector
-    );
-
-    @CompatSince(minor = 23)
-    default ExecutionMonitor newCoarseBoundedProgressExecutionMonitor(
-        long highNodeId,
-        long highRelationshipId,
-        int batchSize,
-        LongConsumer progress,
-        LongConsumer outNumberOfBatches
-    ) {
-        throw new UnsupportedOperationException(
-            "`org.neo4j.gds.compat._519.Neo4jProxyApi.newCoarseBoundedProgressExecutionMonitor` is not yet implemented.");
-    }
 
     @CompatSince(minor = 23)
     ReadableGroups newGroups();

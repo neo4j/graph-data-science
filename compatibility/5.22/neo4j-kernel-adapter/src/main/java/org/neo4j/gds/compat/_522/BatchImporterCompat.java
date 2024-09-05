@@ -19,10 +19,8 @@
  */
 package org.neo4j.gds.compat._522;
 
-import org.neo4j.common.DependencyResolver;
 import org.neo4j.configuration.Config;
 import org.neo4j.gds.compat.batchimport.BatchImporter;
-import org.neo4j.gds.compat.batchimport.ExecutionMonitor;
 import org.neo4j.gds.compat.batchimport.ImportConfig;
 import org.neo4j.gds.compat.batchimport.InputIterable;
 import org.neo4j.gds.compat.batchimport.InputIterator;
@@ -36,18 +34,14 @@ import org.neo4j.gds.compat.batchimport.input.InputChunk;
 import org.neo4j.gds.compat.batchimport.input.InputEntityVisitor;
 import org.neo4j.gds.compat.batchimport.input.ReadableGroups;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
-import org.neo4j.internal.batchimport.BatchImporterFactory;
 import org.neo4j.internal.batchimport.IndexConfig;
 import org.neo4j.internal.batchimport.input.Collectors;
 import org.neo4j.internal.batchimport.input.Groups;
-import org.neo4j.internal.batchimport.staging.CoarseBoundedProgressExecutionMonitor;
-import org.neo4j.internal.batchimport.staging.StageExecution;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.context.CursorContextFactory;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
-import org.neo4j.kernel.impl.transaction.log.EmptyLogTailMetadata;
 import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.memory.EmptyMemoryTracker;
@@ -58,13 +52,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
-import java.util.function.LongConsumer;
 
 public final class BatchImporterCompat {
 
     private BatchImporterCompat() {}
 
-    static BatchImporter instantiateBlockBatchImporter(
+    static BatchImporter instantiateBatchImporter(
         DatabaseLayout dbLayout,
         FileSystemAbstraction fileSystem,
         ImportConfig config,
@@ -105,40 +98,6 @@ public final class BatchImporterCompat {
         private MonitorAdapter(Monitor delegate) {this.delegate = delegate;}
 
         @Override
-        public void doubleRelationshipRecordUnitsEnabled() {
-            delegate.doubleRelationshipRecordUnitsEnabled();
-        }
-
-        @Override
-        public void mayExceedNodeIdCapacity(long capacity, long estimatedCount) {
-            delegate.mayExceedNodeIdCapacity(capacity, estimatedCount);
-        }
-
-        @Override
-        public void mayExceedRelationshipIdCapacity(long capacity, long estimatedCount) {
-            delegate.mayExceedRelationshipIdCapacity(capacity, estimatedCount);
-        }
-
-        @Override
-        public void insufficientHeapSize(long optimalMinimalHeapSize, long heapSize) {
-            delegate.insufficientHeapSize(optimalMinimalHeapSize, heapSize);
-        }
-
-        @Override
-        public void abundantHeapSize(long optimalMinimalHeapSize, long heapSize) {
-            delegate.abundantHeapSize(optimalMinimalHeapSize, heapSize);
-        }
-
-        @Override
-        public void insufficientAvailableMemory(
-            long estimatedCacheSize,
-            long optimalMinimalHeapSize,
-            long availableMemory
-        ) {
-            delegate.insufficientAvailableMemory(estimatedCacheSize, optimalMinimalHeapSize, availableMemory);
-        }
-
-        @Override
         public void started() {
             delegate.started();
         }
@@ -152,38 +111,6 @@ public final class BatchImporterCompat {
         public void completed(boolean success) {
             delegate.completed(success);
         }
-    }
-
-    static BatchImporter instantiateRecordBatchImporter(
-        DatabaseLayout directoryStructure,
-        FileSystemAbstraction fileSystem,
-        ImportConfig config,
-        ExecutionMonitor executionMonitor,
-        LogService logService,
-        Config dbConfig,
-        JobScheduler jobScheduler,
-        Collector badCollector
-    ) {
-        var importer = BatchImporterFactory.withHighestPriority()
-            .instantiate(
-                directoryStructure,
-                fileSystem,
-                PageCacheTracer.NULL,
-                new ConfigurationAdapter(config),
-                logService,
-                new ExecutionMonitorAdapter(executionMonitor),
-                AdditionalInitialIds.EMPTY,
-                new EmptyLogTailMetadata(dbConfig),
-                dbConfig,
-                org.neo4j.internal.batchimport.Monitor.NO_MONITOR,
-                jobScheduler,
-                badCollector != null ? ((CollectorAdapter) badCollector).delegate : null,
-                TransactionLogInitializer.getLogFilesInitializer(),
-                new IndexImporterFactoryImpl(),
-                EmptyMemoryTracker.INSTANCE,
-                CursorContextFactory.NULL_CONTEXT_FACTORY
-            );
-        return new BatchImporterReverseAdapter(importer);
     }
 
     static final class ConfigurationAdapter implements org.neo4j.internal.batchimport.Configuration {
@@ -218,104 +145,6 @@ public final class BatchImporterCompat {
                 config = config.withRelationshipTypeIndex();
             }
             return config;
-        }
-    }
-
-    static ExecutionMonitor newCoarseBoundedProgressExecutionMonitor(
-        long highNodeId,
-        long highRelationshipId,
-        int batchSize,
-        LongConsumer progress,
-        LongConsumer outNumberOfBatches
-    ) {
-        var delegate = new CoarseBoundedProgressExecutionMonitor(
-            highNodeId,
-            highRelationshipId,
-            org.neo4j.internal.batchimport.Configuration.withBatchSize(
-                org.neo4j.internal.batchimport.Configuration.DEFAULT,
-                batchSize
-            )
-        ) {
-            @Override
-            protected void progress(long l) {
-                progress.accept(l);
-            }
-
-            long numberOfBatches() {
-                return this.total();
-            }
-        };
-        // Note: this only works because we declare the delegate with `var`
-        outNumberOfBatches.accept(delegate.numberOfBatches());
-
-        return new ExecutionMonitor() {
-
-            @Override
-            public Monitor toMonitor() {
-                throw new UnsupportedOperationException("Cannot call  `toMonitor` on this one");
-            }
-
-            @Override
-            public void start(StageExecution execution) {
-                delegate.start(execution);
-            }
-
-            @Override
-            public void end(StageExecution execution, long totalTimeMillis) {
-                delegate.end(execution, totalTimeMillis);
-            }
-
-            @Override
-            public void done(boolean successful, long totalTimeMillis, String additionalInformation) {
-                delegate.done(successful, totalTimeMillis, additionalInformation);
-            }
-
-            @Override
-            public long checkIntervalMillis() {
-                return delegate.checkIntervalMillis();
-            }
-
-            @Override
-            public void check(StageExecution execution) {
-                delegate.check(execution);
-            }
-        };
-    }
-
-    static final class ExecutionMonitorAdapter implements org.neo4j.internal.batchimport.staging.ExecutionMonitor {
-        private final ExecutionMonitor delegate;
-
-        ExecutionMonitorAdapter(ExecutionMonitor delegate) {this.delegate = delegate;}
-
-        @Override
-        public void initialize(DependencyResolver dependencyResolver) {
-            org.neo4j.internal.batchimport.staging.ExecutionMonitor.super.initialize(dependencyResolver);
-            this.delegate.initialize(dependencyResolver);
-        }
-
-        @Override
-        public void start(StageExecution stageExecution) {
-            this.delegate.start(stageExecution);
-        }
-
-        @Override
-        public void end(StageExecution stageExecution, long l) {
-            this.delegate.end(stageExecution, l);
-        }
-
-        @Override
-        public void done(boolean b, long l, String s) {
-            this.delegate.done(b, l, s);
-        }
-
-        @Override
-        public long checkIntervalMillis() {
-            return this.delegate.checkIntervalMillis();
-        }
-
-        @Override
-        public void check(StageExecution stageExecution) {
-            this.delegate.check(stageExecution);
         }
     }
 

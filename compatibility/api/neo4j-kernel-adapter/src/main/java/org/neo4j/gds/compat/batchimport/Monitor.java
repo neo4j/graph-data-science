@@ -20,21 +20,6 @@
 package org.neo4j.gds.compat.batchimport;
 
 public interface Monitor {
-    Monitor NO_MONITOR = new Monitor() {};
-
-    default void doubleRelationshipRecordUnitsEnabled() {}
-
-    default void mayExceedNodeIdCapacity(long capacity, long estimatedCount) {}
-
-    default void mayExceedRelationshipIdCapacity(long capacity, long estimatedCount) {}
-
-    default void insufficientHeapSize(long optimalMinimalHeapSize, long heapSize) {}
-
-    default void abundantHeapSize(long optimalMinimalHeapSize, long heapSize) {}
-
-    default void insufficientAvailableMemory(
-            long estimatedCacheSize, long optimalMinimalHeapSize, long availableMemory) {}
-
     /**
      * Called right before import is starting.
      */

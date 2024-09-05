@@ -33,8 +33,8 @@ import org.neo4j.dbms.api.DatabaseNotFoundException;
 import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.compat.batchimport.BatchImporter;
-import org.neo4j.gds.compat.batchimport.ExecutionMonitor;
 import org.neo4j.gds.compat.batchimport.ImportConfig;
+import org.neo4j.gds.compat.batchimport.Monitor;
 import org.neo4j.gds.compat.batchimport.input.Collector;
 import org.neo4j.gds.compat.batchimport.input.Estimates;
 import org.neo4j.gds.compat.batchimport.input.ReadableGroups;
@@ -102,7 +102,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.LongConsumer;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
@@ -301,34 +300,21 @@ public final class Neo4jProxy {
         FileSystemAbstraction fileSystem,
         ImportConfig configuration,
         LogService logService,
-        ExecutionMonitor executionMonitor,
+        Monitor executionMonitor,
         Config dbConfig,
         JobScheduler jobScheduler,
         Collector badCollector
     ) {
-        if (dbConfig.get(GraphDatabaseSettings.db_format).equals("block")) {
-            return IMPL.instantiateBlockBatchImporter(
-                directoryStructure,
-                fileSystem,
-                configuration,
-                executionMonitor.toMonitor(),
-                logService,
-                dbConfig,
-                jobScheduler,
-                badCollector
-            );
-        } else {
-            return IMPL.instantiateRecordBatchImporter(
-                directoryStructure,
-                fileSystem,
-                configuration,
-                executionMonitor,
-                logService,
-                dbConfig,
-                jobScheduler,
-                badCollector
-            );
-        }
+        return IMPL.instantiateBatchImporter(
+            directoryStructure,
+            fileSystem,
+            configuration,
+            executionMonitor,
+            logService,
+            dbConfig,
+            jobScheduler,
+            badCollector
+        );
     }
 
     public static Setting<String> additionalJvm() {
@@ -357,22 +343,6 @@ public final class Neo4jProxy {
 
     public static long getHighestPossibleRelationshipCount(Read read) {
         return read.relationshipsGetCount();
-    }
-
-    public static ExecutionMonitor newCoarseBoundedProgressExecutionMonitor(
-        long highNodeId,
-        long highRelationshipId,
-        int batchSize,
-        LongConsumer progress,
-        LongConsumer outNumberOfBatches
-    ) {
-        return IMPL.newCoarseBoundedProgressExecutionMonitor(
-            highNodeId,
-            highRelationshipId,
-            batchSize,
-            progress,
-            outNumberOfBatches
-        );
     }
 
     public static ReadableGroups newGroups() {
