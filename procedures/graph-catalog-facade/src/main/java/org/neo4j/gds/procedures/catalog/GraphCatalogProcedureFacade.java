@@ -20,7 +20,6 @@
 package org.neo4j.gds.procedures.catalog;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
@@ -84,7 +83,7 @@ public class GraphCatalogProcedureFacade {
     private final DatabaseModeRestriction databaseModeRestriction;
 
     // business facade
-    private final ApplicationsFacade applicationsFacade;
+    private final GraphCatalogApplications catalog;
 
     /**
      * @param streamCloser A special thing needed for property streaming
@@ -95,7 +94,7 @@ public class GraphCatalogProcedureFacade {
         GraphDatabaseService graphDatabaseService,
         GraphProjectMemoryUsageService graphProjectMemoryUsageService,
         TransactionContext transactionContext,
-        ApplicationsFacade applicationsFacade,
+        GraphCatalogApplications catalog,
         WriteContext writeContext,
         ProcedureReturnColumns procedureReturnColumns,
         DatabaseModeRestriction databaseModeRestriction
@@ -106,7 +105,7 @@ public class GraphCatalogProcedureFacade {
         this.graphProjectMemoryUsageService = graphProjectMemoryUsageService;
         this.transactionContext = transactionContext;
 
-        this.applicationsFacade = applicationsFacade;
+        this.catalog = catalog;
         this.writeContext = writeContext;
         this.procedureReturnColumns = procedureReturnColumns;
         this.databaseModeRestriction = databaseModeRestriction;
@@ -131,7 +130,7 @@ public class GraphCatalogProcedureFacade {
     }
 
     public boolean graphExists(String graphName) {
-        return catalog().graphExists(
+        return catalog.graphExists(
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId(),
             graphName
@@ -150,7 +149,7 @@ public class GraphCatalogProcedureFacade {
         String databaseName,
         String username
     ) throws IllegalArgumentException {
-        var results = catalog().dropGraph(
+        var results = catalog.dropGraph(
             graphNameOrListOfGraphNames,
             failIfMissing,
             databaseName,
@@ -171,7 +170,7 @@ public class GraphCatalogProcedureFacade {
 
         var displayDegreeDistribution = procedureReturnColumns.contains("degreeDistribution");
 
-        var results = catalog().listGraphs(
+        var results = catalog.listGraphs(
             requestScopedDependencies.getUser(),
             graphName,
             displayDegreeDistribution,
@@ -195,7 +194,7 @@ public class GraphCatalogProcedureFacade {
         Object relationshipProjection,
         Map<String, Object> configuration
     ) {
-        var result = catalog().nativeProject(
+        var result = catalog.nativeProject(
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId(),
             graphDatabaseService,
@@ -219,7 +218,7 @@ public class GraphCatalogProcedureFacade {
         Object relationshipProjection,
         Map<String, Object> configuration
     ) {
-        var result = catalog().estimateNativeProject(
+        var result = catalog.estimateNativeProject(
             requestScopedDependencies.getDatabaseId(),
             graphProjectMemoryUsageService,
             requestScopedDependencies.getTaskRegistryFactory(),
@@ -240,7 +239,7 @@ public class GraphCatalogProcedureFacade {
         String relationshipQuery,
         Map<String, Object> configuration
     ) {
-        var result = catalog().cypherProject(
+        var result = catalog.cypherProject(
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId(),
             graphDatabaseService,
@@ -263,7 +262,7 @@ public class GraphCatalogProcedureFacade {
         String relationshipQuery,
         Map<String, Object> configuration
     ) {
-        var result = catalog().estimateCypherProject(
+        var result = catalog.estimateCypherProject(
             requestScopedDependencies.getDatabaseId(),
             graphProjectMemoryUsageService,
             requestScopedDependencies.getTaskRegistryFactory(),
@@ -285,7 +284,7 @@ public class GraphCatalogProcedureFacade {
         String relationshipFilter,
         Map<String, Object> configuration
     ) {
-        var result = catalog().subGraphProject(
+        var result = catalog.subGraphProject(
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId(),
             requestScopedDependencies.getTaskRegistryFactory(),
@@ -301,7 +300,7 @@ public class GraphCatalogProcedureFacade {
     }
 
     public Stream<GraphMemoryUsage> sizeOf(String graphName) {
-        var result = catalog().sizeOf(
+        var result = catalog.sizeOf(
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId(),
             graphName
@@ -315,7 +314,7 @@ public class GraphCatalogProcedureFacade {
         Object nodeProperties,
         Map<String, Object> configuration
     ) {
-        var result = catalog().dropNodeProperties(
+        var result = catalog.dropNodeProperties(
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId(),
             requestScopedDependencies.getTaskRegistryFactory(),
@@ -332,7 +331,7 @@ public class GraphCatalogProcedureFacade {
         String graphName,
         String relationshipType
     ) {
-        var result = catalog().dropRelationships(
+        var result = catalog.dropRelationships(
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId(),
             requestScopedDependencies.getTaskRegistryFactory(),
@@ -349,7 +348,7 @@ public class GraphCatalogProcedureFacade {
         String graphProperty,
         Map<String, Object> configuration
     ) {
-        var numberOfPropertiesRemoved = catalog().dropGraphProperty(
+        var numberOfPropertiesRemoved = catalog.dropGraphProperty(
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId(),
             graphName,
@@ -371,7 +370,7 @@ public class GraphCatalogProcedureFacade {
         String nodeLabel,
         Map<String, Object> configuration
     ) {
-        var result = catalog().mutateNodeLabel(
+        var result = catalog.mutateNodeLabel(
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId(),
             graphName,
@@ -387,7 +386,7 @@ public class GraphCatalogProcedureFacade {
         String graphProperty,
         Map<String, Object> configuration
     ) {
-        var result = catalog().streamGraphProperty(
+        var result = catalog.streamGraphProperty(
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId(),
             graphName,
@@ -442,7 +441,7 @@ public class GraphCatalogProcedureFacade {
     ) {
         var usesPropertyNameColumn = procedureReturnColumns.contains("nodeProperty");
 
-        var resultStream = catalog().streamNodeProperties(
+        var resultStream = catalog.streamNodeProperties(
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId(),
             requestScopedDependencies.getTaskRegistryFactory(),
@@ -500,7 +499,7 @@ public class GraphCatalogProcedureFacade {
         Object relationshipTypes,
         Map<String, Object> configuration
     ) {
-        return catalog().streamRelationships(
+        return catalog.streamRelationships(
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId(),
             graphName,
@@ -515,7 +514,7 @@ public class GraphCatalogProcedureFacade {
         Object nodeLabels,
         Map<String, Object> configuration
     ) {
-        var result = catalog().writeNodeProperties(
+        var result = catalog.writeNodeProperties(
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId(),
             writeContext.nodePropertyExporterBuilder(),
@@ -537,7 +536,7 @@ public class GraphCatalogProcedureFacade {
         List<String> relationshipProperties,
         Map<String, Object> configuration
     ) {
-        var result = catalog().writeRelationshipProperties(
+        var result = catalog.writeRelationshipProperties(
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId(),
             writeContext.relationshipPropertiesExporterBuilder(),
@@ -556,7 +555,7 @@ public class GraphCatalogProcedureFacade {
         String nodeLabel,
         Map<String, Object> configuration
     ) {
-        var result = catalog().writeNodeLabel(
+        var result = catalog.writeNodeLabel(
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId(),
             writeContext.nodeLabelExporterBuilder(),
@@ -575,7 +574,7 @@ public class GraphCatalogProcedureFacade {
         String relationshipProperty,
         Map<String, Object> configuration
     ) {
-        var result = catalog().writeRelationships(
+        var result = catalog.writeRelationships(
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId(),
             writeContext.relationshipExporterBuilder(),
@@ -596,7 +595,7 @@ public class GraphCatalogProcedureFacade {
         String originGraphName,
         Map<String, Object> configuration
     ) {
-        var result = catalog().sampleRandomWalkWithRestarts(
+        var result = catalog.sampleRandomWalkWithRestarts(
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId(),
             requestScopedDependencies.getTaskRegistryFactory(),
@@ -614,7 +613,7 @@ public class GraphCatalogProcedureFacade {
         String originGraphName,
         Map<String, Object> configuration
     ) {
-        var result = catalog().sampleCommonNeighbourAwareRandomWalk(
+        var result = catalog.sampleCommonNeighbourAwareRandomWalk(
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId(),
             requestScopedDependencies.getTaskRegistryFactory(),
@@ -631,7 +630,7 @@ public class GraphCatalogProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var result = catalog().estimateCommonNeighbourAwareRandomWalk(
+        var result = catalog.estimateCommonNeighbourAwareRandomWalk(
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId(),
             graphName,
@@ -645,13 +644,13 @@ public class GraphCatalogProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var result = catalog().exportToCsv(graphName, configuration);
+        var result = catalog.exportToCsv(graphName, configuration);
 
         return Stream.of(result);
     }
 
     public Stream<MemoryEstimateResult> exportToCsvEstimate(String graphName, Map<String, Object> configuration) {
-        var result = catalog().exportToCsvEstimate(graphName, configuration);
+        var result = catalog.exportToCsvEstimate(graphName, configuration);
 
         return Stream.of(result);
     }
@@ -662,7 +661,7 @@ public class GraphCatalogProcedureFacade {
     ) {
         databaseModeRestriction.ensureNotOnCluster();
 
-        var result = catalog().exportToDatabase(graphName, configuration);
+        var result = catalog.exportToDatabase(graphName, configuration);
 
         return Stream.of(result);
     }
@@ -673,7 +672,7 @@ public class GraphCatalogProcedureFacade {
         long averageDegree,
         Map<String, Object> configuration
     ) {
-        var result = catalog().generateGraph(
+        var result = catalog.generateGraph(
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId(),
             graphName,
@@ -694,7 +693,7 @@ public class GraphCatalogProcedureFacade {
     ) {
         var usesPropertyNameColumn = procedureReturnColumns.contains("relationshipProperty");
 
-        var resultStream = catalog().streamRelationshipProperties(
+        var resultStream = catalog.streamRelationshipProperties(
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId(),
             requestScopedDependencies.getTaskRegistryFactory(),
@@ -719,9 +718,5 @@ public class GraphCatalogProcedureFacade {
         if (NO_VALUE_PLACEHOLDER.equals(graphName)) return null;
 
         return graphName;
-    }
-
-    private GraphCatalogApplications catalog() {
-        return applicationsFacade.graphCatalog();
     }
 }

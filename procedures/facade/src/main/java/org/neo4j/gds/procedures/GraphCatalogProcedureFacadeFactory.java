@@ -91,7 +91,7 @@ public class GraphCatalogProcedureFacadeFactory {
             graphDatabaseService,
             graphProjectMemoryUsageService,
             transactionContext,
-            applicationsFacade,
+            applicationsFacade.graphCatalog(),
             writeContext,
             procedureReturnColumns,
             databaseModeRestriction

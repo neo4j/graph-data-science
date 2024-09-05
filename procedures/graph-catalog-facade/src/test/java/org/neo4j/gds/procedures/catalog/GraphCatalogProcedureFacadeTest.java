@@ -79,7 +79,7 @@ class GraphCatalogProcedureFacadeTest {
             null,
             null,
             null,
-            new ApplicationsFacadeBuilder().with(businessFacade).build(),
+            new ApplicationsFacadeBuilder().with(businessFacade).build().graphCatalog(),
             WriteContext.builder().build(),
             null,
             null
@@ -108,7 +108,7 @@ class GraphCatalogProcedureFacadeTest {
             null,
             null,
             null,
-            new ApplicationsFacadeBuilder().with(businessFacade).build(),
+            new ApplicationsFacadeBuilder().with(businessFacade).build().graphCatalog(),
             procedureContext,
             procedureReturnColumns,
             null
@@ -145,7 +145,7 @@ class GraphCatalogProcedureFacadeTest {
             null,
             null,
             null,
-            new ApplicationsFacadeBuilder().with(businessFacade).build(),
+            new ApplicationsFacadeBuilder().with(businessFacade).build().graphCatalog(),
             procedureContext,
             procedureReturnColumns,
             null
@@ -194,7 +194,7 @@ class GraphCatalogProcedureFacadeTest {
             null,
             null,
             null,
-            new ApplicationsFacadeBuilder().with(businessFacade).build(),
+            new ApplicationsFacadeBuilder().with(businessFacade).build().graphCatalog(),
             procedureContext,
             procedureReturnColumns,
             null
@@ -234,7 +234,7 @@ class GraphCatalogProcedureFacadeTest {
             null,
             null,
             null,
-            new ApplicationsFacadeBuilder().with(businessFacade).build(),
+            new ApplicationsFacadeBuilder().with(businessFacade).build().graphCatalog(),
             procedureContext,
             procedureReturnColumns,
             null
