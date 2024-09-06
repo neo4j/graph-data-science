@@ -31,6 +31,8 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 class GraphDropNodePropertiesProcTest extends BaseProcTest {
     private static final String TEST_GRAPH_SAME_PROPERTIES = "testGraph";
     private static final String TEST_GRAPH_DIFFERENT_PROPERTIES = "testGraph2";
@@ -98,5 +100,31 @@ class GraphDropNodePropertiesProcTest extends BaseProcTest {
                 "propertiesRemoved", 12L
             ))
         );
+    }
+
+    @Test
+    void removeNodePropertiesWithFailIfMissing() {
+        assertCypherResult(
+            "CALL gds.graph.nodeProperties.drop($graphName, ['nodeProp42', 'nodeProp1337'], {failIfMissing: false})",
+            Map.of("graphName", TEST_GRAPH_SAME_PROPERTIES),
+            List.of(Map.of(
+                "graphName", TEST_GRAPH_SAME_PROPERTIES,
+                "nodeProperties", List.of(),
+                "propertiesRemoved", 0L
+            ))
+        );
+    }
+
+    @Test
+    void removeNodePropertiesFailIfMissingDefaultsToTrue() {
+        assertThatThrownBy(() -> runQuery(
+                "CALL gds.graph.nodeProperties.drop($graphName, ['nodeProp42', 'nodeProp1337'])",
+                Map.of("graphName", TEST_GRAPH_SAME_PROPERTIES)
+            )
+        )
+            .rootCause()
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Could not find property key(s) ['nodeProp1337', 'nodeProp42']")
+            .hasMessageContaining("Defined keys: ['nodeProp1', 'nodeProp2']");
     }
 }

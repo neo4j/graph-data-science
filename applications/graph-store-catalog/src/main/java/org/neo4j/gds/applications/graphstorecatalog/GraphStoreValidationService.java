@@ -58,6 +58,12 @@ public class GraphStoreValidationService {
         }
     }
 
+    List<String> filterExistingNodeProperties(GraphStore graphStore, Collection<String> nodeProperties) {
+        return nodeProperties.stream()
+            .filter(graphStore::hasNodeProperty)
+            .toList();
+    }
+
     void ensureRelationshipsMayBeDeleted(GraphStore graphStore, String relationshipType, GraphName graphName) {
         var relationshipTypes = graphStore.relationshipTypes();
 

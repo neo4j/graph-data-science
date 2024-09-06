@@ -547,18 +547,29 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         // melt this together, so you only obtain the graph store if it is valid? think it over
         var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
         var graphStore = graphStoreWithConfig.graphStore();
-        graphStoreValidationService.ensureNodePropertiesExist(graphStore, configuration.nodeProperties());
+
+
+        List<String> droppedProperties;
+        if (configuration.failIfMissing()) {
+            graphStoreValidationService.ensureNodePropertiesExist(graphStore, configuration.nodeProperties());
+            droppedProperties = configuration.nodeProperties();
+        } else {
+            droppedProperties = graphStoreValidationService.filterExistingNodeProperties(
+                graphStore,
+                configuration.nodeProperties()
+            );
+        }
 
         var numberOfPropertiesRemoved = dropNodePropertiesApplication.compute(
             taskRegistryFactory,
             userLogRegistryFactory,
-            configuration,
+            droppedProperties,
             graphStore
         );
 
         return new GraphDropNodePropertiesResult(
             graphName.getValue(),
-            configuration.nodeProperties(),
+            droppedProperties,
             numberOfPropertiesRemoved
         );
     }

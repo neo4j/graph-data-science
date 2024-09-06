@@ -39,7 +39,7 @@ public class DropNodePropertiesApplication {
     public long compute(
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory,
-        GraphDropNodePropertiesConfig configuration,
+        List<String> nodeProperties,
         GraphStore graphStore
     ) {
         var progressTrackerFactory = new ProgressTrackerFactory(
@@ -51,7 +51,7 @@ public class DropNodePropertiesApplication {
         return computeWithProgressTracking(
             graphStore,
             progressTrackerFactory,
-            configuration.nodeProperties()
+            nodeProperties
         );
     }
 
@@ -63,7 +63,7 @@ public class DropNodePropertiesApplication {
         var task = Tasks.leaf("Graph :: NodeProperties :: Drop", nodeProperties.size());
 
         var progressTracker = progressTrackerFactory.create(task);
-        
+
         return computeWithErrorHandling(graphStore, progressTracker, nodeProperties);
     }
 
