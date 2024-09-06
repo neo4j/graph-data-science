@@ -66,11 +66,7 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter {
             .useBadCollector(false)
             .build();
 
-        var executionMonitor = new ProgressTrackerExecutionMonitor(
-            graphStore,
-            progressTracker,
-            pbiConfig.batchSize()
-        );
+        var executionMonitor = new ProgressTrackerExecutionMonitor(graphStore, progressTracker);
 
         var parallelBatchImporter = GdsParallelBatchImporter.fromDb(databaseService, pbiConfig, log, executionMonitor);
 

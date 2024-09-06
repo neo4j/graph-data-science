@@ -26,8 +26,8 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.batchimport.BatchImporter;
-import org.neo4j.gds.compat.batchimport.ExecutionMonitor;
 import org.neo4j.gds.compat.batchimport.ImportConfig;
+import org.neo4j.gds.compat.batchimport.Monitor;
 import org.neo4j.gds.compat.batchimport.input.Collector;
 import org.neo4j.gds.compat.batchimport.input.Input;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -54,7 +54,7 @@ public final class GdsParallelBatchImporter {
 
     private final Config config;
     private final Log log;
-    private final ExecutionMonitor executionMonitor;
+    private final Monitor executionMonitor;
 
     private final FileSystemAbstraction fileSystem;
     private final LogService logService;
@@ -65,7 +65,7 @@ public final class GdsParallelBatchImporter {
         GraphDatabaseService databaseService,
         Config config,
         Log log,
-        ExecutionMonitor executionMonitor
+        Monitor executionMonitor
     ) {
         var dbms = GraphDatabaseApiProxy.resolveDependency(databaseService, DatabaseManagementService.class);
         return fromDbms(dbms, config, log, executionMonitor);
@@ -75,7 +75,7 @@ public final class GdsParallelBatchImporter {
         DatabaseManagementService dbms,
         Config config,
         Log log,
-        ExecutionMonitor executionMonitor
+        Monitor executionMonitor
     ) {
         var databaseService = dbms.database(SYSTEM_DATABASE_NAME);
         var fs = GraphDatabaseApiProxy.resolveDependency(databaseService, FileSystemAbstraction.class);
@@ -95,7 +95,7 @@ public final class GdsParallelBatchImporter {
     private GdsParallelBatchImporter(
         Config config,
         Log log,
-        ExecutionMonitor executionMonitor,
+        Monitor executionMonitor,
         DatabaseManagementService dbms,
         FileSystemAbstraction fileSystem,
         LogService logService,

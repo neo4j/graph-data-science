@@ -27,7 +27,6 @@ import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.compat.CompatCallableProcedure;
 import org.neo4j.gds.compat.Neo4jProxyApi;
 import org.neo4j.gds.compat.batchimport.BatchImporter;
-import org.neo4j.gds.compat.batchimport.ExecutionMonitor;
 import org.neo4j.gds.compat.batchimport.ImportConfig;
 import org.neo4j.gds.compat.batchimport.Monitor;
 import org.neo4j.gds.compat.batchimport.input.Collector;
@@ -48,14 +47,13 @@ import org.neo4j.values.AnyValue;
 import org.neo4j.values.SequenceValue;
 
 import java.io.OutputStream;
-import java.util.function.LongConsumer;
 
 import static org.neo4j.internal.helpers.collection.Iterators.asRawIterator;
 
 public final class Neo4jProxyImpl implements Neo4jProxyApi {
 
     @Override
-    public BatchImporter instantiateBlockBatchImporter(
+    public BatchImporter instantiateBatchImporter(
         DatabaseLayout dbLayout,
         FileSystemAbstraction fileSystem,
         ImportConfig config,
@@ -65,7 +63,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         JobScheduler jobScheduler,
         Collector badCollector
     ) {
-        return BatchImporterCompat.instantiateBlockBatchImporter(
+        return BatchImporterCompat.instantiateBatchImporter(
             dbLayout,
             fileSystem,
             config,
@@ -74,46 +72,6 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             dbConfig,
             jobScheduler,
             badCollector
-        );
-    }
-
-    @Override
-    public BatchImporter instantiateRecordBatchImporter(
-        DatabaseLayout directoryStructure,
-        FileSystemAbstraction fileSystem,
-        ImportConfig config,
-        ExecutionMonitor executionMonitor,
-        LogService logService,
-        Config dbConfig,
-        JobScheduler jobScheduler,
-        Collector badCollector
-    ) {
-        return BatchImporterCompat.instantiateRecordBatchImporter(
-            directoryStructure,
-            fileSystem,
-            config,
-            executionMonitor,
-            logService,
-            dbConfig,
-            jobScheduler,
-            badCollector
-        );
-    }
-
-    @Override
-    public ExecutionMonitor newCoarseBoundedProgressExecutionMonitor(
-        long highNodeId,
-        long highRelationshipId,
-        int batchSize,
-        LongConsumer progress,
-        LongConsumer outNumberOfBatches
-    ) {
-        return BatchImporterCompat.newCoarseBoundedProgressExecutionMonitor(
-            highNodeId,
-            highRelationshipId,
-            batchSize,
-            progress,
-            outNumberOfBatches
         );
     }
 
