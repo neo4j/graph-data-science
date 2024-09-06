@@ -3,23 +3,30 @@
 :description: This section details projecting GDS graphs using `Cypher` projections.
 :page-aliases: management-ops/projections/graph-project-cypher-aggregation.adoc, management-ops/projections/graph-project-cypher-projection.adoc
 
+A Cypher projection creates an in-memory graph from the context of a Cypher query.
+With a Cypher projection, you can read data from one or more Neo4j databases, load local or remote files, or create data on the fly.
 
-Cypher projections are a more flexible and expressive approach compared to xref:management-ops/graph-creation/graph-project.adoc[native projections].
-A Cypher projection uses Cypher to create (_project_) an in-memory graph from the Neo4j database.
+A Cypher projection has two main parts:
 
+. One or more clauses to construct a set of nodes or source-target node pairs.
+. A call to the `gds.graph.project` function.
+
+See the <<graph-project-cypher-projection-examples>> section for some common projection patterns.
+
+[TIP]
+====
+Cypher projections are more flexible and expressive than xref:management-ops/graph-creation/graph-project.adoc[native projections].
+====
 
 == Considerations
 
 === Lifecycle
 
-[NOTE]
---
-The projected graphs will reside in the catalog until either:
+Projected graphs reside in memory (in the graph catalog) until any of the following happens:
 
-- the graph is dropped using xref:management-ops/graph-drop.adoc[gds.graph.drop]
-- the Neo4j database from which the graph was projected is stopped or dropped
-- the Neo4j database management system is stopped.
---
+- The graph is dropped with the xref:management-ops/graph-drop.adoc[`gds.graph.drop`] procedure.
+- The Neo4j database from which the graph was projected is stopped or dropped.
+- The Neo4j DBMS is stopped.
 
 
 === Node property support
@@ -295,24 +302,24 @@ RETURN g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 
 The value for `sourceNodeLabels` or `targetNodeLabels` can be one of the following:
 
-.*NodeLabels key
-[opts="header", cols="1,1,1m"]
+.Values for `sourceNodeLabels` and `targetNodeLabels`
+[opts="header", cols="1,1,1"]
 |===
 | type           | example                     | description
-| List of String | `labels(s)` or `['A', 'B']` | Associate all labels in that list with the source or target node
-| String         | `'A'`                       | Associate that label with the source or target node
-| Boolean        | `true`                      | Associate all labels of the source or target node; same as `labels(s)`
-| Boolean        | `false`                     | Don't load any label information for the source or target node; same as if `nodeLabels` was missing
+| List of String | `labels(s)` or `['A', 'B']` | Associate all labels in that list with the source or target node.
+| String         | `'A'`                       | Associate that label with the source or target node.
+| Boolean        | `true`                      | Associate all labels of the source or target node; same as `labels(s)`.
+| Boolean        | `false`                     | Don't load any label information for the source or target node; same as if `nodeLabels` was missing.
 |===
 
 
 The value for `relationshipType` must be a `String`:
 
-.relationshipType key
-[opts="header", cols="1,1,1m"]
+.Values for `relationshipType`
+[opts="header", cols="1,1,1"]
 |===
 | type           | example            | description
-| String         | `type(r)` or `'A'` | Associate that type with the relationship
+| String         | `type(r)` or `'A'` | Associate that type with the relationship.
 |===
 
 
@@ -375,6 +382,45 @@ RETURN g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
 |===
 | graph                              | nodes  | rels
 | "graphWithUndirectedRelationships" | 5      | 12
+|===
+--
+
+[[graph-project-cypher-projection-add-reverse-relationships]]
+==== Add both natural and reverse relationships
+
+To add both a relationship with its natural _and_ with its reverse orientation, you can use a `UNION` clause within a subquery.
+
+[role=query-example]
+--
+.Project `Person` nodes and `KNOWS` and `KNOWN_BY` relationships:
+[source, cypher, role=noplay]
+----
+MATCH (source:Person)-[:KNOWS]->(target:Person)
+CALL {
+  WITH source, target
+  RETURN id(source) AS sourceId, id(target) AS targetId, 'KNOWS' AS rType
+  UNION
+  WITH source, target
+  RETURN id(target) AS sourceId, id(source) AS targetId, 'KNOWN_BY' AS rType
+}
+WITH gds.graph.project(
+  'graphWithNaturalAndReverseRelationships',
+  sourceId,
+  targetId,
+  {
+    sourceNodeLabels: 'Person', 
+    targetNodeLabels: 'Person',
+    relationshipType: rType
+  }
+) AS g
+RETURN g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| graph                                     | nodes  | rels
+| "graphWithNaturalAndReverseRelationships" | 3      | 4
 |===
 --
 

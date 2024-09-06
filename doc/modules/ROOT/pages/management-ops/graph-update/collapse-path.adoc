@@ -107,18 +107,15 @@ The following query will project such a graph:
 
 [source, cypher, role=noplay graph-project-query]
 ----
-CALL gds.graph.project(
-  'persons',
-  ['Person', 'Instrument'],
-  {
-    PLAYS: {
-      orientation: 'NATURAL'
-    },
-    PLAYED_BY: {
-      type: 'PLAYS',
-      orientation: 'REVERSE'
-    }
-})
+MATCH (p:Person)-[:PLAYS]->(i:Instrument)
+CALL {
+  WITH p, i
+  RETURN id(p) AS sourceId, id(i) AS targetId, 'PLAYS' AS rType
+  UNION
+  WITH p, i
+  RETURN id(i) AS sourceId, id(p) AS targetId, 'PLAYED_BY' AS rType
+}
+RETURN gds.graph.project('persons', sourceId, targetId, { relationshipType: rType })
 ----
 
 Now we can run the algorithm by specifying the traversal `PLAYS, PLAYED_BY` in the `pathTemplates` option.
