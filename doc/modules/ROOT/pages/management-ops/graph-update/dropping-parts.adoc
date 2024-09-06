@@ -37,6 +37,7 @@ YIELD
 |===
 | Name                   | Type                  | Default           | Description
 | concurrency            | Integer               | 4                 | The number of concurrent threads. Note, this procedure is always running single-threaded.
+| failIfMissing          | Boolean               | true              | If false, the procedure will ignore properties that do not exist in the graph.
 |===
 
 .Results
@@ -148,6 +149,28 @@ YIELD propertiesRemoved
 [NOTE]
 --
 The above example requires all given properties to be present on _at least one_ projected node label.
+--
+
+==== Ignore missing properties
+
+By default, the procedure will fail if any of the given properties do not exist in the graph.
+If you want to ignore missing properties, you can set the `failIfMissing` configuration option to `false`.
+
+[role=query-example]
+--
+.Attempt to drop the `missing_score` property from all projected nodes in the `socialGraph`:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.nodeProperties.drop('socialGraph', ['missing_score'], {failIfMissing: false})
+YIELD propertiesRemoved, nodeProperties
+----
+
+.Results
+[opts="header"]
+|===
+| propertiesRemoved | nodeProperties
+| 0                 | []
+|===
 --
 
 [[catalog-graph-delete-rel-type]]
