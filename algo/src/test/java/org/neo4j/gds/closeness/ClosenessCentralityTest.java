@@ -32,6 +32,7 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -96,7 +97,8 @@ class ClosenessCentralityTest {
             new Concurrency(4),
             new DefaultCentralityComputer(),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var result = algo.compute().centralityScoreProvider();
@@ -119,7 +121,8 @@ class ClosenessCentralityTest {
             new Concurrency(4),
             new DefaultCentralityComputer(),
             DefaultPool.INSTANCE,
-            progressTracker
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         );
 
         algo.compute();

@@ -30,6 +30,7 @@ import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.msbfs.BfsConsumer;
 import org.neo4j.gds.msbfs.MultiSourceBFSAccessMethods;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -55,7 +56,8 @@ public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResu
         Concurrency concurrency,
         CentralityComputer centralityComputer,
         ExecutorService executorService,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -65,6 +67,8 @@ public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResu
         this.centralityComputer = centralityComputer;
         this.farness = HugeAtomicIntArray.of(nodeCount, ParallelIntPageCreator.of(concurrency));
         this.component = HugeAtomicIntArray.of(nodeCount, ParallelIntPageCreator.of(concurrency));
+
+        this.terminationFlag = terminationFlag;
     }
 
     @Override

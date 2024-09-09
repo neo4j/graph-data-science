@@ -26,6 +26,7 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.termination.TerminationFlag;
 
 public class ClosenessCentralityAlgorithmFactory<CONFIG extends ClosenessCentralityBaseConfig> extends
     GraphAlgorithmFactory<ClosenessCentrality, CONFIG> {
@@ -39,7 +40,8 @@ public class ClosenessCentralityAlgorithmFactory<CONFIG extends ClosenessCentral
             parameters.concurrency(),
             centralityComputer,
             DefaultPool.INSTANCE,
-            progressTracker
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         );
     }
 

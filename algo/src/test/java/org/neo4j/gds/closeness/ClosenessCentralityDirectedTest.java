@@ -28,6 +28,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -91,7 +92,8 @@ class ClosenessCentralityDirectedTest {
             new Concurrency(4),
             new DefaultCentralityComputer(),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var result = algo.compute().centralityScoreProvider();
@@ -112,7 +114,8 @@ class ClosenessCentralityDirectedTest {
             new Concurrency(4),
             new WassermanFaustCentralityComputer(graph.nodeCount()),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var result = algo.compute().centralityScoreProvider();
