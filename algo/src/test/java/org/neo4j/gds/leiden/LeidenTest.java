@@ -96,7 +96,8 @@ class LeidenTest {
             null,
             TOLERANCE_DEFAULT,
             new Concurrency(1),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var leidenResult = leiden.compute();
@@ -131,7 +132,8 @@ class LeidenTest {
             graph.nodeProperties("optimal"),
             TOLERANCE_DEFAULT,
             new Concurrency(1),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var leidenResult = leiden.compute();
@@ -169,7 +171,8 @@ class LeidenTest {
             graph.nodeProperties("seed"),
             TOLERANCE_DEFAULT,
             new Concurrency(1),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var leidenResult = leiden.compute();
@@ -204,7 +207,8 @@ class LeidenTest {
             graph.nodeProperties("seed2"),
             TOLERANCE_DEFAULT,
             new Concurrency(1),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         assertThatThrownBy(leiden::compute).hasMessageContaining("non-negative");
@@ -285,7 +289,8 @@ class LeidenTest {
             null,
             0.1,
             new Concurrency(1),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
         var leidenResult = leiden.compute();
         assertThat(leidenResult.ranLevels()).isEqualTo(2);
@@ -382,7 +387,8 @@ class LeidenTest {
             null,
             0.1,
             new Concurrency(1),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
         var communities = result.communities();
         assertThat(communities.toArray()).isEqualTo(new long[]{0, 1});

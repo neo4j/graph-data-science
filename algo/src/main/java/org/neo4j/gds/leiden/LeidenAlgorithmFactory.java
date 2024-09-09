@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.progress.tasks.IterativeTask;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Optional;
@@ -52,7 +53,8 @@ public class LeidenAlgorithmFactory<CONFIG extends LeidenBaseConfig> extends Gra
             seedValues,
             parameters.tolerance(),
             parameters.concurrency(),
-            progressTracker
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         );
     }
 

@@ -31,6 +31,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.modularity.TestGraphs;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
@@ -60,7 +61,8 @@ class KarateTest {
             null,
             TOLERANCE_DEFAULT,
             new Concurrency(4),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
         var leidenResult = leiden.compute();
         var communities = leidenResult.communities();
@@ -98,7 +100,8 @@ class KarateTest {
             graph.nodeProperties("single"),
             TOLERANCE_DEFAULT,
             new Concurrency(4),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
         var leidenResult = leiden.compute();
         var communities = leidenResult.communities();

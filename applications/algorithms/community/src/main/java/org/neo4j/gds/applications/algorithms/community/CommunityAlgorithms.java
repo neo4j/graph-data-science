@@ -283,7 +283,8 @@ public class CommunityAlgorithms {
             seedValues,
             parameters.tolerance(),
             parameters.concurrency(),
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);

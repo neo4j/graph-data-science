@@ -32,6 +32,7 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Optional;
@@ -67,7 +68,8 @@ public class Leiden extends Algorithm<LeidenResult> {
         @Nullable NodePropertyValues seedValues,
         double tolerance,
         Concurrency concurrency,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.rootGraph = graph;
@@ -90,6 +92,8 @@ public class Leiden extends Algorithm<LeidenResult> {
         this.modularities = new double[maxIterations];
         this.modularity = 0d;
         this.tolerance = tolerance;
+
+        this.terminationFlag = terminationFlag;
     }
 
     @Override

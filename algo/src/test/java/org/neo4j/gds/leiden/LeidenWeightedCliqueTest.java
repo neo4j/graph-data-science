@@ -28,6 +28,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Arrays;
 
@@ -80,8 +81,9 @@ class LeidenWeightedCliqueTest {
             null,
             TOLERANCE_DEFAULT,
             new Concurrency(4),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
 
+            TerminationFlag.RUNNING_TRUE
         );
         var leidenResult = leiden.compute();
         assertThat(Arrays.stream(leidenResult.communities().toArray()).distinct().count()).isEqualTo(1);
