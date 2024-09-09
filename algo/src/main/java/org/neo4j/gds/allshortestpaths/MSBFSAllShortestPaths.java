@@ -23,6 +23,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.msbfs.MultiSourceBFSAccessMethods;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
@@ -49,12 +50,15 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
     public MSBFSAllShortestPaths(
         Graph graph,
         Concurrency concurrency,
-        ExecutorService executorService
+        ExecutorService executorService,
+        TerminationFlag terminationFlag
     ) {
         super(ProgressTracker.NULL_TRACKER);
         this.graph = graph;
         this.concurrency = concurrency;
         this.executorService = executorService;
+
+        this.terminationFlag = terminationFlag;
     }
 
     /**

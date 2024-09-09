@@ -440,7 +440,8 @@ public class PathFindingAlgorithms {
             return new MSBFSAllShortestPaths(
                 graph,
                 configuration.concurrency(),
-                DefaultPool.INSTANCE
+                DefaultPool.INSTANCE,
+                requestScopedDependencies.getTerminationFlag()
             );
         }
     }

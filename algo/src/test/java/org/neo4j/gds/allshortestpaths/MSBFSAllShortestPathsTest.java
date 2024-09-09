@@ -28,6 +28,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyDouble;
@@ -96,7 +97,8 @@ class MSBFSAllShortestPathsTest {
         var hugeMSBFSAllShortestPaths = new MSBFSAllShortestPaths(
             graph,
             ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         );
 
         TriConsumer<Long, Long, Double> mock = mock(TriConsumer.class);
