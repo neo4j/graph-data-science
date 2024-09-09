@@ -26,6 +26,7 @@ import org.neo4j.gds.core.utils.paged.HugeDoubleArrayStack;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 public class DFS extends Algorithm<HugeLongArray> {
 
@@ -43,7 +44,8 @@ public class DFS extends Algorithm<HugeLongArray> {
         ExitPredicate exitPredicate,
         Aggregator aggregatorFunction,
         long maxDepth,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
 
         super(progressTracker);
@@ -53,6 +55,8 @@ public class DFS extends Algorithm<HugeLongArray> {
         this.exitPredicate = exitPredicate;
         this.aggregatorFunction = aggregatorFunction;
         this.maxDepth = maxDepth;
+
+        this.terminationFlag = terminationFlag;
     }
 
     @Override

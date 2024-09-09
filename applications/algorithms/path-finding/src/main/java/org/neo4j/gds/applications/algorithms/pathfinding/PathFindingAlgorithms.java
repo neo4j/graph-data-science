@@ -173,7 +173,8 @@ public class PathFindingAlgorithms {
         return algorithm.compute(
             graph,
             configuration,
-            progressTracker
+            progressTracker,
+            requestScopedDependencies.getTerminationFlag()
         );
     }
 

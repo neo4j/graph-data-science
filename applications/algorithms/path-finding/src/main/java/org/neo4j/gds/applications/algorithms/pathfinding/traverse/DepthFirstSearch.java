@@ -29,12 +29,13 @@ import org.neo4j.gds.paths.traverse.DfsBaseConfig;
 import org.neo4j.gds.paths.traverse.ExitPredicate;
 import org.neo4j.gds.paths.traverse.OneHopAggregator;
 import org.neo4j.gds.paths.traverse.TargetExitPredicate;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class DepthFirstSearch {
-    public HugeLongArray compute(Graph graph, DfsBaseConfig configuration, ProgressTracker progressTracker) {
+    public HugeLongArray compute(Graph graph, DfsBaseConfig configuration, ProgressTracker progressTracker, TerminationFlag terminationFlag) {
         ExitPredicate exitFunction;
         Aggregator aggregatorFunction;
         // target node given; terminate if target is reached
@@ -62,7 +63,8 @@ public class DepthFirstSearch {
             exitFunction,
             aggregatorFunction,
             maxDepth,
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
 
         return new AlgorithmMachinery().runAlgorithmsAndManageProgressTracker(dfs, progressTracker, true);

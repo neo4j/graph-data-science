@@ -27,6 +27,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.paths.traverse.ExitPredicate.Result;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.stream.Stream;
 
@@ -99,7 +100,8 @@ class DFSTest {
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
             Aggregator.NO_AGGREGATION,
             DfsBaseConfig.NO_MAX_DEPTH,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).compute().toArray();
 
         assertThat(nodes).isEqualTo(
@@ -120,7 +122,8 @@ class DFSTest {
             (s, t, w) -> Result.FOLLOW,
             Aggregator.NO_AGGREGATION,
             DfsBaseConfig.NO_MAX_DEPTH,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).compute().toArray();
 
         assertThat(nodes).isEqualTo(
@@ -142,7 +145,8 @@ class DFSTest {
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
             Aggregator.NO_AGGREGATION,
             DfsBaseConfig.NO_MAX_DEPTH,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).compute().toArray();
 
         assertThat(nodes).isEqualTo(
@@ -159,7 +163,8 @@ class DFSTest {
             (s, t, w) -> Result.FOLLOW,
             new OneHopAggregator(),
             3,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).compute().toArray();
 
         assertThat(nodes).isEqualTo(
@@ -175,7 +180,8 @@ class DFSTest {
             (s, t, w) -> Result.FOLLOW,
             Aggregator.NO_AGGREGATION,
             DfsBaseConfig.NO_MAX_DEPTH,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
     }
 }
