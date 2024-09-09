@@ -548,17 +548,11 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
         var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
         var graphStore = graphStoreWithConfig.graphStore();
 
-
-        List<String> droppedProperties;
-        if (configuration.failIfMissing()) {
-            graphStoreValidationService.ensureNodePropertiesExist(graphStore, configuration.nodeProperties());
-            droppedProperties = configuration.nodeProperties();
-        } else {
-            droppedProperties = graphStoreValidationService.filterExistingNodeProperties(
-                graphStore,
-                configuration.nodeProperties()
-            );
-        }
+        var droppedProperties = gatherDroppedProperties(
+            graphStore,
+            configuration.nodeProperties(),
+            configuration.failIfMissing()
+        );
 
         var numberOfPropertiesRemoved = dropNodePropertiesApplication.compute(
             taskRegistryFactory,
@@ -572,6 +566,19 @@ public class DefaultGraphCatalogApplications implements GraphCatalogApplications
             droppedProperties,
             numberOfPropertiesRemoved
         );
+    }
+
+    private List<String> gatherDroppedProperties(
+        GraphStore graphStore,
+        List<String> nodeProperties,
+        boolean failIfMissing
+    ) {
+        if (failIfMissing) {
+            graphStoreValidationService.ensureNodePropertiesExist(graphStore, nodeProperties);
+            return nodeProperties;
+        } else {
+            return graphStoreValidationService.filterExistingNodeProperties(graphStore, nodeProperties);
+        }
     }
 
     @Override
