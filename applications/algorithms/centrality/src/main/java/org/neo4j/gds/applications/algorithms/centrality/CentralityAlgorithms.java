@@ -212,7 +212,8 @@ public class CentralityAlgorithms {
             graph,
             configuration.concurrency(),
             DefaultPool.INSTANCE,
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);

@@ -29,6 +29,7 @@ import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.msbfs.BfsConsumer;
 import org.neo4j.gds.msbfs.MultiSourceBFSAccessMethods;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -46,7 +47,8 @@ public class HarmonicCentrality extends Algorithm<HarmonicResult> {
         Graph graph,
         Concurrency concurrency,
         ExecutorService executorService,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -54,6 +56,8 @@ public class HarmonicCentrality extends Algorithm<HarmonicResult> {
         this.executorService = executorService;
         this.inverseFarness = HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(concurrency));
         this.nodeCount = graph.nodeCount();
+
+        this.terminationFlag = terminationFlag;
     }
 
     @Override
