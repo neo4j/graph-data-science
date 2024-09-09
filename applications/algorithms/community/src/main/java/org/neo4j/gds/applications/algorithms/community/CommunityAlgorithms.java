@@ -309,7 +309,8 @@ public class CommunityAlgorithms {
             parameters.includeIntermediateCommunities(),
             parameters.seedProperty(),
             progressTracker,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            terminationFlag
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);

@@ -134,7 +134,8 @@ class LouvainTest {
             true,
             null,
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         );
         algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
@@ -181,7 +182,8 @@ class LouvainTest {
             true,
             null,
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         );
         algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
@@ -228,7 +230,8 @@ class LouvainTest {
             true,
             "seed",
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         );
         algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
@@ -269,8 +272,9 @@ class LouvainTest {
             false,
             null,
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
 
+            TerminationFlag.RUNNING_TRUE
         );
         algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
@@ -296,7 +300,8 @@ class LouvainTest {
             false,
             null,
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         );
         algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
@@ -325,7 +330,8 @@ class LouvainTest {
                     false,
                     null,
                     ProgressTracker.NULL_TRACKER,
-                    DefaultPool.INSTANCE
+                    DefaultPool.INSTANCE,
+                    TerminationFlag.RUNNING_TRUE
                 );
                 louvain.setTerminationFlag(terminationFlag);
                 louvain.compute();
@@ -356,7 +362,8 @@ class LouvainTest {
             false,
             null,
             progressTracker,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         );
 
         louvain.compute();
@@ -382,7 +389,8 @@ class LouvainTest {
             false,
             "seed2",
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         );
         algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
@@ -413,7 +421,8 @@ class LouvainTest {
             false,
             null,
             ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var result = louvain.compute();

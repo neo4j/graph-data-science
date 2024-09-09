@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationFactory;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 
@@ -41,7 +42,8 @@ public class LouvainAlgorithmFactory<CONFIG extends LouvainBaseConfig> extends G
             parameters.includeIntermediateCommunities(),
             parameters.seedProperty(),
             progressTracker,
-            DefaultPool.INSTANCE
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
         );
     }
 

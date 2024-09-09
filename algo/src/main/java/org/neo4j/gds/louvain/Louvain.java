@@ -38,6 +38,7 @@ import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.modularityoptimization.ModularityOptimization;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -75,7 +76,8 @@ public final class Louvain extends Algorithm<LouvainResult> {
         boolean trackIntermediateCommunities,
         String seedProperty,
         ProgressTracker progressTracker,
-        ExecutorService executorService
+        ExecutorService executorService,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.rootGraph = graph;
@@ -94,6 +96,8 @@ public final class Louvain extends Algorithm<LouvainResult> {
         this.modularities = new double[maxLevels];
         this.maxLevels = maxLevels;
         this.trackIntermediateCommunities = trackIntermediateCommunities;
+
+        this.terminationFlag = terminationFlag;
     }
 
     @Override
