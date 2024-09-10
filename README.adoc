@@ -31,9 +31,10 @@ When installing GDS manually, please refer to the below compatibility matrix:
 .3+.^|Java 21 & Java 17
 |Neo4j 5.23.0
 |Neo4j 5.22.0
-.6+<.^|GDS 2.9.x
+.7+<.^|GDS 2.9.x
+|Neo4j 5.23.0
+.7+.^|Java 21 & Java 17
 |Neo4j 5.22.0
-.6+.^|Java 21 & Java 17
 |Neo4j 5.21.0, 5.21.1, 5.21.2
 |Neo4j 5.20.0
 |Neo4j 5.19.0
