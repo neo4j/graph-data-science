@@ -140,11 +140,13 @@ public class FastRP extends Algorithm<FastRPResult> {
 
     void initPropertyVectors() {
         int propertyDimension = embeddingDimension - baseEmbeddingDimension;
-        float entryValue = (float) Math.sqrt(SPARSITY) / (float) Math.sqrt(propertyDimension);
+        float entryValue = (float) Math.sqrt(SPARSITY) / (float) Math.sqrt(embeddingDimension);
         var random = new HighQualityRandom(randomSeed);
         for (int i = 0; i < inputDimension; i++) {
             this.propertyVectors[i] = new float[propertyDimension];
-            for (int d = 0; d < propertyDimension; d++) {
+        }
+        for (int d = 0; d < propertyDimension; d++) {
+            for (int i = 0; i < inputDimension; i++) {
                 this.propertyVectors[i][d] = computeRandomEntry(random, entryValue);
             }
         }
@@ -153,7 +155,7 @@ public class FastRP extends Algorithm<FastRPResult> {
     void initRandomVectors() {
         progressTracker.beginSubTask();
 
-        var sqrtEmbeddingDimension = (float) Math.sqrt(baseEmbeddingDimension);
+        var sqrtEmbeddingDimension = (float) Math.sqrt(embeddingDimension);
         List<Runnable> tasks = PartitionUtils.rangePartition(
             concurrency,
             graph.nodeCount(),
