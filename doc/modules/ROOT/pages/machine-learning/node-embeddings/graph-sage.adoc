@@ -534,9 +534,10 @@ RETURN gds.graph.project(
     sourceNodeProperties: source { .age, .heightAndWeight },
     targetNodeLabels: labels(target),
     targetNodeProperties: target { .cost },
+    relationshipType: type(r),
     relationshipProperties: r { .relWeight }
   },
-  { undirectedRelationshipTypes: ['KNOWS', 'LIKES'] }
+  { undirectedRelationshipTypes: ['LIKES'] }
 )
 ----
 
