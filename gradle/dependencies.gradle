@@ -68,7 +68,7 @@ def neo_deps = [
 ]
 
 ext.neodeps = {
-    (!neo4jVersion.startsWith('5.22') && !neo4jVersion.startsWith('5.23'))
+    (!ver.neo4j.startsWith('5.22') && !ver.neo4j.startsWith('5.23'))
         ? (neo_deps + ['neo4j-gql-status']).iterator()
         : neo_deps.iterator()
 }
