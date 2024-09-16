@@ -87,4 +87,61 @@ class CosineSimilarityComputerTest {
         );
     }
 
+    @Test
+    void shouldComputeCorrectSimilarityWhenInputVectorsHaveSameSizes() {
+        var vector1 = new long[]{1, 5, 4, 6, 3};
+        var vector2 = new long[]{1, 3, 4, 5, 6};
+        var weights1 = new double[]{
+            0.5801196133134187,
+            0.5801196133134187,
+            0.5551196133134186,
+            0.8213475204444817,
+            0.5051196133134187
+        };
+        var weights2 = new double[]{
+            0.5801196133134187,
+            0.5051196133134187,
+            0.5551196133134186,
+            0.5801196133134187,
+            0.0
+        };
+
+        var computer = new CosineSimilarityComputer(1.0E-42);
+
+        var similarity = computer.computeWeightedSimilarity(
+            vector1,
+            vector2,
+            weights1,
+            weights2
+        );
+
+        assertThat(similarity).isCloseTo(0.4378842976395471, Offset.offset(1e-15));
+    }
+
+
+    @Test
+    void shouldComputeCorrectSimilarityWhenInputVectorsHaveDifferentSizes() {
+        var vector1 = new long[]{1, 5, 4, 6, 3};
+        var vector2 = new long[]{1, 3, 4, 5};
+        var weights1 = new double[]{
+            0.5801196133134187,
+            0.5801196133134187,
+            0.5551196133134186,
+            0.8213475204444817,
+            0.5051196133134187
+        };
+        var weights2 = new double[]{0.5801196133134187, 0.5051196133134187, 0.5551196133134186, 0.5801196133134187};
+
+        var computer = new CosineSimilarityComputer(1.0E-42);
+
+        var similarity = computer.computeWeightedSimilarity(
+            vector1,
+            vector2,
+            weights1,
+            weights2
+        );
+
+        assertThat(similarity).isCloseTo(0.4378842976395471, Offset.offset(1e-15));
+    }
+
 }
