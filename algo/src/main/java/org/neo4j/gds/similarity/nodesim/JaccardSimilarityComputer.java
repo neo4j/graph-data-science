@@ -19,7 +19,10 @@
  */
 package org.neo4j.gds.similarity.nodesim;
 
+import org.neo4j.gds.collections.hsa.HugeSparseDoubleArray;
 import org.neo4j.gds.core.utils.Intersections;
+
+import java.util.Arrays;
 
 public class JaccardSimilarityComputer implements MetricSimilarityComputer {
     private final double similarityCutoff;
@@ -41,42 +44,41 @@ public class JaccardSimilarityComputer implements MetricSimilarityComputer {
         assert vector1.length == weights1.length;
         assert vector2.length == weights2.length;
 
-        int offset1 = 0;
-        int offset2 = 0;
-        int length1 = weights1.length;
-        int length2 = weights2.length;
-        double max = 0;
-        double min = 0;
-        while (offset1 < length1 && offset2 < length2) {
-            long target1 = vector1[offset1];
-            long target2 = vector2[offset2];
-            if (target1 == target2) {
-                double w1 = weights1[offset1];
-                double w2 = weights2[offset2];
-                if (w1 > w2) {
-                    max += w1;
-                    min += w2;
-                } else {
-                    min += w1;
-                    max += w2;
-                }
-                offset1++;
-                offset2++;
-            } else if (target1 < target2) {
-                max += weights1[offset1];
-                offset1++;
-            } else {
-                max += weights2[offset2];
-                offset2++;
-            }
+        // It is possible the input vectors to have different lengths.
+        // In such cases we need to make sure that elements that are missing get assigned `0.0` weights.
+        // To do so, we make use of HugeSparseDoubleArrays
+        // where the index is the element from `vector1` and `vector2` and
+        // the values are from `weights1` and `weights2`.
+
+        // 1. Find the maximum element from each of the vector arrays
+        var vector1MaxElement = Arrays.stream(vector1).max().orElseThrow();
+        var vector2MaxElement = Arrays.stream(vector2).max().orElseThrow();
+        var maxElement = Math.max(vector1MaxElement, vector2MaxElement);
+
+        // 2. Create HugeSparseDoubleArrays
+        var vector1WeightsBuilder = HugeSparseDoubleArray.builder(0d, maxElement);
+        for (int i = 0; i < vector1.length; i++) {
+            vector1WeightsBuilder.set(vector1[i], weights1[i]);
         }
-        for (; offset1 < length1; offset1++) {
-            max += weights1[offset1];
+        var vector1Weights = vector1WeightsBuilder.build();
+        var vector2WeightsBuilder = HugeSparseDoubleArray.builder(0d, maxElement);
+        for (int i = 0; i < vector2.length; i++) {
+            vector2WeightsBuilder.set(vector2[i], weights2[i]);
         }
-        for (; offset2 < length2; offset2++) {
-            max += weights2[offset2];
+        var vector2Weights = vector2WeightsBuilder.build();
+
+        // 3. Iterate over the arrays and compute the min and max sums
+        var minSum = 0d;
+        var maxSum = 0d;
+        for (int i = 0; i <= maxElement; i++) {
+            var weight1 = vector1Weights.get(i);
+            var weight2 = vector2Weights.get(i);
+            minSum += Math.min(weight1, weight2);
+            maxSum += Math.max(weight1, weight2);
         }
-        double similarity = min / max;
+
+        // 4. Compute the final similarity
+        var similarity = minSum / maxSum;
         return similarity >= similarityCutoff ? similarity : Double.NaN;
     }
 
