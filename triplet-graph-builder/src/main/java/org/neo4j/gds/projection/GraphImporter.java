@@ -47,6 +47,7 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -189,14 +190,17 @@ public final class GraphImporter {
     private void validateRelTypes(RelationshipSchema relationshipSchema) {
         var  unusedUndirectedTypes = notProjectedRelationshipTypes(relationshipSchema, undirectedRelationshipTypes);
         if (!unusedUndirectedTypes.isEmpty()) {
-            throw new IllegalArgumentException(("Specified undirectedRelationshipTypes `%s` were not projected in the graph. " + "Projected types are: `%s`.").formatted(
+            throw new IllegalArgumentException(String.format(Locale.US,
+                "Specified undirectedRelationshipTypes `%s` were not projected in the graph. " + "Projected types are: `%s`.",
                 unusedUndirectedTypes,
                 StringJoining.join(relationshipSchema.availableTypes().stream().map(RelationshipType::name))
             ));
         }
         var unusedInverseTypes = notProjectedRelationshipTypes(relationshipSchema, inverseIndexedRelationshipTypes);
         if (!unusedInverseTypes.isEmpty()) {
-            throw new IllegalArgumentException(("Specified inverseIndexedRelationshipTypes `%s` were not projected in the graph. " + "Projected types are: `%s`.").formatted(
+            throw new IllegalArgumentException(String.format(
+                Locale.US,
+                "Specified inverseIndexedRelationshipTypes `%s` were not projected in the graph. " + "Projected types are: `%s`.",
                 unusedInverseTypes,
                 StringJoining.join(relationshipSchema.availableTypes().stream().map(RelationshipType::name))
             ));
