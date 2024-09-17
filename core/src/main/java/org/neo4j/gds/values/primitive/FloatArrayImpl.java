@@ -87,4 +87,9 @@ public class FloatArrayImpl implements FloatArray {
     public int hashCode() {
         return Arrays.hashCode(value);
     }
+
+    @Override
+    public String toString() {
+        return "FloatArray" + Arrays.toString(value);
+    }
 }

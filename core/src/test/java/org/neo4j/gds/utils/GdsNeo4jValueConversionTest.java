@@ -148,8 +148,7 @@ class GdsNeo4jValueConversionTest {
     static Stream<Arguments> longArrayConversion() {
         return Stream.of(
             arguments(PrimitiveValues.longArray(new long[]{42L}), new long[]{42L}),
-
-            arguments(PrimitiveValues.intArray(new int[]{42}), null),
+            arguments(PrimitiveValues.intArray(new int[]{42}), new long[]{42L}),
             arguments(PrimitiveValues.floatArray(new float[]{42.0F}), new long[]{42L}),
             arguments(PrimitiveValues.floatArray(new float[]{42.42F}), null),
             arguments(PrimitiveValues.doubleArray(new double[]{42.0}), new long[]{42L}),

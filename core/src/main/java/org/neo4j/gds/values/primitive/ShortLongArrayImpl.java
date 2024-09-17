@@ -83,4 +83,9 @@ public class ShortLongArrayImpl implements LongArray {
     public int hashCode() {
         return Arrays.hashCode(value);
     }
+
+    @Override
+    public String toString() {
+        return "LongArray" + Arrays.toString(value);
+    }
 }

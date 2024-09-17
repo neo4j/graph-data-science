@@ -21,4 +21,5 @@ package org.neo4j.gds.values;
 
 public interface Array extends GdsValue {
     int length();
+    String toString();
 }

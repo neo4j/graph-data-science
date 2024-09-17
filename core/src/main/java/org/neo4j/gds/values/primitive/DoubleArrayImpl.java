@@ -78,4 +78,9 @@ public class DoubleArrayImpl implements DoubleArray {
     public int hashCode() {
         return Arrays.hashCode(value);
     }
+
+    @Override
+    public String toString() {
+        return "DoubleArray" + Arrays.toString(value);
+    }
 }
