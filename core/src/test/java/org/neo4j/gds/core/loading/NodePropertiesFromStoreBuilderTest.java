@@ -30,8 +30,8 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
-import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.Values;
+import org.neo4j.gds.values.GdsValue;
+import org.neo4j.gds.values.primitive.PrimitiveValues;
 
 import java.util.OptionalDouble;
 import java.util.OptionalLong;
@@ -81,7 +81,7 @@ final class NodePropertiesFromStoreBuilderTest {
 
     @Test
     void returnsValuesThatHaveBeenSet() {
-        var properties = createNodeProperties(2L, 42.0, b -> b.set(1, Values.of(1.0)));
+        var properties = createNodeProperties(2L, 42.0, b -> b.set(1, PrimitiveValues.of(1.0)));
 
         assertEquals(1.0, properties.doubleValue(1));
         assertEquals(42.0, properties.doubleValue(0));
@@ -94,7 +94,7 @@ final class NodePropertiesFromStoreBuilderTest {
         NodePropertyValues properties = createNodeProperties(
             2L,
             defaultValue,
-            b -> b.set(1, Values.of(data))
+            b -> b.set(1, PrimitiveValues.of(data))
         );
 
         assertArrayEquals(data, properties.longArrayValue(1));
@@ -108,7 +108,7 @@ final class NodePropertiesFromStoreBuilderTest {
         NodePropertyValues properties = createNodeProperties(
             2L,
             defaultValue,
-            b -> b.set(1, Values.of(data))
+            b -> b.set(1, PrimitiveValues.of(data))
         );
 
         assertArrayEquals(data, properties.doubleArrayValue(1));
@@ -122,7 +122,7 @@ final class NodePropertiesFromStoreBuilderTest {
         NodePropertyValues properties = createNodeProperties(
             2L,
             defaultValue,
-            b -> b.set(1, Values.of(data))
+            b -> b.set(1, PrimitiveValues.of(data))
         );
 
         assertArrayEquals(data, properties.floatArrayValue(1));
@@ -137,7 +137,7 @@ final class NodePropertiesFromStoreBuilderTest {
         NodePropertyValues properties = createNodeProperties(
             2L,
             defaultValue,
-            b -> b.set(1, Values.of(floatData))
+            b -> b.set(1, PrimitiveValues.of(floatData))
         );
 
         assertArrayEquals(floatData, properties.floatArrayValue(1));
@@ -156,7 +156,7 @@ final class NodePropertiesFromStoreBuilderTest {
         NodePropertyValues properties = createNodeProperties(
             2L,
             defaultValue,
-            b -> b.set(1, Values.of(doubleData))
+            b -> b.set(1, PrimitiveValues.of(doubleData))
         );
 
         assertArrayEquals(doubleData, properties.doubleArrayValue(1));
@@ -166,11 +166,11 @@ final class NodePropertiesFromStoreBuilderTest {
 
     @Test
     void dimensions() {
-        var longs = createNodeProperties(2, -6L, b -> b.set(1, Values.of(69L)));
-        var doubles = createNodeProperties(2, 420D, b -> b.set(1, Values.of(13.37D)));
-        var floatArray = createNodeProperties(2, new float[2], b -> b.set(1, Values.of(new float[]{42.2F, 1337.1F})));
-        var doubleArray = createNodeProperties(2, new double[3], b -> b.set(1, Values.of(new double[]{1D, 1D, 0D})));
-        var longArray = createNodeProperties(2, new long[0], b -> b.set(1, Values.of(new long[0])));
+        var longs = createNodeProperties(2, -6L, b -> b.set(1, PrimitiveValues.of(69L)));
+        var doubles = createNodeProperties(2, 420D, b -> b.set(1, PrimitiveValues.of(13.37D)));
+        var floatArray = createNodeProperties(2, new float[2], b -> b.set(1, PrimitiveValues.of(new float[]{42.2F, 1337.1F})));
+        var doubleArray = createNodeProperties(2, new double[3], b -> b.set(1, PrimitiveValues.of(new double[]{1D, 1D, 0D})));
+        var longArray = createNodeProperties(2, new long[0], b -> b.set(1, PrimitiveValues.of(new long[0])));
 
         assertThat(longs.dimension()).contains(1);
         assertThat(doubles.dimension()).contains(1);
@@ -181,9 +181,9 @@ final class NodePropertiesFromStoreBuilderTest {
 
     @Test
     void dimensionsWithNulls() {
-        var floatArray = createNodeProperties(3, null, b -> b.set(1, Values.of(new float[]{42.2F, 1337.1F})));
-        var doubleArray = createNodeProperties(3, new double[3], b -> b.set(1, Values.of(null)));
-        var longArray = createNodeProperties(3, new long[0], b -> b.set(0, Values.of(null)));
+        var floatArray = createNodeProperties(3, null, b -> b.set(1, PrimitiveValues.of(new float[]{42.2F, 1337.1F})));
+        var doubleArray = createNodeProperties(3, new double[3], b -> b.set(1, PrimitiveValues.of(null)));
+        var longArray = createNodeProperties(3, new long[0], b -> b.set(0, PrimitiveValues.of(null)));
 
         assertThat(floatArray.dimension()).isEmpty();
         assertThat(doubleArray.dimension()).contains(3);
@@ -192,17 +192,14 @@ final class NodePropertiesFromStoreBuilderTest {
 
     static Stream<Arguments> unsupportedValues() {
         return Stream.of(
-            arguments(Values.stringValue("42L")),
-            arguments(Values.shortArray(new short[]{(short) 42})),
-            arguments(Values.byteArray(new byte[]{(byte) 42})),
-            arguments(Values.booleanValue(true)),
-            arguments(Values.charValue('c'))
+            arguments(PrimitiveValues.shortArray(new short[]{(short) 42})),
+            arguments(PrimitiveValues.byteArray(new byte[]{(byte) 42}))
         );
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.loading.NodePropertiesFromStoreBuilderTest#unsupportedValues")
-    void shouldFailOnUnSupportedTypes(Value data) {
+    @MethodSource("org.neo4j.gds.core.loading.NodePropertiesFromStoreBuilderTest#unsupportedValues") // Leaving this test failing to discuss the smol type array implementations
+    void shouldFailOnUnSupportedTypes(GdsValue data) {
         assertThatThrownBy(() -> createNodeProperties(
             2L,
             null,
@@ -225,7 +222,7 @@ final class NodePropertiesFromStoreBuilderTest {
     @MethodSource("invalidValueTypeCombinations")
     void failOnInvalidDefaultType(Object defaultValue, Object propertyValue) {
         Assertions.assertThatThrownBy(() -> createNodeProperties(1L, defaultValue, b -> {
-            b.set(0, Values.of(propertyValue));
+            b.set(0, PrimitiveValues.of(propertyValue));
         })).isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining(formatWithLocale("Expected type of default value to be `%s`.", propertyValue.getClass().getSimpleName()));
     }
@@ -240,7 +237,7 @@ final class NodePropertiesFromStoreBuilderTest {
 
     @Test
     void returnNaNIfItWasSet() {
-        var properties = createNodeProperties(2L, 42.0, b -> b.set(1, Values.of(Double.NaN)));
+        var properties = createNodeProperties(2L, 42.0, b -> b.set(1, PrimitiveValues.of(Double.NaN)));
 
         assertEquals(42.0, properties.doubleValue(0));
         assertEquals(Double.NaN, properties.doubleValue(1));
@@ -249,8 +246,8 @@ final class NodePropertiesFromStoreBuilderTest {
     @Test
     void trackMaxValue() {
         var properties = createNodeProperties(2L, 0.0, b -> {
-            b.set(0, Values.of(42));
-            b.set(1, Values.of(21));
+            b.set(0, PrimitiveValues.of(42));
+            b.set(1, PrimitiveValues.of(21));
         });
         var maxPropertyValue = properties.getMaxLongPropertyValue();
         assertTrue(maxPropertyValue.isPresent());
@@ -260,8 +257,8 @@ final class NodePropertiesFromStoreBuilderTest {
     @Test
     void hasSize() {
         var properties = createNodeProperties(2L, 0.0, b -> {
-            b.set(0, Values.of(42.0));
-            b.set(1, Values.of(21.0));
+            b.set(0, PrimitiveValues.of(42.0));
+            b.set(1, PrimitiveValues.of(21.0));
         });
         assertEquals(2, properties.nodeCount());
     }
@@ -275,9 +272,9 @@ final class NodePropertiesFromStoreBuilderTest {
             new Concurrency(1)
         );
 
-        Value value = null;
+        GdsValue value = null;
         builder.set(0, value);
-        builder.set(1, Values.longValue(42L));
+        builder.set(1, PrimitiveValues.longValue(42L));
 
         var properties = builder.build(idMap(nodeCount));
 
@@ -304,7 +301,7 @@ final class NodePropertiesFromStoreBuilderTest {
             // that value, while the other thread will write 2^42 in the meantime. If that happens,
             // this thread would overwrite a new maxValue.
             for (int i = 0; i < nodeSize; i += 2) {
-                builder.set(i, Values.of(i == 1338 ? 0x1p41 : 2.0));
+                builder.set(i, PrimitiveValues.of(i == 1338 ? 0x1p41 : 2.0));
             }
         });
         pool.execute(() -> {
@@ -313,7 +310,7 @@ final class NodePropertiesFromStoreBuilderTest {
             // second task, sets the value 1 on every other node, except for 1337 which is set to 2^42
             // Depending on thread scheduling, the write for 2^42 might be overwritten by the first thread
             for (int i = 1; i < nodeSize; i += 2) {
-                builder.set(i, Values.of(i == 1337 ? 0x1p42 : 1.0));
+                builder.set(i, PrimitiveValues.of(i == 1337 ? 0x1p42 : 1.0));
             }
         });
 
