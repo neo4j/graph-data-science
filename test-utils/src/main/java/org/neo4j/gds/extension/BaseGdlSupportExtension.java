@@ -41,18 +41,14 @@ import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.stream;
-import static org.junit.platform.commons.support.AnnotationSupport.isAnnotated;
 import static org.neo4j.gds.extension.ExtensionUtil.getStringValueOfField;
 import static org.neo4j.gds.extension.ExtensionUtil.injectInstance;
-import static org.neo4j.gds.extension.ExtensionUtil.setField;
 
 public abstract class BaseGdlSupportExtension {
 
