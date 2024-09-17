@@ -57,8 +57,9 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlSupportPerMethodExtension;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.values.GdsValue;
+import org.neo4j.gds.values.primitive.PrimitiveValues;
 import org.neo4j.values.storable.ArrayValue;
-import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 import org.s1ck.gdl.GDLHandler;
 import org.s1ck.gdl.model.Element;
@@ -214,12 +215,12 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
                     .collect(Collectors.toList());
             }
 
-            Map<String, Value> propertyValues = new HashMap<>();
+            Map<String, GdsValue> propertyValues = new HashMap<>();
             vertex.getProperties().forEach((propertyKey, propertyValue) -> {
                 if (propertyValue instanceof List) {
                     propertyValue = convertListProperty((List<?>) propertyValue);
                 }
-                propertyValues.put(propertyKey, Values.of(propertyValue));
+                propertyValues.put(propertyKey, PrimitiveValues.of(propertyValue));
             });
 
             nodesBuilder.addNode(

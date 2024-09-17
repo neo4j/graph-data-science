@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.values.primitive;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.values.Array;
 import org.neo4j.gds.values.DoubleArray;
@@ -35,6 +36,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class PrimitiveValues {
     public static final GdsNoValue NO_VALUE = GdsNoValue.NO_VALUE;
+    public static final LongArray EMPTY_LONG_ARRAY = longArray(ArrayUtils.EMPTY_LONG_ARRAY);
 
     public static GdsValue of(@Nullable Object value) {
         GdsValue of = unsafeOf(value);

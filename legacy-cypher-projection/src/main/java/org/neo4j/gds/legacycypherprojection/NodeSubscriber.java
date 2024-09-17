@@ -19,15 +19,15 @@
  */
 package org.neo4j.gds.legacycypherprojection;
 
-import org.neo4j.gds.core.loading.ValueConverter;
+import org.neo4j.gds.core.loading.GdsNeo4jValueConverter;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.values.CypherNodeLabelTokens;
+import org.neo4j.gds.values.GdsValue;
 import org.neo4j.graphdb.QueryStatistics;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.SequenceValue;
 import org.neo4j.values.storable.NumberValue;
-import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 import org.neo4j.values.virtual.VirtualValues;
 
@@ -54,7 +54,7 @@ class NodeSubscriber extends ErrorCachingQuerySubscriber {
 
     private long neoId = -1L;
     private SequenceValue labels = VirtualValues.EMPTY_LIST;
-    private Map<String, Value> properties;
+    private Map<String, GdsValue> properties;
 
     private int idOffset = UNINITIALIZED;
     private int labelOffset = UNINITIALIZED;
@@ -118,7 +118,7 @@ class NodeSubscriber extends ErrorCachingQuerySubscriber {
             labels = (SequenceValue) value;
         } else {//properties
             if ( value != Values.NO_VALUE) {
-                properties.put(fieldNames[offset], ValueConverter.toValue(value));
+                properties.put(fieldNames[offset], GdsNeo4jValueConverter.toValue(value));
             }
         }
     }

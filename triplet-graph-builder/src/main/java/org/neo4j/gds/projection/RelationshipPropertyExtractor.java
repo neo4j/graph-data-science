@@ -19,10 +19,12 @@
  */
 package org.neo4j.gds.projection;
 
+import org.neo4j.gds.api.ValueConversion;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.values.storable.NumberValue;
-import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.Values;
+import org.neo4j.gds.values.FloatingPointValue;
+import org.neo4j.gds.values.GdsNoValue;
+import org.neo4j.gds.values.GdsValue;
+import org.neo4j.gds.values.IntegralValue;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -32,18 +34,22 @@ public final class RelationshipPropertyExtractor {
         throw new UnsupportedOperationException("No instances");
     }
 
-    public static double extractValue(Value value, double defaultValue) {
+    public static double extractValue(GdsValue value, double defaultValue) {
         return extractValue(Aggregation.NONE, value, defaultValue);
     }
 
-    public static double extractValue(Aggregation aggregation, Value value, double defaultValue) {
+    public static double extractValue(Aggregation aggregation, GdsValue value, double defaultValue) {
         // slightly different logic than org.neo4j.values.storable.Values#coerceToDouble
         // b/c we want to fall back to the default value if the value is empty
-        if (value instanceof NumberValue) {
-            double propertyValue = ((NumberValue) value).doubleValue();
+        if (value instanceof FloatingPointValue) {
+            double propertyValue = ((FloatingPointValue) value).doubleValue();
             return aggregation.normalizePropertyValue(propertyValue);
         }
-        if (Values.NO_VALUE.equals(value)) {
+        if (value instanceof IntegralValue) {
+            double propertyValue = ValueConversion.exactLongToDouble(((IntegralValue) value).longValue());
+            return aggregation.normalizePropertyValue(propertyValue);
+        }
+        if (GdsNoValue.NO_VALUE.equals(value)) {
             return aggregation.emptyValue(defaultValue);
         }
 
@@ -51,7 +57,7 @@ public final class RelationshipPropertyExtractor {
         //       Do we want to do so or is failing on non numeric properties ok?
         throw new IllegalArgumentException(formatWithLocale(
             "Unsupported type [%s] of value %s. Please use a numeric property.",
-            value.valueRepresentation().valueGroup(),
+            value.type(),
             value
         ));
     }

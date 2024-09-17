@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.core.loading.construction;
 
-import org.neo4j.gds.core.loading.ValueConverter;
-import org.neo4j.values.storable.Value;
+import org.neo4j.gds.core.loading.GdsNeo4jValueConverter;
+import org.neo4j.gds.values.GdsValue;
 import org.neo4j.values.virtual.MapValue;
 
 import java.util.Map;
@@ -29,7 +29,7 @@ import java.util.function.BiConsumer;
 
 public abstract class PropertyValues {
 
-    public abstract void forEach(BiConsumer<String, Value> consumer);
+    public abstract void forEach(BiConsumer<String, GdsValue> consumer);
 
     public abstract boolean isEmpty();
 
@@ -37,25 +37,25 @@ public abstract class PropertyValues {
 
     public abstract Iterable<String> propertyKeys();
 
-    public abstract Value get(String key);
+    public abstract GdsValue get(String key);
 
     public static PropertyValues of(MapValue mapValue) {
         return new CypherPropertyValues(mapValue);
     }
 
-    public static PropertyValues of(Map<String, Value> map) {
+    public static PropertyValues of(Map<String, GdsValue> map) {
         return new NativePropertyValues(map);
     }
 
     private static final class NativePropertyValues extends PropertyValues {
-        private final Map<String, Value> properties;
+        private final Map<String, GdsValue> properties;
 
-        private NativePropertyValues(Map<String, Value> properties) {
+        private NativePropertyValues(Map<String, GdsValue> properties) {
             this.properties = properties;
         }
 
         @Override
-        public void forEach(BiConsumer<String, Value> consumer) {
+        public void forEach(BiConsumer<String, GdsValue> consumer) {
             this.properties.forEach(consumer);
         }
 
@@ -75,7 +75,7 @@ public abstract class PropertyValues {
         }
 
         @Override
-        public Value get(String key) {
+        public GdsValue get(String key) {
             return properties.get(key);
         }
     }
@@ -88,9 +88,9 @@ public abstract class PropertyValues {
         }
 
         @Override
-        public void forEach(BiConsumer<String, Value> consumer) {
+        public void forEach(BiConsumer<String, GdsValue> consumer) {
             this.properties.foreach((k, v) -> {
-                consumer.accept(k, ValueConverter.toValue(v));
+                consumer.accept(k, GdsNeo4jValueConverter.toValue(v));
             });
         }
 
@@ -110,8 +110,8 @@ public abstract class PropertyValues {
         }
 
         @Override
-        public Value get(String key) {
-            return ValueConverter.toValue(properties.get(key));
+        public GdsValue get(String key) {
+            return GdsNeo4jValueConverter.toValue(properties.get(key));
         }
     }
 }
