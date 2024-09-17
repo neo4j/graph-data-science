@@ -204,7 +204,7 @@ public final class CentralityProcedureFacade {
             estimationModeBusinessFacade,
             procedureReturnColumns,
             mutateModeBusinessFacade::pageRank,
-            PageRankMutateConfig::configWithDampingFactor
+            PageRankMutateConfig::of
 
         );
 
@@ -297,7 +297,7 @@ public final class CentralityProcedureFacade {
     ) {
         var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
-            PageRankStatsConfig::configWithDampingFactor
+            ArticleRankStatsConfig::of
         );
 
         return Stream.of(estimationModeBusinessFacade.pageRank(parsedConfiguration, graphNameOrConfiguration));
@@ -323,7 +323,7 @@ public final class CentralityProcedureFacade {
     ) {
         var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
-            PageRankStreamConfig::configWithoutDampingFactor
+            ArticleRankStreamConfig::of
         );
 
         return Stream.of(estimationModeBusinessFacade.pageRank(parsedConfiguration, graphNameOrConfiguration));
@@ -354,7 +354,7 @@ public final class CentralityProcedureFacade {
     ) {
         var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
-            PageRankWriteConfig::configWithoutDampingFactor
+            ArticleRankWriteConfig::of
         );
 
         return Stream.of(estimationModeBusinessFacade.pageRank(parsedConfiguration, graphNameOrConfiguration));
@@ -920,7 +920,7 @@ public final class CentralityProcedureFacade {
     ) {
         var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
-            PageRankStatsConfig::configWithoutDampingFactor
+            EigenvectorStatsConfig::of
         );
 
         return Stream.of(estimationModeBusinessFacade.pageRank(parsedConfiguration, graphNameOrConfiguration));
@@ -947,7 +947,7 @@ public final class CentralityProcedureFacade {
     ) {
         var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
-            PageRankStreamConfig::configWithoutDampingFactor
+            EigenvectorStreamConfig::of
         );
 
         return Stream.of(estimationModeBusinessFacade.pageRank(parsedConfiguration, graphNameOrConfiguration));
@@ -975,7 +975,7 @@ public final class CentralityProcedureFacade {
     ) {
         var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
-            PageRankWriteConfig::configWithoutDampingFactor
+            EigenvectorWriteConfig::of
         );
 
         return Stream.of(estimationModeBusinessFacade.pageRank(parsedConfiguration, graphNameOrConfiguration));
@@ -1045,7 +1045,7 @@ public final class CentralityProcedureFacade {
 
         var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            PageRankStatsConfig::configWithDampingFactor
+            PageRankStatsConfig::of
         );
 
         return statsModeBusinessFacade.pageRank(
@@ -1061,7 +1061,7 @@ public final class CentralityProcedureFacade {
     ) {
         var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
-            PageRankStatsConfig::configWithDampingFactor
+            PageRankStatsConfig::of
         );
 
         return Stream.of(estimationModeBusinessFacade.pageRank(parsedConfiguration, graphNameOrConfiguration));
@@ -1072,7 +1072,7 @@ public final class CentralityProcedureFacade {
 
         var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            PageRankStreamConfig::configWithDampingFactor
+            PageRankStreamConfig::of
         );
 
         return streamModeBusinessFacade.pageRank(
@@ -1088,7 +1088,7 @@ public final class CentralityProcedureFacade {
     ) {
         var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
-            PageRankStreamConfig::configWithDampingFactor
+            PageRankStreamConfig::of
         );
 
         return Stream.of(estimationModeBusinessFacade.pageRank(parsedConfiguration, graphNameOrConfiguration));
@@ -1101,7 +1101,7 @@ public final class CentralityProcedureFacade {
 
         var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            PageRankWriteConfig::configWithDampingFactor
+            PageRankWriteConfig::of
         );
 
         return writeModeBusinessFacade.pageRank(
@@ -1117,7 +1117,7 @@ public final class CentralityProcedureFacade {
     ) {
         var parsedConfiguration = configurationParser.parseConfiguration(
             algorithmConfiguration,
-            PageRankWriteConfig::configWithDampingFactor
+            PageRankWriteConfig::of
         );
 
         return Stream.of(estimationModeBusinessFacade.pageRank(parsedConfiguration, graphNameOrConfiguration));

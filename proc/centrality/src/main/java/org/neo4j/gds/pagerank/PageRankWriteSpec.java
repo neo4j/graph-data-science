@@ -47,7 +47,7 @@ public class PageRankWriteSpec implements AlgorithmSpec<PageRankAlgorithm<PageRa
 
     @Override
     public NewConfigFunction<PageRankWriteConfig> newConfigFunction() {
-        return (___,config) -> PageRankWriteConfig.configWithDampingFactor(config);
+        return (___,config) -> PageRankWriteConfig.of(config);
     }
 
     @Override

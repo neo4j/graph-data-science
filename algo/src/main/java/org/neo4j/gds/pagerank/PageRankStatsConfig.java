@@ -25,20 +25,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 @Configuration
 public interface PageRankStatsConfig extends PageRankConfig {
 
-   private static PageRankStatsConfig of(CypherMapWrapper userInput, boolean checkDampingFactor) {
-        if (checkDampingFactor && userInput.containsKey("dampingFactor")) {
-            throw new IllegalArgumentException("Unexpected configuration key: dampingFactor");
-        }
+   public static PageRankStatsConfig of(CypherMapWrapper userInput) {
         return new PageRankStatsConfigImpl(userInput);
     }
-
-     static PageRankStatsConfig configWithDampingFactor(CypherMapWrapper userInput) {
-       return of(userInput, false);
-    }
-
-     static PageRankStatsConfig configWithoutDampingFactor(CypherMapWrapper userInput) {
-        return of(userInput, true);
-    }
-
-
 }

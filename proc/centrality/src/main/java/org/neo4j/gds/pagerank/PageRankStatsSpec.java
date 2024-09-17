@@ -47,7 +47,7 @@ public class PageRankStatsSpec implements AlgorithmSpec<PageRankAlgorithm<PageRa
 
     @Override
     public NewConfigFunction<PageRankStatsConfig> newConfigFunction() {
-        return (___, config) -> PageRankStatsConfig.configWithDampingFactor(config);
+        return (___, config) -> PageRankStatsConfig.of(config);
     }
 
     @Override

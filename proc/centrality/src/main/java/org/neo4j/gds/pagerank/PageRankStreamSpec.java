@@ -47,7 +47,7 @@ public class PageRankStreamSpec implements AlgorithmSpec<PageRankAlgorithm<PageR
 
     @Override
     public NewConfigFunction<PageRankStreamConfig> newConfigFunction() {
-        return (___,config) -> PageRankStreamConfig.configWithDampingFactor(config);
+        return (___,config) -> PageRankStreamConfig.of(config);
     }
 
     @Override
