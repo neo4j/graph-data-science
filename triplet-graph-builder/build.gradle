@@ -26,6 +26,8 @@ dependencies {
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':graph-schema-api')
+    implementation project(':logging')
+    implementation project(':neo4j-log-adapter')
     implementation project(':proc-common')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')

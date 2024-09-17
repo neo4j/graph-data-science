@@ -44,6 +44,9 @@ import org.neo4j.gds.core.loading.construction.NodeLabelToken;
 import org.neo4j.gds.core.loading.construction.PropertyValues;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.List;
@@ -69,8 +72,18 @@ public final class GraphImporter {
     private final WriteMode writeMode;
     private final String query;
 
+    private final ProgressTracker progressTracker;
+
     private final Map<RelationshipType, RelationshipsBuilder> relImporters;
     private final ImmutableMutableGraphSchema.Builder graphSchemaBuilder;
+
+    public static Task graphImporterTask() {
+        return Tasks.task(
+            "Graph aggregation",
+            Tasks.leaf("Update aggregation"),
+            Tasks.task("Build graph store", Tasks.leaf("Nodes"), Tasks.leaf("Relationships"))
+        );
+    }
 
     public GraphImporter(
         GraphProjectConfig config,
@@ -78,7 +91,8 @@ public final class GraphImporter {
         List<String> inverseIndexedRelationshipTypes,
         LazyIdMapBuilder idMapBuilder,
         WriteMode writeMode,
-        String query
+        String query,
+        ProgressTracker progressTracker
     ) {
         this.config = config;
         this.undirectedRelationshipTypes = undirectedRelationshipTypes;
@@ -86,8 +100,12 @@ public final class GraphImporter {
         this.idMapBuilder = idMapBuilder;
         this.writeMode = writeMode;
         this.query = query;
+        this.progressTracker = progressTracker;
         this.relImporters = new ConcurrentHashMap<>();
         this.graphSchemaBuilder = MutableGraphSchema.builder();
+
+        progressTracker.beginSubTask("Graph aggregation");
+        progressTracker.beginSubTask("Update aggregation");
     }
 
     public void update(
@@ -137,6 +155,8 @@ public final class GraphImporter {
                 relImporter.addFromInternal(intermediateSourceId, intermediateTargetId);
             }
         }
+
+        progressTracker.logProgress();
     }
 
     public AggregationResult result(
@@ -144,6 +164,9 @@ public final class GraphImporter {
         ProgressTimer timer,
         boolean hasSeenArbitraryId
     ) {
+        progressTracker.endSubTask("Update aggregation");
+        progressTracker.beginSubTask("Build graph store");
+        progressTracker.beginSubTask("Nodes");
         var graphName = config.graphName();
 
         if (GraphStoreCatalog.exists(config.username(), databaseInfo.databaseId(), graphName)) {
@@ -162,14 +185,21 @@ public final class GraphImporter {
             .databaseInfo(databaseInfo);
 
         var valueMapper = buildNodesWithProperties(graphStoreBuilder);
+        progressTracker.endSubTask("Nodes");
+
+        progressTracker.beginSubTask("Relationships");
         buildRelationshipsWithProperties(graphStoreBuilder, valueMapper);
 
         var graphStore = graphStoreBuilder.schema(this.graphSchemaBuilder.build()).build();
         validateRelTypes(graphStore.schema().relationshipSchema());
+        progressTracker.endSubTask("Relationships");
 
         GraphStoreCatalog.set(this.config, graphStore);
 
         var projectMillis = timer.stop().getDuration();
+
+        progressTracker.endSubTask("Build graph store");
+        progressTracker.endSubTask("Graph aggregation");
 
         return AggregationResultBuilder.builder()
             .graphName(graphName)

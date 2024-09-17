@@ -22,9 +22,12 @@ package org.neo4j.gds.projection;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.TestTaskStore;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.PropertyState;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.Capabilities;
@@ -33,6 +36,12 @@ import org.neo4j.gds.core.loading.LazyIdMapBuilderBuilder;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.PropertyValues;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.utils.progress.LocalTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
+import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.values.storable.Values;
 
 import java.util.List;
@@ -63,7 +72,8 @@ class GraphImporterTest {
                 .propertyState(PropertyState.REMOTE)
                 .build(),
             Capabilities.WriteMode.REMOTE,
-            ""
+            "",
+            ProgressTracker.NULL_TRACKER
         );
 
         for (int i = 0; i < 2; i++) {
@@ -107,7 +117,8 @@ class GraphImporterTest {
                 .propertyState(PropertyState.REMOTE)
                 .build(),
             Capabilities.WriteMode.REMOTE,
-            ""
+            "",
+            ProgressTracker.NULL_TRACKER
         );
 
         for (int i = 0; i < 2; i++) {
@@ -149,7 +160,8 @@ class GraphImporterTest {
                 .propertyState(PropertyState.REMOTE)
                 .build(),
             Capabilities.WriteMode.REMOTE,
-            ""
+            "",
+            ProgressTracker.NULL_TRACKER
         );
 
         for (int i = 0; i < 2; i++) {
@@ -192,7 +204,8 @@ class GraphImporterTest {
                 .propertyState(PropertyState.REMOTE)
                 .build(),
             Capabilities.WriteMode.REMOTE,
-            ""
+            "",
+            ProgressTracker.NULL_TRACKER
         );
 
         for (int i = 0; i < 2; i++) {
@@ -236,7 +249,8 @@ class GraphImporterTest {
                 .propertyState(PropertyState.REMOTE)
                 .build(),
             Capabilities.WriteMode.REMOTE,
-            ""
+            "",
+            ProgressTracker.NULL_TRACKER
         );
 
         for (int i = 0; i < 2; i++) {
@@ -280,7 +294,8 @@ class GraphImporterTest {
                 .propertyState(PropertyState.REMOTE)
                 .build(),
             Capabilities.WriteMode.REMOTE,
-            ""
+            "",
+            ProgressTracker.NULL_TRACKER
         );
 
         for (int i = 0; i < 2; i++) {
@@ -322,7 +337,8 @@ class GraphImporterTest {
                 .propertyState(PropertyState.REMOTE)
                 .build(),
             Capabilities.WriteMode.REMOTE,
-            ""
+            "",
+            ProgressTracker.NULL_TRACKER
         );
 
         importer.update(0,
@@ -352,7 +368,8 @@ class GraphImporterTest {
                 .propertyState(PropertyState.REMOTE)
                 .build(),
             Capabilities.WriteMode.REMOTE,
-            ""
+            "",
+            ProgressTracker.NULL_TRACKER
         );
 
         importer.update(0,
@@ -369,5 +386,69 @@ class GraphImporterTest {
             ProgressTimer.start(),
             true
         )).hasMessage("Specified inverseIndexedRelationshipTypes `[UNUSED_REL]` were not projected in the graph. Projected types are: `['REL']`.");
+    }
+
+    @Test
+    void shouldRegisterTaskAndLogProgress() {
+        var log = Neo4jProxy.testLog();
+        var jobId = new JobId("test");
+        var taskStore = new TestTaskStore();
+        var progressTracker = new TaskProgressTracker(
+            GraphImporter.graphImporterTask(),
+            new LogAdapter(log),
+            new Concurrency(1),
+            jobId,
+            new LocalTaskRegistryFactory("", taskStore),
+            EmptyUserLogRegistryFactory.INSTANCE
+        );
+        var importer = new GraphImporter(
+            GraphProjectConfig.emptyWithName("", "g"),
+            List.of(),
+            List.of(),
+            new LazyIdMapBuilderBuilder()
+                .concurrency(new Concurrency(4))
+                .hasLabelInformation(true)
+                .hasProperties(true)
+                .propertyState(PropertyState.REMOTE)
+                .build(),
+            Capabilities.WriteMode.REMOTE,
+            "",
+            progressTracker
+        );
+
+        for (int i = 0; i < 2; i++) {
+            importer.update(
+                i,
+                i + 1,
+                null,
+                null,
+                NodeLabelTokens.empty(),
+                NodeLabelTokens.empty(),
+                RelationshipType.ALL_RELATIONSHIPS,
+                null
+            );
+        }
+
+        importer.result(
+            DatabaseInfo.of(DatabaseId.EMPTY, DatabaseInfo.DatabaseLocation.LOCAL),
+            ProgressTimer.start(),
+            true
+        );
+
+        assertThat(taskStore.tasksSeen()).containsExactly("Graph aggregation");
+        log.printMessages();
+        log.assertContainsMessage(TestLog.INFO, "Graph aggregation :: Start");
+        log.assertContainsMessage(TestLog.INFO, "Graph aggregation :: Update aggregation :: Start");
+        log.assertContainsMessage(TestLog.INFO, "Graph aggregation :: Update aggregation 100%");
+        log.assertContainsMessage(TestLog.INFO, "Graph aggregation :: Update aggregation :: Finished");
+        log.assertContainsMessage(TestLog.INFO, "Graph aggregation :: Build graph store :: Start");
+        log.assertContainsMessage(TestLog.INFO, "Graph aggregation :: Build graph store :: Nodes :: Start");
+        log.assertContainsMessage(TestLog.INFO, "Graph aggregation :: Build graph store :: Nodes 100%");
+        log.assertContainsMessage(TestLog.INFO, "Graph aggregation :: Build graph store :: Nodes :: Finished");
+        log.assertContainsMessage(TestLog.INFO, "Graph aggregation :: Build graph store :: Relationships :: Start");
+        log.assertContainsMessage(TestLog.INFO, "Graph aggregation :: Build graph store :: Relationships 100%");
+        log.assertContainsMessage(TestLog.INFO, "Graph aggregation :: Build graph store :: Relationships :: Finished");
+        log.assertContainsMessage(TestLog.INFO, "Graph aggregation :: Build graph store :: Finished");
+        log.assertContainsMessage(TestLog.INFO, "Graph aggregation :: Finished");
     }
 }

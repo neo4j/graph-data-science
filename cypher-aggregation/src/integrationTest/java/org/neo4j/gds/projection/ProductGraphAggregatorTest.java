@@ -26,6 +26,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.progress.EmptyTaskStore;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.values.storable.NoValue;
 import org.neo4j.values.storable.Values;
@@ -49,7 +51,9 @@ class ProductGraphAggregatorTest {
             userName,
             WriteMode.LOCAL,
             ExecutingQueryProvider.empty(),
-            MetricsFacade.PASSTHROUGH_METRICS_FACADE.projectionMetrics()
+            MetricsFacade.PASSTHROUGH_METRICS_FACADE.projectionMetrics(),
+            EmptyTaskStore.INSTANCE,
+            Log.noOpLog()
         );
 
         long source = 1L << 50;
@@ -85,7 +89,9 @@ class ProductGraphAggregatorTest {
             "neo4j",
             WriteMode.LOCAL,
             ExecutingQueryProvider.empty(),
-            MetricsFacade.PASSTHROUGH_METRICS_FACADE.projectionMetrics()
+            MetricsFacade.PASSTHROUGH_METRICS_FACADE.projectionMetrics(),
+            EmptyTaskStore.INSTANCE,
+            Log.noOpLog()
         );
 
         assertThatIllegalArgumentException().isThrownBy(() ->

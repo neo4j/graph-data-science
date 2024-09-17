@@ -39,6 +39,11 @@ import org.neo4j.gds.core.loading.construction.NodeLabelToken;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.PropertyValues;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.TaskStore;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.UserAggregationReducer;
@@ -77,6 +82,8 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
     private final WriteMode writeMode;
     private final ExecutingQueryProvider queryProvider;
     private final ProjectionMetricsService projectionMetricsService;
+    private final TaskStore taskStore;
+    private final Log log;
 
     private final ProgressTimer progressTimer;
     private final ConfigValidator configValidator;
@@ -94,13 +101,17 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
         String username,
         WriteMode writeMode,
         ExecutingQueryProvider queryProvider,
-        ProjectionMetricsService projectionMetricsService
+        ProjectionMetricsService projectionMetricsService,
+        TaskStore taskStore,
+        Log log
     ) {
         this.databaseId = databaseId;
         this.username = username;
         this.writeMode = writeMode;
         this.queryProvider = queryProvider;
         this.projectionMetricsService = projectionMetricsService;
+        this.taskStore = taskStore;
+        this.log = log;
         this.progressTimer = ProgressTimer.start();
         this.lock = new ReentrantLock();
         this.configValidator = new ConfigValidator();
@@ -189,13 +200,23 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
 
         var idMapBuilder = idMapBuilder(config.readConcurrency());
 
+        var progressTracker = new TaskProgressTracker(
+            GraphImporter.graphImporterTask(),
+            log,
+            config.readConcurrency(),
+            config.jobId(),
+            TaskRegistryFactory.local(username, taskStore),
+            EmptyUserLogRegistryFactory.INSTANCE
+        );
+
         return new GraphImporter(
             config,
             config.undirectedRelationshipTypes(),
             config.inverseIndexedRelationshipTypes(),
             idMapBuilder,
             this.writeMode,
-            query
+            query,
+            progressTracker
         );
     }
 
