@@ -79,8 +79,34 @@ public class FloatArrayImpl implements FloatArray {
         return false;
     }
 
+    @Override
+    public boolean equals(byte[] o) {
+        return ArrayEquals.byteAndFloat(o, value);
+    }
+
+    @Override
+    public boolean equals(short[] o) {
+        return ArrayEquals.shortAndFloat(o, value);
+    }
+
+    @Override
+    public boolean equals(int[] o) {
+        return ArrayEquals.intAndFloat(o, value);
+    }
+
+    @Override
+    public boolean equals(long[] other) {
+        return ArrayEquals.longAndFloat(other, value);
+    }
+
+    @Override
     public boolean equals(float[] o) {
         return Arrays.equals(value, o);
+    }
+
+    @Override
+    public boolean equals(double[] o) {
+        return ArrayEquals.floatAndDouble(value, o);
     }
 
     @Override

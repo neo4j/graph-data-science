@@ -20,5 +20,4 @@
 package org.neo4j.gds.values;
 
 public interface IntegralArray extends Array {
-    int length();
 }

@@ -75,8 +75,34 @@ public class IntLongArrayImpl implements LongArray {
         return false;
     }
 
+    @Override
+    public boolean equals(byte[] o) {
+        return ArrayEquals.byteAndInt(o, value);
+    }
+
+    @Override
+    public boolean equals(short[] o) {
+        return ArrayEquals.shortAndInt(o, value);
+    }
+
+    @Override
     public boolean equals(int[] o) {
         return Arrays.equals(value, o);
+    }
+
+    @Override
+    public boolean equals(long[] other) {
+        return ArrayEquals.intAndLong(value, other);
+    }
+
+    @Override
+    public boolean equals(float[] o) {
+        return ArrayEquals.intAndFloat(value, o);
+    }
+
+    @Override
+    public boolean equals(double[] o) {
+        return ArrayEquals.intAndDouble(value, o);
     }
 
     @Override

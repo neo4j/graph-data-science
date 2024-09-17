@@ -70,6 +70,32 @@ public class DoubleArrayImpl implements DoubleArray {
         return false;
     }
 
+    @Override
+    public boolean equals(byte[] o) {
+        return ArrayEquals.byteAndDouble(o, value);
+    }
+
+    @Override
+    public boolean equals(short[] o) {
+        return ArrayEquals.shortAndDouble(o, value);
+    }
+
+    @Override
+    public boolean equals(int[] o) {
+        return ArrayEquals.intAndDouble(o, value);
+    }
+
+    @Override
+    public boolean equals(long[] other) {
+        return ArrayEquals.longAndDouble(other, value);
+    }
+
+    @Override
+    public boolean equals(float[] o) {
+        return ArrayEquals.floatAndDouble(o, value);
+    }
+
+    @Override
     public boolean equals(double[] o) {
         return Arrays.equals(value, o);
     }

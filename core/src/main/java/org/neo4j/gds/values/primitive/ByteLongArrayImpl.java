@@ -75,8 +75,34 @@ public class ByteLongArrayImpl implements LongArray {
         return false;
     }
 
+    @Override
     public boolean equals(byte[] o) {
         return Arrays.equals(value, o);
+    }
+
+    @Override
+    public boolean equals(short[] o) {
+        return ArrayEquals.byteAndShort(value, o);
+    }
+
+    @Override
+    public boolean equals(int[] o) {
+        return ArrayEquals.byteAndInt(value, o);
+    }
+
+    @Override
+    public boolean equals(long[] other) {
+        return ArrayEquals.byteAndLong(value, other);
+    }
+
+    @Override
+    public boolean equals(float[] o) {
+        return ArrayEquals.byteAndFloat(value, o);
+    }
+
+    @Override
+    public boolean equals(double[] o) {
+        return ArrayEquals.byteAndDouble(value, o);
     }
 
     @Override

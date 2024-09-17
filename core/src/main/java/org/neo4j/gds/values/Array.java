@@ -21,5 +21,11 @@ package org.neo4j.gds.values;
 
 public interface Array extends GdsValue {
     int length();
+    boolean equals(byte[] other);
+    boolean equals(short[] other);
+    boolean equals(int[] other);
+    boolean equals(long[] other);
+    boolean equals(float[] other);
+    boolean equals(double[] other);
     String toString();
 }
