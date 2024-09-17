@@ -38,9 +38,7 @@ import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeAtomicGrowingBitSet;
 import org.neo4j.gds.values.GdsValue;
-import org.neo4j.gds.values.primitive.PrimitiveValues;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.atomic.LongAdder;
@@ -146,20 +144,6 @@ public final class NodesBuilder {
 
     public void addNode(long originalId, NodeLabel nodeLabel) {
         this.addNode(originalId, NodeLabelTokens.ofNodeLabel(nodeLabel));
-    }
-
-    public void addNodeWithPropertiesAsObjects(long originalId, Map<String, Object> propertiesAsObjects) {
-        this.addNodeWithPropertiesAsObjects(originalId, propertiesAsObjects, NodeLabelTokens.empty());
-    }
-
-    public void addNodeWithPropertiesAsObjects(long originalId, Map<String, Object> propertiesAsObjects, NodeLabel... nodeLabels) {
-        this.addNodeWithPropertiesAsObjects(originalId, propertiesAsObjects, NodeLabelTokens.ofNodeLabels(nodeLabels));
-    }
-
-    public void addNodeWithPropertiesAsObjects(long originalId, Map<String, Object> propertiesAsObjects, NodeLabelToken nodeLabels) {
-        var properties = new HashMap<String, GdsValue>(propertiesAsObjects.size());
-        propertiesAsObjects.forEach((key, value) -> properties.put(key, PrimitiveValues.of(value)));
-        this.addNode(originalId, properties, nodeLabels);
     }
 
     public void addNode(long originalId, Map<String, GdsValue> properties) {
