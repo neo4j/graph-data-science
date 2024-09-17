@@ -51,6 +51,7 @@ import java.util.stream.Stream;
 import static java.util.Arrays.stream;
 import static org.junit.platform.commons.support.AnnotationSupport.isAnnotated;
 import static org.neo4j.gds.extension.ExtensionUtil.getStringValueOfField;
+import static org.neo4j.gds.extension.ExtensionUtil.injectInstance;
 import static org.neo4j.gds.extension.ExtensionUtil.setField;
 
 public abstract class BaseGdlSupportExtension {
@@ -169,21 +170,6 @@ public abstract class BaseGdlSupportExtension {
             injectInstance(testInstance, graphNamePrefix, idFunction, IdFunction.class, "IdFunction");
             injectInstance(testInstance, graphNamePrefix, dimensions, GraphDimensions.class, "GraphDimensions");
         });
-    }
-
-    private static <T> void injectInstance(
-        Object testInstance,
-        String graphNamePrefix,
-        T instance,
-        Class<T> clazz,
-        String suffix
-    ) {
-        Stream.<Class<?>>iterate(testInstance.getClass(), Objects::nonNull, Class::getSuperclass)
-            .flatMap(c -> Arrays.stream(c.getDeclaredFields()))
-            .filter(field -> field.getType() == clazz)
-            .filter(field -> isAnnotated(field, Inject.class))
-            .filter(field -> field.getName().equalsIgnoreCase(graphNamePrefix + suffix))
-            .forEach(field -> setField(testInstance, field, instance));
     }
 
     @ValueClass

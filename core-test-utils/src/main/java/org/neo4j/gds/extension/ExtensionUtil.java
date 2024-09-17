@@ -23,7 +23,10 @@ import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.stream;
 import static org.junit.platform.commons.support.AnnotationSupport.isAnnotated;
@@ -84,5 +87,20 @@ public final class ExtensionUtil {
             testClass = testClass.getSuperclass();
         }
         while (testClass != null);
+    }
+
+    public static <T> void injectInstance(
+        Object testInstance,
+        String fieldPrefix,
+        T instance,
+        Class<T> clazz,
+        String fieldSuffix
+    ) {
+        Stream.<Class<?>>iterate(testInstance.getClass(), Objects::nonNull, Class::getSuperclass)
+            .flatMap(c -> Arrays.stream(c.getDeclaredFields()))
+            .filter(field -> field.getType() == clazz)
+            .filter(field -> isAnnotated(field, Inject.class))
+            .filter(field -> field.getName().equalsIgnoreCase(fieldPrefix + fieldSuffix))
+            .forEach(field -> setField(testInstance, field, instance));
     }
 }
