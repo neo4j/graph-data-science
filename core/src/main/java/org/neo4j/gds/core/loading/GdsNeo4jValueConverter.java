@@ -47,8 +47,10 @@ public final class GdsNeo4jValueConverter {
         if (value instanceof Value storableValue) {
             if (storableValue.valueGroup() != ValueGroup.NUMBER) {
                 throw new IllegalArgumentException(formatWithLocale("Unsupported GDS node property of type `%s`.", storableValue.getTypeName()));
-            } else if (storableValue instanceof org.neo4j.values.storable.FloatingPointValue floatingPointValue) {
-                return PrimitiveValues.floatingPointValue(floatingPointValue.floatValue());
+            } else if (storableValue instanceof org.neo4j.values.storable.FloatValue floatValue) {
+                return PrimitiveValues.floatingPointValue(floatValue.floatValue());
+            } else if (storableValue instanceof org.neo4j.values.storable.DoubleValue doubleValue) {
+                return PrimitiveValues.floatingPointValue(doubleValue.doubleValue());
             } else if (storableValue instanceof IntegralValue integralValue) {
                 return PrimitiveValues.longValue(integralValue.longValue());
             }
