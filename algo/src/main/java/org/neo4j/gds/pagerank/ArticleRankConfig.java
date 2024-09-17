@@ -21,8 +21,9 @@ package org.neo4j.gds.pagerank;
 
 import org.neo4j.gds.annotation.Configuration;
 
-@Configuration("PageRankConfigImpl")
-public interface PageRankConfig extends RankConfig {
+@Configuration("ArticleRankConfigImpl")
+public interface ArticleRankConfig extends RankConfig
+{
     @Configuration.DoubleRange(min = 0, max = 1, maxInclusive = false)
     default double dampingFactor() {
         return 0.85;

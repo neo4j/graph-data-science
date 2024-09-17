@@ -37,6 +37,8 @@ import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationWriteConfig;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.pagerank.ArticleRankWriteConfig;
+import org.neo4j.gds.pagerank.EigenvectorWriteConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankWriteConfig;
 
@@ -88,10 +90,10 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
 
     public <RESULT> RESULT articleRank(
         GraphName graphName,
-        PageRankWriteConfig configuration,
-        ResultBuilder<PageRankWriteConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
+        ArticleRankWriteConfig configuration,
+        ResultBuilder<ArticleRankWriteConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new PageRankWriteStep(writeToDatabase, configuration, ArticleRank);
+        var writeStep = new PageRankWriteStep<>(writeToDatabase, configuration, ArticleRank);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
@@ -194,10 +196,10 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
 
     public <RESULT> RESULT eigenvector(
         GraphName graphName,
-        PageRankWriteConfig configuration,
-        ResultBuilder<PageRankWriteConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
+        EigenvectorWriteConfig configuration,
+        ResultBuilder<EigenvectorWriteConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new PageRankWriteStep(writeToDatabase, configuration, EigenVector);
+        var writeStep = new PageRankWriteStep<>(writeToDatabase, configuration, EigenVector);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
@@ -233,7 +235,7 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
         PageRankWriteConfig configuration,
         ResultBuilder<PageRankWriteConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var writeStep = new PageRankWriteStep(writeToDatabase, configuration, ArticleRank);
+        var writeStep = new PageRankWriteStep<>(writeToDatabase, configuration, ArticleRank);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,

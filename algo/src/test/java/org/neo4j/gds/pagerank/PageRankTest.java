@@ -26,8 +26,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
@@ -43,13 +43,13 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.logging.GdsTestLog;
-import org.neo4j.gds.pagerank.PageRankAlgorithmFactory.Mode;
 import org.neo4j.gds.scaling.ScalerFactory;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
@@ -109,7 +109,13 @@ class PageRankTest {
                 .tolerance(0)
                 .build();
 
-            var rankProvider = runOnPregel(graph, config).centralityScoreProvider();
+            var rankProvider = new PageRankAlgorithmFactory<>()
+                .build(
+                    graph,
+                    config,
+                    ProgressTracker.NULL_TRACKER
+                )
+                .compute().centralityScoreProvider();
 
             var expected = graph.nodeProperties("expectedRank");
 
@@ -130,7 +136,13 @@ class PageRankTest {
                 .tolerance(tolerance)
                 .build();
 
-            var pregelResult = runOnPregel(graph, config);
+            var pregelResult = new PageRankAlgorithmFactory<>()
+                .build(
+                    graph,
+                    config,
+                    ProgressTracker.NULL_TRACKER
+                )
+                .compute();
 
             // initial iteration is counted extra in Pregel
             assertThat(pregelResult.iterations()).isEqualTo(expectedIterations);
@@ -154,7 +166,13 @@ class PageRankTest {
                 .sourceNodes(sourceNodeIds)
                 .build();
 
-            var rankProvider = runOnPregel(graph, config).centralityScoreProvider();
+            var rankProvider = new PageRankAlgorithmFactory<>()
+                .build(
+                    graph,
+                    config,
+                    ProgressTracker.NULL_TRACKER
+                )
+                .compute().centralityScoreProvider();
 
             var expected = graph.nodeProperties(expectedPropertyKey);
 
@@ -166,15 +184,14 @@ class PageRankTest {
             }
         }
 
-        @ParameterizedTest
-        @EnumSource(Mode.class)
-        void shouldLogProgress(Mode mode) {
+        @Test
+        void shouldLogProgress() {
             var maxIterations = 10;
             var config = PageRankConfigImpl.builder()
                 .maxIterations(maxIterations)
                 .build();
 
-            var factory = new PageRankAlgorithmFactory<>(mode);
+            var factory = new PageRankAlgorithmFactory<>();
 
             var progressTask = factory.progressTask(graph, config);
             var log = new GdsTestLog();
@@ -214,25 +231,25 @@ class PageRankTest {
                     .contains(
                         formatWithLocale(
                             "%s :: Compute iteration %d of %d :: Start",
-                            mode.taskName(),
+                            factory.taskName(),
                             iteration,
                             config.maxIterations()
                         ),
                         formatWithLocale(
                             "%s :: Compute iteration %d of %d :: Finished",
-                            mode.taskName(),
+                            factory.taskName(),
                             iteration,
                             config.maxIterations()
                         ),
                         formatWithLocale(
                             "%s :: Master compute iteration %d of %d :: Start",
-                            mode.taskName(),
+                            factory.taskName(),
                             iteration,
                             config.maxIterations()
                         ),
                         formatWithLocale(
                             "%s :: Master compute iteration %d of %d :: Finished",
-                            mode.taskName(),
+                            factory.taskName(),
                             iteration,
                             config.maxIterations()
                         )
@@ -241,9 +258,17 @@ class PageRankTest {
             assertThat(messages)
                 .extracting(removingThreadId())
                 .contains(
-                    formatWithLocale("%s :: Start", mode.taskName()),
-                    formatWithLocale("%s :: Finished", mode.taskName())
+                    formatWithLocale("%s :: Start", factory.taskName()),
+                    formatWithLocale("%s :: Finished", factory.taskName())
                 );
+        }
+
+        static Stream<Arguments> pageRankVariantFactories() {
+            return Stream.of(
+                Arguments.of(new PageRankAlgorithmFactory<>()),
+                Arguments.of(new EigenvectorAlgorithmFactory()),
+                Arguments.of(new ArticleRankAlgorithmFactory())
+            );
         }
 
         @Test
@@ -253,7 +278,7 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var algo = new PageRankAlgorithmFactory<>(Mode.PAGE_RANK)
+            var algo = new PageRankAlgorithmFactory<>()
                 .build(
                     graph,
                     config,
@@ -341,7 +366,13 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var rankProvider = runOnPregel(graph, config).centralityScoreProvider();
+            var rankProvider = new PageRankAlgorithmFactory<>()
+                .build(
+                    graph,
+                    config,
+                    ProgressTracker.NULL_TRACKER
+                )
+                .compute().centralityScoreProvider();
 
             var expected = graph.nodeProperties("expectedRank");
 
@@ -362,7 +393,13 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var rankProvider = runOnPregel(zeroWeightsGraph, config).centralityScoreProvider();
+            var rankProvider = new PageRankAlgorithmFactory<>()
+                .build(
+                    zeroWeightsGraph,
+                    config,
+                    ProgressTracker.NULL_TRACKER
+                )
+                .compute().centralityScoreProvider();
 
             var expected = zeroWeightsGraph.nodeProperties("expectedRank");
 
@@ -435,14 +472,22 @@ class PageRankTest {
 
         @Test
         void articleRank(SoftAssertions softly) {
-            var config = PageRankStreamConfigImpl
+            var config = ArticleRankStreamConfigImpl
                 .builder()
                 .maxIterations(40)
                 .tolerance(0)
                 .concurrency(1)
                 .build();
 
-            var rankProvider = runOnPregel(graph, config, Mode.ARTICLE_RANK).centralityScoreProvider();
+            var result = new ArticleRankAlgorithmFactory()
+                .build(
+                    graph,
+                    config,
+                    ProgressTracker.NULL_TRACKER
+                )
+                .compute();
+
+            var rankProvider = result.centralityScoreProvider();
 
             var expected = graph.nodeProperties("expectedRank");
 
@@ -454,7 +499,7 @@ class PageRankTest {
 
         @Test
         void articleRankOnPaperGraphTest(SoftAssertions softly) {
-            var config = PageRankStreamConfigImpl
+            var config = ArticleRankStreamConfigImpl
                 .builder()
                 .maxIterations(20)
                 .tolerance(0)
@@ -462,7 +507,16 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var rankProvider = runOnPregel(paperGraph, config, Mode.ARTICLE_RANK).centralityScoreProvider();
+            var result = new ArticleRankAlgorithmFactory()
+                .build(
+                    paperGraph,
+                    config,
+                    ProgressTracker.NULL_TRACKER
+                )
+                .compute();
+
+
+            var rankProvider = result.centralityScoreProvider();
 
             var expected = paperGraph.nodeProperties("expectedRank");
 
@@ -508,14 +562,22 @@ class PageRankTest {
 
         @Test
         void eigenvector() {
-            var config = PageRankStreamConfigImpl
+            var config = EigenvectorStreamConfigImpl
                 .builder()
                 .maxIterations(40)
                 .tolerance(0)
                 .concurrency(1)
                 .build();
 
-            var rankProvider = runOnPregel(graph, config, Mode.EIGENVECTOR).centralityScoreProvider();
+            var result = new EigenvectorAlgorithmFactory()
+                .build(
+                    graph,
+                    config,
+                    ProgressTracker.NULL_TRACKER
+                )
+                .compute();
+
+            var rankProvider = result.centralityScoreProvider();
 
             var expected = graph.nodeProperties("expectedRank");
 
@@ -529,15 +591,22 @@ class PageRankTest {
 
         @Test
         void weighted() {
-            var config = PageRankStreamConfigImpl
+            var config = EigenvectorStreamConfigImpl
                 .builder()
                 .relationshipWeightProperty("weight")
                 .maxIterations(10)
                 .tolerance(0)
                 .concurrency(1)
                 .build();
+            var result = new EigenvectorAlgorithmFactory()
+                .build(
+                    graph,
+                    config,
+                    ProgressTracker.NULL_TRACKER
+                )
+                .compute();
 
-            var rankProvider = runOnPregel(graph, config, Mode.EIGENVECTOR).centralityScoreProvider();
+            var rankProvider = result.centralityScoreProvider();
 
             var expected = graph.nodeProperties("expectedWeightedRank");
 
@@ -551,7 +620,7 @@ class PageRankTest {
 
         @Test
         void withSourceNodes() {
-            var config = PageRankStreamConfigImpl
+            var config = EigenvectorStreamConfigImpl
                 .builder()
                 .maxIterations(10)
                 .tolerance(0.1)
@@ -559,7 +628,15 @@ class PageRankTest {
                 .sourceNodes(List.of(idFunction.of("d")))
                 .build();
 
-            var rankProvider = runOnPregel(graph, config, Mode.EIGENVECTOR).centralityScoreProvider();
+            var result = new EigenvectorAlgorithmFactory()
+                .build(
+                    graph,
+                    config,
+                    ProgressTracker.NULL_TRACKER
+                )
+                .compute();
+
+            var rankProvider = result.centralityScoreProvider();
 
             var expected = graph.nodeProperties("expectedPersonalizedRank");
 
@@ -612,7 +689,13 @@ class PageRankTest {
                 .scaler(ScalerFactory.parse(scalerName))
                 .build();
 
-            var rankProvider = runOnPregel(graph, config).centralityScoreProvider();
+            var rankProvider = new PageRankAlgorithmFactory<>()
+                .build(
+                    graph,
+                    config,
+                    ProgressTracker.NULL_TRACKER
+                )
+                .compute().centralityScoreProvider();
 
             var expected = graph.nodeProperties(expectedPropertyKey);
 
@@ -625,9 +708,8 @@ class PageRankTest {
         }
     }
 
-    @ParameterizedTest
-    @EnumSource(Mode.class)
-    void parallelExecution(Mode mode) {
+    @Test
+    void parallelExecution() {
         var graph = RandomGraphGenerator.builder()
             .nodeCount(40_000)
             .averageDegree(5)
@@ -637,26 +719,26 @@ class PageRankTest {
 
         var configBuilder = PageRankConfigImpl.builder();
 
-        var singleThreaded = runOnPregel(graph, configBuilder.concurrency(1).build(), mode).centralityScoreProvider();
-        var multiThreaded = runOnPregel(graph, configBuilder.concurrency(4).build(), mode).centralityScoreProvider();
-
-        for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-            assertThat(singleThreaded.applyAsDouble(nodeId)).isEqualTo(multiThreaded.applyAsDouble(nodeId), Offset.offset(1e-5));
-        }
-    }
-
-    PageRankResult runOnPregel(Graph graph, PageRankConfig config) {
-        return runOnPregel(graph, config, Mode.PAGE_RANK);
-    }
-
-    PageRankResult runOnPregel(Graph graph, PageRankConfig config, Mode mode) {
-        return new PageRankAlgorithmFactory<>(mode)
+        PageRankConfig config1 = configBuilder.concurrency(1).build();
+        var singleThreaded = new PageRankAlgorithmFactory<>()
+            .build(
+                graph,
+                config1,
+                ProgressTracker.NULL_TRACKER
+            )
+            .compute().centralityScoreProvider();
+        PageRankConfig config = configBuilder.concurrency(4).build();
+        var multiThreaded = new PageRankAlgorithmFactory<>()
             .build(
                 graph,
                 config,
                 ProgressTracker.NULL_TRACKER
             )
-            .compute();
+            .compute().centralityScoreProvider();
+
+        for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
+            assertThat(singleThreaded.applyAsDouble(nodeId)).isEqualTo(multiThreaded.applyAsDouble(nodeId), Offset.offset(1e-5));
+        }
     }
 
 }

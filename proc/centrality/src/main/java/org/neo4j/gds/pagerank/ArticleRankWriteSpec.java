@@ -19,14 +19,21 @@
  */
 package org.neo4j.gds.pagerank;
 
+import org.neo4j.gds.NullComputationResultConsumer;
+import org.neo4j.gds.executor.AlgorithmSpec;
+import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.procedures.algorithms.centrality.PageRankWriteResult;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
+
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.gds.pagerank.Constants.ARTICLE_RANK_DESCRIPTION;
 
 @GdsCallable(name = "gds.articleRank.write", description = ARTICLE_RANK_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class ArticleRankWriteSpec extends  PageRankWriteSpec {
+public class ArticleRankWriteSpec implements AlgorithmSpec<PageRankAlgorithm<ArticleRankWriteConfig>, PageRankResult, ArticleRankWriteConfig, Stream<PageRankWriteResult>, ArticleRankAlgorithmFactory<ArticleRankWriteConfig>> {
 
     @Override
     public String name() {
@@ -34,8 +41,17 @@ public class ArticleRankWriteSpec extends  PageRankWriteSpec {
     }
 
     @Override
-    public PageRankAlgorithmFactory<PageRankWriteConfig> algorithmFactory(ExecutionContext executionContext) {
-        return new PageRankAlgorithmFactory<>(PageRankAlgorithmFactory.Mode.ARTICLE_RANK);
+    public ArticleRankAlgorithmFactory<ArticleRankWriteConfig> algorithmFactory(ExecutionContext executionContext) {
+        return new ArticleRankAlgorithmFactory<>();
     }
 
+    @Override
+    public NewConfigFunction<ArticleRankWriteConfig> newConfigFunction() {
+        return (__, userInput) -> ArticleRankWriteConfig.of(userInput);
+    }
+
+    @Override
+    public ComputationResultConsumer<PageRankAlgorithm<ArticleRankWriteConfig>, PageRankResult, ArticleRankWriteConfig, Stream<PageRankWriteResult>> computationResultConsumer() {
+        return new NullComputationResultConsumer<>();
+    }
 }

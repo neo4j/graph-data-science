@@ -33,7 +33,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.pagerank.Constants.PAGE_RANK_DESCRIPTION;
 
 @GdsCallable(name = "gds.pageRank.stream", description = PAGE_RANK_DESCRIPTION, executionMode = STREAM)
-public class PageRankStreamSpec implements AlgorithmSpec<PageRankAlgorithm, PageRankResult,PageRankStreamConfig,Stream<CentralityStreamResult>,PageRankAlgorithmFactory<PageRankStreamConfig>> {
+public class PageRankStreamSpec implements AlgorithmSpec<PageRankAlgorithm<PageRankStreamConfig>, PageRankResult,PageRankStreamConfig,Stream<CentralityStreamResult>,PageRankAlgorithmFactory<PageRankStreamConfig>> {
 
     @Override
     public String name() {
@@ -51,7 +51,7 @@ public class PageRankStreamSpec implements AlgorithmSpec<PageRankAlgorithm, Page
     }
 
     @Override
-    public ComputationResultConsumer<PageRankAlgorithm, PageRankResult, PageRankStreamConfig, Stream<CentralityStreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<PageRankAlgorithm<PageRankStreamConfig>, PageRankResult, PageRankStreamConfig, Stream<CentralityStreamResult>> computationResultConsumer() {
         return new NullComputationResultConsumer<>();
     }
 }

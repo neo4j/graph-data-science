@@ -24,12 +24,12 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.pagerank.PageRankResult;
-import org.neo4j.gds.pagerank.PageRankStatsConfig;
+import org.neo4j.gds.pagerank.RankConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class PageRankResultBuilderForStatsMode implements StatsResultBuilder<PageRankStatsConfig, PageRankResult, Stream<PageRankStatsResult>> {
+class PageRankResultBuilderForStatsMode<C extends RankConfig> implements StatsResultBuilder<C, PageRankResult, Stream<PageRankStatsResult>> {
     private final boolean shouldComputeCentralityDistribution;
 
     PageRankResultBuilderForStatsMode(boolean shouldComputeCentralityDistribution) {
@@ -39,7 +39,7 @@ class PageRankResultBuilderForStatsMode implements StatsResultBuilder<PageRankSt
     @Override
     public Stream<PageRankStatsResult> build(
         Graph graph,
-        PageRankStatsConfig configuration,
+        C configuration,
         Optional<PageRankResult> result,
         AlgorithmProcessingTimings timings
     ) {

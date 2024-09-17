@@ -19,15 +19,21 @@
  */
 package org.neo4j.gds.pagerank;
 
+import org.neo4j.gds.NullComputationResultConsumer;
+import org.neo4j.gds.executor.AlgorithmSpec;
+import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.procedures.algorithms.centrality.PageRankMutateResult;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
+
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
 import static org.neo4j.gds.pagerank.Constants.EIGENVECTOR_DESCRIPTION;
 
 @GdsCallable(name = "gds.eigenvector.stats", description = EIGENVECTOR_DESCRIPTION, executionMode = STATS)
-public class EigenVectorStatsSpec extends  PageRankStatsSpec {
+public class EigenVectorStatsSpec  implements AlgorithmSpec<PageRankAlgorithm<EigenvectorStatsConfig>, PageRankResult, EigenvectorStatsConfig, Stream<PageRankMutateResult>, EigenvectorAlgorithmFactory<EigenvectorStatsConfig>> {
 
     @Override
     public String name() {
@@ -35,12 +41,17 @@ public class EigenVectorStatsSpec extends  PageRankStatsSpec {
     }
 
     @Override
-    public PageRankAlgorithmFactory<PageRankStatsConfig> algorithmFactory(ExecutionContext executionContext) {
-        return new PageRankAlgorithmFactory<>(PageRankAlgorithmFactory.Mode.EIGENVECTOR);
+    public EigenvectorAlgorithmFactory<EigenvectorStatsConfig> algorithmFactory(ExecutionContext executionContext) {
+        return new EigenvectorAlgorithmFactory<>();
     }
     @Override
-    public NewConfigFunction<PageRankStatsConfig> newConfigFunction() {
-        return (___, config) -> PageRankStatsConfig.configWithoutDampingFactor(config);
+    public NewConfigFunction<EigenvectorStatsConfig> newConfigFunction() {
+        return (___, config) -> EigenvectorStatsConfig.of(config);
+    }
+
+    @Override
+    public ComputationResultConsumer<PageRankAlgorithm<EigenvectorStatsConfig>, PageRankResult, EigenvectorStatsConfig, Stream<PageRankMutateResult>> computationResultConsumer() {
+        return new NullComputationResultConsumer<>();
     }
 
 

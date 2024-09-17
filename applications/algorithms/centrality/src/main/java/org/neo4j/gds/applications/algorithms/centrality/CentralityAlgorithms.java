@@ -21,7 +21,6 @@ package org.neo4j.gds.applications.algorithms.centrality;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.LongScatterSet;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
@@ -29,7 +28,6 @@ import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.articulationpoints.ArticulationPoints;
 import org.neo4j.gds.articulationpoints.ArticulationPointsProgressTaskCreator;
 import org.neo4j.gds.beta.pregel.Pregel;
-import org.neo4j.gds.beta.pregel.PregelComputation;
 import org.neo4j.gds.betweenness.BetweennessCentrality;
 import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
@@ -47,8 +45,6 @@ import org.neo4j.gds.closeness.WassermanFaustCentralityComputer;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.degree.DegreeCentrality;
 import org.neo4j.gds.degree.DegreeCentralityConfig;
@@ -60,20 +56,22 @@ import org.neo4j.gds.influenceMaximization.CELF;
 import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationBaseConfig;
 import org.neo4j.gds.pagerank.ArticleRankComputation;
+import org.neo4j.gds.pagerank.ArticleRankConfig;
+import org.neo4j.gds.pagerank.DegreeFunctions;
 import org.neo4j.gds.pagerank.EigenvectorComputation;
+import org.neo4j.gds.pagerank.EigenvectorConfig;
 import org.neo4j.gds.pagerank.PageRankAlgorithm;
-import org.neo4j.gds.pagerank.PageRankAlgorithmFactory;
 import org.neo4j.gds.pagerank.PageRankComputation;
 import org.neo4j.gds.pagerank.PageRankConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
-import java.util.concurrent.atomic.LongAdder;
-import java.util.function.LongToDoubleFunction;
-
-import static org.neo4j.gds.pagerank.PageRankAlgorithmFactory.Mode.ARTICLE_RANK;
-import static org.neo4j.gds.pagerank.PageRankAlgorithmFactory.Mode.EIGENVECTOR;
-import static org.neo4j.gds.pagerank.PageRankAlgorithmFactory.Mode.PAGE_RANK;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.ArticleRank;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.EigenVector;
+import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.PageRank;
+import static org.neo4j.gds.pagerank.PageRankVariant.ARTICLE_RANK;
+import static org.neo4j.gds.pagerank.PageRankVariant.EIGENVECTOR;
+import static org.neo4j.gds.pagerank.PageRankVariant.PAGE_RANK;
 
 public class CentralityAlgorithms {
     private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
@@ -86,8 +84,23 @@ public class CentralityAlgorithms {
         this.terminationFlag = terminationFlag;
     }
 
-    PageRankResult articleRank(Graph graph, PageRankConfig configuration) {
-        return pagerank(graph, configuration, Algorithm.ArticleRank, ARTICLE_RANK);
+    PageRankResult articleRank(Graph graph, ArticleRankConfig configuration) {
+        var task = Pregel.progressTask(graph, configuration, ArticleRank.labelForProgressTracking);
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var articleRankComputation = articleRankComputation(graph, configuration);
+
+        var articleRank = new PageRankAlgorithm<>(
+            graph,
+            configuration,
+            articleRankComputation,
+            ARTICLE_RANK,
+            DefaultPool.INSTANCE,
+            progressTracker,
+            terminationFlag
+        );
+
+        return articleRank.compute();
     }
 
     BetwennessCentralityResult betweennessCentrality(Graph graph, BetweennessCentralityBaseConfig configuration) {
@@ -201,8 +214,23 @@ public class CentralityAlgorithms {
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
-    PageRankResult eigenVector(Graph graph, PageRankConfig configuration) {
-        return pagerank(graph, configuration, Algorithm.EigenVector, EIGENVECTOR);
+    PageRankResult eigenVector(Graph graph, EigenvectorConfig configuration) {
+        var task = Pregel.progressTask(graph, configuration, EigenVector.labelForProgressTracking);
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var eigenvectorComputation = eigenvectorComputation(graph, configuration);
+
+        var eigenvector = new PageRankAlgorithm<>(
+            graph,
+            configuration,
+            eigenvectorComputation,
+            EIGENVECTOR,
+            DefaultPool.INSTANCE,
+            progressTracker,
+            terminationFlag
+        );
+
+        return eigenvector.compute();
     }
 
     HarmonicResult harmonicCentrality(Graph graph, HarmonicCentralityBaseConfig configuration) {
@@ -221,93 +249,73 @@ public class CentralityAlgorithms {
     }
 
     PageRankResult pageRank(Graph graph, PageRankConfig configuration) {
-        return pagerank(graph, configuration, Algorithm.PageRank, PAGE_RANK);
-    }
-
-    private double averageDegree(Graph graph, Concurrency concurrency) {
-        var degreeSum = new LongAdder();
-        ParallelUtil.parallelForEachNode(
-            graph.nodeCount(),
-            concurrency,
-            TerminationFlag.RUNNING_TRUE,
-            nodeId -> degreeSum.add(graph.degree(nodeId))
-        );
-        return (double) degreeSum.sum() / graph.nodeCount();
-    }
-
-    private LongToDoubleFunction degreeFunction(
-        Graph graph,
-        PageRankConfig configuration
-    ) {
-        var degreeCentrality = new DegreeCentrality(
-            graph,
-            DefaultPool.INSTANCE,
-            configuration.concurrency(),
-            Orientation.NATURAL,
-            configuration.hasRelationshipWeightProperty(),
-            10_000,
-            ProgressTracker.NULL_TRACKER
-        );
-
-        var degrees = degreeCentrality.compute().degreeFunction();
-        return degrees::get;
-    }
-
-    private PageRankResult pagerank(
-        Graph graph,
-        PageRankConfig configuration,
-        Algorithm algorithmMetadata,
-        PageRankAlgorithmFactory.Mode mode
-    ) {
-        var task = Pregel.progressTask(graph, configuration, algorithmMetadata.labelForProgressTracking);
+        var task = Pregel.progressTask(graph, configuration, PageRank.labelForProgressTracking);
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
-        var computation = pickComputation(graph, configuration, mode);
-
-        var algorithm = new PageRankAlgorithm(
+        var pageRankComputation = pageRankComputation(graph, configuration);
+        var pageRank = new PageRankAlgorithm<>(
             graph,
             configuration,
-            computation,
-            mode,
+            pageRankComputation,
+            PAGE_RANK,
             DefaultPool.INSTANCE,
             progressTracker,
             terminationFlag
         );
-
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return pageRank.compute();
     }
 
-    private PregelComputation<PageRankConfig> pickComputation(
-        Graph graph, PageRankConfig configuration,
-        PageRankAlgorithmFactory.Mode mode
-    ) {
-        var degreeFunction = degreeFunction(
+    private ArticleRankComputation articleRankComputation(Graph graph, ArticleRankConfig configuration) {
+        var degreeFunction = DegreeFunctions.pageRankDegreeFunction(
             graph,
-            configuration
+            configuration.hasRelationshipWeightProperty(),
+            configuration.concurrency()
         );
 
         var mappedSourceNodes = new LongScatterSet(configuration.sourceNodes().size());
-
         configuration.sourceNodes().stream()
             .mapToLong(graph::toMappedNodeId)
             .forEach(mappedSourceNodes::add);
 
-        if (mode == ARTICLE_RANK) {
-            double avgDegree = averageDegree(graph, configuration.concurrency());
-            return new ArticleRankComputation(configuration, mappedSourceNodes, degreeFunction, avgDegree);
-        } else if (mode == EIGENVECTOR) {
-            // Degrees are generally not respected in eigenvector centrality.
-            //
-            // However, relationship weights need to be normalized by the weighted degree.
-            // The score is divided by the weighted degree before being sent to the neighbors.
-            // For the unweighted case, we want a no-op and divide by 1.
-            degreeFunction = configuration.hasRelationshipWeightProperty()
-                ? degreeFunction
-                : (nodeId) -> 1;
+        double avgDegree = DegreeFunctions.averageDegree(graph, configuration.concurrency());
 
-            return new EigenvectorComputation(graph.nodeCount(), configuration, mappedSourceNodes, degreeFunction);
-        } else {
-            return new PageRankComputation(configuration, mappedSourceNodes, degreeFunction);
-        }
+        return new ArticleRankComputation(configuration, mappedSourceNodes, degreeFunction, avgDegree);
     }
+
+    private EigenvectorComputation eigenvectorComputation(Graph graph, EigenvectorConfig configuration) {
+        var mappedSourceNodes = new LongScatterSet(configuration.sourceNodes().size());
+        configuration.sourceNodes().stream()
+            .mapToLong(graph::toMappedNodeId)
+            .forEach(mappedSourceNodes::add);
+
+        boolean hasRelationshipWeightProperty = configuration.hasRelationshipWeightProperty();
+        Concurrency concurrency = configuration.concurrency();
+        var degreeFunction = DegreeFunctions.eigenvectorDegreeFunction(
+            graph,
+            hasRelationshipWeightProperty,
+            concurrency
+        );
+
+        return new EigenvectorComputation(
+            graph.nodeCount(),
+            configuration,
+            mappedSourceNodes,
+            degreeFunction
+        );
+    }
+
+    private PageRankComputation pageRankComputation(Graph graph, PageRankConfig configuration) {
+        var degreeFunction = DegreeFunctions.pageRankDegreeFunction(
+            graph,
+            configuration.hasRelationshipWeightProperty(), configuration.concurrency()
+        );
+
+        var mappedSourceNodes = new LongScatterSet(configuration.sourceNodes().size());
+        configuration.sourceNodes().stream()
+            .mapToLong(graph::toMappedNodeId)
+            .forEach(mappedSourceNodes::add);
+
+        return new PageRankComputation(configuration, mappedSourceNodes, degreeFunction);
+    }
+
 }

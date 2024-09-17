@@ -34,6 +34,8 @@ import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStreamConfig;
+import org.neo4j.gds.pagerank.ArticleRankStreamConfig;
+import org.neo4j.gds.pagerank.EigenvectorStreamConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankStreamConfig;
 
@@ -67,7 +69,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
 
     public <RESULT> Stream<RESULT> articleRank(
         GraphName graphName,
-        PageRankStreamConfig configuration,
+        ArticleRankStreamConfig configuration,
         StreamResultBuilder<PageRankResult, RESULT> streamResultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
@@ -170,7 +172,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
 
     public <RESULT> Stream<RESULT> eigenvector(
         GraphName graphName,
-        PageRankStreamConfig configuration,
+        EigenvectorStreamConfig configuration,
         StreamResultBuilder<PageRankResult, RESULT> streamResultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(

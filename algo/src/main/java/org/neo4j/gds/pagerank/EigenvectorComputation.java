@@ -40,7 +40,7 @@ import org.neo4j.gds.scaling.ScalerFactory;
 import java.util.Optional;
 import java.util.function.LongToDoubleFunction;
 
-public final class EigenvectorComputation implements PregelComputation<PageRankConfig> {
+public final class EigenvectorComputation<C extends EigenvectorConfig> implements PregelComputation<C> {
 
     private static final String RANK = PageRankComputation.PAGE_RANK;
     private static final String NEXT_RANK = "next_rank";
@@ -54,7 +54,7 @@ public final class EigenvectorComputation implements PregelComputation<PageRankC
 
     public EigenvectorComputation(
         long nodeCount,
-        PageRankConfig config,
+        C config,
         LongSet sourceNodes,
         LongToDoubleFunction weightDenominator
     ) {
@@ -73,7 +73,7 @@ public final class EigenvectorComputation implements PregelComputation<PageRankC
     }
 
     @Override
-    public PregelSchema schema(PageRankConfig config) {
+    public PregelSchema schema(C config) {
         return new PregelSchema.Builder()
             .add(RANK, ValueType.DOUBLE)
             .add(NEXT_RANK, ValueType.DOUBLE)
@@ -81,11 +81,11 @@ public final class EigenvectorComputation implements PregelComputation<PageRankC
     }
 
     @Override
-    public void init(InitContext<PageRankConfig> context) {
+    public void init(InitContext<C> context) {
         context.setNodeValue(RANK, initialValue(context));
     }
 
-    private double initialValue(InitContext<PageRankConfig> context) {
+    private double initialValue(InitContext<C> context) {
         if (!hasSourceNodes || sourceNodes.contains(context.nodeId())) {
             return initialValue;
         }
@@ -93,7 +93,7 @@ public final class EigenvectorComputation implements PregelComputation<PageRankC
     }
 
     @Override
-    public void compute(ComputeContext<PageRankConfig> context, Messages messages) {
+    public void compute(ComputeContext<C> context, Messages messages) {
         // Instead of just using the adjacency matrix A, we add
         // the centrality score from the previous iteration (A + I).
         // This makes the difference between dominant eigenvalues
@@ -113,7 +113,7 @@ public final class EigenvectorComputation implements PregelComputation<PageRankC
     }
 
     @Override
-    public boolean masterCompute(MasterComputeContext<PageRankConfig> context) {
+    public boolean masterCompute(MasterComputeContext<C> context) {
         var concurrency = context.config().concurrency();
 
         var properties = new DoubleNodePropertyValues() {

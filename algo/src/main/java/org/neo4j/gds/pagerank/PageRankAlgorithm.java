@@ -36,12 +36,12 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
 
-public class PageRankAlgorithm extends Algorithm<PageRankResult> {
+public class PageRankAlgorithm<C extends RankConfig> extends Algorithm<PageRankResult> {
 
-    private final Pregel<PageRankConfig> pregelJob;
+    private final Pregel<C> pregelJob;
     private final Graph graph;
-    private final PageRankAlgorithmFactory.Mode mode;
-    private final PageRankConfig config;
+    private final PageRankVariant mode;
+    private final C config;
     private final ExecutorService executorService;
 
     /**
@@ -50,9 +50,9 @@ public class PageRankAlgorithm extends Algorithm<PageRankResult> {
     @Deprecated
     public PageRankAlgorithm(
         Graph graph,
-        PageRankConfig config,
-        PregelComputation<PageRankConfig> pregelComputation,
-        PageRankAlgorithmFactory.Mode mode,
+        C config,
+        PregelComputation<C> pregelComputation,
+        PageRankVariant mode,
         ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
@@ -69,9 +69,9 @@ public class PageRankAlgorithm extends Algorithm<PageRankResult> {
 
     public PageRankAlgorithm(
         Graph graph,
-        PageRankConfig config,
-        PregelComputation<PageRankConfig> pregelComputation,
-        PageRankAlgorithmFactory.Mode mode,
+        C config,
+        PregelComputation<C> pregelComputation,
+        PageRankVariant mode,
         ExecutorService executorService,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
@@ -111,7 +111,7 @@ public class PageRankAlgorithm extends Algorithm<PageRankResult> {
         var concurrency = config.concurrency();
 
         // Eigenvector produces L2NORM-scaled results by default.
-        if (scalerFactory.type().equals(NoneScaler.TYPE) || (scalerFactory.type().equals(L2Norm.TYPE) && mode == PageRankAlgorithmFactory.Mode.EIGENVECTOR)) {
+        if (scalerFactory.type().equals(NoneScaler.TYPE) || (scalerFactory.type().equals(L2Norm.TYPE) && mode == PageRankVariant.EIGENVECTOR)) {
             return;
         }
 

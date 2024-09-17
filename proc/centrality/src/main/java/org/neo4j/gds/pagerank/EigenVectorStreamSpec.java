@@ -19,15 +19,21 @@
  */
 package org.neo4j.gds.pagerank;
 
+import org.neo4j.gds.NullComputationResultConsumer;
+import org.neo4j.gds.executor.AlgorithmSpec;
+import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.procedures.algorithms.centrality.PageRankMutateResult;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
+
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.pagerank.Constants.EIGENVECTOR_DESCRIPTION;
 
 @GdsCallable(name = "gds.eigenvector.stream", description = EIGENVECTOR_DESCRIPTION, executionMode = STREAM)
-public class EigenVectorStreamSpec extends  PageRankStreamSpec {
+public class EigenVectorStreamSpec  implements AlgorithmSpec<PageRankAlgorithm<EigenvectorStreamConfig>, PageRankResult, EigenvectorStreamConfig, Stream<PageRankMutateResult>, EigenvectorAlgorithmFactory<EigenvectorStreamConfig>> {
 
     @Override
     public String name() {
@@ -35,12 +41,17 @@ public class EigenVectorStreamSpec extends  PageRankStreamSpec {
     }
 
     @Override
-    public PageRankAlgorithmFactory<PageRankStreamConfig> algorithmFactory(ExecutionContext executionContext) {
-        return new PageRankAlgorithmFactory<>(PageRankAlgorithmFactory.Mode.EIGENVECTOR);
+    public EigenvectorAlgorithmFactory<EigenvectorStreamConfig> algorithmFactory(ExecutionContext executionContext) {
+        return new EigenvectorAlgorithmFactory<>();
     }
 
     @Override
-    public NewConfigFunction<PageRankStreamConfig> newConfigFunction() {
-        return (___, config) -> PageRankStreamConfig.configWithoutDampingFactor(config);
+    public NewConfigFunction<EigenvectorStreamConfig> newConfigFunction() {
+        return (___, config) -> EigenvectorStreamConfig.of(config);
+    }
+
+    @Override
+    public ComputationResultConsumer<PageRankAlgorithm<EigenvectorStreamConfig>, PageRankResult, EigenvectorStreamConfig, Stream<PageRankMutateResult>> computationResultConsumer() {
+        return new NullComputationResultConsumer<>();
     }
 }

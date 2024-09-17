@@ -19,15 +19,21 @@
  */
 package org.neo4j.gds.pagerank;
 
+import org.neo4j.gds.NullComputationResultConsumer;
+import org.neo4j.gds.executor.AlgorithmSpec;
+import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.procedures.algorithms.centrality.PageRankMutateResult;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
+
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.gds.pagerank.Constants.EIGENVECTOR_DESCRIPTION;
 
 @GdsCallable(name = "gds.eigenvector.write", description = EIGENVECTOR_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class EigenVectorWriteSpec extends  PageRankWriteSpec {
+public class EigenVectorWriteSpec  implements AlgorithmSpec<PageRankAlgorithm<EigenvectorWriteConfig>, PageRankResult, EigenvectorWriteConfig, Stream<PageRankMutateResult>, EigenvectorAlgorithmFactory<EigenvectorWriteConfig>> {
 
     @Override
     public String name() {
@@ -35,13 +41,18 @@ public class EigenVectorWriteSpec extends  PageRankWriteSpec {
     }
 
     @Override
-    public PageRankAlgorithmFactory<PageRankWriteConfig> algorithmFactory(ExecutionContext executionContext) {
-        return new PageRankAlgorithmFactory<>(PageRankAlgorithmFactory.Mode.EIGENVECTOR);
+    public EigenvectorAlgorithmFactory<EigenvectorWriteConfig> algorithmFactory(ExecutionContext executionContext) {
+        return new EigenvectorAlgorithmFactory<>();
     }
 
     @Override
-    public NewConfigFunction<PageRankWriteConfig> newConfigFunction() {
-        return (___, config) -> PageRankWriteConfig.configWithoutDampingFactor(config);
+    public NewConfigFunction<EigenvectorWriteConfig> newConfigFunction() {
+        return (___, config) -> EigenvectorWriteConfig.of(config);
+    }
+
+    @Override
+    public ComputationResultConsumer<PageRankAlgorithm<EigenvectorWriteConfig>, PageRankResult, EigenvectorWriteConfig, Stream<PageRankMutateResult>> computationResultConsumer() {
+        return new NullComputationResultConsumer<>();
     }
 
 }

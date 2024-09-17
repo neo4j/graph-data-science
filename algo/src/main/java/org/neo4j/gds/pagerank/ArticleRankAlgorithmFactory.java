@@ -29,13 +29,13 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.termination.TerminationFlag;
 
-import static org.neo4j.gds.pagerank.PageRankVariant.PAGE_RANK;
+import static org.neo4j.gds.pagerank.PageRankVariant.ARTICLE_RANK;
 
-public class PageRankAlgorithmFactory<C extends PageRankConfig> extends GraphAlgorithmFactory<PageRankAlgorithm<C>, C> {
+public class ArticleRankAlgorithmFactory<C extends ArticleRankConfig> extends GraphAlgorithmFactory<PageRankAlgorithm<C>, C> {
 
     @Override
     public String taskName() {
-        return PAGE_RANK.taskName();
+        return ARTICLE_RANK.taskName();
     }
 
     @Override
@@ -55,13 +55,14 @@ public class PageRankAlgorithmFactory<C extends PageRankConfig> extends GraphAlg
             .mapToLong(graph::toMappedNodeId)
             .forEach(mappedSourceNodes::add);
 
-        var computation = new PageRankComputation<>(configuration, mappedSourceNodes, degreeFunction);
+        double avgDegree = DegreeFunctions.averageDegree(graph, configuration.concurrency());
+        var computation = new ArticleRankComputation<>(configuration, mappedSourceNodes, degreeFunction, avgDegree);
 
         return new PageRankAlgorithm<>(
             graph,
             configuration,
             computation,
-            PAGE_RANK,
+            ARTICLE_RANK,
             DefaultPool.INSTANCE,
             progressTracker,
             TerminationFlag.RUNNING_TRUE

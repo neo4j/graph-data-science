@@ -33,7 +33,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STATS;
 import static org.neo4j.gds.pagerank.Constants.PAGE_RANK_DESCRIPTION;
 
 @GdsCallable(name = "gds.pageRank.stats", description = PAGE_RANK_DESCRIPTION, executionMode = STATS)
-public class PageRankStatsSpec implements AlgorithmSpec<PageRankAlgorithm, PageRankResult,PageRankStatsConfig,Stream<PageRankStatsResult>,PageRankAlgorithmFactory<PageRankStatsConfig>> {
+public class PageRankStatsSpec implements AlgorithmSpec<PageRankAlgorithm<PageRankStatsConfig>, PageRankResult, PageRankStatsConfig, Stream<PageRankStatsResult>, PageRankAlgorithmFactory<PageRankStatsConfig>> {
 
     @Override
     public String name() {
@@ -47,11 +47,11 @@ public class PageRankStatsSpec implements AlgorithmSpec<PageRankAlgorithm, PageR
 
     @Override
     public NewConfigFunction<PageRankStatsConfig> newConfigFunction() {
-        return (___,config) -> PageRankStatsConfig.configWithDampingFactor(config);
+        return (___, config) -> PageRankStatsConfig.configWithDampingFactor(config);
     }
 
     @Override
-    public ComputationResultConsumer<PageRankAlgorithm, PageRankResult, PageRankStatsConfig, Stream<PageRankStatsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<PageRankAlgorithm<PageRankStatsConfig>, PageRankResult, PageRankStatsConfig, Stream<PageRankStatsResult>> computationResultConsumer() {
         return new NullComputationResultConsumer<>();
     }
 }

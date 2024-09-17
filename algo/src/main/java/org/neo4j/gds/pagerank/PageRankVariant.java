@@ -19,12 +19,18 @@
  */
 package org.neo4j.gds.pagerank;
 
-import org.neo4j.gds.annotation.Configuration;
+public enum PageRankVariant {
+    PAGE_RANK("PageRank"),
+    ARTICLE_RANK("ArticleRank"),
+    EIGENVECTOR("EigenVector");
 
-@Configuration("PageRankConfigImpl")
-public interface PageRankConfig extends RankConfig {
-    @Configuration.DoubleRange(min = 0, max = 1, maxInclusive = false)
-    default double dampingFactor() {
-        return 0.85;
+    private final String taskName;
+
+    PageRankVariant(String taskName) {
+        this.taskName = taskName;
+    }
+
+    String taskName() {
+        return taskName;
     }
 }

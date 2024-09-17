@@ -33,7 +33,7 @@ import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.gds.pagerank.Constants.PAGE_RANK_DESCRIPTION;
 
 @GdsCallable(name = "gds.pageRank.write", description = PAGE_RANK_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class PageRankWriteSpec implements AlgorithmSpec<PageRankAlgorithm, PageRankResult,PageRankWriteConfig,Stream<PageRankWriteResult>,PageRankAlgorithmFactory<PageRankWriteConfig>> {
+public class PageRankWriteSpec implements AlgorithmSpec<PageRankAlgorithm<PageRankWriteConfig>, PageRankResult,PageRankWriteConfig,Stream<PageRankWriteResult>,PageRankAlgorithmFactory<PageRankWriteConfig>> {
 
     @Override
     public String name() {
@@ -51,7 +51,7 @@ public class PageRankWriteSpec implements AlgorithmSpec<PageRankAlgorithm, PageR
     }
 
     @Override
-    public ComputationResultConsumer<PageRankAlgorithm, PageRankResult, PageRankWriteConfig, Stream<PageRankWriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<PageRankAlgorithm<PageRankWriteConfig>, PageRankResult, PageRankWriteConfig, Stream<PageRankWriteResult>> computationResultConsumer() {
         return new NullComputationResultConsumer<>();
     }
 }

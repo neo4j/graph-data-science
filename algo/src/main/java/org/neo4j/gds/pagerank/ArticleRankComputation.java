@@ -32,7 +32,7 @@ import org.neo4j.gds.beta.pregel.context.InitContext;
 import java.util.Optional;
 import java.util.function.LongToDoubleFunction;
 
-public final class ArticleRankComputation implements PregelComputation<PageRankConfig> {
+public final class ArticleRankComputation<C extends ArticleRankConfig> implements PregelComputation<C> {
 
     private static final String PAGE_RANK = "pagerank";
 
@@ -46,7 +46,7 @@ public final class ArticleRankComputation implements PregelComputation<PageRankC
     private final double averageDegree;
 
     public ArticleRankComputation(
-        PageRankConfig config,
+        C config,
         LongSet sourceNodes,
         LongToDoubleFunction degreeFunction,
         double averageDegree
@@ -61,16 +61,16 @@ public final class ArticleRankComputation implements PregelComputation<PageRankC
     }
 
     @Override
-    public PregelSchema schema(PageRankConfig config) {
+    public PregelSchema schema(C config) {
         return new PregelSchema.Builder().add(PAGE_RANK, ValueType.DOUBLE).build();
     }
 
     @Override
-    public void init(InitContext<PageRankConfig> context) {
+    public void init(InitContext<C> context) {
         context.setNodeValue(PAGE_RANK, initialValue(context));
     }
 
-    private double initialValue(InitContext<PageRankConfig> context) {
+    private double initialValue(InitContext<C> context) {
         if (!hasSourceNodes || sourceNodes.contains(context.nodeId())) {
             return alpha;
         }
@@ -78,7 +78,7 @@ public final class ArticleRankComputation implements PregelComputation<PageRankC
     }
 
     @Override
-    public void compute(ComputeContext<PageRankConfig> context, Messages messages) {
+    public void compute(ComputeContext<C> context, Messages messages) {
         double rank = context.doubleNodeValue(PAGE_RANK);
         double delta = rank;
 

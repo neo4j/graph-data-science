@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.ml.pipeline.stubs;
 
-import org.neo4j.gds.pagerank.PageRankMutateConfig;
+import org.neo4j.gds.pagerank.ArticleRankMutateConfig;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.centrality.PageRankMutateResult;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
-public class ArticleRankStub extends AbstractStub<PageRankMutateConfig, PageRankMutateResult> {
-    protected MutateStub<PageRankMutateConfig, PageRankMutateResult> stub(AlgorithmsProcedureFacade facade) {
+public class ArticleRankStub extends AbstractStub<ArticleRankMutateConfig, PageRankMutateResult> {
+    protected MutateStub<ArticleRankMutateConfig, PageRankMutateResult> stub(AlgorithmsProcedureFacade facade) {
         return facade.centrality().articleRankMutateStub();
     }
 }

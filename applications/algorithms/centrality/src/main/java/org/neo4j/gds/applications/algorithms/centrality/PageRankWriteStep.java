@@ -26,18 +26,19 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
+import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.pagerank.PageRankResult;
-import org.neo4j.gds.pagerank.PageRankWriteConfig;
+import org.neo4j.gds.pagerank.RankConfig;
 
-class PageRankWriteStep implements WriteStep<PageRankResult, NodePropertiesWritten> {
+class PageRankWriteStep<C extends RankConfig & WritePropertyConfig> implements WriteStep<PageRankResult, NodePropertiesWritten> {
     private final WriteToDatabase writeToDatabase;
-    private final PageRankWriteConfig configuration;
+    private final C configuration;
     private final Algorithm algorithmMetadata;
 
     PageRankWriteStep(
         WriteToDatabase writeToDatabase,
-        PageRankWriteConfig configuration,
+        C configuration,
         Algorithm algorithmMetadata
     ) {
         this.writeToDatabase = writeToDatabase;

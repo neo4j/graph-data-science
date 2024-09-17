@@ -19,26 +19,39 @@
  */
 package org.neo4j.gds.pagerank;
 
+import org.neo4j.gds.NullComputationResultConsumer;
+import org.neo4j.gds.executor.AlgorithmSpec;
+import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.procedures.algorithms.centrality.PageRankMutateResult;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
+
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.gds.pagerank.Constants.ARTICLE_RANK_DESCRIPTION;
 
 @GdsCallable(name = "gds.articleRank.mutate", description = ARTICLE_RANK_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class ArticleRankMutateSpec extends PageRankMutateSpec {
+public class ArticleRankMutateSpec implements AlgorithmSpec<PageRankAlgorithm<ArticleRankMutateConfig>, PageRankResult, ArticleRankMutateConfig, Stream<PageRankMutateResult>, ArticleRankAlgorithmFactory<ArticleRankMutateConfig>> {
 
     @Override
     public String name() {
-        return "ArticleRankMutate";
+        return "ArticleRank";
     }
 
     @Override
-    public PageRankAlgorithmFactory<PageRankMutateConfig> algorithmFactory(ExecutionContext executionContext) {
-        return new PageRankAlgorithmFactory<>(PageRankAlgorithmFactory.Mode.ARTICLE_RANK);
+    public ArticleRankAlgorithmFactory<ArticleRankMutateConfig> algorithmFactory(ExecutionContext executionContext) {
+        return new ArticleRankAlgorithmFactory();
     }
 
+    @Override
+    public NewConfigFunction<ArticleRankMutateConfig> newConfigFunction() {
+        return (__, userInput) -> ArticleRankMutateConfig.of(userInput);
+    }
 
-
-
+    @Override
+    public ComputationResultConsumer<PageRankAlgorithm<ArticleRankMutateConfig>, PageRankResult, ArticleRankMutateConfig, Stream<PageRankMutateResult>> computationResultConsumer() {
+        return new NullComputationResultConsumer<>();
+    }
 }

@@ -20,11 +20,12 @@
 package org.neo4j.gds.pagerank;
 
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.core.CypherMapWrapper;
 
-@Configuration("PageRankConfigImpl")
-public interface PageRankConfig extends RankConfig {
-    @Configuration.DoubleRange(min = 0, max = 1, maxInclusive = false)
-    default double dampingFactor() {
-        return 0.85;
+@Configuration
+public interface ArticleRankStreamConfig extends ArticleRankConfig {
+
+    public static ArticleRankStreamConfig of(CypherMapWrapper userInput) {
+        return new ArticleRankStreamConfigImpl(userInput);
     }
 }

@@ -24,16 +24,17 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.pagerank.PageRankMutateConfig;
+import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
+import org.neo4j.gds.pagerank.RankConfig;
 
-class PageRankMutateStep implements MutateStep<PageRankResult, NodePropertiesWritten> {
+class PageRankMutateStep<C extends RankConfig & MutateNodePropertyConfig> implements MutateStep<PageRankResult, NodePropertiesWritten> {
     private final MutateNodeProperty mutateNodeProperty;
-    private final PageRankMutateConfig configuration;
+    private final C configuration;
 
     PageRankMutateStep(
         MutateNodeProperty mutateNodeProperty,
-        PageRankMutateConfig configuration
+        C configuration
     ) {
         this.mutateNodeProperty = mutateNodeProperty;
         this.configuration = configuration;

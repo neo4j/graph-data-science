@@ -36,6 +36,8 @@ import org.neo4j.gds.harmonic.HarmonicCentralityMutateConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationMutateConfig;
+import org.neo4j.gds.pagerank.ArticleRankMutateConfig;
+import org.neo4j.gds.pagerank.EigenvectorMutateConfig;
 import org.neo4j.gds.pagerank.PageRankMutateConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 
@@ -69,10 +71,10 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
 
     public <RESULT> RESULT articleRank(
         GraphName graphName,
-        PageRankMutateConfig configuration,
-        ResultBuilder<PageRankMutateConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
+        ArticleRankMutateConfig configuration,
+        ResultBuilder<ArticleRankMutateConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new PageRankMutateStep(mutateNodeProperty, configuration);
+        var mutateStep = new PageRankMutateStep<>(mutateNodeProperty, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -178,10 +180,10 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
 
     public <RESULT> RESULT eigenVector(
         GraphName graphName,
-        PageRankMutateConfig configuration,
-        ResultBuilder<PageRankMutateConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
+        EigenvectorMutateConfig configuration,
+        ResultBuilder<EigenvectorMutateConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new PageRankMutateStep(mutateNodeProperty, configuration);
+        var mutateStep = new PageRankMutateStep<>(mutateNodeProperty, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
@@ -217,7 +219,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
         PageRankMutateConfig configuration,
         ResultBuilder<PageRankMutateConfig, PageRankResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
-        var mutateStep = new PageRankMutateStep(mutateNodeProperty, configuration);
+        var mutateStep = new PageRankMutateStep<>(mutateNodeProperty, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,

@@ -31,6 +31,8 @@ import org.neo4j.gds.degree.DegreeCentralityStatsConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityStatsConfig;
 import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
+import org.neo4j.gds.pagerank.ArticleRankStatsConfig;
+import org.neo4j.gds.pagerank.EigenvectorStatsConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankStatsConfig;
 
@@ -61,8 +63,8 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
 
     public <RESULT> RESULT articleRank(
         GraphName graphName,
-        PageRankStatsConfig configuration,
-        StatsResultBuilder<PageRankStatsConfig, PageRankResult, RESULT> resultBuilder
+        ArticleRankStatsConfig configuration,
+        StatsResultBuilder<ArticleRankStatsConfig, PageRankResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
@@ -151,8 +153,8 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
 
     public <RESULT> RESULT eigenVector(
         GraphName graphName,
-        PageRankStatsConfig configuration,
-        StatsResultBuilder<PageRankStatsConfig, PageRankResult, RESULT> resultBuilder
+        EigenvectorStatsConfig configuration,
+        StatsResultBuilder<EigenvectorStatsConfig, PageRankResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,

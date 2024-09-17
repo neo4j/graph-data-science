@@ -24,13 +24,14 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.pagerank.PageRankMutateConfig;
+import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
+import org.neo4j.gds.pagerank.RankConfig;
 import org.neo4j.gds.procedures.algorithms.centrality.PageRankMutateResult;
 
 import java.util.Optional;
 
-public class PageRankResultBuilderForMutateMode implements ResultBuilder<PageRankMutateConfig, PageRankResult, PageRankMutateResult, NodePropertiesWritten> {
+public class PageRankResultBuilderForMutateMode<C extends RankConfig & MutateNodePropertyConfig> implements ResultBuilder<C, PageRankResult, PageRankMutateResult, NodePropertiesWritten> {
     private final boolean shouldComputeCentralityDistribution;
 
     public PageRankResultBuilderForMutateMode(boolean shouldComputeCentralityDistribution) {
@@ -40,7 +41,7 @@ public class PageRankResultBuilderForMutateMode implements ResultBuilder<PageRan
     @Override
     public PageRankMutateResult build(
         Graph graph,
-        PageRankMutateConfig configuration,
+        C configuration,
         Optional<PageRankResult> result,
         AlgorithmProcessingTimings timings,
         Optional<NodePropertiesWritten> metadata

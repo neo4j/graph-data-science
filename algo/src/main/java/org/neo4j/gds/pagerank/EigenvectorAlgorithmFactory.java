@@ -23,19 +23,21 @@ import com.carrotsearch.hppc.LongScatterSet;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.pregel.Pregel;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.termination.TerminationFlag;
 
-import static org.neo4j.gds.pagerank.PageRankVariant.PAGE_RANK;
+import static org.neo4j.gds.pagerank.PageRankVariant.EIGENVECTOR;
 
-public class PageRankAlgorithmFactory<C extends PageRankConfig> extends GraphAlgorithmFactory<PageRankAlgorithm<C>, C> {
+public class EigenvectorAlgorithmFactory<C extends EigenvectorConfig> extends GraphAlgorithmFactory<PageRankAlgorithm<C>, C> {
+
 
     @Override
     public String taskName() {
-        return PAGE_RANK.taskName();
+        return EIGENVECTOR.taskName();
     }
 
     @Override
@@ -45,23 +47,30 @@ public class PageRankAlgorithmFactory<C extends PageRankConfig> extends GraphAlg
         ProgressTracker progressTracker
     ) {
 
-        var degreeFunction = DegreeFunctions.pageRankDegreeFunction(
-            graph,
-            configuration.hasRelationshipWeightProperty(), configuration.concurrency()
-        );
-
         var mappedSourceNodes = new LongScatterSet(configuration.sourceNodes().size());
         configuration.sourceNodes().stream()
             .mapToLong(graph::toMappedNodeId)
             .forEach(mappedSourceNodes::add);
 
-        var computation = new PageRankComputation<>(configuration, mappedSourceNodes, degreeFunction);
+        boolean hasRelationshipWeightProperty = configuration.hasRelationshipWeightProperty();
+        Concurrency concurrency = configuration.concurrency();
+        var degreeFunction = DegreeFunctions.eigenvectorDegreeFunction(
+            graph,
+            hasRelationshipWeightProperty,
+            concurrency
+        );
 
+        var computation = new EigenvectorComputation<>(
+            graph.nodeCount(),
+            configuration,
+            mappedSourceNodes,
+            degreeFunction
+        );
         return new PageRankAlgorithm<>(
             graph,
             configuration,
             computation,
-            PAGE_RANK,
+            EIGENVECTOR,
             DefaultPool.INSTANCE,
             progressTracker,
             TerminationFlag.RUNNING_TRUE

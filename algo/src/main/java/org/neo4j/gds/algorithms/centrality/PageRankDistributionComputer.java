@@ -20,8 +20,8 @@
 package org.neo4j.gds.algorithms.centrality;
 
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.pagerank.PageRankConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
+import org.neo4j.gds.pagerank.RankConfig;
 import org.neo4j.gds.result.CentralityStatistics;
 import org.neo4j.gds.scaling.LogScaler;
 
@@ -37,7 +37,7 @@ public final class PageRankDistributionComputer {
 
     public static PageRankDistribution computeDistribution(
         PageRankResult result,
-        PageRankConfig configuration,
+        RankConfig configuration,
         boolean shouldComputeCentralityDistribution
     ) {
         Map<String, Object> centralitySummary = new HashMap<>();

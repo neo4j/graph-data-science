@@ -49,6 +49,14 @@ import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStreamConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationWriteConfig;
+import org.neo4j.gds.pagerank.ArticleRankMutateConfig;
+import org.neo4j.gds.pagerank.ArticleRankStatsConfig;
+import org.neo4j.gds.pagerank.ArticleRankStreamConfig;
+import org.neo4j.gds.pagerank.ArticleRankWriteConfig;
+import org.neo4j.gds.pagerank.EigenvectorMutateConfig;
+import org.neo4j.gds.pagerank.EigenvectorStatsConfig;
+import org.neo4j.gds.pagerank.EigenvectorStreamConfig;
+import org.neo4j.gds.pagerank.EigenvectorWriteConfig;
 import org.neo4j.gds.pagerank.PageRankMutateConfig;
 import org.neo4j.gds.pagerank.PageRankStatsConfig;
 import org.neo4j.gds.pagerank.PageRankStreamConfig;
@@ -63,7 +71,6 @@ import org.neo4j.gds.procedures.algorithms.centrality.stubs.HarmonicCentralityMu
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.PageRankMutateStub;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
-import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -72,15 +79,15 @@ public final class CentralityProcedureFacade {
     private final ProcedureReturnColumns procedureReturnColumns;
 
     private final ArticulationPointsMutateStub articulationPointsMutateStub;
-    private final PageRankMutateStub articleRankMutateStub;
+    private final PageRankMutateStub<ArticleRankMutateConfig> articleRankMutateStub;
     private final BetaClosenessCentralityMutateStub betaClosenessCentralityMutateStub;
     private final BetweennessCentralityMutateStub betweennessCentralityMutateStub;
     private final CelfMutateStub celfMutateStub;
     private final ClosenessCentralityMutateStub closenessCentralityMutateStub;
     private final DegreeCentralityMutateStub degreeCentralityMutateStub;
-    private final MutateStub<PageRankMutateConfig, PageRankMutateResult> eigenVectorMutateStub;
+    private final PageRankMutateStub<EigenvectorMutateConfig> eigenVectorMutateStub;
     private final HarmonicCentralityMutateStub harmonicCentralityMutateStub;
-    private final PageRankMutateStub pageRankMutateStub;
+    private final PageRankMutateStub<PageRankMutateConfig> pageRankMutateStub;
 
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
     private final CentralityAlgorithmsStatsModeBusinessFacade statsModeBusinessFacade;
@@ -91,16 +98,16 @@ public final class CentralityProcedureFacade {
 
     private CentralityProcedureFacade(
         ProcedureReturnColumns procedureReturnColumns,
-        PageRankMutateStub articleRankMutateStub,
+        PageRankMutateStub<ArticleRankMutateConfig> articleRankMutateStub,
         BetaClosenessCentralityMutateStub betaClosenessCentralityMutateStub,
         BetweennessCentralityMutateStub betweennessCentralityMutateStub,
         CelfMutateStub celfMutateStub,
         ClosenessCentralityMutateStub closenessCentralityMutateStub,
         DegreeCentralityMutateStub degreeCentralityMutateStub,
-        MutateStub<PageRankMutateConfig, PageRankMutateResult> eigenVectorMutateStub,
+        PageRankMutateStub<EigenvectorMutateConfig> eigenVectorMutateStub,
         HarmonicCentralityMutateStub harmonicCentralityMutateStub,
         ArticulationPointsMutateStub articulationPointsMutateStub,
-        PageRankMutateStub pageRankMutateStub,
+        PageRankMutateStub<PageRankMutateConfig> pageRankMutateStub,
         CentralityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
         CentralityAlgorithmsStatsModeBusinessFacade statsModeBusinessFacade,
         CentralityAlgorithmsStreamModeBusinessFacade streamModeBusinessFacade,
@@ -135,12 +142,12 @@ public final class CentralityProcedureFacade {
         var mutateModeBusinessFacade = centralityApplications.mutate();
         var estimationModeBusinessFacade = centralityApplications.estimate();
 
-        var articleRankMutateStub = new PageRankMutateStub(
+        var articleRankMutateStub = new PageRankMutateStub<>(
             genericStub,
             estimationModeBusinessFacade,
             procedureReturnColumns,
             mutateModeBusinessFacade::articleRank,
-            PageRankMutateConfig::configWithDampingFactor
+            ArticleRankMutateConfig::of
         );
 
         var betaClosenessCentralityMutateStub = new BetaClosenessCentralityMutateStub(
@@ -177,12 +184,12 @@ public final class CentralityProcedureFacade {
             procedureReturnColumns
         );
 
-        var eigenVectorMutateStub = new PageRankMutateStub(
+        var eigenVectorMutateStub = new PageRankMutateStub<>(
             genericStub,
             estimationModeBusinessFacade,
             procedureReturnColumns,
             mutateModeBusinessFacade::eigenVector,
-            PageRankMutateConfig::configWithoutDampingFactor
+            EigenvectorMutateConfig::of
         );
 
         var harmonicCentralityMutateStub = new HarmonicCentralityMutateStub(
@@ -192,7 +199,7 @@ public final class CentralityProcedureFacade {
             procedureReturnColumns
         );
 
-        var pageRankMutateStub = new PageRankMutateStub(
+        var pageRankMutateStub = new PageRankMutateStub<>(
             genericStub,
             estimationModeBusinessFacade,
             procedureReturnColumns,
@@ -264,17 +271,17 @@ public final class CentralityProcedureFacade {
         );
     }
 
-    public PageRankMutateStub articleRankMutateStub() {
+    public PageRankMutateStub<ArticleRankMutateConfig> articleRankMutateStub() {
         return articleRankMutateStub;
     }
 
     public Stream<PageRankStatsResult> articleRankStats(String graphName, Map<String, Object> configuration) {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("centralityDistribution");
-        var resultBuilder = new PageRankResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
+        var resultBuilder = new PageRankResultBuilderForStatsMode<ArticleRankStatsConfig>(shouldComputeSimilarityDistribution);
 
         var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            PageRankStatsConfig::configWithDampingFactor
+            ArticleRankStatsConfig::of
         );
 
         return statsModeBusinessFacade.articleRank(
@@ -301,7 +308,7 @@ public final class CentralityProcedureFacade {
 
         var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            PageRankStreamConfig::configWithoutDampingFactor
+            ArticleRankStreamConfig::of
         );
 
         return streamModeBusinessFacade.articleRank(
@@ -327,11 +334,11 @@ public final class CentralityProcedureFacade {
         Map<String, Object> configuration
     ) {
         var shouldComputeCentralityDistribution = procedureReturnColumns.contains("centralityDistribution");
-        var resultBuilder = new PageRankResultBuilderForWriteMode(shouldComputeCentralityDistribution);
+        var resultBuilder = new PageRankResultBuilderForWriteMode<ArticleRankWriteConfig>(shouldComputeCentralityDistribution);
 
         var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            PageRankWriteConfig::configWithDampingFactor
+            ArticleRankWriteConfig::of
         );
 
         return writeModeBusinessFacade.articleRank(
@@ -886,18 +893,18 @@ public final class CentralityProcedureFacade {
         ));
     }
 
-    public MutateStub<PageRankMutateConfig, PageRankMutateResult> eigenVectorMutateStub() {
+    public PageRankMutateStub<EigenvectorMutateConfig> eigenVectorMutateStub() {
         return eigenVectorMutateStub;
     }
 
     public Stream<PageRankStatsResult> eigenvectorStats(String graphName, Map<String, Object> configuration) {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("centralityDistribution");
-        var resultBuilder = new PageRankResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
+        var resultBuilder = new PageRankResultBuilderForStatsMode<EigenvectorStatsConfig>(shouldComputeSimilarityDistribution);
 
 
         var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            PageRankStatsConfig::configWithoutDampingFactor
+            EigenvectorStatsConfig::of
         );
 
         return statsModeBusinessFacade.eigenVector(
@@ -924,7 +931,7 @@ public final class CentralityProcedureFacade {
 
         var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            PageRankStreamConfig::configWithoutDampingFactor
+            EigenvectorStreamConfig::of
         );
 
         return streamModeBusinessFacade.eigenvector(
@@ -948,11 +955,11 @@ public final class CentralityProcedureFacade {
 
     public Stream<PageRankWriteResult> eigenvectorWrite(String graphName, Map<String, Object> configuration) {
         var shouldComputeCentralityDistribution = procedureReturnColumns.contains("centralityDistribution");
-        var resultBuilder = new PageRankResultBuilderForWriteMode(shouldComputeCentralityDistribution);
+        var resultBuilder = new PageRankResultBuilderForWriteMode<EigenvectorWriteConfig>(shouldComputeCentralityDistribution);
 
         var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
-            PageRankWriteConfig::configWithoutDampingFactor
+            EigenvectorWriteConfig::of
         );
 
         return writeModeBusinessFacade.eigenvector(
@@ -1028,13 +1035,13 @@ public final class CentralityProcedureFacade {
         );
     }
 
-    public PageRankMutateStub pageRankMutateStub() {
+    public PageRankMutateStub<PageRankMutateConfig> pageRankMutateStub() {
         return pageRankMutateStub;
     }
 
     public Stream<PageRankStatsResult> pageRankStats(String graphName, Map<String, Object> configuration) {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("centralityDistribution");
-        var resultBuilder = new PageRankResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
+        var resultBuilder = new PageRankResultBuilderForStatsMode<PageRankStatsConfig>(shouldComputeSimilarityDistribution);
 
         var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
@@ -1089,7 +1096,7 @@ public final class CentralityProcedureFacade {
 
     public Stream<PageRankWriteResult> pageRankWrite(String graphName, Map<String, Object> configuration) {
         var shouldComputeCentralityDistribution = procedureReturnColumns.contains("centralityDistribution");
-        var resultBuilder = new PageRankResultBuilderForWriteMode(shouldComputeCentralityDistribution);
+        var resultBuilder = new PageRankResultBuilderForWriteMode<PageRankWriteConfig>(shouldComputeCentralityDistribution);
 
 
         var parsedConfiguration = configurationParser.parseConfiguration(

@@ -33,7 +33,7 @@ import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.gds.pagerank.Constants.PAGE_RANK_DESCRIPTION;
 
 @GdsCallable(name = "gds.pageRank.mutate", description = PAGE_RANK_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class PageRankMutateSpec implements AlgorithmSpec<PageRankAlgorithm, PageRankResult,PageRankMutateConfig,Stream<PageRankMutateResult>,PageRankAlgorithmFactory<PageRankMutateConfig>> {
+public class PageRankMutateSpec implements AlgorithmSpec<PageRankAlgorithm<PageRankMutateConfig>, PageRankResult, PageRankMutateConfig, Stream<PageRankMutateResult>, PageRankAlgorithmFactory<PageRankMutateConfig>> {
 
     @Override
     public String name() {
@@ -47,11 +47,11 @@ public class PageRankMutateSpec implements AlgorithmSpec<PageRankAlgorithm, Page
 
     @Override
     public NewConfigFunction<PageRankMutateConfig> newConfigFunction() {
-        return (___,config) -> PageRankMutateConfig.configWithDampingFactor(config);
+        return (___, config) -> PageRankMutateConfig.configWithDampingFactor(config);
     }
 
     @Override
-    public ComputationResultConsumer<PageRankAlgorithm, PageRankResult, PageRankMutateConfig, Stream<PageRankMutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<PageRankAlgorithm<PageRankMutateConfig>, PageRankResult, PageRankMutateConfig, Stream<PageRankMutateResult>> computationResultConsumer() {
         return new NullComputationResultConsumer<>();
     }
 }
