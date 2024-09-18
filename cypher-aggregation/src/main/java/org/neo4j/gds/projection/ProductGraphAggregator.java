@@ -37,12 +37,13 @@ public class ProductGraphAggregator extends GraphAggregator {
         DatabaseId databaseId,
         String username,
         WriteMode writeMode,
+        QueryEstimator queryEstimator,
         ExecutingQueryProvider queryProvider,
         ProjectionMetricsService projectionMetricsService,
         TaskStore taskStore,
         Log log
     ) {
-        super(databaseId, username, writeMode, queryProvider, projectionMetricsService, taskStore, log);
+        super(databaseId, username, writeMode, queryEstimator, queryProvider, projectionMetricsService, taskStore, log);
     }
 
     @Override

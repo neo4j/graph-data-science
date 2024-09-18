@@ -40,9 +40,19 @@ public class AlphaGraphAggregator extends GraphAggregator {
         String username,
         WriteMode writeMode,
         ExecutingQueryProvider queryProvider,
+        QueryEstimator queryEstimator,
         ProjectionMetricsService projectionMetricsService
     ) {
-        super(databaseId, username, writeMode, queryProvider, projectionMetricsService, EmptyTaskStore.INSTANCE, Log.noOpLog());
+        super(
+            databaseId,
+            username,
+            writeMode,
+            queryEstimator,
+            queryProvider,
+            projectionMetricsService,
+            EmptyTaskStore.INSTANCE,
+            Log.noOpLog()
+        );
     }
 
     @Override

@@ -105,7 +105,7 @@ class CypherAggregationTest extends BaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-    private static void registerUserAggregationFunction(
+    static void registerUserAggregationFunction(
         GraphDatabaseService db,
         CallableUserAggregationFunction function
     )
@@ -783,7 +783,6 @@ class CypherAggregationTest extends BaseProcTest {
             List.of(Map.of("numberOfComponents", 2L))
         );
     }
-
 
     @Test
     void testReturnedConfig() {

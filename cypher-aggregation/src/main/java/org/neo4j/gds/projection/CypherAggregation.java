@@ -105,10 +105,13 @@ public class CypherAggregation implements CallableUserAggregationFunction {
             ? WriteMode.NONE
             : WriteMode.LOCAL;
 
+        var queryEstimator = QueryEstimator.fromTransaction(transaction);
+
         return new ProductGraphAggregator(
             DatabaseId.of(databaseService.databaseName()),
             username,
             writeMode,
+            queryEstimator,
             queryProvider,
             metricsFacade.projectionMetrics(),
             taskStore,

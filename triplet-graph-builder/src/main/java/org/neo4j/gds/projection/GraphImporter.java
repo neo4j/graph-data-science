@@ -77,10 +77,10 @@ public final class GraphImporter {
     private final Map<RelationshipType, RelationshipsBuilder> relImporters;
     private final ImmutableMutableGraphSchema.Builder graphSchemaBuilder;
 
-    public static Task graphImporterTask() {
+    public static Task graphImporterTask(int taskVolume) {
         return Tasks.task(
             "Graph aggregation",
-            Tasks.leaf("Update aggregation"),
+            Tasks.leaf("Update aggregation", taskVolume),
             Tasks.task("Build graph store", Tasks.leaf("Nodes"), Tasks.leaf("Relationships"))
         );
     }

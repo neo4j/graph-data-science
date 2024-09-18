@@ -394,7 +394,7 @@ class GraphImporterTest {
         var jobId = new JobId("test");
         var taskStore = new TestTaskStore();
         var progressTracker = new TaskProgressTracker(
-            GraphImporter.graphImporterTask(),
+            GraphImporter.graphImporterTask(2),
             new LogAdapter(log),
             new Concurrency(1),
             jobId,
@@ -439,6 +439,7 @@ class GraphImporterTest {
         log.printMessages();
         log.assertContainsMessage(TestLog.INFO, "Graph aggregation :: Start");
         log.assertContainsMessage(TestLog.INFO, "Graph aggregation :: Update aggregation :: Start");
+        log.assertContainsMessage(TestLog.INFO, "Graph aggregation :: Update aggregation 50%");
         log.assertContainsMessage(TestLog.INFO, "Graph aggregation :: Update aggregation 100%");
         log.assertContainsMessage(TestLog.INFO, "Graph aggregation :: Update aggregation :: Finished");
         log.assertContainsMessage(TestLog.INFO, "Graph aggregation :: Build graph store :: Start");

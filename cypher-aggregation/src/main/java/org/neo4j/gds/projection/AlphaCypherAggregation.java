@@ -101,6 +101,7 @@ public class AlphaCypherAggregation implements CallableUserAggregationFunction {
             username,
             writeMode,
             queryProvider,
+            QueryEstimator.empty(),
             metricsFacade.projectionMetrics()
         );
     }

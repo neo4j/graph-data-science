@@ -80,6 +80,7 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
     private final DatabaseId databaseId;
     private final String username;
     private final WriteMode writeMode;
+    private final QueryEstimator queryEstimator;
     private final ExecutingQueryProvider queryProvider;
     private final ProjectionMetricsService projectionMetricsService;
     private final TaskStore taskStore;
@@ -100,6 +101,7 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
         DatabaseId databaseId,
         String username,
         WriteMode writeMode,
+        QueryEstimator queryEstimator,
         ExecutingQueryProvider queryProvider,
         ProjectionMetricsService projectionMetricsService,
         TaskStore taskStore,
@@ -108,6 +110,7 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
         this.databaseId = databaseId;
         this.username = username;
         this.writeMode = writeMode;
+        this.queryEstimator = queryEstimator;
         this.queryProvider = queryProvider;
         this.projectionMetricsService = projectionMetricsService;
         this.taskStore = taskStore;
@@ -200,8 +203,9 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
 
         var idMapBuilder = idMapBuilder(config.readConcurrency());
 
+        var taskVolume = queryEstimator.estimateRows(query);
         var progressTracker = new TaskProgressTracker(
-            GraphImporter.graphImporterTask(),
+            GraphImporter.graphImporterTask(taskVolume),
             log,
             config.readConcurrency(),
             config.jobId(),
