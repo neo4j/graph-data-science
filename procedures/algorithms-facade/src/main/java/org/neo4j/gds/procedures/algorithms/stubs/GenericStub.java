@@ -22,13 +22,10 @@ package org.neo4j.gds.procedures.algorithms.stubs;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.procedures.algorithms.AlgorithmHandle;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 
@@ -37,38 +34,15 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 public final class GenericStub {
-
     private final UserSpecificConfigurationParser configurationParser;
     private final AlgorithmEstimationTemplate algorithmEstimationTemplate;
 
-    private GenericStub(
+    public GenericStub(
         UserSpecificConfigurationParser configurationParser,
         AlgorithmEstimationTemplate algorithmEstimationTemplate
     ) {
-
         this.configurationParser = configurationParser;
         this.algorithmEstimationTemplate = algorithmEstimationTemplate;
-    }
-
-    public static GenericStub create(
-        GraphStoreCatalogService graphStoreCatalogService,
-        UserSpecificConfigurationParser configurationParser,
-        RequestScopedDependencies requestScopedDependencies
-    ) {
-        var databaseGraphStoreEstimationService = new DatabaseGraphStoreEstimationService(
-            requestScopedDependencies.getGraphLoaderContext(),
-            requestScopedDependencies.getUser()
-        );
-        var algorithmEstimationTemplate = new AlgorithmEstimationTemplate(
-            graphStoreCatalogService,
-            databaseGraphStoreEstimationService,
-            requestScopedDependencies
-        );
-
-        return new GenericStub(
-            configurationParser,
-            algorithmEstimationTemplate
-        );
     }
 
     /**

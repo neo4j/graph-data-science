@@ -20,6 +20,13 @@
 package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
@@ -28,6 +35,9 @@ import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineModelInfo;
+import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 
 import java.util.Map;
 import java.util.Optional;
@@ -35,12 +45,47 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 class PipelineApplications {
+    private final ModelCatalog modelCatalog;
     private final PipelineRepository pipelineRepository;
+
     private final User user;
 
-    PipelineApplications(PipelineRepository pipelineRepository, User user) {
+    private final NodeClassificationPredictPipelineEstimator nodeClassificationPredictPipelineEstimator;
+    private final AlgorithmEstimationTemplate algorithmEstimationTemplate;
+
+    PipelineApplications(
+        ModelCatalog modelCatalog,
+        PipelineRepository pipelineRepository,
+        User user,
+        NodeClassificationPredictPipelineEstimator nodeClassificationPredictPipelineEstimator,
+        AlgorithmEstimationTemplate algorithmEstimationTemplate
+    ) {
+        this.modelCatalog = modelCatalog;
         this.pipelineRepository = pipelineRepository;
         this.user = user;
+        this.nodeClassificationPredictPipelineEstimator = nodeClassificationPredictPipelineEstimator;
+        this.algorithmEstimationTemplate = algorithmEstimationTemplate;
+    }
+
+    static PipelineApplications create(
+        ModelCatalog modelCatalog,
+        PipelineRepository pipelineRepository,
+        User user,
+        AlgorithmsProcedureFacade algorithmsProcedureFacade,
+        AlgorithmEstimationTemplate algorithmEstimationTemplate
+    ) {
+        var nodeClassificationPredictPipelineEstimator = new NodeClassificationPredictPipelineEstimator(
+            modelCatalog,
+            algorithmsProcedureFacade
+        );
+
+        return new PipelineApplications(
+            modelCatalog,
+            pipelineRepository,
+            user,
+            nodeClassificationPredictPipelineEstimator,
+            algorithmEstimationTemplate
+        );
     }
 
     NodeClassificationTrainingPipeline addNodeProperty(
@@ -140,5 +185,37 @@ class PipelineApplications {
         configurationAction.accept(pipeline);
 
         return pipeline;
+    }
+
+    MemoryEstimateResult nodeClassificationMutateEstimate(
+        Object graphNameOrConfiguration,
+        NodeClassificationPredictPipelineMutateConfig configuration
+    ) {
+        var estimate = nodeClassificationMutateMemoryEstimation(configuration);
+
+        var memoryEstimation = MemoryEstimations.builder("Node Classification Predict Pipeline Executor")
+            .add("Pipeline executor", estimate)
+            .build();
+
+        return algorithmEstimationTemplate.estimate(configuration, graphNameOrConfiguration, memoryEstimation);
+    }
+
+    private MemoryEstimation nodeClassificationMutateMemoryEstimation(NodeClassificationPredictPipelineBaseConfig configuration) {
+        var model = getTrainedNCPipelineModel(configuration.modelName(), configuration.username());
+
+        return nodeClassificationPredictPipelineEstimator.estimate(model, configuration);
+    }
+
+    private Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> getTrainedNCPipelineModel(
+        String modelName,
+        String username
+    ) {
+        return modelCatalog.get(
+            username,
+            modelName,
+            Classifier.ClassifierData.class,
+            NodeClassificationPipelineTrainConfig.class,
+            NodeClassificationPipelineModelInfo.class
+        );
     }
 }

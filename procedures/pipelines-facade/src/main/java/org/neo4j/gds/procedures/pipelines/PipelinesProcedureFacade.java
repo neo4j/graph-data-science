@@ -20,9 +20,14 @@
 package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.ml.pipeline.PipelineCompanion;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,18 +40,48 @@ import java.util.stream.Stream;
 public final class PipelinesProcedureFacade {
     public static final String NO_VALUE = "__NO_VALUE";
 
-    private final PipelineConfigurationParser pipelineConfigurationParser = new PipelineConfigurationParser();
+    private final NodeClassificationPredictConfigPreProcessor nodeClassificationPredictConfigPreProcessor;
+    private final PipelineConfigurationParser pipelineConfigurationParser;
 
     private final PipelineApplications pipelineApplications;
 
-    PipelinesProcedureFacade(PipelineApplications pipelineApplications) {
+    PipelinesProcedureFacade(
+        NodeClassificationPredictConfigPreProcessor nodeClassificationPredictConfigPreProcessor,
+        PipelineConfigurationParser pipelineConfigurationParser,
+        PipelineApplications pipelineApplications
+    ) {
+        this.nodeClassificationPredictConfigPreProcessor = nodeClassificationPredictConfigPreProcessor;
+        this.pipelineConfigurationParser = pipelineConfigurationParser;
         this.pipelineApplications = pipelineApplications;
     }
 
-    public static PipelinesProcedureFacade create(PipelineRepository pipelineRepository, User user) {
-        var pipelineApplications = new PipelineApplications(pipelineRepository, user);
+    public static PipelinesProcedureFacade create(
+        ModelCatalog modelCatalog,
+        PipelineRepository pipelineRepository,
+        User user,
+        AlgorithmsProcedureFacade algorithmsProcedureFacade,
+        AlgorithmEstimationTemplate algorithmEstimationTemplate
+    ) {
+        var nodeClassificationPredictConfigPreProcessor = new NodeClassificationPredictConfigPreProcessor(
+            modelCatalog,
+            user
+        );
 
-        return new PipelinesProcedureFacade(pipelineApplications);
+        var pipelineConfigurationParser = new PipelineConfigurationParser(user);
+
+        var pipelineApplications = PipelineApplications.create(
+            modelCatalog,
+            pipelineRepository,
+            user,
+            algorithmsProcedureFacade,
+            algorithmEstimationTemplate
+        );
+
+        return new PipelinesProcedureFacade(
+            nodeClassificationPredictConfigPreProcessor,
+            pipelineConfigurationParser,
+            pipelineApplications
+        );
     }
 
     public Stream<NodePipelineInfoResult> addLogisticRegression(
@@ -164,6 +199,24 @@ public final class PipelinesProcedureFacade {
         if (pipeline.isEmpty()) return Stream.empty();
 
         var result = PipelineCatalogResult.create(pipeline.get(), pipelineName.value);
+
+        return Stream.of(result);
+    }
+
+    public Stream<MemoryEstimateResult> nodeClassificationMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    ) {
+        PipelineCompanion.preparePipelineConfig(graphNameOrConfiguration, rawConfiguration);
+        nodeClassificationPredictConfigPreProcessor.enhanceInputWithPipelineParameters(rawConfiguration);
+
+        var configuration = pipelineConfigurationParser.parseNodeClassificationPredictPipelineMutateConfig(
+            rawConfiguration);
+
+        var result = pipelineApplications.nodeClassificationMutateEstimate(
+            graphNameOrConfiguration,
+            configuration
+        );
 
         return Stream.of(result);
     }

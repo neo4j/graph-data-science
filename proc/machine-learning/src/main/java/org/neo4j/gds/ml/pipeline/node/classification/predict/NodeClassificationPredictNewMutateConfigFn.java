@@ -22,6 +22,8 @@ package org.neo4j.gds.ml.pipeline.node.classification.predict;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
+import org.neo4j.gds.procedures.pipelines.NodeClassificationPredictPipelineMutateConfig;
+import org.neo4j.gds.procedures.pipelines.NodeClassificationPredictPipelineMutateConfigImpl;
 
 import static org.neo4j.gds.ml.pipeline.node.NodePropertyPredictPipelineFilterUtil.generatePredictPipelineFilter;
 

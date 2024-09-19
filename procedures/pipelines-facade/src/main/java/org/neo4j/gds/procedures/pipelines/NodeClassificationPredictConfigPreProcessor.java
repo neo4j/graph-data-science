@@ -17,9 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.node.classification.predict;
+package org.neo4j.gds.procedures.pipelines;
 
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.models.BaseModelData;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
@@ -29,15 +31,33 @@ import java.util.Map;
 /**
  * Enhance user input by adding targetNodeLabels and relationshipTypes from training parameters if appropriate
  */
-final class NodeClassificationPredictConfigPreProcessor {
-    private NodeClassificationPredictConfigPreProcessor() {}
+public final class NodeClassificationPredictConfigPreProcessor {
+    private final ModelCatalog modelCatalog;
+    private final User user;
 
-    static void enhanceInputWithPipelineParameters(Map<String, Object> userInput, ExecutionContext executionContext) {
+    NodeClassificationPredictConfigPreProcessor(ModelCatalog modelCatalog, User user) {
+        this.modelCatalog = modelCatalog;
+        this.user = user;
+    }
+
+    public static void enhanceInputWithPipelineParameters(
+        Map<String, Object> userInput,
+        ExecutionContext executionContext
+    ) {
+        var modelCatalog = executionContext.modelCatalog();
+        var user = new User(executionContext.username(), executionContext.isGdsAdmin());
+
+        var preProcessor = new NodeClassificationPredictConfigPreProcessor(modelCatalog, user);
+
+        preProcessor.enhanceInputWithPipelineParameters(userInput);
+    }
+
+    void enhanceInputWithPipelineParameters(Map<String, Object> userInput) {
         if (!userInput.containsKey("modelName")) return;
 
         //noinspection ConstantConditions
-        var model = executionContext.modelCatalog().get(
-            executionContext.username(),
+        var model = modelCatalog.get(
+            user.getUsername(),
             (String) userInput.get("modelName"),
             BaseModelData.class,
             NodeClassificationPipelineTrainConfig.class,

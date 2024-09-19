@@ -66,6 +66,7 @@ import org.neo4j.gds.procedures.algorithms.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
+import org.neo4j.gds.procedures.pipelines.NodeClassificationPredictPipelineBaseConfigImpl;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.test.TestProc;
 
@@ -452,7 +453,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             null
         );
         var configurationParser = new UserSpecificConfigurationParser(new  ConfigurationParser(null, null),requestScopedDependencies.getUser());
-        var genericStub = GenericStub.create(null,  configurationParser, requestScopedDependencies);
+        var genericStub = new GenericStub(configurationParser, null);
         var centralityProcedureFacade = CentralityProcedureFacade.create(
             genericStub,
             applicationsFacade,

@@ -24,6 +24,7 @@ import org.neo4j.gds.core.model.Model.CustomInfo;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.models.BaseModelData;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPipelineBaseTrainConfig;
+import org.neo4j.gds.procedures.pipelines.NodePropertyPredictPipelineBaseConfig;
 
 import java.util.List;
 

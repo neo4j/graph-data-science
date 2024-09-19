@@ -5,6 +5,10 @@ description = 'Neo4j Graph Data Science :: Pipelines Procedure Facade'
 group = 'org.neo4j.gds'
 
 dependencies {
+    annotationProcessor project(':config-generator')
+
+    compileOnly openGds.jetbrains.annotations
+
     neodeps().each {
         compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
             transitive = false
@@ -13,12 +17,19 @@ dependencies {
         testImplementation(group: 'org.neo4j', name: it, version: ver.'neo4j')
     }
 
+    implementation project(':algorithms-machinery')
+    implementation project(':algorithms-procedure-facade')
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')
+    implementation project(':executor')
+    implementation project(':memory-usage')
     implementation project(':ml-algo')
     implementation project(':ml-api')
+    implementation project(':model-catalog-api')
     implementation project(':pipeline')
+    implementation project(':progress-tracking')
+    implementation project(':string-formatting')
 
     testImplementation platform(openGds.junit5bom)
     testImplementation openGds.junit5.jupiter.api

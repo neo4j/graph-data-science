@@ -28,6 +28,8 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.ml.pipeline.node.PredictMutateResult;
+import org.neo4j.gds.procedures.pipelines.NodeClassificationPredictConfigPreProcessor;
+import org.neo4j.gds.procedures.pipelines.NodeClassificationPredictPipelineMutateConfig;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;

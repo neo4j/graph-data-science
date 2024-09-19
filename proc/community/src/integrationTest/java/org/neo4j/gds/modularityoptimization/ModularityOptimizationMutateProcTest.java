@@ -73,6 +73,7 @@ import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.GraphDataScienceProceduresBuilder;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
@@ -509,11 +510,7 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
 
         var configurationParser = new UserSpecificConfigurationParser(new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance),requestScopedDependencies.getUser());
 
-        var genericStub = GenericStub.create(
-            graphStoreCatalogService,
-            configurationParser,
-            requestScopedDependencies
-        );
+        var genericStub = new GenericStub(configurationParser, null);
         var applicationsFacade = ApplicationsFacade.create(
             logMock,
             null,
@@ -544,7 +541,7 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
         );
 
         return new GraphDataScienceProceduresBuilder(logMock)
-            .with(communityProcedureFacade)
+            .with(new AlgorithmsProcedureFacade(null, communityProcedureFacade, null, null, null, null, null))
             .with(DeprecatedProceduresMetricService.PASSTHROUGH)
             .build();
     }

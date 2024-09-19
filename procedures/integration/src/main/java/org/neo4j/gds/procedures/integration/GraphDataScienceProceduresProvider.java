@@ -39,7 +39,6 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
-import org.neo4j.gds.procedures.AlgorithmProcedureFacadeBuilderFactory;
 import org.neo4j.gds.procedures.DatabaseIdAccessor;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
 import org.neo4j.gds.procedures.GraphCatalogProcedureFacadeFactory;
@@ -74,7 +73,6 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
     private final Configuration neo4jConfiguration;
 
     private final AlgorithmMetricsService algorithmMetricsService;
-    private final AlgorithmProcedureFacadeBuilderFactory algorithmProcedureFacadeBuilderFactory;
     private final DefaultsConfiguration defaultsConfiguration;
     private final DeprecatedProceduresMetricService deprecatedProceduresMetricService;
     private final ExporterBuildersProviderService exporterBuildersProviderService;
@@ -100,7 +98,6 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         Log log,
         Configuration neo4jConfiguration,
         AlgorithmMetricsService algorithmMetricsService,
-        AlgorithmProcedureFacadeBuilderFactory algorithmProcedureFacadeBuilderFactory,
         DefaultsConfiguration defaultsConfiguration,
         DeprecatedProceduresMetricService deprecatedProceduresMetricService,
         ExporterBuildersProviderService exporterBuildersProviderService,
@@ -125,7 +122,6 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         this.neo4jConfiguration = neo4jConfiguration;
 
         this.algorithmMetricsService = algorithmMetricsService;
-        this.algorithmProcedureFacadeBuilderFactory = algorithmProcedureFacadeBuilderFactory;
         this.defaultsConfiguration = defaultsConfiguration;
         this.deprecatedProceduresMetricService = deprecatedProceduresMetricService;
         this.exporterBuildersProviderService = exporterBuildersProviderService;
@@ -190,7 +186,6 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         return GraphDataScienceProcedures.create(
             log,
             algorithmMetricsService,
-            algorithmProcedureFacadeBuilderFactory,
             defaultsConfiguration,
             deprecatedProceduresMetricService,
             exportLocation,

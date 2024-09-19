@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -35,6 +36,7 @@ import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
@@ -88,7 +90,6 @@ public class GraphDataScienceProcedures {
     public static GraphDataScienceProcedures create(
         Log log,
         AlgorithmMetricsService algorithmMetricsService,
-        AlgorithmProcedureFacadeBuilderFactory algorithmProcedureFacadeBuilderFactory,
         DefaultsConfiguration defaultsConfiguration,
         DeprecatedProceduresMetricService deprecatedProceduresMetricService,
         ExportLocation exportLocation,
@@ -142,41 +143,48 @@ public class GraphDataScienceProcedures {
 
         var modelCatalogProcedureFacade = new ModelCatalogProcedureFacade(applicationsFacade);
 
+        // merge these two
         var configurationParser = new ConfigurationParser(defaultsConfiguration, limitsConfiguration);
+        var userSpecificConfigurationParser = new UserSpecificConfigurationParser(
+            configurationParser,
+            requestScopedDependencies.getUser()
+        );
 
+        var databaseGraphStoreEstimationService = new DatabaseGraphStoreEstimationService(
+            requestScopedDependencies.getGraphLoaderContext(),
+            requestScopedDependencies.getUser()
+        );
+        var algorithmEstimationTemplate = new AlgorithmEstimationTemplate(
+            graphStoreCatalogService,
+            databaseGraphStoreEstimationService,
+            requestScopedDependencies
+        );
 
-        var algorithmProcedureFacadeBuilder = algorithmProcedureFacadeBuilderFactory.create(
-            new UserSpecificConfigurationParser(configurationParser,requestScopedDependencies.getUser()),
+        var algorithmsProcedureFacade = AlgorithmsProcedureFacadeFactory.create(
+            userSpecificConfigurationParser,
             requestScopedDependencies,
             kernelTransaction,
             applicationsFacade,
-            procedureReturnColumns
+            procedureReturnColumns,
+            algorithmEstimationTemplate
         );
-
-        var centralityProcedureFacade = algorithmProcedureFacadeBuilder.createCentralityProcedureFacade();
-        var communityProcedureFacade = algorithmProcedureFacadeBuilder.createCommunityProcedureFacade();
-        var machineLearningProcedureFacade = algorithmProcedureFacadeBuilder.createMachineLearningProcedureFacade();
-        var miscellaneousProcedureFacade = algorithmProcedureFacadeBuilder.createMiscellaneousProcedureFacade();
-        var nodeEmbeddingsProcedureFacade = algorithmProcedureFacadeBuilder.createNodeEmbeddingsProcedureFacade();
-        var pathFindingProcedureFacade = algorithmProcedureFacadeBuilder.createPathFindingProcedureFacade();
-        var similarityProcedureFacade = algorithmProcedureFacadeBuilder.createSimilarityProcedureFacade();
 
         var operationsProcedureFacade = new OperationsProcedureFacade(applicationsFacade);
 
-        var pipelinesProcedureFacade = PipelinesProcedureFacade.create(pipelineRepository, requestScopedDependencies.getUser());
+        var pipelinesProcedureFacade = PipelinesProcedureFacade.create(
+            modelCatalog,
+            pipelineRepository,
+            requestScopedDependencies.getUser(),
+            algorithmsProcedureFacade,
+            algorithmEstimationTemplate
+        );
 
         return new GraphDataScienceProceduresBuilder(log)
-            .with(centralityProcedureFacade)
-            .with(communityProcedureFacade)
+            .with(algorithmsProcedureFacade)
             .with(graphCatalogProcedureFacade)
-            .with(machineLearningProcedureFacade)
-            .with(miscellaneousProcedureFacade)
             .with(modelCatalogProcedureFacade)
-            .with(nodeEmbeddingsProcedureFacade)
             .with(operationsProcedureFacade)
-            .with(pathFindingProcedureFacade)
             .with(pipelinesProcedureFacade)
-            .with(similarityProcedureFacade)
             .with(deprecatedProceduresMetricService)
             .build();
     }

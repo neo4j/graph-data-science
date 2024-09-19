@@ -20,12 +20,12 @@
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.ml.pipeline.node.PredictMutateResult;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -43,6 +43,9 @@ public class NodeClassificationPipelineMutateProc extends BaseProc {
     @Context
     public ModelCatalog internalModelCatalog;
 
+    @Context
+    public GraphDataScienceProcedures facade;
+
     @Procedure(name = "gds.beta.pipeline.nodeClassification.predict.mutate", mode = Mode.READ)
     @Description(PREDICT_DESCRIPTION)
     public Stream<PredictMutateResult> mutate(
@@ -59,15 +62,10 @@ public class NodeClassificationPipelineMutateProc extends BaseProc {
     @Procedure(name = "gds.beta.pipeline.nodeClassification.predict.mutate.estimate", mode = Mode.READ)
     @Description(ESTIMATE_PREDICT_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
-        @Name(value = "graphName") Object graphName,
-        @Name(value = "configuration") Map<String, Object> configuration
+        @Name(value = "graphName") Object graphNameOrConfiguration,
+        @Name(value = "configuration") Map<String, Object> algorithmConfiguration
     ) {
-        preparePipelineConfig(graphName, configuration);
-        return new MemoryEstimationExecutor<>(
-            new NodeClassificationPipelineMutateSpec(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphName, configuration);
+        return facade.pipelines().nodeClassificationMutateEstimate(graphNameOrConfiguration, algorithmConfiguration);
     }
 
     @Override

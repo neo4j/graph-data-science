@@ -24,7 +24,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -42,9 +41,10 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+import org.neo4j.gds.procedures.pipelines.NodeClassificationPredictPipelineBaseConfig;
+import org.neo4j.gds.procedures.pipelines.NodeClassificationPredictPipelineConstants;
+import org.neo4j.gds.procedures.pipelines.NodeClassificationPredictPipelineEstimator;
 import org.neo4j.gds.utils.StringJoining;
-
-import java.util.List;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -53,7 +53,6 @@ public class NodeClassificationPredictPipelineExecutor extends PredictPipelineEx
     NodePropertyPredictPipeline,
     NodeClassificationPipelineResult
     > {
-    private static final int MIN_BATCH_SIZE = 100;
     private final Classifier.ClassifierData modelData;
     private final LocalIdMap classIdMap;
     private final PipelineGraphFilter predictGraphFilter;
@@ -90,35 +89,9 @@ public class NodeClassificationPredictPipelineExecutor extends PredictPipelineEx
         ModelCatalog modelCatalog,
         AlgorithmsProcedureFacade algorithmsProcedureFacade
     ) {
-        var pipeline = model.customInfo().pipeline();
-        var classCount = model.customInfo().classes().size();
-        var featureCount = model.data().featureDimension();
+        var estimator = new NodeClassificationPredictPipelineEstimator(modelCatalog, algorithmsProcedureFacade);
 
-        var combinedNodeLabels = configuration.targetNodeLabels().isEmpty() ? model.trainConfig().targetNodeLabels() : configuration.targetNodeLabels();
-        var combinedRelationshipTypes = configuration.relationshipTypes().isEmpty() ? model.trainConfig().relationshipTypes() : configuration.relationshipTypes();
-
-        MemoryEstimation nodePropertyStepEstimation = NodePropertyStepExecutor.estimateNodePropertySteps(
-            algorithmsProcedureFacade,
-            modelCatalog,
-            configuration.username(),
-            pipeline.nodePropertySteps(),
-            combinedNodeLabels,
-            combinedRelationshipTypes
-        );
-
-        var predictionEstimation = MemoryEstimations.builder().add(
-            "Pipeline Predict",
-            NodeClassificationPredict.memoryEstimationWithDerivedBatchSize(
-                model.data().trainerMethod(),
-                configuration.includePredictedProbabilities(),
-                MIN_BATCH_SIZE,
-                featureCount,
-                classCount,
-                false
-            )
-        ).build();
-
-        return MemoryEstimations.maxEstimation(List.of(nodePropertyStepEstimation, predictionEstimation));
+        return estimator.estimate(model, configuration);
     }
 
     @Override
@@ -143,7 +116,7 @@ public class NodeClassificationPredictPipelineExecutor extends PredictPipelineEx
         var nodeClassificationResult =  new NodeClassificationPredict(
             ClassifierFactory.create(modelData),
             features,
-            MIN_BATCH_SIZE,
+            NodeClassificationPredictPipelineConstants.MIN_BATCH_SIZE,
             config.concurrency(),
             config.includePredictedProbabilities(),
             progressTracker,

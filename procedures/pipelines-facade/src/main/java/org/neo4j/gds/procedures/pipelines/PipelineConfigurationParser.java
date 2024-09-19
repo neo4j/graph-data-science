@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.procedures.pipelines;
 
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.ConfigKeyValidation;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.api.TrainingMethod;
@@ -34,6 +35,12 @@ import java.util.Map;
 import java.util.function.Function;
 
 class PipelineConfigurationParser {
+    private final User user;
+
+    PipelineConfigurationParser(User user) {
+        this.user = user;
+    }
+
     AutoTuningConfig parseAutoTuningConfig(Map<String, Object> rawConfiguration) {
         return parseConfiguration(
             rawConfiguration,
@@ -56,6 +63,12 @@ class PipelineConfigurationParser {
             MLPClassifierTrainConfig.DEFAULT.configKeys(),
             TrainingMethod.MLPClassification
         );
+    }
+
+    NodeClassificationPredictPipelineMutateConfig parseNodeClassificationPredictPipelineMutateConfig(Map<String, Object> configuration) {
+        var wrapper = CypherMapWrapper.create(configuration);
+
+        return NodeClassificationPredictPipelineMutateConfig.of(user.getUsername(), wrapper);
     }
 
     NodePropertyPredictionSplitConfig parseNodePropertyPredictionSplitConfig(Map<String, Object> rawConfiguration) {

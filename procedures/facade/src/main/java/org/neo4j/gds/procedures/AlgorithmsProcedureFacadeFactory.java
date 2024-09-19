@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.procedures;
 
-import org.neo4j.gds.api.CloseableResourceRegistry;
-import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
@@ -33,82 +33,68 @@ import org.neo4j.gds.procedures.algorithms.miscellaneous.MiscellaneousProcedureF
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
+import org.neo4j.kernel.api.KernelTransaction;
 
-class AlgorithmProcedureFacadeBuilder {
-    private final RequestScopedDependencies requestScopedDependencies;
-    private final CloseableResourceRegistry closeableResourceRegistry;
-    private final NodeLookup nodeLookup;
-    private final ProcedureReturnColumns procedureReturnColumns;
-    private final ApplicationsFacade applicationsFacade;
-    private final GenericStub genericStub;
+/**
+ * Just some squirreled away scaffolding, but also,
+ * hides some dependencies that you would otherwise need to make available to, for example,
+ * a {@link org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade} factory method
+ */
+final class AlgorithmsProcedureFacadeFactory {
+    private AlgorithmsProcedureFacadeFactory() {}
 
-    private final UserSpecificConfigurationParser configurationParser;
-
-    AlgorithmProcedureFacadeBuilder(
+    static AlgorithmsProcedureFacade create(
+        UserSpecificConfigurationParser configurationParser,
         RequestScopedDependencies requestScopedDependencies,
-        CloseableResourceRegistry closeableResourceRegistry,
-        NodeLookup nodeLookup,
-        ProcedureReturnColumns procedureReturnColumns,
+        KernelTransaction kernelTransaction,
         ApplicationsFacade applicationsFacade,
-        GenericStub genericStub,
-        UserSpecificConfigurationParser configurationParser
+        ProcedureReturnColumns procedureReturnColumns,
+        AlgorithmEstimationTemplate algorithmEstimationTemplate
     ) {
-        this.requestScopedDependencies = requestScopedDependencies;
-        this.closeableResourceRegistry = closeableResourceRegistry;
-        this.nodeLookup = nodeLookup;
-        this.procedureReturnColumns = procedureReturnColumns;
-        this.applicationsFacade = applicationsFacade;
-        this.genericStub = genericStub;
-        this.configurationParser = configurationParser;
-    }
+        var nodeLookup = new TransactionNodeLookup(kernelTransaction);
+        var closeableResourceRegistry = new TransactionCloseableResourceRegistry(kernelTransaction);
 
-    CentralityProcedureFacade createCentralityProcedureFacade() {
-        return CentralityProcedureFacade.create(
+        var genericStub = new GenericStub(
+            configurationParser,
+            algorithmEstimationTemplate
+        );
+
+        var centralityProcedureFacade = CentralityProcedureFacade.create(
             genericStub,
             applicationsFacade,
             procedureReturnColumns,
             configurationParser
         );
-    }
 
-    CommunityProcedureFacade createCommunityProcedureFacade() {
-        return CommunityProcedureFacade.create(
+        var communityProcedureFacade = CommunityProcedureFacade.create(
             genericStub,
             applicationsFacade,
             closeableResourceRegistry,
             procedureReturnColumns,
             configurationParser
         );
-    }
 
-    MachineLearningProcedureFacade createMachineLearningProcedureFacade() {
-        return MachineLearningProcedureFacade.create(
+        var machineLearningProcedureFacade = MachineLearningProcedureFacade.create(
             genericStub,
             applicationsFacade,
             configurationParser
         );
-    }
 
-    MiscellaneousProcedureFacade createMiscellaneousProcedureFacade() {
-        return MiscellaneousProcedureFacade.create(
+        var miscellaneousProcedureFacade = MiscellaneousProcedureFacade.create(
             genericStub,
             applicationsFacade,
             procedureReturnColumns,
             configurationParser
         );
-    }
 
-    NodeEmbeddingsProcedureFacade createNodeEmbeddingsProcedureFacade() {
-        return NodeEmbeddingsProcedureFacade.create(
+        var nodeEmbeddingsProcedureFacade = NodeEmbeddingsProcedureFacade.create(
             genericStub,
             applicationsFacade,
             configurationParser,
             requestScopedDependencies.getUser()
         );
-    }
 
-    PathFindingProcedureFacade createPathFindingProcedureFacade() {
-        return PathFindingProcedureFacade.create(
+        var pathFindingProcedureFacade = PathFindingProcedureFacade.create(
             closeableResourceRegistry,
             nodeLookup,
             procedureReturnColumns,
@@ -116,14 +102,22 @@ class AlgorithmProcedureFacadeBuilder {
             genericStub,
             configurationParser
         );
-    }
 
-    SimilarityProcedureFacade createSimilarityProcedureFacade() {
-        return SimilarityProcedureFacade.create(
+        var similarityProcedureFacade = SimilarityProcedureFacade.create(
             applicationsFacade,
             genericStub,
             procedureReturnColumns,
             configurationParser
+        );
+
+        return new AlgorithmsProcedureFacade(
+            centralityProcedureFacade,
+            communityProcedureFacade,
+            machineLearningProcedureFacade,
+            miscellaneousProcedureFacade,
+            nodeEmbeddingsProcedureFacade,
+            pathFindingProcedureFacade,
+            similarityProcedureFacade
         );
     }
 }

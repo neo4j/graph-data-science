@@ -32,8 +32,15 @@ class PipelinesProcedureFacadeTest {
     @Test
     void createPipeline() {
         var repository = new PipelineRepository();
-        var applications = new PipelineApplications(repository, new User("me", false));
-        var facade = new PipelinesProcedureFacade(applications);
+        var nodeClassificationPredictPipelineEstimator = new NodeClassificationPredictPipelineEstimator(null, null);
+        var applications = new PipelineApplications(
+            null,
+            repository,
+            new User("me", false),
+            nodeClassificationPredictPipelineEstimator,
+            null
+        );
+        var facade = new PipelinesProcedureFacade(null, null, applications);
 
         var result = facade.createPipeline("myPipeline").findAny().orElseThrow();
 
@@ -49,8 +56,15 @@ class PipelinesProcedureFacadeTest {
     @Test
     void shouldNotCreatePipelineWhenOneExists() {
         var repository = new PipelineRepository();
-        var applications = new PipelineApplications(repository, new User("me", false));
-        var facade = new PipelinesProcedureFacade(applications);
+        var nodeClassificationPredictPipelineEstimator = new NodeClassificationPredictPipelineEstimator(null, null);
+        var applications = new PipelineApplications(
+            null,
+            repository,
+            new User("me", false),
+            nodeClassificationPredictPipelineEstimator,
+            null
+        );
+        var facade = new PipelinesProcedureFacade(null, null, applications);
 
         assertThatIllegalStateException()
             .isThrownBy(() -> facade.createPipeline("myPipeline"))
@@ -59,7 +73,11 @@ class PipelinesProcedureFacadeTest {
 
     @Test
     void shouldNotCreatePipelineWithInvalidName() {
-        var facade = new PipelinesProcedureFacade(null);
+        var facade = new PipelinesProcedureFacade(
+            null,
+            null,
+            null
+        );
 
         assertThatIllegalArgumentException()
             .isThrownBy(() -> facade.createPipeline("   blanks!"))

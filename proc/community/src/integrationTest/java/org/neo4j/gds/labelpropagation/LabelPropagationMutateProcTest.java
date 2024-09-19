@@ -73,6 +73,7 @@ import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.GraphDataScienceProceduresBuilder;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
@@ -502,11 +503,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
 
         var configurationParser = new UserSpecificConfigurationParser(new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance),requestScopedDependencies.getUser());
 
-        var genericStub = GenericStub.create(
-            graphStoreCatalogService,
-            configurationParser,
-            requestScopedDependencies
-        );
+        var genericStub = new GenericStub(configurationParser, null);
         var applicationsFacade = ApplicationsFacade.create(
             logMock,
             null,
@@ -537,7 +534,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
         );
 
         return new GraphDataScienceProceduresBuilder(Log.noOpLog())
-            .with(communityProcedureFacade)
+            .with(new AlgorithmsProcedureFacade(null, communityProcedureFacade, null, null, null, null, null))
             .with(DeprecatedProceduresMetricService.PASSTHROUGH)
             .build();
     }

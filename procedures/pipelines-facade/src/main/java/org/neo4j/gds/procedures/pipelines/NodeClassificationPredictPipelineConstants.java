@@ -17,13 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.node.classification.predict;
+package org.neo4j.gds.procedures.pipelines;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.ml.pipeline.node.NodePropertyPredictPipelineBaseConfig;
+public final class NodeClassificationPredictPipelineConstants {
+    public static final int MIN_BATCH_SIZE = 100;
 
-@Configuration
-public interface NodeClassificationPredictPipelineBaseConfig extends NodePropertyPredictPipelineBaseConfig {
-    @Configuration.Key("includePredictedProbabilities")
-    boolean includePredictedProbabilities();
+    private NodeClassificationPredictPipelineConstants() {}
 }

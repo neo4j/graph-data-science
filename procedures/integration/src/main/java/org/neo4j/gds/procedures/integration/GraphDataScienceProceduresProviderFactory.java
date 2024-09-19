@@ -34,7 +34,6 @@ import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryGauge;
 import org.neo4j.gds.metrics.MetricsFacade;
-import org.neo4j.gds.procedures.AlgorithmProcedureFacadeBuilderFactory;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
 import org.neo4j.gds.procedures.GraphCatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
@@ -112,17 +111,12 @@ final class GraphDataScienceProceduresProviderFactory {
     ) {
         var catalogProcedureFacadeFactory = new GraphCatalogProcedureFacadeFactory(log);
 
-        var algorithmFacadeBuilderFactory = createAlgorithmFacadeBuilderFactory(
-            graphStoreCatalogService
-        );
-
         var memoryGuard = new DefaultMemoryGuard(log, useMaxMemoryEstimation, memoryGauge);
 
         return new GraphDataScienceProceduresProvider(
             log,
             neo4jConfiguration,
             metricsFacade.algorithmMetrics(),
-            algorithmFacadeBuilderFactory,
             defaultsConfiguration,
             metricsFacade.deprecatedProcedures(),
             exporterBuildersProviderService,
@@ -142,12 +136,6 @@ final class GraphDataScienceProceduresProviderFactory {
             algorithmProcessingTemplateDecorator,
             graphCatalogApplicationsDecorator,
             modelCatalogApplicationsDecorator
-        );
-    }
-
-    private AlgorithmProcedureFacadeBuilderFactory createAlgorithmFacadeBuilderFactory(GraphStoreCatalogService graphStoreCatalogService) {
-        return new AlgorithmProcedureFacadeBuilderFactory(
-            graphStoreCatalogService
         );
     }
 }

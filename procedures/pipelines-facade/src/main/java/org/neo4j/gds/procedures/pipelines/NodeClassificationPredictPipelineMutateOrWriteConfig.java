@@ -17,32 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.node;
+package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphNameConfig;
-import org.neo4j.gds.model.ModelConfig;
 
-import java.util.List;
+import java.util.Optional;
 
-@Configuration
-public interface NodePropertyPredictPipelineBaseConfig extends
-    AlgoBaseConfig,
-    GraphNameConfig,
-    ModelConfig {
-
-
-    default List<String> targetNodeLabels() {return List.of();}
-
-    @Override
-    default List<String> relationshipTypes() {
-        return List.of();
-    }
+public interface NodeClassificationPredictPipelineMutateOrWriteConfig extends NodeClassificationPredictPipelineBaseConfig {
+    Optional<String> predictedProbabilityProperty();
 
     @Override
     @Configuration.Ignore
-    default List<String> nodeLabels() {
-        return targetNodeLabels();
+    default boolean includePredictedProbabilities() {
+        return predictedProbabilityProperty().isPresent();
     }
 }

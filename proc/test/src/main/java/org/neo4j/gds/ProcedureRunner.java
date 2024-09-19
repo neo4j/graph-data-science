@@ -38,7 +38,6 @@ import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
-import org.neo4j.gds.procedures.AlgorithmProcedureFacadeBuilderFactory;
 import org.neo4j.gds.procedures.DatabaseIdAccessor;
 import org.neo4j.gds.procedures.GraphCatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
@@ -53,7 +52,6 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 public final class ProcedureRunner {
-
     private ProcedureRunner() {}
 
     @SuppressWarnings("WeakerAccess") // needs to be public, or a test gets unhappy
@@ -169,14 +167,9 @@ public final class ProcedureRunner {
 
         var modelCatalog = new OpenModelCatalog();
 
-        var algorithmFacadeBuilderFactory = new AlgorithmProcedureFacadeBuilderFactory(
-            graphStoreCatalogService
-        );
-
         return GraphDataScienceProcedures.create(
             gdsLog,
             MetricsFacade.PASSTHROUGH_METRICS_FACADE.algorithmMetrics(),
-            algorithmFacadeBuilderFactory,
             DefaultsConfiguration.Instance,
             DeprecatedProceduresMetricService.PASSTHROUGH,
             null,
