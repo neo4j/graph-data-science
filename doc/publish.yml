@@ -5,7 +5,7 @@ site:
 
 content:
   sources:
-  - url: https://github.com/neo-technology/graph-analytics
+  - url: ../../
     # Includes previous version, current, and preview (master).
     # When updating this, update the version in the
     # `page-add-notes-versions` below too.
