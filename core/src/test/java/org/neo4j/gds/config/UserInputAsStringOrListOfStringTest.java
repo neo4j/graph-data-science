@@ -20,8 +20,9 @@
 package org.neo4j.gds.config;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.VirtualRelationshipImpl;
 import org.neo4j.graphalgo.impl.util.PathImpl;
+import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.kernel.impl.core.NodeEntity;
 
@@ -70,7 +71,12 @@ class UserInputAsStringOrListOfStringTest {
     void shouldNotParseRelationship() {
         var node1 = new NodeEntity(null, 0);
         var node2 = new NodeEntity(null, 1);
-        var relationship = Neo4jProxy.virtualRelationship(0, node1, node2, RelationshipType.withName("FOO"));
+        var relationship = (Relationship) new VirtualRelationshipImpl(
+            0,
+            node1,
+            node2,
+            RelationshipType.withName("FOO")
+        );
         assertThatThrownBy(() -> UserInputAsStringOrListOfString.parse(relationship, "nodeProperties"))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Type mismatch for nodeProperties: expected List<String> or String, but found relationship");

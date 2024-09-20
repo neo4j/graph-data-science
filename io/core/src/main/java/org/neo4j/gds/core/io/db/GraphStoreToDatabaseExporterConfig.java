@@ -21,7 +21,7 @@ package org.neo4j.gds.core.io.db;
 
 import org.neo4j.configuration.helpers.DatabaseNameValidator;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.SettingProxy;
 import org.neo4j.gds.config.JobIdConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.io.GraphStoreExporterBaseConfig;
@@ -43,7 +43,7 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
 
     @Configuration.Key(DB_FORMAT_KEY)
     default String databaseFormat() {
-        return Neo4jProxy.defaultDatabaseFormatSetting();
+        return SettingProxy.defaultDatabaseFormatSetting();
     }
 
     @Configuration.Check

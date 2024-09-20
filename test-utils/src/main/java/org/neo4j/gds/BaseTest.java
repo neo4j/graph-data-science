@@ -22,8 +22,8 @@ package org.neo4j.gds;
 
 import org.assertj.core.api.Assertions;
 import org.intellij.lang.annotations.Language;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.compat.TestLogImpl;
 import org.neo4j.gds.extension.IdToVariable;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraphExtension;
@@ -83,7 +83,7 @@ public abstract class BaseTest {
         // but those are not enabled by default, test scope or otherwise.
         builder.setConfigRaw(Map.of("unsupported.dbms.debug.track_cursor_close", "true"));
         builder.setConfigRaw(Map.of("unsupported.dbms.debug.trace_cursors", "true"));
-        testLog = Neo4jProxy.testLog();
+        testLog = new TestLogImpl();
         builder.setUserLogProvider(new TestLogProvider(testLog));
 
         // Hacky as hell but will have to do until we make this BaseTest obsolete

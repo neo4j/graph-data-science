@@ -26,8 +26,8 @@ import org.neo4j.gds.TestTaskStore;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.PropertyState;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.compat.TestLogImpl;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.Capabilities;
@@ -390,7 +390,7 @@ class GraphImporterTest {
 
     @Test
     void shouldRegisterTaskAndLogProgress() {
-        var log = Neo4jProxy.testLog();
+        var log = new TestLogImpl();
         var jobId = new JobId("test");
         var taskStore = new TestTaskStore();
         var progressTracker = new TaskProgressTracker(

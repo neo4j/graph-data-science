@@ -19,24 +19,15 @@
  */
 package org.neo4j.gds.compat;
 
-import org.neo4j.common.EntityType;
 import org.neo4j.internal.kernel.api.InternalIndexState;
-import org.neo4j.internal.kernel.api.SchemaRead;
 import org.neo4j.internal.kernel.api.exceptions.schema.IndexNotFoundKernelException;
 import org.neo4j.internal.schema.IndexDescriptor;
 import org.neo4j.internal.schema.IndexType;
 import org.neo4j.internal.schema.SchemaDescriptor;
-import org.neo4j.internal.schema.SchemaDescriptors;
 import org.neo4j.kernel.api.KernelTransaction;
 
 final class NodeLabelIndexLookupImpl {
 
-    static boolean hasNodeLabelIndex(KernelTransaction transaction) {
-        return NodeLabelIndexLookupImpl.findUsableMatchingIndex(
-            transaction,
-            SchemaDescriptors.forAnyEntityTokens(EntityType.NODE)
-        ) != IndexDescriptor.NO_INDEX;
-    }
 
     static IndexDescriptor findUsableMatchingIndex(
         KernelTransaction transaction,
@@ -46,22 +37,20 @@ final class NodeLabelIndexLookupImpl {
         var iterator = schemaRead.index(schemaDescriptor);
         while (iterator.hasNext()) {
             var index = iterator.next();
-            if (index.getIndexType() == IndexType.LOOKUP && indexIsOnline(schemaRead, index)) {
-                return index;
+            if (index.getIndexType() == IndexType.LOOKUP) {
+                var state = InternalIndexState.FAILED;
+                try {
+                    state = schemaRead.indexGetState(index);
+                } catch (IndexNotFoundKernelException e) {
+                    // Well the index should always exist here, but if we didn't find it while checking the state,
+                    // then we obviously don't want to use it.
+                }
+                if (state == InternalIndexState.ONLINE) {
+                    return index;
+                }
             }
         }
         return IndexDescriptor.NO_INDEX;
-    }
-
-    private static boolean indexIsOnline(SchemaRead schemaRead, IndexDescriptor index) {
-        var state = InternalIndexState.FAILED;
-        try {
-            state = schemaRead.indexGetState(index);
-        } catch (IndexNotFoundKernelException e) {
-            // Well the index should always exist here, but if we didn't find it while checking the state,
-            // then we obviously don't want to use it.
-        }
-        return state == InternalIndexState.ONLINE;
     }
 
     private NodeLabelIndexLookupImpl() {}

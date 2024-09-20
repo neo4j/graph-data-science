@@ -20,7 +20,6 @@
 package org.neo4j.gds.projection;
 
 import org.neo4j.gds.compat.CompositeNodeCursor;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.StoreScan;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
@@ -49,7 +48,7 @@ final class MultipleNodeLabelIndexBasedScanner extends AbstractNodeCursorBasedSc
             .stream(labelIds)
             .mapToObj(i -> transaction.cursors().allocateNodeLabelIndexCursor(transaction.cursorContext()))
             .collect(Collectors.toList());
-        return Neo4jProxy.compositeNodeCursor(cursors, labelIds);
+        return new CompositeNodeCursor(cursors, labelIds);
     }
 
     @Override

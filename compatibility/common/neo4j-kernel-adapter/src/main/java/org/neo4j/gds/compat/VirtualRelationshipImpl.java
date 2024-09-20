@@ -22,9 +22,9 @@ package org.neo4j.gds.compat;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 
-public class VirtualRelationshipImpl extends VirtualRelationship {
+public final class VirtualRelationshipImpl extends VirtualRelationship {
 
-    VirtualRelationshipImpl(
+    public VirtualRelationshipImpl(
         long id,
         Node startNode,
         Node endNode,

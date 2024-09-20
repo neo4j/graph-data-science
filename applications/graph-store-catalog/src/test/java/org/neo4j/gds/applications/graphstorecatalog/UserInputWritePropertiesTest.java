@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.VirtualRelationshipImpl;
 import org.neo4j.graphalgo.impl.util.PathImpl;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.kernel.impl.core.NodeEntity;
@@ -92,7 +92,7 @@ class UserInputWritePropertiesTest {
             arguments(1, "number"),
             arguments(Boolean.TRUE, "boolean"),
             arguments(new NodeEntity(null, 1), "node"),
-            arguments(Neo4jProxy.virtualRelationship(
+            arguments(new VirtualRelationshipImpl(
                 0,
                 new NodeEntity(null, 1),
                 new NodeEntity(null, 2),

@@ -26,11 +26,11 @@ import org.neo4j.graphdb.config.Setting;
 import java.nio.file.Path;
 import java.util.Map;
 
-public class GdsDatabaseManagementServiceBuilderImpl implements GdsDatabaseManagementServiceBuilder {
+public final class GdsDatabaseManagementServiceBuilderImpl implements GdsDatabaseManagementServiceBuilder {
 
     private final DatabaseManagementServiceBuilderImplementation dbmsBuilder;
 
-    GdsDatabaseManagementServiceBuilderImpl(Path storeDir) {
+    public GdsDatabaseManagementServiceBuilderImpl(Path storeDir) {
         this.dbmsBuilder = new DatabaseManagementServiceBuilderImplementation(storeDir);
     }
 

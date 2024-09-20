@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.projection;
 
-import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.PartitionedStoreScan;
 import org.neo4j.gds.compat.StoreScan;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -68,7 +68,25 @@ final class RelationshipScanCursorBasedScanner extends AbstractCursorBasedScanne
 
     @Override
     StoreScan<RelationshipScanCursor> entityCursorScan(KernelTransaction transaction) {
-        return Neo4jProxy.relationshipsScan(transaction, this.relationshipCount, batchSize());
+        int batchSize = batchSize();
+        int numberOfPartitions;
+        if (this.relationshipCount > 0) {
+            // ceil div to try to get enough partitions so a single one does
+            // not include more nodes than batchSize
+            long partitions = ((this.relationshipCount - 1) / batchSize) + 1;
+
+            // value must be positive
+            if (partitions < 1) {
+                partitions = 1;
+            }
+
+            numberOfPartitions = (int) Long.min(Integer.MAX_VALUE, partitions);
+        } else {
+            // we have no partitions to scan, but the value must still  be positive
+            numberOfPartitions = 1;
+        }
+        return new PartitionedStoreScan<>(transaction.dataRead()
+            .allRelationshipsScan(numberOfPartitions, transaction.cursorContext()));
     }
 
     @Override

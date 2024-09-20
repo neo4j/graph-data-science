@@ -20,15 +20,8 @@
 package org.neo4j.gds.compat;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class Neo4jProxyTest {
 
@@ -36,22 +29,5 @@ class Neo4jProxyTest {
     void shouldLoadProxySuccessfully() {
         // Any access to the proxy will trigger loading an implementation
         assertThatCode(Neo4jProxy::emptyCollector).doesNotThrowAnyException();
-    }
-
-    @ParameterizedTest
-    @MethodSource("versions")
-    void testVersionLongToString(long version, String expected) {
-        var proxy = Neo4jProxy.versionLongToString(version);
-        assertThat(proxy).isEqualTo(expected);
-    }
-
-    static Stream<Arguments> versions() {
-        return Stream.of(
-            arguments(-1L, "Unknown"),
-            arguments(0x0000007473755204L, "Rust"),
-            arguments(0x0000000000736902L, "is"),
-            arguments(0x0000000065687403L, "the"),
-            arguments(0x2165727574754607L, "Future!")
-        );
     }
 }

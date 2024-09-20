@@ -33,7 +33,7 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.InternalReadOps;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.utils.StatementFunction;
@@ -101,7 +101,7 @@ final class GraphDimensionsReader extends StatementFunction<GraphDimensions> {
         long nodeCount = labelTokenNodeLabelMappings.keyStream()
             .mapToLong(label -> dataRead.estimateCountsForNode(label))
             .sum();
-        final long allNodesCount = Neo4jProxy.getHighestPossibleNodeCount(idGeneratorFactory);
+        final long allNodesCount = InternalReadOps.getHighestPossibleNodeCount(idGeneratorFactory);
         long finalNodeCount = labelTokenNodeLabelMappings.keys().contains(ANY_LABEL)
             ? allNodesCount
             : Math.min(nodeCount, allNodesCount);
