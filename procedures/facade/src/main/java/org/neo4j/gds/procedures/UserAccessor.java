@@ -20,7 +20,7 @@
 package org.neo4j.gds.procedures;
 
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 
 /**
@@ -28,7 +28,8 @@ import org.neo4j.internal.kernel.api.security.SecurityContext;
  */
 public class UserAccessor {
     public User getUser(SecurityContext securityContext) {
-        String username = Neo4jProxy.username(securityContext.subject());
+        AuthSubject subject = securityContext.subject();
+        String username = subject.executingUser();
         boolean isAdmin = securityContext.roles().contains("admin");
         return new User(username, isAdmin);
     }

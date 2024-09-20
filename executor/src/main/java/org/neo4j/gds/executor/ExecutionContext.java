@@ -26,7 +26,6 @@ import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -111,7 +110,17 @@ public interface ExecutionContext {
 
         @Override
         public DependencyResolver dependencyResolver() {
-            return Neo4jProxy.emptyDependencyResolver();
+            return new DependencyResolver() {
+                @Override
+                public <T> T resolveDependency(Class<T> type, SelectionStrategy selector) {
+                    return null;
+                }
+
+                @Override
+                public boolean containsDependency(Class<?> type) {
+                    return false;
+                }
+            };
         }
 
         @Override

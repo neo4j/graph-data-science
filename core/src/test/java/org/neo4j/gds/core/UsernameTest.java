@@ -20,7 +20,6 @@
 package org.neo4j.gds.core;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,6 +28,6 @@ class UsernameTest {
 
     @Test
     void emptyUsernameShouldAgreeWithAnonymousAuthSubject() {
-        assertThat(Username.EMPTY_USERNAME.username()).isEqualTo(Neo4jProxy.username(AuthSubject.ANONYMOUS));
+        assertThat(Username.EMPTY_USERNAME.username()).isEqualTo(AuthSubject.ANONYMOUS.executingUser());
     }
 }

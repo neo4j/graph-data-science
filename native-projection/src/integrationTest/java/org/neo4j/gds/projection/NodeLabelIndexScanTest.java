@@ -24,9 +24,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.CompatExecutionContext;
+import org.neo4j.gds.compat.PartitionedStoreScan;
 import org.neo4j.gds.core.loading.RecordsBatchBuffer;
 import org.neo4j.graphdb.Label;
+import org.neo4j.internal.kernel.api.Cursor;
+import org.neo4j.internal.kernel.api.PartitionedScan;
+import org.neo4j.kernel.api.ExecutionContext;
+import org.neo4j.kernel.api.Statement;
 
 import java.util.HashSet;
 import java.util.Random;
@@ -70,24 +75,40 @@ class NodeLabelIndexScanTest extends BaseTest {
 
         tx.accept((tx1, ktx) -> {
             var aToken = ktx.tokenRead().nodeLabel(label);
-            var storeScan = Neo4jProxy.nodeLabelIndexScan(
-                ktx,
-                aToken,
-                RecordsBatchBuffer.DEFAULT_BUFFER_SIZE
-            );
+            var storeScan = PartitionedStoreScan.createScans(ktx, RecordsBatchBuffer.DEFAULT_BUFFER_SIZE, aToken)
+                .get(0);
 
             try (
-                var cursor = Neo4jProxy.allocateNodeLabelIndexCursor(ktx);
-                var ctx = Neo4jProxy.executionContext(ktx)
+                var cursor = ktx.cursors().allocateNodeLabelIndexCursor(ktx.cursorContext())
             ) {
-                var aNodesCount = 0;
-                while (storeScan.reserveBatch(cursor, ctx)) {
-                    while (cursor.next()) {
-                        assertThat(expectedSet.contains(cursor.nodeReference())).isTrue();
-                        aNodesCount += 1;
+                try (
+                    var ctx = new CompatExecutionContext() {
+
+                        private final Statement stmt = ktx.acquireStatement();
+                        private final ExecutionContext ctx1 = ktx.createExecutionContext();
+
+                        @Override
+                        public <C extends Cursor> boolean reservePartition(PartitionedScan<C> scan, C cursor1) {
+                            return scan.reservePartition(cursor1, ctx1);
+                        }
+
+                        @Override
+                        public void close() {
+                            ctx1.complete();
+                            ctx1.close();
+                            stmt.close();
+                        }
                     }
+                ) {
+                    var aNodesCount = 0;
+                    while (storeScan.reserveBatch(cursor, ctx)) {
+                        while (cursor.next()) {
+                            assertThat(expectedSet.contains(cursor.nodeReference())).isTrue();
+                            aNodesCount += 1;
+                        }
+                    }
+                    assertThat(aNodesCount).isEqualTo(expectedSet.size());
                 }
-                assertThat(aNodesCount).isEqualTo(expectedSet.size());
             }
         });
     }

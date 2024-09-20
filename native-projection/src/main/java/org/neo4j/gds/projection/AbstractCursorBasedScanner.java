@@ -20,12 +20,14 @@
 package org.neo4j.gds.projection;
 
 import org.neo4j.gds.compat.CompatExecutionContext;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.StoreScan;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.internal.kernel.api.Cursor;
+import org.neo4j.internal.kernel.api.PartitionedScan;
+import org.neo4j.kernel.api.ExecutionContext;
 import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.api.Statement;
 
 abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor>
     implements StoreScanner<Reference> {
@@ -46,7 +48,23 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
             this.cursor = cursor;
             this.cursorReference = reference;
             this.scan = entityCursorScan;
-            this.executionContext = Neo4jProxy.executionContext(ktx);
+            this.executionContext = new CompatExecutionContext() {
+
+                private final Statement stmt = ktx.acquireStatement();
+                private final ExecutionContext ctx = ktx.createExecutionContext();
+
+                @Override
+                public <C extends Cursor> boolean reservePartition(PartitionedScan<C> scan1, C cursor1) {
+                    return scan1.reservePartition(cursor1, ctx);
+                }
+
+                @Override
+                public void close() {
+                    ctx.complete();
+                    ctx.close();
+                    stmt.close();
+                }
+            };
         }
 
         @Override

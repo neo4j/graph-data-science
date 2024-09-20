@@ -24,7 +24,6 @@ import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.graphstorecatalog.GraphProjectMemoryUsageService;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.procedures.catalog.DatabaseModeRestriction;
 import org.neo4j.gds.procedures.catalog.GraphCatalogProcedureFacade;
@@ -75,7 +74,7 @@ public class GraphCatalogProcedureFacadeFactory {
         var streamCloser = new Consumer<AutoCloseable>() {
             @Override
             public void accept(AutoCloseable autoCloseable) {
-                Neo4jProxy.registerCloseableResource(kernelTransaction, autoCloseable);
+                kernelTransaction.resourceMonitor().registerCloseableResource(autoCloseable);
             }
         };
         var transactionContext = transactionContextAccessor.transactionContext(

@@ -20,8 +20,8 @@
 package org.neo4j.gds.core.utils.warnings;
 
 import org.neo4j.function.ThrowingFunction;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
+import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.kernel.api.procedure.Context;
 
 class UserLogRegistryFactoryProvider implements ThrowingFunction<Context, UserLogRegistryFactory, ProcedureException> {
@@ -31,7 +31,8 @@ class UserLogRegistryFactoryProvider implements ThrowingFunction<Context, UserLo
 
     @Override
     public UserLogRegistryFactory apply(Context context) throws ProcedureException {
-        var username = Neo4jProxy.username(context.securityContext().subject());
+        AuthSubject subject = context.securityContext().subject();
+        var username = subject.executingUser();
         return new LocalUserLogRegistryFactory(username, userLogStore);
     }
 }

@@ -36,7 +36,7 @@ final class NodeCursorBasedScanner extends AbstractNodeCursorBasedScanner<NodeCu
 
     @Override
     NodeCursor entityCursor(KernelTransaction transaction) {
-        return Neo4jProxy.allocateNodeCursor(transaction);
+        return transaction.cursors().allocateNodeCursor(transaction.cursorContext());
     }
 
     @Override

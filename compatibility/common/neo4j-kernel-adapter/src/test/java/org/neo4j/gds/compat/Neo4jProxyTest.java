@@ -35,7 +35,7 @@ class Neo4jProxyTest {
     @Test
     void shouldLoadProxySuccessfully() {
         // Any access to the proxy will trigger loading an implementation
-        assertThatCode(Neo4jProxy::additionalJvm).doesNotThrowAnyException();
+        assertThatCode(Neo4jProxy::emptyCollector).doesNotThrowAnyException();
     }
 
     @ParameterizedTest

@@ -19,11 +19,13 @@
  */
 package org.neo4j.gds.core.io.db;
 
+import org.neo4j.configuration.helpers.DatabaseNameValidator;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.JobIdConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.io.GraphStoreExporterBaseConfig;
+import org.neo4j.kernel.database.NormalizedDatabaseName;
 
 @Configuration
 public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBaseConfig, JobIdConfig {
@@ -46,12 +48,15 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
 
     @Configuration.Check
     default void validate() {
-        Neo4jProxy.validateExternalDatabaseName(databaseName());
+        var normalizedName = new NormalizedDatabaseName(databaseName());
+        DatabaseNameValidator.validateExternalDatabaseName(normalizedName);
     }
 
     static GraphStoreToDatabaseExporterConfig of(CypherMapWrapper config) {
         var normalizedConfig = config.getString(DB_NAME_KEY).map(dbName -> {
-            var databaseName = Neo4jProxy.validateExternalDatabaseName(dbName);
+            var normalizedName = new NormalizedDatabaseName(dbName);
+            DatabaseNameValidator.validateExternalDatabaseName(normalizedName);
+            var databaseName = normalizedName.name();
             return config.withString(DB_NAME_KEY, databaseName);
         }).orElse(config);
         return new GraphStoreToDatabaseExporterConfigImpl(normalizedConfig);

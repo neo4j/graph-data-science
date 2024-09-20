@@ -47,7 +47,7 @@ final class MultipleNodeLabelIndexBasedScanner extends AbstractNodeCursorBasedSc
     CompositeNodeCursor entityCursor(KernelTransaction transaction) {
         List<NodeLabelIndexCursor> cursors = Arrays
             .stream(labelIds)
-            .mapToObj(i -> Neo4jProxy.allocateNodeLabelIndexCursor(transaction))
+            .mapToObj(i -> transaction.cursors().allocateNodeLabelIndexCursor(transaction.cursorContext()))
             .collect(Collectors.toList());
         return Neo4jProxy.compositeNodeCursor(cursors, labelIds);
     }
@@ -66,7 +66,7 @@ final class MultipleNodeLabelIndexBasedScanner extends AbstractNodeCursorBasedSc
         return new MultipleNodeLabelIndexReference(
             cursor,
             transaction.dataRead(),
-            Neo4jProxy.allocateNodeCursor(transaction)
+            transaction.cursors().allocateNodeCursor(transaction.cursorContext())
         );
     }
 

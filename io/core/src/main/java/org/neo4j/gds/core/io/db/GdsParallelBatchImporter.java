@@ -36,15 +36,18 @@ import org.neo4j.gds.settings.Neo4jSettings;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
+import org.neo4j.io.layout.Neo4jLayout;
 import org.neo4j.kernel.impl.scheduler.JobSchedulerFactory;
 import org.neo4j.kernel.lifecycle.LifeSupport;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.logging.internal.NullLogService;
 import org.neo4j.scheduler.JobScheduler;
+import org.neo4j.storageengine.api.StorageEngineFactory;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
+import java.util.Locale;
 
 import static org.neo4j.configuration.GraphDatabaseSettings.SYSTEM_DATABASE_NAME;
 import static org.neo4j.gds.core.io.GraphStoreExporter.DIRECTORY_IS_WRITABLE;
@@ -114,7 +117,8 @@ public final class GdsParallelBatchImporter {
             .set(Neo4jSettings.neo4jHome(), databaseConfig.get(Neo4jSettings.neo4jHome()))
             .set(GraphDatabaseSettings.data_directory, databaseConfig.get(GraphDatabaseSettings.data_directory));
 
-        Neo4jProxy.configureDatabaseFormat(configBuilder, config.databaseFormat());
+        var databaseRecordFormat = config.databaseFormat().toLowerCase(Locale.ENGLISH);
+        configBuilder.set(GraphDatabaseSettings.db_format, databaseRecordFormat);
 
         this.databaseConfig = configBuilder.build();
     }
@@ -124,13 +128,19 @@ public final class GdsParallelBatchImporter {
 
         var importTimer = ProgressTimer.start();
 
-        Neo4jProxy.allAvailableDatabaseLayouts(databaseConfig, config.databaseName())
+        String databaseName1 = config.databaseName();
+        var neo4jLayout1 = Neo4jLayout.of(databaseConfig);
+        StorageEngineFactory.allAvailableStorageEngines().stream()
+            .map(engine -> engine.databaseLayout(neo4jLayout1, databaseName1))
             .forEach(databaseLayout -> {
                 validateWritableDirectories(databaseLayout);
                 validateDatabaseDoesNotExist(databaseLayout);
             });
 
-        var databaseLayout = Neo4jProxy.databaseLayout(databaseConfig, config.databaseName());
+        String databaseName = config.databaseName();
+        var neo4jLayout = Neo4jLayout.of(databaseConfig);
+        var storageEngineFactory = StorageEngineFactory.selectStorageEngine(databaseConfig);
+        var databaseLayout = storageEngineFactory.databaseLayout(neo4jLayout, databaseName);
 
         var lifeSupport = new LifeSupport();
 
