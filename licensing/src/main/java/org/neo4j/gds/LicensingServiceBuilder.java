@@ -27,5 +27,9 @@ public interface LicensingServiceBuilder {
 
     LicensingService build(Config config);
 
+    /**
+     * The LicensingService with the highest priority will be used
+     * @return the priority of the LicensingService
+     */
     int priority();
 }

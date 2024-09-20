@@ -29,6 +29,14 @@ public final class PriorityServiceLoader {
 
     private PriorityServiceLoader() {}
 
+    /**
+     * Find the service and return the one with the maximum priority.
+     *
+     * @param serviceClass the service interface to load implementations for
+     * @param priorityFunction a function that specifies a priority for the service
+     * @return the service with the maximum priority
+     * @param <T>
+     */
     public static <T> T loadService(Class<T> serviceClass, Function<T, Integer> priorityFunction) {
         return load(serviceClass, serviceClass.getClassLoader())
             .stream()
