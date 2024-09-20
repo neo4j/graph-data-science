@@ -80,22 +80,7 @@ public final class PartitionedStoreScan<C extends Cursor> implements StoreScan<C
         labelIds[maxIndex] = labelIds[0];
         labelIds[0] = maxToken;
 
-        int numberOfPartitions;
-        if (maxCount > 0) {
-            // ceil div to try to get enough partitions so a single one does
-            // not include more nodes than batchSize
-            long partitions = ((maxCount - 1) / batchSize) + 1;
-
-            // value must be positive
-            if (partitions < 1) {
-                partitions = 1;
-            }
-
-            numberOfPartitions = (int) Long.min(Integer.MAX_VALUE, partitions);
-        } else {
-            // we have no partitions to scan, but the value must still  be positive
-            numberOfPartitions = 1;
-        }
+        int numberOfPartitions = getNumberOfPartitions(maxCount, batchSize);
 
         try {
             var session = read.tokenReadSession(indexDescriptor);
@@ -125,4 +110,23 @@ public final class PartitionedStoreScan<C extends Cursor> implements StoreScan<C
         }
     }
 
+    public static int getNumberOfPartitions(long nodeCount, int batchSize) {
+        int numberOfPartitions;
+        if (nodeCount > 0) {
+            // ceil div to try to get enough partitions so a single one does
+            // not include more nodes than batchSize
+            long partitions = ((nodeCount - 1) / batchSize) + 1;
+
+            // value must be positive
+            if (partitions < 1) {
+                partitions = 1;
+            }
+
+            numberOfPartitions = (int) Long.min(Integer.MAX_VALUE, partitions);
+        } else {
+            // we have no partitions to scan, but the value must still  be positive
+            numberOfPartitions = 1;
+        }
+        return numberOfPartitions;
+    }
 }
