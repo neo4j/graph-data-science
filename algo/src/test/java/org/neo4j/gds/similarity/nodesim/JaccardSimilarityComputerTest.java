@@ -20,24 +20,22 @@
 package org.neo4j.gds.similarity.nodesim;
 
 import org.assertj.core.data.Offset;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
-@Disabled("Until properly fixed")
 class JaccardSimilarityComputerTest {
 
     @Test
     void shouldComputeCorrectSimilarityWhenInputVectorsHaveDifferentSizes() {
-        var vector1 = new long[]{1, 5, 4, 6, 3};
+        var vector1 = new long[]{1, 3, 4, 5, 6};
         var vector2 = new long[]{1, 3, 4, 5};
         var weights1 = new double[]{
             0.5801196133134187,
-            0.5801196133134187,
+            0.5051196133134187,
             0.5551196133134186,
-            0.8213475204444817,
-            0.5051196133134187
+            0.5801196133134187,
+            0.8213475204444817
         };
         var weights2 = new double[]{0.5801196133134187, 0.5051196133134187, 0.5551196133134186, 0.5801196133134187};
 
@@ -55,14 +53,14 @@ class JaccardSimilarityComputerTest {
 
     @Test
     void shouldComputeCorrectSimilarityWhenInputVectorsHaveSameSizes() {
-        var vector1 = new long[]{1, 5, 4, 6, 3};
+        var vector1 = new long[]{1, 3, 4, 5, 6};
         var vector2 = new long[]{1, 3, 4, 5, 6};
         var weights1 = new double[]{
             0.5801196133134187,
-            0.5801196133134187,
+            0.5051196133134187,
             0.5551196133134186,
-            0.8213475204444817,
-            0.5051196133134187
+            0.5801196133134187,
+            0.8213475204444817
         };
         var weights2 = new double[]{
             0.5801196133134187,

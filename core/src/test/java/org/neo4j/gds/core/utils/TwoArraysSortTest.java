@@ -17,11 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.graphsampling.samplers.rw.cnarw;
+package org.neo4j.gds.core.utils;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.TwoArraysSort;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -37,6 +37,8 @@ class TwoArraysSortTest {
             assertTrue(longData[i] < longData[i + 1]);
             assertTrue(doubleData[i] > doubleData[i + 1]);
         }
+
+        assertThat(longData).containsExactly(5, 6, 7, 8, 9, 10);
     }
 
     @Test
@@ -49,6 +51,9 @@ class TwoArraysSortTest {
             assertTrue(longData[i] < longData[i + 1]);
             assertTrue(doubleData[i] < doubleData[i + 1]);
         }
+
+        assertThat(longData).containsExactly( 0, 3, 5, 8, 10, 12);
+
     }
 
     @Test
@@ -90,5 +95,44 @@ class TwoArraysSortTest {
         assertEquals(0.0, doubleData[3]);
         assertEquals(0.0, doubleData[4]);
         assertEquals(0.0, doubleData[5]);
+    }
+
+    @Test
+    void sort() {
+        var ids = new long[]{1, 7, 3, 2, 5};
+        var weights = new double[]{0.5801196133134187, 0.8213475204444817, 0.5551196133134186, 0.5051196133134187, 0.5801196133134187};
+
+        TwoArraysSort.sortDoubleArrayByLongValues(ids, weights, 5);
+        assertThat(ids).containsExactly(1L, 2L, 3L, 5L, 7L);
+        assertThat(weights).containsExactly(
+            0.5801196133134187,
+            0.5051196133134187,
+            0.5551196133134186,
+            0.5801196133134187,
+            0.8213475204444817
+        );
+    }
+
+    @Test
+    void reorder() {
+        var ids = new long[]{1, 7, 3, 2, 5};
+        var weights = new double[]{
+            0.5801196133134187,
+            0.8213475204444817,
+            0.5551196133134186,
+            0.5051196133134187,
+            0.5801196133134187
+        };
+        var order = new int[]{0, 3, 2, 4, 1};
+
+        TwoArraysSort.reorder(order, ids, weights, 5);
+        assertThat(ids).containsExactly(1L, 2L, 3L, 5L, 7L);
+        assertThat(weights).containsExactly(
+            0.5801196133134187,
+            0.5051196133134187,
+            0.5551196133134186,
+            0.5801196133134187,
+            0.8213475204444817
+        );
     }
 }
