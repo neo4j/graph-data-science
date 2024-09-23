@@ -11,8 +11,6 @@ dependencies {
     annotationProcessor openGds.immutables.builder
     annotationProcessor openGds.immutables.value
 
-    api project(':proc-common')
-
     implementation project(':algo-common')
     implementation project(':algorithms-machinery')
     implementation project(':algorithms-procedure-facade')
@@ -37,6 +35,7 @@ dependencies {
     implementation project(':operations-applications')
     implementation project(':operations-procedure-facade')
     implementation project(':pipelines-procedure-facade')
+    implementation project(':proc-common')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':termination')

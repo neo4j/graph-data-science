@@ -12,8 +12,6 @@ dependencies {
     annotationProcessor openGds.immutables.builder
     annotationProcessor openGds.immutables.value
 
-    api project(':proc-common')
-
     compileOnly project(':logging')
 
     implementation project(':algorithms-machinery')
@@ -42,6 +40,7 @@ dependencies {
     implementation project(':neo4j-settings')
     implementation project(':opengds-procedure-facade')
     implementation project(':progress-tracking')
+    implementation project(':proc-common')
     implementation project(':string-formatting')
     implementation project(':subgraph-filtering')
     implementation project(':termination')
