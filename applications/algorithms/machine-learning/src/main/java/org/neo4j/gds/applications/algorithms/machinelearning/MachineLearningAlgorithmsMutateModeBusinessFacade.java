@@ -29,8 +29,8 @@ import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateConfig;
 
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.KGE;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.SplitRelationships;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KGE;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SplitRelationships;
 
 public class MachineLearningAlgorithmsMutateModeBusinessFacade {
     private final RequestScopedDependencies requestScopedDependencies;

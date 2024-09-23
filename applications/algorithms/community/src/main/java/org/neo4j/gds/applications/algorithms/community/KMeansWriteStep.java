@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.kmeans.KmeansWriteConfig;
 
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.KCore;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KCore;
 
 class KMeansWriteStep implements WriteStep<KmeansResult, NodePropertiesWritten> {
     private final WriteToDatabase writeToDatabase;

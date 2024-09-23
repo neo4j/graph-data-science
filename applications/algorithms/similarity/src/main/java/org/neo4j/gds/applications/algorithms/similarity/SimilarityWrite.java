@@ -25,10 +25,9 @@ import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
+import org.neo4j.gds.applications.algorithms.machinery.Label;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.config.ConcurrencyConfig;
-import org.neo4j.gds.config.WriteConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.utils.progress.JobId;
@@ -52,13 +51,12 @@ class SimilarityWrite {
         Graph graph,
         GraphStore graphStore,
         ConcurrencyConfig concurrencyConfiguration,
-        WriteConfig writeConfiguration,
         WritePropertyConfig writePropertyConfiguration,
         WriteRelationshipConfig writeRelationshipConfiguration,
         boolean shouldComputeSimilarityDistribution,
         Optional<ResultStore> resultStore,
         Stream<SimilarityResult> similarityResultStream,
-        Algorithm algorithmMetadata,
+        Label label,
         JobId jobId
     ) {
         var similarityGraphResult = similarityResultStreamDelegate.computeSimilarityGraph(
@@ -69,12 +67,11 @@ class SimilarityWrite {
 
         return execute(
             graphStore,
-            writeConfiguration,
             writePropertyConfiguration,
             writeRelationshipConfiguration,
             shouldComputeSimilarityDistribution,
             resultStore,
-            algorithmMetadata,
+            label,
             similarityGraphResult,
             jobId
         );
@@ -82,12 +79,11 @@ class SimilarityWrite {
 
     Pair<RelationshipsWritten, Map<String, Object>> execute(
         GraphStore graphStore,
-        WriteConfig writeConfiguration,
         WritePropertyConfig writePropertyConfiguration,
         WriteRelationshipConfig writeRelationshipConfiguration,
         boolean shouldComputeSimilarityDistribution,
         Optional<ResultStore> resultStore,
-        Algorithm algorithmMetadata,
+        Label label,
         SimilarityGraphResult similarityGraphResult,
         JobId jobId
     ) {
@@ -104,7 +100,7 @@ class SimilarityWrite {
             writePropertyConfiguration.writeProperty(),
             similarityGraph,
             rootIdMap,
-            algorithmMetadata.labelForProgressTracking,
+            label.asString(),
             resultStore,
             similarityDistributionBuilder.similarityConsumer(),
             jobId

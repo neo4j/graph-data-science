@@ -35,10 +35,10 @@ import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
 import java.util.Map;
 
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.FilteredKNN;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.FilteredNodeSimilarity;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.KNN;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.NodeSimilarity;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.FilteredKNN;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.FilteredNodeSimilarity;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KNN;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.NodeSimilarity;
 
 public class SimilarityAlgorithmsMutateModeBusinessFacade {
     private final Log log;

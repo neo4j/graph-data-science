@@ -20,13 +20,14 @@
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.Computation;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
+import org.neo4j.gds.applications.algorithms.machinery.Label;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
-import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
@@ -50,14 +51,14 @@ import org.neo4j.gds.steiner.SteinerTreeWriteConfig;
 
 import java.util.function.Supplier;
 
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.AStar;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.BellmanFord;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.DeltaStepping;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.Dijkstra;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.KSpanningTree;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.SingleSourceDijkstra;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.SteinerTree;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.Yens;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.AStar;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BellmanFord;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Dijkstra;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KSpanningTree;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SteinerTree;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Yens;
 
 /**
  * Here is the top level business facade for all your path finding write needs.
@@ -224,7 +225,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         return runAlgorithmAndWrite(
             graphName,
             configuration,
-            Algorithm.SpanningTree,
+            AlgorithmLabel.SpanningTree,
             estimationFacade::spanningTree,
             (graph, __) -> pathFindingAlgorithms.spanningTree(graph, configuration),
             writeStep,
@@ -256,7 +257,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     private <CONFIGURATION extends AlgoBaseConfig & RelationshipWeightConfig & WriteRelationshipConfig & WritePathOptionsConfig, RESULT_TO_CALLER> RESULT_TO_CALLER runAlgorithmAndWrite(
         GraphName graphName,
         CONFIGURATION configuration,
-        Algorithm algorithmMetadata,
+        Label label,
         Supplier<MemoryEstimation> memoryEstimation,
         Computation<PathFindingResult> algorithm,
         ResultBuilder<CONFIGURATION, PathFindingResult, RESULT_TO_CALLER, RelationshipsWritten> resultBuilder
@@ -271,7 +272,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         return runAlgorithmAndWrite(
             graphName,
             configuration,
-            algorithmMetadata,
+            label,
             memoryEstimation,
             algorithm,
             writeStep,
@@ -282,7 +283,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     private <CONFIGURATION extends AlgoBaseConfig & RelationshipWeightConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER runAlgorithmAndWrite(
         GraphName graphName,
         CONFIGURATION configuration,
-        Algorithm algorithmMetadata,
+        Label label,
         Supplier<MemoryEstimation> memoryEstimation,
         Computation<RESULT_FROM_ALGORITHM> algorithm,
         WriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> writeStep,
@@ -291,7 +292,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
             graphName,
             configuration,
-            algorithmMetadata,
+            label,
             memoryEstimation,
             algorithm,
             writeStep,

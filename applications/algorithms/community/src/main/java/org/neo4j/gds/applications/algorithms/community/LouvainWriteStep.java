@@ -32,7 +32,7 @@ import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.louvain.LouvainWriteConfig;
 
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.Louvain;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Louvain;
 
 class LouvainWriteStep implements WriteStep<LouvainResult, NodePropertiesWritten> {
     private final WriteToDatabase writeToDatabase;
@@ -53,7 +53,7 @@ class LouvainWriteStep implements WriteStep<LouvainResult, NodePropertiesWritten
     ) {
         var nodePropertyValues = constructNodePropertyValues(graphStore, result);
 
-        var nodePropertiesWritten = writeToDatabase.perform(
+        return writeToDatabase.perform(
             graph,
             graphStore,
             resultStore,
@@ -63,8 +63,6 @@ class LouvainWriteStep implements WriteStep<LouvainResult, NodePropertiesWritten
             jobId,
             nodePropertyValues
         );
-
-        return nodePropertiesWritten;
     }
 
     private NodePropertyValues constructNodePropertyValues(GraphStore graphStore, LouvainResult result) {

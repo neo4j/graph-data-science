@@ -30,7 +30,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.Dijkstra;
 
 /**
  * Pinky promise: next time we add or change functionality here,
@@ -62,7 +61,7 @@ class DefaultAlgorithmProcessingTemplateTest {
         when(algorithmComputer.computeAlgorithm(
             configuration,
             graphResources,
-            Dijkstra,
+            new StandardLabel("some compute job"),
             null,
             null
         )).thenReturn("some result");
@@ -71,7 +70,7 @@ class DefaultAlgorithmProcessingTemplateTest {
             GraphName.parse("some graph"),
             configuration,
             Optional.empty(),
-            Dijkstra,
+            new StandardLabel("some compute job"),
             null,
             null,
             Optional.of((__, ___) -> Optional.of("metadata from some side effect")),
@@ -113,7 +112,7 @@ class DefaultAlgorithmProcessingTemplateTest {
         when(algorithmComputer.computeAlgorithm(
             configuration,
             graphResources,
-            Dijkstra,
+            new StandardLabel("some other compute job"),
             null,
             null
         )).thenReturn("some other result");
@@ -122,7 +121,7 @@ class DefaultAlgorithmProcessingTemplateTest {
             GraphName.parse("some other graph"),
             configuration,
             Optional.empty(),
-            Dijkstra,
+            new StandardLabel("some other compute job"),
             null,
             null,
             Optional.empty(),

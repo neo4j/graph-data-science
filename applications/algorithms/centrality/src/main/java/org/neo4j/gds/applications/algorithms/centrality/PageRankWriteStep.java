@@ -22,9 +22,9 @@ package org.neo4j.gds.applications.algorithms.centrality;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.applications.algorithms.machinery.Label;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
 import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
-import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.utils.progress.JobId;
@@ -34,16 +34,16 @@ import org.neo4j.gds.pagerank.RankConfig;
 class PageRankWriteStep<C extends RankConfig & WritePropertyConfig> implements WriteStep<PageRankResult, NodePropertiesWritten> {
     private final WriteToDatabase writeToDatabase;
     private final C configuration;
-    private final Algorithm algorithmMetadata;
+    private final Label label;
 
     PageRankWriteStep(
         WriteToDatabase writeToDatabase,
         C configuration,
-        Algorithm algorithmMetadata
+        Label label
     ) {
         this.writeToDatabase = writeToDatabase;
         this.configuration = configuration;
-        this.algorithmMetadata = algorithmMetadata;
+        this.label = label;
     }
 
     @Override
@@ -60,7 +60,7 @@ class PageRankWriteStep<C extends RankConfig & WritePropertyConfig> implements W
             resultStore,
             configuration,
             configuration,
-            algorithmMetadata,
+            label,
             jobId,
             result.nodePropertyValues()
         );

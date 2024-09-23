@@ -41,15 +41,15 @@ import org.neo4j.gds.pagerank.EigenvectorMutateConfig;
 import org.neo4j.gds.pagerank.PageRankMutateConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.ArticleRank;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.ArticulationPoints;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.BetweennessCentrality;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.CELF;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.ClosenessCentrality;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.DegreeCentrality;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.EigenVector;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.HarmonicCentrality;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.PageRank;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticleRank;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticulationPoints;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BetweennessCentrality;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CELF;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ClosenessCentrality;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DegreeCentrality;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.EigenVector;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HarmonicCentrality;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PageRank;
 
 public class CentralityAlgorithmsMutateModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimation;

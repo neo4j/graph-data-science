@@ -24,10 +24,10 @@ import org.neo4j.gds.algorithms.machinelearning.KGEPredictWriteConfig;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
-import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -64,7 +64,7 @@ class KgeWriteStep implements WriteStep<KGEPredictResult, RelationshipsWritten> 
     ) {
         var topKGraph = new TopKGraph(graph, result.topKMap());
 
-        var task = NodePropertyExporter.baseTask(Algorithm.KGE.labelForProgressTracking, graph.nodeCount());
+        var task = NodePropertyExporter.baseTask(AlgorithmLabel.KGE.asString(), graph.nodeCount());
         var progressTracker = new TaskProgressTracker(
             task,
             log,

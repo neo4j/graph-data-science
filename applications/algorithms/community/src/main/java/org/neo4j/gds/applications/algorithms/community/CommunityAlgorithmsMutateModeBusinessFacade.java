@@ -51,18 +51,18 @@ import org.neo4j.gds.triangle.TriangleCountMutateConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.wcc.WccMutateConfig;
 
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.ApproximateMaximumKCut;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.K1Coloring;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.KCore;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.KMeans;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.LCC;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.LabelPropagation;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.Leiden;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.Louvain;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.ModularityOptimization;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.SCC;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.TriangleCount;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.WCC;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ApproximateMaximumKCut;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.K1Coloring;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KCore;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KMeans;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.LCC;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.LabelPropagation;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Leiden;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Louvain;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ModularityOptimization;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SCC;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.TriangleCount;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.WCC;
 
 public class CommunityAlgorithmsMutateModeBusinessFacade {
     private final CommunityAlgorithmsEstimationModeBusinessFacade estimation;

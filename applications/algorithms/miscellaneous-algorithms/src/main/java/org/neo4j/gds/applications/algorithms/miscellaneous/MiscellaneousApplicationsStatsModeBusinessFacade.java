@@ -25,7 +25,7 @@ import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 import org.neo4j.gds.scaleproperties.ScalePropertiesStatsConfig;
 
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.ScaleProperties;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ScaleProperties;
 
 public class MiscellaneousApplicationsStatsModeBusinessFacade {
     private final MiscellaneousApplicationsEstimationModeBusinessFacade estimationFacade;

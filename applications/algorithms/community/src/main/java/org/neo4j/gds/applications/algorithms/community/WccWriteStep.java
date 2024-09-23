@@ -32,7 +32,7 @@ import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.wcc.WccWriteConfig;
 
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.WCC;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.WCC;
 
 class WccWriteStep implements WriteStep<DisjointSetStruct, Pair<NodePropertiesWritten, NodePropertyValues>> {
     private final WriteToDatabase writeToDatabase;

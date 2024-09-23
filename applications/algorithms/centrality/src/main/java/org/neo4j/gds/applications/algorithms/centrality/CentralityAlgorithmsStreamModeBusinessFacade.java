@@ -41,16 +41,16 @@ import org.neo4j.gds.pagerank.PageRankStreamConfig;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.ArticleRank;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.ArticulationPoints;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.BetweennessCentrality;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.Bridges;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.CELF;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.ClosenessCentrality;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.DegreeCentrality;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.EigenVector;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.HarmonicCentrality;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.PageRank;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticleRank;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticulationPoints;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BetweennessCentrality;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Bridges;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CELF;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ClosenessCentrality;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DegreeCentrality;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.EigenVector;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HarmonicCentrality;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PageRank;
 
 public class CentralityAlgorithmsStreamModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
@@ -96,6 +96,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
             streamResultBuilder
         );
     }
+
     public <RESULT> Stream<RESULT> articulationPoints(
         GraphName graphName,
         ArticulationPointsStreamConfig configuration,
@@ -110,6 +111,7 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
             streamResultBuilder
         );
     }
+
     public <RESULT> Stream<RESULT> bridges(
         GraphName graphName,
         BridgesStreamConfig configuration,

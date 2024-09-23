@@ -20,9 +20,9 @@
 package org.neo4j.gds.applications.algorithms.embeddings;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
-import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.compat.GdsVersionInfoProvider;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.model.Model;
@@ -95,7 +95,7 @@ public class NodeEmbeddingAlgorithms {
     }
 
     GraphSageResult graphSage(Graph graph, GraphSageBaseConfig configuration) {
-        var task = Tasks.leaf(Algorithm.GraphSage.labelForProgressTracking, graph.nodeCount());
+        var task = Tasks.leaf(AlgorithmLabel.GraphSage.asString(), graph.nodeCount());
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
         var model = graphSageModelCatalog.get(configuration);
@@ -120,7 +120,7 @@ public class NodeEmbeddingAlgorithms {
         var parameters = configuration.toParameters();
 
         var task = Tasks.task(
-            Algorithm.GraphSageTrain.labelForProgressTracking,
+            AlgorithmLabel.GraphSageTrain.asString(),
             GraphSageModelTrainer.progressTasks(
                 parameters.numberOfBatches(graph.nodeCount()),
                 parameters.batchesPerIteration(graph.nodeCount()),
@@ -204,7 +204,7 @@ public class NodeEmbeddingAlgorithms {
             () -> List.of(Tasks.leaf("Propagate embeddings task", graph.relationshipCount())),
             iterationWeightsSize
         ));
-        return Tasks.task(Algorithm.FastRP.labelForProgressTracking, tasks);
+        return Tasks.task(AlgorithmLabel.FastRP.asString(), tasks);
     }
 
     private static Task createHashGnnTask(Graph graph, HashGNNConfig configuration) {
@@ -239,7 +239,7 @@ public class NodeEmbeddingAlgorithms {
             tasks.add(Tasks.leaf("Densify output embeddings", graph.nodeCount()));
         }
 
-        return Tasks.task(Algorithm.HashGNN.labelForProgressTracking, tasks);
+        return Tasks.task(AlgorithmLabel.HashGNN.asString(), tasks);
     }
 
     private Task createNode2VecTask(Graph graph, Node2VecBaseConfig configuration) {
@@ -250,7 +250,7 @@ public class NodeEmbeddingAlgorithms {
         randomWalkTasks.add(Tasks.leaf("create walks", graph.nodeCount()));
 
         return Tasks.task(
-            Algorithm.Node2Vec.labelForProgressTracking,
+            AlgorithmLabel.Node2Vec.asString(),
             Tasks.task("RandomWalk", randomWalkTasks),
             Tasks.iterativeFixed(
                 "train",

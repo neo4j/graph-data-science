@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.procedures.algorithms.CanonicalProcedureName;
@@ -109,13 +110,15 @@ final class NodePropertyStepFactoryUsingStubs {
 
         validationService.validate(algorithm, configuration);
 
+        var label = AlgorithmLabel.from(algorithm);
+
         // create step
         return new StubPoweredNodePropertyStep(
             canonicalProcedureName,
             configuration,
             contextNodeLabels,
             contextRelationshipTypes,
-            algorithm
+            label
         );
     }
 

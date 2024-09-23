@@ -20,7 +20,6 @@
 package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.loading.PostLoadValidationHook;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -61,7 +60,7 @@ public interface AlgorithmProcessingTemplate {
         GraphName graphName,
         CONFIGURATION configuration,
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
-        Algorithm algorithmMetadata,
+        Label label,
         Supplier<MemoryEstimation> estimationFactory,
         Computation<RESULT_FROM_ALGORITHM> computation,
         WriteStep<RESULT_FROM_ALGORITHM, WRITE_METADATA> writeStep,
@@ -74,7 +73,7 @@ public interface AlgorithmProcessingTemplate {
         GraphName graphName,
         CONFIGURATION configuration,
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
-        Algorithm algorithmMetadata,
+        Label label,
         Supplier<MemoryEstimation> estimationFactory,
         Computation<RESULT_FROM_ALGORITHM> computation,
         MutateStep<RESULT_FROM_ALGORITHM, MUTATE_METADATA> mutateStep,
@@ -87,7 +86,7 @@ public interface AlgorithmProcessingTemplate {
         GraphName graphName,
         CONFIGURATION configuration,
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
-        Algorithm algorithmMetadata,
+        Label label,
         Supplier<MemoryEstimation> estimationFactory,
         Computation<RESULT_FROM_ALGORITHM> computation,
         StreamResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
@@ -99,7 +98,7 @@ public interface AlgorithmProcessingTemplate {
         GraphName graphName,
         CONFIGURATION configuration,
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
-        Algorithm algorithmMetadata,
+        Label label,
         Supplier<MemoryEstimation> estimationFactory,
         Computation<RESULT_FROM_ALGORITHM> computation,
         StatsResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder

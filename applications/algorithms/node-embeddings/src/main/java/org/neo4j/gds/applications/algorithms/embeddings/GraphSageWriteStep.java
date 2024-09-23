@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
 
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.GraphSage;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.GraphSage;
 
 class GraphSageWriteStep implements WriteStep<GraphSageResult, NodePropertiesWritten> {
     private final WriteToDatabase writeToDatabase;

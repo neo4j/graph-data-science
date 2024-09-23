@@ -33,7 +33,7 @@ import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.leiden.LeidenWriteConfig;
 
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.Leiden;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Leiden;
 
 class LeidenWriteStep implements WriteStep<LeidenResult, Pair<NodePropertiesWritten, NodePropertyValues>> {
     private final WriteToDatabase writeToDatabase;

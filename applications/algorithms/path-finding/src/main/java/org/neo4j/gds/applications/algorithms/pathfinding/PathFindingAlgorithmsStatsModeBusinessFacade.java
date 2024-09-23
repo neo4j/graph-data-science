@@ -20,9 +20,9 @@
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
-import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.paths.bellmanford.AllShortestPathsBellmanFordStatsConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
@@ -37,11 +37,11 @@ import org.neo4j.gds.traversal.RandomWalkStatsConfig;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.BFS;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.BellmanFord;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.DeltaStepping;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.RandomWalk;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.SteinerTree;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BFS;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BellmanFord;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.RandomWalk;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SteinerTree;
 
 public class PathFindingAlgorithmsStatsModeBusinessFacade {
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
@@ -127,7 +127,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
             configuration,
-            Algorithm.SpanningTree,
+            AlgorithmLabel.SpanningTree,
             estimationFacade::spanningTree,
             (graph, __) -> pathFindingAlgorithms.spanningTree(graph, configuration),
             resultBuilder

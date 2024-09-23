@@ -35,10 +35,10 @@ import org.neo4j.gds.walking.CollapsePathConfig;
 
 import java.util.Map;
 
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.CollapsePath;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.IndexInverse;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.ScaleProperties;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.ToUndirected;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CollapsePath;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.IndexInverse;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ScaleProperties;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ToUndirected;
 
 public class MiscellaneousApplicationsMutateModeBusinessFacade {
     private final MiscellaneousApplicationsEstimationModeBusinessFacade estimation;

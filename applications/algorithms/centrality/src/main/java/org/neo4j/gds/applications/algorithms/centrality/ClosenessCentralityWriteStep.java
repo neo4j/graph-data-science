@@ -29,7 +29,7 @@ import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
 import org.neo4j.gds.core.utils.progress.JobId;
 
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.ClosenessCentrality;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ClosenessCentrality;
 
 class ClosenessCentralityWriteStep implements WriteStep<CentralityAlgorithmResult, NodePropertiesWritten> {
     private final WriteToDatabase writeToDatabase;

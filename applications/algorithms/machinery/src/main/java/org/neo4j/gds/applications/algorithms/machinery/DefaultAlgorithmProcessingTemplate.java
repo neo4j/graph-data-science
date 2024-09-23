@@ -20,7 +20,6 @@
 package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.loading.GraphResources;
@@ -72,7 +71,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         GraphName graphName,
         CONFIGURATION configuration,
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
-        Algorithm algorithmMetadata,
+        Label label,
         Supplier<MemoryEstimation> estimationSupplier,
         Computation<RESULT_FROM_ALGORITHM> computation,
         MutateStep<RESULT_FROM_ALGORITHM, MUTATE_METADATA> mutateStep,
@@ -86,7 +85,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             graphName,
             configuration,
             postGraphStoreLoadValidationHooks,
-            algorithmMetadata,
+            label,
             estimationSupplier,
             computation,
             Optional.of(mutateEffect),
@@ -100,7 +99,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         GraphName graphName,
         CONFIGURATION configuration,
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
-        Algorithm algorithmMetadata,
+        Label label,
         Supplier<MemoryEstimation> estimationSupplier,
         Computation<RESULT_FROM_ALGORITHM> computation,
         StatsResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
@@ -112,7 +111,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             graphName,
             configuration,
             postGraphStoreLoadValidationHooks,
-            algorithmMetadata,
+            label,
             estimationSupplier,
             computation,
             Optional.empty(),
@@ -126,7 +125,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         GraphName graphName,
         CONFIGURATION configuration,
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
-        Algorithm algorithmMetadata,
+        Label label,
         Supplier<MemoryEstimation> estimationSupplier,
         Computation<RESULT_FROM_ALGORITHM> computation,
         StreamResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
@@ -138,7 +137,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             graphName,
             configuration,
             postGraphStoreLoadValidationHooks,
-            algorithmMetadata,
+            label,
             estimationSupplier,
             computation,
             Optional.empty(),
@@ -152,7 +151,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         GraphName graphName,
         CONFIGURATION configuration,
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
-        Algorithm algorithmMetadata,
+        Label label,
         Supplier<MemoryEstimation> estimationSupplier,
         Computation<RESULT_FROM_ALGORITHM> computation,
         WriteStep<RESULT_FROM_ALGORITHM, WRITE_METADATA> writeStep,
@@ -166,7 +165,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             graphName,
             configuration,
             postGraphStoreLoadValidationHooks,
-            algorithmMetadata,
+            label,
             estimationSupplier,
             computation,
             Optional.of(writeEffect),
@@ -191,7 +190,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         GraphName graphName,
         CONFIGURATION configuration,
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
-        Algorithm algorithmMetadata,
+        Label label,
         Supplier<MemoryEstimation> estimationFactory,
         Computation<RESULT_FROM_ALGORITHM> computation,
         Optional<SideEffect<RESULT_FROM_ALGORITHM, SIDE_EFFECT_METADATA>> sideEffect,
@@ -211,7 +210,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         var result = runComputation(
             configuration,
             graphResources,
-            algorithmMetadata,
+            label,
             estimationFactory,
             computation,
             timingsBuilder
@@ -265,7 +264,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
     private <RESULT_FROM_ALGORITHM, CONFIGURATION extends AlgoBaseConfig> Optional<RESULT_FROM_ALGORITHM> runComputation(
         CONFIGURATION configuration,
         GraphResources graphResources,
-        Algorithm algorithmMetadata,
+        Label label,
         Supplier<MemoryEstimation> estimationSupplier,
         Computation<RESULT_FROM_ALGORITHM> computation,
         AlgorithmProcessingTimingsBuilder timingsBuilder
@@ -276,7 +275,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             var result = computationService.computeAlgorithm(
                 configuration,
                 graphResources,
-                algorithmMetadata,
+                label,
                 estimationSupplier,
                 computation
             );

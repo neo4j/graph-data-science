@@ -30,7 +30,7 @@ import org.neo4j.gds.influenceMaximization.CELFNodeProperties;
 import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationWriteConfig;
 
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.CELF;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CELF;
 
 class CelfWriteStep implements WriteStep<CELFResult, NodePropertiesWritten> {
     private final WriteToDatabase writeToDatabase;

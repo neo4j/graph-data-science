@@ -27,7 +27,7 @@ import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.KGE;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KGE;
 
 public class MachineLearningAlgorithmsStreamModeBusinessFacade {
     private final AlgorithmProcessingTemplateConvenience convenience;

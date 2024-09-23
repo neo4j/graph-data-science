@@ -29,7 +29,7 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.logging.Log;
 
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.KGE;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KGE;
 
 public class MachineLearningAlgorithmsWriteModeBusinessFacade {
     private final Log log;

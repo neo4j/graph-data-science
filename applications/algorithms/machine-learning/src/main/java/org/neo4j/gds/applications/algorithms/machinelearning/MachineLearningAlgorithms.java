@@ -25,9 +25,9 @@ import org.neo4j.gds.algorithms.machinelearning.KGEPredictResult;
 import org.neo4j.gds.algorithms.machinelearning.TopKMapComputer;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
-import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.gds.ml.splitting.SplitRelationships;
@@ -48,7 +48,7 @@ class MachineLearningAlgorithms {
     KGEPredictResult kge(Graph graph, KGEPredictBaseConfig configuration) {
         var progressTracker = progressTrackerCreator.createProgressTracker(
             configuration,
-            Tasks.leaf(Algorithm.KGE.labelForProgressTracking)
+            Tasks.leaf(AlgorithmLabel.KGE.asString())
         );
 
         var sourceNodes = new BitSet(graph.nodeCount());

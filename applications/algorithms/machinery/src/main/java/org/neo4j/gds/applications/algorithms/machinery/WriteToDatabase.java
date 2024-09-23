@@ -23,7 +23,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.config.WriteConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
@@ -47,7 +46,7 @@ public class WriteToDatabase {
         ResultStore resultStore,
         WriteConfig writeConfiguration,
         WritePropertyConfig writePropertyConfiguration,
-        Algorithm algorithmMetadata,
+        Label label,
         JobId jobId,
         NodePropertyValues nodePropertyValues
     ) {
@@ -59,7 +58,7 @@ public class WriteToDatabase {
             nodePropertyValues,
             writeConfiguration.writeConcurrency(),
             writePropertyConfiguration.writeProperty(),
-            algorithmMetadata.labelForProgressTracking,
+            label.asString(),
             writeConfiguration.resolveResultStore(resultStore),
             jobId,
             requestScopedDependencies.getTerminationFlag(),

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 
-import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.logging.Log;
@@ -45,21 +44,21 @@ class ComputationService {
     <CONFIGURATION extends ConcurrencyConfig, RESULT_FROM_ALGORITHM> RESULT_FROM_ALGORITHM computeAlgorithm(
         CONFIGURATION configuration,
         GraphResources graphResources,
-        Algorithm metadata,
+        Label label,
         Supplier<MemoryEstimation> estimationSupplier,
         Computation<RESULT_FROM_ALGORITHM> computation
     ) {
-        memoryGuard.assertAlgorithmCanRun(metadata, configuration, graphResources.graph(), estimationSupplier);
+        memoryGuard.assertAlgorithmCanRun(label, configuration, graphResources.graph(), estimationSupplier);
 
-        return computeWithMetrics(graphResources, metadata, computation);
+        return computeWithMetrics(graphResources, label, computation);
     }
 
     private <RESULT_FROM_ALGORITHM> RESULT_FROM_ALGORITHM computeWithMetrics(
         GraphResources graphResources,
-        Algorithm metadata,
+        Label label,
         Computation<RESULT_FROM_ALGORITHM> computation
     ) {
-        var executionMetric = algorithmMetricsService.create(metadata.labelForProgressTracking);
+        var executionMetric = algorithmMetricsService.create(label.asString());
 
         try (executionMetric) {
             executionMetric.start();

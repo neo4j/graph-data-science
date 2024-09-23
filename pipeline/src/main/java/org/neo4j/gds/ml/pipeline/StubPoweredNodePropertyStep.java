@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.pipeline;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
+import org.neo4j.gds.applications.algorithms.machinery.Label;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
@@ -50,20 +50,20 @@ class StubPoweredNodePropertyStep implements ExecutableNodePropertyStep {
     private final Map<String, Object> configuration;
     private final List<String> contextNodeLabels;
     private final List<String> contextRelationshipTypes;
-    private final Algorithm algorithmMetadata;
+    private final Label label;
 
     StubPoweredNodePropertyStep(
         CanonicalProcedureName canonicalProcedureName,
         Map<String, Object> configuration,
         List<String> contextNodeLabels,
         List<String> contextRelationshipTypes,
-        Algorithm algorithmMetadata
+        Label label
     ) {
         this.canonicalProcedureName = canonicalProcedureName;
         this.configuration = configuration;
         this.contextNodeLabels = contextNodeLabels;
         this.contextRelationshipTypes = contextRelationshipTypes;
-        this.algorithmMetadata = algorithmMetadata;
+        this.label = label;
     }
 
     @Override
@@ -146,7 +146,7 @@ class StubPoweredNodePropertyStep implements ExecutableNodePropertyStep {
 
     @Override
     public String rootTaskName() {
-        return algorithmMetadata.labelForProgressTracking;
+        return label.asString();
     }
 
     @Override

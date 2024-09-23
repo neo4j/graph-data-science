@@ -32,7 +32,7 @@ import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
 import java.util.Map;
 
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.FilteredNodeSimilarity;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.FilteredNodeSimilarity;
 
 final class FilteredNodeSimilarityWriteStep implements WriteStep<NodeSimilarityResult, Pair<RelationshipsWritten, Map<String, Object>>> {
     private final SimilarityWrite similarityWrite;
@@ -73,7 +73,6 @@ final class FilteredNodeSimilarityWriteStep implements WriteStep<NodeSimilarityR
     ) {
         return similarityWrite.execute(
             graphStore,
-            configuration,
             configuration,
             configuration,
             shouldComputeSimilarityDistribution,

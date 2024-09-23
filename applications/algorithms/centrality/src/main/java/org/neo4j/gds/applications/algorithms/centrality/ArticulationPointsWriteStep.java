@@ -30,7 +30,7 @@ import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.articulationpoints.ArticulationPointsWriteConfig;
 import org.neo4j.gds.core.utils.progress.JobId;
 
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.ArticulationPoints;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticulationPoints;
 
 class ArticulationPointsWriteStep implements WriteStep<BitSet, NodePropertiesWritten> {
     private final ArticulationPointsWriteConfig configuration;

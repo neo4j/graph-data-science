@@ -29,7 +29,7 @@ import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
 
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.HarmonicCentrality;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HarmonicCentrality;
 
 class HarmonicCentralityWriteStep implements WriteStep<HarmonicResult, NodePropertiesWritten> {
     private final WriteToDatabase writeToDatabase;

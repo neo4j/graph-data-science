@@ -34,7 +34,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.Dijkstra;
 
 /**
  * This is a saga of mocks. In my defense,
@@ -58,7 +57,7 @@ class DefaultMemoryGuardTest {
 
         // there is enough memory available
         memoryGuard.assertAlgorithmCanRun(
-            Dijkstra,
+            new StandardLabel("some label"),
             new ExampleConfiguration(),
             graph,
             () -> memoryEstimation
@@ -81,7 +80,7 @@ class DefaultMemoryGuardTest {
         // uh oh
         try {
             memoryGuard.assertAlgorithmCanRun(
-                Dijkstra,
+                new StandardLabel("some other label"),
                 new ExampleConfiguration(),
                 graph,
                 () -> memoryEstimation
@@ -89,7 +88,7 @@ class DefaultMemoryGuardTest {
 
             fail();
         } catch (IllegalStateException e) {
-            assertThat(e).hasMessage("Memory required to run Dijkstra (117b) exceeds available memory (42b)");
+            assertThat(e).hasMessage("Memory required to run some other label (117b) exceeds available memory (42b)");
         }
     }
 
@@ -109,7 +108,7 @@ class DefaultMemoryGuardTest {
         // uh oh
         try {
             memoryGuard.assertAlgorithmCanRun(
-                Dijkstra,
+                new StandardLabel("yet another label"),
                 new ExampleConfiguration(),
                 graph,
                 () -> memoryEstimation
@@ -117,7 +116,7 @@ class DefaultMemoryGuardTest {
 
             fail();
         } catch (IllegalStateException e) {
-            assertThat(e).hasMessage("Memory required to run Dijkstra (243b) exceeds available memory (42b)");
+            assertThat(e).hasMessage("Memory required to run yet another label (243b) exceeds available memory (42b)");
         }
     }
 }

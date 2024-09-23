@@ -22,9 +22,9 @@ package org.neo4j.gds.applications.algorithms.centrality;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.LongScatterSet;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
-import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.articulationpoints.ArticulationPoints;
 import org.neo4j.gds.articulationpoints.ArticulationPointsProgressTaskCreator;
 import org.neo4j.gds.beta.pregel.Pregel;
@@ -66,9 +66,9 @@ import org.neo4j.gds.pagerank.PageRankConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.ArticleRank;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.EigenVector;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.PageRank;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticleRank;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.EigenVector;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PageRank;
 import static org.neo4j.gds.pagerank.PageRankVariant.ARTICLE_RANK;
 import static org.neo4j.gds.pagerank.PageRankVariant.EIGENVECTOR;
 import static org.neo4j.gds.pagerank.PageRankVariant.PAGE_RANK;
@@ -85,7 +85,7 @@ public class CentralityAlgorithms {
     }
 
     PageRankResult articleRank(Graph graph, ArticleRankConfig configuration) {
-        var task = Pregel.progressTask(graph, configuration, ArticleRank.labelForProgressTracking);
+        var task = Pregel.progressTask(graph, configuration, ArticleRank.asString());
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
         var articleRankComputation = articleRankComputation(graph, configuration);
@@ -118,7 +118,7 @@ public class CentralityAlgorithms {
             : ForwardTraverser.Factory.unweighted();
 
         var task = Tasks.leaf(
-            Algorithm.BetweennessCentrality.labelForProgressTracking,
+            AlgorithmLabel.BetweennessCentrality.asString(),
             samplingSize.orElse(graph.nodeCount())
         );
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
@@ -138,7 +138,7 @@ public class CentralityAlgorithms {
 
     CELFResult celf(Graph graph, InfluenceMaximizationBaseConfig configuration) {
         var task = Tasks.task(
-            Algorithm.CELF.labelForProgressTracking,
+            AlgorithmLabel.CELF.asString(),
             Tasks.leaf("Greedy", graph.nodeCount()),
             Tasks.leaf("LazyForwarding", configuration.seedSetSize() - 1)
         );
@@ -157,7 +157,7 @@ public class CentralityAlgorithms {
             : new DefaultCentralityComputer();
 
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, Tasks.task(
-            Algorithm.ClosenessCentrality.labelForProgressTracking,
+            AlgorithmLabel.ClosenessCentrality.asString(),
             Tasks.leaf("Farness computation", graph.nodeCount() * graph.nodeCount()),
             Tasks.leaf("Closeness computation", graph.nodeCount())
         ));
@@ -177,7 +177,7 @@ public class CentralityAlgorithms {
     DegreeCentralityResult degreeCentrality(Graph graph, DegreeCentralityConfig configuration) {
         var parameters = configuration.toParameters();
 
-        var task = Tasks.leaf(Algorithm.DegreeCentrality.labelForProgressTracking, graph.nodeCount());
+        var task = Tasks.leaf(AlgorithmLabel.DegreeCentrality.asString(), graph.nodeCount());
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
         var algorithm = new DegreeCentrality(
@@ -215,7 +215,7 @@ public class CentralityAlgorithms {
     }
 
     PageRankResult eigenVector(Graph graph, EigenvectorConfig configuration) {
-        var task = Pregel.progressTask(graph, configuration, EigenVector.labelForProgressTracking);
+        var task = Pregel.progressTask(graph, configuration, EigenVector.asString());
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
         var eigenvectorComputation = eigenvectorComputation(graph, configuration);
@@ -234,7 +234,7 @@ public class CentralityAlgorithms {
     }
 
     HarmonicResult harmonicCentrality(Graph graph, HarmonicCentralityBaseConfig configuration) {
-        var task = Tasks.leaf(Algorithm.HarmonicCentrality.labelForProgressTracking);
+        var task = Tasks.leaf(AlgorithmLabel.HarmonicCentrality.asString());
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
         var algorithm = new HarmonicCentrality(
@@ -249,7 +249,7 @@ public class CentralityAlgorithms {
     }
 
     PageRankResult pageRank(Graph graph, PageRankConfig configuration) {
-        var task = Pregel.progressTask(graph, configuration, PageRank.labelForProgressTracking);
+        var task = Pregel.progressTask(graph, configuration, PageRank.asString());
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
         var pageRankComputation = pageRankComputation(graph, configuration);

@@ -32,7 +32,7 @@ import org.neo4j.gds.similarity.filteredknn.FilteredKnnWriteConfig;
 
 import java.util.Map;
 
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.FilteredKNN;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.FilteredKNN;
 
 final class FilteredKnnWriteStep implements WriteStep<FilteredKnnResult, Pair<RelationshipsWritten, Map<String, Object>>> {
     private final FilteredKnnWriteConfig configuration;
@@ -74,7 +74,6 @@ final class FilteredKnnWriteStep implements WriteStep<FilteredKnnResult, Pair<Re
         return similarityWrite.execute(
             graph,
             graphStore,
-            configuration,
             configuration,
             configuration,
             configuration,

@@ -33,7 +33,7 @@ import org.neo4j.gds.scc.SccWriteConfig;
 
 import java.util.Optional;
 
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.SCC;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SCC;
 
 class SccWriteStep implements WriteStep<HugeLongArray, NodePropertiesWritten> {
     private final WriteToDatabase writeToDatabase;

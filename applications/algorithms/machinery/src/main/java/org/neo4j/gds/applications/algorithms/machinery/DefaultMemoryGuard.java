@@ -20,7 +20,6 @@
 package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
@@ -44,7 +43,7 @@ public class DefaultMemoryGuard implements MemoryGuard {
 
     @Override
     public <CONFIGURATION extends ConcurrencyConfig> void assertAlgorithmCanRun(
-        Algorithm algorithmMetadata,
+        Label label,
         CONFIGURATION configuration,
         Graph graph,
         Supplier<MemoryEstimation> estimationFactory
@@ -60,20 +59,20 @@ public class DefaultMemoryGuard implements MemoryGuard {
 
             var bytesRequired = useMaxMemoryEstimation ? memoryRange.max : memoryRange.min;
 
-            assertAlgorithmCanRun(algorithmMetadata, bytesRequired);
+            assertAlgorithmCanRun(label, bytesRequired);
         } catch (MemoryEstimationNotImplementedException e) {
-            log.info("Memory usage estimate not available for " + algorithmMetadata.labelForProgressTracking + ", skipping guard");
+            log.info("Memory usage estimate not available for " + label + ", skipping guard");
         }
     }
 
-    private void assertAlgorithmCanRun(Algorithm algorithmMetadata, long bytesRequired)
+    private void assertAlgorithmCanRun(Label label, long bytesRequired)
     throws IllegalStateException {
         long bytesAvailable = memoryGauge.availableMemory();
 
         if (bytesRequired > bytesAvailable) {
             var message = StringFormatting.formatWithLocale(
                 "Memory required to run %s (%db) exceeds available memory (%db)",
-                algorithmMetadata.labelForProgressTracking,
+                label,
                 bytesRequired,
                 bytesAvailable
             );

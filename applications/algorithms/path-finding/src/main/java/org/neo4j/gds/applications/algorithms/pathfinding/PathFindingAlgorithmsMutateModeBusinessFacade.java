@@ -21,10 +21,10 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
-import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -45,16 +45,16 @@ import org.neo4j.gds.steiner.SteinerTreeMutateConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.traversal.RandomWalkMutateConfig;
 
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.AStar;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.BFS;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.BellmanFord;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.DFS;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.DeltaStepping;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.Dijkstra;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.RandomWalk;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.SingleSourceDijkstra;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.SteinerTree;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.Yens;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.AStar;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BFS;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BellmanFord;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DFS;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Dijkstra;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.RandomWalk;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SteinerTree;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Yens;
 
 /**
  * Here is the top level business facade for all your path finding mutate needs.
@@ -253,7 +253,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
             configuration,
-            Algorithm.SpanningTree,
+            AlgorithmLabel.SpanningTree,
             estimationFacade::spanningTree,
             (graph, __) -> pathFindingAlgorithms.spanningTree(graph, configuration),
             mutateStep,

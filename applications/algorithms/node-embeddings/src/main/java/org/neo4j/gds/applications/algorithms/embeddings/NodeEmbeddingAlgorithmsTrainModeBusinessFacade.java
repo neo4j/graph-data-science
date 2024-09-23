@@ -31,7 +31,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import java.util.List;
 import java.util.Optional;
 
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.GraphSageTrain;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.GraphSageTrain;
 
 public class NodeEmbeddingAlgorithmsTrainModeBusinessFacade {
     private final GraphSageModelCatalog graphSageModelCatalog;

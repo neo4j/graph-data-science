@@ -22,10 +22,10 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
-import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -64,7 +64,7 @@ class SpanningTreeWriteStep implements WriteStep<SpanningTree, RelationshipsWrit
         var spanningGraph = new SpanningGraph(graph, result);
 
         var progressTracker = new TaskProgressTracker(
-            NodePropertyExporter.baseTask(Algorithm.SpanningTree.labelForProgressTracking, graph.nodeCount()),
+            NodePropertyExporter.baseTask(AlgorithmLabel.SpanningTree.asString(), graph.nodeCount()),
             log,
             configuration.writeConcurrency(),
             requestScopedDependencies.getTaskRegistryFactory()

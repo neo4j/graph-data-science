@@ -20,10 +20,10 @@
 package org.neo4j.gds.applications.algorithms.similarity;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
-import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -46,9 +46,9 @@ import org.neo4j.gds.wcc.WccAlgorithmFactory;
 
 import java.util.List;
 
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.FilteredKNN;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.FilteredNodeSimilarity;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.KNN;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.FilteredKNN;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.FilteredNodeSimilarity;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.KNN;
 
 public class SimilarityAlgorithms {
     private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
@@ -68,7 +68,7 @@ public class SimilarityAlgorithms {
         long nodeCount = graph.nodeCount();
 
         Task task = Tasks.task(
-            FilteredKNN.labelForProgressTracking,
+            FilteredKNN.asString(),
             Tasks.leaf("Initialize random neighbors", nodeCount),
             Tasks.iterativeDynamic(
                 "Iteration",
@@ -100,7 +100,7 @@ public class SimilarityAlgorithms {
         var targetNodeFilter = configuration.targetNodeFilter().toNodeFilter(graph);
 
         var task = Tasks.task(
-            FilteredNodeSimilarity.labelForProgressTracking,
+            FilteredNodeSimilarity.asString(),
             filteredNodeSimilarityProgressTask(graph, configuration.useComponents().computeComponents()),
             Tasks.leaf("compare node pairs")
         );
@@ -127,7 +127,7 @@ public class SimilarityAlgorithms {
         long nodeCount = graph.nodeCount();
 
         Task task = Tasks.task(
-            KNN.labelForProgressTracking,
+            KNN.asString(),
             Tasks.leaf("Initialize random neighbors", nodeCount),
             Tasks.iterativeDynamic(
                 "Iteration",
@@ -161,7 +161,7 @@ public class SimilarityAlgorithms {
 
     NodeSimilarityResult nodeSimilarity(Graph graph, NodeSimilarityBaseConfig configuration) {
         Task task = Tasks.task(
-            Algorithm.NodeSimilarity.labelForProgressTracking,
+            AlgorithmLabel.NodeSimilarity.asString(),
             configuration.useComponents().computeComponents()
                 ? Tasks.task(
                 "prepare",
