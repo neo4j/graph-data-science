@@ -40,21 +40,21 @@ public final class TwoArraysSort {
         reorder(order, longArray, doubleArray, length);
     }
 
-    private static void reorder(int[] order, long[] longArray, double[] doubleArray, int length) {
+    static void reorder(int[] order, long[] longArray, double[] doubleArray, int length) {
         for (int i = 0; i < length; i++) {
-            while (order[i] != i) {
-                int idx = order[order[i]];
-                var longVal = longArray[order[i]];
-                var doubleVal = doubleArray[order[i]];
-
-                longArray[order[i]] = longArray[i];
-                doubleArray[order[i]] = doubleArray[i];
-                order[order[i]] = order[i];
-
-                order[i] = idx;
-                longArray[i] = longVal;
-                doubleArray[i] = doubleVal;
+            var initV = longArray[i];
+            var initW = doubleArray[i];
+            var currIdx = i;
+            while (order[currIdx] !=i){
+                var nci = order[currIdx];
+                longArray[currIdx] = longArray[nci];
+                doubleArray[currIdx] = doubleArray[nci];
+                order[currIdx] = currIdx;
+                currIdx = nci;
             }
+            longArray[currIdx] = initV;
+            doubleArray[currIdx] = initW;
+            order[currIdx] = currIdx;
         }
     }
 
@@ -69,11 +69,7 @@ public final class TwoArraysSort {
             final long a = array[indexA];
             final long b = array[indexB];
 
-            if (a < b)
-                return -1;
-            if (a > b)
-                return 1;
-            return 0;
+            return Long.compare(a, b);
         }
     }
 }
