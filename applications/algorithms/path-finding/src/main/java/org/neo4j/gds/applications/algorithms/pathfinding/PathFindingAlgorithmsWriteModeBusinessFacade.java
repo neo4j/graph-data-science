@@ -20,7 +20,7 @@
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmComputation;
+import org.neo4j.gds.applications.algorithms.machinery.Computation;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
@@ -258,7 +258,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         CONFIGURATION configuration,
         Algorithm algorithmMetadata,
         Supplier<MemoryEstimation> memoryEstimation,
-        AlgorithmComputation<PathFindingResult> algorithm,
+        Computation<PathFindingResult> algorithm,
         ResultBuilder<CONFIGURATION, PathFindingResult, RESULT_TO_CALLER, RelationshipsWritten> resultBuilder
     ) {
         var writeStep = new ShortestPathWriteStep<>(
@@ -284,7 +284,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         CONFIGURATION configuration,
         Algorithm algorithmMetadata,
         Supplier<MemoryEstimation> memoryEstimation,
-        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithm,
+        Computation<RESULT_FROM_ALGORITHM> algorithm,
         WriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> writeStep,
         ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
     ) {

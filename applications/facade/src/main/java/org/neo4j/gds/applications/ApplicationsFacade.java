@@ -256,7 +256,7 @@ public final class ApplicationsFacade {
         AlgorithmMetricsService algorithmMetricsService,
         RequestScopedDependencies requestScopedDependencies
     ) {
-        var algorithmProcessingTemplate = new DefaultAlgorithmProcessingTemplate(
+        var algorithmProcessingTemplate = DefaultAlgorithmProcessingTemplate.create(
             log,
             algorithmMetricsService,
             graphStoreCatalogService,

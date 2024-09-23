@@ -63,7 +63,7 @@ public interface AlgorithmProcessingTemplate {
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
         Algorithm algorithmMetadata,
         Supplier<MemoryEstimation> estimationFactory,
-        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
+        Computation<RESULT_FROM_ALGORITHM> computation,
         WriteStep<RESULT_FROM_ALGORITHM, WRITE_METADATA> writeStep,
         ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, WRITE_METADATA> resultBuilder
     );
@@ -76,7 +76,7 @@ public interface AlgorithmProcessingTemplate {
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
         Algorithm algorithmMetadata,
         Supplier<MemoryEstimation> estimationFactory,
-        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
+        Computation<RESULT_FROM_ALGORITHM> computation,
         MutateStep<RESULT_FROM_ALGORITHM, MUTATE_METADATA> mutateStep,
         ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_METADATA> resultBuilder
     );
@@ -89,7 +89,7 @@ public interface AlgorithmProcessingTemplate {
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
         Algorithm algorithmMetadata,
         Supplier<MemoryEstimation> estimationFactory,
-        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
+        Computation<RESULT_FROM_ALGORITHM> computation,
         StreamResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
     );
 
@@ -101,7 +101,7 @@ public interface AlgorithmProcessingTemplate {
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
         Algorithm algorithmMetadata,
         Supplier<MemoryEstimation> estimationFactory,
-        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
+        Computation<RESULT_FROM_ALGORITHM> computation,
         StatsResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
     );
 }

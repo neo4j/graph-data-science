@@ -46,7 +46,7 @@ public class AlgorithmProcessingTemplateConvenience {
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
         Algorithm algorithmMetadata,
         Supplier<MemoryEstimation> estimationFactory,
-        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
+        Computation<RESULT_FROM_ALGORITHM> computation,
         WriteStep<RESULT_FROM_ALGORITHM, WRITE_METADATA> writeStep,
         ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, WRITE_METADATA> resultBuilder
     ) {
@@ -57,7 +57,7 @@ public class AlgorithmProcessingTemplateConvenience {
             postGraphStoreLoadValidationHooks,
             algorithmMetadata,
             estimationFactory,
-            algorithmComputation,
+            computation,
             writeStep,
             resultBuilder
         );
@@ -71,7 +71,7 @@ public class AlgorithmProcessingTemplateConvenience {
         CONFIGURATION configuration,
         Algorithm algorithmMetadata,
         Supplier<MemoryEstimation> estimationFactory,
-        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
+        Computation<RESULT_FROM_ALGORITHM> computation,
         WriteStep<RESULT_FROM_ALGORITHM, WRITE_METADATA> writeStep,
         ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, WRITE_METADATA> resultBuilder
     ) {
@@ -82,7 +82,7 @@ public class AlgorithmProcessingTemplateConvenience {
             Optional.empty(),
             algorithmMetadata,
             estimationFactory,
-            algorithmComputation,
+            computation,
             writeStep,
             resultBuilder
         );
@@ -96,7 +96,7 @@ public class AlgorithmProcessingTemplateConvenience {
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
         Algorithm algorithmMetadata,
         Supplier<MemoryEstimation> estimationFactory,
-        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
+        Computation<RESULT_FROM_ALGORITHM> computation,
         MutateStep<RESULT_FROM_ALGORITHM, MUTATE_METADATA> mutateStep,
         ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_METADATA> resultBuilder
     ) {
@@ -107,7 +107,7 @@ public class AlgorithmProcessingTemplateConvenience {
             postGraphStoreLoadValidationHooks,
             algorithmMetadata,
             estimationFactory,
-            algorithmComputation,
+            computation,
             mutateStep,
             resultBuilder
         );
@@ -121,7 +121,7 @@ public class AlgorithmProcessingTemplateConvenience {
         CONFIGURATION configuration,
         Algorithm algorithmMetadata,
         Supplier<MemoryEstimation> estimationFactory,
-        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
+        Computation<RESULT_FROM_ALGORITHM> computation,
         MutateStep<RESULT_FROM_ALGORITHM, MUTATE_METADATA> mutateStep,
         ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_METADATA> resultBuilder
     ) {
@@ -132,7 +132,7 @@ public class AlgorithmProcessingTemplateConvenience {
             Optional.empty(),
             algorithmMetadata,
             estimationFactory,
-            algorithmComputation,
+            computation,
             mutateStep,
             resultBuilder
         );
@@ -149,7 +149,7 @@ public class AlgorithmProcessingTemplateConvenience {
         CONFIGURATION configuration,
         Algorithm algorithmMetadata,
         Supplier<MemoryEstimation> estimationFactory,
-        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
+        Computation<RESULT_FROM_ALGORITHM> computation,
         StatsResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithmForStats(
@@ -159,7 +159,7 @@ public class AlgorithmProcessingTemplateConvenience {
             Optional.empty(),
             algorithmMetadata,
             estimationFactory,
-            algorithmComputation,
+            computation,
             resultBuilder
         );
     }
@@ -169,7 +169,7 @@ public class AlgorithmProcessingTemplateConvenience {
         CONFIGURATION configuration,
         Algorithm algorithmMetadata,
         Supplier<MemoryEstimation> estimationFactory,
-        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
+        Computation<RESULT_FROM_ALGORITHM> computation,
         StreamResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder,
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
         Optional<String> relationshipWeightOverride
@@ -181,7 +181,7 @@ public class AlgorithmProcessingTemplateConvenience {
             postGraphStoreLoadValidationHooks,
             algorithmMetadata,
             estimationFactory,
-            algorithmComputation,
+            computation,
             resultBuilder
         );
     }
@@ -190,7 +190,7 @@ public class AlgorithmProcessingTemplateConvenience {
         CONFIGURATION configuration,
         Algorithm algorithmMetadata,
         Supplier<MemoryEstimation> estimationFactory,
-        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
+        Computation<RESULT_FROM_ALGORITHM> computation,
         StreamResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
     ) {
         return processAlgorithmInStreamMode(
@@ -198,7 +198,7 @@ public class AlgorithmProcessingTemplateConvenience {
             configuration,
             algorithmMetadata,
             estimationFactory,
-            algorithmComputation,
+            computation,
             resultBuilder,
             Optional.empty(),
             Optional.empty()

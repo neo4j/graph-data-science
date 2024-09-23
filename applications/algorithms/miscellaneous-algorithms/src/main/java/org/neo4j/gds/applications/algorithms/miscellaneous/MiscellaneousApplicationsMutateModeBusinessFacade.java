@@ -124,7 +124,7 @@ public class MiscellaneousApplicationsMutateModeBusinessFacade {
             configuration,
             ToUndirected,
             () -> estimation.toUndirected(configuration),
-            (graph, graphStore) -> algorithms.toUndirected(graphStore, configuration),
+            (__, graphStore) -> algorithms.toUndirected(graphStore, configuration),
             mutateStep,
             resultBuilder
         );

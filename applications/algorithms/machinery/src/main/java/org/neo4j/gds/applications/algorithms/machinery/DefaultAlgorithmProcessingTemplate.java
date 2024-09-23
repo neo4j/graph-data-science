@@ -19,10 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
@@ -30,7 +27,6 @@ import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.PostLoadValidationHook;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
@@ -40,79 +36,35 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTemplate {
-    private final Log log;
-    private final AlgorithmMetricsService algorithmMetricsService;
     private final GraphStoreCatalogService graphStoreCatalogService;
-    private final MemoryGuard memoryGuard;
     private final RequestScopedDependencies requestScopedDependencies;
+    private final ComputationService computationService;
 
-    public DefaultAlgorithmProcessingTemplate(
+    DefaultAlgorithmProcessingTemplate(
+        GraphStoreCatalogService graphStoreCatalogService,
+        RequestScopedDependencies requestScopedDependencies,
+        ComputationService computationService
+    ) {
+        this.graphStoreCatalogService = graphStoreCatalogService;
+        this.requestScopedDependencies = requestScopedDependencies;
+        this.computationService = computationService;
+    }
+
+    public static DefaultAlgorithmProcessingTemplate create(
         Log log,
         AlgorithmMetricsService algorithmMetricsService,
         GraphStoreCatalogService graphStoreCatalogService,
         MemoryGuard memoryGuard,
         RequestScopedDependencies requestScopedDependencies
     ) {
-        this.log = log;
-        this.algorithmMetricsService = algorithmMetricsService;
-        this.graphStoreCatalogService = graphStoreCatalogService;
-        this.memoryGuard = memoryGuard;
-        this.requestScopedDependencies = requestScopedDependencies;
-    }
+        var algorithmComputer = new ComputationService(log, memoryGuard, algorithmMetricsService);
 
-    @Override
-    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM, WRITE_METADATA> RESULT_TO_CALLER processAlgorithmForWrite(
-        Optional<String> relationshipWeightOverride,
-        GraphName graphName,
-        CONFIGURATION configuration,
-        Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
-        Algorithm algorithmMetadata,
-        Supplier<MemoryEstimation> estimationFactory,
-        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
-        WriteStep<RESULT_FROM_ALGORITHM, WRITE_METADATA> mutateOrWriteStep,
-        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, WRITE_METADATA> resultBuilder
-    ) {
-        // as we progress through the steps we gather timings
-        var timingsBuilder = new AlgorithmProcessingTimingsBuilder();
-
-        var graphResources = graphLoadAndValidationWithTiming(
-            timingsBuilder,
-            relationshipWeightOverride,
-            graphName,
-            configuration,
-            postGraphStoreLoadValidationHooks
-        );
-
-        var result = runComputation(
-            configuration,
-            graphResources.graph(),
-            graphResources.graphStore(),
-            algorithmMetadata,
-            estimationFactory,
-            algorithmComputation,
-            timingsBuilder
-        );
-
-        var metadata = writeWithTiming(
-            mutateOrWriteStep,
-            timingsBuilder,
-            graphResources.graph(),
-            graphResources.graphStore(),
-            graphResources.resultStore(),
-            result,
-            configuration.jobId()
-        );
-
-        // inject dependencies to render results
-        return resultBuilder.build(
-            graphResources.graph(),
-            configuration,
-            result,
-            timingsBuilder.build(),
-            metadata
+        return new DefaultAlgorithmProcessingTemplate(
+            graphStoreCatalogService,
+            requestScopedDependencies,
+            algorithmComputer
         );
     }
-
 
     @Override
     public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM, MUTATE_METADATA> RESULT_TO_CALLER processAlgorithmForMutate(
@@ -121,85 +73,24 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         CONFIGURATION configuration,
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
         Algorithm algorithmMetadata,
-        Supplier<MemoryEstimation> estimationFactory,
-        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
+        Supplier<MemoryEstimation> estimationSupplier,
+        Computation<RESULT_FROM_ALGORITHM> computation,
         MutateStep<RESULT_FROM_ALGORITHM, MUTATE_METADATA> mutateStep,
         ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_METADATA> resultBuilder
     ) {
-        var timingsBuilder = new AlgorithmProcessingTimingsBuilder();
+        var mutateEffect = new MutateSideEffect<>(mutateStep);
+        var resultRenderer = new MutateResultRenderer<>(configuration, resultBuilder);
 
-        var graphResources = graphLoadAndValidationWithTiming(
-            timingsBuilder,
+        return processAlgorithmAndAnySideEffects(
             relationshipWeightOverride,
             graphName,
             configuration,
-            postGraphStoreLoadValidationHooks
-        );
-
-        var result = runComputation(
-            configuration,
-            graphResources.graph(),
-            graphResources.graphStore(),
+            postGraphStoreLoadValidationHooks,
             algorithmMetadata,
-            estimationFactory,
-            algorithmComputation,
-            timingsBuilder
-        );
-
-        var metadata = mutateWithTiming(
-            mutateStep,
-            timingsBuilder,
-            graphResources.graph(),
-            graphResources.graphStore(),
-            result
-        );
-
-        // inject dependencies to render results
-        return resultBuilder.build(
-            graphResources.graph(),
-            configuration,
-            result,
-            timingsBuilder.build(),
-            metadata
-        );
-    }
-
-    @Override
-    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM> Stream<RESULT_TO_CALLER> processAlgorithmForStream(
-        Optional<String> relationshipWeightOverride,
-        GraphName graphName,
-        CONFIGURATION configuration,
-        Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
-        Algorithm algorithmMetadata,
-        Supplier<MemoryEstimation> estimationFactory,
-        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
-        StreamResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
-    ) {
-
-        var timingsBuilder = new AlgorithmProcessingTimingsBuilder();
-        var graphResources = graphLoadAndValidationWithTiming(
-            timingsBuilder,
-            relationshipWeightOverride,
-            graphName,
-            configuration,
-            postGraphStoreLoadValidationHooks
-        );
-
-        var result = runComputation(
-            configuration,
-            graphResources.graph(),
-            graphResources.graphStore(),
-            algorithmMetadata,
-            estimationFactory,
-            algorithmComputation,
-            timingsBuilder
-        );
-
-        // inject dependencies to render results
-        return resultBuilder.build(
-            graphResources.graph(),
-            graphResources.graphStore(),
-            result
+            estimationSupplier,
+            computation,
+            Optional.of(mutateEffect),
+            resultRenderer
         );
     }
 
@@ -210,12 +101,106 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         CONFIGURATION configuration,
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
         Algorithm algorithmMetadata,
-        Supplier<MemoryEstimation> estimationFactory,
-        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
+        Supplier<MemoryEstimation> estimationSupplier,
+        Computation<RESULT_FROM_ALGORITHM> computation,
         StatsResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
     ) {
+        var resultRenderer = new StatsResultRenderer<>(configuration, resultBuilder);
+
+        return processAlgorithmAndAnySideEffects(
+            relationshipWeightOverride,
+            graphName,
+            configuration,
+            postGraphStoreLoadValidationHooks,
+            algorithmMetadata,
+            estimationSupplier,
+            computation,
+            Optional.empty(),
+            resultRenderer
+        );
+    }
+
+    @Override
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM> Stream<RESULT_TO_CALLER> processAlgorithmForStream(
+        Optional<String> relationshipWeightOverride,
+        GraphName graphName,
+        CONFIGURATION configuration,
+        Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
+        Algorithm algorithmMetadata,
+        Supplier<MemoryEstimation> estimationSupplier,
+        Computation<RESULT_FROM_ALGORITHM> computation,
+        StreamResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
+    ) {
+        var resultRenderer = new StreamResultRenderer<>(resultBuilder);
+
+        return processAlgorithmAndAnySideEffects(
+            relationshipWeightOverride,
+            graphName,
+            configuration,
+            postGraphStoreLoadValidationHooks,
+            algorithmMetadata,
+            estimationSupplier,
+            computation,
+            Optional.empty(),
+            resultRenderer
+        );
+    }
+
+    @Override
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM, WRITE_METADATA> RESULT_TO_CALLER processAlgorithmForWrite(
+        Optional<String> relationshipWeightOverride,
+        GraphName graphName,
+        CONFIGURATION configuration,
+        Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
+        Algorithm algorithmMetadata,
+        Supplier<MemoryEstimation> estimationSupplier,
+        Computation<RESULT_FROM_ALGORITHM> computation,
+        WriteStep<RESULT_FROM_ALGORITHM, WRITE_METADATA> writeStep,
+        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, WRITE_METADATA> resultBuilder
+    ) {
+        var writeEffect = new WriteSideEffect<>(configuration.jobId(), writeStep);
+        var resultRenderer = new WriteResultRenderer<>(configuration, resultBuilder);
+
+        return processAlgorithmAndAnySideEffects(
+            relationshipWeightOverride,
+            graphName,
+            configuration,
+            postGraphStoreLoadValidationHooks,
+            algorithmMetadata,
+            estimationSupplier,
+            computation,
+            Optional.of(writeEffect),
+            resultRenderer
+        );
+    }
+
+    /**
+     * This is the nice, reusable template method for all algorithms, that does four things:
+     *
+     * <ol>
+     *     <li>Load data</li>
+     *     <li>Compute algorithm</li>
+     *     <li>Process any side effects, like mutation</li>
+     *     <li>Render a result</li>
+     * </ol>
+     *
+     * We instrument with timings, to separate cross-cutting boilerplate from business logic.
+     */
+    <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM, SIDE_EFFECT_METADATA> RESULT_TO_CALLER processAlgorithmAndAnySideEffects(
+        Optional<String> relationshipWeightOverride,
+        GraphName graphName,
+        CONFIGURATION configuration,
+        Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
+        Algorithm algorithmMetadata,
+        Supplier<MemoryEstimation> estimationFactory,
+        Computation<RESULT_FROM_ALGORITHM> computation,
+        Optional<SideEffect<RESULT_FROM_ALGORITHM, SIDE_EFFECT_METADATA>> sideEffect,
+        ResultRenderer<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, SIDE_EFFECT_METADATA> resultRenderer
+    ) {
+        // as we progress through the steps we gather timings
         var timingsBuilder = new AlgorithmProcessingTimingsBuilder();
-        var graphResources = graphLoadAndValidationWithTiming(
+
+        var graphResources = loadAndValidateGraph(
             timingsBuilder,
             relationshipWeightOverride,
             graphName,
@@ -225,62 +210,30 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
 
         var result = runComputation(
             configuration,
-            graphResources.graph(),
-            graphResources.graphStore(),
+            graphResources,
             algorithmMetadata,
             estimationFactory,
-            algorithmComputation,
+            computation,
             timingsBuilder
         );
 
-        // inject dependencies to render results
-        return resultBuilder.build(
-            graphResources.graph(),
-            configuration,
-            result,
-            timingsBuilder.build()
-        );
-    }
+        var metadata = processSideEffect(timingsBuilder, graphResources, result, sideEffect);
 
-    private <RESULT_FROM_ALGORITHM,CONFIGURATION extends  AlgoBaseConfig> Optional<RESULT_FROM_ALGORITHM> runComputation(
-        CONFIGURATION configuration,
-        Graph graph,
-        GraphStore graphStore,
-        Algorithm algorithmMetadata,
-        Supplier<MemoryEstimation> estimationFactory,
-        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
-        AlgorithmProcessingTimingsBuilder timingsBuilder
-    ){
-
-        if (graph.isEmpty()){
-            return Optional.empty();
-        }
-
-        memoryGuard.assertAlgorithmCanRun(algorithmMetadata, configuration, graph, estimationFactory);
-        // do the actual computation
-        var result = computeWithTiming(
-            timingsBuilder,
-            algorithmMetadata,
-            algorithmComputation,
-            graph,
-            graphStore
-        );
-
-        return Optional.ofNullable(result);
+        return resultRenderer.render(graphResources, result, timingsBuilder.build(), metadata);
     }
 
     /**
      * We have a convention here for determining relationship property. Most use cases follow the convention.
      * But because at least one use case does not, there is _also_ an override.
      */
-    <CONFIGURATION extends AlgoBaseConfig> GraphResources graphLoadAndValidationWithTiming(
+    private <CONFIGURATION extends AlgoBaseConfig> GraphResources loadAndValidateGraph(
         AlgorithmProcessingTimingsBuilder timingsBuilder,
         Optional<String> relationshipWeightOverride,
         GraphName graphName,
         CONFIGURATION configuration,
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks
     ) {
-        try (ProgressTimer ignored = ProgressTimer.start(timingsBuilder::withPreProcessingMillis)) {
+        try (var ignored = ProgressTimer.start(timingsBuilder::withPreProcessingMillis)) {
             var relationshipProperty = determineRelationshipProperty(configuration, relationshipWeightOverride);
 
             return graphStoreCatalogService.getGraphResources(
@@ -309,68 +262,39 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         return Optional.empty();
     }
 
-    <RESULT_FROM_ALGORITHM> RESULT_FROM_ALGORITHM computeWithTiming(
-        AlgorithmProcessingTimingsBuilder timingsBuilder,
+    private <RESULT_FROM_ALGORITHM, CONFIGURATION extends AlgoBaseConfig> Optional<RESULT_FROM_ALGORITHM> runComputation(
+        CONFIGURATION configuration,
+        GraphResources graphResources,
         Algorithm algorithmMetadata,
-        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
-        Graph graph,
-        GraphStore graphStore
+        Supplier<MemoryEstimation> estimationSupplier,
+        Computation<RESULT_FROM_ALGORITHM> computation,
+        AlgorithmProcessingTimingsBuilder timingsBuilder
     ) {
-        try (ProgressTimer ignored = ProgressTimer.start(timingsBuilder::withComputeMillis)) {
-            return computeWithMetric(algorithmMetadata, algorithmComputation, graph, graphStore);
+        if (graphResources.graph().isEmpty()) return Optional.empty();
+
+        try (var ignored = ProgressTimer.start(timingsBuilder::withComputeMillis)) {
+            var result = computationService.computeAlgorithm(
+                configuration,
+                graphResources,
+                algorithmMetadata,
+                estimationSupplier,
+                computation
+            );
+
+            return Optional.ofNullable(result);
         }
     }
 
-    private <RESULT_FROM_ALGORITHM> RESULT_FROM_ALGORITHM computeWithMetric(
-        Algorithm algorithmMetadata,
-        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
-        Graph graph,
-        GraphStore graphStore
-    ) {
-        var executionMetric = algorithmMetricsService.create(algorithmMetadata.labelForProgressTracking);
-
-        try (executionMetric) {
-            executionMetric.start();
-
-            return algorithmComputation.compute(graph, graphStore);
-        } catch (RuntimeException e) {
-            log.warn("computation failed, halting metrics gathering", e);
-            executionMetric.failed(e);
-            throw e;
-        }
-    }
-
-    /**
-     * @return null if we are not in mutate or write mode; appropriate metadata otherwise
-     */
-    <RESULT_FROM_ALGORITHM, WRITE_METADATA> Optional<WRITE_METADATA> writeWithTiming(
-        WriteStep<RESULT_FROM_ALGORITHM, WRITE_METADATA> mutateOrWriteStep,
+    private <RESULT_FROM_ALGORITHM, METADATA> Optional<METADATA> processSideEffect(
         AlgorithmProcessingTimingsBuilder timingsBuilder,
-        Graph graph,
-        GraphStore graphStore,
-        ResultStore resultStore,
+        GraphResources graphResources,
         Optional<RESULT_FROM_ALGORITHM> result,
-        JobId jobId
+        Optional<SideEffect<RESULT_FROM_ALGORITHM, METADATA>> sideEffect
     ) {
-        if (result.isEmpty()) return Optional.empty();
+        if (sideEffect.isEmpty()) return Optional.empty();
 
-        try (ProgressTimer ignored = ProgressTimer.start(timingsBuilder::withMutateOrWriteMillis)) {
-            return Optional.ofNullable(mutateOrWriteStep.execute(graph, graphStore, resultStore, result.get(), jobId));
+        try (var ignored = ProgressTimer.start(timingsBuilder::withMutateOrWriteMillis)) {
+            return sideEffect.get().process(graphResources, result);
         }
     }
-
-    <RESULT_FROM_ALGORITHM, MUTATE_METADATA> Optional<MUTATE_METADATA> mutateWithTiming(
-        MutateStep<RESULT_FROM_ALGORITHM, MUTATE_METADATA> mutateOrWriteStep,
-        AlgorithmProcessingTimingsBuilder timingsBuilder,
-        Graph graph,
-        GraphStore graphStore,
-        Optional<RESULT_FROM_ALGORITHM> result
-    ) {
-        if (result.isEmpty()) return Optional.empty();
-
-        try (ProgressTimer ignored = ProgressTimer.start(timingsBuilder::withMutateOrWriteMillis)) {
-            return Optional.ofNullable(mutateOrWriteStep.execute(graph, graphStore, result.get()));
-        }
-    }
-
 }

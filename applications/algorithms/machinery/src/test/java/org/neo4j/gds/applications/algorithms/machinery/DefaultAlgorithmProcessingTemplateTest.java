@@ -20,31 +20,17 @@
 package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.api.User;
-import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
-import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.loading.PostLoadValidationHook;
-import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.metrics.ExecutionMetric;
-import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.entry;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.Dijkstra;
-import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.KNN;
 
 /**
  * Pinky promise: next time we add or change functionality here,
@@ -53,251 +39,104 @@ import static org.neo4j.gds.applications.algorithms.metadata.Algorithm.KNN;
  */
 class DefaultAlgorithmProcessingTemplateTest {
     @Test
-    void shouldProcessStreamAlgorithm() {
-        var databaseId = DatabaseId.of("some database");
-        var user = new User("some user", false);
+    void shouldDoFourStepProcess() {
         var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
-        var algorithmMetricsService = mock(AlgorithmMetricsService.class);
-        var algorithmProcessingTemplate = new DefaultAlgorithmProcessingTemplate(
-            null,
-            algorithmMetricsService,
+        var requestScopedDependencies = RequestScopedDependencies.builder().build();
+        var algorithmComputer = mock(ComputationService.class);
+        var template = new DefaultAlgorithmProcessingTemplate(
             graphStoreCatalogService,
-            MemoryGuard.DISABLED,
-            RequestScopedDependencies.builder().with(databaseId).with(user).build()
+            requestScopedDependencies,
+            algorithmComputer
         );
 
-        var graphName = GraphName.parse("some graph");
         var configuration = new ExampleConfiguration();
-        var graph = mock(Graph.class);
-        var graphStore = mock(GraphStore.class);
+        var graphResources = new GraphResources(null, mock(Graph.class), null);
         when(graphStoreCatalogService.getGraphResources(
-            graphName,
+            GraphName.parse("some graph"),
             configuration,
             Optional.empty(),
             Optional.empty(),
-            user,
-            databaseId
-        )).thenReturn(new GraphResources(graphStore, graph, ResultStore.EMPTY));
-
-        // We need it to not be null :shrug:
-        when(algorithmMetricsService.create(Dijkstra.labelForProgressTracking)).thenReturn(mock(ExecutionMetric.class));
-
-        //noinspection unchecked
-        AlgorithmComputation<ExampleResult> computation = mock(AlgorithmComputation.class);
-        var pathFindingResult = mock(ExampleResult.class);
-        when(computation.compute(graph, graphStore)).thenReturn(pathFindingResult);
-
-        var resultBuilder = new StreamResultBuilder<ExampleResult, String>() {
-            @Override
-            public Stream<String> build(
-                Graph graph,
-                GraphStore graphStore,
-                Optional<ExampleResult> pathFindingResult
-            ) {
-
-                return Stream.of(
-                    "Huey",
-                    "Dewey",
-                    "Louie"
-                );
-            }
-        };
-
-        var resultStream = algorithmProcessingTemplate.processAlgorithmForStream(
+            requestScopedDependencies.getUser(),
+            requestScopedDependencies.getDatabaseId()
+        )).thenReturn(graphResources);
+        when(algorithmComputer.computeAlgorithm(
+            configuration,
+            graphResources,
+            Dijkstra,
+            null,
+            null
+        )).thenReturn("some result");
+        Object renderedResult = template.processAlgorithmAndAnySideEffects(
             Optional.empty(),
-            graphName,
+            GraphName.parse("some graph"),
             configuration,
             Optional.empty(),
             Dijkstra,
             null,
-            computation,
-            resultBuilder
+            null,
+            Optional.of((__, ___) -> Optional.of("metadata from some side effect")),
+            (__, result, timings, metadata) -> {
+                assertThat(result).hasValue("some result");
+                assertThat(timings.preProcessingMillis).isGreaterThan(-1);
+                assertThat(timings.computeMillis).isGreaterThan(-1);
+                assertThat(timings.mutateOrWriteMillis).isGreaterThan(-1);
+                assertThat(metadata).hasValue("metadata from some side effect");
+
+                return "some rendered result";
+            }
         );
 
-        assertThat(resultStream).containsExactly(
-            "Huey",
-            "Dewey",
-            "Louie"
-        );
+        assertThat(renderedResult).isEqualTo("some rendered result");
     }
 
-    /**
-     * From Dijkstra, the contract is that the mutate and write side effects will set relationshipsWritten.
-     * So that's the example we go with.
-     */
     @Test
-    void shouldProcessWriteAlgorithm() {
-        var databaseId = DatabaseId.of("some database");
-        var user = new User("some user", false);
+    void shouldSkipSideEffect() {
         var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
-        var algorithmMetricsService = mock(AlgorithmMetricsService.class);
-        var algorithmProcessingTemplate = new DefaultAlgorithmProcessingTemplate(
-            null,
-            algorithmMetricsService,
+        var requestScopedDependencies = RequestScopedDependencies.builder().build();
+        var algorithmComputer = mock(ComputationService.class);
+        var template = new DefaultAlgorithmProcessingTemplate(
             graphStoreCatalogService,
-            MemoryGuard.DISABLED,
-            RequestScopedDependencies.builder().with(databaseId).with(user).build()
+            requestScopedDependencies,
+            algorithmComputer
         );
 
-        var graphName = GraphName.parse("some graph");
         var configuration = new ExampleConfiguration();
-        var graph = mock(Graph.class);
-        var graphStore = mock(GraphStore.class);
+        var graphResources = new GraphResources(null, mock(Graph.class), null);
         when(graphStoreCatalogService.getGraphResources(
-            graphName,
+            GraphName.parse("some other graph"),
             configuration,
             Optional.empty(),
             Optional.empty(),
-            user,
-            databaseId
-        )).thenReturn(new GraphResources(graphStore, graph, ResultStore.EMPTY));
-
-        var pathFindingResult = mock(ExampleResult.class);
-        var resultBuilder = new ResultBuilder<ExampleConfiguration, ExampleResult, String, Long>() {
-            @Override
-            public String build(
-                Graph actualGraph,
-                ExampleConfiguration configuration,
-                Optional<ExampleResult> actualResult,
-                AlgorithmProcessingTimings timings,
-                Optional<Long> metadata
-            ) {
-                assertThat(actualGraph).isEqualTo(graph);
-                assertThat(actualResult).hasValue(pathFindingResult);
-
-                assertThat(metadata.orElseThrow()).isEqualTo(42L);
-
-                return "all assertions green!";
-            }
-        };
-
-        // We need it to not be null :shrug:
-        when(algorithmMetricsService.create(KNN.labelForProgressTracking)).thenReturn(mock(ExecutionMetric.class));
-
-        //noinspection unchecked
-        AlgorithmComputation<ExampleResult> computation = mock(AlgorithmComputation.class);
-        when(computation.compute(graph, graphStore)).thenReturn(pathFindingResult);
-
-        var writeStep = new WriteStep<ExampleResult, Long>() {
-            @Override
-            public Long execute(
-                Graph graph,
-                GraphStore graphStore,
-                ResultStore resultStore,
-                ExampleResult resultFromAlgorithm,
-                JobId jobId
-            ) {
-                return 42L;
-            }
-        };
-
-        var relationshipsWritten = algorithmProcessingTemplate.processAlgorithmForWrite(
-            Optional.empty(),
-            graphName,
+            requestScopedDependencies.getUser(),
+            requestScopedDependencies.getDatabaseId()
+        )).thenReturn(graphResources);
+        when(algorithmComputer.computeAlgorithm(
             configuration,
-            Optional.empty(),
-            KNN,
+            graphResources,
+            Dijkstra,
             null,
-            computation,
-            writeStep,
-            resultBuilder
-        );
-
-        assertThat(relationshipsWritten).isEqualTo("all assertions green!");
-    }
-
-    @Test
-    void shouldDoTimingsAndCounts() {
-        var algorithmProcessingTemplate = new DefaultAlgorithmProcessingTemplate(
-            null,
-            null,
-            null,
-            MemoryGuard.DISABLED,
             null
-        ) {
-            @Override
-            <CONFIGURATION extends AlgoBaseConfig> GraphResources graphLoadAndValidationWithTiming(
-                AlgorithmProcessingTimingsBuilder timingsBuilder,
-                Optional<String> relationshipWeightOverride,
-                GraphName graphName,
-                CONFIGURATION configuration,
-                Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks
-            ) {
-                timingsBuilder.withPreProcessingMillis(23);
-                return new GraphResources(null, mock(Graph.class), null);
-            }
-
-            @Override
-            <RESULT_FROM_ALGORITHM> RESULT_FROM_ALGORITHM computeWithTiming(
-                AlgorithmProcessingTimingsBuilder timingsBuilder,
-                Algorithm algorithmMetadata,
-                AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
-                Graph graph,
-                GraphStore graphStore
-            ) {
-                timingsBuilder.withComputeMillis(117);
-                return null;
-            }
-
-            @Override
-            <RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> Optional<MUTATE_OR_WRITE_METADATA> writeWithTiming(
-                WriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> mutateOrWriteStep,
-                AlgorithmProcessingTimingsBuilder timingsBuilder,
-                Graph graph,
-                GraphStore graphStore,
-                ResultStore resultStore,
-                Optional<RESULT_FROM_ALGORITHM> resultFromAlgorithm,
-                JobId jobId
-            ) {
-                timingsBuilder.withMutateOrWriteMillis(87);
-                return Optional.of(
-                    mutateOrWriteStep.execute(
-                        graph,
-                        graphStore,
-                        resultStore,
-                        null,
-                        jobId
-                     )
-                );
-            }
-        };
-
-        var resultBuilder = new ResultBuilder<ExampleConfiguration, Void, Map<String, Long>, Long>() {
-            @Override
-            public Map<String, Long> build(
-                Graph graph,
-                ExampleConfiguration configuration,
-                Optional<Void> unused,
-                AlgorithmProcessingTimings timings,
-                Optional<Long> metadata
-            ) {
-                return Map.of(
-                    "preProcessingMillis", timings.preProcessingMillis,
-                    "computeMillis", timings.computeMillis,
-                    "postProcessingMillis", timings.mutateOrWriteMillis,
-                    "relationshipsWritten", metadata.orElseThrow()
-                );
-            }
-        };
-
-        var resultMap = algorithmProcessingTemplate.processAlgorithmForWrite(
+        )).thenReturn("some other result");
+        Object renderedResult = template.processAlgorithmAndAnySideEffects(
             Optional.empty(),
-            null,
-            new ExampleConfiguration(),
+            GraphName.parse("some other graph"),
+            configuration,
             Optional.empty(),
+            Dijkstra,
             null,
             null,
-            null,
-            (graph, graphStore, resultStore, unused, jobId) -> 6573L,
-            resultBuilder
+            Optional.empty(),
+            (__, result, timings, metadata) -> {
+                assertThat(result).hasValue("some other result");
+                assertThat(timings.preProcessingMillis).isGreaterThan(-1);
+                assertThat(timings.computeMillis).isGreaterThan(-1);
+                assertThat(timings.mutateOrWriteMillis).isEqualTo(-1); // no side effect, no timing
+                assertThat(metadata).isEmpty();
+
+                return "some other rendered result";
+            }
         );
 
-        assertThat(resultMap)
-            .containsOnly(
-                entry("preProcessingMillis", 23L),
-                entry("computeMillis", 117L),
-                entry("postProcessingMillis", 87L),
-                entry("relationshipsWritten", 6573L)
-            );
+        assertThat(renderedResult).isEqualTo("some other rendered result");
     }
 }

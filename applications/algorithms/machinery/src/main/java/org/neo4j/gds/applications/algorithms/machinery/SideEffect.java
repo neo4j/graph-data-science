@@ -19,19 +19,13 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.loading.GraphResources;
 
-/**
- * The framework hook for all the algorithms computations.
- * (Other things you can inject in constructor of course)
- */
-public interface AlgorithmComputation<RESULT> {
-    /**
-     * The lowest common denominator of things algorithm computations need
-     *
-     * @param graph      all except CollapsePath need this
-     * @param graphStore only CollapsePath needs this
-     */
-    RESULT compute(Graph graph, GraphStore graphStore);
+import java.util.Optional;
+
+interface SideEffect<RESULT_FROM_ALGORITHM, METADATA> {
+    Optional<METADATA> process(
+        GraphResources graphResources,
+        Optional<RESULT_FROM_ALGORITHM> result
+    );
 }
