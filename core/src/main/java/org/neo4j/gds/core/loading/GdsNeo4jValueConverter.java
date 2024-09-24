@@ -20,14 +20,13 @@
 package org.neo4j.gds.core.loading;
 
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.values.Array;
 import org.neo4j.gds.values.GdsNoValue;
 import org.neo4j.gds.values.GdsValue;
 import org.neo4j.gds.values.primitive.PrimitiveValues;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.ArrayValue;
-import org.neo4j.values.storable.DoubleValue;
 import org.neo4j.values.storable.IntegralValue;
-import org.neo4j.values.storable.LongValue;
 import org.neo4j.values.storable.NoValue;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.ValueGroup;
@@ -42,7 +41,7 @@ public final class GdsNeo4jValueConverter {
             return GdsNoValue.NO_VALUE;
         }
         if (value.isSequenceValue()) { // ArrayValue or ListValue
-            return castToNumericArrayOrFail(value);
+            return convertSequenceValueOrFail(value);
         }
         if (value instanceof Value storableValue) {
             if (storableValue.valueGroup() != ValueGroup.NUMBER) {
@@ -58,76 +57,40 @@ public final class GdsNeo4jValueConverter {
         throw new IllegalArgumentException(formatWithLocale("Unsupported GDS node property of type `%s`.", value.getTypeName()));
     }
 
-    private static GdsValue castToNumericArrayOrFail(AnyValue value) {
+    private static GdsValue convertSequenceValueOrFail(AnyValue value) {
         if (value instanceof ListValue listValue) {
-            return castToNumericArrayOrFail(listValue);
+            return convertListValueOrFail(listValue);
         } else if (value instanceof ArrayValue arrayValue){
-        return assertNumberArray(arrayValue);
+        return convertArrayValueOrFail(arrayValue);
         } else {
             throw failOnBadList(value);
         }
     }
 
-    private static org.neo4j.gds.values.Array assertNumberArray(ArrayValue array) {
+    @NotNull
+    private static Array convertListValueOrFail(ListValue listValue) {
+        if (listValue.isEmpty()) {
+            // encode as long array
+            return PrimitiveValues.EMPTY_LONG_ARRAY;
+        }
+        return convertArrayValueOrFail(listValue.toStorableArray());
+    }
+
+    @NotNull
+    private static Array convertArrayValueOrFail(ArrayValue array) {
         if (array.valueGroup() != ValueGroup.NUMBER_ARRAY) {
             throw failOnBadList(array);
         }
         if (array.isEmpty()) {
             return PrimitiveValues.EMPTY_LONG_ARRAY;
         }
-
-        var firstValue = array.value(0);
-        try {
-            if (firstValue instanceof LongValue) {
-                var longArray = new long[array.length()];
-                var iterator = array.iterator();
-                for (int i = 0; i < array.length() && iterator.hasNext(); i++) {
-                    longArray[i] = ((LongValue) iterator.next()).longValue();
-                }
-                return PrimitiveValues.longArray(longArray);
-            } else if (firstValue instanceof DoubleValue) {
-                var doubleArray = new double[array.length()];
-                var iterator = array.iterator();
-                for (int i = 0; i < array.length() && iterator.hasNext(); i++) {
-                    doubleArray[i] = ((DoubleValue) iterator.next()).doubleValue();
-                }
-                return PrimitiveValues.doubleArray(doubleArray);
-            } else {
-                throw failOnBadList(array);
-            }
-        } catch (ClassCastException c) {
+        var arrayCopy = array.asObjectCopy();
+        if (arrayCopy instanceof long[]) {
+            return PrimitiveValues.longArray((long[]) arrayCopy);
+        } else if (arrayCopy instanceof double[]) {
+            return PrimitiveValues.doubleArray((double[]) arrayCopy);
+        } else {
             throw failOnBadList(array);
-        }
-    }
-
-    @NotNull
-    private static org.neo4j.gds.values.Array castToNumericArrayOrFail(ListValue listValue) {
-        if (listValue.isEmpty()) {
-            // encode as long array
-            return PrimitiveValues.EMPTY_LONG_ARRAY;
-        }
-
-        var firstValue = listValue.head();
-        try {
-            if (firstValue instanceof LongValue) {
-                var longArray = new long[listValue.size()];
-                var iterator = listValue.iterator();
-                for (int i = 0; i < listValue.size() && iterator.hasNext(); i++) {
-                    longArray[i] = ((LongValue) iterator.next()).longValue();
-                }
-                return PrimitiveValues.longArray(longArray);
-            } else if (firstValue instanceof DoubleValue) {
-                var doubleArray = new double[listValue.size()];
-                var iterator = listValue.iterator();
-                for (int i = 0; i < listValue.size() && iterator.hasNext(); i++) {
-                    doubleArray[i] = ((DoubleValue) iterator.next()).doubleValue();
-                }
-                return PrimitiveValues.doubleArray(doubleArray);
-            } else {
-                throw failOnBadList(listValue);
-            }
-        } catch (ClassCastException c) {
-            throw failOnBadList(listValue);
         }
     }
 
