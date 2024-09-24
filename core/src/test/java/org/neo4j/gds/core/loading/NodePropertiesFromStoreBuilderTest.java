@@ -27,6 +27,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
@@ -43,11 +44,9 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.gds.TestSupport.idMap;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -190,23 +189,33 @@ final class NodePropertiesFromStoreBuilderTest {
         assertThat(longArray.dimension()).contains(0);
     }
 
-    static Stream<Arguments> unsupportedValues() {
-        return Stream.of(
-            arguments(PrimitiveValues.shortArray(new short[]{(short) 42})),
-            arguments(PrimitiveValues.byteArray(new byte[]{(byte) 42}))
-        );
+    @Test
+    void shouldSupportByteArray() {
+        var data = PrimitiveValues.byteArray(new byte[]{(byte) 42});
+        var nodeProperties = createNodeProperties(2L, DefaultValue.forLongArray(), b -> b.set(1, data));
+        assertThat(nodeProperties).isInstanceOf(LongArrayNodePropertyValues.class);
+        assertThat(nodeProperties.longArrayValue(0)).isEqualTo(DefaultValue.forLongArray().longArrayValue());
+        assertThat(nodeProperties.longArrayValue(1)).isEqualTo(data.longArrayValue());
     }
 
-    @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.loading.NodePropertiesFromStoreBuilderTest#unsupportedValues") // Leaving this test failing to discuss the smol type array implementations
-    void shouldFailOnUnSupportedTypes(GdsValue data) {
-        assertThatThrownBy(() -> createNodeProperties(
-            2L,
-            null,
-            b -> b.set(1, data)
-        )).isInstanceOf(UnsupportedOperationException.class)
-            .hasMessageContaining("Loading of values of type");
+    @Test
+    void shouldSupportShortArray() {
+        var data = PrimitiveValues.shortArray(new short[]{(short) 42});
+        var nodeProperties = createNodeProperties(2L, DefaultValue.forLongArray(), b -> b.set(1, data));
+        assertThat(nodeProperties).isInstanceOf(LongArrayNodePropertyValues.class);
+        assertThat(nodeProperties.longArrayValue(0)).isEqualTo(DefaultValue.forLongArray().longArrayValue());
+        assertThat(nodeProperties.longArrayValue(1)).isEqualTo(data.longArrayValue());
     }
+
+    @Test
+    void shouldSupportIntArray() {
+        var data = PrimitiveValues.intArray(new int[]{(int) 42});
+        var nodeProperties = createNodeProperties(2L, DefaultValue.forLongArray(), b -> b.set(1, data));
+        assertThat(nodeProperties).isInstanceOf(LongArrayNodePropertyValues.class);
+        assertThat(nodeProperties.longArrayValue(0)).isEqualTo(DefaultValue.forLongArray().longArrayValue());
+        assertThat(nodeProperties.longArrayValue(1)).isEqualTo(data.longArrayValue());
+    }
+
 
     private static Stream<Arguments> invalidValueTypeCombinations() {
         Supplier<Stream<Arguments>> scalarValues = () -> Stream.of(2L, 2D).map(Arguments::of);
