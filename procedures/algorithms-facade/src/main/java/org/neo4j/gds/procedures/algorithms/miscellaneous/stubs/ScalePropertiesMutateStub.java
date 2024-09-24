@@ -19,83 +19,28 @@
  */
 package org.neo4j.gds.procedures.algorithms.miscellaneous.stubs;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsMutateModeBusinessFacade;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.ScalePropertiesMutateResult;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 import org.neo4j.gds.scaleproperties.ScalePropertiesMutateConfig;
 
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
-public class ScalePropertiesMutateStub implements MutateStub<ScalePropertiesMutateConfig, ScalePropertiesMutateResult> {
-
-    private final GenericStub genericStub;
-    private final MiscellaneousApplicationsEstimationModeBusinessFacade estimationModeBusinessFacade;
-    private final MiscellaneousApplicationsMutateModeBusinessFacade mutateModeBusinessFacade;
-    private final ProcedureReturnColumns procedureReturnColumns;
-    private final Function<CypherMapWrapper, ScalePropertiesMutateConfig> configFunction;
-
-    public ScalePropertiesMutateStub(
-        GenericStub genericStub,
-        MiscellaneousApplicationsEstimationModeBusinessFacade estimationModeBusinessFacade,
-        MiscellaneousApplicationsMutateModeBusinessFacade mutateModeBusinessFacade,
-        ProcedureReturnColumns procedureReturnColumns,
-        Function<CypherMapWrapper, ScalePropertiesMutateConfig> configFunction
-    ) {
-        this.genericStub = genericStub;
-        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
-        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
-        this.procedureReturnColumns = procedureReturnColumns;
-        this.configFunction = configFunction;
-    }
+public interface ScalePropertiesMutateStub extends MutateStub<ScalePropertiesMutateConfig, ScalePropertiesMutateResult> {
+    @Override
+    ScalePropertiesMutateConfig parseConfiguration(Map<String, Object> configuration);
 
     @Override
-    public ScalePropertiesMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(configFunction, configuration);
-    }
+    MemoryEstimation getMemoryEstimation(String username, Map<String, Object> rawConfiguration);
 
     @Override
-    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> rawConfiguration) {
-        return genericStub.getMemoryEstimation(
-            rawConfiguration,
-            configFunction,
-            estimationModeBusinessFacade::scaleProperties
-        );
-    }
+    Stream<MemoryEstimateResult> estimate(Object graphNameAsString, Map<String, Object> rawConfiguration);
 
     @Override
-    public Stream<MemoryEstimateResult> estimate(Object graphNameAsString, Map<String, Object> rawConfiguration) {
-        return genericStub.estimate(
-            graphNameAsString,
-            rawConfiguration,
-            configFunction,
-            estimationModeBusinessFacade::scaleProperties
-        );
-    }
-
-    @Override
-    public Stream<ScalePropertiesMutateResult> execute(
+    Stream<ScalePropertiesMutateResult> execute(
         String graphNameAsString,
         Map<String, Object> rawConfiguration
-    ) {
-
-        var shouldDisplayScalerStatistics = procedureReturnColumns.contains("scalerStatistics");
-        var resultBuilder = new ScalePropertiesResultBuilderForMutateMode(shouldDisplayScalerStatistics);
-
-        return genericStub.execute(
-            graphNameAsString,
-            rawConfiguration,
-            configFunction,
-            mutateModeBusinessFacade::scaleProperties,
-            resultBuilder
-        );
-    }
-
+    );
 }

@@ -20,72 +20,27 @@
 package org.neo4j.gds.procedures.algorithms.miscellaneous.stubs;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsMutateModeBusinessFacade;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.ToUndirectedMutateResult;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 import org.neo4j.gds.undirected.ToUndirectedConfig;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class ToUndirectedMutateStub implements MutateStub<ToUndirectedConfig, ToUndirectedMutateResult> {
-
-    private final GenericStub genericStub;
-    private final MiscellaneousApplicationsEstimationModeBusinessFacade estimationModeBusinessFacade;
-    private final MiscellaneousApplicationsMutateModeBusinessFacade mutateModeBusinessFacade;
-
-    public ToUndirectedMutateStub(
-        GenericStub genericStub,
-        MiscellaneousApplicationsEstimationModeBusinessFacade estimationModeBusinessFacade,
-        MiscellaneousApplicationsMutateModeBusinessFacade mutateModeBusinessFacade) {
-
-        this.genericStub = genericStub;
-        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
-        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
-    }
+public interface ToUndirectedMutateStub extends MutateStub<ToUndirectedConfig, ToUndirectedMutateResult> {
+    @Override
+    ToUndirectedConfig parseConfiguration(Map<String, Object> configuration);
 
     @Override
-    public ToUndirectedConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(ToUndirectedConfig::of, configuration);
-    }
+    MemoryEstimation getMemoryEstimation(String username, Map<String, Object> rawConfiguration);
 
     @Override
-    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> rawConfiguration) {
-        return genericStub.getMemoryEstimation(
-            rawConfiguration,
-            ToUndirectedConfig::of,
-            estimationModeBusinessFacade::toUndirected
-        );
-    }
+    Stream<MemoryEstimateResult> estimate(Object graphNameAsString, Map<String, Object> rawConfiguration);
 
     @Override
-    public Stream<MemoryEstimateResult> estimate(Object graphNameAsString, Map<String, Object> rawConfiguration) {
-        return genericStub.estimate(
-            graphNameAsString,
-            rawConfiguration,
-            ToUndirectedConfig::of,
-            estimationModeBusinessFacade::toUndirected
-        );
-    }
-
-    @Override
-    public Stream<ToUndirectedMutateResult> execute(
+    Stream<ToUndirectedMutateResult> execute(
         String graphNameAsString,
         Map<String, Object> rawConfiguration
-    ) {
-        var resultBuilder = new ToUndirectedResultBuilderForMutateMode();
-
-        return genericStub.execute(
-            graphNameAsString,
-            rawConfiguration,
-            ToUndirectedConfig::of,
-            mutateModeBusinessFacade::toUndirected,
-            resultBuilder
-        );
-    }
-
-
+    );
 }

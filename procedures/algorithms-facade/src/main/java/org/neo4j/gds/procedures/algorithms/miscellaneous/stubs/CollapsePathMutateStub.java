@@ -20,70 +20,27 @@
 package org.neo4j.gds.procedures.algorithms.miscellaneous.stubs;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsMutateModeBusinessFacade;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.CollapsePathMutateResult;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 import org.neo4j.gds.walking.CollapsePathConfig;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class CollapsePathMutateStub implements MutateStub<CollapsePathConfig, CollapsePathMutateResult> {
-    private final GenericStub genericStub;
-    private final MiscellaneousApplicationsEstimationModeBusinessFacade estimationModeBusinessFacade;
-    private final MiscellaneousApplicationsMutateModeBusinessFacade mutateModeBusinessFacade;
-
-    public CollapsePathMutateStub(
-        GenericStub genericStub,
-        MiscellaneousApplicationsEstimationModeBusinessFacade estimationModeBusinessFacade,
-        MiscellaneousApplicationsMutateModeBusinessFacade mutateModeBusinessFacade
-    ) {
-        this.genericStub = genericStub;
-        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
-        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
-    }
+public interface CollapsePathMutateStub extends MutateStub<CollapsePathConfig, CollapsePathMutateResult> {
+    @Override
+    CollapsePathConfig parseConfiguration(Map<String, Object> configuration);
 
     @Override
-    public CollapsePathConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(CollapsePathConfig::of, configuration);
-    }
+    MemoryEstimation getMemoryEstimation(String username, Map<String, Object> rawConfiguration);
 
     @Override
-    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> rawConfiguration) {
-        return genericStub.getMemoryEstimation(
-            rawConfiguration,
-            CollapsePathConfig::of,
-            __ -> estimationModeBusinessFacade.collapsePath()
-        );
-    }
+    Stream<MemoryEstimateResult> estimate(Object graphNameAsString, Map<String, Object> rawConfiguration);
 
     @Override
-    public Stream<MemoryEstimateResult> estimate(Object graphNameAsString, Map<String, Object> rawConfiguration) {
-        return genericStub.estimate(
-            graphNameAsString,
-            rawConfiguration,
-            CollapsePathConfig::of,
-            __ -> estimationModeBusinessFacade.collapsePath()
-        );
-    }
-
-    @Override
-    public Stream<CollapsePathMutateResult> execute(
+    Stream<CollapsePathMutateResult> execute(
         String graphNameAsString,
         Map<String, Object> rawConfiguration
-    ) {
-        var resultBuilder = new CollapsePathResultBuilderForMutateMode();
-
-        return genericStub.execute(
-            graphNameAsString,
-            rawConfiguration,
-            CollapsePathConfig::of,
-            mutateModeBusinessFacade::collapsePath,
-            resultBuilder
-        );
-    }
-
+    );
 }

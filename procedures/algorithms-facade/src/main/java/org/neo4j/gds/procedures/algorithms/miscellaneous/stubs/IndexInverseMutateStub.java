@@ -20,70 +20,27 @@
 package org.neo4j.gds.procedures.algorithms.miscellaneous.stubs;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.miscellaneous.MiscellaneousApplicationsMutateModeBusinessFacade;
 import org.neo4j.gds.indexInverse.InverseRelationshipsConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.IndexInverseMutateResult;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class IndexInverseMutateStub implements MutateStub<InverseRelationshipsConfig, IndexInverseMutateResult> {
-    private final GenericStub genericStub;
-    private final MiscellaneousApplicationsEstimationModeBusinessFacade estimationModeBusinessFacade;
-    private final MiscellaneousApplicationsMutateModeBusinessFacade mutateModeBusinessFacade;
-
-    public IndexInverseMutateStub(
-        GenericStub genericStub,
-        MiscellaneousApplicationsEstimationModeBusinessFacade estimationModeBusinessFacade,
-        MiscellaneousApplicationsMutateModeBusinessFacade mutateModeBusinessFacade
-    ) {
-        this.genericStub = genericStub;
-        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
-        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
-    }
+public interface IndexInverseMutateStub extends MutateStub<InverseRelationshipsConfig, IndexInverseMutateResult> {
+    @Override
+    InverseRelationshipsConfig parseConfiguration(Map<String, Object> configuration);
 
     @Override
-    public InverseRelationshipsConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(InverseRelationshipsConfig::of, configuration);
-    }
+    MemoryEstimation getMemoryEstimation(String username, Map<String, Object> rawConfiguration);
 
     @Override
-    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> rawConfiguration) {
-        return genericStub.getMemoryEstimation(
-            rawConfiguration,
-            InverseRelationshipsConfig::of,
-            estimationModeBusinessFacade::indexInverse
-        );
-    }
+    Stream<MemoryEstimateResult> estimate(Object graphNameAsString, Map<String, Object> rawConfiguration);
 
     @Override
-    public Stream<MemoryEstimateResult> estimate(Object graphNameAsString, Map<String, Object> rawConfiguration) {
-        return genericStub.estimate(
-            graphNameAsString,
-            rawConfiguration,
-            InverseRelationshipsConfig::of,
-            estimationModeBusinessFacade::indexInverse
-        );
-    }
-
-    @Override
-    public Stream<IndexInverseMutateResult> execute(
+    Stream<IndexInverseMutateResult> execute(
         String graphNameAsString,
         Map<String, Object> rawConfiguration
-    ) {
-        var resultBuilder = new IndexInverseResultBuilderForMutateMode();
-
-        return genericStub.execute(
-            graphNameAsString,
-            rawConfiguration,
-            InverseRelationshipsConfig::of,
-            mutateModeBusinessFacade::indexInverse,
-            resultBuilder
-        );
-    }
-
+    );
 }
