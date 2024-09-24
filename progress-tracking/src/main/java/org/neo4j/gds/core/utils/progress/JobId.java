@@ -20,44 +20,19 @@
 package org.neo4j.gds.core.utils.progress;
 
 import java.util.Locale;
-import java.util.Objects;
 import java.util.UUID;
 
-public final class JobId {
-    private final String value;
-
+public record JobId(String value) {
     public JobId() {
-        this.value = UUID.randomUUID().toString();
+        this(UUID.randomUUID().toString());
     }
 
     public JobId(UUID id) {
         this(id.toString());
     }
 
-    public JobId(String id) {
-        this.value = id;
-    }
-
     public String asString() {
         return value;
-    }
-
-    @Override
-    public String toString() {
-        return "JobId(" + value + ')';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        JobId that = (JobId) o;
-        return Objects.equals(value, that.value);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(value);
     }
 
     public static JobId parse(Object input) {
