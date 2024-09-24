@@ -63,7 +63,7 @@ public class MemoryEstimateResult {
         this.relationshipCount = dimensions.relCountUpperBound();
     }
 
-    private double getPercentage(long requiredBytes, long heapSizeBytes) {
+    private static double getPercentage(long requiredBytes, long heapSizeBytes) {
         if (heapSizeBytes == 0) {
             return Double.NaN;
         }
@@ -71,4 +71,27 @@ public class MemoryEstimateResult {
             .divide(BigDecimal.valueOf(heapSizeBytes), 1, RoundingMode.UP)
             .doubleValue();
     }
+
+    public MemoryEstimateResult(
+        String requiredMemory,
+        String treeView,
+        Map<String, Object> mapView,
+        long bytesMin,
+        long bytesMax,
+        long nodeCount,
+        long relationshipCount,
+        double heapPercentageMin,
+        double heapPercentageMax
+    ) {
+        this.requiredMemory = requiredMemory;
+        this.treeView = treeView;
+        this.mapView = mapView;
+        this.bytesMin = bytesMin;
+        this.bytesMax = bytesMax;
+        this.nodeCount = nodeCount;
+        this.relationshipCount = relationshipCount;
+        this.heapPercentageMin = heapPercentageMin;
+        this.heapPercentageMax = heapPercentageMax;
+    }
+
 }
