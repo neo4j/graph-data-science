@@ -19,72 +19,28 @@
  */
 package org.neo4j.gds.procedures.algorithms.embeddings.stubs;
 
-import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.embeddings.Node2VecMutateResult;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class Node2VecMutateStub implements MutateStub<Node2VecMutateConfig, Node2VecMutateResult> {
-
-    private final GenericStub genericStub;
-    private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
-    private final NodeEmbeddingAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
-
-    public Node2VecMutateStub(
-        GenericStub genericStub,
-        NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
-        NodeEmbeddingAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade
-    ) {
-        this.genericStub = genericStub;
-        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
-        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
-    }
+public interface Node2VecMutateStub extends MutateStub<Node2VecMutateConfig, Node2VecMutateResult> {
+    @Override
+    Node2VecMutateConfig parseConfiguration(Map<String, Object> configuration);
 
     @Override
-    public Node2VecMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(Node2VecMutateConfig::of, configuration);
-    }
+    MemoryEstimation getMemoryEstimation(String username, Map<String, Object> rawConfiguration);
 
     @Override
-    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> rawConfiguration) {
-        return genericStub.getMemoryEstimation(
-            rawConfiguration,
-            Node2VecMutateConfig::of,
-            estimationModeBusinessFacade::node2Vec
-        );
-    }
+    Stream<MemoryEstimateResult> estimate(Object graphNameAsString, Map<String, Object> rawConfiguration);
 
     @Override
-    public Stream<MemoryEstimateResult> estimate(Object graphNameAsString, Map<String, Object> rawConfiguration) {
-        return genericStub.estimate(
-            graphNameAsString,
-            rawConfiguration,
-            Node2VecMutateConfig::of,
-            estimationModeBusinessFacade::node2Vec
-        );
-    }
-
-    @Override
-    public Stream<Node2VecMutateResult> execute(
+    Stream<Node2VecMutateResult> execute(
         String graphNameAsString,
         Map<String, Object> rawConfiguration
-    ) {
-        var resultBuilder = new Node2VecResultBuilderForMutateMode();
-
-        return genericStub.execute(
-            graphNameAsString,
-            rawConfiguration,
-            Node2VecMutateConfig::of,
-            mutateModeBusinessFacade::node2Vec,
-            resultBuilder
-        );
-    }
-
+    );
 }

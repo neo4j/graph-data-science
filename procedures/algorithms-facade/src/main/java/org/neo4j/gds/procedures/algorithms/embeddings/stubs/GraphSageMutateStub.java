@@ -19,86 +19,28 @@
  */
 package org.neo4j.gds.procedures.algorithms.embeddings.stubs;
 
-import org.neo4j.gds.api.User;
-import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.core.Username;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMutateConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.embeddings.DefaultNodeEmbeddingMutateResult;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class GraphSageMutateStub implements MutateStub<GraphSageMutateConfig, DefaultNodeEmbeddingMutateResult> {
-
-    private final User user;
-    private final GenericStub genericStub;
-    private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
-    private final NodeEmbeddingAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
-
-    public GraphSageMutateStub(
-        User user,
-        GenericStub genericStub,
-        NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
-        NodeEmbeddingAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade
-    ) {
-        this.user = user;
-        this.genericStub = genericStub;
-        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
-        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
-    }
+public interface GraphSageMutateStub extends MutateStub<GraphSageMutateConfig, DefaultNodeEmbeddingMutateResult> {
+    @Override
+    GraphSageMutateConfig parseConfiguration(Map<String, Object> configuration);
 
     @Override
-    public GraphSageMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(cypherMapWrapper -> GraphSageMutateConfig.of(
-            Username.EMPTY_USERNAME.username(),
-            cypherMapWrapper
-        ), configuration);
-    }
+    MemoryEstimation getMemoryEstimation(String username, Map<String, Object> rawConfiguration);
 
     @Override
-    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> rawConfiguration) {
-        return genericStub.getMemoryEstimation(
-            rawConfiguration,
-            cypherMapWrapper -> GraphSageMutateConfig.of(username, cypherMapWrapper),
-            configuration -> estimationModeBusinessFacade.graphSage(configuration, true)
-        );
-    }
+    Stream<MemoryEstimateResult> estimate(Object graphNameAsString, Map<String, Object> rawConfiguration);
 
     @Override
-    public Stream<MemoryEstimateResult> estimate(Object graphNameAsString, Map<String, Object> rawConfiguration) {
-        return genericStub.estimate(
-            graphNameAsString,
-            rawConfiguration,
-            cypherMapWrapper -> GraphSageMutateConfig.of(
-                user.getUsername(),
-                cypherMapWrapper
-            ),
-            configuration -> estimationModeBusinessFacade.graphSage(configuration, true)
-        );
-    }
-
-    @Override
-    public Stream<DefaultNodeEmbeddingMutateResult> execute(
+    Stream<DefaultNodeEmbeddingMutateResult> execute(
         String graphNameAsString,
         Map<String, Object> rawConfiguration
-    ) {
-        var resultBuilder = new GraphSageResultBuilderForMutateMode();
-
-        var username =  user.getUsername();
-
-        return genericStub.execute(
-            graphNameAsString,
-            rawConfiguration,
-            cypherMapWrapper -> GraphSageMutateConfig.of(username, cypherMapWrapper),
-            mutateModeBusinessFacade::graphSage,
-            resultBuilder
-        );
-    }
-
-
+    );
 }

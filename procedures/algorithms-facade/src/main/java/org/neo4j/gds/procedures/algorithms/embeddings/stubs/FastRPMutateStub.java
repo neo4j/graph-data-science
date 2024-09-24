@@ -19,73 +19,28 @@
  */
 package org.neo4j.gds.procedures.algorithms.embeddings.stubs;
 
-import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.embeddings.fastrp.FastRPMutateConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.embeddings.DefaultNodeEmbeddingMutateResult;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class FastRPMutateStub implements MutateStub<FastRPMutateConfig, DefaultNodeEmbeddingMutateResult> {
-
-    private final GenericStub genericStub;
-    private final NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
-    private final NodeEmbeddingAlgorithmsMutateModeBusinessFacade  mutateModeBusinessFacade;
-
-    public FastRPMutateStub(
-        GenericStub genericStub,
-        NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
-        NodeEmbeddingAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade
-    ) {
-        this.genericStub = genericStub;
-        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
-        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
-    }
+public interface FastRPMutateStub extends MutateStub<FastRPMutateConfig, DefaultNodeEmbeddingMutateResult> {
+    @Override
+    FastRPMutateConfig parseConfiguration(Map<String, Object> configuration);
 
     @Override
-    public FastRPMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(FastRPMutateConfig::of, configuration);
-    }
+    MemoryEstimation getMemoryEstimation(String username, Map<String, Object> rawConfiguration);
 
     @Override
-    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> rawConfiguration) {
-        return genericStub.getMemoryEstimation(
-            rawConfiguration,
-            FastRPMutateConfig::of,
-            estimationModeBusinessFacade::fastRP
-        );
-    }
+    Stream<MemoryEstimateResult> estimate(Object graphNameAsString, Map<String, Object> rawConfiguration);
 
     @Override
-    public Stream<MemoryEstimateResult> estimate(Object graphNameAsString, Map<String, Object> rawConfiguration) {
-        return genericStub.estimate(
-            graphNameAsString,
-            rawConfiguration,
-            FastRPMutateConfig::of,
-            estimationModeBusinessFacade::fastRP
-        );
-    }
-
-    @Override
-    public Stream<DefaultNodeEmbeddingMutateResult> execute(
+    Stream<DefaultNodeEmbeddingMutateResult> execute(
         String graphNameAsString,
         Map<String, Object> rawConfiguration
-    ) {
-        var resultBuilder = new FastRPResultBuilderForMutateMode();
-
-        return genericStub.execute(
-            graphNameAsString,
-            rawConfiguration,
-            FastRPMutateConfig::of,
-            mutateModeBusinessFacade::fastRP,
-            resultBuilder
-        );
-    }
-
-
+    );
 }
