@@ -1,0 +1,13 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: GDS Values'
+group = 'org.neo4j.gds'
+
+dependencies {
+    api                 project(':graph-projection-api')
+    compileOnly         openGds.jetbrains.annotations
+    testImplementation  platform(openGds.junit5bom)
+    testImplementation  openGds.junit.pioneer
+    testImplementation  openGds.junit5.jupiter.engine
+    testImplementation  openGds.assertj.core
+}

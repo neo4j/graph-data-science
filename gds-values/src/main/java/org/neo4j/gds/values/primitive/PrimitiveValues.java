@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.values.primitive;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.values.Array;
 import org.neo4j.gds.values.DoubleArray;
@@ -30,13 +29,13 @@ import org.neo4j.gds.values.GdsValue;
 import org.neo4j.gds.values.IntegralValue;
 import org.neo4j.gds.values.LongArray;
 
+import java.util.Locale;
 import java.util.Objects;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-
 public final class PrimitiveValues {
+    private static final long[] EMPTY_LONGS = new long[0];
     public static final GdsNoValue NO_VALUE = GdsNoValue.NO_VALUE;
-    public static final LongArray EMPTY_LONG_ARRAY = longArray(ArrayUtils.EMPTY_LONG_ARRAY);
+    public static final LongArray EMPTY_LONG_ARRAY = longArray(EMPTY_LONGS);
 
     public static GdsValue create(@Nullable Object value) {
         GdsValue of = of(value);
@@ -44,7 +43,12 @@ public final class PrimitiveValues {
             return of;
         }
         Objects.requireNonNull(value);
-        throw new IllegalArgumentException(formatWithLocale("[%s:%s] is not a supported property value", value, value.getClass().getName()));
+        throw new IllegalArgumentException(
+            String.format(
+                Locale.ENGLISH,
+                "[%s:%s] is not a supported property value", value, value.getClass().getName()
+            )
+        );
     }
 
     private static @Nullable GdsValue of(Object value) {

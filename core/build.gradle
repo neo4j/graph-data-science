@@ -23,6 +23,7 @@ dependencies {
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core-utils')
+    implementation project(':gds-values')
     implementation project(':licensing')
     implementation project(':logging')
     implementation project(':graph-schema-api')
