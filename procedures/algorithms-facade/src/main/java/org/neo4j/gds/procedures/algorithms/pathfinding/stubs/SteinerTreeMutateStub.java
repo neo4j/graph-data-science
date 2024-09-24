@@ -20,67 +20,24 @@
 package org.neo4j.gds.procedures.algorithms.pathfinding.stubs;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SteinerMutateResult;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 import org.neo4j.gds.steiner.SteinerTreeMutateConfig;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class SteinerTreeMutateStub implements MutateStub<SteinerTreeMutateConfig, SteinerMutateResult> {
-    private final GenericStub genericStub;
-    private final PathFindingAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
-    private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
-
-    public SteinerTreeMutateStub(
-        GenericStub genericStub,
-        PathFindingAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
-        PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade
-    ) {
-        this.genericStub = genericStub;
-        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
-        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
-    }
+public interface SteinerTreeMutateStub extends MutateStub<SteinerTreeMutateConfig, SteinerMutateResult> {
+    @Override
+    SteinerTreeMutateConfig parseConfiguration(Map<String, Object> configuration);
 
     @Override
-    public SteinerTreeMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(SteinerTreeMutateConfig::of, configuration);
-    }
+    MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration);
 
     @Override
-    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
-        return genericStub.getMemoryEstimation(
-            configuration,
-            SteinerTreeMutateConfig::of,
-            estimationModeBusinessFacade::steinerTree
-        );
-    }
+    Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration);
 
     @Override
-    public Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration) {
-        return genericStub.estimate(
-            graphName,
-            configuration,
-            SteinerTreeMutateConfig::of,
-            estimationModeBusinessFacade::steinerTree
-        );
-    }
-
-    @Override
-    public Stream<SteinerMutateResult> execute(String graphName, Map<String, Object> configuration) {
-        var resultBuilder = new SteinerTreeResultBuilderForMutateMode();
-
-        return genericStub.execute(
-            graphName,
-            configuration,
-            SteinerTreeMutateConfig::of,
-            mutateModeBusinessFacade::steinerTree,
-            resultBuilder
-        );
-    }
-
+    Stream<SteinerMutateResult> execute(String graphName, Map<String, Object> configuration);
 }

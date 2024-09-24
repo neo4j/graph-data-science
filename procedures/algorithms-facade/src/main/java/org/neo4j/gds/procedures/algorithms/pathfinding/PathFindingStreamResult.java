@@ -23,15 +23,11 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.graphdb.Path;
-import org.neo4j.graphdb.RelationshipType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static org.neo4j.gds.paths.PathFactory.create;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class PathFindingStreamResult {
 
@@ -83,7 +79,6 @@ public final class PathFindingStreamResult {
             var costs = pathResult.costs();
             var pathIndex = pathResult.index();
 
-            var relationshipType = RelationshipType.withName(formatWithLocale("PATH_%d", pathIndex));
 
             // convert internal ids to Neo ids
             for (int i = 0; i < nodeIds.length; i++) {
@@ -92,12 +87,11 @@ public final class PathFindingStreamResult {
 
             Path path = null;
             if (createCypherPath) {
-                    path = create(
+                    path = StandardStreamPathCreator.create(
                         nodeLookup,
                         nodeIds,
                         costs,
-                        relationshipType,
-                        COST_PROPERTY_NAME
+                        pathIndex
                     );
 
 

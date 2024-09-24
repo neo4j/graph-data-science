@@ -21,22 +21,22 @@ package org.neo4j.gds.procedures.algorithms.pathfinding.stubs;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaMutateConfig;
+import org.neo4j.gds.paths.traverse.DfsMutateConfig;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public interface DeltaSteppingMutateStub extends MutateStub<AllShortestPathsDeltaMutateConfig, PathFindingMutateResult> {
+public interface DFSMutateStub extends MutateStub<DfsMutateConfig, PathFindingMutateResult> {
     @Override
-    AllShortestPathsDeltaMutateConfig parseConfiguration(Map<String, Object> configuration);
+    DfsMutateConfig parseConfiguration(Map<String, Object> configuration);
 
     @Override
     MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration);
 
     @Override
-    Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> rawConfiguration);
+    Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration);
 
     @Override
     Stream<PathFindingMutateResult> execute(String graphName, Map<String, Object> configuration);

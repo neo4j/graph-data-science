@@ -20,66 +20,24 @@
 package org.neo4j.gds.procedures.algorithms.pathfinding.stubs;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeMutateResult;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 import org.neo4j.gds.spanningtree.SpanningTreeMutateConfig;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class SpanningTreeMutateStub implements MutateStub<SpanningTreeMutateConfig, SpanningTreeMutateResult> {
-    private final GenericStub genericStub;
-    private final PathFindingAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
-    private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
-
-    public SpanningTreeMutateStub(
-        GenericStub genericStub,
-        PathFindingAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
-        PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade
-    ) {
-        this.genericStub = genericStub;
-        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
-        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
-    }
+public interface SpanningTreeMutateStub extends MutateStub<SpanningTreeMutateConfig, SpanningTreeMutateResult> {
     @Override
-    public SpanningTreeMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(SpanningTreeMutateConfig::of, configuration);
-    }
+    SpanningTreeMutateConfig parseConfiguration(Map<String, Object> configuration);
 
     @Override
-    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
-        return genericStub.getMemoryEstimation(
-            configuration,
-            SpanningTreeMutateConfig::of,
-            __ -> estimationModeBusinessFacade.spanningTree()
-        );
-    }
+    MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration);
 
     @Override
-    public Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration) {
-        return genericStub.estimate(
-            graphName,
-            configuration,
-            SpanningTreeMutateConfig::of,
-            __ -> estimationModeBusinessFacade.spanningTree()
-        );
-    }
+    Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration);
 
     @Override
-    public Stream<SpanningTreeMutateResult> execute(String graphName, Map<String, Object> configuration) {
-        var resultBuilder = new SpanningTreeResultBuilderForMutateMode();
-
-        return genericStub.execute(
-            graphName,
-            configuration,
-            SpanningTreeMutateConfig::of,
-            mutateModeBusinessFacade::spanningTree,
-            resultBuilder
-        );
-    }
-
+    Stream<SpanningTreeMutateResult> execute(String graphName, Map<String, Object> configuration);
 }

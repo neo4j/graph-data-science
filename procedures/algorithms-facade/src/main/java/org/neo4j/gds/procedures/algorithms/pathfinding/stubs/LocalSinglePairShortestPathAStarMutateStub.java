@@ -23,20 +23,21 @@ import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.paths.traverse.BfsMutateConfig;
+import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingResultBuilderForMutateMode;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
-import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class BreadthFirstSearchMutateStub implements MutateStub<BfsMutateConfig, PathFindingMutateResult> {
+public class LocalSinglePairShortestPathAStarMutateStub implements
+    SinglePairShortestPathAStarMutateStub {
     private final GenericStub genericStub;
     private final PathFindingAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
     private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
 
-    public BreadthFirstSearchMutateStub(
+    public LocalSinglePairShortestPathAStarMutateStub(
         GenericStub genericStub,
         PathFindingAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade
@@ -45,17 +46,18 @@ public class BreadthFirstSearchMutateStub implements MutateStub<BfsMutateConfig,
         this.mutateModeBusinessFacade = mutateModeBusinessFacade;
         this.estimationModeBusinessFacade = estimationModeBusinessFacade;
     }
+
     @Override
-    public BfsMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(BfsMutateConfig::of, configuration);
+    public ShortestPathAStarMutateConfig parseConfiguration(Map<String, Object> configuration) {
+        return genericStub.parseConfiguration(ShortestPathAStarMutateConfig::of, configuration);
     }
 
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
             configuration,
-            BfsMutateConfig::of,
-            __ -> estimationModeBusinessFacade.breadthFirstSearch()
+            ShortestPathAStarMutateConfig::of,
+            __ -> estimationModeBusinessFacade.singlePairShortestPathAStar()
         );
     }
 
@@ -64,21 +66,19 @@ public class BreadthFirstSearchMutateStub implements MutateStub<BfsMutateConfig,
         return genericStub.estimate(
             graphName,
             configuration,
-            BfsMutateConfig::of,
-            __ -> estimationModeBusinessFacade.breadthFirstSearch()
+            ShortestPathAStarMutateConfig::of,
+            __ -> estimationModeBusinessFacade.singlePairShortestPathAStar()
         );
     }
 
     @Override
     public Stream<PathFindingMutateResult> execute(String graphName, Map<String, Object> configuration) {
-        var resultBuilder = new BreadthFirstSearchResultBuilderForMutateMode();
-
         return genericStub.execute(
             graphName,
             configuration,
-            BfsMutateConfig::of,
-            mutateModeBusinessFacade::breadthFirstSearch,
-            resultBuilder
+            ShortestPathAStarMutateConfig::of,
+            mutateModeBusinessFacade::singlePairShortestPathAStar,
+            new PathFindingResultBuilderForMutateMode<>()
         );
     }
 

@@ -23,20 +23,20 @@ import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.paths.traverse.DfsMutateConfig;
-import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.RandomWalkMutateResult;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
-import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
+import org.neo4j.gds.traversal.RandomWalkMutateConfig;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class DepthFirstSearchMutateStub implements MutateStub<DfsMutateConfig, PathFindingMutateResult> {
+public class LocalRandomWalkMutateStub implements
+    RandomWalkMutateStub {
     private final GenericStub genericStub;
     private final PathFindingAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
     private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
 
-    public DepthFirstSearchMutateStub(
+    public LocalRandomWalkMutateStub(
         GenericStub genericStub,
         PathFindingAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade
@@ -46,16 +46,16 @@ public class DepthFirstSearchMutateStub implements MutateStub<DfsMutateConfig, P
         this.estimationModeBusinessFacade = estimationModeBusinessFacade;
     }
     @Override
-    public DfsMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(DfsMutateConfig::of, configuration);
+    public RandomWalkMutateConfig parseConfiguration(Map<String, Object> configuration) {
+        return genericStub.parseConfiguration(RandomWalkMutateConfig::of, configuration);
     }
 
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
             configuration,
-            DfsMutateConfig::of,
-            __ -> estimationModeBusinessFacade.depthFirstSearch()
+            RandomWalkMutateConfig::of,
+            estimationModeBusinessFacade::randomWalkCountingVisits
         );
     }
 
@@ -64,20 +64,20 @@ public class DepthFirstSearchMutateStub implements MutateStub<DfsMutateConfig, P
         return genericStub.estimate(
             graphName,
             configuration,
-            DfsMutateConfig::of,
-            __ -> estimationModeBusinessFacade.depthFirstSearch()
+            RandomWalkMutateConfig::of,
+            estimationModeBusinessFacade::randomWalkCountingVisits
         );
     }
 
     @Override
-    public Stream<PathFindingMutateResult> execute(String graphName, Map<String, Object> configuration) {
-        var resultBuilder = new DepthFirstSearchResultBuilderForMutateMode();
+    public Stream<RandomWalkMutateResult> execute(String graphName, Map<String, Object> configuration) {
+        var resultBuilder = new RandomWalkResultBuilderForMutateMode();
 
         return genericStub.execute(
             graphName,
             configuration,
-            DfsMutateConfig::of,
-            mutateModeBusinessFacade::depthFirstSearch,
+            RandomWalkMutateConfig::of,
+            mutateModeBusinessFacade::randomWalk,
             resultBuilder
         );
     }

@@ -20,66 +20,24 @@
 package org.neo4j.gds.procedures.algorithms.pathfinding.stubs;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.pathfinding.RandomWalkMutateResult;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 import org.neo4j.gds.traversal.RandomWalkMutateConfig;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class RandomWalkMutateStub implements MutateStub<RandomWalkMutateConfig, RandomWalkMutateResult> {
-    private final GenericStub genericStub;
-    private final PathFindingAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
-    private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
-
-    public RandomWalkMutateStub(
-        GenericStub genericStub,
-        PathFindingAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
-        PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade
-    ) {
-        this.genericStub = genericStub;
-        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
-        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
-    }
+public interface RandomWalkMutateStub extends MutateStub<RandomWalkMutateConfig, RandomWalkMutateResult> {
     @Override
-    public RandomWalkMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(RandomWalkMutateConfig::of, configuration);
-    }
+    RandomWalkMutateConfig parseConfiguration(Map<String, Object> configuration);
 
     @Override
-    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
-        return genericStub.getMemoryEstimation(
-            configuration,
-            RandomWalkMutateConfig::of,
-            estimationModeBusinessFacade::randomWalkCountingVisits
-        );
-    }
+    MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration);
 
     @Override
-    public Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration) {
-        return genericStub.estimate(
-            graphName,
-            configuration,
-            RandomWalkMutateConfig::of,
-            estimationModeBusinessFacade::randomWalkCountingVisits
-        );
-    }
+    Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration);
 
     @Override
-    public Stream<RandomWalkMutateResult> execute(String graphName, Map<String, Object> configuration) {
-        var resultBuilder = new RandomWalkResultBuilderForMutateMode();
-
-        return genericStub.execute(
-            graphName,
-            configuration,
-            RandomWalkMutateConfig::of,
-            mutateModeBusinessFacade::randomWalk,
-            resultBuilder
-        );
-    }
-
+    Stream<RandomWalkMutateResult> execute(String graphName, Map<String, Object> configuration);
 }

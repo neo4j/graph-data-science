@@ -24,6 +24,9 @@ import org.neo4j.graphdb.Path;
 import java.util.List;
 
 public final class BfsStreamResult {
+
+    public static final String RELATIONSHIP_TYPE_NAME = "NEXT";
+
     public final long sourceNode;
     public final List<Long> nodeIds;
     public final Path path;

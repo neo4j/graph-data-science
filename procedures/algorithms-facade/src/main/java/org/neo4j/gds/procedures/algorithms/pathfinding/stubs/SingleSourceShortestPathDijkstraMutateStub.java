@@ -20,65 +20,24 @@
 package org.neo4j.gds.procedures.algorithms.pathfinding.stubs;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraMutateConfig;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
-import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingResultBuilderForMutateMode;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class SingleSourceShortestPathDijkstraMutateStub implements MutateStub<AllShortestPathsDijkstraMutateConfig, PathFindingMutateResult> {
-    private final GenericStub genericStub;
-    private final PathFindingAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
-    private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
-
-    public SingleSourceShortestPathDijkstraMutateStub(
-        GenericStub genericStub,
-        PathFindingAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
-        PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade
-    ) {
-        this.genericStub = genericStub;
-        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
-        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
-    }
+public interface SingleSourceShortestPathDijkstraMutateStub extends MutateStub<AllShortestPathsDijkstraMutateConfig, PathFindingMutateResult> {
     @Override
-    public AllShortestPathsDijkstraMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(AllShortestPathsDijkstraMutateConfig::of, configuration);
-    }
+    AllShortestPathsDijkstraMutateConfig parseConfiguration(Map<String, Object> configuration);
 
     @Override
-    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
-        return genericStub.getMemoryEstimation(
-            configuration,
-            AllShortestPathsDijkstraMutateConfig::of,
-            estimationModeBusinessFacade::singleSourceShortestPathDijkstra
-        );
-    }
+    MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration);
 
     @Override
-    public Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration) {
-        return genericStub.estimate(
-            graphName,
-            configuration,
-            AllShortestPathsDijkstraMutateConfig::of,
-            estimationModeBusinessFacade::singleSourceShortestPathDijkstra
-        );
-    }
+    Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration);
 
     @Override
-    public Stream<PathFindingMutateResult> execute(String graphName, Map<String, Object> configuration) {
-        return genericStub.execute(
-            graphName,
-            configuration,
-            AllShortestPathsDijkstraMutateConfig::of,
-            mutateModeBusinessFacade::singleSourceShortestPathDijkstra,
-            new PathFindingResultBuilderForMutateMode<>()
-        );
-    }
-
+    Stream<PathFindingMutateResult> execute(String graphName, Map<String, Object> configuration);
 }

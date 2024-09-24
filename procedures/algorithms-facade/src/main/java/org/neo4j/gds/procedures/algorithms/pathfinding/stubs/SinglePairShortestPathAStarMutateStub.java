@@ -19,67 +19,25 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding.stubs;
 
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
-import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
-import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingResultBuilderForMutateMode;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class SinglePairShortestPathAStarMutateStub implements MutateStub<ShortestPathAStarMutateConfig, PathFindingMutateResult> {
-    private final GenericStub genericStub;
-    private final PathFindingAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
-    private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
-
-    public SinglePairShortestPathAStarMutateStub(
-        GenericStub genericStub,
-        PathFindingAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
-        PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade
-    ) {
-        this.genericStub = genericStub;
-        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
-        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
-    }
+public interface SinglePairShortestPathAStarMutateStub extends MutateStub<ShortestPathAStarMutateConfig, PathFindingMutateResult> {
+    @Override
+    ShortestPathAStarMutateConfig parseConfiguration(Map<String, Object> configuration);
 
     @Override
-    public ShortestPathAStarMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(ShortestPathAStarMutateConfig::of, configuration);
-    }
+    MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration);
 
     @Override
-    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
-        return genericStub.getMemoryEstimation(
-            configuration,
-            ShortestPathAStarMutateConfig::of,
-            __ -> estimationModeBusinessFacade.singlePairShortestPathAStar()
-        );
-    }
+    Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration);
 
     @Override
-    public Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration) {
-        return genericStub.estimate(
-            graphName,
-            configuration,
-            ShortestPathAStarMutateConfig::of,
-            __ -> estimationModeBusinessFacade.singlePairShortestPathAStar()
-        );
-    }
-
-    @Override
-    public Stream<PathFindingMutateResult> execute(String graphName, Map<String, Object> configuration) {
-        return genericStub.execute(
-            graphName,
-            configuration,
-            ShortestPathAStarMutateConfig::of,
-            mutateModeBusinessFacade::singlePairShortestPathAStar,
-            new PathFindingResultBuilderForMutateMode<>()
-        );
-    }
-
+    Stream<PathFindingMutateResult> execute(String graphName, Map<String, Object> configuration);
 }

@@ -30,6 +30,8 @@ import org.neo4j.graphdb.RelationshipType;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.procedures.algorithms.pathfinding.BfsStreamResult.RELATIONSHIP_TYPE_NAME;
+
 class BfsStreamResultBuilder implements StreamResultBuilder<HugeLongArray, BfsStreamResult> {
     private final NodeLookup nodeLookup;
     private final boolean pathRequested;
@@ -57,7 +59,7 @@ class BfsStreamResultBuilder implements StreamResultBuilder<HugeLongArray, BfsSt
             BfsStreamResult::new,
             pathRequested && graphStore.capabilities().canWriteToLocalDatabase(),
             new PathFactoryFacade(),
-            RelationshipType.withName("NEXT"),
+            RelationshipType.withName(RELATIONSHIP_TYPE_NAME),
             nodeLookup
         );
     }

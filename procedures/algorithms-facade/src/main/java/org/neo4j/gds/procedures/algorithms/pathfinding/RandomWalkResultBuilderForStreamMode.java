@@ -35,6 +35,8 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.procedures.algorithms.pathfinding.RandomWalkStreamResult.RELATIONSHIP_TYPE_NAME;
+
 class RandomWalkResultBuilderForStreamMode implements StreamResultBuilder<Stream<long[]>, RandomWalkStreamResult> {
     private final CloseableResourceRegistry closeableResourceRegistry;
     private final NodeLookup nodeLookup;
@@ -59,7 +61,8 @@ class RandomWalkResultBuilderForStreamMode implements StreamResultBuilder<Stream
         if (result.isEmpty()) return Stream.empty();
 
         Function<List<Long>, Path> pathCreator = returnPath
-            ? (List<Long> nodes) -> PathFactory.create(nodeLookup, nodes, RelationshipType.withName("NEXT"))
+            ? (List<Long> nodes) -> PathFactory.create(nodeLookup, nodes, RelationshipType.withName(
+            RELATIONSHIP_TYPE_NAME))
             : (List<Long> nodes) -> null;
 
         var streamOfLongArrays = result.get();

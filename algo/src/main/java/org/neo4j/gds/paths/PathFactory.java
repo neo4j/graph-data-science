@@ -65,6 +65,36 @@ public final class PathFactory {
     public static Path create(
         NodeLookup nodeLookup,
         List<Long> nodeIds,
+        List<Double> costs,
+        RelationshipType relationshipType,
+        String costPropertyName
+    ) {
+        var firstNodeId = nodeIds.get(0);
+        var pathBuilder = new PathImpl.Builder(nodeLookup.getNodeById(firstNodeId));
+
+        var size = nodeIds.size();
+        for (int i = 0; i < size - 1; i++) {
+            long sourceNodeId = nodeIds.get(i);
+            long targetNodeId = nodeIds.get(i + 1);
+
+
+            var relationship = Neo4jProxy.virtualRelationship(
+                RelationshipIds.next(),
+                nodeLookup.getNodeById(sourceNodeId),
+                nodeLookup.getNodeById(targetNodeId),
+                relationshipType
+            );
+            var costDifference = costs.get(i + 1) - costs.get(i);
+            relationship.setProperty(costPropertyName, costDifference);
+            pathBuilder = pathBuilder.push(relationship);
+        }
+
+        return pathBuilder.build();
+    }
+
+    public static Path create(
+        NodeLookup nodeLookup,
+        List<Long> nodeIds,
         RelationshipType relationshipType
     ) {
         var firstNodeId = nodeIds.get(0);
