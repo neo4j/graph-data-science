@@ -19,71 +19,28 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality.stubs;
 
-import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.articulationpoints.ArticulationPointsMutateConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.centrality.ArticulationPointsMutateResult;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class ArticulationPointsMutateStub implements MutateStub<ArticulationPointsMutateConfig, ArticulationPointsMutateResult> {
-    private final GenericStub genericStub;
-    private final CentralityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
-    private final CentralityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
-
-    public ArticulationPointsMutateStub(
-        GenericStub genericStub,
-        CentralityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
-        CentralityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade
-    ) {
-        this.genericStub = genericStub;
-        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
-        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
-    }
+public interface ArticulationPointsMutateStub extends MutateStub<ArticulationPointsMutateConfig, ArticulationPointsMutateResult> {
+    @Override
+    ArticulationPointsMutateConfig parseConfiguration(Map<String, Object> configuration);
 
     @Override
-    public ArticulationPointsMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(ArticulationPointsMutateConfig::of, configuration);
-    }
+    MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration);
 
     @Override
-    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
-        return genericStub.getMemoryEstimation(
-            configuration,
-            ArticulationPointsMutateConfig::of,
-            (config) -> estimationModeBusinessFacade.articulationPoints()
-        );
-    }
+    Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration);
 
     @Override
-    public Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration) {
-        return genericStub.estimate(
-            graphName,
-            configuration,
-            ArticulationPointsMutateConfig::of,
-            (config) -> estimationModeBusinessFacade.articulationPoints()
-        );
-    }
-
-    @Override
-    public Stream<ArticulationPointsMutateResult> execute(
+    Stream<ArticulationPointsMutateResult> execute(
         String graphNameAsString,
         Map<String, Object> rawConfiguration
-    ) {
-        var resultBuilder = new ArticulationPointsResultBuilderForMutateMode();
-
-        return genericStub.execute(
-            graphNameAsString,
-            rawConfiguration,
-            ArticulationPointsMutateConfig::of,
-            mutateModeBusinessFacade::articulationPoints,
-            resultBuilder
-        );
-    }
-
+    );
 }

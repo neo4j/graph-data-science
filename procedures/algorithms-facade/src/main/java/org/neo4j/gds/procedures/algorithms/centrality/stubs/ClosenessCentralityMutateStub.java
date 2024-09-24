@@ -19,73 +19,25 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality.stubs;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityMutateResult;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class ClosenessCentralityMutateStub implements MutateStub<ClosenessCentralityMutateConfig, CentralityMutateResult> {
-    private final GenericStub genericStub;
-    private final CentralityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
-    private final CentralityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
-    private final ProcedureReturnColumns procedureReturnColumns;
-
-    public ClosenessCentralityMutateStub(
-        GenericStub genericStub,
-        CentralityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
-        CentralityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
-        ProcedureReturnColumns procedureReturnColumns
-    ) {
-        this.genericStub = genericStub;
-        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
-        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
-        this.procedureReturnColumns = procedureReturnColumns;
-    }
+public interface ClosenessCentralityMutateStub extends MutateStub<ClosenessCentralityMutateConfig, CentralityMutateResult> {
+    @Override
+    ClosenessCentralityMutateConfig parseConfiguration(Map<String, Object> configuration);
 
     @Override
-    public ClosenessCentralityMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(ClosenessCentralityMutateConfig::of, configuration);
-    }
+    MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration);
 
     @Override
-    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
-        return genericStub.getMemoryEstimation(
-            configuration,
-            ClosenessCentralityMutateConfig::of,
-            estimationModeBusinessFacade::closenessCentrality
-        );
-    }
+    Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration);
 
     @Override
-    public Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration) {
-        return genericStub.estimate(
-            graphName,
-            configuration,
-            ClosenessCentralityMutateConfig::of,
-            estimationModeBusinessFacade::closenessCentrality
-        );
-    }
-
-    @Override
-    public Stream<CentralityMutateResult> execute(String graphNameAsString, Map<String, Object> rawConfiguration) {
-        var shouldComputeCentralityDistribution = procedureReturnColumns.contains("centralityDistribution");
-        var resultBuilder = new ClosenessCentralityResultBuilderForMutateMode(shouldComputeCentralityDistribution);
-
-        return genericStub.execute(
-            graphNameAsString,
-            rawConfiguration,
-            ClosenessCentralityMutateConfig::of,
-            mutateModeBusinessFacade::closenessCentrality,
-            resultBuilder
-        );
-    }
-
+    Stream<CentralityMutateResult> execute(String graphNameAsString, Map<String, Object> rawConfiguration);
 }

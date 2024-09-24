@@ -33,7 +33,7 @@ public final class AlphaHarmonicWriteResult {
     public final long preProcessingMillis;
     public final Map<String, Object> centralityDistribution;
 
-    AlphaHarmonicWriteResult(
+    public AlphaHarmonicWriteResult(
         long nodes,
         long preProcessingMillis,
         long computeMillis,

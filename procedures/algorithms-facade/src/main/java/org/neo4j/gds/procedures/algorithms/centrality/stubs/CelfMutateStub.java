@@ -19,68 +19,25 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality.stubs;
 
-import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationMutateConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.centrality.CELFMutateResult;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class CelfMutateStub implements MutateStub<InfluenceMaximizationMutateConfig, CELFMutateResult> {
-    private final GenericStub genericStub;
-    private final CentralityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
-    private final CentralityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
-
-    public CelfMutateStub(
-        GenericStub genericStub,
-        CentralityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
-        CentralityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade
-    ) {
-        this.genericStub = genericStub;
-        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
-        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
-    }
+public interface CelfMutateStub extends MutateStub<InfluenceMaximizationMutateConfig, CELFMutateResult> {
+    @Override
+    InfluenceMaximizationMutateConfig parseConfiguration(Map<String, Object> configuration);
 
     @Override
-    public InfluenceMaximizationMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(InfluenceMaximizationMutateConfig::of, configuration);
-    }
+    MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration);
 
     @Override
-    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
-        return genericStub.getMemoryEstimation(
-            configuration,
-            InfluenceMaximizationMutateConfig::of,
-            estimationModeBusinessFacade::celf
-        );
-    }
+    Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration);
 
     @Override
-    public Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration) {
-        return genericStub.estimate(
-            graphName,
-            configuration,
-            InfluenceMaximizationMutateConfig::of,
-            estimationModeBusinessFacade::celf
-        );
-    }
-
-    @Override
-    public Stream<CELFMutateResult> execute(String graphNameAsString, Map<String, Object> rawConfiguration) {
-        var resultBuilder = new CelfResultBuilderForMutateMode();
-
-        return genericStub.execute(
-            graphNameAsString,
-            rawConfiguration,
-            InfluenceMaximizationMutateConfig::of,
-            mutateModeBusinessFacade::celf,
-            resultBuilder
-        );
-    }
-
+    Stream<CELFMutateResult> execute(String graphNameAsString, Map<String, Object> rawConfiguration);
 }

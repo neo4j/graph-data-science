@@ -19,73 +19,25 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality.stubs;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.harmonic.HarmonicCentralityMutateConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityMutateResult;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class HarmonicCentralityMutateStub implements MutateStub<HarmonicCentralityMutateConfig, CentralityMutateResult> {
-    private final GenericStub genericStub;
-    private final CentralityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
-    private final CentralityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
-    private final ProcedureReturnColumns procedureReturnColumns;
-
-    public HarmonicCentralityMutateStub(
-        GenericStub genericStub,
-        CentralityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
-        CentralityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
-        ProcedureReturnColumns procedureReturnColumns
-    ) {
-        this.genericStub = genericStub;
-        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
-        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
-        this.procedureReturnColumns = procedureReturnColumns;
-    }
+public interface HarmonicCentralityMutateStub extends MutateStub<HarmonicCentralityMutateConfig, CentralityMutateResult> {
+    @Override
+    HarmonicCentralityMutateConfig parseConfiguration(Map<String, Object> configuration);
 
     @Override
-    public HarmonicCentralityMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(HarmonicCentralityMutateConfig::of, configuration);
-    }
+    MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration);
 
     @Override
-    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
-        return genericStub.getMemoryEstimation(
-            configuration,
-            HarmonicCentralityMutateConfig::of,
-            __ -> estimationModeBusinessFacade.harmonicCentrality()
-        );
-    }
+    Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration);
 
     @Override
-    public Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration) {
-        return genericStub.estimate(
-            graphName,
-            configuration,
-            HarmonicCentralityMutateConfig::of,
-            __ -> estimationModeBusinessFacade.harmonicCentrality()
-        );
-    }
-
-    @Override
-    public Stream<CentralityMutateResult> execute(String graphNameAsString, Map<String, Object> rawConfiguration) {
-        var shouldComputeCentralityDistribution = procedureReturnColumns.contains("centralityDistribution");
-        var resultBuilder = new HarmonicCentralityResultBuilderForMutateMode(shouldComputeCentralityDistribution);
-
-        return genericStub.execute(
-            graphNameAsString,
-            rawConfiguration,
-            HarmonicCentralityMutateConfig::of,
-            mutateModeBusinessFacade::harmonicCentrality,
-            resultBuilder
-        );
-    }
-
+    Stream<CentralityMutateResult> execute(String graphNameAsString, Map<String, Object> rawConfiguration);
 }
