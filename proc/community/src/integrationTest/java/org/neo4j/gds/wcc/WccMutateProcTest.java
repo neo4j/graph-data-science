@@ -75,7 +75,7 @@ import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.GraphDataScienceProceduresBuilder;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.community.CommunityProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.community.LocalCommunityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.community.WccMutateResult;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
@@ -607,9 +607,9 @@ class WccMutateProcTest extends BaseProcTest {
         var configurationParser = new UserSpecificConfigurationParser(new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance),requestScopedDependencies.getUser());
 
         var genericStub = new GenericStub(configurationParser, null);
-        var communityProcedureFacade = CommunityProcedureFacade.create(
+        var communityProcedureFacade = LocalCommunityProcedureFacade.create(
+            applicationsFacade.community(),
             genericStub,
-            applicationsFacade,
             null,
             ProcedureReturnColumns.EMPTY,
             new UserSpecificConfigurationParser(

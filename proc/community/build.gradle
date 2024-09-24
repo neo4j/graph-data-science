@@ -65,4 +65,7 @@ dependencies {
     testCompileOnly openGds.jetbrains.annotations
 
     testImplementation project(':opengds-extension')
+
+    integrationTestImplementation project(':algorithms-procedure-facade')
+    integrationTestImplementation project(':community-algorithms')
 }

@@ -19,70 +19,25 @@
  */
 package org.neo4j.gds.procedures.algorithms.community.stubs;
 
-import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.community.ApproxMaxKCutMutateResult;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class ApproximateMaximumKCutMutateStub implements MutateStub<ApproxMaxKCutMutateConfig, ApproxMaxKCutMutateResult> {
-
-    private final GenericStub genericStub;
-    private final CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
-    private final CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
-
-    public ApproximateMaximumKCutMutateStub(
-        GenericStub genericStub,
-        CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
-        CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade
-    ) {
-        this.genericStub = genericStub;
-        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
-        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
-    }
+public interface ApproximateMaximumKCutMutateStub extends MutateStub<ApproxMaxKCutMutateConfig, ApproxMaxKCutMutateResult> {
+    @Override
+    ApproxMaxKCutMutateConfig parseConfiguration(Map<String, Object> configuration);
 
     @Override
-    public ApproxMaxKCutMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(ApproxMaxKCutMutateConfig::of, configuration);
-    }
+    MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration);
 
     @Override
-    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
-        return genericStub.getMemoryEstimation(
-            configuration,
-            ApproxMaxKCutMutateConfig::of,
-            estimationModeBusinessFacade::approximateMaximumKCut
-        );
-    }
+    Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration);
 
     @Override
-    public Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration) {
-        return genericStub.estimate(
-            graphName,
-            configuration,
-            ApproxMaxKCutMutateConfig::of,
-            estimationModeBusinessFacade::approximateMaximumKCut
-        );
-    }
-
-    @Override
-    public Stream<ApproxMaxKCutMutateResult> execute(String graphNameAsString, Map<String, Object> rawConfiguration) {
-        var resultBuilder = new ApproxMaxKCutResultBuilderForMutateMode();
-
-        return genericStub.execute(
-            graphNameAsString,
-            rawConfiguration,
-            ApproxMaxKCutMutateConfig::of,
-            mutateModeBusinessFacade::approximateMaximumKCut,
-            resultBuilder
-        );
-    }
-
-
+    Stream<ApproxMaxKCutMutateResult> execute(String graphNameAsString, Map<String, Object> rawConfiguration);
 }

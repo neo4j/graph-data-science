@@ -19,72 +19,28 @@
  */
 package org.neo4j.gds.procedures.algorithms.community.stubs;
 
-import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.community.LocalClusteringCoefficientMutateResult;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateConfig;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class LccMutateStub implements MutateStub<LocalClusteringCoefficientMutateConfig, LocalClusteringCoefficientMutateResult> {
-
-    private final GenericStub genericStub;
-    private final CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
-    private final CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
-
-    public LccMutateStub(
-        GenericStub genericStub,
-        CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
-        CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade
-    ) {
-        this.genericStub = genericStub;
-        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
-        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
-    }
+public interface LccMutateStub extends MutateStub<LocalClusteringCoefficientMutateConfig, LocalClusteringCoefficientMutateResult> {
+    @Override
+    LocalClusteringCoefficientMutateConfig parseConfiguration(Map<String, Object> configuration);
 
     @Override
-    public LocalClusteringCoefficientMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(LocalClusteringCoefficientMutateConfig::of, configuration);
-    }
+    MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration);
 
     @Override
-    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
-        return genericStub.getMemoryEstimation(
-            configuration,
-            LocalClusteringCoefficientMutateConfig::of,
-            estimationModeBusinessFacade::lcc
-        );
-    }
+    Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration);
 
     @Override
-    public Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration) {
-        return genericStub.estimate(
-            graphName,
-            configuration,
-            LocalClusteringCoefficientMutateConfig::of,
-            estimationModeBusinessFacade::lcc
-        );
-    }
-
-    @Override
-    public Stream<LocalClusteringCoefficientMutateResult> execute(
+    Stream<LocalClusteringCoefficientMutateResult> execute(
         String graphNameAsString,
         Map<String, Object> rawConfiguration
-    ) {
-        var resultBuilder = new LccResultBuilderForMutateMode();
-
-        return genericStub.execute(
-            graphNameAsString,
-            rawConfiguration,
-            LocalClusteringCoefficientMutateConfig::of,
-            mutateModeBusinessFacade::lcc,
-            resultBuilder
-        );
-    }
-
+    );
 }

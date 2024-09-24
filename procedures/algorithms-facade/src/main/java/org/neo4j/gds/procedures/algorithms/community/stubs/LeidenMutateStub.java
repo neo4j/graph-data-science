@@ -19,76 +19,25 @@
  */
 package org.neo4j.gds.procedures.algorithms.community.stubs;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.leiden.LeidenMutateConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.community.LeidenMutateResult;
-import org.neo4j.gds.procedures.algorithms.community.ProcedureStatisticsComputationInstructions;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class LeidenMutateStub implements MutateStub<LeidenMutateConfig, LeidenMutateResult> {
-
-    private final GenericStub genericStub;
-    private final CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
-    private final CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
-    private final ProcedureReturnColumns procedureReturnColumns;
-
-    public LeidenMutateStub(
-        GenericStub genericStub,
-        CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
-        CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
-        ProcedureReturnColumns procedureReturnColumns
-    ) {
-        this.genericStub = genericStub;
-        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
-        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
-        this.procedureReturnColumns = procedureReturnColumns;
-    }
+public interface LeidenMutateStub extends MutateStub<LeidenMutateConfig, LeidenMutateResult> {
+    @Override
+    LeidenMutateConfig parseConfiguration(Map<String, Object> configuration);
 
     @Override
-    public LeidenMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(LeidenMutateConfig::of, configuration);
-    }
+    MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration);
 
     @Override
-    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
-        return genericStub.getMemoryEstimation(
-            configuration,
-            LeidenMutateConfig::of,
-            estimationModeBusinessFacade::leiden
-        );
-    }
+    Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration);
 
     @Override
-    public Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration) {
-        return genericStub.estimate(
-            graphName,
-            configuration,
-            LeidenMutateConfig::of,
-            estimationModeBusinessFacade::leiden
-        );
-    }
-
-    @Override
-    public Stream<LeidenMutateResult> execute(String graphNameAsString, Map<String, Object> rawConfiguration) {
-        var statisticsComputationInstructions = ProcedureStatisticsComputationInstructions.forCommunities(
-            procedureReturnColumns);
-        var resultBuilder = new LeidenResultBuilderForMutateMode(statisticsComputationInstructions);
-
-        return genericStub.execute(
-            graphNameAsString,
-            rawConfiguration,
-            LeidenMutateConfig::of,
-            mutateModeBusinessFacade::leiden,
-            resultBuilder
-        );
-    }
-
+    Stream<LeidenMutateResult> execute(String graphNameAsString, Map<String, Object> rawConfiguration);
 }

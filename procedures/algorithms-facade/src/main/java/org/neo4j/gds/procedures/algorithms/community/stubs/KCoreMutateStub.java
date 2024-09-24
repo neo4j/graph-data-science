@@ -19,72 +19,28 @@
  */
 package org.neo4j.gds.procedures.algorithms.community.stubs;
 
-import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.community.KCoreDecompositionMutateResult;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class KCoreMutateStub implements MutateStub<KCoreDecompositionMutateConfig, KCoreDecompositionMutateResult> {
-
-    private final GenericStub genericStub;
-    private final CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
-    private final CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
-
-    public KCoreMutateStub(
-        GenericStub genericStub,
-        CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
-        CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade
-    ) {
-        this.genericStub = genericStub;
-        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
-        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
-    }
+public interface KCoreMutateStub extends MutateStub<KCoreDecompositionMutateConfig, KCoreDecompositionMutateResult> {
+    @Override
+    KCoreDecompositionMutateConfig parseConfiguration(Map<String, Object> configuration);
 
     @Override
-    public KCoreDecompositionMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(KCoreDecompositionMutateConfig::of, configuration);
-    }
+    MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration);
 
     @Override
-    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
-        return genericStub.getMemoryEstimation(
-            configuration,
-            KCoreDecompositionMutateConfig::of,
-            __ -> estimationModeBusinessFacade.kCore()
-        );
-    }
+    Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration);
 
     @Override
-    public Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration) {
-        return genericStub.estimate(
-            graphName,
-            configuration,
-            KCoreDecompositionMutateConfig::of,
-            __ -> estimationModeBusinessFacade.kCore()
-        );
-    }
-
-    @Override
-    public Stream<KCoreDecompositionMutateResult> execute(
+    Stream<KCoreDecompositionMutateResult> execute(
         String graphNameAsString,
         Map<String, Object> rawConfiguration
-    ) {
-        var resultBuilder = new KCoreResultBuilderForMutateMode();
-
-        return genericStub.execute(
-            graphNameAsString,
-            rawConfiguration,
-            KCoreDecompositionMutateConfig::of,
-            mutateModeBusinessFacade::kCore,
-            resultBuilder
-        );
-    }
-
+    );
 }

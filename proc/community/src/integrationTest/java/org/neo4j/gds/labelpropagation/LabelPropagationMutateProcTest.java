@@ -74,7 +74,7 @@ import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.GraphDataScienceProceduresBuilder;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.community.CommunityProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.community.LocalCommunityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
@@ -522,9 +522,9 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
             null,
             null
         );
-        var communityProcedureFacade = CommunityProcedureFacade.create(
+        var communityProcedureFacade = LocalCommunityProcedureFacade.create(
+            applicationsFacade.community(),
             genericStub,
-            applicationsFacade,
             null,
             ProcedureReturnColumns.EMPTY,
             new UserSpecificConfigurationParser(

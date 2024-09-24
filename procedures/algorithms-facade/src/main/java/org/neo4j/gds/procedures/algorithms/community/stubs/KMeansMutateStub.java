@@ -19,80 +19,28 @@
  */
 package org.neo4j.gds.procedures.algorithms.community.stubs;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.kmeans.KmeansMutateConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.community.KmeansMutateResult;
-import org.neo4j.gds.procedures.algorithms.community.ProcedureStatisticsComputationInstructions;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class KMeansMutateStub implements MutateStub<KmeansMutateConfig, KmeansMutateResult> {
-
-    private final GenericStub genericStub;
-    private final CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
-    private final CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
-    private final ProcedureReturnColumns procedureReturnColumns;
-
-    public KMeansMutateStub(
-        GenericStub genericStub,
-        CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
-        CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
-        ProcedureReturnColumns procedureReturnColumns
-    ) {
-        this.genericStub = genericStub;
-        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
-        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
-        this.procedureReturnColumns = procedureReturnColumns;
-    }
+public interface KMeansMutateStub extends MutateStub<KmeansMutateConfig, KmeansMutateResult> {
+    @Override
+    KmeansMutateConfig parseConfiguration(Map<String, Object> configuration);
 
     @Override
-    public KmeansMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(KmeansMutateConfig::of, configuration);
-    }
+    MemoryEstimation getMemoryEstimation(String username, Map<String, Object> rawConfiguration);
 
     @Override
-    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> rawConfiguration) {
-        return genericStub.getMemoryEstimation(
-            rawConfiguration,
-            KmeansMutateConfig::of,
-            estimationModeBusinessFacade::kMeans
-        );
-    }
+    Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> rawConfiguration);
 
     @Override
-    public Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> rawConfiguration) {
-        return genericStub.estimate(
-            graphName,
-            rawConfiguration,
-            KmeansMutateConfig::of,
-            estimationModeBusinessFacade::kMeans
-        );
-    }
-
-    @Override
-    public Stream<KmeansMutateResult> execute(
+    Stream<KmeansMutateResult> execute(
         String graphNameAsString,
         Map<String, Object> rawConfiguration
-    ) {
-        var statisticsComputationInstructions = ProcedureStatisticsComputationInstructions.forCommunities(
-            procedureReturnColumns);
-        var shouldComputeListOfCentroids = procedureReturnColumns.contains("centroids");
-        var resultBuilder = new KMeansResultBuilderForMutateMode(statisticsComputationInstructions, shouldComputeListOfCentroids);
-
-        return genericStub.execute(
-            graphNameAsString,
-            rawConfiguration,
-            KmeansMutateConfig::of,
-            mutateModeBusinessFacade::kMeans,
-            resultBuilder
-        );
-    }
-
+    );
 }

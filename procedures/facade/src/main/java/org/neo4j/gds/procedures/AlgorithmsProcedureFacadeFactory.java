@@ -24,15 +24,9 @@ import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.centrality.CentralityProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.centrality.LocalCentralityProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.community.LocalCommunityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
-import org.neo4j.gds.procedures.algorithms.embeddings.NodeEmbeddingsProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.machinelearning.MachineLearningProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.miscellaneous.MiscellaneousProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.embeddings.LocalNodeEmbeddingsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.machinelearning.LocalMachineLearningProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.miscellaneous.LocalMiscellaneousProcedureFacade;
@@ -72,9 +66,9 @@ final class AlgorithmsProcedureFacadeFactory {
             configurationParser
         );
 
-        var communityProcedureFacade = CommunityProcedureFacade.create(
+        var communityProcedureFacade = LocalCommunityProcedureFacade.create(
+            applicationsFacade.community(),
             genericStub,
-            applicationsFacade,
             closeableResourceRegistry,
             procedureReturnColumns,
             configurationParser

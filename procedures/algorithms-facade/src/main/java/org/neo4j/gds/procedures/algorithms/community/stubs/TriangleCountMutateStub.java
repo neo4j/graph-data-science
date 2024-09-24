@@ -19,69 +19,25 @@
  */
 package org.neo4j.gds.procedures.algorithms.community.stubs;
 
-import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.community.TriangleCountMutateResult;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 import org.neo4j.gds.triangle.TriangleCountMutateConfig;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class TriangleCountMutateStub implements MutateStub<TriangleCountMutateConfig, TriangleCountMutateResult> {
-
-    private final GenericStub genericStub;
-    private final CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
-    private final CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
-
-    public TriangleCountMutateStub(
-        GenericStub genericStub,
-        CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
-        CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade
-    ) {
-        this.genericStub = genericStub;
-        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
-        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
-    }
+public interface TriangleCountMutateStub extends MutateStub<TriangleCountMutateConfig, TriangleCountMutateResult> {
+    @Override
+    TriangleCountMutateConfig parseConfiguration(Map<String, Object> configuration);
 
     @Override
-    public TriangleCountMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(TriangleCountMutateConfig::of, configuration);
-    }
+    MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration);
 
     @Override
-    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
-        return genericStub.getMemoryEstimation(
-            configuration,
-            TriangleCountMutateConfig::of,
-            __ -> estimationModeBusinessFacade.triangleCount()
-        );
-    }
+    Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration);
 
     @Override
-    public Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration) {
-        return genericStub.estimate(
-            graphName,
-            configuration,
-            TriangleCountMutateConfig::of,
-            __ -> estimationModeBusinessFacade.triangleCount()
-        );
-    }
-
-    @Override
-    public Stream<TriangleCountMutateResult> execute(String graphNameAsString, Map<String, Object> rawConfiguration) {
-        var resultBuilder = new TriangleCountResultBuilderForMutateMode();
-
-        return genericStub.execute(
-            graphNameAsString,
-            rawConfiguration,
-            TriangleCountMutateConfig::of,
-            mutateModeBusinessFacade::triangleCount,
-            resultBuilder
-        );
-    }
-
+    Stream<TriangleCountMutateResult> execute(String graphNameAsString, Map<String, Object> rawConfiguration);
 }

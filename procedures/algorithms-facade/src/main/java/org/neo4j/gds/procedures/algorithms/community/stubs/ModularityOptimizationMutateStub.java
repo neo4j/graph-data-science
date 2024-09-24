@@ -19,79 +19,28 @@
  */
 package org.neo4j.gds.procedures.algorithms.community.stubs;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
 import org.neo4j.gds.procedures.algorithms.community.ModularityOptimizationMutateResult;
-import org.neo4j.gds.procedures.algorithms.community.ProcedureStatisticsComputationInstructions;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class ModularityOptimizationMutateStub implements MutateStub<ModularityOptimizationMutateConfig, ModularityOptimizationMutateResult> {
-
-    private final GenericStub genericStub;
-    private final CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
-    private final CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
-    private final ProcedureReturnColumns procedureReturnColumns;
-
-    public ModularityOptimizationMutateStub(
-        GenericStub genericStub,
-        CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
-        CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
-        ProcedureReturnColumns procedureReturnColumns
-    ) {
-        this.genericStub = genericStub;
-        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
-        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
-        this.procedureReturnColumns = procedureReturnColumns;
-    }
+public interface ModularityOptimizationMutateStub extends MutateStub<ModularityOptimizationMutateConfig, ModularityOptimizationMutateResult> {
+    @Override
+    ModularityOptimizationMutateConfig parseConfiguration(Map<String, Object> configuration);
 
     @Override
-    public ModularityOptimizationMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(ModularityOptimizationMutateConfig::of, configuration);
-    }
+    MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration);
 
     @Override
-    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
-        return genericStub.getMemoryEstimation(
-            configuration,
-            ModularityOptimizationMutateConfig::of,
-            __ -> estimationModeBusinessFacade.modularityOptimization()
-        );
-    }
+    Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration);
 
     @Override
-    public Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration) {
-        return genericStub.estimate(
-            graphName,
-            configuration,
-            ModularityOptimizationMutateConfig::of,
-            __ -> estimationModeBusinessFacade.modularityOptimization()
-        );
-    }
-
-    @Override
-    public Stream<ModularityOptimizationMutateResult> execute(
+    Stream<ModularityOptimizationMutateResult> execute(
         String graphNameAsString,
         Map<String, Object> rawConfiguration
-    ) {
-        var statisticsComputationInstructions = ProcedureStatisticsComputationInstructions.forCommunities(
-            procedureReturnColumns);
-        var resultBuilder = new ModularityOptimizationResultBuilderForMutateMode(statisticsComputationInstructions);
-
-        return genericStub.execute(
-            graphNameAsString,
-            rawConfiguration,
-            ModularityOptimizationMutateConfig::of,
-            mutateModeBusinessFacade::modularityOptimization,
-            resultBuilder
-        );
-    }
-
+    );
 }

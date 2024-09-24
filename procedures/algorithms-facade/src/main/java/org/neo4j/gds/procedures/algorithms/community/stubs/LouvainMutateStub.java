@@ -19,76 +19,25 @@
  */
 package org.neo4j.gds.procedures.algorithms.community.stubs;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.community.LouvainMutateResult;
-import org.neo4j.gds.procedures.algorithms.community.ProcedureStatisticsComputationInstructions;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class LouvainMutateStub implements MutateStub<LouvainMutateConfig, LouvainMutateResult> {
-
-    private final GenericStub genericStub;
-    private final CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
-    private final CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
-    private final ProcedureReturnColumns procedureReturnColumns;
-
-    public LouvainMutateStub(
-        GenericStub genericStub,
-        CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
-        CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
-        ProcedureReturnColumns procedureReturnColumns
-    ) {
-        this.genericStub = genericStub;
-        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
-        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
-        this.procedureReturnColumns = procedureReturnColumns;
-    }
+public interface LouvainMutateStub extends MutateStub<LouvainMutateConfig, LouvainMutateResult> {
+    @Override
+    LouvainMutateConfig parseConfiguration(Map<String, Object> configuration);
 
     @Override
-    public LouvainMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(LouvainMutateConfig::of, configuration);
-    }
+    MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration);
 
     @Override
-    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
-        return genericStub.getMemoryEstimation(
-            configuration,
-            LouvainMutateConfig::of,
-            estimationModeBusinessFacade::louvain
-        );
-    }
+    Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration);
 
     @Override
-    public Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration) {
-        return genericStub.estimate(
-            graphName,
-            configuration,
-            LouvainMutateConfig::of,
-            estimationModeBusinessFacade::louvain
-        );
-    }
-
-    @Override
-    public Stream<LouvainMutateResult> execute(String graphNameAsString, Map<String, Object> rawConfiguration) {
-        var statisticsComputationInstructions = ProcedureStatisticsComputationInstructions.forCommunities(
-            procedureReturnColumns);
-        var resultBuilder = new LouvainResultBuilderForMutateMode(statisticsComputationInstructions);
-
-        return genericStub.execute(
-            graphNameAsString,
-            rawConfiguration,
-            LouvainMutateConfig::of,
-            mutateModeBusinessFacade::louvain,
-            resultBuilder
-        );
-    }
-
+    Stream<LouvainMutateResult> execute(String graphNameAsString, Map<String, Object> rawConfiguration);
 }

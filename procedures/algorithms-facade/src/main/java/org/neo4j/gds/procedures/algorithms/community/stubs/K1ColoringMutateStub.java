@@ -19,74 +19,25 @@
  */
 package org.neo4j.gds.procedures.algorithms.community.stubs;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.community.K1ColoringMutateResult;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class K1ColoringMutateStub implements MutateStub<K1ColoringMutateConfig, K1ColoringMutateResult> {
-
-    private final GenericStub genericStub;
-    private final CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
-    private final CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
-    private final ProcedureReturnColumns procedureReturnColumns;
-
-    public K1ColoringMutateStub(
-        GenericStub genericStub,
-        CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
-        CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
-        ProcedureReturnColumns procedureReturnColumns
-    ) {
-        this.genericStub = genericStub;
-        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
-        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
-        this.procedureReturnColumns = procedureReturnColumns;
-    }
+public interface K1ColoringMutateStub extends MutateStub<K1ColoringMutateConfig, K1ColoringMutateResult> {
+    @Override
+    K1ColoringMutateConfig parseConfiguration(Map<String, Object> configuration);
 
     @Override
-    public K1ColoringMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(K1ColoringMutateConfig::of, configuration);
-    }
+    MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration);
 
     @Override
-    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
-        return genericStub.getMemoryEstimation(
-            configuration,
-            K1ColoringMutateConfig::of,
-            __ -> estimationModeBusinessFacade.k1Coloring()
-        );
-    }
+    Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration);
 
     @Override
-    public Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration) {
-        return genericStub.estimate(
-            graphName,
-            configuration,
-            K1ColoringMutateConfig::of,
-            __ -> estimationModeBusinessFacade.k1Coloring()
-        );
-    }
-
-    @Override
-    public Stream<K1ColoringMutateResult> execute(String graphNameAsString, Map<String, Object> rawConfiguration) {
-        var resultBuilder = new K1ColoringResultBuilderForMutateMode(procedureReturnColumns.contains("colorCount"));
-
-        return genericStub.execute(
-            graphNameAsString,
-            rawConfiguration,
-            K1ColoringMutateConfig::of,
-           mutateModeBusinessFacade::k1Coloring,
-            resultBuilder
-        );
-    }
-
-
+    Stream<K1ColoringMutateResult> execute(String graphNameAsString, Map<String, Object> rawConfiguration);
 }
