@@ -28,6 +28,7 @@ import org.neo4j.kernel.GraphDatabaseQueryService;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.impl.query.Neo4jTransactionalContextFactory;
 import org.neo4j.kernel.impl.query.QueryExecution;
+import org.neo4j.kernel.impl.query.QueryExecutionConfiguration;
 import org.neo4j.kernel.impl.query.QueryExecutionEngine;
 import org.neo4j.kernel.impl.query.QuerySubscriber;
 import org.neo4j.kernel.impl.query.TransactionalContextFactory;
@@ -158,7 +159,7 @@ abstract class CypherRecordLoader<R> {
         QuerySubscriber subscriber
     ) {
         var convertedParams = ValueUtils.asMapValue(params);
-        var context = Neo4jProxy.newQueryContext(contextFactory, tx, query, convertedParams);
+        var context = contextFactory.newContext(tx, query, convertedParams, QueryExecutionConfiguration.DEFAULT_CONFIG);
         try {
             return executionEngine.executeQuery(query, convertedParams, context, false, subscriber);
         } catch (Exception e) {

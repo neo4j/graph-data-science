@@ -21,8 +21,8 @@ package org.neo4j.gds.projection;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.huge.DirectIdMap;
+import org.neo4j.storageengine.api.LongReference;
 import org.neo4j.storageengine.api.Reference;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,7 +38,7 @@ class BufferedRelationshipConsumerTest {
             .capacity(1)
             .build();
 
-        buffer.relationshipsBatchBuffer().add(0, 1, -1, Neo4jProxy.noPropertyReference());
+        buffer.relationshipsBatchBuffer().add(0, 1, -1, LongReference.NULL_REFERENCE);
         assertTrue(buffer.relationshipsBatchBuffer().isFull());
     }
 
@@ -68,7 +68,7 @@ class BufferedRelationshipConsumerTest {
 
         @Override
         default Reference propertiesReference() {
-            return Neo4jProxy.noPropertyReference();
+            return LongReference.NULL_REFERENCE;
         }
     }
 

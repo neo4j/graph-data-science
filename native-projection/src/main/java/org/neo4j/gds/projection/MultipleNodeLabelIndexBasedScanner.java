@@ -20,7 +20,7 @@
 package org.neo4j.gds.projection;
 
 import org.neo4j.gds.compat.CompositeNodeCursor;
-import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.PartitionedStoreScan;
 import org.neo4j.gds.compat.StoreScan;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
@@ -47,9 +47,9 @@ final class MultipleNodeLabelIndexBasedScanner extends AbstractNodeCursorBasedSc
     CompositeNodeCursor entityCursor(KernelTransaction transaction) {
         List<NodeLabelIndexCursor> cursors = Arrays
             .stream(labelIds)
-            .mapToObj(i -> Neo4jProxy.allocateNodeLabelIndexCursor(transaction))
+            .mapToObj(i -> transaction.cursors().allocateNodeLabelIndexCursor(transaction.cursorContext()))
             .collect(Collectors.toList());
-        return Neo4jProxy.compositeNodeCursor(cursors, labelIds);
+        return new CompositeNodeCursor(cursors, labelIds);
     }
 
     @Override
@@ -66,7 +66,7 @@ final class MultipleNodeLabelIndexBasedScanner extends AbstractNodeCursorBasedSc
         return new MultipleNodeLabelIndexReference(
             cursor,
             transaction.dataRead(),
-            Neo4jProxy.allocateNodeCursor(transaction)
+            transaction.cursors().allocateNodeCursor(transaction.cursorContext())
         );
     }
 

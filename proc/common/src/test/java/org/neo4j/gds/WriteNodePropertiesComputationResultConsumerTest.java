@@ -20,6 +20,7 @@
 package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
@@ -38,7 +39,6 @@ import org.neo4j.gds.api.schema.ImmutableMutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.huge.HugeGraphBuilder;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
@@ -84,7 +84,17 @@ class WriteNodePropertiesComputationResultConsumerTest extends BaseTest {
     private final ExecutionContext executionContext = ImmutableExecutionContext
         .builder()
         .databaseId(DatabaseId.of(""))
-        .dependencyResolver(Neo4jProxy.emptyDependencyResolver())
+        .dependencyResolver(new DependencyResolver() {
+            @Override
+            public <T> T resolveDependency(Class<T> type, SelectionStrategy selector) {
+                return null;
+            }
+
+            @Override
+            public boolean containsDependency(Class<?> type) {
+                return false;
+            }
+        })
         .returnColumns(ProcedureReturnColumns.EMPTY)
         .log(Log.noOpLog())
         .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)

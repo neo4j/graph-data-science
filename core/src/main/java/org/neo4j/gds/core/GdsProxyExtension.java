@@ -20,13 +20,13 @@
 package org.neo4j.gds.core;
 
 import org.neo4j.annotations.service.ServiceProvider;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.ProxyUtil;
 import org.neo4j.kernel.extension.ExtensionFactory;
 import org.neo4j.kernel.extension.ExtensionType;
 import org.neo4j.kernel.extension.context.ExtensionContext;
 import org.neo4j.kernel.lifecycle.Lifecycle;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
+import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
 
 @ServiceProvider
@@ -39,7 +39,8 @@ public class GdsProxyExtension extends ExtensionFactory<GdsProxyExtension.Depend
     @Override
     public Lifecycle newInstance(ExtensionContext context, Dependencies dependencies) {
         return LifecycleAdapter.onInit(() -> {
-            var log = Neo4jProxy.getUserLog(dependencies.logService(), GdsProxyExtension.class);
+            LogService logService = dependencies.logService();
+            var log = (Log) logService.getUserLog(GdsProxyExtension.class);
             ProxyUtil.dumpLogMessages(log);
         });
     }

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.projection;
 
-import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.PartitionedStoreScan;
 import org.neo4j.gds.compat.StoreScan;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
@@ -40,16 +40,13 @@ final class NodeLabelIndexBasedScanner extends AbstractNodeCursorBasedScanner<No
 
     @Override
     NodeLabelIndexCursor entityCursor(KernelTransaction transaction) {
-        return Neo4jProxy.allocateNodeLabelIndexCursor(transaction);
+        return transaction.cursors().allocateNodeLabelIndexCursor(transaction.cursorContext());
     }
 
     @Override
     StoreScan<NodeLabelIndexCursor> entityCursorScan(KernelTransaction transaction) {
-        return Neo4jProxy.nodeLabelIndexScan(
-            transaction,
-            labelId,
-            batchSize()
-        );
+        int batchSize = batchSize();
+        return PartitionedStoreScan.createScans(transaction, batchSize, labelId).get(0);
     }
 
     @Override
@@ -57,7 +54,7 @@ final class NodeLabelIndexBasedScanner extends AbstractNodeCursorBasedScanner<No
         return new NodeLabelIndexReference(
             cursor,
             transaction.dataRead(),
-            Neo4jProxy.allocateNodeCursor(transaction),
+            transaction.cursors().allocateNodeCursor(transaction.cursorContext()),
             labelId
         );
     }

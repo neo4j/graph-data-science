@@ -23,11 +23,13 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.internal.kernel.api.connectioninfo.ClientConnectionInfo;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
+import org.neo4j.internal.kernel.api.security.AuthenticationResult;
+import org.neo4j.internal.kernel.api.security.SecurityContext;
 
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -229,7 +231,29 @@ public final class QueryRunner {
         GraphDatabaseService db,
         Consumer<Transaction> block
     ) {
-        var securityContext = Neo4jProxy.securityContext(username, AuthSubject.AUTH_DISABLED, READ, db.databaseName());
+        String databaseName = db.databaseName();
+        var securityContext = new SecurityContext(
+            new AuthSubject() {
+                @Override
+                public AuthenticationResult getAuthenticationResult() {
+                    return AUTH_DISABLED.getAuthenticationResult();
+                }
+
+                @Override
+                public boolean hasUsername(String s) {
+                    return s.equals(username);
+                }
+
+                @Override
+                public String executingUser() {
+                    return username;
+                }
+            },
+            READ,
+            // GDS is always operating from an embedded context
+            ClientConnectionInfo.EMBEDDED_CONNECTION,
+            databaseName
+        );
         GraphDatabaseApiProxy.runInTransaction(db, securityContext, block);
     }
 
@@ -239,7 +263,29 @@ public final class QueryRunner {
         GraphDatabaseService db,
         Function<Transaction, T> block
     ) {
-        var securityContext = Neo4jProxy.securityContext(username, AuthSubject.AUTH_DISABLED, READ, db.databaseName());
+        String databaseName = db.databaseName();
+        var securityContext = new SecurityContext(
+            new AuthSubject() {
+                @Override
+                public AuthenticationResult getAuthenticationResult() {
+                    return AUTH_DISABLED.getAuthenticationResult();
+                }
+
+                @Override
+                public boolean hasUsername(String s) {
+                    return s.equals(username);
+                }
+
+                @Override
+                public String executingUser() {
+                    return username;
+                }
+            },
+            READ,
+            // GDS is always operating from an embedded context
+            ClientConnectionInfo.EMBEDDED_CONNECTION,
+            databaseName
+        );
         return GraphDatabaseApiProxy.applyInTransaction(db, securityContext, block);
     }
 }

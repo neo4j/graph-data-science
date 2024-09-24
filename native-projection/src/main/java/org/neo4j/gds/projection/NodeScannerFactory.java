@@ -19,9 +19,15 @@
  */
 package org.neo4j.gds.projection;
 
-import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.common.EntityType;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.internal.kernel.api.InternalIndexState;
+import org.neo4j.internal.kernel.api.exceptions.schema.IndexNotFoundKernelException;
+import org.neo4j.internal.schema.IndexDescriptor;
+import org.neo4j.internal.schema.IndexType;
+import org.neo4j.internal.schema.SchemaDescriptor;
+import org.neo4j.internal.schema.SchemaDescriptors;
 
 import java.util.Arrays;
 
@@ -61,6 +67,28 @@ public final class NodeScannerFactory {
     }
 
     private static boolean hasNodeLabelIndex(TransactionContext transactionContext) {
-        return transactionContext.apply((tx, ktx) -> Neo4jProxy.hasNodeLabelIndex(ktx));
+        return transactionContext.apply((tx, ktx) -> {
+            IndexDescriptor usableMatchingIndex = IndexDescriptor.NO_INDEX;
+            SchemaDescriptor schemaDescriptor = SchemaDescriptors.forAnyEntityTokens(EntityType.NODE);
+            var schemaRead = ktx.schemaRead();
+            var iterator = schemaRead.index(schemaDescriptor);
+            while (iterator.hasNext()) {
+                var index = iterator.next();
+                if (index.getIndexType() == IndexType.LOOKUP) {
+                    var state = InternalIndexState.FAILED;
+                    try {
+                        state = schemaRead.indexGetState(index);
+                    } catch (IndexNotFoundKernelException e) {
+                        // Well the index should always exist here, but if we didn't find it while checking the state,
+                        // then we obviously don't want to use it.
+                    }
+                    if (state == InternalIndexState.ONLINE) {
+                        usableMatchingIndex = index;
+                        break;
+                    }
+                }
+            }
+            return usableMatchingIndex != IndexDescriptor.NO_INDEX;
+        });
     }
 }

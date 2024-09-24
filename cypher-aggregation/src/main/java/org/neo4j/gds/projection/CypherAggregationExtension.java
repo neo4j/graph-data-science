@@ -20,7 +20,6 @@
 package org.neo4j.gds.projection;
 
 import org.neo4j.annotations.service.ServiceProvider;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.extension.ExtensionFactory;
@@ -28,6 +27,7 @@ import org.neo4j.kernel.extension.ExtensionType;
 import org.neo4j.kernel.extension.context.ExtensionContext;
 import org.neo4j.kernel.lifecycle.Lifecycle;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
+import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -48,7 +48,8 @@ public final class CypherAggregationExtension extends ExtensionFactory<CypherAgg
                 registry.register(new CypherAggregation());
                 registry.register(new AlphaCypherAggregation());
             } catch (ProcedureException e) {
-                var log = Neo4jProxy.getInternalLog(dependencies.logService(), getClass());
+                LogService logService = dependencies.logService();
+                var log = (Log) logService.getInternalLog(getClass());
                 log.warn(formatWithLocale("`%s` is not available", CypherAggregation.FUNCTION_NAME), e);
             }
         });

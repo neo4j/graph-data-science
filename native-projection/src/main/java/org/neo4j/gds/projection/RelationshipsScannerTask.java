@@ -23,7 +23,6 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.AdjacencyBuffer;
 import org.neo4j.gds.core.loading.PropertyReader;
 import org.neo4j.gds.core.loading.RecordScannerTask;
@@ -214,7 +213,11 @@ final class RelationshipsScannerTask extends StatementAction implements RecordSc
             long[][] properties = new long[propertyKeyIds.length][producer.numberOfElements()];
             if (atLeastOnePropertyToLoad) {
                 var read = kernelTransaction.dataRead();
-                try (PropertyCursor pc = Neo4jProxy.allocatePropertyCursor(kernelTransaction)) {
+                try (
+                    PropertyCursor pc = kernelTransaction
+                        .cursors()
+                        .allocatePropertyCursor(kernelTransaction.cursorContext(), kernelTransaction.memoryTracker())
+                ) {
                     double[] relProps = new double[propertyKeyIds.length];
                     producer.forEach((index, source, target, relationshipReference, propertyReference) -> {
                         read.relationshipProperties(

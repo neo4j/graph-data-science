@@ -27,7 +27,7 @@ import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.gds.QueryRunner;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.InternalReadOps;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Result;
@@ -141,7 +141,7 @@ public class Neo4jSupportExtension implements BeforeEachCallback {
         // try to convince the db that `idOffset` number of nodes have already been allocated
         var idGeneratorFactory = GraphDatabaseApiProxy.resolveDependency(db, IdGeneratorFactory.class);
         TestSupport.fullAccessTransaction(db)
-            .accept((tx, ktx) -> Neo4jProxy.reserveNeo4jIds(idGeneratorFactory, 42, ktx.cursorContext()));
+            .accept((tx, ktx) -> InternalReadOps.reserveNeo4jIds(idGeneratorFactory, 42, ktx.cursorContext()));
     }
 
     private void injectFields(ExtensionContext context, GraphDatabaseService db, IdFunctions idFunctions) {

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.projection;
 
-import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.PartitionedStoreScan;
 import org.neo4j.gds.compat.StoreScan;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.internal.kernel.api.NodeCursor;
@@ -36,12 +36,15 @@ final class NodeCursorBasedScanner extends AbstractNodeCursorBasedScanner<NodeCu
 
     @Override
     NodeCursor entityCursor(KernelTransaction transaction) {
-        return Neo4jProxy.allocateNodeCursor(transaction);
+        return transaction.cursors().allocateNodeCursor(transaction.cursorContext());
     }
 
     @Override
     StoreScan<NodeCursor> entityCursorScan(KernelTransaction transaction) {
-        return Neo4jProxy.nodesScan(transaction, this.nodeCount, batchSize());
+        int batchSize = batchSize();
+        int numberOfPartitions = PartitionedStoreScan.getNumberOfPartitions(this.nodeCount, batchSize);
+        return new PartitionedStoreScan<>(transaction.dataRead()
+            .allNodesScan(numberOfPartitions, transaction.cursorContext()));
     }
 
     @Override

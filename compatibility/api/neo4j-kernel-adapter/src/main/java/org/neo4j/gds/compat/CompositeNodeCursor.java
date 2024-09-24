@@ -32,7 +32,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.PriorityQueue;
 
-public abstract class CompositeNodeCursor extends DefaultCloseListenable implements Cursor {
+public class CompositeNodeCursor extends DefaultCloseListenable implements Cursor {
 
     private final PriorityQueue<NodeLabelIndexCursor> cursorQueue;
     private boolean repopulateCursorQueue;
@@ -43,7 +43,7 @@ public abstract class CompositeNodeCursor extends DefaultCloseListenable impleme
 
     private boolean closed = false;
 
-    protected CompositeNodeCursor(List<NodeLabelIndexCursor> cursors, int[] labelIds) {
+    public CompositeNodeCursor(List<NodeLabelIndexCursor> cursors, int[] labelIds) {
         this.cursors = cursors;
         this.cursorQueue = new PriorityQueue<>(
             cursors.size(),

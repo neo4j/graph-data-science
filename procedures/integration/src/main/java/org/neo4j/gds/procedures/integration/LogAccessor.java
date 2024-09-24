@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.procedures.integration;
 
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.logging.internal.LogService;
@@ -30,7 +29,7 @@ import org.neo4j.logging.internal.LogService;
 public class LogAccessor {
     public Log getLog(LogService logService, Class<?> cls) {
         // We stack off the Neo4j's log and have our own
-        var neo4jUserLog = Neo4jProxy.getUserLog(logService, cls);
+        var neo4jUserLog = (org.neo4j.logging.Log) logService.getUserLog(cls);
         return new LogAdapter(neo4jUserLog);
     }
 }

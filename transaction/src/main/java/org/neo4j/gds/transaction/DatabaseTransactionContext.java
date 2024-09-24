@@ -20,7 +20,6 @@
 package org.neo4j.gds.transaction;
 
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.security.AccessMode;
@@ -78,7 +77,7 @@ public final class DatabaseTransactionContext implements TransactionContext {
 
     @Override
     public String username() {
-        return Neo4jProxy.username(securityContext.subject());
+        return securityContext.subject().executingUser();
     }
 
     @Override

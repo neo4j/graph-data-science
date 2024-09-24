@@ -21,14 +21,8 @@ package org.neo4j.gds.compat;
 
 import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.PartitionedScan;
-import org.neo4j.internal.kernel.api.security.AccessMode;
-import org.neo4j.io.pagecache.context.CursorContext;
 
 public interface CompatExecutionContext extends AutoCloseable {
-
-     CursorContext cursorContext();
-
-     AccessMode accessMode();
 
      <C extends Cursor> boolean reservePartition(PartitionedScan<C> scan, C cursor);
 

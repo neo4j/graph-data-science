@@ -20,7 +20,7 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLogImpl;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -38,7 +38,7 @@ public final class TestProcedureRunner {
         Class<P> procClass,
         Consumer<P> func
     ) {
-        applyOnProcedure(graphDb, procClass, Neo4jProxy.testLog(), func);
+        applyOnProcedure(graphDb, procClass, new TestLogImpl(), func);
     }
 
     public static <P extends BaseProc> void applyOnProcedure(

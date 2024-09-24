@@ -28,11 +28,11 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
 
-public class TestLogImpl implements TestLog {
+public final class TestLogImpl implements TestLog {
 
     private final ConcurrentMap<String, ConcurrentLinkedQueue<String>> messages;
 
-    TestLogImpl() {
+    public TestLogImpl() {
         messages = new ConcurrentHashMap<>(3);
     }
 

@@ -21,8 +21,8 @@ package org.neo4j.gds.projection;
 
 import com.carrotsearch.hppc.LongHashSet;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.NodeLabelTokenSet;
+import org.neo4j.storageengine.api.LongReference;
 import org.neo4j.storageengine.api.Reference;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -116,7 +116,7 @@ class BufferedNodeConsumerTest {
 
         @Override
         public Reference propertiesReference() {
-            return Neo4jProxy.noPropertyReference();
+            return LongReference.NULL_REFERENCE;
         }
     }
 }

@@ -19,12 +19,13 @@
  */
 package org.neo4j.gds.settings;
 
+import org.neo4j.configuration.BootloaderSettings;
 import org.neo4j.configuration.GraphDatabaseSettings;
+import org.neo4j.configuration.SettingValueParsers;
 import org.neo4j.configuration.connectors.BoltConnector;
 import org.neo4j.configuration.connectors.HttpConnector;
 import org.neo4j.configuration.connectors.HttpsConnector;
 import org.neo4j.configuration.helpers.SocketAddress;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.SettingsUtil;
 import org.neo4j.graphdb.config.Setting;
 
@@ -71,11 +72,11 @@ public final class Neo4jSettings {
     }
 
     public static Setting<Long> pageCacheMemory() {
-        return Neo4jProxy.pageCacheMemory();
+        return GraphDatabaseSettings.pagecache_memory;
     }
 
     public static Long pageCacheMemoryValue(String value) {
-        return Neo4jProxy.pageCacheMemoryValue(value);
+        return SettingValueParsers.BYTES.parse(value);
     }
 
     public static Setting<GraphDatabaseSettings.TransactionStateMemoryAllocation> transactionStateAllocation() {
@@ -123,7 +124,7 @@ public final class Neo4jSettings {
     }
 
     public static Setting<String> additionalJvm() {
-        return Neo4jProxy.additionalJvm();
+        return BootloaderSettings.additional_jvm;
     }
 
     private Neo4jSettings() {

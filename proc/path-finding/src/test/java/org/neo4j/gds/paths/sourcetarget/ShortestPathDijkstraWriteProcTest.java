@@ -27,8 +27,8 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.TestLogProvider;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.compat.TestLogImpl;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -104,7 +104,7 @@ class ShortestPathDijkstraWriteProcTest extends BaseProcTest {
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         super.configuration(builder);
-        testLog = Neo4jProxy.testLog();
+        testLog = new TestLogImpl();
         builder.setUserLogProvider(new TestLogProvider(testLog));
     }
 

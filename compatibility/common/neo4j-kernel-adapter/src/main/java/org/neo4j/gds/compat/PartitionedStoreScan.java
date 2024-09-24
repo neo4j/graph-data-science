@@ -64,11 +64,11 @@ public final class PartitionedStoreScan<C extends Cursor> implements StoreScan<C
         // and use that one as the driving partitioned index scan. The partitions
         // of all other partitioned index scans will be aligned to that one.
         int maxToken = labelIds[0];
-        long maxCount = Neo4jProxy.estimateNodeCount(read, labelIds[0]);
+        long maxCount = read.estimateCountsForNode(labelIds[0]);
         int maxIndex = 0;
 
         for (int i = 1; i < labelIds.length; i++) {
-            long count = Neo4jProxy.estimateNodeCount(read, labelIds[i]);
+            long count = read.estimateCountsForNode(labelIds[i]);
             if (count > maxCount) {
                 maxCount = count;
                 maxToken = labelIds[i];
@@ -110,7 +110,7 @@ public final class PartitionedStoreScan<C extends Cursor> implements StoreScan<C
         }
     }
 
-    static int getNumberOfPartitions(long nodeCount, int batchSize) {
+    public static int getNumberOfPartitions(long nodeCount, int batchSize) {
         int numberOfPartitions;
         if (nodeCount > 0) {
             // ceil div to try to get enough partitions so a single one does

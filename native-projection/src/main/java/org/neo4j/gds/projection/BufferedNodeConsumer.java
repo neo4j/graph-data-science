@@ -22,10 +22,10 @@ package org.neo4j.gds.projection;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
 import org.immutables.builder.Builder;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.NodeLabelTokenSet;
 import org.neo4j.gds.core.loading.NodesBatchBuffer;
 import org.neo4j.gds.core.loading.NodesBatchBufferBuilder;
+import org.neo4j.storageengine.api.LongReference;
 import org.neo4j.storageengine.api.Reference;
 import org.neo4j.token.api.TokenConstants;
 
@@ -92,9 +92,8 @@ public final class BufferedNodeConsumer implements StoreScanner.RecordConsumer<N
         }
 
         if (this.nodeLabelIds.isEmpty()) {
-            var propertiesReference = this.readProperty
-                ? record.propertiesReference()
-                : Neo4jProxy.noPropertyReference();
+            Reference propertiesReference;
+            propertiesReference = this.readProperty ? record.propertiesReference() : LongReference.NULL_REFERENCE;
             this.buffer.add(record.nodeId(), propertiesReference, NodeLabelTokenSet.ANY_LABEL);
         } else {
             boolean atLeastOneLabelFound = false;
@@ -108,9 +107,8 @@ public final class BufferedNodeConsumer implements StoreScanner.RecordConsumer<N
                 }
             }
             if (atLeastOneLabelFound) {
-                var propertiesReference = this.readProperty
-                    ? record.propertiesReference()
-                    : Neo4jProxy.noPropertyReference();
+                Reference propertiesReference;
+                propertiesReference = this.readProperty ? record.propertiesReference() : LongReference.NULL_REFERENCE;
 
                 this.buffer.add(record.nodeId(), propertiesReference, labels);
             }

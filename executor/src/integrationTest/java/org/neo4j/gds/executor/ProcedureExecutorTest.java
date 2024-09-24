@@ -22,11 +22,11 @@ package org.neo4j.gds.executor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -138,7 +138,17 @@ class ProcedureExecutorTest {
             .username("")
             .terminationMonitor(TerminationMonitor.EMPTY)
             .isGdsAdmin(true)
-            .dependencyResolver(Neo4jProxy.emptyDependencyResolver())
+            .dependencyResolver(new DependencyResolver() {
+                @Override
+                public <T> T resolveDependency(Class<T> type, SelectionStrategy selector) {
+                    return null;
+                }
+
+                @Override
+                public boolean containsDependency(Class<?> type) {
+                    return false;
+                }
+            })
             .modelCatalog(ModelCatalog.EMPTY)
             .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
             .nodeLookup(NodeLookup.EMPTY)

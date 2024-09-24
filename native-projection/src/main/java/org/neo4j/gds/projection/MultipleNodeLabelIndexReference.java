@@ -20,7 +20,6 @@
 package org.neo4j.gds.projection;
 
 import org.neo4j.gds.compat.CompositeNodeCursor;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.NodeLabelTokenSet;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.Read;
@@ -67,9 +66,9 @@ public class MultipleNodeLabelIndexReference implements NodeReference {
     public Reference propertiesReference() {
         dataRead.singleNode(compositeNodeCursor.nodeReference(), nodeCursor);
         if (nodeCursor.next()) {
-            return Neo4jProxy.propertyReference(nodeCursor);
+            return nodeCursor.propertiesReference();
         } else {
-            return Neo4jProxy.noPropertyReference();
+            return LongReference.NULL_REFERENCE;
         }
     }
 

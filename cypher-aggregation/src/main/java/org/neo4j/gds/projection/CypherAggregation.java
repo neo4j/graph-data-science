@@ -35,6 +35,8 @@ import org.neo4j.internal.kernel.api.procs.UserAggregationReducer;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
 import org.neo4j.kernel.api.procedure.Context;
+import org.neo4j.kernel.database.DatabaseReferenceImpl;
+import org.neo4j.kernel.database.DatabaseReferenceRepository;
 import org.neo4j.kernel.impl.api.KernelTransactions;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Name;
@@ -90,7 +92,12 @@ public class CypherAggregation implements CallableUserAggregationFunction {
         var username = ctx.kernelTransaction().securityContext().subject().executingUser();
         var transaction = ctx.transaction();
 
-        var runsOnCompositeDatabase = Neo4jProxy.isCompositeDatabase(databaseService);
+        var databaseId = GraphDatabaseApiProxy.databaseId(databaseService);
+        var repo = GraphDatabaseApiProxy.resolveDependency(databaseService, DatabaseReferenceRepository.class);
+        var runsOnCompositeDatabase = repo.getCompositeDatabaseReferences()
+            .stream()
+            .map(DatabaseReferenceImpl.Internal::databaseId)
+            .anyMatch(databaseId::equals);
 
         ExecutingQueryProvider queryProvider;
         if (runsOnCompositeDatabase) {

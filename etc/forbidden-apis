@@ -1,17 +1,5 @@
 org.neo4j.internal.helpers.collection.MapUtil @ Don't do it
 java.lang.Thread.Thread(java.lang.Runnable) @ Use org.neo4j.gds.core.concurrency.ExecutorServiceUtil.newThread to make sure that the new thread is properly named
 java.lang.Thread.Thread(java.lang.ThreadGroup, java.lang.Runnable) @ Use org.neo4j.gds.core.concurrency.ExecutorServiceUtil.newThread to make sure that the new thread is properly named
-org.neo4j.internal.batchimport.staging.ExecutionMonitor.Adapter @ Implement CompatExecutionMonitor and call Neo4jProxy.executionMonitor
-
-org.neo4j.logging.internal.LogService#getUserLogProvider() @ Pass the logService through and use Neo4jProxy at the end.
-org.neo4j.logging.internal.LogService#getUserLog(java.lang.Class) @ Use Neo4jProxy#getUserLog instead.
-org.neo4j.logging.internal.LogService#getInternalLogProvider() @ Pass the logService through and use Neo4jProxy at the end.
-org.neo4j.logging.internal.LogService#getInternalLog(java.lang.Class) @ Use Neo4jProxy#getInternalLog instead.
-
-org.neo4j.configuration.SettingImpl#newBuilder(java.lang.String, org.neo4j.configuration.SettingValueParser, java.lang.Object) @ Use SettingProxy#newBuilder instead.
-org.neo4j.configuration.SettingBuilder(java.lang.String, org.neo4j.configuration.SettingValueParser, java.lang.Object) @ Use SettingProxy#newBuilder instead.
-
-org.neo4j.io.layout.Neo4jLayout.of(org.neo4j.configuration.Config) @ Use Neo4jProxy.neo4jLayout instead.
-org.neo4j.io.layout.Neo4jLayout.of(org.neo4j.graphdb.config.Configuration) @ Use Neo4jProxy.neo4jLayout instead.
 
 java.util.ServiceLoader#load(java.lang.Class) @ Must pass explicit class loader with service loading, as the context class loader for the thread may be the wrong one

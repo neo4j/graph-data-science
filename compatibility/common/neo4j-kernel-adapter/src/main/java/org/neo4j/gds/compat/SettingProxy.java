@@ -21,12 +21,18 @@ package org.neo4j.gds.compat;
 
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.configuration.SettingBuilder;
 import org.neo4j.configuration.SettingValueParser;
 import org.neo4j.dbms.systemgraph.TopologyGraphDbmsModel;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.kernel.impl.factory.GraphDatabaseFacade;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.logging.InternalLog;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 public final class SettingProxy {
 
@@ -75,6 +81,23 @@ public final class SettingProxy {
 
     public static String secondaryModeName() {
         return "Secondary";
+    }
+
+    public static String defaultDatabaseFormatSetting() {
+        return migratedDefaultDatabaseFormatSetting().orElseGet(GraphDatabaseSettings.db_format::defaultValue);
+    }
+
+    private static Optional<String> migratedDefaultDatabaseFormatSetting() {
+        try {
+            Class<?> cls = Class.forName("com.neo4j.configuration.DefaultDbFormatSettingMigrator");
+            Object migrator = cls.getDeclaredConstructor().newInstance();
+            var migrateMethod = cls.getDeclaredMethod("migrate", Map.class, Map.class, InternalLog.class);
+            var defaultValues = new HashMap<String, String>();
+            migrateMethod.invoke(migrator, Map.<String, String>of(), defaultValues, null);
+            return Optional.ofNullable(defaultValues.get(GraphDatabaseSettings.db_format.name()));
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 
     private SettingProxy() {}

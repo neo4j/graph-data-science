@@ -20,7 +20,8 @@
 package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.compat.TestLogImpl;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
@@ -80,7 +81,7 @@ class ProcedureRunnerTest extends BaseTest {
     void shouldPassCorrectParameters() {
         try (var tx = db.beginTx()) {
             var procedureCallContext = ProcedureCallContext.EMPTY;
-            var log = Neo4jProxy.testLog();
+            var log = (TestLog) new TestLogImpl();
             var username = Username.of("foo");
             TaskRegistryFactory taskRegistryFactory = jobId -> new TaskRegistry(
                 username.username(),

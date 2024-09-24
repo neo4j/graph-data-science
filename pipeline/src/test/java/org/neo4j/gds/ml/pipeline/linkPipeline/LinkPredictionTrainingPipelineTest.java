@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.pipeline.linkPipeline;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CloseableResourceRegistry;
@@ -29,7 +30,6 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -185,7 +185,17 @@ class LinkPredictionTrainingPipelineTest {
     void deriveRelationshipWeightProperty() {
         var executionContext = ImmutableExecutionContext.builder()
             .databaseId(DatabaseId.of(""))
-            .dependencyResolver(Neo4jProxy.emptyDependencyResolver())
+            .dependencyResolver(new DependencyResolver() {
+                @Override
+                public <T> T resolveDependency(Class<T> type, SelectionStrategy selector) {
+                    return null;
+                }
+
+                @Override
+                public boolean containsDependency(Class<?> type) {
+                    return false;
+                }
+            })
             .username("")
             .terminationMonitor(TerminationMonitor.EMPTY)
             .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
@@ -229,7 +239,17 @@ class LinkPredictionTrainingPipelineTest {
 
         var executionContext = ImmutableExecutionContext.builder()
             .databaseId(DatabaseId.of(""))
-            .dependencyResolver(Neo4jProxy.emptyDependencyResolver())
+            .dependencyResolver(new DependencyResolver() {
+                @Override
+                public <T> T resolveDependency(Class<T> type, SelectionStrategy selector) {
+                    return null;
+                }
+
+                @Override
+                public boolean containsDependency(Class<?> type) {
+                    return false;
+                }
+            })
             .username("")
             .modelCatalog(modelCatalog)
             .terminationMonitor(TerminationMonitor.EMPTY)
@@ -273,7 +293,17 @@ class LinkPredictionTrainingPipelineTest {
 
         var executionContext = ImmutableExecutionContext.builder()
             .databaseId(DatabaseId.of(""))
-            .dependencyResolver(Neo4jProxy.emptyDependencyResolver())
+            .dependencyResolver(new DependencyResolver() {
+                @Override
+                public <T> T resolveDependency(Class<T> type, SelectionStrategy selector) {
+                    return null;
+                }
+
+                @Override
+                public boolean containsDependency(Class<?> type) {
+                    return false;
+                }
+            })
             .username("")
             .modelCatalog(modelCatalog)
             .terminationMonitor(TerminationMonitor.EMPTY)

@@ -20,7 +20,7 @@
 package org.neo4j.gds.core;
 
 import org.neo4j.annotations.service.ServiceProvider;
-import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.extension.ExtensionFactory;
@@ -45,7 +45,8 @@ public class UsernameExtension extends ExtensionFactory<UsernameExtension.Depend
     }
 
     static Username createUsername(Context context) {
-        var username = Neo4jProxy.username(context.securityContext().subject());
+        AuthSubject subject = context.securityContext().subject();
+        var username = subject.executingUser();
         return new Username(username);
     }
 
