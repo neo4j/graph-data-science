@@ -220,7 +220,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
                 if (propertyValue instanceof List) {
                     propertyValue = convertListProperty((List<?>) propertyValue);
                 }
-                propertyValues.put(propertyKey, PrimitiveValues.of(propertyValue));
+                propertyValues.put(propertyKey, PrimitiveValues.create(propertyValue));
             });
 
             nodesBuilder.addNode(

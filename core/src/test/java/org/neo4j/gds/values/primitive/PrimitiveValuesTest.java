@@ -35,10 +35,10 @@ class PrimitiveValuesTest {
         assertThat(PrimitiveValues.longValue(42))
             .satisfies(value -> {
                 assertThat(value.type()).isEqualTo(ValueType.LONG);
-                assertThat(value).isEqualTo(PrimitiveValues.of((byte) 42));
-                assertThat(value).isEqualTo(PrimitiveValues.of((short) 42));
-                assertThat(value).isEqualTo(PrimitiveValues.of((int) 42));
-                assertThat(value).isEqualTo(PrimitiveValues.of((long) 42));
+                assertThat(value).isEqualTo(PrimitiveValues.create((byte) 42));
+                assertThat(value).isEqualTo(PrimitiveValues.create((short) 42));
+                assertThat(value).isEqualTo(PrimitiveValues.create((int) 42));
+                assertThat(value).isEqualTo(PrimitiveValues.create((long) 42));
             });
     }
 
@@ -48,30 +48,30 @@ class PrimitiveValuesTest {
         assertThat(floatValue).satisfies(value -> {
             assertThat(value.type()).isEqualTo(ValueType.DOUBLE);
             assertThat(value.doubleValue()).isEqualTo(1F);
-            assertThat(value).isEqualTo(PrimitiveValues.of(1F));
+            assertThat(value).isEqualTo(PrimitiveValues.create(1F));
         });
         FloatingPointValue doubleValue = PrimitiveValues.floatingPointValue(1D);
         assertThat(doubleValue).satisfies(value -> {
             assertThat(value.type()).isEqualTo(ValueType.DOUBLE);
             assertThat(value.doubleValue()).isEqualTo(1D);
-            assertThat(value).isEqualTo(PrimitiveValues.of(1D));
+            assertThat(value).isEqualTo(PrimitiveValues.create(1D));
         });
         assertThat(floatValue).isEqualTo(doubleValue);
     }
 
     @Test
     void shouldFailCreatingValuesFromSomeOtherThings() {
-        assertThatThrownBy(() -> PrimitiveValues.of('c'))
+        assertThatThrownBy(() -> PrimitiveValues.create('c'))
             .hasMessageContaining("java.lang.Character")
             .hasMessageContaining("is not a supported property value");
-        assertThatThrownBy(() -> PrimitiveValues.of("string"))
+        assertThatThrownBy(() -> PrimitiveValues.create("string"))
             .hasMessageContaining("java.lang.String")
             .hasMessageContaining("is not a supported property value");
-        assertThatThrownBy(() -> PrimitiveValues.of(List.of(1, 2)))
+        assertThatThrownBy(() -> PrimitiveValues.create(List.of(1, 2)))
             .hasMessageContaining("[1, 2]")
             .hasMessageContaining("List")
             .hasMessageContaining("is not a supported property value");
-        assertThatThrownBy(() -> PrimitiveValues.of(new Object[]{'c', "string"}))
+        assertThatThrownBy(() -> PrimitiveValues.create(new Object[]{'c', "string"}))
             .hasMessageContaining("[Ljava.lang.Object;")
             .hasMessageContaining("is not a supported property value");
     }
@@ -82,29 +82,29 @@ class PrimitiveValuesTest {
         assertThat(byteArray)
             .satisfies(arr -> {
                 assertThat(arr.type()).isEqualTo(ValueType.LONG_ARRAY);
-                assertThat(arr).isEqualTo(PrimitiveValues.of(new byte[]{1, 2, 3}));
-                assertThat(arr).isEqualTo(PrimitiveValues.of(new Byte[]{(byte) 1, (byte) 2, (byte) 3}));
+                assertThat(arr).isEqualTo(PrimitiveValues.create(new byte[]{1, 2, 3}));
+                assertThat(arr).isEqualTo(PrimitiveValues.create(new Byte[]{(byte) 1, (byte) 2, (byte) 3}));
             });
         var shortArray = PrimitiveValues.shortArray(new short[]{1, 2, 3});
         assertThat(shortArray)
             .satisfies(arr -> {
                 assertThat(arr.type()).isEqualTo(ValueType.LONG_ARRAY);
-                assertThat(arr).isEqualTo(PrimitiveValues.of(new short[]{1, 2, 3}));
-                assertThat(arr).isEqualTo(PrimitiveValues.of(new Short[]{(short) 1, (short) 2, (short) 3}));
+                assertThat(arr).isEqualTo(PrimitiveValues.create(new short[]{1, 2, 3}));
+                assertThat(arr).isEqualTo(PrimitiveValues.create(new Short[]{(short) 1, (short) 2, (short) 3}));
             });
         var intArray = PrimitiveValues.intArray(new int[]{1, 2, 3});
         assertThat(intArray)
             .satisfies(arr -> {
                 assertThat(arr.type()).isEqualTo(ValueType.LONG_ARRAY);
-                assertThat(arr).isEqualTo(PrimitiveValues.of(new int[]{1, 2, 3}));
-                assertThat(arr).isEqualTo(PrimitiveValues.of(new Integer[]{(int) 1, (int) 2, (int) 3}));
+                assertThat(arr).isEqualTo(PrimitiveValues.create(new int[]{1, 2, 3}));
+                assertThat(arr).isEqualTo(PrimitiveValues.create(new Integer[]{(int) 1, (int) 2, (int) 3}));
             });
         var longArray = PrimitiveValues.longArray(new long[]{1, 2, 3});
         assertThat(longArray)
             .satisfies(arr -> {
                 assertThat(arr.type()).isEqualTo(ValueType.LONG_ARRAY);
-                assertThat(arr).isEqualTo(PrimitiveValues.of(new long[]{1, 2, 3}));
-                assertThat(arr).isEqualTo(PrimitiveValues.of(new Long[]{(long) 1, (long) 2, (long) 3}));
+                assertThat(arr).isEqualTo(PrimitiveValues.create(new long[]{1, 2, 3}));
+                assertThat(arr).isEqualTo(PrimitiveValues.create(new Long[]{(long) 1, (long) 2, (long) 3}));
             });
         assertThat(longArray)
             .isEqualTo(byteArray)
@@ -118,15 +118,15 @@ class PrimitiveValuesTest {
         assertThat(floatArray)
             .satisfies(arr -> {
                 assertThat(arr.type()).isEqualTo(ValueType.FLOAT_ARRAY);
-                assertThat(arr).isEqualTo(PrimitiveValues.of(new float[]{1, 2, 3}));
-                assertThat(arr).isEqualTo(PrimitiveValues.of(new Float[]{(float) 1, (float) 2, (float) 3}));
+                assertThat(arr).isEqualTo(PrimitiveValues.create(new float[]{1, 2, 3}));
+                assertThat(arr).isEqualTo(PrimitiveValues.create(new Float[]{(float) 1, (float) 2, (float) 3}));
             });
         var doubleArray = PrimitiveValues.doubleArray(new double[]{1, 2, 3});
         assertThat(doubleArray)
             .satisfies(arr -> {
                 assertThat(arr.type()).isEqualTo(ValueType.DOUBLE_ARRAY);
-                assertThat(arr).isEqualTo(PrimitiveValues.of(new double[]{1, 2, 3}));
-                assertThat(arr).isEqualTo(PrimitiveValues.of(new Double[]{(double) 1, (double) 2, (double) 3}));
+                assertThat(arr).isEqualTo(PrimitiveValues.create(new double[]{1, 2, 3}));
+                assertThat(arr).isEqualTo(PrimitiveValues.create(new Double[]{(double) 1, (double) 2, (double) 3}));
             });
         assertThat(doubleArray)
             .isEqualTo(floatArray);

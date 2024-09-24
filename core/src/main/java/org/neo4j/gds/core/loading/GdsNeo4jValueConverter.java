@@ -25,6 +25,7 @@ import org.neo4j.gds.values.GdsNoValue;
 import org.neo4j.gds.values.GdsValue;
 import org.neo4j.gds.values.primitive.PrimitiveValues;
 import org.neo4j.values.AnyValue;
+import org.neo4j.values.SequenceValue;
 import org.neo4j.values.storable.ArrayValue;
 import org.neo4j.values.storable.IntegralValue;
 import org.neo4j.values.storable.NoValue;
@@ -41,12 +42,10 @@ public final class GdsNeo4jValueConverter {
             return GdsNoValue.NO_VALUE;
         }
         if (value.isSequenceValue()) { // ArrayValue or ListValue
-            return convertSequenceValueOrFail(value);
+            return convertSequenceValueOrFail((SequenceValue) value);
         }
-        if (value instanceof Value storableValue) {
-            if (storableValue.valueGroup() != ValueGroup.NUMBER) {
-                throw new IllegalArgumentException(formatWithLocale("Unsupported GDS node property of type `%s`.", storableValue.getTypeName()));
-            } else if (storableValue instanceof org.neo4j.values.storable.FloatValue floatValue) {
+        if (value instanceof Value storableValue && storableValue.valueGroup() == ValueGroup.NUMBER) {
+            if (storableValue instanceof org.neo4j.values.storable.FloatValue floatValue) {
                 return PrimitiveValues.floatingPointValue(floatValue.floatValue());
             } else if (storableValue instanceof org.neo4j.values.storable.DoubleValue doubleValue) {
                 return PrimitiveValues.floatingPointValue(doubleValue.doubleValue());
@@ -54,16 +53,19 @@ public final class GdsNeo4jValueConverter {
                 return PrimitiveValues.longValue(integralValue.longValue());
             }
         }
-        throw new IllegalArgumentException(formatWithLocale("Unsupported GDS node property of type `%s`.", value.getTypeName()));
+        throw new IllegalArgumentException(formatWithLocale(
+            "Unsupported conversion to GDS Value from Neo4j Value with type `%s`.",
+            value.getTypeName()
+        ));
     }
 
-    private static GdsValue convertSequenceValueOrFail(AnyValue value) {
+    private static GdsValue convertSequenceValueOrFail(SequenceValue value) {
         if (value instanceof ListValue listValue) {
             return convertListValueOrFail(listValue);
-        } else if (value instanceof ArrayValue arrayValue){
-        return convertArrayValueOrFail(arrayValue);
+        } else if (value instanceof ArrayValue arrayValue) {
+            return convertArrayValueOrFail(arrayValue);
         } else {
-            throw failOnBadList(value);
+            throw failOnBadInput(value);
         }
     }
 
@@ -76,14 +78,14 @@ public final class GdsNeo4jValueConverter {
         try {
             return convertArrayValueOrFail(listValue.toStorableArray());
         } catch (RuntimeException e) {
-            throw failOnBadList(listValue);
+            throw failOnBadInput(listValue);
         }
     }
 
     @NotNull
     private static Array convertArrayValueOrFail(ArrayValue array) {
         if (array.valueGroup() != ValueGroup.NUMBER_ARRAY) {
-            throw failOnBadList(array);
+            throw failOnBadInput(array);
         }
         if (array.isEmpty()) {
             return PrimitiveValues.EMPTY_LONG_ARRAY;
@@ -94,15 +96,17 @@ public final class GdsNeo4jValueConverter {
         } else if (arrayCopy instanceof double[]) {
             return PrimitiveValues.doubleArray((double[]) arrayCopy);
         } else {
-            throw failOnBadList(array);
+            throw failOnBadInput(array);
         }
     }
 
-    private static IllegalArgumentException failOnBadList(AnyValue badList) {
-        return new IllegalArgumentException(formatWithLocale(
-            "Only lists of uniformly typed numbers are supported as GDS node properties, but found an unsupported list `%s`.",
-            badList
-        ));
+    private static IllegalArgumentException failOnBadInput(SequenceValue badInput) {
+        return new IllegalArgumentException(
+            formatWithLocale(
+                "Unsupported conversion to GDS Value from Neo4j Value `%s`.",
+                badInput
+            )
+        );
     }
 
     private GdsNeo4jValueConverter() {}

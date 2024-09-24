@@ -41,7 +41,7 @@ public class GraphStoreNodeVisitor extends NodeVisitor {
     protected void exportElement() {
         Map<String, GdsValue> props = new HashMap<>();
         forEachProperty((key, value) -> {
-            props.put(key, PrimitiveValues.of(value));
+            props.put(key, PrimitiveValues.create(value));
         });
         var nodeLabels = NodeLabelTokens.of(labels());
         nodesBuilder.addNode(id(), props, nodeLabels);

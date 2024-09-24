@@ -235,7 +235,7 @@ class CypherFactoryTest extends BaseTest {
 
         assertThatThrownBy(() -> applyInFullAccessTransaction(db, tx -> builder.build().graph()))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Only lists of uniformly typed numbers are supported as GDS node properties")
+            .hasMessageContaining("Unsupported conversion to GDS Value from Neo4j Value")
             .hasMessageContaining("List{Long(1), Long(2), Boolean('true')}");
     }
 
@@ -264,7 +264,7 @@ class CypherFactoryTest extends BaseTest {
 
         assertThatThrownBy(() -> applyInFullAccessTransaction(db, tx -> builder.build().graph()))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Only lists of uniformly typed numbers are supported as GDS node properties")
+            .hasMessageContaining("Unsupported conversion to GDS Value from Neo4j Value")
             .hasMessageContaining("List{String(\"forty\"), String(\"two\")}");
     }
 

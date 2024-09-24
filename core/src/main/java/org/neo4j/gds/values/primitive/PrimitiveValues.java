@@ -38,8 +38,8 @@ public final class PrimitiveValues {
     public static final GdsNoValue NO_VALUE = GdsNoValue.NO_VALUE;
     public static final LongArray EMPTY_LONG_ARRAY = longArray(ArrayUtils.EMPTY_LONG_ARRAY);
 
-    public static GdsValue of(@Nullable Object value) {
-        GdsValue of = unsafeOf(value);
+    public static GdsValue create(@Nullable Object value) {
+        GdsValue of = of(value);
         if (of != null) {
             return of;
         }
@@ -47,7 +47,7 @@ public final class PrimitiveValues {
         throw new IllegalArgumentException(formatWithLocale("[%s:%s] is not a supported property value", value, value.getClass().getName()));
     }
 
-    private static @Nullable GdsValue unsafeOf(Object value) {
+    private static @Nullable GdsValue of(Object value) {
         if (value == null) return NO_VALUE;
         if (value instanceof Number) {
             return numberValue((Number) value);
