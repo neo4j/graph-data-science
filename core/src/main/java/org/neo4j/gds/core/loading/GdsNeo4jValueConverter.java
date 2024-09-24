@@ -73,7 +73,11 @@ public final class GdsNeo4jValueConverter {
             // encode as long array
             return PrimitiveValues.EMPTY_LONG_ARRAY;
         }
-        return convertArrayValueOrFail(listValue.toStorableArray());
+        try {
+            return convertArrayValueOrFail(listValue.toStorableArray());
+        } catch (RuntimeException e) {
+            throw failOnBadList(listValue);
+        }
     }
 
     @NotNull
