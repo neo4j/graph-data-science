@@ -20,7 +20,7 @@
 package org.neo4j.gds.catalog;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.LocalGraphDataScienceProcedures;
 import org.neo4j.gds.procedures.catalog.GraphCatalogProcedureFacade;
 import org.neo4j.gds.procedures.catalog.GraphInfo;
 
@@ -33,7 +33,7 @@ import static org.mockito.Mockito.when;
 class GraphDropProcTest {
     @Test
     void shouldDelegateToFacade() {
-        var facade = mock(GraphDataScienceProcedures.class);
+        var facade = mock(LocalGraphDataScienceProcedures.class);
         var procedure = new GraphDropProc(facade);
 
         var expectedResult = Stream.<GraphInfo>of();

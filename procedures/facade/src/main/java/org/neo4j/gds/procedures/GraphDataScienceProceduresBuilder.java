@@ -77,7 +77,7 @@ public class GraphDataScienceProceduresBuilder {
     }
 
     public GraphDataScienceProcedures build() {
-        return new GraphDataScienceProcedures(
+        return new LocalGraphDataScienceProcedures(
             log,
             algorithmsProcedureFacade,
             graphCatalogProcedureFacade,

@@ -44,6 +44,7 @@ import org.neo4j.gds.procedures.ExporterBuildersProviderService;
 import org.neo4j.gds.procedures.GraphCatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.KernelTransactionAccessor;
+import org.neo4j.gds.procedures.LocalGraphDataScienceProcedures;
 import org.neo4j.gds.procedures.ProcedureCallContextReturnColumns;
 import org.neo4j.gds.procedures.ProcedureTransactionAccessor;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
@@ -183,7 +184,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
             .with(userLogStore)
             .build();
 
-        return GraphDataScienceProcedures.create(
+        return LocalGraphDataScienceProcedures.create(
             log,
             algorithmMetricsService,
             defaultsConfiguration,
