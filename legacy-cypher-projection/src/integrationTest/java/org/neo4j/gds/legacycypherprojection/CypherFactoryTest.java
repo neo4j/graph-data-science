@@ -240,7 +240,7 @@ class CypherFactoryTest extends BaseTest {
     }
 
     @Test
-    void failsOnMixedNumbersList() {
+    void mixedNumbersListNodeProperty() {
         var nodeQuery = "RETURN 0 AS id, [1, 2, 1.23] AS list";
 
         var builder = new CypherLoaderBuilder()
@@ -248,10 +248,9 @@ class CypherFactoryTest extends BaseTest {
             .nodeQuery(nodeQuery)
             .relationshipQuery("RETURN 0 AS source, 0 AS target LIMIT 0");
 
-        assertThatThrownBy(() -> applyInFullAccessTransaction(db, tx -> builder.build().graph()))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Only lists of uniformly typed numbers are supported as GDS node properties")
-            .hasMessageContaining("List{Long(1), Long(2), Double(1"); // omitting the rest of the double for locale reasons
+        var graph = applyInFullAccessTransaction(db, tx -> builder.build().graph());
+        var value = graph.nodeProperties("list").doubleArrayValue(0);
+        assertThat(value).isEqualTo(new double[]{1.0, 2.0, 1.23});
     }
 
     @Test
