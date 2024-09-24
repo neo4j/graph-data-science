@@ -19,76 +19,28 @@
  */
 package org.neo4j.gds.procedures.algorithms.machinelearning.stubs;
 
-import org.neo4j.gds.applications.algorithms.machinelearning.MachineLearningAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.machinelearning.MachineLearningAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateConfig;
 import org.neo4j.gds.procedures.algorithms.machinelearning.SplitRelationshipsMutateResult;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class SplitRelationshipsMutateStub implements MutateStub<SplitRelationshipsMutateConfig, SplitRelationshipsMutateResult> {
-    private final GenericStub genericStub;
-    private final MachineLearningAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
-    private final MachineLearningAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
-
-    public SplitRelationshipsMutateStub(
-        GenericStub genericStub,
-        MachineLearningAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
-        MachineLearningAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade
-    ) {
-        this.genericStub = genericStub;
-        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
-        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
-    }
+public interface SplitRelationshipsMutateStub extends MutateStub<SplitRelationshipsMutateConfig, SplitRelationshipsMutateResult> {
+    @Override
+    SplitRelationshipsMutateConfig parseConfiguration(Map<String, Object> configuration);
 
     @Override
-    public SplitRelationshipsMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(SplitRelationshipsMutateConfig::of, configuration);
-    }
+    MemoryEstimation getMemoryEstimation(String username, Map<String, Object> rawConfiguration);
 
     @Override
-    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> rawConfiguration) {
-        return genericStub.getMemoryEstimation(
-            rawConfiguration,
-            SplitRelationshipsMutateConfig::of,
-            estimationModeBusinessFacade::splitRelationships
-        );
-    }
+    Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> rawConfiguration);
 
     @Override
-    public Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> rawConfiguration) {
-        return genericStub.estimate(
-            graphName,
-            rawConfiguration,
-            SplitRelationshipsMutateConfig::of,
-            estimationModeBusinessFacade::splitRelationships
-        );
-    }
-
-    @Override
-    public Stream<SplitRelationshipsMutateResult> execute(
+    Stream<SplitRelationshipsMutateResult> execute(
         String graphNameAsString,
         Map<String, Object> rawConfiguration
-    ) {
-        var resultBuilder = new SplitRelationshipsResultBuilderForMutateMode();
-
-        return genericStub.execute(
-            graphNameAsString,
-            rawConfiguration,
-            SplitRelationshipsMutateConfig::of,
-            (graphName, configuration, __) -> mutateModeBusinessFacade.splitRelationships(
-                graphName,
-                configuration,
-                resultBuilder
-            ),
-            resultBuilder
-        );
-    }
-
-
+    );
 }

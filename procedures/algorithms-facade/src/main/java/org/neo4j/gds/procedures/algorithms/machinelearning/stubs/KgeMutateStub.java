@@ -20,72 +20,24 @@
 package org.neo4j.gds.procedures.algorithms.machinelearning.stubs;
 
 import org.neo4j.gds.algorithms.machinelearning.KGEPredictMutateConfig;
-import org.neo4j.gds.applications.algorithms.machinelearning.MachineLearningAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.machinelearning.MachineLearningAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.machinelearning.KGEMutateResult;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class KgeMutateStub implements MutateStub<KGEPredictMutateConfig, KGEMutateResult> {
-    private final GenericStub genericStub;
-    private final MachineLearningAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
-    private final MachineLearningAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
-
-    public KgeMutateStub(
-        GenericStub genericStub,
-        MachineLearningAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
-        MachineLearningAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade
-    ) {
-        this.genericStub = genericStub;
-        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
-        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
-    }
+public interface KgeMutateStub extends MutateStub<KGEPredictMutateConfig, KGEMutateResult> {
+    @Override
+    KGEPredictMutateConfig parseConfiguration(Map<String, Object> configuration);
 
     @Override
-    public KGEPredictMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(KGEPredictMutateConfig::of, configuration);
-    }
+    MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration);
 
     @Override
-    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
-        return genericStub.getMemoryEstimation(
-            configuration,
-            KGEPredictMutateConfig::of,
-            __ -> estimationModeBusinessFacade.kge()
-        );
-    }
+    Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration);
 
     @Override
-    public Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration) {
-        return genericStub.estimate(
-            graphName,
-            configuration,
-            KGEPredictMutateConfig::of,
-            __ -> estimationModeBusinessFacade.kge()
-        );
-    }
-
-    @Override
-    public Stream<KGEMutateResult> execute(String graphNameAsString, Map<String, Object> rawConfiguration) {
-        var resultBuilder = new KgeResultBuilderForMutateMode();
-
-        return genericStub.execute(
-            graphNameAsString,
-            rawConfiguration,
-            KGEPredictMutateConfig::of,
-            (graphName, configuration, __) -> mutateModeBusinessFacade.kge(
-                graphName,
-                configuration,
-                resultBuilder
-            ),
-            resultBuilder
-        );
-    }
-
-
+    Stream<KGEMutateResult> execute(String graphNameAsString, Map<String, Object> rawConfiguration);
 }

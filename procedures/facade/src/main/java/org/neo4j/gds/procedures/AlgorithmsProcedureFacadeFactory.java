@@ -34,6 +34,7 @@ import org.neo4j.gds.procedures.algorithms.miscellaneous.MiscellaneousProcedureF
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.embeddings.LocalNodeEmbeddingsProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.machinelearning.LocalMachineLearningProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.pathfinding.LocalPathFindingProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.similarity.LocalSimilarityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
@@ -78,7 +79,7 @@ final class AlgorithmsProcedureFacadeFactory {
             configurationParser
         );
 
-        var machineLearningProcedureFacade = MachineLearningProcedureFacade.create(
+        var machineLearningProcedureFacade = LocalMachineLearningProcedureFacade.create(
             genericStub,
             applicationsFacade,
             configurationParser

@@ -19,100 +19,18 @@
  */
 package org.neo4j.gds.procedures.algorithms.machinelearning;
 
-import org.neo4j.gds.algorithms.machinelearning.KGEPredictStreamConfig;
-import org.neo4j.gds.algorithms.machinelearning.KGEPredictWriteConfig;
-import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.applications.ApplicationsFacade;
-import org.neo4j.gds.applications.algorithms.machinelearning.MachineLearningAlgorithmsStreamModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.machinelearning.MachineLearningAlgorithmsWriteModeBusinessFacade;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.machinelearning.stubs.KgeMutateStub;
 import org.neo4j.gds.procedures.algorithms.machinelearning.stubs.SplitRelationshipsMutateStub;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
-public final class MachineLearningProcedureFacade {
+public interface MachineLearningProcedureFacade {
+    KgeMutateStub kgeMutateStub();
 
-    private MachineLearningAlgorithmsStreamModeBusinessFacade streamModeBusinessFacade;
-    private MachineLearningAlgorithmsWriteModeBusinessFacade writeModeBusinessFacade;
+    Stream<KGEStreamResult> kgeStream(String graphName, Map<String, Object> configuration);
 
-    private final KgeMutateStub kgeMutateStub;
-    private final SplitRelationshipsMutateStub splitRelationshipsMutateStub;
+    Stream<KGEWriteResult> kgeWrite(String graphName, Map<String, Object> configuration);
 
-    private final UserSpecificConfigurationParser configurationParser;
-
-    private MachineLearningProcedureFacade(
-        KgeMutateStub kgeMutateStub,
-        SplitRelationshipsMutateStub splitRelationshipsMutateStub,
-        MachineLearningAlgorithmsStreamModeBusinessFacade streamModeBusinessFacade,
-        MachineLearningAlgorithmsWriteModeBusinessFacade writeModeBusinessFacade,
-        UserSpecificConfigurationParser configurationParser
-    ) {
-        this.streamModeBusinessFacade = streamModeBusinessFacade;
-        this.writeModeBusinessFacade = writeModeBusinessFacade;
-        this.configurationParser = configurationParser;
-        this.kgeMutateStub = kgeMutateStub;
-        this.splitRelationshipsMutateStub = splitRelationshipsMutateStub;
-    }
-
-    public static MachineLearningProcedureFacade create(
-        GenericStub genericStub,
-        ApplicationsFacade applicationsFacade,
-        UserSpecificConfigurationParser configurationParser
-    ) {
-        var kgeMutateStub = new KgeMutateStub(genericStub, applicationsFacade.machineLearning().mutate(), applicationsFacade.machineLearning().estimate());
-        var splitRelationshipsMutateStub = new SplitRelationshipsMutateStub(genericStub, applicationsFacade.machineLearning().mutate(), applicationsFacade.machineLearning().estimate());
-
-        return new MachineLearningProcedureFacade(
-            kgeMutateStub,
-            splitRelationshipsMutateStub,
-            applicationsFacade.machineLearning().stream(),
-            applicationsFacade.machineLearning().write(),
-            configurationParser
-        );
-    }
-
-    public KgeMutateStub kgeMutateStub() {
-        return kgeMutateStub;
-    }
-
-    public Stream<KGEStreamResult> kgeStream(String graphName, Map<String, Object> configuration) {
-        var resultBuilder = new KgeResultBuilderForStreamMode();
-
-        return streamModeBusinessFacade.kge(
-            GraphName.parse(graphName),
-            parseConfiguration(configuration, KGEPredictStreamConfig::of),
-            resultBuilder
-        );
-    }
-
-    public Stream<KGEWriteResult> kgeWrite(String graphName, Map<String, Object> configuration) {
-        var resultBuilder = new KgeResultBuilderForWriteMode();
-
-        return writeModeBusinessFacade.kge(
-            GraphName.parse(graphName),
-            parseConfiguration(configuration, KGEPredictWriteConfig::of),
-            resultBuilder
-        );
-    }
-
-    public SplitRelationshipsMutateStub splitRelationshipsMutateStub() {
-        return splitRelationshipsMutateStub;
-    }
-
-
-    private <C extends AlgoBaseConfig> C parseConfiguration(
-        Map<String, Object> configuration,
-        Function<CypherMapWrapper, C> configurationMapper
-    ) {
-        return configurationParser.parseConfiguration(
-            configuration,
-            configurationMapper
-        );
-    }
+    SplitRelationshipsMutateStub splitRelationshipsMutateStub();
 }
