@@ -59,8 +59,8 @@ public final class ComponentSpec {
         return new ComponentSpec(Boolean.TRUE, userInput);
     }
 
-    public static String render(ComponentSpec spec) {
-        return spec.componentProperty == null ? spec.useComponents.toString() : spec.componentProperty;
+    public static Object render(ComponentSpec spec) {
+        return spec.componentProperty == null ? spec.useComponents : spec.componentProperty;
     }
 
     static final ComponentSpec NO = new ComponentSpec(false, null);

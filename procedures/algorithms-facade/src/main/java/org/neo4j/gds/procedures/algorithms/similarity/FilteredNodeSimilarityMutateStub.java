@@ -19,78 +19,24 @@
  */
 package org.neo4j.gds.procedures.algorithms.similarity;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityMutateConfig;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class FilteredNodeSimilarityMutateStub implements MutateStub<FilteredNodeSimilarityMutateConfig, SimilarityMutateResult> {
-
-    private final GenericStub genericStub;
-    private final SimilarityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
-    private final SimilarityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
-    private final ProcedureReturnColumns procedureReturnColumns;
-
-    FilteredNodeSimilarityMutateStub(
-        GenericStub genericStub,
-        SimilarityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
-        SimilarityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
-        ProcedureReturnColumns procedureReturnColumns
-    ) {
-        this.genericStub = genericStub;
-        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
-        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
-        this.procedureReturnColumns = procedureReturnColumns;
-    }
+public interface FilteredNodeSimilarityMutateStub extends MutateStub<FilteredNodeSimilarityMutateConfig, SimilarityMutateResult> {
+    @Override
+    FilteredNodeSimilarityMutateConfig parseConfiguration(Map<String, Object> configuration);
 
     @Override
-    public FilteredNodeSimilarityMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(FilteredNodeSimilarityMutateConfig::of, configuration);
-    }
+    MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration);
 
     @Override
-    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
-        return genericStub.getMemoryEstimation(
-            configuration,
-            FilteredNodeSimilarityMutateConfig::of,
-            estimationModeBusinessFacade::filteredNodeSimilarity
-        );
-    }
+    Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration);
 
     @Override
-    public Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration) {
-        return genericStub.estimate(
-            graphName,
-            configuration,
-            FilteredNodeSimilarityMutateConfig::of,
-            estimationModeBusinessFacade::filteredNodeSimilarity
-        );
-    }
-
-    @Override
-    public Stream<SimilarityMutateResult> execute(String graphNameAsString, Map<String, Object> rawConfiguration) {
-        var resultBuilder = new FilteredNodeSimilarityResultBuilderForMutateMode();
-
-        return genericStub.execute(
-            graphNameAsString,
-            rawConfiguration,
-            FilteredNodeSimilarityMutateConfig::of,
-            (graphName, configuration, __) -> mutateModeBusinessFacade.filteredNodeSimilarity(
-                graphName,
-                configuration,
-                resultBuilder,
-                procedureReturnColumns.contains("similarityDistribution")
-            ),
-            resultBuilder
-        );
-    }
-
-
+    Stream<SimilarityMutateResult> execute(String graphNameAsString, Map<String, Object> rawConfiguration);
 }

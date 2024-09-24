@@ -19,78 +19,24 @@
  */
 package org.neo4j.gds.procedures.algorithms.similarity;
 
-import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnMutateConfig;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class FilteredKnnMutateStub implements MutateStub<FilteredKnnMutateConfig, KnnMutateResult> {
-
-    private final GenericStub genericStub;
-    private final SimilarityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
-    private final SimilarityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
-    private final ProcedureReturnColumns procedureReturnColumns;
-
-    FilteredKnnMutateStub(
-        GenericStub genericStub,
-        SimilarityAlgorithmsEstimationModeBusinessFacade similarityAlgorithmsEstimationModeBusinessFacade,
-        SimilarityAlgorithmsMutateModeBusinessFacade similarityAlgorithmsMutateMode,
-        ProcedureReturnColumns procedureReturnColumns
-    ) {
-        this.genericStub = genericStub;
-        this.estimationModeBusinessFacade = similarityAlgorithmsEstimationModeBusinessFacade;
-        this.mutateModeBusinessFacade = similarityAlgorithmsMutateMode;
-        this.procedureReturnColumns = procedureReturnColumns;
-    }
+public interface FilteredKnnMutateStub extends MutateStub<FilteredKnnMutateConfig, KnnMutateResult> {
+    @Override
+    FilteredKnnMutateConfig parseConfiguration(Map<String, Object> configuration);
 
     @Override
-    public FilteredKnnMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(FilteredKnnMutateConfig::of, configuration);
-    }
+    MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration);
 
     @Override
-    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
-        return genericStub.getMemoryEstimation(
-            configuration,
-            FilteredKnnMutateConfig::of,
-            estimationModeBusinessFacade::filteredKnn
-        );
-    }
+    Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration);
 
     @Override
-    public Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration) {
-        return genericStub.estimate(
-            graphName,
-            configuration,
-            FilteredKnnMutateConfig::of,
-            estimationModeBusinessFacade::filteredKnn
-        );
-    }
-
-    @Override
-    public Stream<KnnMutateResult> execute(String graphNameAsString, Map<String, Object> rawConfiguration) {
-        var resultBuilder = new FilteredKnnResultBuilderForMutateMode();
-
-        return genericStub.execute(
-            graphNameAsString,
-            rawConfiguration,
-            FilteredKnnMutateConfig::of,
-            (graphName, configuration, __) -> mutateModeBusinessFacade.filteredKnn(
-                graphName,
-                configuration,
-                resultBuilder,
-                procedureReturnColumns.contains("similarityDistribution")
-            ),
-            resultBuilder
-        );
-    }
-
-
+    Stream<KnnMutateResult> execute(String graphNameAsString, Map<String, Object> rawConfiguration);
 }
