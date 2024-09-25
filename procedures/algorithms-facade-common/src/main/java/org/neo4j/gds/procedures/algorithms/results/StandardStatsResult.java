@@ -17,18 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.influenceMaximization;
+package org.neo4j.gds.procedures.algorithms.results;
 
-import org.neo4j.gds.annotation.Parameters;
-import org.neo4j.gds.core.concurrency.Concurrency;
+import java.util.Map;
 
-@Parameters
-public record CELFParameters(
-    int seedSetSize,
-    double propagationProbability,
-    int monteCarloSimulations,
-    Concurrency concurrency,
-    long randomSeed,
-    int batchSize
-) {
+public class StandardStatsResult extends StandardModeResult {
+    public final long postProcessingMillis;
+
+    public StandardStatsResult(
+        long preProcessingMillis,
+        long computeMillis,
+        long postProcessingMillis,
+        Map<String, Object> configuration
+    ) {
+        super(preProcessingMillis, computeMillis, configuration);
+        this.postProcessingMillis = postProcessingMillis;
+    }
 }

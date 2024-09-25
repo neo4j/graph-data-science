@@ -11,6 +11,12 @@ dependencies {
         }
     }
 
+    api project(':centrality-facade-api')
+
+    // TODO: remove this once we get all categories to `api` modules?
+    // We will still need something to expose this as API
+    api project(':algorithms-facade-common')
+
     implementation project(':algo')
     implementation project(':algo-common')
     implementation project(':algorithms-machinery')

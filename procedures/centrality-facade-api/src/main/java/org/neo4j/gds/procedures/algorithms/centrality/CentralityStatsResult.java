@@ -21,54 +21,37 @@ package org.neo4j.gds.procedures.algorithms.centrality;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
-import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
 
 import java.util.Map;
 
-public final class BetaClosenessCentralityMutateResult extends StandardMutateResult {
-
-    public final long nodePropertiesWritten;
-    public final String mutateProperty;
+public class CentralityStatsResult extends StandardStatsResult {
     public final Map<String, Object> centralityDistribution;
 
-    public BetaClosenessCentralityMutateResult(
-        long nodePropertiesWritten,
+    public CentralityStatsResult(
+        Map<String, Object> centralityDistribution,
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
-        long mutateMillis,
-        String mutateProperty,
-        Map<String, Object> centralityDistribution,
-        Map<String, Object> config
+        Map<String, Object> configuration
     ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, mutateMillis, config);
-        this.mutateProperty = mutateProperty;
+        super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
         this.centralityDistribution = centralityDistribution;
-        this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    public static final class Builder extends AbstractCentralityResultBuilder<BetaClosenessCentralityMutateResult> {
-        public String mutateProperty;
-
+    public static final class Builder extends AbstractCentralityResultBuilder<CentralityStatsResult> {
         public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
             super(returnColumns, concurrency);
         }
 
-        public void withMutateProperty(String mutateProperty) {
-            this.mutateProperty = mutateProperty;
-        }
-
         @Override
-        public BetaClosenessCentralityMutateResult buildResult() {
-            return new BetaClosenessCentralityMutateResult(
-                nodePropertiesWritten,
+        public CentralityStatsResult buildResult() {
+            return new CentralityStatsResult(
+                centralityHistogram,
                 preProcessingMillis,
                 computeMillis,
                 postProcessingMillis,
-                mutateMillis,
-                mutateProperty,
-                centralityHistogram,
                 config.toMap()
             );
         }

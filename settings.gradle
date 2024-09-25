@@ -324,6 +324,18 @@ include('gds-values')
 project(':gds-values').projectDir = file('gds-values')
 
 
+// Facade API modules
+include('algorithms-facade-common')
+project(':algorithms-facade-common').projectDir = file('procedures/algorithms-facade-common')
+
+include('centrality-facade-api')
+project(':centrality-facade-api').projectDir = file('procedures/centrality-facade-api')
+
+include('centrality-configs')
+project(':centrality-configs').projectDir = file('procedures/configs/centrality-configs')
+
+include('centrality-params')
+project(':centrality-params').projectDir = file('algo-params/centrality-params')
 
 
 

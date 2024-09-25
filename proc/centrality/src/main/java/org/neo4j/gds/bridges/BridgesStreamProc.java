@@ -21,6 +21,7 @@ package org.neo4j.gds.bridges;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.algorithms.centrality.BridgesStreamResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -40,7 +41,7 @@ public class BridgesStreamProc {
 
     @Procedure(value = "gds.bridges.stream", mode = READ)
     @Description(BRIDGES_DESCRIPTION)
-    public Stream<Bridge> stream(
+    public Stream<BridgesStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

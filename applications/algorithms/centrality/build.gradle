@@ -8,6 +8,7 @@ dependencies {
     implementation project(":algo")
     implementation project(":algo-common")
     implementation project(":algorithms-machinery")
+    implementation project(":centrality-configs")
     implementation project(":config-api")
     implementation project(":core")
     implementation project(":logging")

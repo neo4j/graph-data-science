@@ -20,7 +20,6 @@
 package org.neo4j.gds.procedures.algorithms.centrality;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.bridges.Bridge;
 import org.neo4j.gds.pagerank.ArticleRankMutateConfig;
 import org.neo4j.gds.pagerank.EigenvectorMutateConfig;
 import org.neo4j.gds.pagerank.PageRankMutateConfig;
@@ -148,7 +147,7 @@ public interface CentralityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    Stream<Bridge> bridgesStream(
+    Stream<BridgesStreamResult> bridgesStream(
         String graphName,
         Map<String, Object> configuration
     );
@@ -283,4 +282,5 @@ public interface CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     );
+
 }

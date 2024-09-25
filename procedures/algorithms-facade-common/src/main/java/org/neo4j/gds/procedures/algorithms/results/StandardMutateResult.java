@@ -17,17 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.degree;
+package org.neo4j.gds.procedures.algorithms.results;
 
-import org.neo4j.gds.Orientation;
-import org.neo4j.gds.annotation.Parameters;
-import org.neo4j.gds.core.concurrency.Concurrency;
+import java.util.Map;
 
-@Parameters
-public record DegreeCentralityParameters(
-    Concurrency concurrency,
-    Orientation orientation,
-    boolean hasRelationshipWeightProperty,
-    int minBatchSize
-) {
+public class StandardMutateResult extends StandardStatsResult {
+    public final long mutateMillis;
+
+    public StandardMutateResult(
+        long preProcessingMillis,
+        long computeMillis,
+        long postProcessingMillis,
+        long mutateMillis,
+        Map<String, Object> configuration
+    ) {
+        super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
+        this.mutateMillis = mutateMillis;
+    }
 }

@@ -34,7 +34,6 @@ import org.neo4j.gds.articulationpoints.ArticulationPointsWriteConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
-import org.neo4j.gds.bridges.Bridge;
 import org.neo4j.gds.bridges.BridgesStreamConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityStatsConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityStreamConfig;
@@ -640,7 +639,7 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
 
 
     @Override
-    public Stream<Bridge> bridgesStream(
+    public Stream<BridgesStreamResult> bridgesStream(
         String graphName,
         Map<String, Object> configuration
     ) {

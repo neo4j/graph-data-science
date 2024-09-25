@@ -19,30 +19,5 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
-import org.neo4j.gds.bridges.BridgeResult;
-
-import java.util.Optional;
-import java.util.stream.Stream;
-
-class BridgesResultBuilderForStreamMode implements StreamResultBuilder<BridgeResult,BridgesStreamResult> {
-
-
-    @Override
-    public Stream<BridgesStreamResult> build(
-        Graph graph,
-        GraphStore graphStore,
-        Optional<BridgeResult> result
-    ) {
-        if (result.isEmpty()) return Stream.empty();
-
-        var bridges = result.get().bridges();
-
-        return  bridges
-            .stream()
-            .map( b -> new BridgesStreamResult(graph.toOriginalNodeId(b.from()), graph.toOriginalNodeId(b.to())));
-
-    }
+public record ArticulationPoint(long nodeId) {
 }

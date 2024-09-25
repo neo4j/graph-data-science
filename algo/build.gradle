@@ -28,6 +28,13 @@ dependencies {
     implementation project(':algorithms-machinery')
     implementation project(':algo-common')
     implementation project(':annotations')
+    
+    implementation project(':centrality-params')
+
+    // This dependency is needed because we still have factories next to the algorithms.
+    // TODO: move the factories out
+    implementation project(':centrality-configs')
+    
     implementation project(':collections-memory-estimation')
     implementation project(':config-api')
     implementation project(':core')

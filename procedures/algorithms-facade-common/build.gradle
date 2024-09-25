@@ -1,0 +1,23 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Algorithms Procedure Facade - Commons'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+
+    // `BaseConfig` lives here
+    implementation project(':config-api')
+
+    // `AbstractResultBuilder` and `AlgoBaseConfig` are here
+    // TODO: remove this dependency
+    implementation project(':core')
+
+    // this is needed because of `MemoryEstimateResult`
+    implementation project(':algorithms-machinery')
+
+    implementation project(':memory-usage')
+
+    // only `JobIdConfig` is what we need from this module
+    implementation project(':progress-tracking')
+}

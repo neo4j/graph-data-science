@@ -29,8 +29,6 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 public class CELFAlgorithmFactory<CONFIG extends InfluenceMaximizationBaseConfig> extends GraphAlgorithmFactory<CELF, CONFIG> {
 
-    public static final int DEFAULT_BATCH_SIZE = 10;
-
     @Override
     public String taskName() {
         return "CELF";
