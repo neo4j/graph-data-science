@@ -119,11 +119,10 @@ public final class GraphFactory {
             // If the requested id map is high limit, we need to make sure that
             // internal data structures are sized accordingly. Using the highest
             // original id will potentially fail due to size limitations.
-            if (nodeCount.isPresent()) {
-                maxIntermediateId = nodeCount.get() - 1;
-            } else {
-                throw new IllegalArgumentException("Cannot use high limit id map without node count.");
-            }
+            // If the node count is not given, we fall back to an unknown max id,
+            // which is fine since label building relies on growing bitsets.
+            maxIntermediateId = nodeCount.map(nc -> nc - 1).orElse(NodesBuilder.UNKNOWN_MAX_ID);
+
             if (deduplicate) {
                 // We internally use HABS for deduplication, which is being initialized
                 // with max original id. This is fine for all id maps except high limit,
