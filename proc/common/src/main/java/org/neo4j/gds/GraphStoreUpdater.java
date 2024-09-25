@@ -21,18 +21,16 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.applications.algorithms.machinery.GraphStoreService;
+import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
-import org.neo4j.gds.core.huge.FilteredNodePropertyValues;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.result.AbstractResultBuilder;
 
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Extracting some common code so that it is reusable; eventually this can probably move to where it is used
@@ -57,38 +55,25 @@ public final class GraphStoreUpdater {
         );
     }
 
+    /**
+     * Let's eventually get rid of this
+     */
+    @Deprecated
     public static void updateGraphStore(
         Graph graph,
         GraphStore graphStore,
         AbstractResultBuilder<?> resultBuilder,
-        MutateNodePropertyConfig mutatePropertyConfig,
+        AlgoBaseConfig configuration,
         Log log,
         final List<NodeProperty> nodePropertyList
     ) {
-        var maybeTranslatedProperties = graph
-            .asNodeFilteredGraph()
-            .map(filteredGraph -> nodePropertyList
-                .stream()
-                .map(nodeProperty -> NodeProperty.of(
-                    nodeProperty.key(),
-                    FilteredNodePropertyValues.OriginalToFilteredNodePropertyValues.create(
-                        nodeProperty.values(),
-                        filteredGraph
-                    )
-                ))
-                .collect(Collectors.toList()))
-            .orElse(nodePropertyList);
+        var nodePropertiesWritten = new GraphStoreService(log).addNodeProperties(
+            graph,
+            graphStore,
+            configuration,
+            nodePropertyList
+        );
 
-        // TODO: stop using Neo4j Log...
-        log.info("Updating in-memory graph store");
-        Collection<NodeLabel> labelsToUpdate = mutatePropertyConfig.nodeLabelIdentifiers(graphStore);
-
-        maybeTranslatedProperties.forEach(nodeProperty -> graphStore.addNodeProperty(
-            new HashSet<>(labelsToUpdate),
-            nodeProperty.key(),
-            nodeProperty.values()
-        ));
-
-        resultBuilder.withNodePropertiesWritten(maybeTranslatedProperties.size() * graph.nodeCount());
+        resultBuilder.withNodePropertiesWritten(nodePropertiesWritten.value());
     }
 }

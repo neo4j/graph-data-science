@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.node.classification.predict;
+package org.neo4j.gds.procedures.pipelines;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
@@ -28,11 +28,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-final class PredictedProbabilities {
+public final class PredictedProbabilities {
     private PredictedProbabilities() {}
 
     @NotNull
-    static List<NodeProperty> asProperties(
+    public static List<NodeProperty> asProperties(
         Optional<NodeClassificationPipelineResult> result,
         String propertyName,
         Optional<String> predictedProbabilityProperty

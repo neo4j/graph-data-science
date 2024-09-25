@@ -36,9 +36,7 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
-import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
-import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
+import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.procedures.DatabaseIdAccessor;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
 import org.neo4j.gds.procedures.GraphCatalogProcedureFacadeFactory;
@@ -48,10 +46,10 @@ import org.neo4j.gds.procedures.LocalGraphDataScienceProcedures;
 import org.neo4j.gds.procedures.ProcedureCallContextReturnColumns;
 import org.neo4j.gds.procedures.ProcedureTransactionAccessor;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
-import org.neo4j.gds.procedures.TerminationFlagAccessor;
 import org.neo4j.gds.procedures.UserAccessor;
 import org.neo4j.gds.procedures.UserLogServices;
 import org.neo4j.gds.procedures.pipelines.PipelineRepository;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.config.Configuration;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
@@ -67,15 +65,12 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
     private final DatabaseIdAccessor databaseIdAccessor = new DatabaseIdAccessor();
     private final KernelTransactionAccessor kernelTransactionAccessor = new KernelTransactionAccessor();
     private final ProcedureTransactionAccessor procedureTransactionAccessor = new ProcedureTransactionAccessor();
-    private final TerminationFlagAccessor terminationFlagAccessor = new TerminationFlagAccessor();
     private final UserAccessor userAccessor = new UserAccessor();
 
     private final Log log;
     private final Configuration neo4jConfiguration;
 
-    private final AlgorithmMetricsService algorithmMetricsService;
     private final DefaultsConfiguration defaultsConfiguration;
-    private final DeprecatedProceduresMetricService deprecatedProceduresMetricService;
     private final ExporterBuildersProviderService exporterBuildersProviderService;
     private final ExportLocation exportLocation;
     private final GraphCatalogProcedureFacadeFactory graphCatalogProcedureFacadeFactory;
@@ -83,10 +78,10 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
     private final GraphStoreCatalogService graphStoreCatalogService;
     private final LimitsConfiguration limitsConfiguration;
     private final MemoryGuard memoryGuard;
+    private final MetricsFacade metricsFacade;
     private final ModelCatalog modelCatalog;
     private final ModelRepository modelRepository;
     private final PipelineRepository pipelineRepository;
-    private final ProjectionMetricsService projectionMetricsService;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
     private final TaskStoreService taskStoreService;
     private final UserLogServices userLogServices;
@@ -98,9 +93,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
     GraphDataScienceProceduresProvider(
         Log log,
         Configuration neo4jConfiguration,
-        AlgorithmMetricsService algorithmMetricsService,
         DefaultsConfiguration defaultsConfiguration,
-        DeprecatedProceduresMetricService deprecatedProceduresMetricService,
         ExporterBuildersProviderService exporterBuildersProviderService,
         ExportLocation exportLocation,
         GraphCatalogProcedureFacadeFactory graphCatalogProcedureFacadeFactory,
@@ -108,10 +101,10 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         GraphStoreCatalogService graphStoreCatalogService,
         LimitsConfiguration limitsConfiguration,
         MemoryGuard memoryGuard,
+        MetricsFacade metricsFacade,
         ModelCatalog modelCatalog,
         ModelRepository modelRepository,
         PipelineRepository pipelineRepository,
-        ProjectionMetricsService projectionMetricsService,
         TaskRegistryFactoryService taskRegistryFactoryService,
         TaskStoreService taskStoreService,
         UserLogServices userLogServices,
@@ -122,9 +115,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         this.log = log;
         this.neo4jConfiguration = neo4jConfiguration;
 
-        this.algorithmMetricsService = algorithmMetricsService;
         this.defaultsConfiguration = defaultsConfiguration;
-        this.deprecatedProceduresMetricService = deprecatedProceduresMetricService;
         this.exporterBuildersProviderService = exporterBuildersProviderService;
         this.exportLocation = exportLocation;
         this.graphCatalogProcedureFacadeFactory = graphCatalogProcedureFacadeFactory;
@@ -132,10 +123,10 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         this.graphStoreCatalogService = graphStoreCatalogService;
         this.limitsConfiguration = limitsConfiguration;
         this.memoryGuard = memoryGuard;
+        this.metricsFacade = metricsFacade;
         this.modelCatalog = modelCatalog;
         this.modelRepository = modelRepository;
         this.pipelineRepository = pipelineRepository;
-        this.projectionMetricsService = projectionMetricsService;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.taskStoreService = taskStoreService;
         this.userLogServices = userLogServices;
@@ -148,6 +139,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
     @Override
     public GraphDataScienceProcedures apply(Context context) throws ProcedureException {
         var graphDatabaseService = context.graphDatabaseAPI();
+        var dependencyResolver = graphDatabaseService.getDependencyResolver();
         var exporterContext = new ExporterContext.ProcedureContextWrapper(context);
         var kernelTransaction = kernelTransactionAccessor.getKernelTransaction(context);
         var procedureCallContext = context.procedureCallContext();
@@ -155,7 +147,8 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
 
         var databaseId = databaseIdAccessor.getDatabaseId(graphDatabaseService);
         var procedureReturnColumns = new ProcedureCallContextReturnColumns(procedureCallContext);
-        var terminationFlag = terminationFlagAccessor.createTerminationFlag(kernelTransaction);
+        var terminationMonitor = new TransactionTerminationMonitor(kernelTransaction);
+        var terminationFlag = TerminationFlag.wrap(terminationMonitor);
         var user = userAccessor.getUser(context.securityContext());
         var writeContext = createWriteContext(exporterContext, graphDatabaseService);
 
@@ -186,23 +179,23 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
 
         return LocalGraphDataScienceProcedures.create(
             log,
-            algorithmMetricsService,
             defaultsConfiguration,
-            deprecatedProceduresMetricService,
+            dependencyResolver,
             exportLocation,
             graphCatalogProcedureFacadeFactory,
             featureTogglesRepository,
             graphStoreCatalogService,
             limitsConfiguration,
             memoryGuard,
+            metricsFacade,
             modelCatalog,
             modelRepository,
             pipelineRepository,
-            projectionMetricsService,
             graphDatabaseService,
             kernelTransaction,
             procedureReturnColumns,
             requestScopedDependencies,
+            terminationMonitor,
             procedureTransaction,
             writeContext,
             algorithmProcessingTemplateDecorator,

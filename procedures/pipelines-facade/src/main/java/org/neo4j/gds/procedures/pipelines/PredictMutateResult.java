@@ -17,18 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.node;
+package org.neo4j.gds.procedures.pipelines;
 
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
 
 import java.util.Map;
 
 public final class PredictMutateResult extends StandardMutateResult {
-
     public final long nodePropertiesWritten;
 
-    private PredictMutateResult(
+    PredictMutateResult(
         long preProcessingMillis,
         long computeMillis,
         long mutateMillis,
@@ -45,8 +45,17 @@ public final class PredictMutateResult extends StandardMutateResult {
         this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    public static class Builder extends AbstractResultBuilder<PredictMutateResult> {
+    static PredictMutateResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+        return new PredictMutateResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.mutateOrWriteMillis,
+            0,
+            configurationMap
+        );
+    }
 
+    public static class Builder extends AbstractResultBuilder<PredictMutateResult> {
         @Override
         public PredictMutateResult build() {
             return new PredictMutateResult(

@@ -24,6 +24,7 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTempla
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.logging.Log;
 
 public final class SimilarityApplications {
@@ -53,7 +54,7 @@ public final class SimilarityApplications {
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
         ProgressTrackerCreator progressTrackerCreator,
-        WriteRelationshipService writeRelationshipService
+        WriteContext writeContext
     ) {
         var estimationModeFacade = new SimilarityAlgorithmsEstimationModeBusinessFacade(algorithmEstimationTemplate);
         var similarityAlgorithms = new SimilarityAlgorithms(progressTrackerCreator, requestScopedDependencies);
@@ -76,6 +77,8 @@ public final class SimilarityApplications {
             similarityAlgorithms,
             algorithmProcessingTemplateConvenience
         );
+
+        var writeRelationshipService = new WriteRelationshipService(log, requestScopedDependencies, writeContext);
 
         var writeModeFacade = new SimilarityAlgorithmsWriteModeBusinessFacade(
             estimationModeFacade,

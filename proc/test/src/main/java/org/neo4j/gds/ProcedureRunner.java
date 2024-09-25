@@ -37,7 +37,6 @@ import org.neo4j.gds.core.utils.warnings.EmptyUserLogStore;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.gds.metrics.MetricsFacade;
-import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.DatabaseIdAccessor;
 import org.neo4j.gds.procedures.GraphCatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.LocalGraphDataScienceProcedures;
@@ -170,23 +169,23 @@ public final class ProcedureRunner {
 
         return LocalGraphDataScienceProcedures.create(
             gdsLog,
-            MetricsFacade.PASSTHROUGH_METRICS_FACADE.algorithmMetrics(),
             DefaultsConfiguration.Instance,
-            DeprecatedProceduresMetricService.PASSTHROUGH,
+            null,
             null,
             catalogProcedureFacadeFactory,
             null,
             graphStoreCatalogService,
             LimitsConfiguration.Instance,
             MemoryGuard.DISABLED,
+            MetricsFacade.PASSTHROUGH_METRICS_FACADE,
             modelCatalog,
             null,
             null,
-            MetricsFacade.PASSTHROUGH_METRICS_FACADE.projectionMetrics(),
             graphDatabaseService,
             kernelTransaction,
             new ProcedureCallContextReturnColumns(procedureCallContext),
             requestScopedDependencies,
+            null,
             procedureTransaction,
             procedureContext,
             Optional.empty(),

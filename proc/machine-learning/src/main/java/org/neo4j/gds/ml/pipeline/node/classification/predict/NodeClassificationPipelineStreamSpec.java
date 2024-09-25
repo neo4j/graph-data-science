@@ -29,6 +29,8 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.ml.models.BaseModelData;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
+import org.neo4j.gds.procedures.pipelines.NodeClassificationPipelineResult;
+import org.neo4j.gds.procedures.pipelines.NodeClassificationPredictPipelineExecutor;
 
 import java.util.Arrays;
 import java.util.List;

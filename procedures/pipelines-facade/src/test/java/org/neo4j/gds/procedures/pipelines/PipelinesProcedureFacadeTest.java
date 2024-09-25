@@ -35,9 +35,26 @@ class PipelinesProcedureFacadeTest {
         var nodeClassificationPredictPipelineEstimator = new NodeClassificationPredictPipelineEstimator(null, null);
         var applications = new PipelineApplications(
             null,
+            null,
+            null,
             repository,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
             new User("me", false),
+            null,
+            null,
+            null,
             nodeClassificationPredictPipelineEstimator,
+            null,
+            null,
             null
         );
         var facade = new PipelinesProcedureFacade(null, null, applications);
@@ -59,9 +76,26 @@ class PipelinesProcedureFacadeTest {
         var nodeClassificationPredictPipelineEstimator = new NodeClassificationPredictPipelineEstimator(null, null);
         var applications = new PipelineApplications(
             null,
+            null,
+            null,
             repository,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
             new User("me", false),
+            null,
+            null,
+            null,
             nodeClassificationPredictPipelineEstimator,
+            null,
+            null,
             null
         );
         var facade = new PipelinesProcedureFacade(null, null, applications);

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.applications;
 
-import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityApplications;
 import org.neo4j.gds.applications.algorithms.community.CommunityApplications;
 import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingApplications;
@@ -27,8 +26,6 @@ import org.neo4j.gds.applications.algorithms.machinelearning.MachineLearningAppl
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
-import org.neo4j.gds.applications.algorithms.machinery.DefaultAlgorithmProcessingTemplate;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -47,8 +44,6 @@ import org.neo4j.gds.applications.operations.OperationsApplications;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
-import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -105,42 +100,22 @@ public final class ApplicationsFacade {
     public static ApplicationsFacade create(
         Log log,
         ExportLocation exportLocation,
-        Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
         Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
         Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator,
         FeatureTogglesRepository featureTogglesRepository,
         GraphStoreCatalogService graphStoreCatalogService,
-        MemoryGuard memoryGuard,
-        AlgorithmMetricsService algorithmMetricsService,
         ProjectionMetricsService projectionMetricsService,
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
         ModelCatalog modelCatalog,
         ModelRepository modelRepository,
         GraphDatabaseService graphDatabaseService,
-        Transaction procedureTransaction
+        Transaction procedureTransaction,
+        ProgressTrackerCreator progressTrackerCreator,
+        AlgorithmEstimationTemplate algorithmEstimationTemplate,
+        AlgorithmProcessingTemplate algorithmProcessingTemplate
     ) {
-        var databaseGraphStoreEstimationService = new DatabaseGraphStoreEstimationService(
-            requestScopedDependencies.getGraphLoaderContext(),
-            requestScopedDependencies.getUser()
-        );
-        var algorithmEstimationTemplate = new AlgorithmEstimationTemplate(
-            graphStoreCatalogService,
-            databaseGraphStoreEstimationService,
-            requestScopedDependencies
-        );
-
-        var algorithmProcessingTemplate = createAlgorithmProcessingTemplate(
-            log,
-            algorithmProcessingTemplateDecorator,
-            graphStoreCatalogService,
-            memoryGuard,
-            algorithmMetricsService,
-            requestScopedDependencies
-        );
         var algorithmProcessingTemplateConvenience = new AlgorithmProcessingTemplateConvenience(algorithmProcessingTemplate);
-
-        var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
 
         var mutateNodeProperty = new MutateNodeProperty(log);
 
@@ -223,15 +198,13 @@ public final class ApplicationsFacade {
             mutateNodeProperty
         );
 
-        var writeRelationshipService = new WriteRelationshipService(log, requestScopedDependencies, writeContext);
-
         var similarityApplications = SimilarityApplications.create(
             log,
             requestScopedDependencies,
             algorithmEstimationTemplate,
             algorithmProcessingTemplateConvenience,
             progressTrackerCreator,
-            writeRelationshipService
+            writeContext
         );
 
         return new ApplicationsFacadeBuilder()
@@ -246,27 +219,6 @@ public final class ApplicationsFacade {
             .with(pathFindingApplications)
             .with(similarityApplications)
             .build();
-    }
-
-    private static AlgorithmProcessingTemplate createAlgorithmProcessingTemplate(
-        Log log,
-        Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
-        GraphStoreCatalogService graphStoreCatalogService,
-        MemoryGuard memoryGuard,
-        AlgorithmMetricsService algorithmMetricsService,
-        RequestScopedDependencies requestScopedDependencies
-    ) {
-        var algorithmProcessingTemplate = DefaultAlgorithmProcessingTemplate.create(
-            log,
-            algorithmMetricsService,
-            graphStoreCatalogService,
-            memoryGuard,
-            requestScopedDependencies
-        );
-
-        if (algorithmProcessingTemplateDecorator.isEmpty()) return algorithmProcessingTemplate;
-
-        return algorithmProcessingTemplateDecorator.get().apply(algorithmProcessingTemplate);
     }
 
     private static GraphCatalogApplications createGraphCatalogApplications(

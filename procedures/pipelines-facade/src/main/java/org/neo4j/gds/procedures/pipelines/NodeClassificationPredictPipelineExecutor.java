@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.node.classification.predict;
+package org.neo4j.gds.procedures.pipelines;
 
 
 import org.neo4j.gds.api.GraphStore;
@@ -41,9 +41,6 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
-import org.neo4j.gds.procedures.pipelines.NodeClassificationPredictPipelineBaseConfig;
-import org.neo4j.gds.procedures.pipelines.NodeClassificationPredictPipelineConstants;
-import org.neo4j.gds.procedures.pipelines.NodeClassificationPredictPipelineEstimator;
 import org.neo4j.gds.utils.StringJoining;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -95,7 +92,7 @@ public class NodeClassificationPredictPipelineExecutor extends PredictPipelineEx
     }
 
     @Override
-    protected PipelineGraphFilter nodePropertyStepFilter() {
+    public PipelineGraphFilter nodePropertyStepFilter() {
         return predictGraphFilter;
     }
 

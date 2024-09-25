@@ -19,13 +19,9 @@
  */
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.ProcedureExecutor;
-import org.neo4j.gds.ml.pipeline.node.PredictMutateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.pipelines.PredictMutateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -35,14 +31,10 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
 import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelineConstants.ESTIMATE_PREDICT_DESCRIPTION;
 import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelineConstants.PREDICT_DESCRIPTION;
 
-public class NodeClassificationPipelineMutateProc extends BaseProc {
-    @Context
-    public ModelCatalog internalModelCatalog;
-
+public class NodeClassificationPipelineMutateProc {
     @Context
     public GraphDataScienceProcedures facade;
 
@@ -52,11 +44,7 @@ public class NodeClassificationPipelineMutateProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        preparePipelineConfig(graphName, configuration);
-        return new ProcedureExecutor<>(
-            new NodeClassificationPipelineMutateSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.pipelines().nodeClassificationMutate(graphName, configuration);
     }
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.predict.mutate.estimate", mode = Mode.READ)
@@ -66,10 +54,5 @@ public class NodeClassificationPipelineMutateProc extends BaseProc {
         @Name(value = "configuration") Map<String, Object> algorithmConfiguration
     ) {
         return facade.pipelines().nodeClassificationMutateEstimate(graphNameOrConfiguration, algorithmConfiguration);
-    }
-
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withModelCatalog(internalModelCatalog);
     }
 }

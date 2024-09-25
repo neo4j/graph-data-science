@@ -19,11 +19,14 @@
  */
 package org.neo4j.gds.procedures;
 
+import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.DefaultAlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.graphstorecatalog.ExportLocation;
@@ -37,9 +40,9 @@ import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
+import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
-import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
@@ -48,6 +51,7 @@ import org.neo4j.gds.procedures.modelcatalog.ModelCatalogProcedureFacade;
 import org.neo4j.gds.procedures.operations.OperationsProcedureFacade;
 import org.neo4j.gds.procedures.pipelines.PipelineRepository;
 import org.neo4j.gds.procedures.pipelines.PipelinesProcedureFacade;
+import org.neo4j.gds.termination.TerminationMonitor;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -89,46 +93,88 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
 
     public static GraphDataScienceProcedures create(
         Log log,
-        AlgorithmMetricsService algorithmMetricsService,
         DefaultsConfiguration defaultsConfiguration,
-        DeprecatedProceduresMetricService deprecatedProceduresMetricService,
+        DependencyResolver dependencyResolver,
         ExportLocation exportLocation,
         GraphCatalogProcedureFacadeFactory graphCatalogProcedureFacadeFactory,
         FeatureTogglesRepository featureTogglesRepository,
         GraphStoreCatalogService graphStoreCatalogService,
         LimitsConfiguration limitsConfiguration,
         MemoryGuard memoryGuard,
+        MetricsFacade metricsFacade,
         ModelCatalog modelCatalog,
         ModelRepository modelRepository,
         PipelineRepository pipelineRepository,
-        ProjectionMetricsService projectionMetricsService,
         GraphDatabaseService graphDatabaseService,
         KernelTransaction kernelTransaction,
         ProcedureReturnColumns procedureReturnColumns,
         RequestScopedDependencies requestScopedDependencies,
+        TerminationMonitor terminationMonitor,
         Transaction procedureTransaction,
         WriteContext writeContext,
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
         Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
         Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator
     ) {
+        var closeableResourceRegistry = new TransactionCloseableResourceRegistry(kernelTransaction);
+
+        var nodeLookup = new TransactionNodeLookup(kernelTransaction);
+
+        var databaseGraphStoreEstimationService = new DatabaseGraphStoreEstimationService(
+            requestScopedDependencies.getGraphLoaderContext(),
+            requestScopedDependencies.getUser()
+        );
+
+        var algorithmEstimationTemplate = new AlgorithmEstimationTemplate(
+            graphStoreCatalogService,
+            databaseGraphStoreEstimationService,
+            requestScopedDependencies
+        );
+
+        var algorithmProcessingTemplate = createAlgorithmProcessingTemplate(
+            log,
+            algorithmProcessingTemplateDecorator,
+            graphStoreCatalogService,
+            memoryGuard,
+            metricsFacade.algorithmMetrics(),
+            requestScopedDependencies
+        );
+
+        var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
+
         var applicationsFacade = ApplicationsFacade.create(
             log,
             exportLocation,
-            algorithmProcessingTemplateDecorator,
             graphCatalogApplicationsDecorator,
             modelCatalogApplicationsDecorator,
             featureTogglesRepository,
             graphStoreCatalogService,
-            memoryGuard,
-            algorithmMetricsService,
-            projectionMetricsService,
+            metricsFacade.projectionMetrics(),
             requestScopedDependencies,
             writeContext,
             modelCatalog,
             modelRepository,
             graphDatabaseService,
-            procedureTransaction
+            procedureTransaction,
+            progressTrackerCreator,
+            algorithmEstimationTemplate,
+            algorithmProcessingTemplate
+        );
+
+        // merge these two
+        var configurationParser = new ConfigurationParser(defaultsConfiguration, limitsConfiguration);
+        var userSpecificConfigurationParser = new UserSpecificConfigurationParser(
+            configurationParser,
+            requestScopedDependencies.getUser()
+        );
+
+        var algorithmsProcedureFacade = AlgorithmsProcedureFacadeFactory.create(
+            userSpecificConfigurationParser,
+            requestScopedDependencies,
+            kernelTransaction,
+            applicationsFacade,
+            procedureReturnColumns,
+            algorithmEstimationTemplate
         );
 
         var graphCatalogProcedureFacade = graphCatalogProcedureFacadeFactory.createGraphCatalogProcedureFacade(
@@ -143,40 +189,28 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
 
         var modelCatalogProcedureFacade = new ModelCatalogProcedureFacade(applicationsFacade);
 
-        // merge these two
-        var configurationParser = new ConfigurationParser(defaultsConfiguration, limitsConfiguration);
-        var userSpecificConfigurationParser = new UserSpecificConfigurationParser(
-            configurationParser,
-            requestScopedDependencies.getUser()
-        );
-
-        var databaseGraphStoreEstimationService = new DatabaseGraphStoreEstimationService(
-            requestScopedDependencies.getGraphLoaderContext(),
-            requestScopedDependencies.getUser()
-        );
-        var algorithmEstimationTemplate = new AlgorithmEstimationTemplate(
-            graphStoreCatalogService,
-            databaseGraphStoreEstimationService,
-            requestScopedDependencies
-        );
-
-        var algorithmsProcedureFacade = AlgorithmsProcedureFacadeFactory.create(
-            userSpecificConfigurationParser,
-            requestScopedDependencies,
-            kernelTransaction,
-            applicationsFacade,
-            procedureReturnColumns,
-            algorithmEstimationTemplate
-        );
-
         var operationsProcedureFacade = new OperationsProcedureFacade(applicationsFacade);
 
         var pipelinesProcedureFacade = PipelinesProcedureFacade.create(
+            log,
             modelCatalog,
             pipelineRepository,
+            closeableResourceRegistry,
+            requestScopedDependencies.getDatabaseId(),
+            dependencyResolver,
+            metricsFacade,
+            nodeLookup,
+            writeContext.nodePropertyExporterBuilder(),
+            procedureReturnColumns,
+            writeContext.relationshipExporterBuilder(),
+            requestScopedDependencies.getTaskRegistryFactory(),
+            terminationMonitor,
             requestScopedDependencies.getUser(),
+            requestScopedDependencies.getUserLogRegistryFactory(),
+            progressTrackerCreator,
             algorithmsProcedureFacade,
-            algorithmEstimationTemplate
+            algorithmEstimationTemplate,
+            algorithmProcessingTemplate
         );
 
         return new GraphDataScienceProceduresBuilder(log)
@@ -185,7 +219,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
             .with(modelCatalogProcedureFacade)
             .with(operationsProcedureFacade)
             .with(pipelinesProcedureFacade)
-            .with(deprecatedProceduresMetricService)
+            .with(metricsFacade.deprecatedProcedures())
             .build();
     }
 
@@ -215,5 +249,26 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
 
     public DeprecatedProceduresMetricService deprecatedProcedures() {
         return deprecatedProceduresMetricService;
+    }
+
+    private static AlgorithmProcessingTemplate createAlgorithmProcessingTemplate(
+        Log log,
+        Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
+        GraphStoreCatalogService graphStoreCatalogService,
+        MemoryGuard memoryGuard,
+        AlgorithmMetricsService algorithmMetricsService,
+        RequestScopedDependencies requestScopedDependencies
+    ) {
+        var algorithmProcessingTemplate = DefaultAlgorithmProcessingTemplate.create(
+            log,
+            algorithmMetricsService,
+            graphStoreCatalogService,
+            memoryGuard,
+            requestScopedDependencies
+        );
+
+        if (algorithmProcessingTemplateDecorator.isEmpty()) return algorithmProcessingTemplate;
+
+        return algorithmProcessingTemplateDecorator.get().apply(algorithmProcessingTemplate);
     }
 }

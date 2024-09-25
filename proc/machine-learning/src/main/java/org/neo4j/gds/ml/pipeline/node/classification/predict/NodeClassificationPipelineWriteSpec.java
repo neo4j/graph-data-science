@@ -28,7 +28,10 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
+import org.neo4j.gds.procedures.pipelines.NodeClassificationPipelineResult;
 import org.neo4j.gds.procedures.pipelines.NodeClassificationPredictConfigPreProcessor;
+import org.neo4j.gds.procedures.pipelines.NodeClassificationPredictPipelineExecutor;
+import org.neo4j.gds.procedures.pipelines.PredictedProbabilities;
 
 import java.util.List;
 import java.util.Map;

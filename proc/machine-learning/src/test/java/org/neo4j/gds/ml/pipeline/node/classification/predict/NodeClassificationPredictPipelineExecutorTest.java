@@ -67,6 +67,7 @@ import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.pipelines.NodeClassificationPredictPipelineBaseConfigImpl;
+import org.neo4j.gds.procedures.pipelines.NodeClassificationPredictPipelineExecutor;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.test.TestProc;
 
@@ -439,14 +440,14 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             null,
             Optional.empty(),
             Optional.empty(),
-            Optional.empty(),
-            null,
-            null,
             null,
             null,
             null,
             requestScopedDependencies,
             WriteContext.builder().build(),
+            null,
+            null,
+            null,
             null,
             null,
             null,

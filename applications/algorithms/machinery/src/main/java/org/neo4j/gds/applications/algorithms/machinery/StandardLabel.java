@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 
-record StandardLabel(String value) implements Label {
+public record StandardLabel(String value) implements Label {
     @Override
     public String asString() {
         return value;

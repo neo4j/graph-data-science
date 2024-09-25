@@ -19,15 +19,30 @@
  */
 package org.neo4j.gds.procedures.pipelines;
 
+import org.neo4j.common.DependencyResolver;
+import org.neo4j.gds.api.CloseableResourceRegistry;
+import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.api.NodeLookup;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
+import org.neo4j.gds.core.write.RelationshipExporterBuilder;
+import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.ml.pipeline.PipelineCompanion;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+import org.neo4j.gds.termination.TerminationMonitor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,11 +71,25 @@ public final class PipelinesProcedureFacade {
     }
 
     public static PipelinesProcedureFacade create(
+        Log log,
         ModelCatalog modelCatalog,
         PipelineRepository pipelineRepository,
+        CloseableResourceRegistry closeableResourceRegistry,
+        DatabaseId databaseId,
+        DependencyResolver dependencyResolver,
+        MetricsFacade metricsFacade,
+        NodeLookup nodeLookup,
+        NodePropertyExporterBuilder nodePropertyExporterBuilder,
+        ProcedureReturnColumns procedureReturnColumns,
+        RelationshipExporterBuilder relationshipExporterBuilder,
+        TaskRegistryFactory taskRegistryFactory,
+        TerminationMonitor terminationMonitor,
         User user,
+        UserLogRegistryFactory userLogRegistryFactory,
+        ProgressTrackerCreator progressTrackerCreator,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
-        AlgorithmEstimationTemplate algorithmEstimationTemplate
+        AlgorithmEstimationTemplate algorithmEstimationTemplate,
+        AlgorithmProcessingTemplate algorithmProcessingTemplate
     ) {
         var nodeClassificationPredictConfigPreProcessor = new NodeClassificationPredictConfigPreProcessor(
             modelCatalog,
@@ -70,11 +99,26 @@ public final class PipelinesProcedureFacade {
         var pipelineConfigurationParser = new PipelineConfigurationParser(user);
 
         var pipelineApplications = PipelineApplications.create(
+            log,
             modelCatalog,
             pipelineRepository,
+            closeableResourceRegistry,
+            databaseId,
+            dependencyResolver,
+            metricsFacade,
+            nodeLookup,
+            nodePropertyExporterBuilder,
+            procedureReturnColumns,
+            relationshipExporterBuilder,
+            taskRegistryFactory,
+            terminationMonitor,
             user,
+            userLogRegistryFactory,
+            pipelineConfigurationParser,
+            progressTrackerCreator,
             algorithmsProcedureFacade,
-            algorithmEstimationTemplate
+            algorithmEstimationTemplate,
+            algorithmProcessingTemplate
         );
 
         return new PipelinesProcedureFacade(
@@ -199,6 +243,20 @@ public final class PipelinesProcedureFacade {
         if (pipeline.isEmpty()) return Stream.empty();
 
         var result = PipelineCatalogResult.create(pipeline.get(), pipelineName.value);
+
+        return Stream.of(result);
+    }
+
+    public Stream<PredictMutateResult> nodeClassificationMutate(
+        String graphNameAsString,
+        Map<String, Object> configuration
+    ) {
+        PipelineCompanion.preparePipelineConfig(graphNameAsString, configuration);
+        nodeClassificationPredictConfigPreProcessor.enhanceInputWithPipelineParameters(configuration);
+
+        var graphName = GraphName.parse(graphNameAsString);
+
+        var result = pipelineApplications.nodeClassificationMutate(graphName, configuration);
 
         return Stream.of(result);
     }

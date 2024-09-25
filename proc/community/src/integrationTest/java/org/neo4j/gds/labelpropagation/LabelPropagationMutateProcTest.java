@@ -48,7 +48,9 @@ import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.applications.ApplicationsFacade;
+import org.neo4j.gds.applications.algorithms.machinery.DefaultAlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryGuard;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.catalog.GraphProjectProc;
@@ -500,27 +502,33 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
             .with(EmptyUserLogRegistryFactory.INSTANCE)
             .build();
 
-
         var configurationParser = new UserSpecificConfigurationParser(new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance),requestScopedDependencies.getUser());
 
         var genericStub = new GenericStub(configurationParser, null);
+        var algorithmProcessingTemplate = DefaultAlgorithmProcessingTemplate.create(
+            logMock,
+            new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
+            graphStoreCatalogService,
+            MemoryGuard.DISABLED,
+            requestScopedDependencies
+        );
         var applicationsFacade = ApplicationsFacade.create(
             logMock,
             null,
             Optional.empty(),
             Optional.empty(),
-            Optional.empty(),
             null,
             graphStoreCatalogService,
-            MemoryGuard.DISABLED,
-            new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
             null,
             requestScopedDependencies,
             WriteContext.builder().build(),
             null,
             null,
             null,
-            null
+            null,
+            new ProgressTrackerCreator(logMock, requestScopedDependencies),
+            null,
+            algorithmProcessingTemplate
         );
         var communityProcedureFacade = LocalCommunityProcedureFacade.create(
             applicationsFacade.community(),
