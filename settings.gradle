@@ -320,6 +320,9 @@ project(':defaults-and-limits-configuration').projectDir = file('defaults-and-li
 include('neo4j-values')
 project(':neo4j-values').projectDir = file('neo4j-values')
 
+include('gds-values')
+project(':gds-values').projectDir = file('gds-values')
+
 
 
 

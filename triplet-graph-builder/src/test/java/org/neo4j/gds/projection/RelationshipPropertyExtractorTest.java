@@ -22,118 +22,67 @@ package org.neo4j.gds.projection;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.Values;
-
-import java.util.Arrays;
-import java.util.stream.Stream;
+import org.neo4j.gds.values.primitive.PrimitiveValues;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.gds.TestSupport.crossArguments;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class RelationshipPropertyExtractorTest {
 
     @Test
     void extractValueReadsAnyNumericType() {
-        Assertions.assertEquals(42.0, RelationshipPropertyExtractor.extractValue(Values.byteValue((byte) 42), 0.0));
-        assertEquals(42.0, RelationshipPropertyExtractor.extractValue(Values.shortValue((short) 42), 0.0));
-        assertEquals(42.0, RelationshipPropertyExtractor.extractValue(Values.intValue(42), 0.0));
-        assertEquals(42.0, RelationshipPropertyExtractor.extractValue(Values.longValue(42), 0.0));
-        assertEquals(42.0, RelationshipPropertyExtractor.extractValue(Values.floatValue(42.0F), 0.0));
-        assertEquals(42.0, RelationshipPropertyExtractor.extractValue(Values.doubleValue(42.0D), 0.0));
-        assertTrue(Double.isNaN(RelationshipPropertyExtractor.extractValue(Values.floatValue(Float.NaN), 0.0)));
-        assertTrue(Double.isNaN(RelationshipPropertyExtractor.extractValue(Values.doubleValue(Double.NaN), 0.0)));
+        Assertions.assertEquals(42.0, RelationshipPropertyExtractor.extractValue(PrimitiveValues.longValue((byte) 42), 0.0));
+        assertEquals(42.0, RelationshipPropertyExtractor.extractValue(PrimitiveValues.longValue((short) 42), 0.0));
+        assertEquals(42.0, RelationshipPropertyExtractor.extractValue(PrimitiveValues.longValue(42), 0.0));
+        assertEquals(42.0, RelationshipPropertyExtractor.extractValue(PrimitiveValues.longValue(42), 0.0));
+        assertEquals(42.0, RelationshipPropertyExtractor.extractValue(PrimitiveValues.floatingPointValue(42.0F), 0.0));
+        assertEquals(42.0, RelationshipPropertyExtractor.extractValue(PrimitiveValues.floatingPointValue(42.0D), 0.0));
+        assertTrue(Double.isNaN(RelationshipPropertyExtractor.extractValue(PrimitiveValues.floatingPointValue(Float.NaN), 0.0)));
+        assertTrue(Double.isNaN(RelationshipPropertyExtractor.extractValue(PrimitiveValues.floatingPointValue(Double.NaN), 0.0)));
     }
 
     @ParameterizedTest
     @EnumSource(value = Aggregation.class, names = "COUNT", mode = EnumSource.Mode.EXCLUDE)
     void extractValueReadsAnyNumericTypeWithAggregationExceptCount(Aggregation aggregation) {
-        assertEquals(42.0, RelationshipPropertyExtractor.extractValue(aggregation, Values.byteValue((byte) 42), 0.0));
-        assertEquals(42.0, RelationshipPropertyExtractor.extractValue(aggregation, Values.shortValue((short) 42), 0.0));
-        assertEquals(42.0, RelationshipPropertyExtractor.extractValue(aggregation, Values.intValue(42), 0.0));
-        assertEquals(42.0, RelationshipPropertyExtractor.extractValue(aggregation, Values.longValue(42), 0.0));
-        assertEquals(42.0, RelationshipPropertyExtractor.extractValue(aggregation, Values.floatValue(42.0F), 0.0));
-        assertEquals(42.0, RelationshipPropertyExtractor.extractValue(aggregation, Values.doubleValue(42.0D), 0.0));
-        assertTrue(Double.isNaN(RelationshipPropertyExtractor.extractValue(aggregation, Values.floatValue(Float.NaN), 0.0)));
-        assertTrue(Double.isNaN(RelationshipPropertyExtractor.extractValue(aggregation, Values.doubleValue(Double.NaN), 0.0)));
+        assertEquals(42.0, RelationshipPropertyExtractor.extractValue(aggregation, PrimitiveValues.longValue((byte) 42), 0.0));
+        assertEquals(42.0, RelationshipPropertyExtractor.extractValue(aggregation, PrimitiveValues.longValue((short) 42), 0.0));
+        assertEquals(42.0, RelationshipPropertyExtractor.extractValue(aggregation, PrimitiveValues.longValue(42), 0.0));
+        assertEquals(42.0, RelationshipPropertyExtractor.extractValue(aggregation, PrimitiveValues.longValue(42), 0.0));
+        assertEquals(42.0, RelationshipPropertyExtractor.extractValue(aggregation, PrimitiveValues.floatingPointValue(42.0F), 0.0));
+        assertEquals(42.0, RelationshipPropertyExtractor.extractValue(aggregation, PrimitiveValues.floatingPointValue(42.0D), 0.0));
+        assertTrue(Double.isNaN(RelationshipPropertyExtractor.extractValue(aggregation, PrimitiveValues.floatingPointValue(Float.NaN), 0.0)));
+        assertTrue(Double.isNaN(RelationshipPropertyExtractor.extractValue(aggregation, PrimitiveValues.floatingPointValue(Double.NaN), 0.0)));
     }
 
     @ParameterizedTest
     @EnumSource(value = Aggregation.class, names = "COUNT", mode = EnumSource.Mode.INCLUDE)
     void extractValueReadsAnyNumericTypeWithCountAggregation(Aggregation aggregation) {
-        assertEquals(1.0, RelationshipPropertyExtractor.extractValue(aggregation, Values.byteValue((byte) 42), 0.0));
-        assertEquals(1.0, RelationshipPropertyExtractor.extractValue(aggregation, Values.shortValue((short) 42), 0.0));
-        assertEquals(1.0, RelationshipPropertyExtractor.extractValue(aggregation, Values.intValue(42), 0.0));
-        assertEquals(1.0, RelationshipPropertyExtractor.extractValue(aggregation, Values.longValue(42), 0.0));
-        assertEquals(1.0, RelationshipPropertyExtractor.extractValue(aggregation, Values.floatValue(42.0F), 0.0));
-        assertEquals(1.0, RelationshipPropertyExtractor.extractValue(aggregation, Values.doubleValue(42.0D), 0.0));
-        assertEquals(1.0, RelationshipPropertyExtractor.extractValue(aggregation, Values.floatValue(Float.NaN), 0.0));
-        assertEquals(1.0, RelationshipPropertyExtractor.extractValue(aggregation, Values.doubleValue(Double.NaN), 0.0));
+        assertEquals(1.0, RelationshipPropertyExtractor.extractValue(aggregation, PrimitiveValues.longValue((byte) 42), 0.0));
+        assertEquals(1.0, RelationshipPropertyExtractor.extractValue(aggregation, PrimitiveValues.longValue((short) 42), 0.0));
+        assertEquals(1.0, RelationshipPropertyExtractor.extractValue(aggregation, PrimitiveValues.longValue(42), 0.0));
+        assertEquals(1.0, RelationshipPropertyExtractor.extractValue(aggregation, PrimitiveValues.longValue(42), 0.0));
+        assertEquals(1.0, RelationshipPropertyExtractor.extractValue(aggregation, PrimitiveValues.floatingPointValue(42.0F), 0.0));
+        assertEquals(1.0, RelationshipPropertyExtractor.extractValue(aggregation, PrimitiveValues.floatingPointValue(42.0D), 0.0));
+        assertEquals(1.0, RelationshipPropertyExtractor.extractValue(aggregation, PrimitiveValues.floatingPointValue(Float.NaN), 0.0));
+        assertEquals(1.0, RelationshipPropertyExtractor.extractValue(aggregation, PrimitiveValues.floatingPointValue(Double.NaN), 0.0));
     }
 
     @Test
     void extractValueReturnsDefaultWhenValueDoesNotExist() {
-        assertEquals(42.0, RelationshipPropertyExtractor.extractValue(Values.NO_VALUE, 42.0));
+        assertEquals(42.0, RelationshipPropertyExtractor.extractValue(PrimitiveValues.NO_VALUE, 42.0));
     }
 
     @ParameterizedTest
     @EnumSource(value = Aggregation.class, names = "COUNT", mode = EnumSource.Mode.EXCLUDE)
     void extractValueReturnsDefaultWhenValueDoesNotExistForAggregationsExceptCount(Aggregation aggregation) {
-        assertEquals(42.0, RelationshipPropertyExtractor.extractValue(aggregation, Values.NO_VALUE, 42.0));
+        assertEquals(42.0, RelationshipPropertyExtractor.extractValue(aggregation, PrimitiveValues.NO_VALUE, 42.0));
     }
 
     @ParameterizedTest
     @EnumSource(value = Aggregation.class, names = "COUNT", mode = EnumSource.Mode.INCLUDE)
     void extractValueReturnsZeroWhenValueDoesNotExistForCountAggregation(Aggregation aggregation) {
-        assertEquals(0.0, RelationshipPropertyExtractor.extractValue(aggregation, Values.NO_VALUE, 42.0));
-    }
-
-    @ParameterizedTest
-    @MethodSource("invalidProperties")
-    void extractValueFailsForNonNumericTypes(Value value, String typePart, String valuePart) {
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> RelationshipPropertyExtractor.extractValue(value, 42.0)
-        );
-        String expectedErrorMessage = formatWithLocale(
-                "Unsupported type [%s] of value %s. Please use a numeric property.",
-                typePart,
-                valuePart
-        );
-        assertEquals(expectedErrorMessage, exception.getMessage());
-    }
-
-    @ParameterizedTest
-    @MethodSource("invalidPropertyAndAnyAggregation")
-    void extractValueFailsForNonNumericTypesAndAggregation(Value value, String typePart, String valuePart, Aggregation aggregation) {
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> RelationshipPropertyExtractor.extractValue(aggregation, value, 42.0)
-        );
-        String expectedErrorMessage = formatWithLocale(
-                "Unsupported type [%s] of value %s. Please use a numeric property.",
-                typePart,
-                valuePart
-        );
-        assertEquals(expectedErrorMessage, exception.getMessage());
-    }
-
-    static Stream<Arguments> invalidProperties() {
-        return Stream.of(
-                arguments(Values.booleanValue(true), "BOOLEAN", "Boolean('true')"),
-                arguments(Values.stringValue("42"), "TEXT", "String(\"42\")")
-        );
-    }
-
-    static Stream<Arguments> invalidPropertyAndAnyAggregation() {
-        return crossArguments(RelationshipPropertyExtractorTest::invalidProperties, () -> Arrays.stream(Aggregation.values()).map(Arguments::of));
+        assertEquals(0.0, RelationshipPropertyExtractor.extractValue(aggregation, PrimitiveValues.NO_VALUE, 42.0));
     }
 }

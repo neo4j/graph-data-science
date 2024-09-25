@@ -30,12 +30,10 @@ import org.neo4j.gds.api.ImmutableTopology;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
-import org.neo4j.gds.api.ValueTypes;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchemaEntry;
-import org.neo4j.values.storable.NumberType;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -157,7 +155,7 @@ public interface RelationshipImportResult {
                     ),
                     propertyMapping.defaultValue().isUserDefined()
                         ? propertyMapping.defaultValue()
-                        : ValueTypes.fromNumberType(NumberType.FLOATING_POINT).fallbackValue(),
+                        : ValueType.DOUBLE.fallbackValue(),
                     propertyMapping.aggregation()
                 )
             );

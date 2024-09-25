@@ -21,6 +21,7 @@ dependencies {
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':core-utils')
+    implementation project(':gds-values')
     implementation project(':legacy-cypher-projection')
     implementation project(':native-projection')
     implementation project(':graph-schema-api')

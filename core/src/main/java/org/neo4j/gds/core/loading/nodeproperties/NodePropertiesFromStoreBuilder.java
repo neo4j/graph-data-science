@@ -26,9 +26,15 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.hsa.HugeSparseCollections;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.HighLimitIdMap;
-import org.neo4j.gds.core.loading.ValueConverter;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.values.GdsNoValue;
+import org.neo4j.gds.values.GdsValue;
+import org.neo4j.values.storable.DoubleArray;
+import org.neo4j.values.storable.FloatArray;
+import org.neo4j.values.storable.FloatingPointValue;
+import org.neo4j.values.storable.IntegralValue;
+import org.neo4j.values.storable.LongArray;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -83,6 +89,15 @@ public final class NodePropertiesFromStoreBuilder {
         }
     }
 
+    public void set(long neoNodeId, GdsValue value) {
+        if (value != null && value != GdsNoValue.NO_VALUE) {
+            if (innerBuilder.get() == null) {
+                initializeWithType(value);
+            }
+            innerBuilder.get().setValue(neoNodeId, value);
+        }
+    }
+
     public NodePropertyValues build(IdMap idMap) {
         if (innerBuilder.get() == null) {
             if (defaultValue.getObject() != null) {
@@ -104,8 +119,16 @@ public final class NodePropertiesFromStoreBuilder {
     // This is synchronized as we want to prevent the creation of multiple InnerNodePropertiesBuilders of which only once survives.
     private synchronized void initializeWithType(Value value) {
         if (innerBuilder.get() == null) {
-            var valueType = ValueConverter.valueType(value);
+            var valueType = valueType(value);
             var newBuilder = newInnerBuilder(valueType);
+            innerBuilder.compareAndSet(null, newBuilder);
+        }
+    }
+
+    // This is synchronized as we want to prevent the creation of multiple InnerNodePropertiesBuilders of which only once survives.
+    private synchronized void initializeWithType(GdsValue value) {
+        if (innerBuilder.get() == null) {
+            var newBuilder = newInnerBuilder(value.type());
             innerBuilder.compareAndSet(null, newBuilder);
         }
     }
@@ -127,6 +150,25 @@ public final class NodePropertiesFromStoreBuilder {
                     "Loading of values of type %s is currently not supported",
                     valueType
                 ));
+        }
+    }
+
+    private ValueType valueType(Value value) {
+        if (value instanceof IntegralValue) {
+            return ValueType.LONG;
+        } else if (value instanceof FloatingPointValue) {
+            return ValueType.DOUBLE;
+        } else if (value instanceof LongArray) {
+            return ValueType.LONG_ARRAY;
+        } else if (value instanceof DoubleArray) {
+            return ValueType.DOUBLE_ARRAY;
+        } else if (value instanceof FloatArray) {
+            return ValueType.FLOAT_ARRAY;
+        } else {
+            throw new UnsupportedOperationException(formatWithLocale(
+                "Loading of values of type %s is currently not supported",
+                value.getTypeName()
+            ));
         }
     }
 }

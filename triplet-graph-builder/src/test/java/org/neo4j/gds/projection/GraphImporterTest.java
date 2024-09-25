@@ -42,7 +42,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.logging.LogAdapter;
-import org.neo4j.values.storable.Values;
+import org.neo4j.gds.values.primitive.PrimitiveValues;
 
 import java.util.List;
 import java.util.Map;
@@ -168,8 +168,8 @@ class GraphImporterTest {
             importer.update(
                 i,
                 i + 1,
-                PropertyValues.of(Map.of("prop", Values.longValue(i))),
-                PropertyValues.of(Map.of("prop", Values.longValue(i + 1))),
+                PropertyValues.of(Map.of("prop", PrimitiveValues.longValue(i))),
+                PropertyValues.of(Map.of("prop", PrimitiveValues.longValue(i + 1))),
                 NodeLabelTokens.empty(),
                 NodeLabelTokens.empty(),
                 RelationshipType.ALL_RELATIONSHIPS,
@@ -214,8 +214,8 @@ class GraphImporterTest {
             importer.update(
                 i,
                 i + 1,
-                PropertyValues.of(Map.of("prop" + i, Values.longValue(i))),
-                PropertyValues.of(Map.of("prop" + j, Values.longValue(j))),
+                PropertyValues.of(Map.of("prop" + i, PrimitiveValues.longValue(i))),
+                PropertyValues.of(Map.of("prop" + j, PrimitiveValues.longValue(j))),
                 NodeLabelTokens.ofStrings("Label" + i),
                 NodeLabelTokens.ofStrings("Label" + (j)),
                 RelationshipType.ALL_RELATIONSHIPS,
@@ -307,7 +307,7 @@ class GraphImporterTest {
                 NodeLabelTokens.empty(),
                 NodeLabelTokens.empty(),
                 RelationshipType.of("REL" + i),
-                PropertyValues.of(Map.of("prop" + i, Values.longValue(i)))
+                PropertyValues.of(Map.of("prop" + i, PrimitiveValues.longValue(i)))
             );
         }
 

@@ -17,25 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.api;
+package org.neo4j.gds.values;
 
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.values.storable.NumberType;
 
-public final class ValueTypes {
+import static org.neo4j.gds.api.nodeproperties.ValueType.UNKNOWN;
 
-    public static ValueType fromNumberType(NumberType nt) {
-        switch (nt) {
-            case FLOATING_POINT:
-                return ValueType.DOUBLE;
-            case INTEGRAL:
-                return ValueType.LONG;
-            case NO_NUMBER:
-                return ValueType.UNKNOWN;
-            default:
-                throw new IllegalArgumentException("Unexpected value: " + nt + " (sad java 😞)");
-        }
+public class GdsNoValue implements GdsValue {
+    public static final GdsNoValue NO_VALUE = new GdsNoValue();
+
+    @Override
+    public ValueType type() {
+        return UNKNOWN;
     }
 
-    private ValueTypes() {}
+    @Override
+    public Object asObject() {
+        return null;
+    }
 }

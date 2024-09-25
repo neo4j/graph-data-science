@@ -22,6 +22,8 @@ package org.neo4j.gds.core.io.file;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
+import org.neo4j.gds.values.GdsValue;
+import org.neo4j.gds.values.primitive.PrimitiveValues;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,12 +39,12 @@ public class GraphStoreNodeVisitor extends NodeVisitor {
 
     @Override
     protected void exportElement() {
-        Map<String, Object> props = new HashMap<>();
+        Map<String, GdsValue> props = new HashMap<>();
         forEachProperty((key, value) -> {
-            props.put(key, value);
+            props.put(key, PrimitiveValues.create(value));
         });
         var nodeLabels = NodeLabelTokens.of(labels());
-        nodesBuilder.addNodeWithPropertiesAsObjects(id(), props, nodeLabels);
+        nodesBuilder.addNode(id(), props, nodeLabels);
     }
 
     public static final class Builder extends NodeVisitor.Builder<Builder, GraphStoreNodeVisitor> {
