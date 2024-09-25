@@ -42,7 +42,7 @@ public class CypherNodeLabelTokens {
     }
 
     public static @NotNull NodeLabelToken of(SequenceValue nodeLabels) {
-        return new Sequence<>(nodeLabels, (s, i) -> ((TextValue) s.value(i)).stringValue());
+        return new Sequence<>(nodeLabels, (s, i) -> ((TextValue) Neo4jProxy.sequenceValueAt(s, i)).stringValue());
     }
 
     private static final class Sequence<T extends SequenceValue> implements NodeLabelTokens.ValidNodeLabelToken {

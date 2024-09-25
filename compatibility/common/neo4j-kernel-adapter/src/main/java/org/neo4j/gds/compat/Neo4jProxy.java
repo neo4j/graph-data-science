@@ -38,6 +38,7 @@ import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.scheduler.JobScheduler;
+import org.neo4j.values.AnyValue;
 import org.neo4j.values.SequenceValue;
 
 import java.io.OutputStream;
@@ -123,6 +124,10 @@ public final class Neo4jProxy {
 
     public static int sequenceSizeAsInt(SequenceValue listValue) {
         return IMPL.sequenceSizeAsInt(listValue);
+    }
+
+    public static AnyValue sequenceValueAt(SequenceValue sequenceValue, int index) {
+        return IMPL.sequenceValueAt(sequenceValue, index);
     }
 
     /**

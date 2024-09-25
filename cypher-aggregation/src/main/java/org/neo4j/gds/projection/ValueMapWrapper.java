@@ -167,7 +167,7 @@ public final class ValueMapWrapper implements CypherMapAccess {
                 var length = Neo4jProxy.sequenceSizeAsInt(value);
                 var list = new ArrayList<>(length);
                 for (var i = 0; i < length; i++) {
-                    list.add(value.value(i).map(AsJavaObject.instance()));
+                    list.add(Neo4jProxy.sequenceValueAt(value, i).map(AsJavaObject.instance()));
                 }
                 return expectedType.cast(list);
             }

@@ -35,6 +35,7 @@ import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.api.procedure.CallableProcedure;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.scheduler.JobScheduler;
+import org.neo4j.values.AnyValue;
 import org.neo4j.values.SequenceValue;
 
 import java.io.OutputStream;
@@ -90,6 +91,9 @@ public interface Neo4jProxyApi {
 
     @CompatSince(minor = 24)
     int sequenceSizeAsInt(SequenceValue sequenceValue);
+
+    @CompatSince(minor = 24)
+    AnyValue sequenceValueAt(SequenceValue sequenceValue, int index);
 
     /**
      * The implementations of this method should look identical and are source-compatible.

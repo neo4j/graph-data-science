@@ -158,6 +158,11 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
+    public AnyValue sequenceValueAt(SequenceValue sequenceValue, int index) {
+        return sequenceValue.value((long) index);
+    }
+
+    @Override
     public RuntimeException queryExceptionAsRuntimeException(Throwable throwable) {
         if (throwable instanceof RuntimeException) {
             return (RuntimeException) throwable;
