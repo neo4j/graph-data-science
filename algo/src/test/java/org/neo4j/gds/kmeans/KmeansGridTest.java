@@ -99,7 +99,7 @@ class KmeansGridTest {
         HugeDoubleArray distanceFromCentroid = HugeDoubleArray.newArray(graph.nodeCount());
         var tasks = List.of(
             KmeansTask.createTask(
-                KmeansSampler.SamplerType.KMEANSPP,
+                SamplerType.KMEANSPP,
                 clusterManager,
                 nodePropertyValues,
                 communities,
@@ -110,7 +110,7 @@ class KmeansGridTest {
             )
         );
         KmeansSampler kmeansSampler = KmeansSampler.createSampler(
-            KmeansSampler.SamplerType.KMEANSPP,
+            SamplerType.KMEANSPP,
             new SplittableRandom(19),
             clusterManager,
             graph.nodeCount(),
@@ -137,7 +137,7 @@ class KmeansGridTest {
             .randomSeed(19L)
             .k(2)
             .maxIterations(3)
-            .initialSampler(KmeansSampler.SamplerType.KMEANSPP)
+            .initialSampler(SamplerType.KMEANSPP)
             .build();
         var kmeansContext = ImmutableKmeansContext.builder().build();
 

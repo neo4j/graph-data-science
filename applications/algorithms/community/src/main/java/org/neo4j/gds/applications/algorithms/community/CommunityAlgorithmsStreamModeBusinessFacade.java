@@ -50,7 +50,7 @@ import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.triangle.TriangleCountStreamConfig;
-import org.neo4j.gds.triangle.TriangleStreamResult;
+import org.neo4j.gds.triangle.TriangleResult;
 import org.neo4j.gds.wcc.WccStreamConfig;
 
 import java.util.stream.Stream;
@@ -284,7 +284,7 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
     public <RESULT> Stream<RESULT> triangles(
         GraphName graphName,
         TriangleCountBaseConfig configuration,
-        StreamResultBuilder<Stream<TriangleStreamResult>, RESULT> streamResultBuilder
+        StreamResultBuilder<Stream<TriangleResult>, RESULT> streamResultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
             graphName,

@@ -1,0 +1,47 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Community Algorithms Procedure Facade API'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    // Annotation processing for the configurations
+    // TODO: maybe extract configurations to their own module 🤔
+    annotationProcessor project(':annotations')
+    annotationProcessor project(':config-generator')
+    // This is needed for the generated configuration classes
+    compileOnly openGds.jetbrains.annotations
+    // Configuration annotations
+    implementation project(':annotations')
+
+    api project(':community-configs')
+
+    // Various result builders are here
+    implementation project(':algo-common')
+
+    implementation project(':algorithms-facade-common')
+
+    // this is needed because of `AlgorithmProcessingTimings`
+    implementation project(':algorithms-machinery')
+
+    // `BaseConfig` lives here
+    implementation project(':config-api')
+
+    // this is needed because of `WritePropertyConfig`
+    implementation project(':core')
+
+    implementation project(':graph-schema-api')
+
+    // this is needed because of `MemoryEstimation`
+    implementation project(':memory-usage')
+
+    implementation project(':neo4j-api')
+
+    // we bring this in only to use `PregelConfig` and `Partitioning` enum
+    implementation project(':pregel')
+
+    // only `JobIdConfig` is what we need from this module
+    implementation project(':progress-tracking')
+
+    implementation project(':string-formatting')
+}

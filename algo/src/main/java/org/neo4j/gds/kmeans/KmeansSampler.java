@@ -22,15 +22,10 @@ package org.neo4j.gds.kmeans;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.utils.StringFormatting;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Collectors;
 
 
 public abstract class KmeansSampler {
@@ -82,60 +77,5 @@ public abstract class KmeansSampler {
                 progressTracker
             );
         }
-    }
-
-
-    public enum SamplerType {
-        UNIFORM("UNIFORM", "UNIFORM"), KMEANSPP("KMEANS++", "KMEANSPP");
-
-        private final String samplerName;
-        private final String samplerType;
-
-        SamplerType(String samplerName, String samplerType) {
-            this.samplerName = samplerName;
-            this.samplerType = samplerType;
-        }
-
-        public String getSamplerName() {
-            return this.samplerName;
-        }
-
-        public String getSamplerType() {
-            return this.samplerType;
-        }
-
-
-        private static final Map<String, String> VALUES = Arrays
-            .stream(SamplerType.values())
-            .collect(Collectors.toMap(SamplerType::getSamplerName, SamplerType::getSamplerType));
-
-        public static SamplerType parse(Object input) {
-            if (input instanceof String) {
-                var inputString = StringFormatting.toUpperCaseWithLocale((String) input);
-
-                if (VALUES.containsKey(inputString)) {
-                    return SamplerType.valueOf(VALUES.get(inputString));
-                }
-
-                throw new IllegalArgumentException(String.format(
-                    Locale.getDefault(),
-                    "Sampler `%s` is not supported. Must be one of: %s.",
-                    inputString,
-                    VALUES
-                ));
-            } else if (input instanceof SamplerType) {
-                return (SamplerType) input;
-            }
-
-            throw new IllegalArgumentException(StringFormatting.formatWithLocale(
-                "Expected Sampler or String. Got %s.",
-                input.getClass().getSimpleName()
-            ));
-        }
-
-        public static String toString(SamplerType samplerType) {
-            return samplerType.toString();
-        }
-
     }
 }

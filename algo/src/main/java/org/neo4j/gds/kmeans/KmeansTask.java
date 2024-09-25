@@ -72,7 +72,7 @@ public abstract class KmeansTask implements Runnable {
     abstract void updateAfterAssignmentToCentroid(long nodeId, int community);
 
     KmeansTask(
-        KmeansSampler.SamplerType samplerType,
+        SamplerType samplerType,
         ClusterManager clusterManager,
         NodePropertyValues nodePropertyValues,
         HugeIntArray communities,
@@ -89,7 +89,7 @@ public abstract class KmeansTask implements Runnable {
         this.dimensions = dimensions;
         this.partition = partition;
         this.communitySizes = new long[k];
-        if (samplerType == KmeansSampler.SamplerType.UNIFORM) {
+        if (samplerType == SamplerType.UNIFORM) {
             this.phase = TaskPhase.ITERATION;
         } else {
             this.phase = TaskPhase.INITIAL;
@@ -98,7 +98,7 @@ public abstract class KmeansTask implements Runnable {
     }
 
     static KmeansTask createTask(
-        KmeansSampler.SamplerType samplerType,
+        SamplerType samplerType,
         ClusterManager clusterManager,
         NodePropertyValues nodePropertyValues,
         HugeIntArray communities,

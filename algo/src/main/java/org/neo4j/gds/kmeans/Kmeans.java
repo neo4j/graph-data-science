@@ -221,7 +221,7 @@ public final class Kmeans extends Algorithm<KmeansResult> {
             long numberOfSwaps = 0;
             //assign each node to a centroid
             boolean shouldComputeDistance = (iteration > 0)
-                || (parameters.samplerType() == KmeansSampler.SamplerType.UNIFORM);
+                || (parameters.samplerType() == SamplerType.UNIFORM);
             if (shouldComputeDistance) {
                 RunWithConcurrency.builder()
                     .concurrency(concurrency)

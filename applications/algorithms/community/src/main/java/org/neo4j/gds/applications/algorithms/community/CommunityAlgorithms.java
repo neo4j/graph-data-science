@@ -76,7 +76,7 @@ import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.triangle.TriangleStream;
-import org.neo4j.gds.triangle.TriangleStreamResult;
+import org.neo4j.gds.triangle.TriangleResult;
 import org.neo4j.gds.wcc.Wcc;
 import org.neo4j.gds.wcc.WccBaseConfig;
 
@@ -393,7 +393,7 @@ public class CommunityAlgorithms {
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
-    Stream<TriangleStreamResult> triangles(Graph graph, ConcurrencyConfig configuration) {
+    Stream<TriangleResult> triangles(Graph graph, ConcurrencyConfig configuration) {
         var algorithm = TriangleStream.create(
             graph,
             DefaultPool.INSTANCE,

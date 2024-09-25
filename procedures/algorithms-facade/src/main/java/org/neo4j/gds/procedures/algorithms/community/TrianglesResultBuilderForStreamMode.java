@@ -23,12 +23,12 @@ import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
-import org.neo4j.gds.triangle.TriangleStreamResult;
+import org.neo4j.gds.triangle.TriangleResult;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class TrianglesResultBuilderForStreamMode implements StreamResultBuilder<Stream<TriangleStreamResult>, TriangleStreamResult> {
+class TrianglesResultBuilderForStreamMode implements StreamResultBuilder<Stream<TriangleResult>, TriangleStreamResult> {
     private final CloseableResourceRegistry closeableResourceRegistry;
 
     TrianglesResultBuilderForStreamMode(CloseableResourceRegistry closeableResourceRegistry) {
@@ -39,11 +39,11 @@ class TrianglesResultBuilderForStreamMode implements StreamResultBuilder<Stream<
     public Stream<TriangleStreamResult> build(
         Graph graph,
         GraphStore graphStore,
-        Optional<Stream<TriangleStreamResult>> result
+        Optional<Stream<TriangleResult>> result
     ) {
         if (result.isEmpty()) return Stream.empty();
 
-        var triangles = result.get();
+        var triangles = result.get().map(t -> new TriangleStreamResult(t.nodeA, t.nodeB, t.nodeC));
 
         closeableResourceRegistry.register(triangles);
 

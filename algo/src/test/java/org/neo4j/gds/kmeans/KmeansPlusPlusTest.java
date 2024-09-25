@@ -78,7 +78,7 @@ public class KmeansPlusPlusTest {
         HugeDoubleArray distanceFromCentroid = HugeDoubleArray.newArray(10);
         var tasks = List.of(
             KmeansTask.createTask(
-                KmeansSampler.SamplerType.KMEANSPP,
+                SamplerType.KMEANSPP,
                 clusterManager,
                 nodePropertyValues,
                 communities,
@@ -88,7 +88,7 @@ public class KmeansPlusPlusTest {
                 new Partition(0, 5)
             ),
             KmeansTask.createTask(
-                KmeansSampler.SamplerType.KMEANSPP,
+                SamplerType.KMEANSPP,
                 clusterManager,
                 nodePropertyValues,
                 communities,
@@ -99,7 +99,7 @@ public class KmeansPlusPlusTest {
             )
         );
         KmeansSampler kmeansSampler = KmeansSampler.createSampler(
-            KmeansSampler.SamplerType.KMEANSPP,
+            SamplerType.KMEANSPP,
             new SplittableRandom(19),
             clusterManager,
             10,

@@ -19,18 +19,12 @@
  */
 package org.neo4j.gds.procedures.algorithms.community;
 
-import org.neo4j.gds.modularity.CommunityModularity;
-
 public final class ModularityStreamResult {
     public final long communityId;
     public final double modularity;
 
-    private ModularityStreamResult(long communityId, double modularity) {
+    public ModularityStreamResult(long communityId, double modularity) {
         this.communityId = communityId;
         this.modularity = modularity;
-    }
-
-    public static ModularityStreamResult from(CommunityModularity communityModularity) {
-        return new ModularityStreamResult(communityModularity.communityId(), communityModularity.modularity());
     }
 }

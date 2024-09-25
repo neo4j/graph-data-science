@@ -82,10 +82,10 @@ public interface KmeansBaseConfig extends AlgoBaseConfig, IterationsConfig, Rand
         );
     }
 
-    @Configuration.ConvertWith(method = "org.neo4j.gds.kmeans.KmeansSampler.SamplerType#parse")
-    @Configuration.ToMapValue("org.neo4j.gds.kmeans.KmeansSampler.SamplerType#toString")
-    default KmeansSampler.SamplerType initialSampler() {
-        return KmeansSampler.SamplerType.UNIFORM;
+    @Configuration.ConvertWith(method = "org.neo4j.gds.kmeans.SamplerType#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.kmeans.SamplerType#toString")
+    default SamplerType initialSampler() {
+        return SamplerType.UNIFORM;
     }
 
     default List<List<Double>> seedCentroids() {

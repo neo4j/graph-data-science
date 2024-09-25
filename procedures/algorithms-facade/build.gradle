@@ -11,7 +11,10 @@ dependencies {
         }
     }
 
-    api project(':centrality-facade-api')
+    api (
+        project(':centrality-facade-api'),
+        project(':community-facade-api'),
+    )
 
     // TODO: remove this once we get all categories to `api` modules?
     // We will still need something to expose this as API

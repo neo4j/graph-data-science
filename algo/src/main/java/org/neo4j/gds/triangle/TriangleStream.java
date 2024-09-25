@@ -50,7 +50,7 @@ import java.util.stream.StreamSupport;
  * emitting the nodeId and the number of triangles the node is part of,
  * this impl. streams the actual nodeIds of each triangle once.
  */
-public final class TriangleStream extends Algorithm<Stream<TriangleStreamResult>> {
+public final class TriangleStream extends Algorithm<Stream<TriangleResult>> {
 
     private final Graph graph;
     private final RelationshipIntersectFactory intersectFactory;
@@ -60,7 +60,7 @@ public final class TriangleStream extends Algorithm<Stream<TriangleStreamResult>
     private final Concurrency concurrency;
     private final int nodeCount;
     private final AtomicInteger runningThreads;
-    private final BlockingQueue<TriangleStreamResult> resultQueue;
+    private final BlockingQueue<TriangleResult> resultQueue;
 
     public static TriangleStream create(
         Graph graph,
@@ -98,15 +98,15 @@ public final class TriangleStream extends Algorithm<Stream<TriangleStreamResult>
     }
 
     @Override
-    public Stream<TriangleStreamResult> compute() {
+    public Stream<TriangleResult> compute() {
         progressTracker.beginSubTask(graph.nodeCount());
         submitTasks();
         final TerminationFlag flag = getTerminationFlag();
-        final Iterator<TriangleStreamResult> it = new AbstractIterator<>() {
+        final Iterator<TriangleResult> it = new AbstractIterator<>() {
 
             @Override
-            protected TriangleStreamResult fetch() {
-                TriangleStreamResult result = null;
+            protected TriangleResult fetch() {
+                TriangleResult result = null;
                 while (result == null && flag.running() && (runningThreads.get() > 0 || !resultQueue.isEmpty())) {
                     result = resultQueue.poll();
                 }
@@ -150,7 +150,7 @@ public final class TriangleStream extends Algorithm<Stream<TriangleStreamResult>
         abstract void evaluateNode(int nodeId);
 
         void emit(long nodeA, long nodeB, long nodeC) {
-            var result = new TriangleStreamResult(
+            var result = new TriangleResult(
                     graph.toOriginalNodeId(nodeA),
                     graph.toOriginalNodeId(nodeB),
                     graph.toOriginalNodeId(nodeC));

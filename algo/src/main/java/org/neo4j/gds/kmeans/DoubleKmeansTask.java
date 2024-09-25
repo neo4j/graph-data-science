@@ -31,7 +31,7 @@ final class DoubleKmeansTask extends KmeansTask {
     private final double[][] communityCoordinateSums;
 
     DoubleKmeansTask(
-        KmeansSampler.SamplerType samplerType,
+        SamplerType samplerType,
         ClusterManager clusterManager,
         NodePropertyValues nodePropertyValues,
         HugeIntArray communities,

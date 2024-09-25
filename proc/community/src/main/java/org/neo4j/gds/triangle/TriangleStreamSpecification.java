@@ -37,7 +37,7 @@ import static org.neo4j.gds.triangle.TriangleProc.DESCRIPTION;
     description = DESCRIPTION,
     executionMode = STREAM
 )
-public class TriangleStreamSpecification implements AlgorithmSpec<TriangleStream, Stream<TriangleStreamResult>, TriangleCountBaseConfig, Stream<TriangleStreamResult>, TriangleStreamFactory> {
+public class TriangleStreamSpecification implements AlgorithmSpec<TriangleStream, Stream<TriangleResult>, TriangleCountBaseConfig, Stream<TriangleResult>, TriangleStreamFactory> {
 
     @Override
     public String name() {
@@ -55,7 +55,7 @@ public class TriangleStreamSpecification implements AlgorithmSpec<TriangleStream
     }
 
     @Override
-    public ComputationResultConsumer<TriangleStream, Stream<TriangleStreamResult>, TriangleCountBaseConfig, Stream<TriangleStreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<TriangleStream, Stream<TriangleResult>, TriangleCountBaseConfig, Stream<TriangleResult>> computationResultConsumer() {
         return new NullComputationResultConsumer<>();
     }
 }

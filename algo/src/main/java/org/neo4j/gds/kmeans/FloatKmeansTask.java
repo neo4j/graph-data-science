@@ -31,7 +31,7 @@ final class FloatKmeansTask extends KmeansTask {
     private final float[][] communityCoordinateSums;
 
     FloatKmeansTask(
-        KmeansSampler.SamplerType samplerType,
+        SamplerType samplerType,
         ClusterManager clusterManager,
         NodePropertyValues nodePropertyValues,
         HugeIntArray communities,

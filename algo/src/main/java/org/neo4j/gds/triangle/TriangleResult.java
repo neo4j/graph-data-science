@@ -17,28 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.kmeans;
+package org.neo4j.gds.triangle;
 
-import org.neo4j.gds.annotation.Parameters;
-import org.neo4j.gds.core.concurrency.Concurrency;
+/**
+ * result type
+ */
+public class TriangleResult {
+    public final long nodeA;
+    public final long nodeB;
+    public final long nodeC;
 
-import java.util.List;
-import java.util.Optional;
+    public TriangleResult(long nodeA, long nodeB, long nodeC) {
+        this.nodeA = nodeA;
+        this.nodeB = nodeB;
+        this.nodeC = nodeC;
+    }
 
-@Parameters
-public record KmeansParameters(
-    int k,
-    int maxIterations,
-    double deltaThreshold,
-    int numberOfRestarts,
-    boolean computeSilhouette,
-    Concurrency concurrency,
-    String nodeProperty,
-    KmeansSampler.SamplerType samplerType,
-    List<List<Double>> seedCentroids,
-    Optional<Long> randomSeed
-) {
-    public boolean isSeeded() {
-        return !seedCentroids().isEmpty();
+    @Override
+    public String toString() {
+        return "Triangle{" +
+            nodeA +
+            ", " + nodeB +
+            ", " + nodeC +
+            '}';
     }
 }

@@ -32,7 +32,6 @@ import org.neo4j.gds.procedures.algorithms.community.stubs.ModularityOptimizatio
 import org.neo4j.gds.procedures.algorithms.community.stubs.SccMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.TriangleCountMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.WccMutateStub;
-import org.neo4j.gds.triangle.TriangleStreamResult;
 
 import java.util.Map;
 import java.util.stream.Stream;

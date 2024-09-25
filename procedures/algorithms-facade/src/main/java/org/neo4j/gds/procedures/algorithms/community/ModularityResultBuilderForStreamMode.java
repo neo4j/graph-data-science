@@ -42,6 +42,6 @@ class ModularityResultBuilderForStreamMode implements StreamResultBuilder<Modula
         return LongStream
             .range(0, modularityResult.communityCount())
             .mapToObj(modularityResult.modularityScores()::get)
-            .map(ModularityStreamResult::from);
+            .map(score -> new ModularityStreamResult(score.communityId(), score.modularity()));
     }
 }
