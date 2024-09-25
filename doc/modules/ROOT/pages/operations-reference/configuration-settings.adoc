@@ -35,6 +35,10 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 | Address the GDS Arrow Flight Server should bind to.
 ^.^| label:enterprise-edition[Enterprise Edition]
 
+<.^| <<gds.arrow.memory.size, gds.arrow.memory.size>>
+| The maximum amount of memory in bytes the GDS Arrow Flight Server can allocate.
+^.^| label:enterprise-edition[Enterprise Edition]
+
 <.^| <<gds.cluster.tx.max.size, gds.cluster.tx.max.size>>
 | Set the maximum transaction size for GDS write back when running in Neo4j Cluster.
 ^.^| label:enterprise-edition[Enterprise Edition]
@@ -130,6 +134,18 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 | Description   | Address the GDS Arrow Flight Server should bind to.
 | Default Value | `localhost:8491`
 | Valid Values  | A socket address in the format `hostname:port`, `hostname` or `:port`.
+| Dynamic       | `false`
+|===
+
+
+[[gds.arrow.memory.size]]
+[.setting-details]
+.gds.arrow.memory.size label:enterprise-edition[Enterprise Edition]
+[cols="1,4", caption =]
+|===
+| Description   | The maximum amount of memory in bytes the GDS Arrow Flight Server can allocate.
+| Default Value | `Long.MAX_VALUE`
+| Valid Values  | A long.
 | Dynamic       | `false`
 |===
 

@@ -82,6 +82,16 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 | Dynamic       | `false`
 |===
 
+[.setting-details]
+.gds.arrow.memory.size
+[cols="1,4", caption =]
+|===
+| Description   | The maximum amount of memory in bytes the GDS Arrow Flight Server can allocate.
+| Default Value | `Long.MAX_VALUE`
+| Valid Values  | A long.
+| Dynamic       | `false`
+|===
+
 
 [.enterprise-edition]
 == Neo4j Cluster
