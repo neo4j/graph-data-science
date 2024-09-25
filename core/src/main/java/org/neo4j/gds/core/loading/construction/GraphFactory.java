@@ -92,7 +92,7 @@ public final class GraphFactory {
         Optional<Boolean> usePooledBuilderProvider
     ) {
         boolean labelInformation = nodeSchema
-            .map(schema -> !(schema.availableLabels().isEmpty() && schema.containsOnlyAllNodesLabel()))
+            .map(schema -> !(schema.availableLabels().isEmpty() || schema.containsOnlyAllNodesLabel()))
             .or(() -> hasLabelInformation)
             .orElse(false);
         var threadCount = concurrency.orElse(new Concurrency(1));
