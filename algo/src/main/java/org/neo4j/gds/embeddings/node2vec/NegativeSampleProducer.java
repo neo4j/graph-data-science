@@ -21,23 +21,25 @@ package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.gds.collections.ha.HugeLongArray;
 
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.SplittableRandom;
 
 public class NegativeSampleProducer {
 
     private final HugeLongArray contextNodeDistribution;
     private final long cumulativeProbability;
+    private SplittableRandom splittableRandom;
 
     public NegativeSampleProducer(
-        HugeLongArray contextNodeDistribution
+        HugeLongArray contextNodeDistribution,
+        long randomSeed
     ) {
+        this.splittableRandom = new SplittableRandom(randomSeed);
         this.contextNodeDistribution = contextNodeDistribution;
         this.cumulativeProbability = contextNodeDistribution.get(contextNodeDistribution.size() - 1);
     }
 
     public long next() {
-        long index = contextNodeDistribution.binarySearch(ThreadLocalRandom.current().nextLong(cumulativeProbability));
-
+        long index = contextNodeDistribution.binarySearch(splittableRandom.nextLong(cumulativeProbability));
         if (index < contextNodeDistribution.size() - 1) {
             index++;
         }

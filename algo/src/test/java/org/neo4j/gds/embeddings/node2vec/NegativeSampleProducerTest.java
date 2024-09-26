@@ -47,7 +47,7 @@ class NegativeSampleProducerTest {
 
         RandomWalkProbabilities probabilityComputer = builder.build();
 
-        var sampler = new NegativeSampleProducer(probabilityComputer.negativeSamplingDistribution());
+        var sampler = new NegativeSampleProducer(probabilityComputer.negativeSamplingDistribution(),0);
 
         Map<Long, Integer> distribution = IntStream
             .range(0, 1300)

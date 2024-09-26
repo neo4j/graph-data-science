@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
@@ -40,7 +41,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class Node2VecModel {
 
-    private final NegativeSampleProducer negativeSamples;
 
     private final HugeObjectArray<FloatVector> centerEmbeddings;
     private final HugeObjectArray<FloatVector> contextEmbeddings;
@@ -114,7 +114,6 @@ public class Node2VecModel {
         this.walks = walks;
         this.randomWalkProbabilities = randomWalkProbabilities;
         this.progressTracker = progressTracker;
-        this.negativeSamples = new NegativeSampleProducer(randomWalkProbabilities.negativeSamplingDistribution());
         this.randomSeed = maybeRandomSeed.orElseGet(() -> new SplittableRandom().nextLong());
 
         var random = new Random();
@@ -145,18 +144,20 @@ public class Node2VecModel {
                     var positiveSampleProducer = new PositiveSampleProducer(
                         walks.iterator(partition.startNode(), partition.nodeCount()),
                         randomWalkProbabilities.positiveSamplingProbabilities(),
-                        windowSize
+                        windowSize,
+                        Optional.of(randomSeed)
                     );
 
                     return new TrainingTask(
                         centerEmbeddings,
                         contextEmbeddings,
                         positiveSampleProducer,
-                        negativeSamples,
+                        randomWalkProbabilities.negativeSamplingDistribution(),
                         learningRate,
                         negativeSamplingRate,
                         embeddingDimension,
-                        progressTracker
+                        progressTracker,
+                         randomSeed
                     );
                 }
             );
@@ -226,16 +227,17 @@ public class Node2VecModel {
             HugeObjectArray<FloatVector> centerEmbeddings,
             HugeObjectArray<FloatVector> contextEmbeddings,
             PositiveSampleProducer positiveSampleProducer,
-            NegativeSampleProducer negativeSampleProducer,
+            HugeLongArray negativeSamples,
             float learningRate,
             int negativeSamplingRate,
             int embeddingDimensions,
-            ProgressTracker progressTracker
+            ProgressTracker progressTracker,
+            long randomSeed
         ) {
             this.centerEmbeddings = centerEmbeddings;
             this.contextEmbeddings = contextEmbeddings;
             this.positiveSampleProducer = positiveSampleProducer;
-            this.negativeSampleProducer = negativeSampleProducer;
+            this.negativeSampleProducer = new NegativeSampleProducer(negativeSamples, randomSeed + Thread.currentThread().getId());
             this.learningRate = learningRate;
             this.negativeSamplingRate = negativeSamplingRate;
 

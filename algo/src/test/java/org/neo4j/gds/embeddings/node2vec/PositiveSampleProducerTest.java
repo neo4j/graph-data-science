@@ -29,6 +29,7 @@ import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -59,7 +60,8 @@ class PositiveSampleProducerTest {
         var sampleProducer = new PositiveSampleProducer(
             walks.iterator(0, nbrOfWalks),
             HugeDoubleArray.of(LongStream.range(0, nbrOfWalks).mapToDouble((l) -> 1.0).toArray()),
-            10
+            10,
+            Optional.empty()
         );
 
         var counter = 0L;
@@ -86,7 +88,8 @@ class PositiveSampleProducerTest {
         var sampleProducer = new PositiveSampleProducer(
             walks.iterator(0, nbrOfWalks),
             probabilities,
-            10
+            10,
+            Optional.empty()
         );
         // does not overflow the stack = passes test
 
@@ -109,7 +112,8 @@ class PositiveSampleProducerTest {
         var sampleProducer = new PositiveSampleProducer(
             walks.iterator(0, nbrOfWalks / 2),
             HugeDoubleArray.of(LongStream.range(0, nbrOfWalks).mapToDouble((l) -> 1.0).toArray()),
-            10
+            10,
+            Optional.empty()
         );
 
         var counter = 0L;
@@ -133,7 +137,8 @@ class PositiveSampleProducerTest {
         PositiveSampleProducer producer = new PositiveSampleProducer(
             walks.iterator(0, walks.size()),
             centerNodeProbabilities,
-            windowSize
+            windowSize,
+            Optional.empty()
         );
         while (producer.next(buffer)) {
             actualPairs.add(Pair.of(buffer[0], buffer[1]));
@@ -155,7 +160,8 @@ class PositiveSampleProducerTest {
         PositiveSampleProducer producer = new PositiveSampleProducer(
             walks.iterator(0, 2),
             centerNodeProbabilities,
-            3
+            3,
+            Optional.empty()
         );
         while (producer.next(buffer)) {
             actualPairs.add(Pair.of(buffer[0], buffer[1]));
@@ -200,7 +206,8 @@ class PositiveSampleProducerTest {
         PositiveSampleProducer producer = new PositiveSampleProducer(
             walks.iterator(0, walks.size()),
             centerNodeProbabilities,
-            3
+            3,
+            Optional.empty()
         );
 
         while (producer.next(buffer)) {
