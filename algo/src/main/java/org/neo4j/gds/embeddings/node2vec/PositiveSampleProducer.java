@@ -22,6 +22,8 @@ package org.neo4j.gds.embeddings.node2vec;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 
 import java.util.Iterator;
+import java.util.Optional;
+import java.util.SplittableRandom;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.neo4j.gds.mem.BitUtil.ceilDiv;
@@ -40,11 +42,13 @@ public class PositiveSampleProducer {
     private int contextWordIndex;
     private int currentWindowStart;
     private int currentWindowEnd;
+    private SplittableRandom probabilitySupplier;
 
     PositiveSampleProducer(
         Iterator<long[]> walks,
         HugeDoubleArray samplingProbabilities,
-        int windowSize
+        int windowSize,
+        Optional<Long> maybeRandomSeed
     ) {
         this.walks = walks;
         this.samplingProbabilities = samplingProbabilities;
@@ -55,6 +59,10 @@ public class PositiveSampleProducer {
         this.currentWalk = new long[0];
         this.centerWordIndex = -1;
         this.contextWordIndex = 1;
+        probabilitySupplier = maybeRandomSeed
+            .map(seed -> new SplittableRandom(Thread.currentThread().getId() + seed))
+            .orElseGet(() -> new SplittableRandom(ThreadLocalRandom.current().nextLong()));
+
     }
 
     public boolean next(long[] buffer) {
@@ -134,7 +142,7 @@ public class PositiveSampleProducer {
     }
 
     private boolean shouldPickNode(long nodeId) {
-        return ThreadLocalRandom.current().nextDouble(0, 1) < samplingProbabilities.get(nodeId);
+        return probabilitySupplier.nextDouble(0,1) < samplingProbabilities.get(nodeId);
     }
 
     // We need to adjust the window size for a given center word to ignore filtered nodes that might occur in the window

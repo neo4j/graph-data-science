@@ -19,10 +19,8 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
-import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.assertj.core.data.Offset;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -30,6 +28,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
@@ -231,9 +230,10 @@ class Node2VecTest {
 
     }
 
-    @Disabled("The order of the randomWalks + its usage in the training is not deterministic yet.")
-    @Test
-    void randomSeed(SoftAssertions softly) {
+    //"The order of the randomWalks + its usage in the training is not deterministic yet. Can guarantee only for concurrency 1")
+    @ParameterizedTest
+    @ValueSource(ints= {1})
+    void randomSeed(int concurrency) {
 
 
         int embeddingDimension = 2;
@@ -242,7 +242,7 @@ class Node2VecTest {
 
         var embeddings = new Node2Vec(
             graph,
-            new Concurrency(4),
+            new Concurrency(concurrency),
             NO_SOURCE_NODES,
             Optional.of(1337L),
             1000,
@@ -253,7 +253,7 @@ class Node2VecTest {
 
         var otherEmbeddings = new Node2Vec(
             graph,
-            new Concurrency(4),
+            new Concurrency(concurrency),
             NO_SOURCE_NODES,
             Optional.of(1337L),
             1000,
@@ -263,7 +263,7 @@ class Node2VecTest {
         ).compute().embeddings();
 
         for (long node = 0; node < graph.nodeCount(); node++) {
-            softly.assertThat(otherEmbeddings.get(node)).isEqualTo(embeddings.get(node));
+            assertThat(otherEmbeddings.get(node)).isEqualTo(embeddings.get(node));
         }
     }
 

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -141,7 +140,8 @@ class Node2VecModelTest {
         );
     }
 
-    @Disabled("The order of the randomWalks + its usage in the training is not deterministic yet.")
+   // @Disabled("The order of the randomWalks + its usage in the training is not deterministic yet.")
+    //We can only guarantee consstency for concurrency 1
     @ParameterizedTest
     @ValueSource(ints = {0, 1, 4})
     void randomSeed(int iterations) {
@@ -168,7 +168,7 @@ class Node2VecModelTest {
             nodeId -> nodeId,
             nodeCount,
             trainParameters,
-            new Concurrency(4),
+            new Concurrency(1),
             Optional.of(1337L),
             walks,
             probabilitiesBuilder.build(),
@@ -179,7 +179,7 @@ class Node2VecModelTest {
             nodeId -> nodeId,
             nodeCount,
             trainParameters,
-            new Concurrency(4),
+            new Concurrency(1),
             Optional.of(1337L),
             walks,
             probabilitiesBuilder.build(),
