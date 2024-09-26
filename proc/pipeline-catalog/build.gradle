@@ -12,8 +12,6 @@ dependencies {
     annotationProcessor openGds.immutables.builder
     annotationProcessor openGds.immutables.value
 
-    api project(':proc-common')
-
     compileOnly project(':logging')
 
     implementation project(':algorithms-procedure-facade')
@@ -23,6 +21,7 @@ dependencies {
     implementation project(':opengds-procedure-facade')
     implementation project(':pipeline')
     implementation project(':pipelines-procedure-facade')
+    implementation project(':proc-common')
     implementation project(':string-formatting')
 
     compileOnly openGds.immutables.value.annotations
