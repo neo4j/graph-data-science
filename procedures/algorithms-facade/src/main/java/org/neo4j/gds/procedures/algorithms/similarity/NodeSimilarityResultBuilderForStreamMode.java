@@ -22,17 +22,16 @@ package org.neo4j.gds.procedures.algorithms.similarity;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
-import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class NodeSimilarityResultBuilderForStreamMode implements StreamResultBuilder<NodeSimilarityResult, SimilarityResult> {
+class NodeSimilarityResultBuilderForStreamMode implements StreamResultBuilder<NodeSimilarityResult, SimilarityStreamResult> {
     private final SimilarityResultStreamMapper similarityResultStreamMapper = new SimilarityResultStreamMapper();
 
     @Override
-    public Stream<SimilarityResult> build(
+    public Stream<SimilarityStreamResult> build(
         Graph graph,
         GraphStore graphStore,
         Optional<NodeSimilarityResult> result

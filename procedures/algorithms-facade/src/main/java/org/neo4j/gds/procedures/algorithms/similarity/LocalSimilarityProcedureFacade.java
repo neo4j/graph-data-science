@@ -28,8 +28,15 @@ import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsStat
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsWriteModeBusinessFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
+import org.neo4j.gds.procedures.algorithms.similarity.stubs.FilteredKnnMutateStub;
+import org.neo4j.gds.procedures.algorithms.similarity.stubs.FilteredNodeSimilarityMutateStub;
+import org.neo4j.gds.procedures.algorithms.similarity.stubs.KnnMutateStub;
+import org.neo4j.gds.procedures.algorithms.similarity.stubs.LocalFilteredKnnMutateStub;
+import org.neo4j.gds.procedures.algorithms.similarity.stubs.LocalFilteredNodeSimilarityMutateStub;
+import org.neo4j.gds.procedures.algorithms.similarity.stubs.LocalKnnMutateStub;
+import org.neo4j.gds.procedures.algorithms.similarity.stubs.LocalNodeSimilarityMutateStub;
+import org.neo4j.gds.procedures.algorithms.similarity.stubs.NodeSimilarityMutateStub;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
-import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnStatsConfig;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnStreamConfig;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnWriteConfig;
@@ -165,7 +172,7 @@ public final class LocalSimilarityProcedureFacade implements SimilarityProcedure
     }
 
     @Override
-    public Stream<SimilarityResult> filteredKnnStream(String graphName, Map<String, Object> configuration) {
+    public Stream<SimilarityStreamResult> filteredKnnStream(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new FilteredKnnResultBuilderForStreamMode();
 
         return streamModeBusinessFacade.filteredKnn(
@@ -249,7 +256,7 @@ public final class LocalSimilarityProcedureFacade implements SimilarityProcedure
     }
 
     @Override
-    public Stream<SimilarityResult> filteredNodeSimilarityStream(String graphName, Map<String, Object> configuration) {
+    public Stream<SimilarityStreamResult> filteredNodeSimilarityStream(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new FilteredNodeSimilarityResultBuilderForStreamMode();
 
         return streamModeBusinessFacade.filteredNodeSimilarity(
@@ -336,7 +343,7 @@ public final class LocalSimilarityProcedureFacade implements SimilarityProcedure
     }
 
     @Override
-    public Stream<SimilarityResult> knnStream(
+    public Stream<SimilarityStreamResult> knnStream(
         String graphName,
         Map<String, Object> configuration
     ) {
@@ -422,7 +429,7 @@ public final class LocalSimilarityProcedureFacade implements SimilarityProcedure
     }
 
     @Override
-    public Stream<SimilarityResult> nodeSimilarityStream(String graphName, Map<String, Object> configuration) {
+    public Stream<SimilarityStreamResult> nodeSimilarityStream(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new NodeSimilarityResultBuilderForStreamMode();
 
         return streamModeBusinessFacade.nodeSimilarity(

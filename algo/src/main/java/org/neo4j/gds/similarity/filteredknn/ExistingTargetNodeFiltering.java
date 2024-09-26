@@ -40,11 +40,9 @@ import java.util.function.UnaryOperator;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.similarity.filteredknn.EmptyTargetNodeFilter.EMPTY_CONSUMER;
+public final class ExistingTargetNodeFiltering implements StreamProducingTargetNodeFiltering {
 
-public final class ExistingTargetNodeFiltering implements TargetNodeFiltering {
-
-    private final HugeObjectArray<TargetNodeFilter> targetNodeFilters;
+    private final HugeObjectArray<StreamProducingTargetNodeFilter> targetNodeFilters;
     private final SeedingSummary seedingSummary;
 
     /**
@@ -60,7 +58,7 @@ public final class ExistingTargetNodeFiltering implements TargetNodeFiltering {
         double similarityCutoff,
         Concurrency concurrency
     ) {
-        var neighbourConsumers = HugeObjectArray.newArray(TargetNodeFilter.class, nodeCount);
+        var neighbourConsumers = HugeObjectArray.newArray(StreamProducingTargetNodeFilter.class, nodeCount);
         long[] startingSeeds = findSeeds(
                 nodeCount,
                 targetNodePredicate,
@@ -72,7 +70,7 @@ public final class ExistingTargetNodeFiltering implements TargetNodeFiltering {
 
         ParallelUtil.parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, (nodeId) -> {
             if (!sourceNodeFilter.test(nodeId)) {
-                neighbourConsumers.set(nodeId, EMPTY_CONSUMER);
+                neighbourConsumers.set(nodeId, EmptyTargetNodeFilter.EMPTY_CONSUMER);
             } else {
                 var optionalPersonalizedSeeds = prepareNode(nodeId, startingSeeds, optionalSimilarityFunction);
                 nodeCountAdder.increment();
@@ -81,7 +79,7 @@ public final class ExistingTargetNodeFiltering implements TargetNodeFiltering {
                     nodepairAdder.add(optionalPersonalizedSeeds.get().size());
                 }
 
-                TargetNodeFilter targetNodeFilter = ExistingTargetNodeFilter.create(
+                var targetNodeFilter = ExistingTargetNodeFilter.create(
                     targetNodePredicate,
                     k,
                     optionalPersonalizedSeeds,
@@ -164,7 +162,7 @@ public final class ExistingTargetNodeFiltering implements TargetNodeFiltering {
 
 
     private ExistingTargetNodeFiltering(
-        HugeObjectArray<TargetNodeFilter> targetNodeFilters,
+        HugeObjectArray<StreamProducingTargetNodeFilter> targetNodeFilters,
         SeedingSummary seedingSummary
     ) {
         this.targetNodeFilters = targetNodeFilters;
@@ -182,7 +180,7 @@ public final class ExistingTargetNodeFiltering implements TargetNodeFiltering {
     }
 
     @Override
-    public TargetNodeFilter get(long nodeId) {
+    public StreamProducingTargetNodeFilter get(long nodeId) {
         return targetNodeFilters.get(nodeId);
     }
 

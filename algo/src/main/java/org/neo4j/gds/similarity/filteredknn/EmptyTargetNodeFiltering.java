@@ -25,7 +25,7 @@ import org.neo4j.gds.similarity.knn.NeighbourConsumer;
 import java.util.function.LongPredicate;
 import java.util.stream.Stream;
 
-public final class EmptyTargetNodeFiltering implements TargetNodeFiltering {
+public final class EmptyTargetNodeFiltering implements StreamProducingTargetNodeFiltering {
 
     static EmptyTargetNodeFiltering EMPTY_TARGET_FILTERING = new EmptyTargetNodeFiltering();
 

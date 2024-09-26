@@ -20,29 +20,16 @@
 package org.neo4j.gds.similarity.filteredknn;
 
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
-import org.neo4j.gds.similarity.knn.NeighbourConsumers;
 import org.neo4j.gds.similarity.knn.SimilarityFunction;
 
 import java.util.Optional;
 import java.util.function.LongPredicate;
-import java.util.stream.Stream;
 
-public interface TargetNodeFiltering extends NeighbourConsumers {
+final class TargetNodeFilteringFactory {
+    private TargetNodeFilteringFactory() {}
 
-    boolean isTargetNodeFiltered();
-
-
-    default SeedingSummary seedingSummary() {
-        return SeedingSummary.EMPTY_SEEDING_SUMMARY;
-    }
-
-    Stream<SimilarityResult> asSimilarityResultStream(LongPredicate sourceNodePredicate);
-
-    long numberOfSimilarityPairs(LongPredicate sourceNodePredicate);
-
-    static TargetNodeFiltering create(
+    static StreamProducingTargetNodeFiltering create(
         NodeFilter sourceNodeFilter,
         long nodeCount,
         int k,
@@ -66,4 +53,5 @@ public interface TargetNodeFiltering extends NeighbourConsumers {
             );
         }
     }
+
 }

@@ -17,19 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.similarity;
+package org.neo4j.gds.procedures.algorithms.similarity.stubs;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.procedures.algorithms.similarity.KnnMutateResult;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
-import org.neo4j.gds.similarity.filteredknn.FilteredKnnMutateConfig;
+import org.neo4j.gds.similarity.knn.KnnMutateConfig;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public interface FilteredKnnMutateStub extends MutateStub<FilteredKnnMutateConfig, KnnMutateResult> {
+public interface KnnMutateStub extends MutateStub<KnnMutateConfig, KnnMutateResult> {
     @Override
-    FilteredKnnMutateConfig parseConfiguration(Map<String, Object> configuration);
+    KnnMutateConfig parseConfiguration(Map<String, Object> configuration);
 
     @Override
     MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration);

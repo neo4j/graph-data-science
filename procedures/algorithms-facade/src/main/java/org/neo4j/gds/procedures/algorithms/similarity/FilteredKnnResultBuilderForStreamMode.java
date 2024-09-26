@@ -22,27 +22,29 @@ package org.neo4j.gds.procedures.algorithms.similarity;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
-import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class FilteredKnnResultBuilderForStreamMode implements StreamResultBuilder<FilteredKnnResult, SimilarityResult> {
+class FilteredKnnResultBuilderForStreamMode implements StreamResultBuilder<FilteredKnnResult, SimilarityStreamResult> {
 
     @Override
-    public Stream<SimilarityResult> build(
+    public Stream<SimilarityStreamResult> build(
         Graph graph,
         GraphStore graphStore,
         Optional<FilteredKnnResult> result
     ) {
         if (result.isEmpty()) return Stream.empty();
 
-        //noinspection SimplifyStreamApiCallChains
-        return result.get().similarityResultStream().map(sr -> {
-            sr.node1 = graph.toOriginalNodeId(sr.node1);
-            sr.node2 = graph.toOriginalNodeId(sr.node2);
-            return sr;
-        });
+        return result.get()
+            .similarityResultStream()
+            .map(sr ->
+                new SimilarityStreamResult(
+                    graph.toOriginalNodeId(sr.node1),
+                    graph.toOriginalNodeId(sr.node2),
+                    sr.similarity
+                )
+            );
     }
 }

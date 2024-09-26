@@ -17,23 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.similarity.filteredknn;
+package org.neo4j.gds.procedures.algorithms.similarity;
 
-import org.neo4j.gds.similarity.SimilarityResult;
-import org.neo4j.gds.similarity.knn.NeighbourConsumer;
-
-import java.util.stream.Stream;
-
-
-public interface TargetNodeFilter extends NeighbourConsumer {
-
-    
-    /**
-     * As part of an instrumentation of KNN this is a handy utility.
-     */
-    Stream<SimilarityResult> asSimilarityStream(long nodeId);
-    /**
-     * As part of an instrumentation of KNN this is a handy utility.
-     */
-    long size();
+public record SimilarityStreamResult(long node1, long node2, double similarity) {
 }

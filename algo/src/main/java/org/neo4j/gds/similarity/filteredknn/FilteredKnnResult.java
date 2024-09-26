@@ -30,13 +30,13 @@ import java.util.stream.Stream;
 public class FilteredKnnResult {
 
     private final boolean isTargetFiltered;
-    private final TargetNodeFiltering targetNodeFiltering;
+    private final StreamProducingTargetNodeFiltering targetNodeFiltering;
     private final NodeFilter sourceNodeFilter;
     private final KnnResult knnResult;
 
 
     public FilteredKnnResult(
-        TargetNodeFiltering targetNodeFiltering,
+        StreamProducingTargetNodeFiltering targetNodeFiltering,
         KnnResult knnResult,
         NodeFilter sourceNodeFilter
     ) {

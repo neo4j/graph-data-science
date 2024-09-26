@@ -51,7 +51,7 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
      */
     private final Knn delegate;
 
-    private final TargetNodeFiltering targetNodeFiltering;
+    private final StreamProducingTargetNodeFiltering targetNodeFiltering;
     private final NodeFilter sourceNodeFilter;
 
     public static FilteredKnn createWithoutSeeding(Graph graph, FilteredKnnBaseConfig config, KnnContext context, TerminationFlag terminationFlag) {
@@ -82,7 +82,7 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
         var targetNodeFilter = config.targetNodeFilter().toNodeFilter(graph);
         var sourceNodeFilter = config.sourceNodeFilter().toNodeFilter(graph);
 
-        var targetNodeFiltering = TargetNodeFiltering.create(
+        var targetNodeFiltering = TargetNodeFilteringFactory.create(
             sourceNodeFilter,
             graph.nodeCount(),
             config.k(graph.nodeCount()).value,
@@ -121,7 +121,7 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
     private FilteredKnn(
         ProgressTracker progressTracker,
         Knn delegate,
-        TargetNodeFiltering targetNodeFiltering,
+        StreamProducingTargetNodeFiltering targetNodeFiltering,
         NodeFilter sourceNodeFilter,
         TerminationFlag terminationFlag
     ) {
