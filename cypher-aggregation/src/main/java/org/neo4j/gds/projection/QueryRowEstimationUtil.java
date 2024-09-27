@@ -20,8 +20,8 @@
 package org.neo4j.gds.projection;
 
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.ExecutionPlanDescription;
-import org.neo4j.graphdb.Transaction;
 
 import java.util.Optional;
 
@@ -34,9 +34,11 @@ final class QueryRowEstimationUtil {
      * of the cypher aggregation node. This child node contains the estimated number of rows that
      * will be returned by the query.
      */
-    static int estimatedRows(Transaction tx, String query) {
-        try {
+    static int estimatedRows(TransactionContext transactionContext, String query) {
+        //noinspection resource
+        try (var tx = transactionContext.fork().transaction()) {
             var executionPlan = tx.execute(explainQuery(query)).getExecutionPlanDescription();
+            tx.commit();
             var aggregationChild = findChildOfRemoteAggregation(executionPlan);
             return aggregationChild
                 .map(child -> ((Number) child.getArguments().get("EstimatedRows")).intValue())

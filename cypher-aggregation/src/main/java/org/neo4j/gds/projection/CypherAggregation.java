@@ -28,6 +28,7 @@ import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.logging.LogAdapter;
 import org.neo4j.gds.metrics.MetricsFacade;
+import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
@@ -112,7 +113,7 @@ public class CypherAggregation implements CallableUserAggregationFunction {
             ? WriteMode.NONE
             : WriteMode.LOCAL;
 
-        var queryEstimator = QueryEstimator.fromTransaction(transaction);
+        var queryEstimator = QueryEstimator.fromTransaction(DatabaseTransactionContext.of(databaseService, transaction));
 
         return new ProductGraphAggregator(
             DatabaseId.of(databaseService.databaseName()),

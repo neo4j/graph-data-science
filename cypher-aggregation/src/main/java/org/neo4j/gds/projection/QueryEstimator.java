@@ -20,12 +20,12 @@
 package org.neo4j.gds.projection;
 
 import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.graphdb.Transaction;
+import org.neo4j.gds.transaction.TransactionContext;
 
 public interface QueryEstimator {
     int estimateRows(String query);
 
-    static QueryEstimator fromTransaction(Transaction transaction) {
+    static QueryEstimator fromTransaction(TransactionContext transaction) {
         return new TxQueryEstimator(transaction);
     }
 
@@ -35,14 +35,14 @@ public interface QueryEstimator {
 }
 
 final class TxQueryEstimator implements QueryEstimator {
-    private final Transaction transaction;
+    private final TransactionContext transactionContext;
 
-    TxQueryEstimator(Transaction transaction) {
-        this.transaction = transaction;
+    TxQueryEstimator(TransactionContext transactionContext) {
+        this.transactionContext = transactionContext;
     }
 
     @Override
     public int estimateRows(String query) {
-        return QueryRowEstimationUtil.estimatedRows(transaction, query);
+        return QueryRowEstimationUtil.estimatedRows(transactionContext, query);
     }
 }

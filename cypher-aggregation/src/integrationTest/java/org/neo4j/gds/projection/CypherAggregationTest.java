@@ -28,6 +28,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.BaseTest;
@@ -55,6 +56,8 @@ import org.neo4j.graphdb.Result;
 import org.neo4j.kernel.api.CypherScope;
 import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
+import org.neo4j.test.TestDatabaseManagementServiceBuilder;
+import org.neo4j.test.extension.ExtensionCallback;
 
 import java.util.List;
 import java.util.Map;
@@ -1215,6 +1218,29 @@ class CypherAggregationTest extends BaseProcTest {
             assertThat(GraphStoreCatalog.exists("", db.databaseName(), "g")).isTrue();
             var graph = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore().getUnion();
             assertThat(graph.nodeCount()).isEqualTo(10000);
+        }
+    }
+
+    @Nested
+    class EstimateRowsTest extends BaseTest {
+
+        @Override
+        @ExtensionCallback
+        protected void configuration(TestDatabaseManagementServiceBuilder builder) {
+            super.configuration(builder.setConfig(GraphDatabaseSettings.log_queries_obfuscate_literals, true));
+        }
+
+        @Test
+        void explainingWithObfuscatedLiteralsDoesntRuinTheDay() {
+            assertThatCode(() -> runQuery("RETURN gds.graph.project('g', 0, 1)")).doesNotThrowAnyException();
+        }
+
+        @Test
+        void notLiterals() {
+            assertThatCode(() -> runQuery(
+                "RETURN gds.graph.project($g, $x, $x)",
+                Map.of("g", "g", "x", 0)
+            )).doesNotThrowAnyException();
         }
     }
 

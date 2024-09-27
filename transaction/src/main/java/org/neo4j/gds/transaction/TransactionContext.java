@@ -107,6 +107,13 @@ public interface TransactionContext {
         }
 
         /**
+         * @return The current {@link org.neo4j.graphdb.Transaction}.
+         */
+        public Transaction transaction() {
+            return tx;
+        }
+
+        /**
          * Closes the underlying transaction.
          */
         public void close() {

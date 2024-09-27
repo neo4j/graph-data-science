@@ -30,6 +30,7 @@ dependencies {
     implementation project(':neo4j-values')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
+    implementation project(':transaction')
     implementation project(':triplet-graph-builder')
 
 
