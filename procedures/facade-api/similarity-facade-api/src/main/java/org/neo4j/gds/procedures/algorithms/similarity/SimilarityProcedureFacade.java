@@ -20,7 +20,10 @@
 package org.neo4j.gds.procedures.algorithms.similarity;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.procedures.algorithms.similarity.stubs.FilteredKnnMutateStub;
+import org.neo4j.gds.procedures.algorithms.similarity.stubs.FilteredNodeSimilarityMutateStub;
+import org.neo4j.gds.procedures.algorithms.similarity.stubs.KnnMutateStub;
+import org.neo4j.gds.procedures.algorithms.similarity.stubs.NodeSimilarityMutateStub;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -35,7 +38,7 @@ public interface SimilarityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    Stream<SimilarityResult> filteredKnnStream(String graphName, Map<String, Object> configuration);
+    Stream<SimilarityStreamResult> filteredKnnStream(String graphName, Map<String, Object> configuration);
 
     Stream<MemoryEstimateResult> filteredKnnStreamEstimate(
         Object graphNameOrConfiguration,
@@ -61,7 +64,7 @@ public interface SimilarityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    Stream<SimilarityResult> filteredNodeSimilarityStream(String graphName, Map<String, Object> configuration);
+    Stream<SimilarityStreamResult> filteredNodeSimilarityStream(String graphName, Map<String, Object> configuration);
 
     Stream<MemoryEstimateResult> filteredNodeSimilarityStreamEstimate(
         Object graphNameOrConfiguration,
@@ -90,7 +93,7 @@ public interface SimilarityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    Stream<SimilarityResult> knnStream(
+    Stream<SimilarityStreamResult> knnStream(
         String graphName,
         Map<String, Object> configuration
     );
@@ -119,7 +122,7 @@ public interface SimilarityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
-    Stream<SimilarityResult> nodeSimilarityStream(String graphName, Map<String, Object> configuration);
+    Stream<SimilarityStreamResult> nodeSimilarityStream(String graphName, Map<String, Object> configuration);
 
     Stream<MemoryEstimateResult> nodeSimilarityStreamEstimate(
         Object graphNameOrConfiguration,

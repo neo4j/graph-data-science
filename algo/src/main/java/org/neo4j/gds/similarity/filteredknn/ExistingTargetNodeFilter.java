@@ -42,7 +42,7 @@ import java.util.stream.Stream;
  * have convinced ourselves that {@link org.neo4j.gds.similarity.knn.Knn} never presents us with such cases. So this
  * data structure suffices.
  */
-public final class ExistingTargetNodeFilter implements TargetNodeFilter {
+public final class ExistingTargetNodeFilter implements TargetNodeFilter, StreamProducingTargetNodeFilter {
     private final TreeSet<Pair<Double, Long>> priorityQueue;
     private final LongPredicate predicate;
     private final int bound;

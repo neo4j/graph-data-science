@@ -21,7 +21,7 @@ package org.neo4j.gds.similarity.filterednodesim;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.procedures.algorithms.similarity.SimilarityStreamResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -41,7 +41,7 @@ public class FilteredNodeSimilarityStreamProc {
 
     @Procedure(value = "gds.nodeSimilarity.filtered.stream", mode = READ)
     @Description(FILTERED_NODE_SIMILARITY_DESCRIPTION)
-    public Stream<SimilarityResult> stream(
+    public Stream<SimilarityStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -61,7 +61,7 @@ public class FilteredNodeSimilarityStreamProc {
     @Internal
     @Procedure(value = "gds.alpha.nodeSimilarity.filtered.stream", mode = READ, deprecatedBy = "gds.nodeSimilarity.filtered.stream")
     @Description(FILTERED_NODE_SIMILARITY_DESCRIPTION)
-    public Stream<SimilarityResult> streamAlpha(
+    public Stream<SimilarityStreamResult> streamAlpha(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

@@ -20,21 +20,23 @@
 package org.neo4j.gds.procedures.algorithms.similarity;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
 class SimilarityResultStreamMapper {
-    Stream<SimilarityResult> process(Graph graph, Optional<NodeSimilarityResult> result) {
+    Stream<SimilarityStreamResult> process(Graph graph, Optional<NodeSimilarityResult> result) {
         if (result.isEmpty()) return Stream.empty();
 
-        //noinspection SimplifyStreamApiCallChains
-        return result.get().streamResult().map(sr -> {
-            sr.node1 = graph.toOriginalNodeId(sr.node1);
-            sr.node2 = graph.toOriginalNodeId(sr.node2);
-            return sr;
-        });
+        return result.get()
+            .streamResult()
+            .map(sr ->
+                new SimilarityStreamResult(
+                    graph.toOriginalNodeId(sr.node1),
+                    graph.toOriginalNodeId(sr.node2),
+                    sr.similarity
+                )
+            );
     }
 }

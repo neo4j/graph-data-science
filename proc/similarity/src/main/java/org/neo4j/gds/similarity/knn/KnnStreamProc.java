@@ -21,7 +21,7 @@ package org.neo4j.gds.similarity.knn;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.procedures.algorithms.similarity.SimilarityStreamResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -40,7 +40,7 @@ public class KnnStreamProc {
 
     @Procedure(value = "gds.knn.stream", mode = READ)
     @Description(KNN_DESCRIPTION)
-    public Stream<SimilarityResult> stream(
+    public Stream<SimilarityStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

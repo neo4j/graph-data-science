@@ -17,48 +17,51 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.similarity;
+package org.neo4j.gds.procedures.algorithms.similarity.stubs;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.procedures.algorithms.similarity.KnnMutateResult;
+import org.neo4j.gds.procedures.algorithms.similarity.KnnResultBuilderForMutateMode;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateConfig;
+import org.neo4j.gds.similarity.knn.KnnMutateConfig;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class LocalNodeSimilarityMutateStub implements NodeSimilarityMutateStub {
+public class LocalKnnMutateStub implements KnnMutateStub {
+
     private final GenericStub genericStub;
     private final SimilarityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
     private final SimilarityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
     private final ProcedureReturnColumns procedureReturnColumns;
 
-    LocalNodeSimilarityMutateStub(
+    public LocalKnnMutateStub(
         GenericStub genericStub,
-        SimilarityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
-        SimilarityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
+        SimilarityAlgorithmsEstimationModeBusinessFacade similarityAlgorithmsEstimationModeBusinessFacade,
+        SimilarityAlgorithmsMutateModeBusinessFacade similarityAlgorithmsMutateMode,
         ProcedureReturnColumns procedureReturnColumns
     ) {
         this.genericStub = genericStub;
-        this.estimationModeBusinessFacade = estimationModeBusinessFacade;
-        this.mutateModeBusinessFacade = mutateModeBusinessFacade;
+        this.estimationModeBusinessFacade = similarityAlgorithmsEstimationModeBusinessFacade;
+        this.mutateModeBusinessFacade = similarityAlgorithmsMutateMode;
         this.procedureReturnColumns = procedureReturnColumns;
     }
 
     @Override
-    public NodeSimilarityMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(NodeSimilarityMutateConfig::of, configuration);
+    public KnnMutateConfig parseConfiguration(Map<String, Object> configuration) {
+        return genericStub.parseConfiguration(KnnMutateConfig::of, configuration);
     }
 
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
             configuration,
-            NodeSimilarityMutateConfig::of,
-            estimationModeBusinessFacade::nodeSimilarity
+            KnnMutateConfig::of,
+            estimationModeBusinessFacade::knn
         );
     }
 
@@ -67,20 +70,20 @@ public class LocalNodeSimilarityMutateStub implements NodeSimilarityMutateStub {
         return genericStub.estimate(
             graphName,
             configuration,
-            NodeSimilarityMutateConfig::of,
-            estimationModeBusinessFacade::nodeSimilarity
+            KnnMutateConfig::of,
+            estimationModeBusinessFacade::knn
         );
     }
 
     @Override
-    public Stream<SimilarityMutateResult> execute(String graphNameAsString, Map<String, Object> rawConfiguration) {
-        var resultBuilder = new NodeSimilarityResultBuilderForMutateMode();
+    public Stream<KnnMutateResult> execute(String graphNameAsString, Map<String, Object> rawConfiguration) {
+        var resultBuilder = new KnnResultBuilderForMutateMode();
 
         return genericStub.execute(
             graphNameAsString,
             rawConfiguration,
-            NodeSimilarityMutateConfig::of,
-            (graphName, configuration, __) -> mutateModeBusinessFacade.nodeSimilarity(
+            KnnMutateConfig::of,
+            (graphName, configuration, __) -> mutateModeBusinessFacade.knn(
                 graphName,
                 configuration,
                 resultBuilder,
@@ -89,5 +92,6 @@ public class LocalNodeSimilarityMutateStub implements NodeSimilarityMutateStub {
             resultBuilder
         );
     }
+
 
 }

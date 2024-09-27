@@ -346,6 +346,15 @@ project(':community-configs').projectDir = file('procedures/facade-api/configs/c
 include('community-params')
 project(':community-params').projectDir = file('algo-params/community-params')
 
+include('similarity-facade-api')
+project(':similarity-facade-api').projectDir = file('procedures/facade-api/similarity-facade-api')
+
+include('similarity-configs')
+project(':similarity-configs').projectDir = file('procedures/facade-api/configs/similarity-configs')
+
+include('similarity-params')
+project(':similarity-params').projectDir = file('algo-params/similarity-params')
+
 
 
 

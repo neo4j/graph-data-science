@@ -17,27 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.similarity;
+package org.neo4j.gds.procedures.algorithms.similarity.stubs;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.procedures.algorithms.similarity.NodeSimilarityResultBuilderForMutateMode;
+import org.neo4j.gds.procedures.algorithms.similarity.SimilarityMutateResult;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
-import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityMutateConfig;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateConfig;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class LocalFilteredNodeSimilarityMutateStub implements FilteredNodeSimilarityMutateStub {
-
+public class LocalNodeSimilarityMutateStub implements NodeSimilarityMutateStub {
     private final GenericStub genericStub;
     private final SimilarityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
     private final SimilarityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
     private final ProcedureReturnColumns procedureReturnColumns;
 
-    LocalFilteredNodeSimilarityMutateStub(
+    public LocalNodeSimilarityMutateStub(
         GenericStub genericStub,
         SimilarityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
         SimilarityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
@@ -50,16 +51,16 @@ public class LocalFilteredNodeSimilarityMutateStub implements FilteredNodeSimila
     }
 
     @Override
-    public FilteredNodeSimilarityMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(FilteredNodeSimilarityMutateConfig::of, configuration);
+    public NodeSimilarityMutateConfig parseConfiguration(Map<String, Object> configuration) {
+        return genericStub.parseConfiguration(NodeSimilarityMutateConfig::of, configuration);
     }
 
     @Override
     public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
             configuration,
-            FilteredNodeSimilarityMutateConfig::of,
-            estimationModeBusinessFacade::filteredNodeSimilarity
+            NodeSimilarityMutateConfig::of,
+            estimationModeBusinessFacade::nodeSimilarity
         );
     }
 
@@ -68,20 +69,20 @@ public class LocalFilteredNodeSimilarityMutateStub implements FilteredNodeSimila
         return genericStub.estimate(
             graphName,
             configuration,
-            FilteredNodeSimilarityMutateConfig::of,
-            estimationModeBusinessFacade::filteredNodeSimilarity
+            NodeSimilarityMutateConfig::of,
+            estimationModeBusinessFacade::nodeSimilarity
         );
     }
 
     @Override
     public Stream<SimilarityMutateResult> execute(String graphNameAsString, Map<String, Object> rawConfiguration) {
-        var resultBuilder = new FilteredNodeSimilarityResultBuilderForMutateMode();
+        var resultBuilder = new NodeSimilarityResultBuilderForMutateMode();
 
         return genericStub.execute(
             graphNameAsString,
             rawConfiguration,
-            FilteredNodeSimilarityMutateConfig::of,
-            (graphName, configuration, __) -> mutateModeBusinessFacade.filteredNodeSimilarity(
+            NodeSimilarityMutateConfig::of,
+            (graphName, configuration, __) -> mutateModeBusinessFacade.nodeSimilarity(
                 graphName,
                 configuration,
                 resultBuilder,
@@ -90,6 +91,5 @@ public class LocalFilteredNodeSimilarityMutateStub implements FilteredNodeSimila
             resultBuilder
         );
     }
-
 
 }

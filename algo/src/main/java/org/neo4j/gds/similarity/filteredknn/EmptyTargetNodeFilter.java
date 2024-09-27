@@ -23,7 +23,7 @@ import org.neo4j.gds.similarity.SimilarityResult;
 
 import java.util.stream.Stream;
 
-public class EmptyTargetNodeFilter implements TargetNodeFilter {
+public class EmptyTargetNodeFilter implements StreamProducingTargetNodeFilter {
 
     static EmptyTargetNodeFilter EMPTY_CONSUMER = new EmptyTargetNodeFilter();
     @Override

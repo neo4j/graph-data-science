@@ -38,7 +38,7 @@ class TargetNodeFilteringTest {
         int kIsTwo = 2;
         LongPredicate evenNodesAreTargetNodes = l -> l % 2 == 0;
         double noSimilarityCutoff = Double.MIN_VALUE;
-        ExistingTargetNodeFiltering targetNodeFiltering = ExistingTargetNodeFiltering.create(
+        var targetNodeFiltering = ExistingTargetNodeFiltering.create(
             NodeFilter.ALLOW_EVERYTHING,
             thereIsSixNodeInThisFilter,
             kIsTwo,

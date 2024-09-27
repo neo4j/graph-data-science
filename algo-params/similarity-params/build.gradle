@@ -1,0 +1,18 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Similarity Algorithms Parameters'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    compileOnly openGds.jetbrains.annotations
+
+    implementation project(':annotations')
+    implementation project(':concurrency')
+    implementation project(':graph-projection-api')
+    implementation project(':string-formatting')
+
+    // Because of `Intersections`
+    // TODO: move Intersections out of `core`
+    implementation project(':core')
+}
