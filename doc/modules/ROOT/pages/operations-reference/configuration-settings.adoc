@@ -35,7 +35,7 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 | Address the GDS Arrow Flight Server should bind to.
 ^.^| label:enterprise-edition[Enterprise Edition]
 
-<.^| <<gds.arrow.memory.size, gds.arrow.memory.size>>
+<.^| <<gds.memory.arrow.max_size, gds.memory.arrow.max_size>>
 | The maximum amount of memory in bytes the GDS Arrow Flight Server can allocate.
 ^.^| label:enterprise-edition[Enterprise Edition]
 
@@ -138,9 +138,9 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 |===
 
 
-[[gds.arrow.memory.size]]
+[[gds.memory.arrow.max_size]]
 [.setting-details]
-.gds.arrow.memory.size label:enterprise-edition[Enterprise Edition]
+.gds.memory.arrow.max_size label:enterprise-edition[Enterprise Edition]
 [cols="1,4", caption =]
 |===
 | Description   | The maximum amount of memory in bytes the GDS Arrow Flight Server can allocate.

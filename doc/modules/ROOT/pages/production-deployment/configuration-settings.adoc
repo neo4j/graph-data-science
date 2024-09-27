@@ -83,7 +83,7 @@ Refer to The https://neo4j.com/docs/operations-manual/current/configuration/neo4
 |===
 
 [.setting-details]
-.gds.arrow.memory.size
+.gds.memory.arrow.max_size
 [cols="1,4", caption =]
 |===
 | Description   | The maximum amount of memory in bytes the GDS Arrow Flight Server can allocate.
