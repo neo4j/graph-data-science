@@ -17,12 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.bellmanford;
+package org.neo4j.gds.spanningtree;
 
-import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import java.util.function.DoubleUnaryOperator;
 
-public record BellmanFordResult(
-    PathFindingResult shortestPaths,
-    PathFindingResult negativeCycles,
-    boolean containsNegativeCycle
-) {}
+public final class PrimOperators {
+
+    public static final DoubleUnaryOperator MAX_OPERATOR = (w) -> -w;
+    public static final DoubleUnaryOperator MIN_OPERATOR = (w) -> w;
+
+    private PrimOperators() {}
+}

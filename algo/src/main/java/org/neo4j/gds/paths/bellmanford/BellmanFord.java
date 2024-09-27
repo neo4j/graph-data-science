@@ -149,10 +149,10 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
             );
         }
 
-        return BellmanFordResult.of(
-            containsNegativeCycle,
+        return new BellmanFordResult(
             new PathFindingResult(paths),
-            new PathFindingResult(negativeCycles)
+            new PathFindingResult(negativeCycles),
+            containsNegativeCycle
         );
     }
 

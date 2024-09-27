@@ -1,0 +1,46 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Path Finding Algorithms Procedure Facade API'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+
+    api project(':path-finding-configs')
+
+    compileOnly openGds.jetbrains.annotations
+
+    compileOnly group: 'org.neo4j', name: 'neo4j-graphdb-api',   version: ver.neo4j, transitive: false
+    compileOnly group: 'org.neo4j', name: 'neo4j-graph-algo', version: ver.'neo4j', transitive: false
+
+    // Various result builders are here
+    implementation project(':algo-common')
+
+    implementation project(':algorithms-facade-common')
+
+    // this is needed because of `AlgorithmProcessingTimings`
+    implementation project(':algorithms-machinery')
+
+    // `BaseConfig` lives here
+    implementation project(':config-api')
+
+    // this is needed because of `WritePropertyConfig`
+    implementation project(':core')
+
+    implementation project(':graph-schema-api')
+
+    // this is needed because of `MemoryEstimation`
+    implementation project(':memory-usage')
+
+    implementation project(':neo4j-api')
+
+    // we bring this in only to use `PregelConfig` and `Partitioning` enum
+    implementation project(':pregel')
+
+    // only `JobIdConfig` is what we need from this module
+    implementation project(':progress-tracking')
+
+    implementation project(':string-formatting')
+
+    testImplementation project(':test-utils')
+}

@@ -35,8 +35,8 @@ class SpanningTreeCompanionTest {
 
     static Stream<Arguments> operators() {
         return Stream.of(
-            arguments("maximum", Prim.MAX_OPERATOR),
-            arguments("minimum", Prim.MIN_OPERATOR)
+            arguments("maximum", PrimOperators.MAX_OPERATOR),
+            arguments("minimum", PrimOperators.MIN_OPERATOR)
         );
     }
 

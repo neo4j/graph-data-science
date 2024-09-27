@@ -17,6 +17,8 @@ dependencies {
     implementation project(":ml-core")
     implementation project(":model-catalog-api")
     implementation project(":model-catalog-applications")
+    // TODO: the `:path-finding-configs` is needed because it's indirectly used by `node2vec` parameters.
+    implementation project(':path-finding-configs')
     implementation project(":progress-tracking")
     implementation project(":string-formatting")
     implementation project(":termination")

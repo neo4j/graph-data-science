@@ -21,7 +21,6 @@ package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.NodeLookup;
-import org.neo4j.gds.paths.PathResult;
 import org.neo4j.graphdb.Path;
 
 import java.util.ArrayList;
@@ -82,11 +81,7 @@ public final class BellmanFordStreamResult {
             return this;
         }
 
-        public BellmanFordStreamResult build(PathResult pathResult, boolean createCypherPath) {
-            var nodeIds = pathResult.nodeIds();
-            var costs = pathResult.costs();
-            var pathIndex = pathResult.index();
-
+        public BellmanFordStreamResult build(long[] nodeIds, double[] costs, long pathIndex, long sourceNode, long targetNode, double totalCost, boolean createCypherPath) {
             // convert internal ids to Neo ids
             for (int i = 0; i < nodeIds.length; i++) {
                 nodeIds[i] = idMap.toOriginalNodeId(nodeIds[i]);
@@ -104,9 +99,9 @@ public final class BellmanFordStreamResult {
 
             return new BellmanFordStreamResult(
                 pathIndex,
-                idMap.toOriginalNodeId(pathResult.sourceNode()),
-                idMap.toOriginalNodeId(pathResult.targetNode()),
-                pathResult.totalCost(),
+                idMap.toOriginalNodeId(sourceNode),
+                idMap.toOriginalNodeId(targetNode),
+                totalCost,
                 // 😿
                 Arrays.stream(nodeIds).boxed().collect(Collectors.toCollection(() -> new ArrayList<>(nodeIds.length))),
                 Arrays.stream(costs).boxed().collect(Collectors.toCollection(() -> new ArrayList<>(costs.length))),

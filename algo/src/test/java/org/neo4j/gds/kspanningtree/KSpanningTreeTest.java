@@ -37,7 +37,7 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.logging.GdsTestLog;
-import org.neo4j.gds.spanningtree.Prim;
+import org.neo4j.gds.spanningtree.PrimOperators;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.HashSet;
@@ -91,7 +91,7 @@ class KSpanningTreeTest {
 
     @Test
     void testMaximumKSpanningTree() {
-        var spanningTree = new KSpanningTree(graph, Prim.MAX_OPERATOR, a, 2, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE)
+        var spanningTree = new KSpanningTree(graph, PrimOperators.MAX_OPERATOR, a, 2, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE)
             .compute();
 
         assertThat(spanningTree).matches(tree -> tree.head(a) == tree.head(b) ^ tree.head(c) == tree.head(d));
@@ -103,7 +103,7 @@ class KSpanningTreeTest {
 
     @Test
     void testMinimumKSpanningTree() {
-        var spanningTree = new KSpanningTree(graph, Prim.MIN_OPERATOR, a, 2, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE)
+        var spanningTree = new KSpanningTree(graph, PrimOperators.MIN_OPERATOR, a, 2, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE)
             .compute();
 
         assertThat(spanningTree).matches(tree -> tree.head(a) == tree.head(d) ^ tree.head(b) == tree.head(c));
@@ -131,7 +131,7 @@ class KSpanningTreeTest {
         var k = 3;
         var spanningTree = new KSpanningTree(
             graph,
-            Prim.MIN_OPERATOR,
+            PrimOperators.MIN_OPERATOR,
             startNode,
             k,
             ProgressTracker.NULL_TRACKER,
@@ -172,7 +172,7 @@ class KSpanningTreeTest {
 
         var spanningTree = new KSpanningTree(
             graph,
-            Prim.MIN_OPERATOR,
+            PrimOperators.MIN_OPERATOR,
             startNode,
             k,
             ProgressTracker.NULL_TRACKER,
@@ -215,7 +215,7 @@ class KSpanningTreeTest {
 
         var spanningTree = new KSpanningTree(
             graph,
-            Prim.MIN_OPERATOR,
+            PrimOperators.MIN_OPERATOR,
             startNode,
             4,
             ProgressTracker.NULL_TRACKER,
@@ -255,7 +255,7 @@ class KSpanningTreeTest {
 
         var spanningTree = new KSpanningTree(
             graph,
-            Prim.MIN_OPERATOR,
+            PrimOperators.MIN_OPERATOR,
             startNode,
             5,
             ProgressTracker.NULL_TRACKER,

@@ -19,20 +19,5 @@
  */
 package org.neo4j.gds.traversal;
 
-public class WalkEstimateParameters {
-    public final int walkLength;
-    public final int walkBufferSize;
-
-    public WalkEstimateParameters(int walkLength, int walkBufferSize) {
-        this.walkLength = walkLength;
-        this.walkBufferSize = walkBufferSize;
-    }
-
-    int walkLength() {
-        return this.walkLength;
-    }
-
-    int walkBufferSize() {
-        return this.walkBufferSize;
-    }
+public record WalkEstimateParameters(int walkLength, int walkBufferSize) {
 }

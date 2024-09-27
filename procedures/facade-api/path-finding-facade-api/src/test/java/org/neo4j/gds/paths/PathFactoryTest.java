@@ -20,6 +20,7 @@
 package org.neo4j.gds.paths;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.graphdb.Node;
@@ -86,7 +87,7 @@ class PathFactoryTest {
                 var actualCost = (double) relationship.getProperty("prop");
                 var expectedCost = costs[(int) relationship.getEndNodeId()] - costs[(int) relationship.getStartNodeId()];
 
-                assertEquals(expectedCost, actualCost, 1E-4);
+                Assertions.assertEquals(expectedCost, actualCost, 1E-4);
             });
         }
     }

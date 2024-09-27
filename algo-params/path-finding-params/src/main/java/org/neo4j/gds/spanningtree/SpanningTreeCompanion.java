@@ -32,9 +32,9 @@ public final class SpanningTreeCompanion {
             var inputString = StringFormatting.toUpperCaseWithLocale((String) input);
 
             if (inputString.equals("MAXIMUM")) {
-                return Prim.MAX_OPERATOR;
+                return PrimOperators.MAX_OPERATOR;
             } else if (inputString.equals("MINIMUM")) {
-                return Prim.MIN_OPERATOR;
+                return PrimOperators.MIN_OPERATOR;
             }
 
             throw new IllegalArgumentException(String.format(
@@ -45,7 +45,7 @@ public final class SpanningTreeCompanion {
             ));
         } else if (input instanceof DoubleUnaryOperator) {
             var inputOperator = (DoubleUnaryOperator) input;
-            if (inputOperator.equals(Prim.MAX_OPERATOR) || inputOperator.equals(Prim.MIN_OPERATOR)) {
+            if (inputOperator.equals(PrimOperators.MAX_OPERATOR) || inputOperator.equals(PrimOperators.MIN_OPERATOR)) {
                 return inputOperator;
 
             }
@@ -64,7 +64,7 @@ public final class SpanningTreeCompanion {
 
     public static String toString(DoubleUnaryOperator doubleUnaryOperator) {
 
-        if (doubleUnaryOperator.equals(Prim.MAX_OPERATOR)) {
+        if (doubleUnaryOperator.equals(PrimOperators.MAX_OPERATOR)) {
             return "maximum";
         } else {
             return "minimum";

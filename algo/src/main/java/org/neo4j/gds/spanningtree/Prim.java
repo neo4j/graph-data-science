@@ -42,8 +42,6 @@ import java.util.function.DoubleUnaryOperator;
  */
 public class Prim extends Algorithm<SpanningTree> {
     private  final int EMPTY=-1;
-    public static final DoubleUnaryOperator MAX_OPERATOR = (w) -> -w;
-    public static final DoubleUnaryOperator MIN_OPERATOR = (w) -> w;
     private final Graph graph;
     private final DoubleUnaryOperator minMax;
     private final long startNodeId;

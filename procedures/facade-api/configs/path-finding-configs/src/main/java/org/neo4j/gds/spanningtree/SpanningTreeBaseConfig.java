@@ -34,7 +34,7 @@ public interface SpanningTreeBaseConfig extends
     @Configuration.ConvertWith(method = "org.neo4j.gds.spanningtree.SpanningTreeCompanion#parse")
     @Configuration.ToMapValue("org.neo4j.gds.spanningtree.SpanningTreeCompanion#toString")
     default DoubleUnaryOperator objective() {
-        return Prim.MIN_OPERATOR;
+        return PrimOperators.MIN_OPERATOR;
     }
 
     @Configuration.Ignore

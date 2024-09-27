@@ -31,12 +31,14 @@ dependencies {
     
     implementation project(':centrality-params')
     implementation project(':community-params')
+    implementation project(':path-finding-params')
     implementation project(':similarity-params')
 
     // This dependency is needed because we still have factories next to the algorithms.
     // TODO: move the factories out
     implementation project(':centrality-configs')
     implementation project(':community-configs')
+    implementation project(':path-finding-configs')
     implementation project(':similarity-configs')
 
     implementation project(':collections-memory-estimation')

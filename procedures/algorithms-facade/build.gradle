@@ -15,6 +15,7 @@ dependencies {
         project(':centrality-facade-api'),
         project(':community-facade-api'),
         project(':similarity-facade-api'),
+        project(':path-finding-facade-api'),
     )
 
     // TODO: remove this once we get all categories to `api` modules?

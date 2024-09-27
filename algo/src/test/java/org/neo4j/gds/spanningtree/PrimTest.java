@@ -125,7 +125,7 @@ class PrimTest {
     void testMaximum(String nodeId, String parentA, String parentB, String parentC, String parentD, String parentE) {
         var mst = new Prim(
             graph,
-            Prim.MAX_OPERATOR,
+            PrimOperators.MAX_OPERATOR,
             idFunction.of(nodeId),
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
@@ -139,7 +139,7 @@ class PrimTest {
     void testMinimum(String nodeId, String parentA, String parentB, String parentC, String parentD, String parentE) {
         var mst = new Prim(
             graph,
-            Prim.MIN_OPERATOR,
+            PrimOperators.MIN_OPERATOR,
             idFunction.of(nodeId),
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
@@ -150,7 +150,7 @@ class PrimTest {
 
     @Test
     void shouldLogProgress() {
-        var parameters = new SpanningTreeParameters(Prim.MIN_OPERATOR, graph.toOriginalNodeId("a"));
+        var parameters = new SpanningTreeParameters(PrimOperators.MIN_OPERATOR, graph.toOriginalNodeId("a"));
         var factory = new SpanningTreeAlgorithmFactory<>();
         var log = new GdsTestLog();
         var progressTracker = new TestProgressTracker(

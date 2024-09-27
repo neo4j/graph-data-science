@@ -28,6 +28,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 import org.neo4j.gds.spanningtree.Prim;
+import org.neo4j.gds.spanningtree.PrimOperators;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -87,7 +88,7 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
 
     @NotNull
     private HugeLongPriorityQueue createPriorityQueue(long parentSize, boolean pruning) {
-        boolean minQueue = minMax == Prim.MIN_OPERATOR;
+        boolean minQueue = minMax == PrimOperators.MIN_OPERATOR;
         //if pruning, we remove the worst (max if it's a minimization problem)
         //therefore we flip the priority queue
         if (pruning) {
@@ -260,7 +261,7 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
     }
 
     private boolean moveMakesSense(double cost1, double cost2, DoubleUnaryOperator minMax) {
-        if (minMax == Prim.MAX_OPERATOR) {
+        if (minMax == PrimOperators.MAX_OPERATOR) {
             return cost1 > cost2;
         } else {
             return cost1 < cost2;

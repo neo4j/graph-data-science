@@ -66,7 +66,12 @@ class BellmanFordResultBuilderForStreamMode implements StreamResultBuilder<Bellm
         var algorithmResult = getPathFindingResult(bellmanFordResult, containsNegativeCycle);
 
         var resultStream = algorithmResult.mapPaths(path -> resultBuilder.build(
-            path,
+            path.nodeIds(),
+            path.costs(),
+            path.index(),
+            path.sourceNode(),
+            path.targetNode(),
+            path.totalCost(),
             shouldCreateRoutes
         ));
 

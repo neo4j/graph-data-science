@@ -1,0 +1,43 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Path Finding Configurations'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+
+    annotationProcessor project(':annotations')
+    annotationProcessor project(':config-generator')
+    // This is needed for the generated configuration classes
+    compileOnly openGds.jetbrains.annotations
+    // Configuration annotations
+    implementation project(':annotations')
+
+    compileOnly openGds.immutables.value.annotations
+
+    // Make this `api` dependency - the various `toParameters` methods return classes from here.
+    api project(':path-finding-params')
+
+    // `BaseConfig` lives here
+    implementation project(':config-api')
+
+    // this is needed because of `WritePropertyConfig` and `AlgoBaseConfig`
+    implementation project(':core')
+
+    implementation project(':graph-schema-api')
+
+    // this is needed because of `MemoryEstimation`
+    implementation project(':memory-usage')
+
+    // we bring this in only to use `PregelConfig` and `Partitioning` enum
+    implementation project(':pregel')
+
+    // only `JobIdConfig` is what we need from this module
+    implementation project(':progress-tracking')
+
+    implementation project(':string-formatting')
+
+    testImplementation project(':test-utils')
+    testImplementation openGds.gdl
+
+}

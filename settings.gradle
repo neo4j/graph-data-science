@@ -355,6 +355,14 @@ project(':similarity-configs').projectDir = file('procedures/facade-api/configs/
 include('similarity-params')
 project(':similarity-params').projectDir = file('algo-params/similarity-params')
 
+include('path-finding-facade-api')
+project(':path-finding-facade-api').projectDir = file('procedures/facade-api/path-finding-facade-api')
+
+include('path-finding-configs')
+project(':path-finding-configs').projectDir = file('procedures/facade-api/configs/path-finding-configs')
+
+include('path-finding-params')
+project(':path-finding-params').projectDir = file('algo-params/path-finding-params')
 
 
 
