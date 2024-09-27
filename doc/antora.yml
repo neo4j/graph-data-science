@@ -1,12 +1,12 @@
 name: graph-data-science
 title: Neo4j Graph Data Science
-version: '2.10'
+version: '2.11-preview'
 start_page: ROOT:index.adoc
 nav:
 - modules/ROOT/content-nav.adoc
 asciidoc:
   attributes:
-    docs-version: '2.10'
+    docs-version: '2.11-preview'
     ga-promos-uri: https://raw.githubusercontent.com/neo4j-graphacademy/courses/main/asciidoc/promos
     ga-promo: analytics
     page-ad-icon: mortarboard

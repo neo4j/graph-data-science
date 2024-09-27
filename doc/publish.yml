@@ -9,8 +9,7 @@ content:
     # Includes previous version, current, and preview (master).
     # When updating this, update the version in the
     # `page-add-notes-versions` below too (if relevant).
-    branches: ['2.5', '2.6', '2.7', '2.8', '2.9', 'master']
-    tags: ['2.10.0']
+    branches: ['2.5', '2.6', '2.7', '2.8', '2.9', '2.10', 'master']
     start_path: public/doc
     include: public/doc/
     exclude:
