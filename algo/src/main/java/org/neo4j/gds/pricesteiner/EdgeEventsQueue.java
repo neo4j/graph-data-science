@@ -72,7 +72,20 @@ import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
         pairingHeapOft.add(edgePart1,w);
     }
 
-    void increaseValuesOnInactiveCluster(long clusterId, double value){
+     void addWithCheck(long s,  long edgePart, double w){
+         var pairingHeapOfs  = pairingHeaps.get(s);
+         pairingHeapOfs.add(edgePart,w);
+         if (w < edgeEventsPriorityQueue.cost(s)){
+               edgeEventsPriorityQueue.set(s, w);
+         }
+     }
+     void addWithoutCheck(long s,  long edgePart, double w){
+         var pairingHeapOfs  = pairingHeaps.get(s);
+         pairingHeapOfs.add(edgePart,w);
+     }
+
+
+     void increaseValuesOnInactiveCluster(long clusterId, double value){
         pairingHeaps.get(clusterId).increaseValues(value);
     }
 

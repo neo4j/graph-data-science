@@ -56,9 +56,28 @@ class ClusterStructureTest {
 
         assertThat(clusterStructure.sumOnEdgePart(0).totalMoat()).isEqualTo(116);
 
+    }
 
+    @Test
+    void shouldReturnCorrectlyClusterPrizes(){
+        var clusterStructure = new ClusterStructure(4);
+        clusterStructure.setClusterPrize(0,10);
+        clusterStructure.setClusterPrize(1,20);
+        assertThat(clusterStructure.clusterPrize(0)).isEqualTo(10);
+        assertThat(clusterStructure.clusterPrize(1)).isEqualTo(20);
+        clusterStructure.merge(0,1);
+        assertThat(clusterStructure.clusterPrize(4)).isEqualTo(30);
+    }
 
-
+    @Test
+    void shouldComputeTightnessCorrectly(){
+        var clusterStructure = new ClusterStructure(4);
+        clusterStructure.setClusterPrize(0,10);
+        clusterStructure.increaseMoat(0,3);
+        clusterStructure.setClusterPrize(1,20);
+        clusterStructure.increaseMoat(1,3);
+        clusterStructure.merge(0,1);
+        assertThat(clusterStructure.tightnessTime(4,3)).isEqualTo(27);
     }
 
 }

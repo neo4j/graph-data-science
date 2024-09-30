@@ -24,15 +24,20 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 
 public class ClusterStructure {
 
-    private final HugeLongArray parent;
+    private final HugeLongArray parent; //TODO: enforce path-compression heuristic
+    private final HugeDoubleArray clusterPrizes; //enforce path-compression heuristic
     private final HugeDoubleArray moat;
+    private final HugeDoubleArray totalMoat;
+
     private  long maxNumberOfClusters;
+
     ClusterStructure(long nodeCount){
 
         this.parent = HugeLongArray.newArray(2*nodeCount);
+        this.clusterPrizes = HugeDoubleArray.newArray(2*nodeCount);
         this.parent.fill(-1L);
         this.maxNumberOfClusters = nodeCount;
-
+        this.totalMoat = HugeDoubleArray.newArray(2*nodeCount);
         this.moat = HugeDoubleArray.newArray(2*nodeCount);
     }
 
@@ -40,14 +45,33 @@ public class ClusterStructure {
         var newCluster = maxNumberOfClusters++;
         parent.set(componentA,newCluster);
         parent.set(componentB,newCluster);
+        clusterPrizes.set(newCluster, clusterPrizes.get(componentA)+ clusterPrizes.get(componentB));
+        totalMoat.set(newCluster, totalMoat.get(componentA)+ totalMoat.get(componentB));
         return  newCluster;
     }
 
-    void increaseMoat(long componentId, double val){
-        moat.addTo(componentId,val);
+    void setClusterPrize(long clusterId, double prize){
+        clusterPrizes.set(clusterId, prize);
     }
 
+    double clusterPrize(long clusterId){
+        return clusterPrizes.get(clusterId);
+    }
 
+    void increaseMoat(long clusterId, double val){
+        moat.addTo(clusterId,val);
+        totalMoat.addTo(clusterId,val);
+    }
+
+    void setMoat(long clusterId, double val){
+        double  moatToAdd =  val - moat.get(clusterId);
+        increaseMoat(clusterId,moatToAdd);
+    }
+
+    double  tightnessTime(long clusterId, double currentMoat){
+            double  slack =   clusterPrizes.get(clusterId) - totalMoat.get(clusterId);
+            return  currentMoat + slack;
+    }
 
     ClusterMoatPair sumOnEdgePart(long node){
         double sum=moat.get(node);
@@ -57,6 +81,16 @@ public class ClusterStructure {
             sum+= moat.get(currentNode);
         }
         return new ClusterMoatPair(currentNode,sum);
+    }
+
+    double sumOnEdgePartOnly(long node){
+            double sum=moat.get(node);
+            long currentNode =node;
+            while (parent.get(currentNode)!=-1){
+                currentNode = parent.get(currentNode);
+                sum+= moat.get(currentNode);
+            }
+            return  sum;
     }
 }
  record ClusterMoatPair(long cluster, double totalMoat){}

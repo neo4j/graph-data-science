@@ -19,37 +19,30 @@
  */
 package org.neo4j.gds.pricesteiner;
 
-import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
+import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-import java.util.function.LongPredicate;
+import java.util.function.LongToDoubleFunction;
 
-public class ClusterEventsPriorityQueue {
+public class PCSTFast extends Algorithm<Void> {
 
-    private final HugeLongPriorityQueue queue;
+    private final Graph graph;
+    private final LongToDoubleFunction prizes; //figure out how to expose to user
 
-    public ClusterEventsPriorityQueue(long nodeCount) {
-        this.queue = HugeLongPriorityQueue.min(nodeCount*2);
+    public PCSTFast(Graph graph, LongToDoubleFunction prizes, ProgressTracker progressTracker) {
+        super(progressTracker);
+        this.graph = graph;
+        this.prizes = prizes;
     }
 
-    double closestEvent(LongPredicate allowed){
-        var top=queue.top();
-        while (!allowed.test(top)){
-            queue.pop();
-            top=queue.top();
-        }
-        return  queue.cost(top);
+    @Override
+    public Void compute() {
+
+        var growthPhase =  new GrowthPhase(graph,prizes);
+        return null;
     }
 
-    long topCluster(){
-        return queue.top();
-    }
 
-    void pop(){
-            queue.pop();
-    }
-
-    void add(long cluster, double sumOfPrizes){
-        queue.add(cluster, sumOfPrizes);
-    }
 
 }

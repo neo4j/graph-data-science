@@ -53,8 +53,9 @@ public class PairingHeap {
         }
     }
 
-    public void join(PairingHeap other) {
+    public PairingHeap join(PairingHeap other) {
         root = meld(root, other.root);
+        return this;
     }
 
     private PairingHeapElement addNewElement(PairingHeapElement node, long  pairingId, double value) {
@@ -85,7 +86,7 @@ public class PairingHeap {
         return mergePairs(node.left());
     }
 
-    //make the delete non-recursive
+    //TODO: make the delete non-recursive
     private  PairingHeapElement deleteNonRecursive(PairingHeapElement node) {
         var current = node.left();
         return null;
