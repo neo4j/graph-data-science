@@ -367,8 +367,6 @@ project(':path-finding-params').projectDir = file('algo-params/path-finding-para
 
 
 
-include('neo4j-kernel-adapter-5.22')
-project(':neo4j-kernel-adapter-5.22').projectDir = file('compatibility/5.22/neo4j-kernel-adapter')
 
 include('neo4j-kernel-adapter-5.23')
 project(':neo4j-kernel-adapter-5.23').projectDir = file('compatibility/5.23/neo4j-kernel-adapter')
