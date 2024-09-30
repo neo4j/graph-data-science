@@ -24,7 +24,6 @@ import org.neo4j.gds.annotation.GenerateBuilder;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
 import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
-import org.neo4j.kernel.api.CypherScope;
 
 import java.util.List;
 import java.util.Optional;
@@ -47,6 +46,8 @@ public record UserFunctionSignature(
         var isBuiltIn = false;       // is built in; never true for GDS
         var deprecated = deprecatedBy.filter(not(String::isEmpty));
 
+        // TODO: Add the problematic `QueryLanguage.ALL` here once we have a baseline of 5.25
+        //noinspection removal
         return new org.neo4j.internal.kernel.api.procs.UserFunctionSignature(
             this.name,
             this.inputField,
@@ -58,8 +59,7 @@ public record UserFunctionSignature(
             caseInsensitive,
             isBuiltIn,
             this.internal,
-            this.threadSafe,
-            CypherScope.ALL_SCOPES
+            this.threadSafe
         );
     }
 }

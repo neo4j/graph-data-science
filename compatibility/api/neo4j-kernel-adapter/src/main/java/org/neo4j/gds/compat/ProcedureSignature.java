@@ -24,7 +24,6 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.GenerateBuilder;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
-import org.neo4j.kernel.api.CypherScope;
 import org.neo4j.procedure.Mode;
 
 import java.util.List;
@@ -51,6 +50,8 @@ public record ProcedureSignature(
 ) {
     public org.neo4j.internal.kernel.api.procs.ProcedureSignature toNeo() {
         var deprecated = this.deprecatedBy.filter(not(String::isEmpty));
+        // TODO: Add the problematic `QueryLanguage.ALL` here once we have a baseline of 5.25
+        //noinspection removal
         return new org.neo4j.internal.kernel.api.procs.ProcedureSignature(
             this.name,
             this.inputField,
@@ -66,8 +67,7 @@ public record ProcedureSignature(
             this.systemProcedure,
             this.internal,
             this.allowExpiredCredentials,
-            this.threadSafe,
-            CypherScope.ALL_SCOPES
+            this.threadSafe
         );
     }
 }
