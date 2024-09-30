@@ -27,7 +27,7 @@ import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.gds.logging.LogAdapter;
-import org.neo4j.gds.metrics.MetricsFacade;
+import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.ProcedureCallContextReturnColumns;
 import org.neo4j.gds.procedures.TransactionCloseableResourceRegistry;
@@ -72,7 +72,7 @@ public abstract class BaseProc {
     public Username username = Username.EMPTY_USERNAME;
 
     @Context
-    public MetricsFacade metricsFacade;
+    public Metrics metrics;
 
     @Context
     public GraphDataScienceProcedures graphDataScienceProcedures;
@@ -108,7 +108,7 @@ public abstract class BaseProc {
                 .closeableResourceRegistry(new TransactionCloseableResourceRegistry(transaction))
                 .nodeLookup(new TransactionNodeLookup(transaction))
                 .isGdsAdmin(transactionContext().isGdsAdmin())
-                .metricsFacade(metricsFacade)
+                .metrics(metrics)
                 .algorithmsProcedureFacade(graphDataScienceProcedures.algorithms())
                 .build();
     }

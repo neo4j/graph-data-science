@@ -41,7 +41,7 @@ import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
-import org.neo4j.gds.metrics.MetricsFacade;
+import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
@@ -70,7 +70,7 @@ class PipelineApplications {
     private final CloseableResourceRegistry closeableResourceRegistry;
     private final DatabaseId databaseId;
     private final DependencyResolver dependencyResolver;
-    private final MetricsFacade metricsFacade;
+    private final Metrics metrics;
     private final NodeLookup nodeLookup;
     private final NodePropertyExporterBuilder nodePropertyExporterBuilder;
     private final ProcedureReturnColumns procedureReturnColumns;
@@ -96,7 +96,7 @@ class PipelineApplications {
         CloseableResourceRegistry closeableResourceRegistry,
         DatabaseId databaseId,
         DependencyResolver dependencyResolver,
-        MetricsFacade metricsFacade,
+        Metrics metrics,
         NodeLookup nodeLookup,
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
         ProcedureReturnColumns procedureReturnColumns,
@@ -119,7 +119,7 @@ class PipelineApplications {
         this.closeableResourceRegistry = closeableResourceRegistry;
         this.databaseId = databaseId;
         this.dependencyResolver = dependencyResolver;
-        this.metricsFacade = metricsFacade;
+        this.metrics = metrics;
         this.nodeLookup = nodeLookup;
         this.nodePropertyExporterBuilder = nodePropertyExporterBuilder;
         this.procedureReturnColumns = procedureReturnColumns;
@@ -143,7 +143,7 @@ class PipelineApplications {
         CloseableResourceRegistry closeableResourceRegistry,
         DatabaseId databaseId,
         DependencyResolver dependencyResolver,
-        MetricsFacade metricsFacade,
+        Metrics metrics,
         NodeLookup nodeLookup,
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
         ProcedureReturnColumns procedureReturnColumns,
@@ -173,7 +173,7 @@ class PipelineApplications {
             closeableResourceRegistry,
             databaseId,
             dependencyResolver,
-            metricsFacade,
+            metrics,
             nodeLookup,
             nodePropertyExporterBuilder,
             procedureReturnColumns,
@@ -301,7 +301,7 @@ class PipelineApplications {
             closeableResourceRegistry,
             databaseId,
             dependencyResolver,
-            metricsFacade,
+            metrics,
             nodeLookup,
             nodePropertyExporterBuilder,
             procedureReturnColumns,

@@ -55,9 +55,9 @@ import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.executor.ProcedureExecutor;
-import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.procedures.LocalGraphDataScienceProcedures;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.logging.NullLog;
@@ -214,7 +214,7 @@ public class PregelProcTest extends BaseProcTest {
             proc.log = NullLog.getInstance();
             proc.callContext = ProcedureCallContext.EMPTY;
 
-            proc.metricsFacade = MetricsFacade.PASSTHROUGH_METRICS_FACADE;
+            proc.metrics = Metrics.DISABLED;
             proc.graphDataScienceProcedures = mock(LocalGraphDataScienceProcedures.class);
 
             Map<String, Object> config = Map.of(
@@ -243,7 +243,7 @@ public class PregelProcTest extends BaseProcTest {
             proc.log = NullLog.getInstance();
             proc.callContext = ProcedureCallContext.EMPTY;
 
-            proc.metricsFacade = MetricsFacade.PASSTHROUGH_METRICS_FACADE;
+            proc.metrics = Metrics.DISABLED;
             proc.graphDataScienceProcedures = mock(LocalGraphDataScienceProcedures.class);
 
             Map<String, Object> config = Map.of(
@@ -271,7 +271,7 @@ public class PregelProcTest extends BaseProcTest {
             proc.log = NullLog.getInstance();
             proc.callContext = ProcedureCallContext.EMPTY;
 
-            proc.metricsFacade = MetricsFacade.PASSTHROUGH_METRICS_FACADE;
+            proc.metrics = Metrics.DISABLED;
             proc.graphDataScienceProcedures = mock(LocalGraphDataScienceProcedures.class);
 
             Map<String, Object> config = Map.of(

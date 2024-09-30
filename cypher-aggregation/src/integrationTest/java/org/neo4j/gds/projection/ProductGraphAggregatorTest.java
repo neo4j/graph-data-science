@@ -28,7 +28,7 @@ import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskStore;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.metrics.MetricsFacade;
+import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.values.storable.NoValue;
 import org.neo4j.values.storable.Values;
 import org.neo4j.values.virtual.MapValue;
@@ -52,7 +52,7 @@ class ProductGraphAggregatorTest {
             WriteMode.LOCAL,
             QueryEstimator.empty(),
             ExecutingQueryProvider.empty(),
-            MetricsFacade.PASSTHROUGH_METRICS_FACADE.projectionMetrics(),
+            ProjectionMetricsService.DISABLED,
             EmptyTaskStore.INSTANCE,
             Log.noOpLog()
         );
@@ -91,7 +91,7 @@ class ProductGraphAggregatorTest {
             WriteMode.LOCAL,
             QueryEstimator.empty(),
             ExecutingQueryProvider.empty(),
-            MetricsFacade.PASSTHROUGH_METRICS_FACADE.projectionMetrics(),
+            ProjectionMetricsService.DISABLED,
             EmptyTaskStore.INSTANCE,
             Log.noOpLog()
         );

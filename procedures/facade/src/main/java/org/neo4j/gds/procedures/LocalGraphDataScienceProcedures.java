@@ -40,7 +40,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
-import org.neo4j.gds.metrics.MetricsFacade;
+import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
@@ -101,7 +101,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
         GraphStoreCatalogService graphStoreCatalogService,
         LimitsConfiguration limitsConfiguration,
         MemoryGuard memoryGuard,
-        MetricsFacade metricsFacade,
+        Metrics metrics,
         ModelCatalog modelCatalog,
         ModelRepository modelRepository,
         PipelineRepository pipelineRepository,
@@ -136,7 +136,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
             algorithmProcessingTemplateDecorator,
             graphStoreCatalogService,
             memoryGuard,
-            metricsFacade.algorithmMetrics(),
+            metrics.algorithmMetrics(),
             requestScopedDependencies
         );
 
@@ -149,7 +149,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
             modelCatalogApplicationsDecorator,
             featureTogglesRepository,
             graphStoreCatalogService,
-            metricsFacade.projectionMetrics(),
+            metrics.projectionMetrics(),
             requestScopedDependencies,
             writeContext,
             modelCatalog,
@@ -198,7 +198,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
             closeableResourceRegistry,
             requestScopedDependencies.getDatabaseId(),
             dependencyResolver,
-            metricsFacade,
+            metrics,
             nodeLookup,
             writeContext.nodePropertyExporterBuilder(),
             procedureReturnColumns,
@@ -219,7 +219,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
             .with(modelCatalogProcedureFacade)
             .with(operationsProcedureFacade)
             .with(pipelinesProcedureFacade)
-            .with(metricsFacade.deprecatedProcedures())
+            .with(metrics.deprecatedProcedures())
             .build();
     }
 

@@ -36,7 +36,7 @@ import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.metrics.MetricsFacade;
+import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.ml.pipeline.PipelineCompanion;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
@@ -77,7 +77,7 @@ public final class PipelinesProcedureFacade {
         CloseableResourceRegistry closeableResourceRegistry,
         DatabaseId databaseId,
         DependencyResolver dependencyResolver,
-        MetricsFacade metricsFacade,
+        Metrics metrics,
         NodeLookup nodeLookup,
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
         ProcedureReturnColumns procedureReturnColumns,
@@ -105,7 +105,7 @@ public final class PipelinesProcedureFacade {
             closeableResourceRegistry,
             databaseId,
             dependencyResolver,
-            metricsFacade,
+            metrics,
             nodeLookup,
             nodePropertyExporterBuilder,
             procedureReturnColumns,

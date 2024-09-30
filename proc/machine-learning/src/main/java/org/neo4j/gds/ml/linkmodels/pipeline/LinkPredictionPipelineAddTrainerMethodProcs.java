@@ -87,7 +87,7 @@ public class LinkPredictionPipelineAddTrainerMethodProcs extends BaseProc {
         @Name(value = "config") Map<String, Object> randomForestClassifierConfig
     ) {
         executionContext()
-            .metricsFacade()
+            .metrics()
             .deprecatedProcedures().called("gds.alpha.pipeline.linkPrediction.addRandomForest");
         executionContext()
             .log()

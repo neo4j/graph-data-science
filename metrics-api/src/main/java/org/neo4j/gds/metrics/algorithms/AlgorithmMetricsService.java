@@ -19,10 +19,11 @@
  */
 package org.neo4j.gds.metrics.algorithms;
 
-import org.neo4j.gds.metrics.ExecutionMetricRegistrar;
 import org.neo4j.gds.metrics.ExecutionMetric;
+import org.neo4j.gds.metrics.ExecutionMetricRegistrar;
 
 public class AlgorithmMetricsService {
+    public static final AlgorithmMetricsService DISABLED = new AlgorithmMetricsService(ExecutionMetricRegistrar.DISABLED);
 
     private final ExecutionMetricRegistrar metricRegistrar;
 

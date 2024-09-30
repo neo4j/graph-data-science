@@ -69,7 +69,6 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
@@ -115,19 +114,19 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
     @Neo4jGraph
     static final String DB_CYPHER =
         "CREATE" +
-        "  (a:Node {name:'a', seed1: 0, seed2: 1})" +
-        ", (b:Node {name:'b', seed1: 0, seed2: 1})" +
-        ", (c:Node {name:'c', seed1: 2, seed2: 1})" +
-        ", (d:Node {name:'d', seed1: 2, seed2: 42})" +
-        ", (e:Node {name:'e', seed1: 2, seed2: 42})" +
-        ", (f:Node {name:'f', seed1: 2, seed2: 42})" +
-        ", (a)-[:TYPE {weight: 0.01}]->(b)" +
-        ", (a)-[:TYPE {weight: 5.0}]->(e)" +
-        ", (a)-[:TYPE {weight: 5.0}]->(f)" +
-        ", (b)-[:TYPE {weight: 5.0}]->(c)" +
-        ", (b)-[:TYPE {weight: 5.0}]->(d)" +
-        ", (c)-[:TYPE {weight: 0.01}]->(e)" +
-        ", (f)-[:TYPE {weight: 0.01}]->(d)";
+            "  (a:Node {name:'a', seed1: 0, seed2: 1})" +
+            ", (b:Node {name:'b', seed1: 0, seed2: 1})" +
+            ", (c:Node {name:'c', seed1: 2, seed2: 1})" +
+            ", (d:Node {name:'d', seed1: 2, seed2: 42})" +
+            ", (e:Node {name:'e', seed1: 2, seed2: 42})" +
+            ", (f:Node {name:'f', seed1: 2, seed2: 42})" +
+            ", (a)-[:TYPE {weight: 0.01}]->(b)" +
+            ", (a)-[:TYPE {weight: 5.0}]->(e)" +
+            ", (a)-[:TYPE {weight: 5.0}]->(f)" +
+            ", (b)-[:TYPE {weight: 5.0}]->(c)" +
+            ", (b)-[:TYPE {weight: 5.0}]->(d)" +
+            ", (c)-[:TYPE {weight: 0.01}]->(e)" +
+            ", (f)-[:TYPE {weight: 0.01}]->(d)";
 
 
     @BeforeEach
@@ -201,7 +200,11 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
 
         runQuery(query);
 
-        GraphStore mutatedGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), TEST_GRAPH_NAME).graphStore();
+        GraphStore mutatedGraph = GraphStoreCatalog.get(
+            getUsername(),
+            DatabaseId.of(db.databaseName()),
+            TEST_GRAPH_NAME
+        ).graphStore();
         var communities = mutatedGraph.nodeProperty(MUTATE_PROPERTY).values();
         var seeds = mutatedGraph.nodeProperty("seed1").values();
         for (int i = 0; i < mutatedGraph.nodeCount(); i++) {
@@ -291,9 +294,9 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
 
         String graphWriteQuery =
             "CALL gds.graph.nodeProperties.write(" +
-            "   $graph, " +
-            "   [$property]" +
-            ") YIELD writeMillis, graphName, nodeProperties, propertiesWritten";
+                "   $graph, " +
+                "   [$property]" +
+                ") YIELD writeMillis, graphName, nodeProperties, propertiesWritten";
         runQuery(graphWriteQuery, Map.of("graph", TEST_GRAPH_NAME, "property", MUTATE_PROPERTY));
 
         String checkNeo4jGraphNegativeQuery = formatWithLocale("MATCH (n:A) RETURN n.%s AS property", MUTATE_PROPERTY);
@@ -323,7 +326,7 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
             .flatMap(e -> e.properties().entrySet().stream())
             .anyMatch(
                 props -> props.getKey().equals(MUTATE_PROPERTY) &&
-                         props.getValue().valueType() == ValueType.LONG
+                    props.getValue().valueType() == ValueType.LONG
             );
         assertThat(containsMutateProperty).isTrue();
     }
@@ -349,7 +352,8 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
         );
         runMutation(TEST_GRAPH_NAME, config);
 
-        var mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), TEST_GRAPH_NAME).graphStore();
+        var mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), TEST_GRAPH_NAME)
+            .graphStore();
 
         var expectedProperties = Set.of(MUTATE_PROPERTY);
         assertEquals(expectedProperties, mutatedGraph.nodePropertyKeys(NodeLabel.of("A")));
@@ -374,10 +378,15 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
 
             fail();
         } catch (IllegalArgumentException e) {
-            assertThat(e).hasMessage(formatWithLocale("Node property `%s` already exists in the in-memory graph.", MUTATE_PROPERTY));
+            assertThat(e).hasMessage(formatWithLocale(
+                "Node property `%s` already exists in the in-memory graph.",
+                MUTATE_PROPERTY
+            ));
         }
 
-        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), graphName).graphStore().getUnion();
+        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), graphName)
+            .graphStore()
+            .getUnion();
         TestSupport.assertGraphEquals(fromGdl(expectedMutatedGraph()), mutatedGraph);
     }
 
@@ -437,18 +446,18 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
     private String expectedMutatedGraph() {
         return
             "  (a { community: 4 }) " +
-            ", (b { community: 4 }) " +
-            ", (c { community: 4 }) " +
-            ", (d { community: 3 }) " +
-            ", (e { community: 4 }) " +
-            ", (f { community: 3 }) " +
-            ", (a)-[]->(b)" +
-            ", (a)-[]->(e)" +
-            ", (a)-[]->(f)" +
-            ", (b)-[]->(c)" +
-            ", (b)-[]->(d)" +
-            ", (c)-[]->(e)" +
-            ", (f)-[]->(d)";
+                ", (b { community: 4 }) " +
+                ", (c { community: 4 }) " +
+                ", (d { community: 3 }) " +
+                ", (e { community: 4 }) " +
+                ", (f { community: 3 }) " +
+                ", (a)-[]->(b)" +
+                ", (a)-[]->(e)" +
+                ", (a)-[]->(f)" +
+                ", (b)-[]->(c)" +
+                ", (b)-[]->(d)" +
+                ", (c)-[]->(e)" +
+                ", (f)-[]->(d)";
     }
 
     @NotNull
@@ -488,12 +497,12 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
         return GraphProjectFromStoreConfigImpl.builder()
             .username(TEST_USERNAME)
             .graphName(graphName)
-                .nodeProjections(
-                    NodeProjections.create(Map.of(
-                        ALL_NODES,
-                        ImmutableNodeProjection.of(PROJECT_ALL, ImmutablePropertyMappings.of())
-                    ))
-                )
+            .nodeProjections(
+                NodeProjections.create(Map.of(
+                    ALL_NODES,
+                    ImmutableNodeProjection.of(PROJECT_ALL, ImmutablePropertyMappings.of())
+                ))
+            )
             .relationshipProjections(RelationshipProjections.ALL)
             .build();
     }
@@ -510,12 +519,15 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
             .with(EmptyUserLogRegistryFactory.INSTANCE)
             .build();
 
-        var configurationParser = new UserSpecificConfigurationParser(new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance),requestScopedDependencies.getUser());
+        var configurationParser = new UserSpecificConfigurationParser(new ConfigurationParser(
+            DefaultsConfiguration.Instance,
+            LimitsConfiguration.Instance
+        ), requestScopedDependencies.getUser());
 
         var genericStub = new GenericStub(configurationParser, null);
         var algorithmProcessingTemplate = DefaultAlgorithmProcessingTemplate.create(
             logMock,
-            new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
+            AlgorithmMetricsService.DISABLED,
             graphStoreCatalogService,
             MemoryGuard.DISABLED,
             requestScopedDependencies
@@ -527,7 +539,7 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
             Optional.empty(),
             null,
             graphStoreCatalogService,
-            new ProjectionMetricsService(new PassthroughExecutionMetricRegistrar()),
+            ProjectionMetricsService.DISABLED,
             requestScopedDependencies,
             WriteContext.builder().build(),
             null,
@@ -551,7 +563,7 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
 
         return new GraphDataScienceProceduresBuilder(logMock)
             .with(new AlgorithmsProcedureFacade(null, communityProcedureFacade, null, null, null, null, null))
-            .with(DeprecatedProceduresMetricService.PASSTHROUGH)
+            .with(DeprecatedProceduresMetricService.DISABLED)
             .build();
     }
 }

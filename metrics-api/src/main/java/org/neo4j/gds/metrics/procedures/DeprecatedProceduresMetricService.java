@@ -20,8 +20,7 @@
 package org.neo4j.gds.metrics.procedures;
 
 public final class DeprecatedProceduresMetricService {
-
-    public static final DeprecatedProceduresMetricService PASSTHROUGH = new DeprecatedProceduresMetricService(new PassthroughDeprecatedProceduresMetricRegistrar());
+    public static final DeprecatedProceduresMetricService DISABLED = new DeprecatedProceduresMetricService(DeprecatedProceduresMetricRegistrar.DISABLED);
 
     private final DeprecatedProceduresMetricRegistrar registrar;
 
@@ -32,5 +31,4 @@ public final class DeprecatedProceduresMetricService {
     public void called(String deprecatedProcedure) {
         registrar.called(deprecatedProcedure);
     }
-
 }

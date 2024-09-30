@@ -42,7 +42,7 @@ import org.neo4j.gds.executor.GdsCallableFinder;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.metrics.MetricsFacade;
+import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
@@ -207,7 +207,7 @@ class LinkPredictionTrainingPipelineTest {
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .isGdsAdmin(false)
-            .metricsFacade(MetricsFacade.PASSTHROUGH_METRICS_FACADE)
+            .metrics(Metrics.DISABLED)
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
@@ -261,7 +261,7 @@ class LinkPredictionTrainingPipelineTest {
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .isGdsAdmin(false)
-            .metricsFacade(MetricsFacade.PASSTHROUGH_METRICS_FACADE)
+            .metrics(Metrics.DISABLED)
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
@@ -315,7 +315,7 @@ class LinkPredictionTrainingPipelineTest {
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .isGdsAdmin(false)
-            .metricsFacade(MetricsFacade.PASSTHROUGH_METRICS_FACADE)
+            .metrics(Metrics.DISABLED)
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();

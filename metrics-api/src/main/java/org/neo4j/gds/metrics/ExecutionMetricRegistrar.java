@@ -20,7 +20,7 @@
 package org.neo4j.gds.metrics;
 
 public interface ExecutionMetricRegistrar {
+    ExecutionMetricRegistrar DISABLED = __ -> ExecutionMetric.DISABLED;
 
     ExecutionMetric create(String algorithm);
-
 }

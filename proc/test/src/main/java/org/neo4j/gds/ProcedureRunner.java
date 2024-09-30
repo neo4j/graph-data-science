@@ -36,7 +36,7 @@ import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogStore;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.logging.LogAdapter;
-import org.neo4j.gds.metrics.MetricsFacade;
+import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.procedures.DatabaseIdAccessor;
 import org.neo4j.gds.procedures.GraphCatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.LocalGraphDataScienceProcedures;
@@ -65,7 +65,7 @@ public final class ProcedureRunner {
         Transaction tx,
         KernelTransaction kernelTransaction,
         Username username,
-        MetricsFacade metricsFacade,
+        Metrics metrics,
         GraphDataScienceProcedures graphDataScienceProcedures
     ) {
         P proc;
@@ -84,7 +84,7 @@ public final class ProcedureRunner {
         proc.userLogRegistryFactory = userLogRegistryFactory;
         proc.username = username;
 
-        proc.metricsFacade = metricsFacade;
+        proc.metrics = metrics;
         proc.graphDataScienceProcedures = graphDataScienceProcedures;
 
         return proc;
@@ -122,7 +122,7 @@ public final class ProcedureRunner {
             tx,
             kernelTransaction,
             username,
-            MetricsFacade.PASSTHROUGH_METRICS_FACADE,
+            Metrics.DISABLED,
             graphDataScienceProcedures
         );
         func.accept(proc);
@@ -177,7 +177,7 @@ public final class ProcedureRunner {
             graphStoreCatalogService,
             LimitsConfiguration.Instance,
             MemoryGuard.DISABLED,
-            MetricsFacade.PASSTHROUGH_METRICS_FACADE,
+            Metrics.DISABLED,
             modelCatalog,
             null,
             null,

@@ -33,7 +33,7 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryGauge;
-import org.neo4j.gds.metrics.MetricsFacade;
+import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
 import org.neo4j.gds.procedures.GraphCatalogProcedureFacadeFactory;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
@@ -68,7 +68,7 @@ final class GraphDataScienceProceduresProviderFactory {
     private final ExportLocation exportLocation;
     private final FeatureTogglesRepository featureTogglesRepository;
     private final MemoryGauge memoryGauge;
-    private final MetricsFacade metricsFacade;
+    private final Metrics metrics;
     private final ModelCatalog modelCatalog;
     private final ModelRepository modelRepository;
     private final Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator;
@@ -82,7 +82,7 @@ final class GraphDataScienceProceduresProviderFactory {
         ExportLocation exportLocation,
         FeatureTogglesRepository featureTogglesRepository,
         MemoryGauge memoryGauge,
-        MetricsFacade metricsFacade,
+        Metrics metrics,
         ModelCatalog modelCatalog,
         ModelRepository modelRepository,
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
@@ -95,7 +95,7 @@ final class GraphDataScienceProceduresProviderFactory {
         this.exportLocation = exportLocation;
         this.featureTogglesRepository = featureTogglesRepository;
         this.memoryGauge = memoryGauge;
-        this.metricsFacade = metricsFacade;
+        this.metrics = metrics;
         this.modelCatalog = modelCatalog;
         this.modelRepository = modelRepository;
         this.algorithmProcessingTemplateDecorator = algorithmProcessingTemplateDecorator;
@@ -124,7 +124,7 @@ final class GraphDataScienceProceduresProviderFactory {
             graphStoreCatalogService,
             limitsConfiguration,
             memoryGuard,
-            metricsFacade,
+            metrics,
             modelCatalog,
             modelRepository,
             pipelineRepository,

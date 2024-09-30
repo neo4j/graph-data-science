@@ -27,7 +27,7 @@ import org.neo4j.gds.compat.UserFunctionSignatureBuilder;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.logging.LogAdapter;
-import org.neo4j.gds.metrics.MetricsFacade;
+import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
@@ -87,7 +87,7 @@ public class CypherAggregation implements CallableUserAggregationFunction {
     @Override
     public UserAggregationReducer createReducer(Context ctx) throws ProcedureException {
         var databaseService = ctx.graphDatabaseAPI();
-        var metricsFacade = Neo4jProxy.lookupComponentProvider(ctx, MetricsFacade.class, true);
+        var metrics = Neo4jProxy.lookupComponentProvider(ctx, Metrics.class, true);
         var taskStore = Neo4jProxy.lookupComponentProvider(ctx, TaskStore.class, true);
         var log = Neo4jProxy.lookupComponentProvider(ctx, Log.class, true);
         var username = ctx.kernelTransaction().securityContext().subject().executingUser();
@@ -121,7 +121,7 @@ public class CypherAggregation implements CallableUserAggregationFunction {
             writeMode,
             queryEstimator,
             queryProvider,
-            metricsFacade.projectionMetrics(),
+            metrics.projectionMetrics(),
             taskStore,
             new LogAdapter(log)
         );

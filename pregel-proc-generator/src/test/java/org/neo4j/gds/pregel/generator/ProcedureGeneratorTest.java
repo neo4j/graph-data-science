@@ -130,7 +130,7 @@ class ProcedureGeneratorTest {
             "public java.util.stream.Stream<org.neo4j.gds.pregel.proc.PregelMutateResult> mutate(" + NL +
             "    @org.neo4j.procedure.Name(\"graphName\") java.lang.String graphName," + NL +
             "    @org.neo4j.procedure.Name(value = \"configuration\", defaultValue = \"{}\") java.util.Map<java.lang.String, java.lang.Object> configuration) {" + NL +
-            "  executionContext().metricsFacade().deprecatedProcedures().called(\"gds.alpha.bar.mutate\");" + NL +
+            "  executionContext().metrics().deprecatedProcedures().called(\"gds.alpha.bar.mutate\");" + NL +
             "  var specification = new gds.bar.BarMutateSpecification();" + NL +
             "  var executor = new org.neo4j.gds.executor.ProcedureExecutor<>(specification, executionContext());" + NL +
             "  return executor.compute(graphName, configuration);" + NL +
@@ -163,7 +163,7 @@ class ProcedureGeneratorTest {
             "public java.util.stream.Stream<org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult> estimate(" + NL +
             "    @org.neo4j.procedure.Name(\"graphNameOrConfiguration\") java.lang.Object graphNameOrConfiguration," + NL +
             "    @org.neo4j.procedure.Name(\"algoConfiguration\") java.util.Map<java.lang.String, java.lang.Object> algoConfiguration) {" + NL +
-            "  executionContext().metricsFacade().deprecatedProcedures().called(\"gds.alpha.bar.mutate.estimate\");" + NL +
+            "  executionContext().metrics().deprecatedProcedures().called(\"gds.alpha.bar.mutate.estimate\");" + NL +
             "  var specification = new gds.bar.BarMutateSpecification();" + NL +
             "  var executor = new org.neo4j.gds.executor.MemoryEstimationExecutor<>(specification, executionContext(), transactionContext());" + NL +
             "  return executor.computeEstimate(graphNameOrConfiguration, algoConfiguration);" + NL +

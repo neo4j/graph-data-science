@@ -116,7 +116,7 @@ public class ProcedureExecutor<
         algo.getProgressTracker().setEstimatedResourceFootprint(memoryEstimationInBytes, config.concurrency());
 
 
-        ALGO_RESULT result = executeAlgorithm(builder, algo, executionContext.metricsFacade().algorithmMetrics());
+        ALGO_RESULT result = executeAlgorithm(builder, algo, executionContext.metrics().algorithmMetrics());
 
         var computationResult = builder
             .graph(graph)

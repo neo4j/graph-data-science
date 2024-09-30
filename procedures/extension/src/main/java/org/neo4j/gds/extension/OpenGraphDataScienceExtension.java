@@ -24,7 +24,7 @@ import org.neo4j.configuration.Config;
 import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
 import org.neo4j.gds.core.model.OpenModelCatalogProvider;
 import org.neo4j.gds.core.write.NativeExportBuildersProvider;
-import org.neo4j.gds.metrics.MetricsFacade;
+import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
 import org.neo4j.gds.procedures.integration.DefaultExportLocation;
 import org.neo4j.gds.procedures.integration.LogAccessor;
@@ -59,9 +59,7 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
         ExporterBuildersProviderService exporterBuildersProviderService = (__, ___) -> new NativeExportBuildersProvider(); // we always just offer native writes in OpenGDS
         var exportLocation = new DefaultExportLocation(log, neo4jConfiguration);
         var featureTogglesRepository = new FeatureTogglesRepository();
-        var metricsFacade = MetricsFacade.PASSTHROUGH_METRICS_FACADE; // no metrics in OpenGDS
         var modelCatalog = new OpenModelCatalogProvider().get(null);
-        var graphSageModelRepository = new DisableModelRepository(); // no model storing in OpenGDS
 
         var graphDataScienceExtensionBuilderAndAssociatedProducts = OpenGraphDataScienceExtensionBuilder.create(
             log,
@@ -70,9 +68,9 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
             exporterBuildersProviderService,
             exportLocation,
             featureTogglesRepository,
-            metricsFacade,
+            Metrics.DISABLED, // no metrics in OpenGDS
             modelCatalog,
-            graphSageModelRepository,
+            new DisableModelRepository(), // no model storing in OpenGDS
             Optional.empty(), // no extra checks in OpenGDS
             Optional.empty(), // no extra checks in OpenGDS
             Optional.empty() // no extra checks in OpenGDS
