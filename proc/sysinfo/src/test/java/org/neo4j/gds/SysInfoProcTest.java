@@ -59,6 +59,7 @@ class SysInfoProcTest extends BaseProcTest {
         "Neo4j 5.22",
         "Neo4j 5.23",
         "Neo4j 5.24",
+        "Neo4j 5.25",
         "Neo4j RC",
         "Neo4j DEV"
     );
