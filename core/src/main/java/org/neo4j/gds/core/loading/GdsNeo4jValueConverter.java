@@ -95,6 +95,8 @@ public final class GdsNeo4jValueConverter {
             return PrimitiveValues.longArray((long[]) arrayCopy);
         } else if (arrayCopy instanceof double[]) {
             return PrimitiveValues.doubleArray((double[]) arrayCopy);
+        } else if (arrayCopy instanceof float[]) {
+            return PrimitiveValues.floatArray((float[]) arrayCopy);
         } else {
             throw failOnBadInput(array);
         }
