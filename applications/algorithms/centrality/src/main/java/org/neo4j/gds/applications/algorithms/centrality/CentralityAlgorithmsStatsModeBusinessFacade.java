@@ -64,7 +64,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT articleRank(
         GraphName graphName,
         ArticleRankStatsConfig configuration,
-        StatsResultBuilder<ArticleRankStatsConfig, PageRankResult, RESULT> resultBuilder
+        StatsResultBuilder<PageRankResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
@@ -79,7 +79,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT articulationPoints(
         GraphName graphName,
         ArticulationPointsStatsConfig configuration,
-        StatsResultBuilder<ArticulationPointsStatsConfig, BitSet, RESULT> resultBuilder
+        StatsResultBuilder<BitSet, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
@@ -94,7 +94,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT betweennessCentrality(
         GraphName graphName,
         BetweennessCentralityStatsConfig configuration,
-        StatsResultBuilder<BetweennessCentralityStatsConfig, CentralityAlgorithmResult, RESULT> resultBuilder
+        StatsResultBuilder<CentralityAlgorithmResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
@@ -109,7 +109,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT celf(
         GraphName graphName,
         InfluenceMaximizationStatsConfig configuration,
-        StatsResultBuilder<InfluenceMaximizationStatsConfig, CELFResult, RESULT> resultBuilder
+        StatsResultBuilder<CELFResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
@@ -124,7 +124,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT closenessCentrality(
         GraphName graphName,
         ClosenessCentralityStatsConfig configuration,
-        StatsResultBuilder<ClosenessCentralityStatsConfig, CentralityAlgorithmResult, RESULT> resultBuilder
+        StatsResultBuilder<CentralityAlgorithmResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
@@ -139,7 +139,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT degreeCentrality(
         GraphName graphName,
         DegreeCentralityStatsConfig configuration,
-        StatsResultBuilder<DegreeCentralityStatsConfig, CentralityAlgorithmResult, RESULT> resultBuilder
+        StatsResultBuilder<CentralityAlgorithmResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
@@ -154,7 +154,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT eigenVector(
         GraphName graphName,
         EigenvectorStatsConfig configuration,
-        StatsResultBuilder<EigenvectorStatsConfig, PageRankResult, RESULT> resultBuilder
+        StatsResultBuilder<PageRankResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
@@ -169,7 +169,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT harmonicCentrality(
         GraphName graphName,
         HarmonicCentralityStatsConfig configuration,
-        StatsResultBuilder<HarmonicCentralityStatsConfig, CentralityAlgorithmResult, RESULT> resultBuilder
+        StatsResultBuilder<CentralityAlgorithmResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
@@ -184,7 +184,7 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT pageRank(
         GraphName graphName,
         PageRankStatsConfig configuration,
-        StatsResultBuilder<PageRankStatsConfig, PageRankResult, RESULT> resultBuilder
+        StatsResultBuilder<PageRankResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,

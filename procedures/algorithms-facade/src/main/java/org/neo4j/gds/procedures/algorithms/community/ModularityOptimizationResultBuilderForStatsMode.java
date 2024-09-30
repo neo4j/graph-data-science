@@ -31,17 +31,21 @@ import org.neo4j.gds.result.StatisticsComputationInstructions;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class ModularityOptimizationResultBuilderForStatsMode implements StatsResultBuilder<ModularityOptimizationStatsConfig, ModularityOptimizationResult, Stream<ModularityOptimizationStatsResult>> {
+class ModularityOptimizationResultBuilderForStatsMode implements StatsResultBuilder<ModularityOptimizationResult, Stream<ModularityOptimizationStatsResult>> {
+    private final ModularityOptimizationStatsConfig configuration;
     private final StatisticsComputationInstructions statisticsComputationInstructions;
 
-    ModularityOptimizationResultBuilderForStatsMode(StatisticsComputationInstructions statisticsComputationInstructions) {
+    ModularityOptimizationResultBuilderForStatsMode(
+        ModularityOptimizationStatsConfig configuration,
+        StatisticsComputationInstructions statisticsComputationInstructions
+    ) {
+        this.configuration = configuration;
         this.statisticsComputationInstructions = statisticsComputationInstructions;
     }
 
     @Override
     public Stream<ModularityOptimizationStatsResult> build(
         Graph graph,
-        ModularityOptimizationStatsConfig configuration,
         Optional<ModularityOptimizationResult> result,
         AlgorithmProcessingTimings timings
     ) {
@@ -60,7 +64,10 @@ class ModularityOptimizationResultBuilderForStatsMode implements StatsResultBuil
             statisticsComputationInstructions
         );
         var componentCount = communityStatistics.componentCount();
-        var communitySummary = CommunityStatistics.communitySummary(communityStatistics.histogram(), communityStatistics.success());
+        var communitySummary = CommunityStatistics.communitySummary(
+            communityStatistics.histogram(),
+            communityStatistics.success()
+        );
 
         var modularityOptimizationStatsResult = new ModularityOptimizationStatsResult(
             timings.preProcessingMillis,

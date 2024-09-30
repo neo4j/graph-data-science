@@ -45,7 +45,7 @@ public class NodeEmbeddingAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT fastRP(
         GraphName graphName,
         FastRPStatsConfig configuration,
-        StatsResultBuilder<FastRPStatsConfig, FastRPResult, RESULT> resultBuilder
+        StatsResultBuilder<FastRPResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,

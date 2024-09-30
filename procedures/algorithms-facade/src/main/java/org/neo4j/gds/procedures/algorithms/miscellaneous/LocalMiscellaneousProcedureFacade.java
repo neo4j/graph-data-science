@@ -181,15 +181,19 @@ public final class LocalMiscellaneousProcedureFacade implements MiscellaneousPro
     @Override
     public Stream<ScalePropertiesStatsResult> scalePropertiesStats(
         String graphName,
-        Map<String, Object> configuration
+        Map<String, Object> rawConfiguration
     ) {
+        var configuration = configurationParser.parseConfiguration(
+            rawConfiguration,
+            ScalePropertiesStatsConfig::of
+        );
 
         var shouldDisplayScalerStatistics = procedureReturnColumns.contains("scalerStatistics");
-        var resultBuilder = new ScalePropertiesResultBuilderForStatsMode(shouldDisplayScalerStatistics);
+        var resultBuilder = new ScalePropertiesResultBuilderForStatsMode(configuration, shouldDisplayScalerStatistics);
 
         return statsModeBusinessFacade.scaleProperties(
             GraphName.parse(graphName),
-            configurationParser.parseConfiguration(configuration, ScalePropertiesStatsConfig::of),
+            configuration,
             resultBuilder
         );
     }

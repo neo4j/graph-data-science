@@ -28,11 +28,16 @@ import org.neo4j.gds.spanningtree.SpanningTreeStatsConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class SpanningTreeResultBuilderForStatsMode implements StatsResultBuilder<SpanningTreeStatsConfig, SpanningTree, Stream<SpanningTreeStatsResult>> {
+class SpanningTreeResultBuilderForStatsMode implements StatsResultBuilder<SpanningTree, Stream<SpanningTreeStatsResult>> {
+    private final SpanningTreeStatsConfig configuration;
+
+    SpanningTreeResultBuilderForStatsMode(SpanningTreeStatsConfig configuration) {
+        this.configuration = configuration;
+    }
+
     @Override
     public Stream<SpanningTreeStatsResult> build(
         Graph graph,
-        SpanningTreeStatsConfig configuration,
         Optional<SpanningTree> result,
         AlgorithmProcessingTimings timings
     ) {

@@ -28,11 +28,16 @@ import org.neo4j.gds.embeddings.fastrp.FastRPStatsConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class FastRPResultBuilderForStatsMode implements StatsResultBuilder<FastRPStatsConfig, FastRPResult, Stream<FastRPStatsResult>> {
+class FastRPResultBuilderForStatsMode implements StatsResultBuilder<FastRPResult, Stream<FastRPStatsResult>> {
+    private final FastRPStatsConfig configuration;
+
+    FastRPResultBuilderForStatsMode(FastRPStatsConfig configuration) {
+        this.configuration = configuration;
+    }
+
     @Override
     public Stream<FastRPStatsResult> build(
         Graph graph,
-        FastRPStatsConfig configuration,
         Optional<FastRPResult> result,
         AlgorithmProcessingTimings timings
     ) {

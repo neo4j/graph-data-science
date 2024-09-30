@@ -29,19 +29,20 @@ import org.neo4j.gds.result.StatisticsComputationInstructions;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class LouvainResultBuilderForStatsMode implements StatsResultBuilder<LouvainStatsConfig, LouvainResult, Stream<LouvainStatsResult>> {
+class LouvainResultBuilderForStatsMode implements StatsResultBuilder<LouvainResult, Stream<LouvainStatsResult>> {
     private final CommunityStatisticsWithTimingComputer communityStatisticsWithTimingComputer = new CommunityStatisticsWithTimingComputer();
 
+    private final LouvainStatsConfig configuration;
     private final StatisticsComputationInstructions statisticsComputationInstructions;
 
-    LouvainResultBuilderForStatsMode(StatisticsComputationInstructions statisticsComputationInstructions) {
+    LouvainResultBuilderForStatsMode(LouvainStatsConfig configuration, StatisticsComputationInstructions statisticsComputationInstructions) {
+        this.configuration = configuration;
         this.statisticsComputationInstructions = statisticsComputationInstructions;
     }
 
     @Override
     public Stream<LouvainStatsResult> build(
         Graph graph,
-        LouvainStatsConfig configuration,
         Optional<LouvainResult> result,
         AlgorithmProcessingTimings timings
     ) {

@@ -28,19 +28,23 @@ import org.neo4j.gds.closeness.ClosenessCentralityStatsConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class ClosenessCentralityResultBuilderForStatsMode implements StatsResultBuilder<ClosenessCentralityStatsConfig, CentralityAlgorithmResult, Stream<CentralityStatsResult>> {
+class ClosenessCentralityResultBuilderForStatsMode implements StatsResultBuilder<CentralityAlgorithmResult, Stream<CentralityStatsResult>> {
     private final GenericCentralityResultBuilderForStatsMode genericResultBuilder = new GenericCentralityResultBuilderForStatsMode();
 
+    private final ClosenessCentralityStatsConfig configuration;
     private final boolean shouldComputeCentralityDistribution;
 
-    ClosenessCentralityResultBuilderForStatsMode(boolean shouldComputeCentralityDistribution) {
+    ClosenessCentralityResultBuilderForStatsMode(
+        ClosenessCentralityStatsConfig configuration,
+        boolean shouldComputeCentralityDistribution
+    ) {
+        this.configuration = configuration;
         this.shouldComputeCentralityDistribution = shouldComputeCentralityDistribution;
     }
 
     @Override
     public Stream<CentralityStatsResult> build(
         Graph graph,
-        ClosenessCentralityStatsConfig configuration,
         Optional<CentralityAlgorithmResult> result,
         AlgorithmProcessingTimings timings
     ) {

@@ -29,11 +29,16 @@ import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class DeltaSteppingResultBuilderForStatsMode implements StatsResultBuilder<AllShortestPathsDeltaStatsConfig, PathFindingResult, Stream<StandardStatsResult>> {
+class DeltaSteppingResultBuilderForStatsMode implements StatsResultBuilder<PathFindingResult, Stream<StandardStatsResult>> {
+    private final AllShortestPathsDeltaStatsConfig configuration;
+
+    DeltaSteppingResultBuilderForStatsMode(AllShortestPathsDeltaStatsConfig configuration) {
+        this.configuration = configuration;
+    }
+
     @Override
     public Stream<StandardStatsResult> build(
         Graph graph,
-        AllShortestPathsDeltaStatsConfig configuration,
         Optional<PathFindingResult> result,
         AlgorithmProcessingTimings timings
     ) {

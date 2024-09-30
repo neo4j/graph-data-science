@@ -31,19 +31,23 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-class LeidenResultBuilderForStatsMode implements StatsResultBuilder<LeidenStatsConfig, LeidenResult, Stream<LeidenStatsResult>> {
+class LeidenResultBuilderForStatsMode implements StatsResultBuilder<LeidenResult, Stream<LeidenStatsResult>> {
     private final CommunityStatisticsWithTimingComputer communityStatisticsWithTimingComputer = new CommunityStatisticsWithTimingComputer();
 
+    private final LeidenStatsConfig configuration;
     private final StatisticsComputationInstructions statisticsComputationInstructions;
 
-    LeidenResultBuilderForStatsMode(StatisticsComputationInstructions statisticsComputationInstructions) {
+    LeidenResultBuilderForStatsMode(
+        LeidenStatsConfig configuration,
+        StatisticsComputationInstructions statisticsComputationInstructions
+    ) {
+        this.configuration = configuration;
         this.statisticsComputationInstructions = statisticsComputationInstructions;
     }
 
     @Override
     public Stream<LeidenStatsResult> build(
         Graph graph,
-        LeidenStatsConfig configuration,
         Optional<LeidenResult> result,
         AlgorithmProcessingTimings timings
     ) {

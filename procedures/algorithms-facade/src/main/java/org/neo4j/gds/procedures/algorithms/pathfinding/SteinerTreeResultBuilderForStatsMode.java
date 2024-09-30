@@ -28,12 +28,16 @@ import org.neo4j.gds.steiner.SteinerTreeStatsConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class SteinerTreeResultBuilderForStatsMode implements StatsResultBuilder<SteinerTreeStatsConfig, SteinerTreeResult, Stream<SteinerStatsResult>> {
+class SteinerTreeResultBuilderForStatsMode implements StatsResultBuilder<SteinerTreeResult, Stream<SteinerStatsResult>> {
+    private final SteinerTreeStatsConfig configuration;
+
+    SteinerTreeResultBuilderForStatsMode(SteinerTreeStatsConfig configuration) {
+        this.configuration = configuration;
+    }
 
     @Override
     public Stream<SteinerStatsResult> build(
         Graph graph,
-        SteinerTreeStatsConfig configuration,
         Optional<SteinerTreeResult> result,
         AlgorithmProcessingTimings timings
     ) {

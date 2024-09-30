@@ -56,18 +56,18 @@ import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.BFSMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.BellmanFordMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.DFSMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.DeltaSteppingMutateStub;
-import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalBellmanFordMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalBFSMutateStub;
-import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalDeltaSteppingMutateStub;
+import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalBellmanFordMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalDFSMutateStub;
+import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalDeltaSteppingMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalRandomWalkMutateStub;
+import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalSinglePairShortestPathAStarMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalSinglePairShortestPathDijkstraMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalSinglePairShortestPathYensMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalSingleSourceShortestPathDijkstraMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalSpanningTreeMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalSteinerTreeMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.RandomWalkMutateStub;
-import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.LocalSinglePairShortestPathAStarMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SinglePairShortestPathAStarMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SinglePairShortestPathDijkstraMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SinglePairShortestPathYensMutateStub;
@@ -322,11 +322,16 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
     }
 
     @Override
-    public Stream<BellmanFordStatsResult> bellmanFordStats(String graphName, Map<String, Object> configuration) {
+    public Stream<BellmanFordStatsResult> bellmanFordStats(String graphName, Map<String, Object> rawConfiguration) {
+        var configuration = configurationParser.parseConfiguration(
+            rawConfiguration,
+            AllShortestPathsBellmanFordStatsConfig::of
+        );
+
         return statsModeBusinessFacade.bellmanFord(
             GraphName.parse(graphName),
-            configurationParser.parseConfiguration(configuration, AllShortestPathsBellmanFordStatsConfig::of),
-            new BellmanFordResultBuilderForStatsMode()
+            configuration,
+            new BellmanFordResultBuilderForStatsMode(configuration)
         );
     }
 
@@ -382,11 +387,13 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
     }
 
     @Override
-    public Stream<StandardStatsResult> breadthFirstSearchStats(String graphName, Map<String, Object> configuration) {
+    public Stream<StandardStatsResult> breadthFirstSearchStats(String graphName, Map<String, Object> rawConfiguration) {
+        var configuration = configurationParser.parseConfiguration(rawConfiguration, BfsStatsConfig::of);
+
         return statsModeBusinessFacade.breadthFirstSearch(
             GraphName.parse(graphName),
-            configurationParser.parseConfiguration(configuration, BfsStatsConfig::of),
-            new BfsStatsResultBuilder()
+            configuration,
+            new BfsStatsResultBuilder(configuration)
         );
     }
 
@@ -409,7 +416,7 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
         return streamModeBusinessFacade.breadthFirstSearch(
             GraphName.parse(graphName),
             parsedConfig,
-            new BfsStreamResultBuilder(nodeLookup, procedureReturnColumns.contains("path"),parsedConfig)
+            new BfsStreamResultBuilder(nodeLookup, procedureReturnColumns.contains("path"), parsedConfig)
         );
     }
 
@@ -432,11 +439,16 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
     }
 
     @Override
-    public Stream<StandardStatsResult> deltaSteppingStats(String graphName, Map<String, Object> configuration) {
+    public Stream<StandardStatsResult> deltaSteppingStats(String graphName, Map<String, Object> rawConfiguration) {
+        var configuration = configurationParser.parseConfiguration(
+            rawConfiguration,
+            AllShortestPathsDeltaStatsConfig::of
+        );
+
         return statsModeBusinessFacade.deltaStepping(
             GraphName.parse(graphName),
-            configurationParser.parseConfiguration(configuration, AllShortestPathsDeltaStatsConfig::of),
-            new DeltaSteppingResultBuilderForStatsMode()
+            configuration,
+            new DeltaSteppingResultBuilderForStatsMode(configuration)
         );
     }
 
@@ -520,7 +532,7 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
         return streamModeBusinessFacade.depthFirstSearch(
             GraphName.parse(graphName),
             parsedConfig,
-            new DfsStreamResultBuilder(nodeLookup, procedureReturnColumns.contains("path"),parsedConfig)
+            new DfsStreamResultBuilder(nodeLookup, procedureReturnColumns.contains("path"), parsedConfig)
         );
     }
 
@@ -564,11 +576,16 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
     }
 
     @Override
-    public Stream<StandardModeResult> randomWalkStats(String graphName, Map<String, Object> configuration) {
+    public Stream<StandardModeResult> randomWalkStats(String graphName, Map<String, Object> rawConfiguration) {
+        var configuration = configurationParser.parseConfiguration(
+            rawConfiguration,
+            RandomWalkStatsConfig::of
+        );
+
         return statsModeBusinessFacade.randomWalk(
             GraphName.parse(graphName),
-            configurationParser.parseConfiguration(configuration, RandomWalkStatsConfig::of),
-            new RandomWalkResultBuilderForStatsMode()
+            configuration,
+            new RandomWalkResultBuilderForStatsMode(configuration)
         );
     }
 
@@ -884,12 +901,17 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
     @Override
     public Stream<SpanningTreeStatsResult> spanningTreeStats(
         String graphName,
-        Map<String, Object> configuration
+        Map<String, Object> rawConfiguration
     ) {
+        var configuration = configurationParser.parseConfiguration(
+            rawConfiguration,
+            SpanningTreeStatsConfig::of
+        );
+
         return statsModeBusinessFacade.spanningTree(
             GraphName.parse(graphName),
-            configurationParser.parseConfiguration(configuration, SpanningTreeStatsConfig::of),
-            new SpanningTreeResultBuilderForStatsMode()
+            configuration,
+            new SpanningTreeResultBuilderForStatsMode(configuration)
         );
     }
 
@@ -962,11 +984,16 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
     }
 
     @Override
-    public Stream<SteinerStatsResult> steinerTreeStats(String graphName, Map<String, Object> configuration) {
+    public Stream<SteinerStatsResult> steinerTreeStats(String graphName, Map<String, Object> rawConfiguration) {
+        var configuration = configurationParser.parseConfiguration(
+            rawConfiguration,
+            SteinerTreeStatsConfig::of
+        );
+
         return statsModeBusinessFacade.steinerTree(
             GraphName.parse(graphName),
-            configurationParser.parseConfiguration(configuration, SteinerTreeStatsConfig::of),
-            new SteinerTreeResultBuilderForStatsMode()
+            configuration,
+            new SteinerTreeResultBuilderForStatsMode(configuration)
         );
     }
 

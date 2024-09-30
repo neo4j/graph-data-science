@@ -28,17 +28,21 @@ import org.neo4j.gds.scaleproperties.ScalePropertiesStatsConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class ScalePropertiesResultBuilderForStatsMode implements StatsResultBuilder<ScalePropertiesStatsConfig, ScalePropertiesResult, Stream<ScalePropertiesStatsResult>> {
+class ScalePropertiesResultBuilderForStatsMode implements StatsResultBuilder<ScalePropertiesResult, Stream<ScalePropertiesStatsResult>> {
+    private final ScalePropertiesStatsConfig configuration;
     private final boolean shouldDisplayScalerStatistics;
 
-    ScalePropertiesResultBuilderForStatsMode(boolean shouldDisplayScalerStatistics) {
+    ScalePropertiesResultBuilderForStatsMode(
+        ScalePropertiesStatsConfig configuration,
+        boolean shouldDisplayScalerStatistics
+    ) {
+        this.configuration = configuration;
         this.shouldDisplayScalerStatistics = shouldDisplayScalerStatistics;
     }
 
     @Override
     public Stream<ScalePropertiesStatsResult> build(
         Graph graph,
-        ScalePropertiesStatsConfig configuration,
         Optional<ScalePropertiesResult> result,
         AlgorithmProcessingTimings timings
     ) {

@@ -28,11 +28,16 @@ import org.neo4j.gds.modularity.ModularityStatsConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class ModularityResultBuilderForStatsMode implements StatsResultBuilder<ModularityStatsConfig, ModularityResult, Stream<ModularityStatsResult>> {
+class ModularityResultBuilderForStatsMode implements StatsResultBuilder<ModularityResult, Stream<ModularityStatsResult>> {
+    private final ModularityStatsConfig configuration;
+
+    ModularityResultBuilderForStatsMode(ModularityStatsConfig configuration) {
+        this.configuration = configuration;
+    }
+
     @Override
     public Stream<ModularityStatsResult> build(
         Graph graph,
-        ModularityStatsConfig configuration,
         Optional<ModularityResult> result,
         AlgorithmProcessingTimings timings
     ) {

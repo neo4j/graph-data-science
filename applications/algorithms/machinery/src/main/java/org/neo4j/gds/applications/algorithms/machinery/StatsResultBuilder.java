@@ -23,8 +23,7 @@ import org.neo4j.gds.api.Graph;
 
 import java.util.Optional;
 
-
-public interface StatsResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> {
+public interface StatsResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> {
     /**
      * You implement this and use as much or as little of the gathered data as is appropriate.
      * Plus your own injected dependencies of course.
@@ -33,7 +32,6 @@ public interface StatsResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT
      */
     RESULT_TO_CALLER build(
         Graph graph,
-        CONFIGURATION configuration,
         Optional<RESULT_FROM_ALGORITHM> result,
         AlgorithmProcessingTimings timings
     );

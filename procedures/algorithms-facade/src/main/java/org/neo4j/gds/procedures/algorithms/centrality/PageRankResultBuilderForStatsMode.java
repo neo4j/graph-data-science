@@ -29,17 +29,18 @@ import org.neo4j.gds.pagerank.RankConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class PageRankResultBuilderForStatsMode<C extends RankConfig> implements StatsResultBuilder<C, PageRankResult, Stream<PageRankStatsResult>> {
+class PageRankResultBuilderForStatsMode<CONFIGURATION extends RankConfig> implements StatsResultBuilder<PageRankResult, Stream<PageRankStatsResult>> {
+    private final CONFIGURATION configuration;
     private final boolean shouldComputeCentralityDistribution;
 
-    PageRankResultBuilderForStatsMode(boolean shouldComputeCentralityDistribution) {
+    PageRankResultBuilderForStatsMode(CONFIGURATION configuration, boolean shouldComputeCentralityDistribution) {
+        this.configuration = configuration;
         this.shouldComputeCentralityDistribution = shouldComputeCentralityDistribution;
     }
 
     @Override
     public Stream<PageRankStatsResult> build(
         Graph graph,
-        C configuration,
         Optional<PageRankResult> result,
         AlgorithmProcessingTimings timings
     ) {

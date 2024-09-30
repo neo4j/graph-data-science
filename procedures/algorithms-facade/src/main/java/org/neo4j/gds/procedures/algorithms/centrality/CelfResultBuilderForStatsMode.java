@@ -28,11 +28,16 @@ import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class CelfResultBuilderForStatsMode implements StatsResultBuilder<InfluenceMaximizationStatsConfig, CELFResult, Stream<CELFStatsResult>> {
+class CelfResultBuilderForStatsMode implements StatsResultBuilder<CELFResult, Stream<CELFStatsResult>> {
+    private final InfluenceMaximizationStatsConfig configuration;
+
+    CelfResultBuilderForStatsMode(InfluenceMaximizationStatsConfig configuration) {
+        this.configuration = configuration;
+    }
+
     @Override
     public Stream<CELFStatsResult> build(
         Graph graph,
-        InfluenceMaximizationStatsConfig configuration,
         Optional<CELFResult> result,
         AlgorithmProcessingTimings timings
     ) {

@@ -62,7 +62,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT bellmanFord(
         GraphName graphName,
         AllShortestPathsBellmanFordStatsConfig configuration,
-        StatsResultBuilder<AllShortestPathsBellmanFordStatsConfig, BellmanFordResult, RESULT> resultBuilder
+        StatsResultBuilder<BellmanFordResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
@@ -77,7 +77,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT breadthFirstSearch(
         GraphName graphName,
         BfsStatsConfig configuration,
-        StatsResultBuilder<BfsStatsConfig, HugeLongArray, RESULT> resultBuilder
+        StatsResultBuilder<HugeLongArray, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
@@ -92,7 +92,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT deltaStepping(
         GraphName graphName,
         AllShortestPathsDeltaStatsConfig configuration,
-        StatsResultBuilder<AllShortestPathsDeltaStatsConfig, PathFindingResult, RESULT> resultBuilder
+        StatsResultBuilder<PathFindingResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
@@ -107,7 +107,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT randomWalk(
         GraphName graphName,
         RandomWalkStatsConfig configuration,
-        StatsResultBuilder<RandomWalkStatsConfig, Stream<long[]>, RESULT> resultBuilder
+        StatsResultBuilder<Stream<long[]>, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
@@ -122,7 +122,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT spanningTree(
         GraphName graphName,
         SpanningTreeStatsConfig configuration,
-        StatsResultBuilder<SpanningTreeStatsConfig, SpanningTree, RESULT> resultBuilder
+        StatsResultBuilder<SpanningTree, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,
@@ -137,7 +137,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
     public <RESULT> RESULT steinerTree(
         GraphName graphName,
         SteinerTreeStatsConfig configuration,
-        StatsResultBuilder<SteinerTreeStatsConfig, SteinerTreeResult, RESULT> resultBuilder
+        StatsResultBuilder<SteinerTreeResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,

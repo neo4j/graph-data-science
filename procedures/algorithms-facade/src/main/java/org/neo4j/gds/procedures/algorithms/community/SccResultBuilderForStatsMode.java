@@ -29,19 +29,23 @@ import org.neo4j.gds.scc.SccStatsConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class SccResultBuilderForStatsMode implements StatsResultBuilder<SccStatsConfig, HugeLongArray, Stream<SccStatsResult>> {
+class SccResultBuilderForStatsMode implements StatsResultBuilder<HugeLongArray, Stream<SccStatsResult>> {
     private final CommunityStatisticsWithTimingComputer communityStatisticsWithTimingComputer = new CommunityStatisticsWithTimingComputer();
 
+    private final SccStatsConfig configuration;
     private final StatisticsComputationInstructions statisticsComputationInstructions;
 
-    SccResultBuilderForStatsMode(StatisticsComputationInstructions statisticsComputationInstructions) {
+    SccResultBuilderForStatsMode(
+        SccStatsConfig configuration,
+        StatisticsComputationInstructions statisticsComputationInstructions
+    ) {
+        this.configuration = configuration;
         this.statisticsComputationInstructions = statisticsComputationInstructions;
     }
 
     @Override
     public Stream<SccStatsResult> build(
         Graph graph,
-        SccStatsConfig configuration,
         Optional<HugeLongArray> result,
         AlgorithmProcessingTimings timings
     ) {

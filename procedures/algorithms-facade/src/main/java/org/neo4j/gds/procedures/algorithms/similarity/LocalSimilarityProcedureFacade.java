@@ -147,13 +147,21 @@ public final class LocalSimilarityProcedureFacade implements SimilarityProcedure
     }
 
     @Override
-    public Stream<KnnStatsResult> filteredKnnStats(String graphName, Map<String, Object> configuration) {
+    public Stream<KnnStatsResult> filteredKnnStats(String graphName, Map<String, Object> rawConfiguration) {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("similarityDistribution");
-        var resultBuilder = new FilteredKnnResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
+
+        var configuration = configurationParser.parseConfiguration(
+            rawConfiguration,
+            FilteredKnnStatsConfig::of
+        );
+        var resultBuilder = new FilteredKnnResultBuilderForStatsMode(
+            configuration,
+            shouldComputeSimilarityDistribution
+        );
 
         return statsModeBusinessFacade.filteredKnn(
             GraphName.parse(graphName),
-            configurationParser.parseConfiguration(configuration, FilteredKnnStatsConfig::of),
+            configuration,
             resultBuilder
         );
     }
@@ -230,14 +238,22 @@ public final class LocalSimilarityProcedureFacade implements SimilarityProcedure
     @Override
     public Stream<SimilarityStatsResult> filteredNodeSimilarityStats(
         String graphName,
-        Map<String, Object> configuration
+        Map<String, Object> rawConfiguration
     ) {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("similarityDistribution");
-        var resultBuilder = new FilteredNodeSimilarityResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
+
+        var configuration = configurationParser.parseConfiguration(
+            rawConfiguration,
+            FilteredNodeSimilarityStatsConfig::of
+        );
+        var resultBuilder = new FilteredNodeSimilarityResultBuilderForStatsMode(
+            configuration,
+            shouldComputeSimilarityDistribution
+        );
 
         return statsModeBusinessFacade.filteredNodeSimilarity(
             GraphName.parse(graphName),
-            configurationParser.parseConfiguration(configuration, FilteredNodeSimilarityStatsConfig::of),
+            configuration,
             resultBuilder
         );
     }
@@ -256,7 +272,10 @@ public final class LocalSimilarityProcedureFacade implements SimilarityProcedure
     }
 
     @Override
-    public Stream<SimilarityStreamResult> filteredNodeSimilarityStream(String graphName, Map<String, Object> configuration) {
+    public Stream<SimilarityStreamResult> filteredNodeSimilarityStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
         var resultBuilder = new FilteredNodeSimilarityResultBuilderForStreamMode();
 
         return streamModeBusinessFacade.filteredNodeSimilarity(
@@ -317,14 +336,15 @@ public final class LocalSimilarityProcedureFacade implements SimilarityProcedure
     @Override
     public Stream<KnnStatsResult> knnStats(
         String graphName,
-        Map<String, Object> configuration
+        Map<String, Object> rawConfiguration
     ) {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("similarityDistribution");
-        var resultBuilder = new KnnResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
+        var configuration = configurationParser.parseConfiguration(rawConfiguration, KnnStatsConfig::of);
+        var resultBuilder = new KnnResultBuilderForStatsMode(configuration, shouldComputeSimilarityDistribution);
 
         return statsModeBusinessFacade.knn(
             GraphName.parse(graphName),
-            configurationParser.parseConfiguration(configuration, KnnStatsConfig::of),
+            configuration,
             resultBuilder
         );
     }
@@ -405,12 +425,21 @@ public final class LocalSimilarityProcedureFacade implements SimilarityProcedure
     }
 
     @Override
-    public Stream<SimilarityStatsResult> nodeSimilarityStats(String graphName, Map<String, Object> configuration) {
+    public Stream<SimilarityStatsResult> nodeSimilarityStats(String graphName, Map<String, Object> rawConfiguration) {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("similarityDistribution");
-        var resultBuilder = new NodeSimilarityResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
+
+        var configuration = configurationParser.parseConfiguration(
+            rawConfiguration,
+            NodeSimilarityStatsConfig::of
+        );
+        var resultBuilder = new NodeSimilarityResultBuilderForStatsMode(
+            configuration,
+            shouldComputeSimilarityDistribution
+        );
+
         return statsModeBusinessFacade.nodeSimilarity(
             GraphName.parse(graphName),
-            configurationParser.parseConfiguration(configuration, NodeSimilarityStatsConfig::of),
+            configuration,
             resultBuilder
         );
     }

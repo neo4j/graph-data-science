@@ -32,14 +32,17 @@ import org.neo4j.gds.result.StatisticsComputationInstructions;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class KMeansResultBuilderForStatsMode implements StatsResultBuilder<KmeansStatsConfig, KmeansResult, Stream<KmeansStatsResult>> {
+class KMeansResultBuilderForStatsMode implements StatsResultBuilder<KmeansResult, Stream<KmeansStatsResult>> {
+    private final KmeansStatsConfig configuration;
     private final StatisticsComputationInstructions statisticsComputationInstructions;
     private final boolean shouldComputeListOfCentroids;
 
     KMeansResultBuilderForStatsMode(
+        KmeansStatsConfig configuration,
         StatisticsComputationInstructions statisticsComputationInstructions,
         boolean shouldComputeListOfCentroids
     ) {
+        this.configuration = configuration;
         this.statisticsComputationInstructions = statisticsComputationInstructions;
         this.shouldComputeListOfCentroids = shouldComputeListOfCentroids;
     }
@@ -47,7 +50,6 @@ class KMeansResultBuilderForStatsMode implements StatsResultBuilder<KmeansStatsC
     @Override
     public Stream<KmeansStatsResult> build(
         Graph graph,
-        KmeansStatsConfig configuration,
         Optional<KmeansResult> result,
         AlgorithmProcessingTimings timings
     ) {
@@ -65,7 +67,10 @@ class KMeansResultBuilderForStatsMode implements StatsResultBuilder<KmeansStatsC
             statisticsComputationInstructions
         );
 
-        var communitySummary = CommunityStatistics.communitySummary(communityStatistics.histogram(), communityStatistics.success());
+        var communitySummary = CommunityStatistics.communitySummary(
+            communityStatistics.histogram(),
+            communityStatistics.success()
+        );
 
         var centroids = new CentroidsComputer().compute(shouldComputeListOfCentroids, kmeansResult.centers());
 

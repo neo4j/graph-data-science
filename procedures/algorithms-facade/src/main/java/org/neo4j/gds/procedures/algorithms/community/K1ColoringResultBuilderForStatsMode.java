@@ -28,17 +28,18 @@ import org.neo4j.gds.k1coloring.K1ColoringStatsConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class K1ColoringResultBuilderForStatsMode implements StatsResultBuilder<K1ColoringStatsConfig, K1ColoringResult, Stream<K1ColoringStatsResult>> {
+class K1ColoringResultBuilderForStatsMode implements StatsResultBuilder<K1ColoringResult, Stream<K1ColoringStatsResult>> {
+    private final K1ColoringStatsConfig configuration;
     private final boolean computeUsedColors;
 
-    K1ColoringResultBuilderForStatsMode(boolean computeUsedColors) {
+    K1ColoringResultBuilderForStatsMode(K1ColoringStatsConfig configuration, boolean computeUsedColors) {
+        this.configuration = configuration;
         this.computeUsedColors = computeUsedColors;
     }
 
     @Override
     public Stream<K1ColoringStatsResult> build(
         Graph graph,
-        K1ColoringStatsConfig configuration,
         Optional<K1ColoringResult> result,
         AlgorithmProcessingTimings timings
     ) {

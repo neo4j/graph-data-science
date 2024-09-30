@@ -145,7 +145,7 @@ public class AlgorithmProcessingTemplateConvenience {
         Label label,
         Supplier<MemoryEstimation> estimationFactory,
         Computation<RESULT_FROM_ALGORITHM> computation,
-        StatsResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
+        StatsResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithmForStats(
             Optional.empty(),

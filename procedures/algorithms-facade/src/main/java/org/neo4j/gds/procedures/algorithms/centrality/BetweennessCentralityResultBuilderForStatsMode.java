@@ -28,19 +28,23 @@ import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class BetweennessCentralityResultBuilderForStatsMode implements StatsResultBuilder<BetweennessCentralityStatsConfig, CentralityAlgorithmResult, Stream<CentralityStatsResult>> {
+class BetweennessCentralityResultBuilderForStatsMode implements StatsResultBuilder<CentralityAlgorithmResult, Stream<CentralityStatsResult>> {
     private final GenericCentralityResultBuilderForStatsMode genericResultBuilder = new GenericCentralityResultBuilderForStatsMode();
 
+    private final BetweennessCentralityStatsConfig configuration;
     private final boolean shouldComputeCentralityDistribution;
 
-    BetweennessCentralityResultBuilderForStatsMode(boolean shouldComputeCentralityDistribution) {
+    BetweennessCentralityResultBuilderForStatsMode(
+        BetweennessCentralityStatsConfig configuration,
+        boolean shouldComputeCentralityDistribution
+    ) {
+        this.configuration = configuration;
         this.shouldComputeCentralityDistribution = shouldComputeCentralityDistribution;
     }
 
     @Override
     public Stream<CentralityStatsResult> build(
         Graph graph,
-        BetweennessCentralityStatsConfig configuration,
         Optional<CentralityAlgorithmResult> result,
         AlgorithmProcessingTimings timings
     ) {

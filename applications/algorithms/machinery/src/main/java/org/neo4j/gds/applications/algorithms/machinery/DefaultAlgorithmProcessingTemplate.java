@@ -102,9 +102,9 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         Label label,
         Supplier<MemoryEstimation> estimationSupplier,
         Computation<RESULT_FROM_ALGORITHM> computation,
-        StatsResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
+        StatsResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
     ) {
-        var resultRenderer = new StatsResultRenderer<>(configuration, resultBuilder);
+        var resultRenderer = new StatsResultRenderer<>(resultBuilder);
 
         return processAlgorithmAndAnySideEffects(
             relationshipWeightOverride,

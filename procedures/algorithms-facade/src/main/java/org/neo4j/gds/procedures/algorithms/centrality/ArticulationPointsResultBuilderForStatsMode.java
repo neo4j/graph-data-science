@@ -28,12 +28,16 @@ import org.neo4j.gds.articulationpoints.ArticulationPointsStatsConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class ArticulationPointsResultBuilderForStatsMode implements StatsResultBuilder<ArticulationPointsStatsConfig, BitSet, Stream<ArticulationPointsStatsResult>> {
+class ArticulationPointsResultBuilderForStatsMode implements StatsResultBuilder<BitSet, Stream<ArticulationPointsStatsResult>> {
+    private final ArticulationPointsStatsConfig configuration;
+
+    ArticulationPointsResultBuilderForStatsMode(ArticulationPointsStatsConfig configuration) {
+        this.configuration = configuration;
+    }
 
     @Override
     public Stream<ArticulationPointsStatsResult> build(
         Graph graph,
-        ArticulationPointsStatsConfig configuration,
         Optional<BitSet> result,
         AlgorithmProcessingTimings timings
     ) {
@@ -44,9 +48,9 @@ class ArticulationPointsResultBuilderForStatsMode implements StatsResultBuilder<
         var bitSet = result.get();
         return Stream.of(
             new ArticulationPointsStatsResult(
-                    bitSet.cardinality(),
-                    timings.computeMillis,
-                    configuration.toMap()
+                bitSet.cardinality(),
+                timings.computeMillis,
+                configuration.toMap()
             )
         );
     }

@@ -28,11 +28,16 @@ import org.neo4j.gds.traversal.RandomWalkStatsConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class RandomWalkResultBuilderForStatsMode implements StatsResultBuilder<RandomWalkStatsConfig, Stream<long[]>, Stream<StandardModeResult>> {
+class RandomWalkResultBuilderForStatsMode implements StatsResultBuilder<Stream<long[]>, Stream<StandardModeResult>> {
+    private final RandomWalkStatsConfig configuration;
+
+    RandomWalkResultBuilderForStatsMode(RandomWalkStatsConfig configuration) {
+        this.configuration = configuration;
+    }
+
     @Override
     public Stream<StandardModeResult> build(
         Graph graph,
-        RandomWalkStatsConfig configuration,
         Optional<Stream<long[]>> result,
         AlgorithmProcessingTimings timings
     ) {

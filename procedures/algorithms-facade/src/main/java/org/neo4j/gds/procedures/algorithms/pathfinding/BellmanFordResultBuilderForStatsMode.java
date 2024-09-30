@@ -28,11 +28,16 @@ import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class BellmanFordResultBuilderForStatsMode implements StatsResultBuilder<AllShortestPathsBellmanFordStatsConfig, BellmanFordResult, Stream<BellmanFordStatsResult>> {
+class BellmanFordResultBuilderForStatsMode implements StatsResultBuilder<BellmanFordResult, Stream<BellmanFordStatsResult>> {
+    private final AllShortestPathsBellmanFordStatsConfig configuration;
+
+    BellmanFordResultBuilderForStatsMode(AllShortestPathsBellmanFordStatsConfig configuration) {
+        this.configuration = configuration;
+    }
+
     @Override
     public Stream<BellmanFordStatsResult> build(
         Graph graph,
-        AllShortestPathsBellmanFordStatsConfig configuration,
         Optional<BellmanFordResult> result,
         AlgorithmProcessingTimings timings
     ) {

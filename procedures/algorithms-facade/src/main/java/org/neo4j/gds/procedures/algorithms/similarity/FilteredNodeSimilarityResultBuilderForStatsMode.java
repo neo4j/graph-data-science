@@ -28,19 +28,23 @@ import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class FilteredNodeSimilarityResultBuilderForStatsMode implements StatsResultBuilder<FilteredNodeSimilarityStatsConfig, NodeSimilarityResult, Stream<SimilarityStatsResult>> {
+class FilteredNodeSimilarityResultBuilderForStatsMode implements StatsResultBuilder<NodeSimilarityResult, Stream<SimilarityStatsResult>> {
     private final GenericNodeSimilarityResultBuilderForStatsMode genericResultBuilder = new GenericNodeSimilarityResultBuilderForStatsMode();
 
+    private final FilteredNodeSimilarityStatsConfig configuration;
     private final boolean shouldComputeSimilarityDistribution;
 
-    FilteredNodeSimilarityResultBuilderForStatsMode(boolean shouldComputeSimilarityDistribution) {
+    FilteredNodeSimilarityResultBuilderForStatsMode(
+        FilteredNodeSimilarityStatsConfig configuration,
+        boolean shouldComputeSimilarityDistribution
+    ) {
+        this.configuration = configuration;
         this.shouldComputeSimilarityDistribution = shouldComputeSimilarityDistribution;
     }
 
     @Override
     public Stream<SimilarityStatsResult> build(
         Graph graph,
-        FilteredNodeSimilarityStatsConfig configuration,
         Optional<NodeSimilarityResult> result,
         AlgorithmProcessingTimings timings
     ) {

@@ -28,19 +28,23 @@ import org.neo4j.gds.harmonic.HarmonicCentralityStatsConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class HarmonicCentralityResultBuilderForStatsMode implements StatsResultBuilder<HarmonicCentralityStatsConfig, CentralityAlgorithmResult, Stream<CentralityStatsResult>> {
+class HarmonicCentralityResultBuilderForStatsMode implements StatsResultBuilder<CentralityAlgorithmResult, Stream<CentralityStatsResult>> {
     private final GenericCentralityResultBuilderForStatsMode genericResultBuilder = new GenericCentralityResultBuilderForStatsMode();
 
+    private final HarmonicCentralityStatsConfig configuration;
     private final boolean shouldComputeCentralityDistribution;
 
-    HarmonicCentralityResultBuilderForStatsMode(boolean shouldComputeCentralityDistribution) {
+    HarmonicCentralityResultBuilderForStatsMode(
+        HarmonicCentralityStatsConfig configuration,
+        boolean shouldComputeCentralityDistribution
+    ) {
+        this.configuration = configuration;
         this.shouldComputeCentralityDistribution = shouldComputeCentralityDistribution;
     }
 
     @Override
     public Stream<CentralityStatsResult> build(
         Graph graph,
-        HarmonicCentralityStatsConfig configuration,
         Optional<CentralityAlgorithmResult> result,
         AlgorithmProcessingTimings timings
     ) {

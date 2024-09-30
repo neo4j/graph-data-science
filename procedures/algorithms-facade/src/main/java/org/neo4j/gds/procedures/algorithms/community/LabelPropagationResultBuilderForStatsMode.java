@@ -29,19 +29,23 @@ import org.neo4j.gds.result.StatisticsComputationInstructions;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class LabelPropagationResultBuilderForStatsMode implements StatsResultBuilder<LabelPropagationStatsConfig, LabelPropagationResult, Stream<LabelPropagationStatsResult>> {
+class LabelPropagationResultBuilderForStatsMode implements StatsResultBuilder<LabelPropagationResult, Stream<LabelPropagationStatsResult>> {
     private final CommunityStatisticsWithTimingComputer communityStatisticsWithTimingComputer = new CommunityStatisticsWithTimingComputer();
 
+    private final LabelPropagationStatsConfig configuration;
     private final StatisticsComputationInstructions statisticsComputationInstructions;
 
-    LabelPropagationResultBuilderForStatsMode(StatisticsComputationInstructions statisticsComputationInstructions) {
+    LabelPropagationResultBuilderForStatsMode(
+        LabelPropagationStatsConfig configuration,
+        StatisticsComputationInstructions statisticsComputationInstructions
+    ) {
+        this.configuration = configuration;
         this.statisticsComputationInstructions = statisticsComputationInstructions;
     }
 
     @Override
     public Stream<LabelPropagationStatsResult> build(
         Graph graph,
-        LabelPropagationStatsConfig configuration,
         Optional<LabelPropagationResult> result,
         AlgorithmProcessingTimings timings
     ) {

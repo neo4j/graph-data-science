@@ -29,11 +29,16 @@ import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class BfsStatsResultBuilder implements StatsResultBuilder<BfsStatsConfig, HugeLongArray, Stream<StandardStatsResult>> {
+class BfsStatsResultBuilder implements StatsResultBuilder<HugeLongArray, Stream<StandardStatsResult>> {
+    private final BfsStatsConfig configuration;
+
+    BfsStatsResultBuilder(BfsStatsConfig configuration) {
+        this.configuration = configuration;
+    }
+
     @Override
     public Stream<StandardStatsResult> build(
         Graph graph,
-        BfsStatsConfig configuration,
         Optional<HugeLongArray> result,
         AlgorithmProcessingTimings timings
     ) {

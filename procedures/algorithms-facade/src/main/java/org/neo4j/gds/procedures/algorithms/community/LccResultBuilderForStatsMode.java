@@ -28,11 +28,16 @@ import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class LccResultBuilderForStatsMode implements StatsResultBuilder<LocalClusteringCoefficientStatsConfig, LocalClusteringCoefficientResult, Stream<LocalClusteringCoefficientStatsResult>> {
+class LccResultBuilderForStatsMode implements StatsResultBuilder<LocalClusteringCoefficientResult, Stream<LocalClusteringCoefficientStatsResult>> {
+    private final LocalClusteringCoefficientStatsConfig configuration;
+
+    LccResultBuilderForStatsMode(LocalClusteringCoefficientStatsConfig configuration) {
+        this.configuration = configuration;
+    }
+
     @Override
     public Stream<LocalClusteringCoefficientStatsResult> build(
         Graph graph,
-        LocalClusteringCoefficientStatsConfig configuration,
         Optional<LocalClusteringCoefficientResult> result,
         AlgorithmProcessingTimings timings
     ) {

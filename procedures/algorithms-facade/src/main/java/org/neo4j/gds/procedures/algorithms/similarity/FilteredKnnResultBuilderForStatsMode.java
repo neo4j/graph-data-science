@@ -29,20 +29,24 @@ import org.neo4j.gds.similarity.filteredknn.FilteredKnnStatsConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class FilteredKnnResultBuilderForStatsMode implements StatsResultBuilder<FilteredKnnStatsConfig, FilteredKnnResult, Stream<KnnStatsResult>> {
+class FilteredKnnResultBuilderForStatsMode implements StatsResultBuilder<FilteredKnnResult, Stream<KnnStatsResult>> {
     private final SimilarityResultStreamDelegate similarityResultStreamDelegate = new SimilarityResultStreamDelegate();
     private final SimilarityStatsProcessor similarityStatsProcessor = new SimilarityStatsProcessor();
 
+    private final FilteredKnnStatsConfig configuration;
     private final boolean shouldComputeSimilarityDistribution;
 
-    FilteredKnnResultBuilderForStatsMode(boolean shouldComputeSimilarityDistribution) {
+    FilteredKnnResultBuilderForStatsMode(
+        FilteredKnnStatsConfig configuration,
+        boolean shouldComputeSimilarityDistribution
+    ) {
+        this.configuration = configuration;
         this.shouldComputeSimilarityDistribution = shouldComputeSimilarityDistribution;
     }
 
     @Override
     public Stream<KnnStatsResult> build(
         Graph graph,
-        FilteredKnnStatsConfig configuration,
         Optional<FilteredKnnResult> result,
         AlgorithmProcessingTimings timings
     ) {

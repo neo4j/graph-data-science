@@ -149,16 +149,16 @@ public final class LocalNodeEmbeddingsProcedureFacade implements NodeEmbeddingsP
     @Override
     public Stream<FastRPStatsResult> fastRPStats(
         String graphName,
-        Map<String, Object> configuration
+        Map<String, Object> rawConfiguration
     ) {
-        var resultBuilder = new FastRPResultBuilderForStatsMode();
+        var configuration = configurationParser.parseConfiguration(rawConfiguration, FastRPStatsConfig::of);
+        var resultBuilder = new FastRPResultBuilderForStatsMode(configuration);
 
         return statsModeBusinessFacade.fastRP(
             GraphName.parse(graphName),
-            configurationParser.parseConfiguration(configuration, FastRPStatsConfig::of),
+            configuration,
             resultBuilder
         );
-
     }
 
     @Override

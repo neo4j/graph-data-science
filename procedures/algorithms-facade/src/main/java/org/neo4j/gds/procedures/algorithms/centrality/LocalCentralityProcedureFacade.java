@@ -288,11 +288,14 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
     @Override
     public Stream<PageRankStatsResult> articleRankStats(String graphName, Map<String, Object> configuration) {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("centralityDistribution");
-        var resultBuilder = new PageRankResultBuilderForStatsMode<ArticleRankStatsConfig>(shouldComputeSimilarityDistribution);
 
         var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
             ArticleRankStatsConfig::of
+        );
+        var resultBuilder = new PageRankResultBuilderForStatsMode<>(
+            parsedConfiguration,
+            shouldComputeSimilarityDistribution
         );
 
         return statsModeBusinessFacade.articleRank(
@@ -349,7 +352,8 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
         Map<String, Object> configuration
     ) {
         var shouldComputeCentralityDistribution = procedureReturnColumns.contains("centralityDistribution");
-        var resultBuilder = new PageRankResultBuilderForWriteMode<ArticleRankWriteConfig>(shouldComputeCentralityDistribution);
+        var resultBuilder = new PageRankResultBuilderForWriteMode<ArticleRankWriteConfig>(
+            shouldComputeCentralityDistribution);
 
         var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
@@ -412,11 +416,14 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
         Map<String, Object> configuration
     ) {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("centralityDistribution");
-        var resultBuilder = new BetweennessCentralityResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
 
         var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
             BetweennessCentralityStatsConfig::of
+        );
+        var resultBuilder = new BetweennessCentralityResultBuilderForStatsMode(
+            parsedConfiguration,
+            shouldComputeSimilarityDistribution
         );
 
         return statsModeBusinessFacade.betweennessCentrality(
@@ -584,7 +591,7 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
         return statsModeBusinessFacade.articulationPoints(
             GraphName.parse(graphName),
             parsedConfiguration,
-            new ArticulationPointsResultBuilderForStatsMode()
+            new ArticulationPointsResultBuilderForStatsMode(parsedConfiguration)
         );
     }
 
@@ -683,11 +690,11 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
         String graphName,
         Map<String, Object> configuration
     ) {
-        var resultBuilder = new CelfResultBuilderForStatsMode();
         var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
             InfluenceMaximizationStatsConfig::of
         );
+        var resultBuilder = new CelfResultBuilderForStatsMode(parsedConfiguration);
 
         return statsModeBusinessFacade.celf(
             GraphName.parse(graphName),
@@ -790,11 +797,14 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
     @Override
     public Stream<CentralityStatsResult> closenessCentralityStats(String graphName, Map<String, Object> configuration) {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("centralityDistribution");
-        var resultBuilder = new ClosenessCentralityResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
 
         var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
             ClosenessCentralityStatsConfig::of
+        );
+        var resultBuilder = new ClosenessCentralityResultBuilderForStatsMode(
+            parsedConfiguration,
+            shouldComputeSimilarityDistribution
         );
 
         return statsModeBusinessFacade.closenessCentrality(
@@ -848,11 +858,14 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
     @Override
     public Stream<CentralityStatsResult> degreeCentralityStats(String graphName, Map<String, Object> configuration) {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("centralityDistribution");
-        var resultBuilder = new DegreeCentralityResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
 
         var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
             DegreeCentralityStatsConfig::of
+        );
+        var resultBuilder = new DegreeCentralityResultBuilderForStatsMode(
+            parsedConfiguration,
+            shouldComputeSimilarityDistribution
         );
 
         return statsModeBusinessFacade.degreeCentrality(
@@ -954,12 +967,15 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
     @Override
     public Stream<PageRankStatsResult> eigenvectorStats(String graphName, Map<String, Object> configuration) {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("centralityDistribution");
-        var resultBuilder = new PageRankResultBuilderForStatsMode<EigenvectorStatsConfig>(shouldComputeSimilarityDistribution);
 
 
         var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
             EigenvectorStatsConfig::of
+        );
+        var resultBuilder = new PageRankResultBuilderForStatsMode<>(
+            parsedConfiguration,
+            shouldComputeSimilarityDistribution
         );
 
         return statsModeBusinessFacade.eigenVector(
@@ -1014,7 +1030,8 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
     @Override
     public Stream<PageRankWriteResult> eigenvectorWrite(String graphName, Map<String, Object> configuration) {
         var shouldComputeCentralityDistribution = procedureReturnColumns.contains("centralityDistribution");
-        var resultBuilder = new PageRankResultBuilderForWriteMode<EigenvectorWriteConfig>(shouldComputeCentralityDistribution);
+        var resultBuilder = new PageRankResultBuilderForWriteMode<EigenvectorWriteConfig>(
+            shouldComputeCentralityDistribution);
 
         var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
@@ -1049,11 +1066,14 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
     @Override
     public Stream<CentralityStatsResult> harmonicCentralityStats(String graphName, Map<String, Object> configuration) {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("centralityDistribution");
-        var resultBuilder = new HarmonicCentralityResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
 
         var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
             HarmonicCentralityStatsConfig::of
+        );
+        var resultBuilder = new HarmonicCentralityResultBuilderForStatsMode(
+            parsedConfiguration,
+            shouldComputeSimilarityDistribution
         );
 
         return statsModeBusinessFacade.harmonicCentrality(
@@ -1107,11 +1127,14 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
     @Override
     public Stream<PageRankStatsResult> pageRankStats(String graphName, Map<String, Object> configuration) {
         var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("centralityDistribution");
-        var resultBuilder = new PageRankResultBuilderForStatsMode<PageRankStatsConfig>(shouldComputeSimilarityDistribution);
 
         var parsedConfiguration = configurationParser.parseConfiguration(
             configuration,
             PageRankStatsConfig::of
+        );
+        var resultBuilder = new PageRankResultBuilderForStatsMode<>(
+            parsedConfiguration,
+            shouldComputeSimilarityDistribution
         );
 
         return statsModeBusinessFacade.pageRank(
@@ -1166,7 +1189,8 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
     @Override
     public Stream<PageRankWriteResult> pageRankWrite(String graphName, Map<String, Object> configuration) {
         var shouldComputeCentralityDistribution = procedureReturnColumns.contains("centralityDistribution");
-        var resultBuilder = new PageRankResultBuilderForWriteMode<PageRankWriteConfig>(shouldComputeCentralityDistribution);
+        var resultBuilder = new PageRankResultBuilderForWriteMode<PageRankWriteConfig>(
+            shouldComputeCentralityDistribution);
 
 
         var parsedConfiguration = configurationParser.parseConfiguration(

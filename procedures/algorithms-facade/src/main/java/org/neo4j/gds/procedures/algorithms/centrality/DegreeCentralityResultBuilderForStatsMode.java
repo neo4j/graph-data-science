@@ -28,19 +28,23 @@ import org.neo4j.gds.degree.DegreeCentralityStatsConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class DegreeCentralityResultBuilderForStatsMode implements StatsResultBuilder<DegreeCentralityStatsConfig, CentralityAlgorithmResult, Stream<CentralityStatsResult>> {
+class DegreeCentralityResultBuilderForStatsMode implements StatsResultBuilder<CentralityAlgorithmResult, Stream<CentralityStatsResult>> {
     private final GenericCentralityResultBuilderForStatsMode genericResultBuilder = new GenericCentralityResultBuilderForStatsMode();
 
+    private final DegreeCentralityStatsConfig configuration;
     private final boolean shouldComputeCentralityDistribution;
 
-    DegreeCentralityResultBuilderForStatsMode(boolean shouldComputeCentralityDistribution) {
+    DegreeCentralityResultBuilderForStatsMode(
+        DegreeCentralityStatsConfig configuration,
+        boolean shouldComputeCentralityDistribution
+    ) {
+        this.configuration = configuration;
         this.shouldComputeCentralityDistribution = shouldComputeCentralityDistribution;
     }
 
     @Override
     public Stream<CentralityStatsResult> build(
         Graph graph,
-        DegreeCentralityStatsConfig configuration,
         Optional<CentralityAlgorithmResult> result,
         AlgorithmProcessingTimings timings
     ) {

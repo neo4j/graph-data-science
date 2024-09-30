@@ -45,7 +45,7 @@ public class MiscellaneousApplicationsStatsModeBusinessFacade {
     public <RESULT> RESULT scaleProperties(
         GraphName graphName,
         ScalePropertiesStatsConfig configuration,
-        StatsResultBuilder<ScalePropertiesStatsConfig, ScalePropertiesResult, RESULT> resultBuilder
+        StatsResultBuilder<ScalePropertiesResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
             graphName,

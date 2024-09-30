@@ -28,11 +28,16 @@ import org.neo4j.gds.triangle.TriangleCountStatsConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class TriangleCountResultBuilderForStatsMode implements StatsResultBuilder<TriangleCountStatsConfig, TriangleCountResult, Stream<TriangleCountStatsResult>> {
+class TriangleCountResultBuilderForStatsMode implements StatsResultBuilder<TriangleCountResult, Stream<TriangleCountStatsResult>> {
+    private final TriangleCountStatsConfig configuration;
+
+    TriangleCountResultBuilderForStatsMode(TriangleCountStatsConfig configuration) {
+        this.configuration = configuration;
+    }
+
     @Override
     public Stream<TriangleCountStatsResult> build(
         Graph graph,
-        TriangleCountStatsConfig configuration,
         Optional<TriangleCountResult> result,
         AlgorithmProcessingTimings timings
     ) {

@@ -19,21 +19,15 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 
-import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.loading.GraphResources;
 
 import java.util.Optional;
 
-class StatsResultRenderer<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, CONFIGURATION extends AlgoBaseConfig> implements ResultRenderer<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, Void> {
-    private final CONFIGURATION configuration;
-    private final StatsResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder;
+class StatsResultRenderer<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> implements ResultRenderer<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, Void> {
+    private final StatsResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> statsResultBuilder;
 
-    StatsResultRenderer(
-        CONFIGURATION configuration,
-        StatsResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
-    ) {
-        this.configuration = configuration;
-        this.resultBuilder = resultBuilder;
+    StatsResultRenderer(StatsResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> statsResultBuilder) {
+        this.statsResultBuilder = statsResultBuilder;
     }
 
     @Override
@@ -43,9 +37,8 @@ class StatsResultRenderer<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, CONFIGURATION
         AlgorithmProcessingTimings timings,
         Optional<Void> unused
     ) {
-        return resultBuilder.build(
+        return statsResultBuilder.build(
             graphResources.graph(),
-            configuration,
             result,
             timings
         );

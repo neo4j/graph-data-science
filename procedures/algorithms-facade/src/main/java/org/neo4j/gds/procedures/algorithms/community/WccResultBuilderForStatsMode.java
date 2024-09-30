@@ -29,19 +29,23 @@ import org.neo4j.gds.wcc.WccStatsConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class WccResultBuilderForStatsMode implements StatsResultBuilder<WccStatsConfig, DisjointSetStruct, Stream<WccStatsResult>> {
+class WccResultBuilderForStatsMode implements StatsResultBuilder<DisjointSetStruct, Stream<WccStatsResult>> {
     private final CommunityStatisticsWithTimingComputer communityStatisticsWithTimingComputer = new CommunityStatisticsWithTimingComputer();
 
+    private final WccStatsConfig configuration;
     private final StatisticsComputationInstructions statisticsComputationInstructions;
 
-    WccResultBuilderForStatsMode(StatisticsComputationInstructions statisticsComputationInstructions) {
+    WccResultBuilderForStatsMode(
+        WccStatsConfig configuration,
+        StatisticsComputationInstructions statisticsComputationInstructions
+    ) {
+        this.configuration = configuration;
         this.statisticsComputationInstructions = statisticsComputationInstructions;
     }
 
     @Override
     public Stream<WccStatsResult> build(
         Graph graph,
-        WccStatsConfig configuration,
         Optional<DisjointSetStruct> result,
         AlgorithmProcessingTimings timings
     ) {

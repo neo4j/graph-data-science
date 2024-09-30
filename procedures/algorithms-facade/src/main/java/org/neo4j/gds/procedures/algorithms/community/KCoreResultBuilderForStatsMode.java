@@ -28,11 +28,16 @@ import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class KCoreResultBuilderForStatsMode implements StatsResultBuilder<KCoreDecompositionStatsConfig, KCoreDecompositionResult, Stream<KCoreDecompositionStatsResult>> {
+class KCoreResultBuilderForStatsMode implements StatsResultBuilder<KCoreDecompositionResult, Stream<KCoreDecompositionStatsResult>> {
+    private final KCoreDecompositionStatsConfig configuration;
+
+    KCoreResultBuilderForStatsMode(KCoreDecompositionStatsConfig configuration) {
+        this.configuration = configuration;
+    }
+
     @Override
     public Stream<KCoreDecompositionStatsResult> build(
         Graph graph,
-        KCoreDecompositionStatsConfig configuration,
         Optional<KCoreDecompositionResult> result,
         AlgorithmProcessingTimings timings
     ) {

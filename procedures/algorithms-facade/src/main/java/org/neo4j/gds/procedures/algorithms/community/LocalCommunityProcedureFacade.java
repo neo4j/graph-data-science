@@ -79,7 +79,6 @@ import org.neo4j.gds.procedures.algorithms.community.stubs.TriangleCountMutateSt
 import org.neo4j.gds.procedures.algorithms.community.stubs.WccMutateStub;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
-import org.neo4j.gds.result.StatisticsComputationInstructions;
 import org.neo4j.gds.scc.SccAlphaWriteConfig;
 import org.neo4j.gds.scc.SccStatsConfig;
 import org.neo4j.gds.scc.SccStreamConfig;
@@ -328,11 +327,12 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         String graphName,
         Map<String, Object> configuration
     ) {
-        var resultBuilder = new K1ColoringResultBuilderForStatsMode(procedureReturnColumns.contains("colorCount"));
-
         var parsedConfig = configurationParser.parseConfiguration(configuration, K1ColoringStatsConfig::of);
+        var resultBuilder = new K1ColoringResultBuilderForStatsMode(
+            parsedConfig,
+            procedureReturnColumns.contains("colorCount")
+        );
         return statsModeBusinessFacade.k1Coloring(GraphName.parse(graphName), parsedConfig, resultBuilder);
-
     }
 
     @Override
@@ -395,9 +395,9 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         String graphName,
         Map<String, Object> configuration
     ) {
-        var resultBuilder = new KCoreResultBuilderForStatsMode();
-
         var parsedConfig = configurationParser.parseConfiguration(configuration, KCoreDecompositionStatsConfig::of);
+        var resultBuilder = new KCoreResultBuilderForStatsMode(parsedConfig);
+
         return statsModeBusinessFacade.kCore(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
@@ -469,12 +469,13 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         var statisticsComputationInstructions = ProcedureStatisticsComputationInstructions.forCommunities(
             procedureReturnColumns);
         var shouldComputeListOfCentroids = procedureReturnColumns.contains("centroids");
+        var parsedConfig = configurationParser.parseConfiguration(configuration, KmeansStatsConfig::of);
         var resultBuilder = new KMeansResultBuilderForStatsMode(
+            parsedConfig,
             statisticsComputationInstructions,
             shouldComputeListOfCentroids
         );
 
-        var parsedConfig = configurationParser.parseConfiguration(configuration, KmeansStatsConfig::of);
         return statsModeBusinessFacade.kMeans(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
@@ -542,9 +543,12 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     ) {
         var statisticsComputationInstructions = ProcedureStatisticsComputationInstructions.forCommunities(
             procedureReturnColumns);
-        var resultBuilder = new LabelPropagationResultBuilderForStatsMode(statisticsComputationInstructions);
-
         var parsedConfig = configurationParser.parseConfiguration(configuration, LabelPropagationStatsConfig::of);
+        var resultBuilder = new LabelPropagationResultBuilderForStatsMode(
+            parsedConfig,
+            statisticsComputationInstructions
+        );
+
         return statsModeBusinessFacade.labelPropagation(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
@@ -618,10 +622,13 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         String graphName,
         Map<String, Object> configuration
     ) {
-        var resultBuilder = new LccResultBuilderForStatsMode();
 
-        var parsedConfig = configurationParser.parseConfiguration(configuration,
-            LocalClusteringCoefficientStatsConfig::of);
+        var parsedConfig = configurationParser.parseConfiguration(
+            configuration,
+            LocalClusteringCoefficientStatsConfig::of
+        );
+        var resultBuilder = new LccResultBuilderForStatsMode(parsedConfig);
+
         return statsModeBusinessFacade.lcc(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
@@ -643,8 +650,10 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     ) {
         var resultBuilder = new LccResultBuilderForStreamMode();
 
-        var parsedConfig = configurationParser.parseConfiguration(configuration,
-            LocalClusteringCoefficientStreamConfig::of);
+        var parsedConfig = configurationParser.parseConfiguration(
+            configuration,
+            LocalClusteringCoefficientStreamConfig::of
+        );
         return streamModeBusinessFacade.lcc(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
@@ -666,8 +675,10 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     ) {
         var resultBuilder = new LccResultBuilderForWriteMode();
 
-        var parsedConfig = configurationParser.parseConfiguration(configuration,
-            LocalClusteringCoefficientWriteConfig::of);
+        var parsedConfig = configurationParser.parseConfiguration(
+            configuration,
+            LocalClusteringCoefficientWriteConfig::of
+        );
         return writeModeBusinessFacade.lcc(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
@@ -692,9 +703,9 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     public Stream<LeidenStatsResult> leidenStats(String graphName, Map<String, Object> configuration) {
         var statisticsComputationInstructions = ProcedureStatisticsComputationInstructions.forCommunities(
             procedureReturnColumns);
-        var resultBuilder = new LeidenResultBuilderForStatsMode(statisticsComputationInstructions);
-
         var parsedConfig = configurationParser.parseConfiguration(configuration, LeidenStatsConfig::of);
+        var resultBuilder = new LeidenResultBuilderForStatsMode(parsedConfig, statisticsComputationInstructions);
+
         return statsModeBusinessFacade.leiden(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
@@ -759,9 +770,9 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     public Stream<LouvainStatsResult> louvainStats(String graphName, Map<String, Object> configuration) {
         var statisticsComputationInstructions = ProcedureStatisticsComputationInstructions.forCommunities(
             procedureReturnColumns);
-        var resultBuilder = new LouvainResultBuilderForStatsMode(statisticsComputationInstructions);
-
         var parsedConfig = configurationParser.parseConfiguration(configuration, LouvainStatsConfig::of);
+        var resultBuilder = new LouvainResultBuilderForStatsMode(parsedConfig, statisticsComputationInstructions);
+
         return statsModeBusinessFacade.louvain(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
@@ -822,9 +833,9 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         String graphName,
         Map<String, Object> configuration
     ) {
-        var resultBuilder = new ModularityResultBuilderForStatsMode();
-
         var parsedConfig = configurationParser.parseConfiguration(configuration, ModularityStatsConfig::of);
+        var resultBuilder = new ModularityResultBuilderForStatsMode(parsedConfig);
+
         return statsModeBusinessFacade.modularity(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
@@ -867,11 +878,14 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         String graphName,
         Map<String, Object> configuration
     ) {
-        StatisticsComputationInstructions statisticsComputationInstructions = ProcedureStatisticsComputationInstructions.forCommunities(
+        var statisticsComputationInstructions = ProcedureStatisticsComputationInstructions.forCommunities(
             procedureReturnColumns);
-        var resultBuilder = new ModularityOptimizationResultBuilderForStatsMode(statisticsComputationInstructions);
-
         var parsedConfig = configurationParser.parseConfiguration(configuration, ModularityOptimizationStatsConfig::of);
+        var resultBuilder = new ModularityOptimizationResultBuilderForStatsMode(
+            parsedConfig,
+            statisticsComputationInstructions
+        );
+
         return statsModeBusinessFacade.modularityOptimization(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
@@ -893,8 +907,10 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         Map<String, Object> configuration
     ) {
 
-        var parsedConfig = configurationParser.parseConfiguration(configuration,
-            ModularityOptimizationStreamConfig::of);
+        var parsedConfig = configurationParser.parseConfiguration(
+            configuration,
+            ModularityOptimizationStreamConfig::of
+        );
 
         var resultBuilder = new ModularityOptimizationResultBuilderForStreamMode(parsedConfig);
 
@@ -950,9 +966,9 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     ) {
         var statisticsComputationInstructions = ProcedureStatisticsComputationInstructions.forComponents(
             procedureReturnColumns);
-        var resultBuilder = new SccResultBuilderForStatsMode(statisticsComputationInstructions);
-
         var parsedConfig = configurationParser.parseConfiguration(configuration, SccStatsConfig::of);
+        var resultBuilder = new SccResultBuilderForStatsMode(parsedConfig, statisticsComputationInstructions);
+
         return statsModeBusinessFacade.scc(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
@@ -1027,9 +1043,9 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
 
     @Override
     public Stream<TriangleCountStatsResult> triangleCountStats(String graphName, Map<String, Object> configuration) {
-        var resultBuilder = new TriangleCountResultBuilderForStatsMode();
-
         var parsedConfig = configurationParser.parseConfiguration(configuration, TriangleCountStatsConfig::of);
+        var resultBuilder = new TriangleCountResultBuilderForStatsMode(parsedConfig);
+
         return statsModeBusinessFacade.triangleCount(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
@@ -1108,9 +1124,9 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     public Stream<WccStatsResult> wccStats(String graphName, Map<String, Object> configuration) {
         var statisticsComputationInstructions = ProcedureStatisticsComputationInstructions.forComponents(
             procedureReturnColumns);
-        var resultBuilder = new WccResultBuilderForStatsMode(statisticsComputationInstructions);
-
         var parsedConfig = configurationParser.parseConfiguration(configuration, WccStatsConfig::of);
+        var resultBuilder = new WccResultBuilderForStatsMode(parsedConfig, statisticsComputationInstructions);
+
         return statsModeBusinessFacade.wcc(GraphName.parse(graphName), parsedConfig, resultBuilder);
     }
 
