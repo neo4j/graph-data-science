@@ -19,18 +19,20 @@
  */
 package org.neo4j.gds.core.io.file;
 
+import org.neo4j.batchimport.api.InputIterable;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.core.loading.Capabilities;
-import org.neo4j.gds.compat.batchimport.InputIterable;
-import org.neo4j.gds.compat.batchimport.input.Input;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public interface FileInput extends Input {
+public interface FileInput {
+    InputIterable nodes();
+
+    InputIterable relationships();
     InputIterable graphProperties();
     String userName();
     GraphInfo graphInfo();

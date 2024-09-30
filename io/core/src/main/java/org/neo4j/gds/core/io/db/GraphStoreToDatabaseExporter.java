@@ -98,7 +98,7 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter {
 
     @Override
     public void export(GraphStoreInput graphStoreInput) {
-        parallelBatchImporter.writeDatabase(graphStoreInput, false);
+        parallelBatchImporter.writeDatabase(graphStoreInput.toInput(), false);
     }
 
     @Override

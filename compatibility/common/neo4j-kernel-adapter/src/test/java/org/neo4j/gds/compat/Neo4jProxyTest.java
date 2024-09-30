@@ -20,6 +20,7 @@
 package org.neo4j.gds.compat;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.values.storable.Values;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 
@@ -28,6 +29,6 @@ class Neo4jProxyTest {
     @Test
     void shouldLoadProxySuccessfully() {
         // Any access to the proxy will trigger loading an implementation
-        assertThatCode(Neo4jProxy::emptyCollector).doesNotThrowAnyException();
+        assertThatCode(() -> Neo4jProxy.sequenceSizeAsInt(Values.EMPTY_BOOLEAN_ARRAY)).doesNotThrowAnyException();
     }
 }

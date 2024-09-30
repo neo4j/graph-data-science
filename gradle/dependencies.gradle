@@ -47,6 +47,7 @@ def neo_deps = [
     'neo4j-fabric',
     'neo4j-graphdb-api',
     'neo4j-id-generator',
+    'neo4j-import-api',
     'neo4j-import-util',
     'neo4j-index',
     'neo4j-io',

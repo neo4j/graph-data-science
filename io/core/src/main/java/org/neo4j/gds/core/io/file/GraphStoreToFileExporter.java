@@ -19,10 +19,11 @@
  */
 package org.neo4j.gds.core.io.file;
 
+import org.neo4j.batchimport.api.input.Collector;
+import org.neo4j.batchimport.api.input.Input;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.compat.batchimport.input.Input;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.io.GraphStoreExporter;
@@ -123,6 +124,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
     @Override
     protected void export(GraphStoreInput graphStoreInput) {
         var progressTracker = createProgressTracker(graphStoreInput);
+        var pbiInput = graphStoreInput.toInput();
         try {
             progressTracker.beginSubTask("Csv export");
             exportUserName();
@@ -133,8 +135,8 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
             exportGraphCapabilities(graphStoreInput);
             exportNodeLabelMapping(graphStoreInput);
             exportRelationshipTypeMapping(graphStoreInput);
-            exportNodes(graphStoreInput, progressTracker);
-            exportRelationships(graphStoreInput, progressTracker);
+            exportNodes(pbiInput, progressTracker);
+            exportRelationships(pbiInput, progressTracker);
             exportGraphProperties(graphStoreInput, progressTracker);
         } catch (Exception e) {
             // as the tracker is created in this method
@@ -172,7 +174,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
         ProgressTracker progressTracker
     ) {
         progressTracker.beginSubTask();
-        var nodeInput = graphStoreInput.nodes();
+        var nodeInput = graphStoreInput.nodes(Collector.EMPTY);
         var nodeInputIterator = nodeInput.iterator();
 
         var tasks = ParallelUtil.tasks(
@@ -193,7 +195,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
         ProgressTracker progressTracker
     ) {
         progressTracker.beginSubTask();
-        var relationshipInput = graphStoreInput.relationships();
+        var relationshipInput = graphStoreInput.relationships(Collector.EMPTY);
         var relationshipInputIterator = relationshipInput.iterator();
 
         var tasks = ParallelUtil.tasks(

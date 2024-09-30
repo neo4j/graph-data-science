@@ -19,9 +19,10 @@
  */
 package org.neo4j.gds.core.io;
 
-import org.neo4j.gds.compat.batchimport.input.Group;
-import org.neo4j.gds.compat.batchimport.input.InputEntityVisitor;
-import org.neo4j.gds.compat.batchimport.input.ReadableGroups;
+
+import org.neo4j.batchimport.api.input.Group;
+import org.neo4j.batchimport.api.input.InputEntityVisitor;
+import org.neo4j.batchimport.api.input.ReadableGroups;
 
 public interface EntityLongIdVisitor {
 
@@ -49,7 +50,7 @@ public interface EntityLongIdVisitor {
     };
 
     static EntityLongIdVisitor mapping(ReadableGroups readableGroups) {
-        return new Mapping(readableGroups.getGlobalGroup());
+        return new Mapping(readableGroups.get(null));
     }
 
     final class Mapping implements EntityLongIdVisitor {

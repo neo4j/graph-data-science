@@ -20,25 +20,24 @@
 package org.neo4j.gds.core.io;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.batchimport.api.InputIterable;
+import org.neo4j.batchimport.api.InputIterator;
+import org.neo4j.batchimport.api.input.IdType;
+import org.neo4j.batchimport.api.input.Input;
+import org.neo4j.batchimport.api.input.InputChunk;
+import org.neo4j.batchimport.api.input.InputEntityVisitor;
+import org.neo4j.batchimport.api.input.ReadableGroups;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.graph.GraphProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.compat.batchimport.InputIterable;
-import org.neo4j.gds.compat.batchimport.InputIterator;
-import org.neo4j.gds.compat.batchimport.input.Estimates;
-import org.neo4j.gds.compat.batchimport.input.IdType;
-import org.neo4j.gds.compat.batchimport.input.Input;
-import org.neo4j.gds.compat.batchimport.input.InputChunk;
-import org.neo4j.gds.compat.batchimport.input.InputEntityVisitor;
-import org.neo4j.gds.compat.batchimport.input.ReadableGroups;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.io.GraphStoreExporter.IdMapFunction;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.internal.batchimport.cache.idmapping.string.LongEncoder;
+import org.neo4j.internal.batchimport.input.Groups;
 import org.neo4j.internal.id.IdValidator;
 
 import java.io.IOException;
@@ -57,7 +56,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public final class GraphStoreInput implements Input {
+public final class GraphStoreInput {
 
     private final MetaDataStore metaDataStore;
     private final NodeStore nodeStore;
@@ -71,7 +70,7 @@ public final class GraphStoreInput implements Input {
     private final Capabilities capabilities;
 
     enum IdMode implements Supplier<EntityLongIdVisitor> {
-        MAPPING(IdType.INTEGER, Neo4jProxy.newGroups()) {
+        MAPPING(IdType.INTEGER, new Groups()) {
             @Override
             public EntityLongIdVisitor get() {
                 return EntityLongIdVisitor.mapping(this.readableGroups);
@@ -172,32 +171,11 @@ public final class GraphStoreInput implements Input {
         this.capabilities = capabilities;
     }
 
-    @Override
-    public InputIterable nodes() {
-        return () -> new NodeImporter(nodeStore, batchSize, idMode.get(), idMapFunction);
-    }
-
-    @Override
-    public InputIterable relationships() {
-        return () -> new RelationshipImporter(relationshipStore, batchSize, idMode.get(), idMapFunction);
-    }
-
-    @Override
-    public IdType idType() {
-        return idMode.idType;
-    }
-
-    @Override
-    public ReadableGroups groups() {
-        return idMode.readableGroups;
-    }
-
-    @Override
-    public Estimates calculateEstimates() {
+    public Input toInput() {
         long numberOfNodeProperties = nodeStore.propertyCount();
         long numberOfRelationshipProperties = relationshipStore.propertyCount();
 
-        return Neo4jProxy.knownEstimates(
+        var estimate = Input.knownEstimates(
             nodeStore.nodeCount,
             relationshipStore.relationshipCount,
             numberOfNodeProperties,
@@ -205,6 +183,13 @@ public final class GraphStoreInput implements Input {
             numberOfNodeProperties * Double.BYTES,
             numberOfRelationshipProperties * Double.BYTES,
             nodeStore.labelCount()
+        );
+        return Input.input(
+            () -> new NodeImporter(nodeStore, batchSize, idMode.get(), idMapFunction),
+            () -> new RelationshipImporter(relationshipStore, batchSize, idMode.get(), idMapFunction),
+            this.idMode.idType,
+            estimate,
+            this.idMode.readableGroups
         );
     }
 
@@ -246,8 +231,9 @@ public final class GraphStoreInput implements Input {
             return new GraphPropertyInputChunk();
         }
 
+
         @Override
-        public synchronized boolean next(InputChunk chunk) throws IOException {
+        public boolean next(InputChunk chunk) throws IOException {
             if (this.splits.isEmpty()) {
                 if (this.graphPropertyIterator.hasNext()) {
                     initializeSplits();

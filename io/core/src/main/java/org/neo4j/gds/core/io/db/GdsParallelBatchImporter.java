@@ -19,33 +19,41 @@
  */
 package org.neo4j.gds.core.io.db;
 
+import org.neo4j.batchimport.api.BatchImporter;
+import org.neo4j.batchimport.api.IndexConfig;
+import org.neo4j.batchimport.api.Monitor;
+import org.neo4j.batchimport.api.input.Collector;
+import org.neo4j.batchimport.api.input.Input;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.compat.batchimport.BatchImporter;
-import org.neo4j.gds.compat.batchimport.ImportConfig;
-import org.neo4j.gds.compat.batchimport.Monitor;
-import org.neo4j.gds.compat.batchimport.input.Collector;
-import org.neo4j.gds.compat.batchimport.input.Input;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.settings.Neo4jSettings;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.internal.batchimport.DefaultAdditionalIds;
+import org.neo4j.internal.batchimport.input.Collectors;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.layout.Neo4jLayout;
+import org.neo4j.io.pagecache.context.CursorContextFactory;
+import org.neo4j.io.pagecache.tracing.PageCacheTracer;
+import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
 import org.neo4j.kernel.impl.scheduler.JobSchedulerFactory;
+import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
 import org.neo4j.kernel.lifecycle.LifeSupport;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.logging.internal.NullLogService;
+import org.neo4j.memory.EmptyMemoryTracker;
 import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.storageengine.api.StorageEngineFactory;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Locale;
 
@@ -211,8 +219,8 @@ public final class GdsParallelBatchImporter {
 
     private Collector getCollector() {
         return config.useBadCollector()
-            ? Neo4jProxy.badCollector(new LoggingOutputStream(log), 0)
-            : Neo4jProxy.emptyCollector();
+            ? Collectors.badCollector(new LoggingOutputStream(log), 0)
+            : Collector.EMPTY;
     }
 
     private BatchImporter instantiateBatchImporter(
@@ -221,15 +229,29 @@ public final class GdsParallelBatchImporter {
         Collector collector,
         JobScheduler jobScheduler
     ) {
-        return Neo4jProxy.instantiateBatchImporter(
+
+        var importConfig = Config.toBatchImporterConfig(this.config);
+        var storageEngineFactory = StorageEngineFactory.selectStorageEngine(this.databaseConfig);
+        var progressOutput = new PrintStream(PrintStream.nullOutputStream(), true, StandardCharsets.UTF_8);
+        var verboseProgressOutput = false;
+
+        return storageEngineFactory.batchImporter(
             databaseLayout,
             this.fileSystem,
-            Config.toBatchImporterConfig(this.config),
+            PageCacheTracer.NULL,
+            importConfig,
             logService,
-            this.executionMonitor,
+            progressOutput,
+            verboseProgressOutput,
+            DefaultAdditionalIds.EMPTY,
             this.databaseConfig,
+            this.executionMonitor,
             jobScheduler,
-            collector
+            collector,
+            TransactionLogInitializer.getLogFilesInitializer(),
+            new IndexImporterFactoryImpl(),
+            EmptyMemoryTracker.INSTANCE,
+            CursorContextFactory.NULL_CONTEXT_FACTORY
         );
     }
 
@@ -273,14 +295,29 @@ public final class GdsParallelBatchImporter {
             return ImmutableConfig.builder();
         }
 
-        static ImportConfig toBatchImporterConfig(Config config) {
-            return new ImportConfig(
-                config.batchSize(),
-                config.writeConcurrency(),
-                config.highIO(),
-                true,
-                true
-            );
+        static org.neo4j.batchimport.api.Configuration toBatchImporterConfig(Config config) {
+            return new org.neo4j.batchimport.api.Configuration() {
+
+                @Override
+                public int batchSize() {
+                    return config.batchSize();
+                }
+
+                @Override
+                public int maxNumberOfWorkerThreads() {
+                    return config.writeConcurrency();
+                }
+
+                @Override
+                public boolean highIO() {
+                    return config.highIO();
+                }
+
+                @Override
+                public IndexConfig indexConfig() {
+                    return IndexConfig.DEFAULT.withLabelIndex().withRelationshipTypeIndex();
+                }
+            };
         }
     }
 }

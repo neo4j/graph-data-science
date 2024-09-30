@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.core.io.file;
 
-import org.neo4j.gds.compat.batchimport.InputIterator;
-import org.neo4j.gds.compat.batchimport.input.InputEntityVisitor;
+import org.neo4j.batchimport.api.InputIterator;
+import org.neo4j.batchimport.api.input.InputEntityVisitor;
 import org.neo4j.gds.core.io.GraphStoreInput;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 

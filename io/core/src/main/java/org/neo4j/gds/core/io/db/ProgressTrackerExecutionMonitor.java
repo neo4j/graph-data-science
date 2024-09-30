@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.core.io.db;
 
+import org.neo4j.batchimport.api.Monitor;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.compat.batchimport.Monitor;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;

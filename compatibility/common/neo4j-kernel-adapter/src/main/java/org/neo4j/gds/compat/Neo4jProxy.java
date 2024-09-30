@@ -20,28 +20,15 @@
 package org.neo4j.gds.compat;
 
 import org.intellij.lang.annotations.PrintFormat;
-import org.neo4j.configuration.Config;
 import org.neo4j.dbms.api.DatabaseNotFoundException;
 import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.annotation.SuppressForbidden;
-import org.neo4j.gds.compat.batchimport.BatchImporter;
-import org.neo4j.gds.compat.batchimport.ImportConfig;
-import org.neo4j.gds.compat.batchimport.Monitor;
-import org.neo4j.gds.compat.batchimport.input.Collector;
-import org.neo4j.gds.compat.batchimport.input.Estimates;
-import org.neo4j.gds.compat.batchimport.input.ReadableGroups;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
-import org.neo4j.io.fs.FileSystemAbstraction;
-import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.api.procedure.CallableProcedure;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
-import org.neo4j.logging.internal.LogService;
-import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.SequenceValue;
-
-import java.io.OutputStream;
 
 public final class Neo4jProxy {
 
@@ -57,64 +44,6 @@ public final class Neo4jProxy {
             GlobalProcedures.class
         );
         return globalProcedures.getCurrentView().lookupComponentProvider(component, safe).apply(ctx);
-    }
-
-    public static BatchImporter instantiateBatchImporter(
-        DatabaseLayout directoryStructure,
-        FileSystemAbstraction fileSystem,
-        ImportConfig configuration,
-        LogService logService,
-        Monitor executionMonitor,
-        Config dbConfig,
-        JobScheduler jobScheduler,
-        Collector badCollector
-    ) {
-        return IMPL.instantiateBatchImporter(
-            directoryStructure,
-            fileSystem,
-            configuration,
-            executionMonitor,
-            logService,
-            dbConfig,
-            jobScheduler,
-            badCollector
-        );
-    }
-
-    public static ReadableGroups newGroups() {
-        return IMPL.newGroups();
-    }
-
-    public static ReadableGroups newInitializedGroups() {
-        return IMPL.newInitializedGroups();
-    }
-
-    public static Collector emptyCollector() {
-        return IMPL.emptyCollector();
-    }
-
-    public static Collector badCollector(OutputStream log, int batchSize) {
-        return IMPL.badCollector(log, batchSize);
-    }
-
-    public static Estimates knownEstimates(
-        long numberOfNodes,
-        long numberOfRelationships,
-        long numberOfNodeProperties,
-        long numberOfRelationshipProperties,
-        long sizeOfNodeProperties,
-        long sizeOfRelationshipProperties,
-        long numberOfNodeLabels
-    ) {
-        return IMPL.knownEstimates(
-            numberOfNodes,
-            numberOfRelationships,
-            numberOfNodeProperties,
-            numberOfRelationshipProperties,
-            sizeOfNodeProperties,
-            sizeOfRelationshipProperties,
-            numberOfNodeLabels
-        );
     }
 
     @SuppressForbidden(reason = "This is the compat API")

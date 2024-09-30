@@ -26,18 +26,15 @@ import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.collections.impl.block.factory.Functions;
+import org.neo4j.batchimport.api.InputIterable;
+import org.neo4j.batchimport.api.InputIterator;
+import org.neo4j.batchimport.api.input.InputChunk;
+import org.neo4j.batchimport.api.input.InputEntityVisitor;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
-import org.neo4j.gds.compat.batchimport.InputIterable;
-import org.neo4j.gds.compat.batchimport.InputIterator;
-import org.neo4j.gds.compat.batchimport.input.Estimates;
-import org.neo4j.gds.compat.batchimport.input.IdType;
-import org.neo4j.gds.compat.batchimport.input.InputChunk;
-import org.neo4j.gds.compat.batchimport.input.InputEntityVisitor;
-import org.neo4j.gds.compat.batchimport.input.ReadableGroups;
 import org.neo4j.gds.core.io.GraphStoreInput;
 import org.neo4j.gds.core.io.file.FileHeader;
 import org.neo4j.gds.core.io.file.FileInput;
@@ -149,21 +146,6 @@ final class CsvFileInput implements FileInput {
         ));
 
         return () -> new GraphPropertyImporter(headerToDataFilesMapping, graphPropertySchema);
-    }
-
-    @Override
-    public IdType idType() {
-        return IdType.ACTUAL;
-    }
-
-    @Override
-    public ReadableGroups groups() {
-        return ReadableGroups.EMPTY;
-    }
-
-    @Override
-    public Estimates calculateEstimates() {
-        return Estimates.NULL;
     }
 
     @Override

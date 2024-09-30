@@ -20,101 +20,24 @@
 package org.neo4j.gds.compat._525;
 
 import org.neo4j.collection.ResourceRawIterator;
-import org.neo4j.configuration.Config;
 import org.neo4j.dbms.api.DatabaseNotFoundException;
 import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.compat.CompatCallableProcedure;
 import org.neo4j.gds.compat.Neo4jProxyApi;
-import org.neo4j.gds.compat.batchimport.BatchImporter;
-import org.neo4j.gds.compat.batchimport.ImportConfig;
-import org.neo4j.gds.compat.batchimport.Monitor;
-import org.neo4j.gds.compat.batchimport.input.Collector;
-import org.neo4j.gds.compat.batchimport.input.Estimates;
-import org.neo4j.gds.compat.batchimport.input.ReadableGroups;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
-import org.neo4j.io.fs.FileSystemAbstraction;
-import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.api.ResourceMonitor;
 import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.api.procedure.CallableProcedure;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.impl.query.QueryExecutionKernelException;
-import org.neo4j.logging.internal.LogService;
-import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.SequenceValue;
-
-import java.io.OutputStream;
 
 import static org.neo4j.internal.helpers.collection.Iterators.asRawIterator;
 
 public final class Neo4jProxyImpl implements Neo4jProxyApi {
-
-    @Override
-    public BatchImporter instantiateBatchImporter(
-        DatabaseLayout dbLayout,
-        FileSystemAbstraction fileSystem,
-        ImportConfig config,
-        Monitor monitor,
-        LogService logService,
-        Config dbConfig,
-        JobScheduler jobScheduler,
-        Collector badCollector
-    ) {
-        return BatchImporterCompat.instantiateBatchImporter(
-            dbLayout,
-            fileSystem,
-            config,
-            monitor,
-            logService,
-            dbConfig,
-            jobScheduler,
-            badCollector
-        );
-    }
-
-    @Override
-    public ReadableGroups newGroups() {
-        return BatchImporterCompat.newGroups();
-    }
-
-    @Override
-    public ReadableGroups newInitializedGroups() {
-        return BatchImporterCompat.newInitializedGroups();
-    }
-
-    @Override
-    public Collector emptyCollector() {
-        return BatchImporterCompat.emptyCollector();
-    }
-
-    @Override
-    public Collector badCollector(OutputStream outputStream, int batchSize) {
-        return BatchImporterCompat.badCollector(outputStream, batchSize);
-    }
-
-    @Override
-    public Estimates knownEstimates(
-        long numberOfNodes,
-        long numberOfRelationships,
-        long numberOfNodeProperties,
-        long numberOfRelationshipProperties,
-        long sizeOfNodeProperties,
-        long sizeOfRelationshipProperties,
-        long numberOfNodeLabels
-    ) {
-        return BatchImporterCompat.knownEstimates(
-            numberOfNodes,
-            numberOfRelationships,
-            numberOfNodeProperties,
-            numberOfRelationshipProperties,
-            sizeOfNodeProperties,
-            sizeOfRelationshipProperties,
-            numberOfNodeLabels
-        );
-    }
 
     @Override
     public void rethrowUnlessDuplicateRegistration(ProcedureException e) throws KernelException {
