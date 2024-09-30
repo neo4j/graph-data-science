@@ -40,7 +40,7 @@ import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.gdl.GdlGraphs;
 import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.metrics.MetricsFacade;
+import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.termination.TerminationMonitor;
 import org.neo4j.gds.test.TestAlgoResultBuilder;
 import org.neo4j.gds.test.TestAlgorithm;
@@ -125,7 +125,7 @@ class WriteProcCancellationTest extends BaseTest {
                 .modelCatalog(ModelCatalog.EMPTY)
                 .isGdsAdmin(false)
                 .nodePropertyExporterBuilder(new NativeNodePropertiesExporterBuilder(DatabaseTransactionContext.of(db, tx)))
-                .metricsFacade(MetricsFacade.PASSTHROUGH_METRICS_FACADE)
+                .metrics(Metrics.DISABLED)
                 .build();
 
             assertThatThrownBy(() -> resultConsumer.consume(computationResult, executionContext))

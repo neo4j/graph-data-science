@@ -151,7 +151,7 @@ public class ProcedureGenerator {
 
         if (deprecatedBy.isPresent()) {
             methodBuilder.addStatement(
-                "executionContext().metricsFacade().deprecatedProcedures().called($S)",
+                "executionContext().metrics().deprecatedProcedures().called($S)",
                 fullProcedureName
             );
         }
@@ -198,7 +198,7 @@ public class ProcedureGenerator {
 
         if (deprecatedBy.isPresent()) {
             methodBuilder.addStatement(
-                "executionContext().metricsFacade().deprecatedProcedures().called($S)",
+                "executionContext().metrics().deprecatedProcedures().called($S)",
                 fullProcedureName
             );
         }

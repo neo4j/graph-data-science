@@ -34,7 +34,7 @@ import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.metrics.MetricsFacade;
+import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.termination.TerminationMonitor;
 
@@ -66,7 +66,7 @@ public interface ExecutionContext {
 
     boolean isGdsAdmin();
 
-    MetricsFacade metricsFacade();
+    Metrics metrics();
 
     @Nullable
     AlgorithmsProcedureFacade algorithmsProcedureFacade();
@@ -169,8 +169,8 @@ public interface ExecutionContext {
         }
 
         @Override
-        public MetricsFacade metricsFacade() {
-            return MetricsFacade.PASSTHROUGH_METRICS_FACADE;
+        public Metrics metrics() {
+            return Metrics.DISABLED;
         }
 
         @Override

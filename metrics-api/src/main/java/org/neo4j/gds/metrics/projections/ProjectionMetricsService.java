@@ -23,6 +23,7 @@ import org.neo4j.gds.metrics.ExecutionMetric;
 import org.neo4j.gds.metrics.ExecutionMetricRegistrar;
 
 public class ProjectionMetricsService {
+    public static final ProjectionMetricsService DISABLED = new ProjectionMetricsService(ExecutionMetricRegistrar.DISABLED);
 
     private final ExecutionMetricRegistrar metricRegistrar;
 
@@ -49,5 +50,4 @@ public class ProjectionMetricsService {
     public ExecutionMetric createRandomWakSampling(String type) {
         return metricRegistrar.create(type);
     }
-
 }

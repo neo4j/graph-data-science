@@ -23,19 +23,21 @@ import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 
-public class MetricsFacade {
-
-    public static final MetricsFacade PASSTHROUGH_METRICS_FACADE = new MetricsFacade(
-        new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
-        new ProjectionMetricsService(new PassthroughExecutionMetricRegistrar()),
-        DeprecatedProceduresMetricService.PASSTHROUGH
+/**
+ * This is a <a href="https://refactoring.com/catalog/introduceParameterObject.html">parameter object</a> for all things metrics.
+ */
+public class Metrics {
+    public static final Metrics DISABLED = new Metrics(
+        AlgorithmMetricsService.DISABLED,
+        ProjectionMetricsService.DISABLED,
+        DeprecatedProceduresMetricService.DISABLED
     );
 
     private final AlgorithmMetricsService algorithmMetricsService;
     private final ProjectionMetricsService projectionMetricsService;
     private final DeprecatedProceduresMetricService deprecatedProceduresMetricService;
 
-    public MetricsFacade(
+    public Metrics(
         AlgorithmMetricsService algorithmMetricsService,
         ProjectionMetricsService projectionMetricsService,
         DeprecatedProceduresMetricService deprecatedProceduresMetricService

@@ -37,7 +37,7 @@ import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.metrics.MetricsFacade;
+import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.termination.TerminationMonitor;
@@ -49,7 +49,7 @@ final class NodeClassificationPredictPipelineMutateComputation implements Comput
     private final CloseableResourceRegistry closeableResourceRegistry;
     private final DatabaseId databaseId;
     private final DependencyResolver dependencyResolver;
-    private final MetricsFacade metricsFacade;
+    private final Metrics metrics;
     private final NodeLookup nodeLookup;
     private final NodePropertyExporterBuilder nodePropertyExporterBuilder;
     private final ProcedureReturnColumns procedureReturnColumns;
@@ -73,7 +73,7 @@ final class NodeClassificationPredictPipelineMutateComputation implements Comput
         CloseableResourceRegistry closeableResourceRegistry,
         DatabaseId databaseId,
         DependencyResolver dependencyResolver,
-        MetricsFacade metricsFacade,
+        Metrics metrics,
         NodeLookup nodeLookup,
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
         ProcedureReturnColumns procedureReturnColumns,
@@ -93,7 +93,7 @@ final class NodeClassificationPredictPipelineMutateComputation implements Comput
         this.closeableResourceRegistry = closeableResourceRegistry;
         this.databaseId = databaseId;
         this.dependencyResolver = dependencyResolver;
-        this.metricsFacade = metricsFacade;
+        this.metrics = metrics;
         this.nodeLookup = nodeLookup;
         this.nodePropertyExporterBuilder = nodePropertyExporterBuilder;
         this.procedureReturnColumns = procedureReturnColumns;
@@ -115,7 +115,7 @@ final class NodeClassificationPredictPipelineMutateComputation implements Comput
         CloseableResourceRegistry closeableResourceRegistry,
         DatabaseId databaseId,
         DependencyResolver dependencyResolver,
-        MetricsFacade metricsFacade,
+        Metrics metrics,
         NodeLookup nodeLookup,
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
         ProcedureReturnColumns procedureReturnColumns,
@@ -137,7 +137,7 @@ final class NodeClassificationPredictPipelineMutateComputation implements Comput
             closeableResourceRegistry,
             databaseId,
             dependencyResolver,
-            metricsFacade,
+            metrics,
             nodeLookup,
             nodePropertyExporterBuilder,
             procedureReturnColumns,
@@ -180,7 +180,7 @@ final class NodeClassificationPredictPipelineMutateComputation implements Comput
             .dependencyResolver(dependencyResolver)
             .isGdsAdmin(user.isAdmin())
             .log(log)
-            .metricsFacade(metricsFacade)
+            .metrics(metrics)
             .modelCatalog(modelCatalog)
             .nodeLookup(nodeLookup)
             .nodePropertyExporterBuilder(nodePropertyExporterBuilder)

@@ -20,6 +20,22 @@
 package org.neo4j.gds.metrics;
 
 public abstract class ExecutionMetric implements AutoCloseable {
+    static final ExecutionMetric DISABLED = new ExecutionMetric("disabled") {
+        @Override
+        public void start() {
+            // do nothing
+        }
+
+        @Override
+        public void failed(Exception e) {
+            // do nothing
+        }
+
+        @Override
+        public void close() {
+            // do nothing
+        }
+    };
 
     protected final String operation;
 

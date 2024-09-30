@@ -57,7 +57,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.metrics.MetricsFacade;
+import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.termination.TerminationMonitor;
 import org.neo4j.gds.test.TestAlgoResultBuilder;
 import org.neo4j.gds.test.TestAlgorithm;
@@ -106,7 +106,7 @@ class WriteNodePropertiesComputationResultConsumerTest extends BaseTest {
         .modelCatalog(ModelCatalog.EMPTY)
         .isGdsAdmin(false)
         .nodePropertyExporterBuilder(new NativeNodePropertiesExporterBuilder(EmptyTransactionContext.INSTANCE))
-        .metricsFacade(MetricsFacade.PASSTHROUGH_METRICS_FACADE)
+        .metrics(Metrics.DISABLED)
         .build();
 
     @Test

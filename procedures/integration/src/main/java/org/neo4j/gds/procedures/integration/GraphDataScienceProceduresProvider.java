@@ -36,7 +36,7 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.metrics.MetricsFacade;
+import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.procedures.DatabaseIdAccessor;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
 import org.neo4j.gds.procedures.GraphCatalogProcedureFacadeFactory;
@@ -78,7 +78,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
     private final GraphStoreCatalogService graphStoreCatalogService;
     private final LimitsConfiguration limitsConfiguration;
     private final MemoryGuard memoryGuard;
-    private final MetricsFacade metricsFacade;
+    private final Metrics metrics;
     private final ModelCatalog modelCatalog;
     private final ModelRepository modelRepository;
     private final PipelineRepository pipelineRepository;
@@ -101,7 +101,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         GraphStoreCatalogService graphStoreCatalogService,
         LimitsConfiguration limitsConfiguration,
         MemoryGuard memoryGuard,
-        MetricsFacade metricsFacade,
+        Metrics metrics,
         ModelCatalog modelCatalog,
         ModelRepository modelRepository,
         PipelineRepository pipelineRepository,
@@ -123,7 +123,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         this.graphStoreCatalogService = graphStoreCatalogService;
         this.limitsConfiguration = limitsConfiguration;
         this.memoryGuard = memoryGuard;
-        this.metricsFacade = metricsFacade;
+        this.metrics = metrics;
         this.modelCatalog = modelCatalog;
         this.modelRepository = modelRepository;
         this.pipelineRepository = pipelineRepository;
@@ -187,7 +187,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
             graphStoreCatalogService,
             limitsConfiguration,
             memoryGuard,
-            metricsFacade,
+            metrics,
             modelCatalog,
             modelRepository,
             pipelineRepository,

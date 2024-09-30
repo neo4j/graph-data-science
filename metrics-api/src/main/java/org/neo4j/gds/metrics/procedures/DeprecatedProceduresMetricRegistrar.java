@@ -20,6 +20,7 @@
 package org.neo4j.gds.metrics.procedures;
 
 public interface DeprecatedProceduresMetricRegistrar {
+    DeprecatedProceduresMetricRegistrar DISABLED = __ -> {};
 
     void called(String deprecatedProcedure);
 }

@@ -40,7 +40,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.metrics.MetricsFacade;
+import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.termination.TerminationMonitor;
 import org.neo4j.gds.utils.StringJoining;
 
@@ -153,7 +153,7 @@ class ProcedureExecutorTest {
             .closeableResourceRegistry(CloseableResourceRegistry.EMPTY)
             .nodeLookup(NodeLookup.EMPTY)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
-            .metricsFacade(MetricsFacade.PASSTHROUGH_METRICS_FACADE)
+            .metrics(Metrics.DISABLED)
             .build();
     }
 

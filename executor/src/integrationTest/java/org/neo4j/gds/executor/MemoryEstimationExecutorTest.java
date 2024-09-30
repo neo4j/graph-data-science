@@ -40,7 +40,7 @@ import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.gdl.GdlGraphs;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.metrics.MetricsFacade;
+import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.termination.TerminationMonitor;
 import org.neo4j.gds.test.TestAlgorithm;
@@ -84,7 +84,7 @@ class MemoryEstimationExecutorTest extends BaseTest {
             .nodeLookup(NodeLookup.EMPTY)
             .modelCatalog(ModelCatalog.EMPTY)
             .isGdsAdmin(false)
-            .metricsFacade(MetricsFacade.PASSTHROUGH_METRICS_FACADE)
+            .metrics(Metrics.DISABLED)
             .build();
 
         memoryEstimationExecutor = new MemoryEstimationExecutor<>(

@@ -28,7 +28,7 @@ import org.neo4j.gds.extension.IdToVariable;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraphExtension;
 import org.neo4j.gds.extension.NodeFunction;
-import org.neo4j.gds.metrics.MetricsFacade;
+import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.settings.Neo4jSettings;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -91,8 +91,8 @@ public abstract class BaseTest {
             @Override
             public Lifecycle newInstance(ExtensionContext context, Dependencies dependencies) {
                 dependencies.globalProcedures().registerComponent(
-                    MetricsFacade.class,
-                    ctx -> MetricsFacade.PASSTHROUGH_METRICS_FACADE,
+                    Metrics.class,
+                    ctx -> Metrics.DISABLED,
                     false
                 );
                 return new LifecycleAdapter();

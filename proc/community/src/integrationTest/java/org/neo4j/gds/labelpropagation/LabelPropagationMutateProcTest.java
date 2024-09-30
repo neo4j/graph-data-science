@@ -70,7 +70,6 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
@@ -110,20 +109,20 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
     @Neo4jGraph
     public static final String DB_CYPHER =
         "CREATE" +
-        "  (a:A {id: 0, seed: 42}) " +
-        ", (b:B {id: 1, seed: 42}) " +
+            "  (a:A {id: 0, seed: 42}) " +
+            ", (b:B {id: 1, seed: 42}) " +
 
-        ", (a)-[:X]->(:A {id: 2,  weight: 1.0, seed: 1}) " +
-        ", (a)-[:X]->(:A {id: 3,  weight: 2.0, seed: 1}) " +
-        ", (a)-[:X]->(:A {id: 4,  weight: 1.0, seed: 1}) " +
-        ", (a)-[:X]->(:A {id: 5,  weight: 1.0, seed: 1}) " +
-        ", (a)-[:X]->(:A {id: 6,  weight: 8.0, seed: 2}) " +
+            ", (a)-[:X]->(:A {id: 2,  weight: 1.0, seed: 1}) " +
+            ", (a)-[:X]->(:A {id: 3,  weight: 2.0, seed: 1}) " +
+            ", (a)-[:X]->(:A {id: 4,  weight: 1.0, seed: 1}) " +
+            ", (a)-[:X]->(:A {id: 5,  weight: 1.0, seed: 1}) " +
+            ", (a)-[:X]->(:A {id: 6,  weight: 8.0, seed: 2}) " +
 
-        ", (b)-[:X]->(:B {id: 7,  weight: 1.0, seed: 1}) " +
-        ", (b)-[:X]->(:B {id: 8,  weight: 2.0, seed: 1}) " +
-        ", (b)-[:X]->(:B {id: 9,  weight: 1.0, seed: 1}) " +
-        ", (b)-[:X]->(:B {id: 10, weight: 1.0, seed: 1}) " +
-        ", (b)-[:X]->(:B {id: 11, weight: 8.0, seed: 2})";
+            ", (b)-[:X]->(:B {id: 7,  weight: 1.0, seed: 1}) " +
+            ", (b)-[:X]->(:B {id: 8,  weight: 2.0, seed: 1}) " +
+            ", (b)-[:X]->(:B {id: 9,  weight: 1.0, seed: 1}) " +
+            ", (b)-[:X]->(:B {id: 10, weight: 1.0, seed: 1}) " +
+            ", (b)-[:X]->(:B {id: 11, weight: 8.0, seed: 2})";
     private static final String TEST_USERNAME = Username.EMPTY_USERNAME.username();
     private static final String MUTATE_PROPERTY = "communityId";
     private static final String TEST_GRAPH_NAME = "myGraph";
@@ -138,13 +137,13 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
         // Create explicit graphs with both projection variants
         runQuery(
             "CALL gds.graph.project(" +
-            "   '" + TEST_GRAPH_NAME + "', " +
-            "   {" +
-            "       A: {label: 'A', properties: {seed: {property: 'seed'}, weight: {property: 'weight'}}}, " +
-            "       B: {label: 'B', properties: {seed: {property: 'seed'}, weight: {property: 'weight'}}}" +
-            "   }, " +
-            "   '*'" +
-            ")"
+                "   '" + TEST_GRAPH_NAME + "', " +
+                "   {" +
+                "       A: {label: 'A', properties: {seed: {property: 'seed'}, weight: {property: 'weight'}}}, " +
+                "       B: {label: 'B', properties: {seed: {property: 'seed'}, weight: {property: 'weight'}}}" +
+                "   }, " +
+                "   '*'" +
+                ")"
         );
     }
 
@@ -156,17 +155,17 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
     private String expectedMutatedGraph() {
         return
             "  (a { communityId: 44 }) " +
-            ", (b { communityId: 49 }) " +
-            ", (a)-->({ communityId: 44 }) " +
-            ", (a)-->({ communityId: 45 }) " +
-            ", (a)-->({ communityId: 46 }) " +
-            ", (a)-->({ communityId: 47 }) " +
-            ", (a)-->({ communityId: 48 }) " +
-            ", (b)-->({ communityId: 49 }) " +
-            ", (b)-->({ communityId: 50 }) " +
-            ", (b)-->({ communityId: 51 }) " +
-            ", (b)-->({ communityId: 52 }) " +
-            ", (b)-->({ communityId: 53 })";
+                ", (b { communityId: 49 }) " +
+                ", (a)-->({ communityId: 44 }) " +
+                ", (a)-->({ communityId: 45 }) " +
+                ", (a)-->({ communityId: 46 }) " +
+                ", (a)-->({ communityId: 47 }) " +
+                ", (a)-->({ communityId: 48 }) " +
+                ", (b)-->({ communityId: 49 }) " +
+                ", (b)-->({ communityId: 50 }) " +
+                ", (b)-->({ communityId: 51 }) " +
+                ", (b)-->({ communityId: 52 }) " +
+                ", (b)-->({ communityId: 53 })";
     }
 
     @Test
@@ -318,9 +317,9 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
 
         String graphWriteQuery =
             "CALL gds.graph.nodeProperties.write(" +
-            "   $graph, " +
-            "   [$property]" +
-            ") YIELD writeMillis, graphName, nodeProperties, propertiesWritten";
+                "   $graph, " +
+                "   [$property]" +
+                ") YIELD writeMillis, graphName, nodeProperties, propertiesWritten";
         runQuery(graphWriteQuery, Map.of("graph", TEST_GRAPH_NAME, "property", MUTATE_PROPERTY));
 
         String checkNeo4jGraphNegativeQuery = formatWithLocale("MATCH (n:A) RETURN n.%s AS property", MUTATE_PROPERTY);
@@ -350,7 +349,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
             .flatMap(e -> e.properties().entrySet().stream())
             .anyMatch(
                 props -> props.getKey().equals(MUTATE_PROPERTY) &&
-                         props.getValue().valueType() == ValueType.LONG
+                    props.getValue().valueType() == ValueType.LONG
             );
         assertThat(containsMutateProperty).isTrue();
     }
@@ -376,7 +375,8 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
         );
         runMutation(TEST_GRAPH_NAME, config);
 
-        var mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), TEST_GRAPH_NAME).graphStore();
+        var mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), TEST_GRAPH_NAME)
+            .graphStore();
 
         var expectedProperties = Set.of(MUTATE_PROPERTY);
         assertEquals(expectedProperties, mutatedGraph.nodePropertyKeys(NodeLabel.of("A")));
@@ -398,10 +398,15 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
 
             fail();
         } catch (IllegalArgumentException e) {
-            assertThat(e).hasMessage(formatWithLocale("Node property `%s` already exists in the in-memory graph.", MUTATE_PROPERTY));
+            assertThat(e).hasMessage(formatWithLocale(
+                "Node property `%s` already exists in the in-memory graph.",
+                MUTATE_PROPERTY
+            ));
         }
 
-        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), graphName).graphStore().getUnion();
+        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), graphName)
+            .graphStore()
+            .getUnion();
         assertGraphEquals(fromGdl(expectedMutatedGraph()), mutatedGraph);
     }
 
@@ -502,12 +507,15 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
             .with(EmptyUserLogRegistryFactory.INSTANCE)
             .build();
 
-        var configurationParser = new UserSpecificConfigurationParser(new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance),requestScopedDependencies.getUser());
+        var configurationParser = new UserSpecificConfigurationParser(new ConfigurationParser(
+            DefaultsConfiguration.Instance,
+            LimitsConfiguration.Instance
+        ), requestScopedDependencies.getUser());
 
         var genericStub = new GenericStub(configurationParser, null);
         var algorithmProcessingTemplate = DefaultAlgorithmProcessingTemplate.create(
             logMock,
-            new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
+            AlgorithmMetricsService.DISABLED,
             graphStoreCatalogService,
             MemoryGuard.DISABLED,
             requestScopedDependencies
@@ -543,7 +551,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
 
         return new GraphDataScienceProceduresBuilder(Log.noOpLog())
             .with(new AlgorithmsProcedureFacade(null, communityProcedureFacade, null, null, null, null, null))
-            .with(DeprecatedProceduresMetricService.PASSTHROUGH)
+            .with(DeprecatedProceduresMetricService.DISABLED)
             .build();
     }
 }

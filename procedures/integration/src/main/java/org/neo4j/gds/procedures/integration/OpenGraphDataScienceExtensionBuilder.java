@@ -35,7 +35,7 @@ import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryGauge;
-import org.neo4j.gds.metrics.MetricsFacade;
+import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
@@ -65,13 +65,13 @@ public final class OpenGraphDataScienceExtensionBuilder {
     private final GraphDataScienceProceduresProviderFactory graphDataScienceProceduresProviderFactory;
 
     // edition specifics
-    private final MetricsFacade metricsFacade;
+    private final Metrics metrics;
     private final ModelCatalog modelCatalog;
 
     // services
     private final TaskStoreService taskStoreService;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
-    private final Boolean useMaxMemoryEstimation;
+    private final boolean useMaxMemoryEstimation;
     private final UserLogServices userLogServices;
     private final Lifecycle gcListener;
 
@@ -79,7 +79,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
         Log log,
         ComponentRegistration componentRegistration,
         GraphDataScienceProceduresProviderFactory graphDataScienceProceduresProviderFactory,
-        MetricsFacade metricsFacade,
+        Metrics metrics,
         ModelCatalog modelCatalog,
         TaskStoreService taskStoreService,
         TaskRegistryFactoryService taskRegistryFactoryService,
@@ -90,7 +90,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
         this.log = log;
         this.componentRegistration = componentRegistration;
         this.graphDataScienceProceduresProviderFactory = graphDataScienceProceduresProviderFactory;
-        this.metricsFacade = metricsFacade;
+        this.metrics = metrics;
         this.modelCatalog = modelCatalog;
         this.taskStoreService = taskStoreService;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
@@ -110,7 +110,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
         ExporterBuildersProviderService exporterBuildersProviderService,
         ExportLocation exportLocation,
         FeatureTogglesRepository featureTogglesRepository,
-        MetricsFacade metricsFacade,
+        Metrics metrics,
         ModelCatalog modelCatalog,
         ModelRepository modelRepository,
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
@@ -157,7 +157,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
             exportLocation,
             featureTogglesRepository,
             memoryGauge,
-            metricsFacade,
+            metrics,
             modelCatalog,
             modelRepository,
             algorithmProcessingTemplateDecorator,
@@ -169,7 +169,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
             log,
             componentRegistration,
             graphDataScienceProviderFactory,
-            metricsFacade,
+            metrics,
             modelCatalog,
             taskStoreService,
             taskRegistryFactoryService,
@@ -191,7 +191,7 @@ public final class OpenGraphDataScienceExtensionBuilder {
         registerGraphDataScienceComponent();
 
         // register legacy bits
-        registerMetricsFacadeComponent(metricsFacade);
+        registerMetricsComponent(metrics);
         registerModelCatalogComponent(modelCatalog);
         registerTaskRegistryFactoryComponent(taskRegistryFactoryService);
         registerTaskStoreComponent(taskStoreService);
@@ -223,8 +223,8 @@ public final class OpenGraphDataScienceExtensionBuilder {
      * @deprecated Legacy stuff, will go away one day
      */
     @Deprecated
-    private void registerMetricsFacadeComponent(MetricsFacade metricsFacade) {
-        componentRegistration.registerComponent("Metrics Facade", MetricsFacade.class, __ -> metricsFacade);
+    private void registerMetricsComponent(Metrics metrics) {
+        componentRegistration.registerComponent("Metrics", Metrics.class, __ -> metrics);
     }
 
     /**

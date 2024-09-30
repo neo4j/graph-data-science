@@ -30,7 +30,7 @@ import org.neo4j.gds.procedures.pipelines.PipelinesProcedureFacade;
 /**
  * I have been postponing this. It is _mainly_ helpful for tests. Just some code structure convenience.
  * I am not, however, putting any convenience in here like a default no-op logger,
- * nor defaulting to @{@link org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService#PASSTHROUGH},
+ * nor defaulting to @{@link org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService#DISABLED},
  * because this is after all used in production code.
  */
 public class GraphDataScienceProceduresBuilder {

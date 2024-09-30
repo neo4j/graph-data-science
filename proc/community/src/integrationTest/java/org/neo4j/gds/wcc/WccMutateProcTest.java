@@ -70,7 +70,6 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
@@ -118,48 +117,48 @@ class WccMutateProcTest extends BaseProcTest {
     private static final String MUTATE_PROPERTY = "componentId";
     private static final String GRAPH_NAME = "loadGraph";
     private static final String EXPECTED_MUTATED_GRAPH = "  (a {componentId: 0})" +
-                                                         ", (b {componentId: 0})" +
-                                                         ", (c {componentId: 0})" +
-                                                         ", (d {componentId: 0})" +
-                                                         ", (e {componentId: 0})" +
-                                                         ", (f {componentId: 0})" +
-                                                         ", (g {componentId: 0})" +
-                                                         ", (h {componentId: 7})" +
-                                                         ", (i {componentId: 7})" +
-                                                         ", (j {componentId: 9})" +
-                                                         // {A, B, C, D}
-                                                         ", (a)-[{w: 1.0d}]->(b)" +
-                                                         ", (b)-[{w: 1.0d}]->(c)" +
-                                                         ", (c)-[{w: 1.0d}]->(d)" +
-                                                         ", (d)-[{w: 1.0d}]->(e)" +
-                                                         // {E, F, G}
-                                                         ", (e)-[{w: 1.0d}]->(f)" +
-                                                         ", (f)-[{w: 1.0d}]->(g)" +
-                                                         // {H, I}
-                                                         ", (h)-[{w: 1.0d}]->(i)";
+        ", (b {componentId: 0})" +
+        ", (c {componentId: 0})" +
+        ", (d {componentId: 0})" +
+        ", (e {componentId: 0})" +
+        ", (f {componentId: 0})" +
+        ", (g {componentId: 0})" +
+        ", (h {componentId: 7})" +
+        ", (i {componentId: 7})" +
+        ", (j {componentId: 9})" +
+        // {A, B, C, D}
+        ", (a)-[{w: 1.0d}]->(b)" +
+        ", (b)-[{w: 1.0d}]->(c)" +
+        ", (c)-[{w: 1.0d}]->(d)" +
+        ", (d)-[{w: 1.0d}]->(e)" +
+        // {E, F, G}
+        ", (e)-[{w: 1.0d}]->(f)" +
+        ", (f)-[{w: 1.0d}]->(g)" +
+        // {H, I}
+        ", (h)-[{w: 1.0d}]->(i)";
     @Neo4jGraph
     static final @Language("Cypher") String DB_CYPHER =
         "CREATE" +
-        " (nA:Label {nodeId: 0, seedId: 42})" +
-        ",(nB:Label {nodeId: 1, seedId: 42})" +
-        ",(nC:Label {nodeId: 2, seedId: 42})" +
-        ",(nD:Label {nodeId: 3, seedId: 42})" +
-        ",(nE:Label2 {nodeId: 4})" +
-        ",(nF:Label2 {nodeId: 5})" +
-        ",(nG:Label2 {nodeId: 6})" +
-        ",(nH:Label2 {nodeId: 7})" +
-        ",(nI:Label2 {nodeId: 8})" +
-        ",(nJ:Label2 {nodeId: 9})" +
-        // {A, B, C, D}
-        ",(nA)-[:TYPE]->(nB)" +
-        ",(nB)-[:TYPE]->(nC)" +
-        ",(nC)-[:TYPE]->(nD)" +
-        ",(nD)-[:TYPE {cost:4.2}]->(nE)" + // threshold UF should split here
-        // {E, F, G}
-        ",(nE)-[:TYPE]->(nF)" +
-        ",(nF)-[:TYPE]->(nG)" +
-        // {H, I}
-        ",(nH)-[:TYPE]->(nI)";
+            " (nA:Label {nodeId: 0, seedId: 42})" +
+            ",(nB:Label {nodeId: 1, seedId: 42})" +
+            ",(nC:Label {nodeId: 2, seedId: 42})" +
+            ",(nD:Label {nodeId: 3, seedId: 42})" +
+            ",(nE:Label2 {nodeId: 4})" +
+            ",(nF:Label2 {nodeId: 5})" +
+            ",(nG:Label2 {nodeId: 6})" +
+            ",(nH:Label2 {nodeId: 7})" +
+            ",(nI:Label2 {nodeId: 8})" +
+            ",(nJ:Label2 {nodeId: 9})" +
+            // {A, B, C, D}
+            ",(nA)-[:TYPE]->(nB)" +
+            ",(nB)-[:TYPE]->(nC)" +
+            ",(nC)-[:TYPE]->(nD)" +
+            ",(nD)-[:TYPE {cost:4.2}]->(nE)" + // threshold UF should split here
+            // {E, F, G}
+            ",(nE)-[:TYPE]->(nF)" +
+            ",(nF)-[:TYPE]->(nG)" +
+            // {H, I}
+            ",(nH)-[:TYPE]->(nI)";
 
     @BeforeEach
     void setupGraph() throws Exception {
@@ -355,9 +354,9 @@ class WccMutateProcTest extends BaseProcTest {
 
         String graphWriteQuery =
             "CALL gds.graph.nodeProperties.write(" +
-            "   $graph, " +
-            "   [$property]" +
-            ") YIELD writeMillis, graphName, nodeProperties, propertiesWritten";
+                "   $graph, " +
+                "   [$property]" +
+                ") YIELD writeMillis, graphName, nodeProperties, propertiesWritten";
 
         runQuery(graphWriteQuery, Map.of("graph", graphName, "property", MUTATE_PROPERTY));
 
@@ -383,7 +382,8 @@ class WccMutateProcTest extends BaseProcTest {
         GraphSchema schema = graphStore.schema();
         boolean nodesContainMutateProperty = schema.nodeSchema().entries().stream()
             .flatMap(e -> e.properties().entrySet().stream())
-            .anyMatch(props -> props.getKey().equals(MUTATE_PROPERTY) && props.getValue().valueType() == ValueType.LONG);
+            .anyMatch(props -> props.getKey().equals(MUTATE_PROPERTY) && props.getValue()
+                .valueType() == ValueType.LONG);
         assertTrue(nodesContainMutateProperty);
     }
 
@@ -415,7 +415,8 @@ class WccMutateProcTest extends BaseProcTest {
 
         runMutation(graphName, filterConfig);
 
-        GraphStore mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), graphName).graphStore();
+        GraphStore mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), graphName)
+            .graphStore();
 
         var expectedProperties = new ArrayList<String>();
         expectedProperties.add(MUTATE_PROPERTY);
@@ -446,7 +447,9 @@ class WccMutateProcTest extends BaseProcTest {
             ));
         }
 
-        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), graphName).graphStore().getUnion();
+        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), graphName)
+            .graphStore()
+            .getUnion();
         assertGraphEquals(fromGdl(EXPECTED_MUTATED_GRAPH), mutatedGraph);
     }
 
@@ -589,7 +592,7 @@ class WccMutateProcTest extends BaseProcTest {
             .build();
         var algorithmProcessingTemplate = DefaultAlgorithmProcessingTemplate.create(
             logMock,
-            new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
+            AlgorithmMetricsService.DISABLED,
             graphStoreCatalogService,
             MemoryGuard.DISABLED,
             requestScopedDependencies
@@ -601,7 +604,7 @@ class WccMutateProcTest extends BaseProcTest {
             Optional.empty(),
             null,
             graphStoreCatalogService,
-            new ProjectionMetricsService(new PassthroughExecutionMetricRegistrar()),
+            ProjectionMetricsService.DISABLED,
             requestScopedDependencies,
             WriteContext.builder().build(),
             null,
@@ -613,7 +616,10 @@ class WccMutateProcTest extends BaseProcTest {
             algorithmProcessingTemplate
         );
 
-        var configurationParser = new UserSpecificConfigurationParser(new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance),requestScopedDependencies.getUser());
+        var configurationParser = new UserSpecificConfigurationParser(new ConfigurationParser(
+            DefaultsConfiguration.Instance,
+            LimitsConfiguration.Instance
+        ), requestScopedDependencies.getUser());
 
         var genericStub = new GenericStub(configurationParser, null);
         var communityProcedureFacade = LocalCommunityProcedureFacade.create(
@@ -629,7 +635,7 @@ class WccMutateProcTest extends BaseProcTest {
 
         return new GraphDataScienceProceduresBuilder(Log.noOpLog())
             .with(new AlgorithmsProcedureFacade(null, communityProcedureFacade, null, null, null, null, null))
-            .with(DeprecatedProceduresMetricService.PASSTHROUGH)
+            .with(DeprecatedProceduresMetricService.DISABLED)
             .build();
     }
 }
