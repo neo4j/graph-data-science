@@ -20,16 +20,70 @@
 package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
-
 import org.neo4j.gds.values.primitive.PrimitiveValues;
 import org.neo4j.values.storable.Values;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class GdsNeo4jValueConverterTest {
+
     @Test
     void shouldConvertFloatArray() {
         assertThat(GdsNeo4jValueConverter.toValue(Values.of(new float[]{1, -1})))
             .isEqualTo(PrimitiveValues.floatArray(new float[]{1, -1}));
     }
+
+    @Test
+    void shouldConvertDoubleArray() {
+        assertThat(GdsNeo4jValueConverter.toValue(Values.of(new double[]{1, -1})))
+            .isEqualTo(PrimitiveValues.doubleArray(new double[]{1, -1}));
+    }
+    @Test
+    void shouldConvertLongArray() {
+        assertThat(GdsNeo4jValueConverter.toValue(Values.of(new long[]{1, -1})))
+            .isEqualTo(PrimitiveValues.longArray(new long[]{1, -1}));
+    }
+
+    @Test
+    void shouldConvertIntArray() {
+        assertThat(GdsNeo4jValueConverter.toValue(Values.of(new int[]{1, -1})))
+            .isEqualTo(PrimitiveValues.intArray(new int[]{1, -1}));
+    }
+
+    @Test
+    void shouldConvertShortArray() {
+        assertThat(GdsNeo4jValueConverter.toValue(Values.of(new short[]{1, -1})))
+            .isEqualTo(PrimitiveValues.shortArray(new short[]{1, -1}));
+    }
+
+    @Test
+    void shouldConvertByteArray() {
+        assertThat(GdsNeo4jValueConverter.toValue(Values.of(new byte[]{1, -1})))
+            .isEqualTo(PrimitiveValues.byteArray(new byte[]{1, -1}));
+    }
+
+    @Test
+    void shouldConvertFloat() {
+        assertThat(GdsNeo4jValueConverter.toValue(Values.of(1F)))
+            .isEqualTo(PrimitiveValues.floatingPointValue(1F));
+    }
+
+    @Test
+    void shouldConvertDouble() {
+        assertThat(GdsNeo4jValueConverter.toValue(Values.of(1D)))
+            .isEqualTo(PrimitiveValues.floatingPointValue(1D));
+    }
+
+    @Test
+    void shouldConvertInt() {
+        assertThat(GdsNeo4jValueConverter.toValue(Values.of(1)))
+            .isEqualTo(PrimitiveValues.longValue(1));
+    }
+
+    @Test
+    void shouldConvertLong() {
+        assertThat(GdsNeo4jValueConverter.toValue(Values.of(1L)))
+            .isEqualTo(PrimitiveValues.longValue(1L));
+    }
+
 }

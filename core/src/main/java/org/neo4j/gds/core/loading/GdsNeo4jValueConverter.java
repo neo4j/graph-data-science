@@ -91,7 +91,13 @@ public final class GdsNeo4jValueConverter {
             return PrimitiveValues.EMPTY_LONG_ARRAY;
         }
         var arrayCopy = array.asObjectCopy();
-        if (arrayCopy instanceof long[]) {
+        if (arrayCopy instanceof byte[]) {
+            return PrimitiveValues.byteArray((byte[]) arrayCopy);
+        } else if (arrayCopy instanceof short[]) {
+            return PrimitiveValues.shortArray((short[]) arrayCopy);
+        } else if (arrayCopy instanceof int[]) {
+            return PrimitiveValues.intArray((int[]) arrayCopy);
+        } else if (arrayCopy instanceof long[]) {
             return PrimitiveValues.longArray((long[]) arrayCopy);
         } else if (arrayCopy instanceof double[]) {
             return PrimitiveValues.doubleArray((double[]) arrayCopy);
