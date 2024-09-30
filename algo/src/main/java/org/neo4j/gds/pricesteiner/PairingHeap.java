@@ -48,7 +48,9 @@ public class PairingHeap {
     public void pop() {
         var offset = root.childrenOffset();
         root = delete(root);
-        root.addOffset(offset);
+        if (root!=null) {
+            root.addOffset(offset);
+        }
     }
 
     public void join(PairingHeap other) {
@@ -82,6 +84,8 @@ public class PairingHeap {
     private PairingHeapElement delete(PairingHeapElement node) {
         return mergePairs(node.left());
     }
+
+    //make the delete non-recursive
     private  PairingHeapElement deleteNonRecursive(PairingHeapElement node) {
         var current = node.left();
         return null;
