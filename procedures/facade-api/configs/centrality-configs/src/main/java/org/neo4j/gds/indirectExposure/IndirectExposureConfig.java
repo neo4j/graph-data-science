@@ -23,6 +23,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.beta.pregel.Partitioning;
 import org.neo4j.gds.beta.pregel.PregelConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 
@@ -36,6 +37,18 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public interface IndirectExposureConfig extends PregelConfig {
 
     String sanctionedProperty();
+
+    @Override
+    @Configuration.Ignore
+    default boolean isAsynchronous() {
+        return false;
+    }
+
+    @Override
+    @Configuration.Ignore
+    default Partitioning partitioning() {
+        return Partitioning.AUTO;
+    }
 
     @Configuration.Check
     default void validateRelationshipWeightIsPresent() {
