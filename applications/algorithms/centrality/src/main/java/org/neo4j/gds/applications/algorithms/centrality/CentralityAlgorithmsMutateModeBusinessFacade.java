@@ -36,6 +36,7 @@ import org.neo4j.gds.degree.DegreeCentralityResult;
 import org.neo4j.gds.harmonic.HarmonicCentralityMutateConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.indirectExposure.IndirectExposureMutateConfig;
+import org.neo4j.gds.indirectExposure.IndirectExposureResult;
 import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationMutateConfig;
 import org.neo4j.gds.pagerank.ArticleRankMutateConfig;
@@ -51,6 +52,7 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Clo
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DegreeCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.EigenVector;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HarmonicCentrality;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.IndirectExposure;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PageRank;
 
 public class CentralityAlgorithmsMutateModeBusinessFacade {
@@ -237,14 +239,15 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
     public <RESULT> RESULT indirectExposure(
         GraphName graphName,
         IndirectExposureMutateConfig configuration,
-        ResultBuilder<IndirectExposureMutateConfig, HugeDoubleArray, RESULT, NodePropertiesWritten> resultBuilder
+        ResultBuilder<IndirectExposureMutateConfig, IndirectExposureResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
         var mutateStep = new IndirectExposureMutateStep(mutateNodeProperty, configuration);
 
         return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
             graphName,
             configuration,
-            PageRank,
+            IndirectExposure,
+            // TODO
             estimation::pageRank,
             (graph, __) -> algorithms.indirectExposure(graph, configuration),
             mutateStep,

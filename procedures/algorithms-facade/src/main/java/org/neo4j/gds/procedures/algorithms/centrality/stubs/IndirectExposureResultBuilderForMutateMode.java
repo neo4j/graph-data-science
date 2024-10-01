@@ -23,19 +23,19 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.indirectExposure.IndirectExposureMutateConfig;
+import org.neo4j.gds.indirectExposure.IndirectExposureResult;
 import org.neo4j.gds.procedures.algorithms.centrality.IndirectExposureMutateResult;
 
 import java.util.Optional;
 
-public class IndirectExposureResultBuilderForMutateMode implements ResultBuilder<IndirectExposureMutateConfig, HugeDoubleArray, IndirectExposureMutateResult, NodePropertiesWritten> {
+public class IndirectExposureResultBuilderForMutateMode implements ResultBuilder<IndirectExposureMutateConfig, IndirectExposureResult, IndirectExposureMutateResult, NodePropertiesWritten> {
 
     @Override
     public IndirectExposureMutateResult build(
         Graph graph,
         IndirectExposureMutateConfig configuration,
-        Optional<HugeDoubleArray> result,
+        Optional<IndirectExposureResult> result,
         AlgorithmProcessingTimings timings,
         Optional<NodePropertiesWritten> metadata
     ) {
@@ -43,10 +43,13 @@ public class IndirectExposureResultBuilderForMutateMode implements ResultBuilder
 
         if (result.isEmpty()) return IndirectExposureMutateResult.emptyFrom(timings, configurationMap);
 
+        var indirectExposureResult = result.orElseThrow();
+
         return new IndirectExposureMutateResult(
+            indirectExposureResult.iterations(),
+            indirectExposureResult.didConverge(),
             timings.preProcessingMillis,
             timings.computeMillis,
-            0l,
             timings.mutateOrWriteMillis,
             metadata.orElseThrow().value(),
             configuration.toMap()

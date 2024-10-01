@@ -24,9 +24,10 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTiming
 import java.util.Map;
 
 public record IndirectExposureMutateResult(
+    long ranIterations,
+    boolean didConverge,
     long preProcessingMillis,
     long computeMillis,
-    long postProcessingMillis,
     long mutateMillis,
     long nodePropertiesWritten,
     Map<String, Object> configuration
@@ -36,9 +37,10 @@ public record IndirectExposureMutateResult(
         Map<String, Object> configurationMap
     ) {
         return new IndirectExposureMutateResult(
+            0,
+            false,
             timings.preProcessingMillis,
             timings.computeMillis,
-            0,
             timings.mutateOrWriteMillis,
             0,
             configurationMap

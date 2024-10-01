@@ -57,6 +57,7 @@ import org.neo4j.gds.harmonic.HarmonicCentralityBaseConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.indirectExposure.IndirectExposure;
 import org.neo4j.gds.indirectExposure.IndirectExposureConfig;
+import org.neo4j.gds.indirectExposure.IndirectExposureResult;
 import org.neo4j.gds.influenceMaximization.CELF;
 import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationBaseConfig;
@@ -183,7 +184,7 @@ public class CentralityAlgorithms {
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
-    HugeDoubleArray indirectExposure(Graph graph, IndirectExposureConfig configuration) {
+    IndirectExposureResult indirectExposure(Graph graph, IndirectExposureConfig configuration) {
         var task = Tasks.task(
             AlgorithmLabel.IndirectExposure.asString(),
             Tasks.leaf("TotalTransfers", graph.nodeCount()),

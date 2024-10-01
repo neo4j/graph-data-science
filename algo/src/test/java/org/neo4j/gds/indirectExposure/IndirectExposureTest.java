@@ -32,6 +32,8 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 @GdlExtension
 @ExtendWith(SoftAssertionsExtension.class)
 class IndirectExposureTest {
@@ -81,16 +83,21 @@ class IndirectExposureTest {
 
         var offset = Offset.offset(0.001);
 
-        softly.assertThat(result.get(graph.toMappedNodeId("e00"))).as("e00").isEqualTo(1.0);
-        softly.assertThat(result.get(graph.toMappedNodeId("e11"))).as("e11").isCloseTo(0.200, offset);
-        softly.assertThat(result.get(graph.toMappedNodeId("e12"))).as("e12").isCloseTo(0.154, offset);
-        softly.assertThat(result.get(graph.toMappedNodeId("e13"))).as("e13").isEqualTo(0.167, offset);
-        softly.assertThat(result.get(graph.toMappedNodeId("e21"))).as("e21").isEqualTo(0.200, offset);
-        softly.assertThat(result.get(graph.toMappedNodeId("e22"))).as("e22").isEqualTo(0.055, offset);
-        softly.assertThat(result.get(graph.toMappedNodeId("e23"))).as("e23").isEqualTo(0.090, offset);
-        softly.assertThat(result.get(graph.toMappedNodeId("e24"))).as("e24").isEqualTo(0.167, offset);
-        softly.assertThat(result.get(graph.toMappedNodeId("e31"))).as("e31").isEqualTo(0.026, offset);
-        softly.assertThat(result.get(graph.toMappedNodeId("e41"))).as("e41").isEqualTo(0.026, offset);
+        assertThat(result.didConverge()).isFalse();
+        assertThat(result.iterations()).isEqualTo(5);
+
+        var exposures = result.exposures();
+
+        softly.assertThat(exposures.get(graph.toMappedNodeId("e00"))).as("e00").isEqualTo(1.0);
+        softly.assertThat(exposures.get(graph.toMappedNodeId("e11"))).as("e11").isCloseTo(0.200, offset);
+        softly.assertThat(exposures.get(graph.toMappedNodeId("e12"))).as("e12").isCloseTo(0.154, offset);
+        softly.assertThat(exposures.get(graph.toMappedNodeId("e13"))).as("e13").isEqualTo(0.167, offset);
+        softly.assertThat(exposures.get(graph.toMappedNodeId("e21"))).as("e21").isEqualTo(0.200, offset);
+        softly.assertThat(exposures.get(graph.toMappedNodeId("e22"))).as("e22").isEqualTo(0.055, offset);
+        softly.assertThat(exposures.get(graph.toMappedNodeId("e23"))).as("e23").isEqualTo(0.090, offset);
+        softly.assertThat(exposures.get(graph.toMappedNodeId("e24"))).as("e24").isEqualTo(0.167, offset);
+        softly.assertThat(exposures.get(graph.toMappedNodeId("e31"))).as("e31").isEqualTo(0.026, offset);
+        softly.assertThat(exposures.get(graph.toMappedNodeId("e41"))).as("e41").isEqualTo(0.026, offset);
     }
 
 }

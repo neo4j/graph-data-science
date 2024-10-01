@@ -21,18 +21,13 @@ package org.neo4j.gds.applications.algorithms.centrality;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.collections.ha.HugeDoubleArray;
-import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.indirectExposure.IndirectExposureMutateConfig;
-import org.neo4j.gds.pagerank.PageRankResult;
-import org.neo4j.gds.pagerank.RankConfig;
+import org.neo4j.gds.indirectExposure.IndirectExposureResult;
 
-class IndirectExposureMutateStep implements MutateStep<HugeDoubleArray, NodePropertiesWritten> {
+class IndirectExposureMutateStep implements MutateStep<IndirectExposureResult, NodePropertiesWritten> {
     private final MutateNodeProperty mutateNodeProperty;
     private final IndirectExposureMutateConfig configuration;
 
@@ -48,13 +43,13 @@ class IndirectExposureMutateStep implements MutateStep<HugeDoubleArray, NodeProp
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        HugeDoubleArray result
+        IndirectExposureResult result
     ) {
         return mutateNodeProperty.mutateNodeProperties(
             graph,
             graphStore,
             configuration,
-            NodePropertyValuesAdapter.adapt(result)
+            result.nodePropertyValues()
         );
     }
 }

@@ -24,7 +24,6 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.pregel.Pregel;
-import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.degree.DegreeCentrality;
@@ -33,7 +32,7 @@ import org.neo4j.gds.degree.DegreeFunction;
 
 import java.util.concurrent.ExecutorService;
 
-public class IndirectExposure extends Algorithm<HugeDoubleArray> {
+public class IndirectExposure extends Algorithm<IndirectExposureResult> {
 
     private final Graph graph;
     private final IndirectExposureConfig config;
@@ -52,7 +51,7 @@ public class IndirectExposure extends Algorithm<HugeDoubleArray> {
     }
 
     @Override
-    public HugeDoubleArray compute() {
+    public IndirectExposureResult compute() {
         this.progressTracker.beginSubTask();
 
         var sanctionedProperty = graph.nodeProperties(config.sanctionedProperty());
@@ -60,18 +59,22 @@ public class IndirectExposure extends Algorithm<HugeDoubleArray> {
         DegreeFunction totalTransfersFn = totalTransfersFunction();
         HugeAtomicBitSet visited = HugeAtomicBitSet.create(graph.nodeCount());
 
-        var exposure = Pregel.create(
+        var pregelResult = Pregel.create(
             graph,
             config,
             new IndirectExposureComputation(isSanctionedFn, totalTransfersFn, visited),
             executorService,
             progressTracker,
             terminationFlag
-        ).run().nodeValues().doubleProperties(IndirectExposureComputation.EXPOSURE);
+        ).run();
 
         this.progressTracker.endSubTask();
 
-        return exposure;
+        return new IndirectExposureResult(
+            pregelResult.nodeValues().doubleProperties(IndirectExposureComputation.EXPOSURE),
+            pregelResult.ranIterations(),
+            pregelResult.didConverge()
+        );
     }
 
     private DegreeFunction totalTransfersFunction() {
