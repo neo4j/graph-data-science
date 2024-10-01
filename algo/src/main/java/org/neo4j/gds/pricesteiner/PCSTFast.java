@@ -25,10 +25,11 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.function.LongToDoubleFunction;
 
-public class PCSTFast extends Algorithm<Void> {
+public class PCSTFast extends Algorithm<PriceSteinerTreeResult> {
 
     private final Graph graph;
     private final LongToDoubleFunction prizes; //figure out how to expose to user
+    public static final long  PRUNED=-2;
 
     public PCSTFast(Graph graph, LongToDoubleFunction prizes, ProgressTracker progressTracker) {
         super(progressTracker);
@@ -37,10 +38,17 @@ public class PCSTFast extends Algorithm<Void> {
     }
 
     @Override
-    public Void compute() {
+    public PriceSteinerTreeResult compute() {
 
         var growthPhase =  new GrowthPhase(graph,prizes);
-        return null;
+        var growthResult = growthPhase.grow();
+        var treeStructure = TreeProducer.createTree(growthResult, graph.nodeCount(),graph.rootIdMap());
+        var activeOriginalNodes = growthResult.activeOriginalNodes();
+        var strongPruning = new StrongPruning(treeStructure,activeOriginalNodes,prizes);
+        strongPruning.performPruning();
+
+        return strongPruning.resultTree();
+
     }
 
 

@@ -80,4 +80,23 @@ class ClusterStructureTest {
         assertThat(clusterStructure.tightnessTime(4,3)).isEqualTo(27);
     }
 
+    @Test
+    void shouldFindOriginalNodesOfCluster(){
+        var clusterStructure = new ClusterStructure(4);
+        clusterStructure.merge(0,1);
+        clusterStructure.merge(4,3);
+        var activePredicate = clusterStructure.activeOriginalNodesOfCluster(5);
+        assertThat(activePredicate.get(0)).isTrue();
+        assertThat(activePredicate.get(1)).isTrue();
+        assertThat(activePredicate.get(3)).isTrue();
+        assertThat(activePredicate.get(2)).isFalse();
+
+        activePredicate = clusterStructure.activeOriginalNodesOfCluster(0);
+        assertThat(activePredicate.get(0)).isTrue();
+        assertThat(activePredicate.get(1)).isFalse();
+        assertThat(activePredicate.get(3)).isFalse();
+        assertThat(activePredicate.get(2)).isFalse();
+
+    }
+
 }

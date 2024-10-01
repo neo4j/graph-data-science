@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.pricesteiner;
 
+import com.carrotsearch.hppc.BitSet;
 import org.agrona.collections.MutableLong;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
@@ -35,9 +36,10 @@ class GrowthPhase {
     private final HugeDoubleArray edgeCosts;
     private final EdgeEventsQueue edgeEventsQueue;
     private final LongToDoubleFunction prizes;
+    private final HugeLongArray treeEdges;
+    private long numberOfTreeEdges;
 
     private final double EPS = 1E-6;
-
 
     GrowthPhase(Graph graph, LongToDoubleFunction prizes) {
         //TODO: INITIALIZE some of these data/structures with n memory instead of 2*n
@@ -49,13 +51,15 @@ class GrowthPhase {
         this.edgeCosts = HugeDoubleArray.newArray(graph.relationshipCount() / 2);
         this.edgeEventsQueue = new EdgeEventsQueue(graph.nodeCount());
         this.prizes = prizes;
+        this.treeEdges = HugeLongArray.newArray(graph.nodeCount());
+        numberOfTreeEdges = 0;
     }
 
-    void grow() {
+    GrowthResult grow() {
         //initialization
         initializeClusterPrizes();
         initializeEdgeParts();
-        double moat = 0;
+        double moat;
         while (clusterActivity.numberOfActiveClusters() > 1) {
             double edgeEventTime = edgeEventsQueue.nextEventTime();
             double clusterEventTime = clusterEventsPriorityQueue.closestEvent(clusterActivity.active());
@@ -83,9 +87,11 @@ class GrowthPhase {
                 if (vCluster == uCluster) {
                     continue;
                 }
-                double r = edgeCost(edgeCosts, uPart) - uClusterSum - vClusterSum;
+
+                long edgeId = partToEdgeId(uPart);
+                double r = edgeCosts.get(uPart) - uClusterSum - vClusterSum;
                 if (Double.compare(r, 0) <= 0 || Double.compare(r, EPS) <= 0) {
-                    mergeClusters(moat, uCluster, vCluster);
+                    mergeClusters(moat, uCluster, vCluster, edgeId);
                 } else {
                     generateNewEdgeEvents(
                         moat,
@@ -100,7 +106,12 @@ class GrowthPhase {
             }
 
         }
-
+        return new GrowthResult(treeEdges,
+            numberOfTreeEdges,
+            edgeParts,
+            edgeCosts,
+            clusterStructure.activeOriginalNodesOfCluster(clusterActivity.firstActiveCluster())
+        );
     }
 
     private void deactivateCluster(double moat, long clusterId) {
@@ -140,7 +151,8 @@ class GrowthPhase {
     private void mergeClusters(
         double moat,
         long cluster1,
-        long cluster2
+        long cluster2,
+        long edgeId
     ) {
         boolean cluster1Inactive = clusterActivity.active(cluster1);
         boolean cluster2Inactive = clusterActivity.active(cluster2);
@@ -157,8 +169,10 @@ class GrowthPhase {
         }
         var newCluster = clusterStructure.merge(cluster1, cluster2);
         edgeEventsQueue.mergeAndUpdate(newCluster, cluster1, cluster2);
+        clusterActivity.activateCluster(newCluster);
         clusterEventsPriorityQueue.add(newCluster, clusterStructure.tightnessTime(newCluster, moat));
 
+        addToTree(edgeId);
     }
 
     private void generateNewEdgeEvents(
@@ -183,7 +197,16 @@ class GrowthPhase {
         return (i + 1) - 2 * (i % 2);
     }
 
-    private double edgeCost(HugeDoubleArray edgeCosts, long i) {
-        return edgeCosts.get(i / 2);
+    private long partToEdgeId(long part) {
+        return part / 2;
     }
+
+    private void addToTree(long edgeId) {
+        treeEdges.set(numberOfTreeEdges++, edgeId);
+    }
+
+}
+
+record GrowthResult(HugeLongArray treeEdges, long numberOfTreeEdges, HugeLongArray edgeParts, HugeDoubleArray edgeCosts,
+                    BitSet activeOriginalNodes) {
 }

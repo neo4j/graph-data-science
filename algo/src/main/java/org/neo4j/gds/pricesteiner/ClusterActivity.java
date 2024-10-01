@@ -63,5 +63,9 @@ import java.util.function.LongPredicate;
          return activeClusters.get(clusterId);
     }
 
+    long firstActiveCluster(){
+         return  activeClusters.nextSetBit(0);
+    }
+
 
 }

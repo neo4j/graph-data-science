@@ -19,15 +19,20 @@
  */
 package org.neo4j.gds.pricesteiner;
 
+import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 
 public class ClusterStructure {
 
     private final HugeLongArray parent; //TODO: enforce path-compression heuristic
     private final HugeDoubleArray clusterPrizes; //enforce path-compression heuristic
+    private final HugeLongArray left;
+    private final HugeLongArray right;
     private final HugeDoubleArray moat;
     private final HugeDoubleArray totalMoat;
+    private final long originalNodeCount;
 
     private  long maxNumberOfClusters;
 
@@ -39,14 +44,19 @@ public class ClusterStructure {
         this.maxNumberOfClusters = nodeCount;
         this.totalMoat = HugeDoubleArray.newArray(2*nodeCount);
         this.moat = HugeDoubleArray.newArray(2*nodeCount);
+        this.left = HugeLongArray.newArray(nodeCount);
+        this.right = HugeLongArray.newArray(nodeCount);
+        this.originalNodeCount = nodeCount;
     }
 
-    long merge(long componentA,long componentB){
+    long merge(long cluster1,long cluster2){
         var newCluster = maxNumberOfClusters++;
-        parent.set(componentA,newCluster);
-        parent.set(componentB,newCluster);
-        clusterPrizes.set(newCluster, clusterPrizes.get(componentA)+ clusterPrizes.get(componentB));
-        totalMoat.set(newCluster, totalMoat.get(componentA)+ totalMoat.get(componentB));
+        parent.set(cluster1,newCluster);
+        parent.set(cluster2,newCluster);
+        clusterPrizes.set(newCluster, clusterPrizes.get(cluster1)+ clusterPrizes.get(cluster2));
+        totalMoat.set(newCluster, totalMoat.get(cluster1)+ totalMoat.get(cluster2));
+        left.set(newCluster- originalNodeCount, cluster1);
+        right.set(newCluster- originalNodeCount, cluster2);
         return  newCluster;
     }
 
@@ -92,5 +102,33 @@ public class ClusterStructure {
             }
             return  sum;
     }
+
+    BitSet activeOriginalNodesOfCluster(long clusterId){
+        BitSet bitSet=new BitSet(originalNodeCount);
+
+        if (clusterId < originalNodeCount){
+            bitSet.set(clusterId);
+            return  bitSet;
+        }
+
+        HugeLongArrayStack stack= HugeLongArrayStack.newStack(originalNodeCount);
+        stack.push(clusterId);
+        while (!stack.isEmpty()){
+            var  stackCluster = stack.pop();
+            if (stackCluster < originalNodeCount){
+                bitSet.set(stackCluster);
+            }else{
+                var adaptedIndex = stackCluster - originalNodeCount;
+                stack.push(left.get(adaptedIndex));
+                stack.push(right.get(adaptedIndex));
+            }
+        }
+        return  bitSet;
+    }
+
+
 }
  record ClusterMoatPair(long cluster, double totalMoat){}
+
+
+
