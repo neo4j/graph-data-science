@@ -25,6 +25,7 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -71,9 +72,12 @@ class IndirectExposureTest {
             .relationshipWeightProperty("w")
             .build();
 
-        var result = new IndirectExposureFactory()
-            .build(graph, config, ProgressTracker.NULL_TRACKER)
-            .compute();
+        var result = new IndirectExposure(
+            graph,
+            config,
+            DefaultPool.INSTANCE,
+            ProgressTracker.NULL_TRACKER
+        ).compute();
 
         var offset = Offset.offset(0.001);
 
