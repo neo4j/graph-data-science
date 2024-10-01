@@ -116,7 +116,19 @@ allprojects {
             testLogging {
                 // set options for log level LIFECYCLE (the default)
                 lifecycle {
-                    events TestLogEvent.FAILED
+                    if (project.hasProperty('showTestResults')) {
+                        events TestLogEvent.FAILED,
+                            TestLogEvent.PASSED,
+                            TestLogEvent.SKIPPED,
+                            TestLogEvent.STANDARD_ERROR,
+                            TestLogEvent.STANDARD_OUT
+                        exceptionFormat TestExceptionFormat.FULL
+                        showExceptions true
+                        showCauses true
+                        showStackTraces true
+                    } else {
+                        events TestLogEvent.FAILED
+                    }
                     exceptionFormat TestExceptionFormat.FULL
                     showExceptions true
                 }
