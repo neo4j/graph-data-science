@@ -80,29 +80,4 @@ public interface Node2VecBaseConfig extends AlgoBaseConfig, EmbeddingDimensionCo
     default List<Long> sourceNodes() {
         return List.of();
     }
-
-    @Configuration.Ignore
-    default Node2VecParameters node2VecParameters() {
-        var walkParameters = walkParameters();
-
-        var samplingWalkParameters = new SamplingWalkParameters(
-            walkParameters.walksPerNode(),
-            walkParameters.walkLength(),
-            walkParameters.returnFactor(),
-            walkParameters.inOutFactor(),
-            positiveSamplingFactor(),
-            negativeSamplingExponent()
-        );
-        var trainParameters = new TrainParameters(
-            initialLearningRate(),
-            minLearningRate(),
-            iterations(),
-            windowSize(),
-            negativeSamplingRate(),
-            embeddingDimension(),
-            embeddingInitializer()
-        );
-
-        return new Node2VecParameters(samplingWalkParameters, trainParameters);
-    }
 }

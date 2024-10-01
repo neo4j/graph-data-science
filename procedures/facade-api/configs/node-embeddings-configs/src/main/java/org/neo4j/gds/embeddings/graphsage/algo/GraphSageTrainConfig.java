@@ -30,9 +30,8 @@ import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.config.ToleranceConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
-import org.neo4j.gds.embeddings.graphsage.Aggregator;
-import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
+import org.neo4j.gds.embeddings.graphsage.ActivationFunctionType;
+import org.neo4j.gds.embeddings.graphsage.AggregatorType;
 import org.neo4j.gds.ml.training.TrainBaseConfig;
 
 import java.util.Collection;
@@ -78,16 +77,16 @@ public interface GraphSageTrainConfig extends
         }
     }
 
-    @Configuration.ConvertWith(method = "org.neo4j.gds.embeddings.graphsage.Aggregator.AggregatorType#parse")
-    @Configuration.ToMapValue("org.neo4j.gds.embeddings.graphsage.Aggregator.AggregatorType#toString")
-    default Aggregator.AggregatorType aggregator() {
-        return Aggregator.AggregatorType.MEAN;
+    @Configuration.ConvertWith(method = "org.neo4j.gds.embeddings.graphsage.AggregatorType#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.embeddings.graphsage.AggregatorType#toString")
+    default AggregatorType aggregator() {
+        return AggregatorType.MEAN;
     }
 
-    @Configuration.ConvertWith(method = "org.neo4j.gds.embeddings.graphsage.ActivationFunction#parse")
-    @Configuration.ToMapValue("org.neo4j.gds.embeddings.graphsage.ActivationFunction#toString")
-    default ActivationFunction activationFunction() {
-        return ActivationFunction.SIGMOID;
+    @Configuration.ConvertWith(method = "org.neo4j.gds.embeddings.graphsage.ActivationFunctionType#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.embeddings.graphsage.ActivationFunctionType#toString")
+    default ActivationFunctionType activationFunction() {
+        return ActivationFunctionType.SIGMOID;
     }
 
     @Override
@@ -164,40 +163,4 @@ public interface GraphSageTrainConfig extends
         return new GraphSageTrainConfigImpl(username, userInput);
     }
 
-
-    @Configuration.Ignore
-    default GraphSageTrainMemoryEstimateParameters toMemoryEstimateParameters() {
-        var estimationFeatureDimension = projectedFeatureDimension().orElse(featureProperties().size());
-        var layerConfigs = GraphSageHelper.layerConfigs(estimationFeatureDimension, sampleSizes(), randomSeed(), aggregator(), activationFunction(), embeddingDimension());
-        return new GraphSageTrainMemoryEstimateParameters(
-            layerConfigs,
-            isMultiLabel(),
-            featureProperties().size(),
-            estimationFeatureDimension,
-            batchSize(),
-            embeddingDimension()
-        );
-    }
-
-    @Configuration.Ignore
-    default GraphSageTrainParameters toParameters() {
-        return new GraphSageTrainParameters(
-            concurrency(),
-            batchSize(),
-            maxIterations(),
-            searchDepth(),
-            epochs(),
-            learningRate(),
-            tolerance(),
-            negativeSampleWeight(),
-            penaltyL2(),
-            embeddingDimension(),
-            sampleSizes(),
-            featureProperties(),
-            maybeBatchSamplingRatio(),
-            randomSeed(),
-            aggregator(),
-            activationFunction()
-        );
-    }
 }

@@ -82,17 +82,4 @@ public interface FastRPBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConf
             }
         }
     }
-
-    @Configuration.Ignore
-    default FastRPParameters toParameters() {
-        return new FastRPParameters(
-            featureProperties(),
-            iterationWeights(),
-            embeddingDimension(),
-            propertyDimension(),
-            relationshipWeightProperty(),
-            normalizationStrength(),
-            nodeSelfInfluence()
-        );
-    }
 }

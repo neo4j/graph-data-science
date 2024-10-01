@@ -28,7 +28,6 @@ import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 
 import java.util.List;
-import java.util.function.Function;
 
 /*
     hkv ← σ(W · MEAN({h(k−1)v } ∪ {h(k−1)u, ∀u ∈ N (v)} --> unweighted
@@ -37,16 +36,16 @@ import java.util.function.Function;
 public class MeanAggregator implements Aggregator {
 
     private final Weights<Matrix> weights;
-    private final Function<Variable<Matrix>, Variable<Matrix>> activationFunction;
-    private final ActivationFunction activation;
+    private final ActivationFunction activationFunction;
+    private final ActivationFunctionType activationFunctionType;
 
     public MeanAggregator(
         Weights<Matrix> weights,
-        ActivationFunction activationFunction
+        ActivationFunctionWrapper activationFunctionWrapper
     ) {
         this.weights = weights;
-        this.activation = activationFunction;
-        this.activationFunction = activationFunction.activationFunction();
+        this.activationFunction = activationFunctionWrapper.activationFunction();
+        this.activationFunctionType = activationFunctionWrapper.activationFunctionType();
     }
 
     @Override
@@ -73,8 +72,8 @@ public class MeanAggregator implements Aggregator {
     }
 
     @Override
-    public ActivationFunction activationFunction() {
-        return activation;
+    public ActivationFunctionType activationFunctionType() {
+        return activationFunctionType;
     }
 
     public Matrix weightsData() {

@@ -20,81 +20,9 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.ml.core.Variable;
-import org.neo4j.gds.ml.core.functions.Relu;
-import org.neo4j.gds.ml.core.functions.Sigmoid;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.utils.StringJoining;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
-
-public enum ActivationFunction {
-    SIGMOID {
-        @Override
-        public Function<Variable<Matrix>, Variable<Matrix>> activationFunction() {
-            return Sigmoid::new;
-        }
-
-        @Override
-        public double weightInitBound(int rows, int cols) {
-            return Math.sqrt(2d / (rows + cols));
-        }
-    },
-    RELU {
-        @Override
-        public Function<Variable<Matrix>, Variable<Matrix>> activationFunction() {
-            return Relu::new;
-        }
-
-        @Override
-        public double weightInitBound(int rows, int cols) {
-            return Math.sqrt(2d / cols);
-        }
-    };
-
-    public abstract Function<Variable<Matrix>, Variable<Matrix>> activationFunction();
-
-    public abstract double weightInitBound(int rows, int cols);
-
-    public static ActivationFunction of(String activationFunction) {
-        return valueOf(toUpperCaseWithLocale(activationFunction));
-    }
-
-    private static final List<String> VALUES = Arrays
-        .stream(ActivationFunction.values())
-        .map(ActivationFunction::name)
-        .collect(Collectors.toList());
-
-
-    public static ActivationFunction parse(Object input) {
-        if (input instanceof String) {
-            var inputString = toUpperCaseWithLocale((String) input);
-
-            if (!VALUES.contains(inputString)) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "ActivationFunction `%s` is not supported. Must be one of: %s.",
-                    input,
-                    StringJoining.join(VALUES)
-                ));
-            }
-
-            return of(inputString);
-        } else if (input instanceof ActivationFunction) {
-            return (ActivationFunction) input;
-        }
-
-        throw new IllegalArgumentException(formatWithLocale(
-            "Expected ActivationFunction or String. Got %s.",
-            input.getClass().getSimpleName()
-        ));
-    }
-
-    public static String toString(ActivationFunction af) {
-        return af.toString();
-    }
+public interface ActivationFunction extends Function<Variable<Matrix>, Variable<Matrix>> {
 }

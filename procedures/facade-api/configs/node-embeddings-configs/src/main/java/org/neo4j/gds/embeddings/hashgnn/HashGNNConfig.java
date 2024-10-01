@@ -67,22 +67,6 @@ public interface HashGNNConfig extends AlgoBaseConfig, FeaturePropertiesConfig, 
         }
     }
 
-    @Configuration.Ignore
-    default HashGNNParameters toParameters() {
-        return new HashGNNParameters(
-            concurrency(),
-            iterations(),
-            embeddingDensity(),
-            neighborInfluence(),
-            featureProperties(),
-            heterogeneous(),
-            outputDimension(),
-            binarizeFeatures(),
-            generateFeatures(),
-            randomSeed()
-        );
-    }
-
     static BinarizeFeaturesConfig parseBinarizationConfig(Map<String, Object> parameter) {
         var cypherMapWrapper = CypherMapWrapper.create(parameter);
         var binarizeFeaturesConfig = new BinarizeFeaturesConfigImpl(cypherMapWrapper);

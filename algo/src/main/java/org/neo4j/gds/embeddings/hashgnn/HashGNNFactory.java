@@ -56,7 +56,7 @@ public class HashGNNFactory<CONFIG extends HashGNNConfig> extends GraphAlgorithm
         CONFIG configuration,
         ProgressTracker progressTracker
     ) {
-        return build(graph, configuration.toParameters(), progressTracker);
+        return build(graph, HashGNNConfigTransformer.toParameters(configuration), progressTracker);
     }
 
     @Override
@@ -104,6 +104,6 @@ public class HashGNNFactory<CONFIG extends HashGNNConfig> extends GraphAlgorithm
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG config) {
-        return memoryEstimation(config.toParameters());
+        return memoryEstimation(HashGNNConfigTransformer.toParameters(config));
     }
 }

@@ -26,10 +26,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
-import org.neo4j.gds.embeddings.graphsage.Aggregator;
+import org.neo4j.gds.embeddings.graphsage.ActivationFunctionType;
+import org.neo4j.gds.embeddings.graphsage.AggregatorType;
 import org.neo4j.gds.embeddings.graphsage.GraphSageTestGraph;
 import org.neo4j.gds.embeddings.graphsage.MultiLabelFeatureFunction;
+import org.neo4j.gds.embeddings.graphsage.TrainConfigTransformer;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -97,7 +98,7 @@ class MultiLabelGraphSageTrainTest {
     void shouldRunWithDifferentProjectedFeatureSizes(String name, GraphSageTrainConfig config) {
         var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
             weightedGraph,
-            config.toParameters(),
+            TrainConfigTransformer.toParameters(config),
             config.projectedFeatureDimension().get(),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
@@ -120,7 +121,7 @@ class MultiLabelGraphSageTrainTest {
 
         var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
             weightedGraph,
-            config.toParameters(),
+            TrainConfigTransformer.toParameters(config),
             PROJECTED_FEATURE_SIZE,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
@@ -143,8 +144,8 @@ class MultiLabelGraphSageTrainTest {
             .concurrency(1)
             .projectedFeatureDimension(featureDimension)
             .featureProperties(List.of("numEmployees", "numIngredients", "rating", "numPurchases", "embedding"))
-            .aggregator(Aggregator.AggregatorType.MEAN)
-            .activationFunction(ActivationFunction.SIGMOID)
+            .aggregator(AggregatorType.MEAN)
+            .activationFunction(ActivationFunctionType.SIGMOID)
             .embeddingDimension(64)
             .modelName(modelName)
             .relationshipWeightProperty("times")
@@ -152,7 +153,7 @@ class MultiLabelGraphSageTrainTest {
 
         var graphSageTrain = new MultiLabelGraphSageTrain(
             weightedGraph,
-            graphSageTrainConfig.toParameters(),
+            TrainConfigTransformer.toParameters(graphSageTrainConfig),
             featureDimension,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
@@ -169,8 +170,8 @@ class MultiLabelGraphSageTrainTest {
         assertNotNull(trainConfig);
         assertEquals(1, trainConfig.concurrency().value());
         assertEquals(List.of("numEmployees", "numIngredients", "rating", "numPurchases", "embedding"), trainConfig.featureProperties());
-        assertEquals("MEAN", Aggregator.AggregatorType.toString(trainConfig.aggregator()));
-        assertEquals("SIGMOID", ActivationFunction.toString(trainConfig.activationFunction()));
+        assertEquals("MEAN", AggregatorType.toString(trainConfig.aggregator()));
+        assertEquals("SIGMOID", ActivationFunctionType.toString(trainConfig.activationFunction()));
         assertEquals(64, trainConfig.embeddingDimension());
     }
 
@@ -198,7 +199,7 @@ class MultiLabelGraphSageTrainTest {
 
         var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
             unequalGraph,
-            config.toParameters(),
+            TrainConfigTransformer.toParameters(config),
             featureDimension,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
@@ -225,7 +226,7 @@ class MultiLabelGraphSageTrainTest {
 
         var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
             graph,
-            config.toParameters(),
+            TrainConfigTransformer.toParameters(config),
             PROJECTED_FEATURE_SIZE,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,

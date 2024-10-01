@@ -31,6 +31,7 @@ dependencies {
     
     implementation project(':centrality-params')
     implementation project(':community-params')
+    implementation project(':node-embeddings-params')
     implementation project(':path-finding-params')
     implementation project(':similarity-params')
 
@@ -38,6 +39,7 @@ dependencies {
     // TODO: move the factories out
     implementation project(':centrality-configs')
     implementation project(':community-configs')
+    implementation project(':node-embeddings-configs')
     implementation project(':path-finding-configs')
     implementation project(':similarity-configs')
 

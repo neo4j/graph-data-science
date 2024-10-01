@@ -54,7 +54,7 @@ public class Node2VecAlgorithmFactory<CONFIG extends Node2VecBaseConfig> extends
             configuration.sourceNodes(),
             configuration.randomSeed(),
             configuration.walkBufferSize(),
-            configuration.node2VecParameters(),
+            Node2VecConfigTransformer.node2VecParameters(configuration),
             progressTracker,
             TerminationFlag.RUNNING_TRUE
         );
@@ -62,7 +62,7 @@ public class Node2VecAlgorithmFactory<CONFIG extends Node2VecBaseConfig> extends
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return new Node2VecMemoryEstimateDefinition(configuration.node2VecParameters()).memoryEstimation();
+        return new Node2VecMemoryEstimateDefinition(Node2VecConfigTransformer.node2VecParameters(configuration)).memoryEstimation();
     }
 
     @Override

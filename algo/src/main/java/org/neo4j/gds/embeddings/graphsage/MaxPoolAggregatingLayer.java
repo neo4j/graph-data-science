@@ -30,7 +30,7 @@ public class MaxPoolAggregatingLayer implements Layer {
     private final Weights<Matrix> selfWeights;
     private final Weights<Matrix> neighborsWeights;
     private final Weights<Vector> bias;
-    private final ActivationFunction activationFunction;
+    private final ActivationFunctionWrapper activationFunctionWrapper;
 
     public MaxPoolAggregatingLayer(
         int sampleSize,
@@ -38,14 +38,14 @@ public class MaxPoolAggregatingLayer implements Layer {
         Weights<Matrix> selfWeights,
         Weights<Matrix> neighborsWeights,
         Weights<Vector> bias,
-        ActivationFunction activationFunction
+        ActivationFunctionWrapper activationFunctionWrapper
     ) {
         this.poolWeights = poolWeights;
         this.selfWeights = selfWeights;
         this.neighborsWeights = neighborsWeights;
         this.bias = bias;
         this.sampleSize = sampleSize;
-        this.activationFunction = activationFunction;
+        this.activationFunctionWrapper = activationFunctionWrapper;
     }
 
     @Override
@@ -60,7 +60,7 @@ public class MaxPoolAggregatingLayer implements Layer {
             this.selfWeights,
             this.neighborsWeights,
             this.bias,
-            activationFunction
+            activationFunctionWrapper
         );
     }
 }

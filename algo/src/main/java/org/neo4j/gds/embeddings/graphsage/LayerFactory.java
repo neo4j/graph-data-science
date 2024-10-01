@@ -36,13 +36,15 @@ public final class LayerFactory {
         int rows = layerConfig.rows();
         int cols = layerConfig.cols();
 
-        ActivationFunction activationFunction = layerConfig.activationFunction();
+        var activationFunctionType = layerConfig.activationFunction();
+        var activationFunctionWrapper = ActivationFunctionFactory
+            .activationFunctionWrapper(activationFunctionType);
 
         var randomSeed = layerConfig.randomSeed();
         Weights<Matrix> weights = generateWeights(
             rows,
             cols,
-            activationFunction.weightInitBound(rows, cols),
+            activationFunctionWrapper.weightInitBound(rows, cols),
             randomSeed
         );
 
@@ -51,7 +53,7 @@ public final class LayerFactory {
                 return new MeanAggregatingLayer(
                     weights,
                     layerConfig.sampleSize(),
-                    activationFunction
+                    activationFunctionWrapper
                 );
             case POOL:
                 Weights<Matrix> poolWeights = weights;
@@ -59,14 +61,14 @@ public final class LayerFactory {
                 Weights<Matrix> selfWeights = generateWeights(
                     rows,
                     cols,
-                    activationFunction.weightInitBound(rows, cols),
+                    activationFunctionWrapper.weightInitBound(rows, cols),
                     randomSeed + 1
                 );
 
                 Weights<Matrix> neighborsWeights = generateWeights(
                     rows,
                     rows,
-                    activationFunction.weightInitBound(rows, rows),
+                    activationFunctionWrapper.weightInitBound(rows, rows),
                     randomSeed + 2
                 );
 
@@ -78,7 +80,7 @@ public final class LayerFactory {
                     selfWeights,
                     neighborsWeights,
                     bias,
-                    activationFunction
+                    activationFunctionWrapper
                 );
             default:
                 throw new IllegalArgumentException(formatWithLocale(

@@ -26,7 +26,9 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
+import org.neo4j.gds.model.ModelConfig;
 
+import java.util.HashMap;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -39,6 +41,20 @@ class GraphSageResultBuilderForTrainMode implements ResultBuilder<GraphSageTrain
         AlgorithmProcessingTimings timings,
         Optional<Void> unused
     ) {
-        return result.stream().map(model -> GraphSageTrainResult.create(model, timings.computeMillis));
+        return result.stream().map(model -> createResult(model, timings.computeMillis));
+    }
+
+    private static GraphSageTrainResult createResult(
+        Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> trainedModel,
+        long trainMillis
+    ) {
+        var modelInfo = new HashMap<String, Object>();
+        modelInfo.put(ModelConfig.MODEL_NAME_KEY, trainedModel.name());
+        modelInfo.put(ModelConfig.MODEL_TYPE_KEY, trainedModel.algoType());
+        modelInfo.putAll(trainedModel.customInfo().toMap());
+
+        var configurationMap = trainedModel.trainConfig().toMap();
+
+        return new GraphSageTrainResult(modelInfo, configurationMap, trainMillis);
     }
 }

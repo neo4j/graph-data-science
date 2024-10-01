@@ -21,8 +21,8 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.annotation.Parameters;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.embeddings.graphsage.ActivationFunction;
-import org.neo4j.gds.embeddings.graphsage.Aggregator;
+import org.neo4j.gds.embeddings.graphsage.ActivationFunctionType;
+import org.neo4j.gds.embeddings.graphsage.AggregatorType;
 import org.neo4j.gds.embeddings.graphsage.LayerConfig;
 
 import java.util.ArrayList;
@@ -46,8 +46,8 @@ public record GraphSageTrainParameters(
     List<String> featureProperties,
     Optional<Double> maybeBatchSamplingRatio,
     Optional<Long> randomSeed,
-    Aggregator.AggregatorType aggregatorType,
-    ActivationFunction activationFunction
+    AggregatorType aggregatorType,
+    ActivationFunctionType activationFunction
 ) {
 
     public long numberOfBatches(long nodeCount) {

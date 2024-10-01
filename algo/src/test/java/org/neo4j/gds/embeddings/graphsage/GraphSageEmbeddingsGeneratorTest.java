@@ -62,17 +62,18 @@ class GraphSageEmbeddingsGeneratorTest {
     private Graph weightedGraph;
 
     @ParameterizedTest
-    @EnumSource(Aggregator.AggregatorType.class)
-    void makesEmbeddings(Aggregator.AggregatorType aggregatorType) {
-        var parameters = GraphSageTrainConfigImpl.builder()
+    @EnumSource(AggregatorType.class)
+    void makesEmbeddings(AggregatorType aggregatorType) {
+        var config = GraphSageTrainConfigImpl.builder()
             .aggregator(aggregatorType)
             .embeddingDimension(EMBEDDING_DIMENSION)
             .featureProperties(Collections.nCopies(FEATURES_COUNT, "dummyProp"))
             .modelName(MODEL_NAME)
             .modelUser("")
             .relationshipWeightProperty("times")
-            .build()
-            .toParameters();
+            .build();
+
+        var parameters = TrainConfigTransformer.toParameters(config);
 
         var features = GraphSageHelper.initializeSingleLabelFeatures(weightedGraph, parameters.featureProperties());
         var featureDimension = FeatureExtraction.featureCount(weightedGraph, parameters.featureProperties());
@@ -101,8 +102,8 @@ class GraphSageEmbeddingsGeneratorTest {
     }
 
     @ParameterizedTest
-    @EnumSource(Aggregator.AggregatorType.class)
-    void makesEmbeddingsFromMultiLabelModel(Aggregator.AggregatorType aggregatorType) {
+    @EnumSource(AggregatorType.class)
+    void makesEmbeddingsFromMultiLabelModel(AggregatorType aggregatorType) {
         var config = GraphSageTrainConfigImpl.builder()
             .aggregator(aggregatorType)
             .modelName(MODEL_NAME)
@@ -115,7 +116,7 @@ class GraphSageEmbeddingsGeneratorTest {
 
         var trainer = new MultiLabelGraphSageTrain(
             weightedGraph,
-            config.toParameters(),
+            TrainConfigTransformer.toParameters(config),
             5,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
@@ -162,7 +163,7 @@ class GraphSageEmbeddingsGeneratorTest {
         Graph filteredGraph = graphStore.getGraph("N", RelationshipType.ALL_RELATIONSHIPS.name, Optional.empty());
 
         var config = GraphSageTrainConfigImpl.builder()
-            .aggregator(Aggregator.AggregatorType.MEAN)
+            .aggregator(AggregatorType.MEAN)
             .modelName("DUMMY")
             .modelUser("")
             .sampleSizes(List.of(2))
@@ -172,7 +173,7 @@ class GraphSageEmbeddingsGeneratorTest {
 
         var trainer = new SingleLabelGraphSageTrain(
             filteredGraph,
-            config.toParameters(),
+            TrainConfigTransformer.toParameters(config),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
             testGdsVersion,

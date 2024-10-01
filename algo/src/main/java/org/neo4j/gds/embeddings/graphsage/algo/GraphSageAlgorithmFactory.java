@@ -25,6 +25,7 @@ import org.neo4j.gds.config.MutateConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.embeddings.graphsage.TrainConfigTransformer;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -86,7 +87,7 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
         var model = resolveModel(modelCatalog, config.username(), config.modelName());
 
         return new GraphSageMemoryEstimateDefinition(
-            model.trainConfig().toMemoryEstimateParameters(),
+            TrainConfigTransformer.toMemoryEstimateParameters(model.trainConfig()),
             config instanceof MutateConfig
         ).memoryEstimation();
     }

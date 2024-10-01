@@ -32,9 +32,9 @@ public interface LayerConfig {
 
     Optional<Integer> bias();
 
-    Aggregator.AggregatorType aggregatorType();
+    AggregatorType aggregatorType();
 
-    ActivationFunction activationFunction();
+    ActivationFunctionType activationFunction();
 
     static ImmutableLayerConfig.Builder builder() {
         return ImmutableLayerConfig.builder();

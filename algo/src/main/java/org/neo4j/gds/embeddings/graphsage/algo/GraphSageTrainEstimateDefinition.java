@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
+import org.neo4j.gds.embeddings.graphsage.AggregatorType;
 import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
-import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
 
 import static org.neo4j.gds.mem.MemoryEstimations.RESIDENT_MEMORY;
@@ -65,7 +65,7 @@ public class GraphSageTrainEstimateDefinition implements MemoryEstimateDefinitio
             var layerConfig = layerConfigs.get(i);
             var weightDimensions = layerConfig.rows() * layerConfig.cols();
             var weightsMemory = sizeOfDoubleArray(weightDimensions);
-            if (layerConfig.aggregatorType() == Aggregator.AggregatorType.POOL) {
+            if (layerConfig.aggregatorType() == AggregatorType.POOL) {
                 // selfWeights
                 weightsMemory += sizeOfDoubleArray((long) layerConfig.rows() * layerConfig.rows());
                 // neighborsWeights

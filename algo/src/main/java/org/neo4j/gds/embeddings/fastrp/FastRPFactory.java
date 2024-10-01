@@ -70,7 +70,7 @@ public class FastRPFactory<CONFIG extends FastRPBaseConfig> extends GraphAlgorit
     ) {
         return build(
             graph,
-            configuration.toParameters(),
+            FastRPConfigTransformer.toParameters(configuration),
             configuration.concurrency(),
             10_000,
             configuration.randomSeed(),
@@ -80,7 +80,7 @@ public class FastRPFactory<CONFIG extends FastRPBaseConfig> extends GraphAlgorit
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return new FastRPMemoryEstimateDefinition(configuration.toParameters()).memoryEstimation();
+        return new FastRPMemoryEstimateDefinition(FastRPConfigTransformer.toParameters(configuration)).memoryEstimation();
     }
 
     @Override

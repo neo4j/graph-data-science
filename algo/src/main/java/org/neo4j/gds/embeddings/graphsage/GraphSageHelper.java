@@ -167,19 +167,26 @@ public final class GraphSageHelper {
                 aggregatorsBuilder.fixed("firstLayer", firstLayerMemory);
             }
 
-            Aggregator.AggregatorType aggregatorType = layerConfig.aggregatorType();
+            var aggregatorType = layerConfig.aggregatorType();
             var embeddingDimension = config.embeddingDimension();
+
+            var aggregatorMemoryEstimation = switch (aggregatorType) {
+                case MEAN -> new MeanAggregatorMemoryEstimator();
+                case POOL -> new PoolAggregatorMemoryEstimator();
+            };
+
+            var aggregatorMemoryRange = aggregatorMemoryEstimation.estimate(
+                minNodeCount,
+                maxNodeCount,
+                minPreviousNodeCount,
+                maxPreviousNodeCount,
+                layerConfig.cols(),
+                embeddingDimension
+            );
 
             aggregatorsBuilder.fixed(
                 formatWithLocale("%s %d", aggregatorType.name(), i + 1),
-                aggregatorType.memoryEstimation(
-                    minNodeCount,
-                    maxNodeCount,
-                    minPreviousNodeCount,
-                    maxPreviousNodeCount,
-                    layerConfig.cols(),
-                    embeddingDimension
-                )
+                aggregatorMemoryRange
             );
 
             if (i == numberOfLayers - 1) {
@@ -269,7 +276,7 @@ public final class GraphSageHelper {
         return features;
     }
 
-    public static List<LayerConfig> layerConfigs(int featureDimension, List<Integer> sampleSizes, Optional<Long> randomSeed, Aggregator.AggregatorType aggregatorType, ActivationFunction activationFunction, int embeddingDimension) {
+    public static List<LayerConfig> layerConfigs(int featureDimension, List<Integer> sampleSizes, Optional<Long> randomSeed, AggregatorType aggregatorType, ActivationFunctionType activationFunction, int embeddingDimension) {
         Random random = new Random();
         randomSeed.ifPresent(random::setSeed);
 

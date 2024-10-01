@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.embeddings.graphsage.TrainConfigTransformer;
 
 import java.util.List;
 import java.util.Map;
@@ -66,7 +67,7 @@ class GraphSageTrainConfigTest {
             "batchSize", 100
         ));
 
-        assertThat(GraphSageTrainConfig.of("user", mapWrapper).toParameters().batchesPerIteration(nodeCount)).isEqualTo(expectedSampledBatches);
+        assertThat(TrainConfigTransformer.toParameters(GraphSageTrainConfig.of("user", mapWrapper)).batchesPerIteration(nodeCount)).isEqualTo(expectedSampledBatches);
     }
 
     @Test

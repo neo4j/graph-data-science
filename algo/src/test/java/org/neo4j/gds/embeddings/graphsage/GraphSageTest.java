@@ -134,11 +134,11 @@ class GraphSageTest {
 
     @ParameterizedTest
     @EnumSource
-    void shouldNotMakeNanEmbeddings(Aggregator.AggregatorType aggregator) {
+    void shouldNotMakeNanEmbeddings(AggregatorType aggregator) {
         var trainConfig = configBuilder
             .modelName(MODEL_NAME)
             .aggregator(aggregator)
-            .activationFunction(ActivationFunction.RELU)
+            .activationFunction(ActivationFunctionType.RELU)
             .sampleSizes(List.of(75,25))
             .featureProperties(List.of("f1", "f2", "f3"))
             .concurrency(4)
@@ -146,7 +146,7 @@ class GraphSageTest {
 
         var trainAlgo = new SingleLabelGraphSageTrain(
             orphanGraph,
-            trainConfig.toParameters(),
+            TrainConfigTransformer.toParameters(trainConfig),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
             testGdsVersion,
@@ -184,7 +184,7 @@ class GraphSageTest {
 
         var graphSageTrain = new SingleLabelGraphSageTrain(
             graph,
-            trainConfig.toParameters(),
+            TrainConfigTransformer.toParameters(trainConfig),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
             testGdsVersion,

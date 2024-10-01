@@ -261,7 +261,7 @@ class HashGNNTest {
             .randomSeed(42L)
             .outputDimension(42)
             .build();
-        var result = new HashGNN(binaryGraph, config.toParameters(), ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE).compute().embeddings();
+        var result = new HashGNN(binaryGraph, HashGNNConfigTransformer.toParameters(config), ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE).compute().embeddings();
         //dimension should be equal to dimension of feature input which is 3
         assertThat(result.doubleArrayValue(0).length).isEqualTo(42);
         assertThat(result.doubleArrayValue(1).length).isEqualTo(42);
@@ -382,8 +382,9 @@ class HashGNNTest {
             .randomSeed(42L)
             .build();
 
-        var firstEmbeddings = new HashGNN(firstGraph, config.toParameters(), ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE).compute().embeddings();
-        var secondEmbeddings = new HashGNN(secondGraph, config.toParameters(), ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE).compute().embeddings();
+        var parameters = HashGNNConfigTransformer.toParameters(config);
+        var firstEmbeddings = new HashGNN(firstGraph, parameters, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE).compute().embeddings();
+        var secondEmbeddings = new HashGNN(secondGraph, parameters, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE).compute().embeddings();
 
         double cosineSum = 0;
         for (long originalNodeId = 0; originalNodeId < nodeCount; originalNodeId++) {

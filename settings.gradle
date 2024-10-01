@@ -364,6 +364,15 @@ project(':path-finding-configs').projectDir = file('procedures/facade-api/config
 include('path-finding-params')
 project(':path-finding-params').projectDir = file('algo-params/path-finding-params')
 
+include('node-embeddings-facade-api')
+project(':node-embeddings-facade-api').projectDir = file('procedures/facade-api/node-embeddings-facade-api')
+
+include('node-embeddings-configs')
+project(':node-embeddings-configs').projectDir = file('procedures/facade-api/configs/node-embeddings-configs')
+
+include('node-embeddings-params')
+project(':node-embeddings-params').projectDir = file('algo-params/node-embeddings-params')
+
 
 
 

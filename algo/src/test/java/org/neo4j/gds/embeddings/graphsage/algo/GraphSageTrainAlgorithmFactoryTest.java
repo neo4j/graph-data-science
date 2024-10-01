@@ -34,9 +34,10 @@ import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.embeddings.graphsage.AggregatorType;
+import org.neo4j.gds.embeddings.graphsage.TrainConfigTransformer;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.mem.MemoryTree;
-import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.gds.embeddings.graphsage.GraphSageTestGraph;
 import org.neo4j.gds.embeddings.graphsage.LayerConfig;
 import org.neo4j.gds.extension.GdlExtension;
@@ -90,7 +91,7 @@ class GraphSageTrainAlgorithmFactoryTest {
         GraphDimensions graphDimensions,
         LongUnaryOperator hugeObjectArraySize
     ) {
-        var parameters = config.toMemoryEstimateParameters();
+        var parameters = TrainConfigTransformer.toMemoryEstimateParameters(config);
         var nodeCount = graphDimensions.nodeCount();
         var concurrency = config.concurrency();
         var layerConfigs = parameters.layerConfigs();
@@ -115,8 +116,8 @@ class GraphSageTrainAlgorithmFactoryTest {
         var layersMemory = layerConfigs.stream().mapToLong(layerConfig -> {
             var weightDimensions = layerConfig.rows() * layerConfig.cols();
             var weightsMemory = sizeOfDoubleArray(weightDimensions);
-            Aggregator.AggregatorType aggregatorType = layerConfig.aggregatorType();
-            if (aggregatorType == Aggregator.AggregatorType.POOL) {
+            AggregatorType aggregatorType = layerConfig.aggregatorType();
+            if (aggregatorType == AggregatorType.POOL) {
                 // selfWeights
                 weightsMemory += sizeOfDoubleArray(layerConfig.rows() * layerConfig.rows());
                 // neighborsWeights
@@ -207,7 +208,7 @@ class GraphSageTrainAlgorithmFactoryTest {
 
             long minAggregatorMemory;
             long maxAggregatorMemory;
-            if (layerConfig.aggregatorType() == Aggregator.AggregatorType.MEAN) {
+            if (layerConfig.aggregatorType() == AggregatorType.MEAN) {
                 var featureOrEmbeddingSize = layerConfig.cols();
 
                 //   [Weighted]MultiMean - new double[[..adjacency.length(=iterNodeCount)] * featureSize];
@@ -224,7 +225,7 @@ class GraphSageTrainAlgorithmFactoryTest {
 
                 minAggregatorMemory = minMeans + minProduct + minActivation;
                 maxAggregatorMemory = maxMeans + maxProduct + maxActivation;
-            } else if (layerConfig.aggregatorType() == Aggregator.AggregatorType.POOL) {
+            } else if (layerConfig.aggregatorType() == AggregatorType.POOL) {
                 var minPreviousNodeCount = previousNodeCounts.getOne();
                 var maxPreviousNodeCount = previousNodeCounts.getTwo();
 
@@ -400,7 +401,7 @@ class GraphSageTrainAlgorithmFactoryTest {
             .modelName("modelName")
             .featureProperties(List.of("a"))
             .sampleSizes(List.of(1, 2))
-            .aggregator(Aggregator.AggregatorType.MEAN);
+            .aggregator(AggregatorType.MEAN);
         var config = isMultiLabel
             ? builder.projectedFeatureDimension(SOME_REASONABLE_VALUE).build()
             : builder.build();
@@ -459,7 +460,7 @@ class GraphSageTrainAlgorithmFactoryTest {
             .modelUser("DUMMY")
             .featureProperties(List.of(DUMMY_PROPERTY))
             .embeddingDimension(12)
-            .aggregator(Aggregator.AggregatorType.POOL)
+            .aggregator(AggregatorType.POOL)
             .tolerance(1e-10)
             .sampleSizes(List.of(5, 3))
             .batchSize(4)
@@ -591,7 +592,7 @@ class GraphSageTrainAlgorithmFactoryTest {
         var batchSizes = List.of(1, 100, 10_000);
         var featurePropertySizes = List.of(1, 9, 42);
         var embeddingDimensions = List.of(64, 256);
-        var aggregators = List.of(Aggregator.AggregatorType.MEAN, Aggregator.AggregatorType.POOL);
+        var aggregators = List.of(AggregatorType.MEAN, AggregatorType.POOL);
         var degreesAsProperty = List.of(true, false);
         var projectedFeatureDimensions = List.of(
             /* single label */ Optional.<Integer>empty(),

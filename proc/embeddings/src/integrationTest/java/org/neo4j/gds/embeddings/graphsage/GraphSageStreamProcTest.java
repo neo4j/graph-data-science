@@ -201,7 +201,7 @@ class GraphSageStreamProcTest extends BaseProcTest {
             .addParameter("sampleSizes", List.of(2, 4))
             .addParameter("featureProperties", List.of("age", "birth_year", "death_year"))
             .addParameter("embeddingDimension", 16)
-            .addParameter("activationFunction", ActivationFunction.SIGMOID)
+            .addParameter("activationFunction", ActivationFunctionType.SIGMOID)
             .addParameter("aggregator", "mean")
             .addParameter("modelName", modelName)
             .yields();

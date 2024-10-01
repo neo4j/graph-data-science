@@ -23,6 +23,7 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.GdsVersionInfoProvider;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.embeddings.graphsage.TrainConfigTransformer;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -56,9 +57,10 @@ public final class GraphSageTrainAlgorithmFactory extends GraphAlgorithmFactory<
             validateRelationshipWeightPropertyValue(graph, configuration.concurrency(), executorService);
         }
 
+        var parameters = TrainConfigTransformer.toParameters(configuration);
         return configuration.isMultiLabel()
-        ? new MultiLabelGraphSageTrain(graph, configuration.toParameters(), configuration.projectedFeatureDimension().get(), executorService, progressTracker, gdsVersion, configuration)
-        : new SingleLabelGraphSageTrain(graph, configuration.toParameters(), executorService, progressTracker, gdsVersion, configuration);
+        ? new MultiLabelGraphSageTrain(graph, parameters, configuration.projectedFeatureDimension().get(), executorService, progressTracker, gdsVersion, configuration)
+        : new SingleLabelGraphSageTrain(graph, parameters, executorService, progressTracker, gdsVersion, configuration);
     }
 
     public MemoryEstimation memoryEstimation(GraphSageTrainMemoryEstimateParameters parameters) {
@@ -67,7 +69,7 @@ public final class GraphSageTrainAlgorithmFactory extends GraphAlgorithmFactory<
 
     @Override
     public MemoryEstimation memoryEstimation(GraphSageTrainConfig configuration) {
-        return memoryEstimation(configuration.toMemoryEstimateParameters());
+        return memoryEstimation(TrainConfigTransformer.toMemoryEstimateParameters(configuration));
     }
 
     public Task progressTask(long nodeCount, GraphSageTrainParameters parameters) {
@@ -84,7 +86,7 @@ public final class GraphSageTrainAlgorithmFactory extends GraphAlgorithmFactory<
 
     @Override
     public Task progressTask(Graph graph, GraphSageTrainConfig config) {
-        return progressTask(graph.nodeCount(), config.toParameters());
+        return progressTask(graph.nodeCount(), TrainConfigTransformer.toParameters(config));
     }
 
 }

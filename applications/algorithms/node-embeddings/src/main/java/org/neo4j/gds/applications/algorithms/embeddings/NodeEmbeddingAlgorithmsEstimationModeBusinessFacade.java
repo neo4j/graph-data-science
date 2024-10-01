@@ -22,14 +22,18 @@ package org.neo4j.gds.applications.algorithms.embeddings;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.embeddings.fastrp.FastRPBaseConfig;
+import org.neo4j.gds.embeddings.fastrp.FastRPConfigTransformer;
 import org.neo4j.gds.embeddings.fastrp.FastRPMemoryEstimateDefinition;
+import org.neo4j.gds.embeddings.graphsage.TrainConfigTransformer;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMemoryEstimateDefinition;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainEstimateDefinition;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNConfig;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNConfigTransformer;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNMemoryEstimateDefinition;
 import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
+import org.neo4j.gds.embeddings.node2vec.Node2VecConfigTransformer;
 import org.neo4j.gds.embeddings.node2vec.Node2VecMemoryEstimateDefinition;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.model.ModelConfig;
@@ -47,7 +51,7 @@ public class NodeEmbeddingAlgorithmsEstimationModeBusinessFacade {
     }
 
     public MemoryEstimation fastRP(FastRPBaseConfig configuration) {
-        return new FastRPMemoryEstimateDefinition(configuration.toParameters()).memoryEstimation();
+        return new FastRPMemoryEstimateDefinition(FastRPConfigTransformer.toParameters(configuration)).memoryEstimation();
     }
 
     public MemoryEstimateResult fastRP(FastRPBaseConfig configuration, Object graphNameOrConfiguration) {
@@ -63,7 +67,7 @@ public class NodeEmbeddingAlgorithmsEstimationModeBusinessFacade {
     public MemoryEstimation graphSage(ModelConfig configuration, boolean mutating) {
         var model = graphSageModelCatalog.get(configuration);
 
-        var memoryEstimateParameters = model.trainConfig().toMemoryEstimateParameters();
+        var memoryEstimateParameters = TrainConfigTransformer.toMemoryEstimateParameters(model.trainConfig());
 
         return new GraphSageMemoryEstimateDefinition(memoryEstimateParameters, mutating).memoryEstimation();
     }
@@ -79,7 +83,7 @@ public class NodeEmbeddingAlgorithmsEstimationModeBusinessFacade {
     }
 
     MemoryEstimation graphSageTrain(GraphSageTrainConfig configuration) {
-        return new GraphSageTrainEstimateDefinition(configuration.toMemoryEstimateParameters()).memoryEstimation();
+        return new GraphSageTrainEstimateDefinition(TrainConfigTransformer.toMemoryEstimateParameters(configuration)).memoryEstimation();
     }
 
     public MemoryEstimateResult graphSageTrain(GraphSageTrainConfig configuration, Object graphNameOrConfiguration) {
@@ -93,7 +97,7 @@ public class NodeEmbeddingAlgorithmsEstimationModeBusinessFacade {
     }
 
     public MemoryEstimation hashGnn(HashGNNConfig configuration) {
-        return new HashGNNMemoryEstimateDefinition(configuration.toParameters()).memoryEstimation();
+        return new HashGNNMemoryEstimateDefinition(HashGNNConfigTransformer.toParameters(configuration)).memoryEstimation();
     }
 
     public MemoryEstimateResult hashGnn(HashGNNConfig configuration, Object graphNameOrConfiguration) {
@@ -107,7 +111,7 @@ public class NodeEmbeddingAlgorithmsEstimationModeBusinessFacade {
     }
 
     public MemoryEstimation node2Vec(Node2VecBaseConfig configuration) {
-        return new Node2VecMemoryEstimateDefinition(configuration.node2VecParameters()).memoryEstimation();
+        return new Node2VecMemoryEstimateDefinition(Node2VecConfigTransformer.node2VecParameters(configuration)).memoryEstimation();
     }
 
     public MemoryEstimateResult node2Vec(Node2VecBaseConfig configuration, Object graphNameOrConfiguration) {

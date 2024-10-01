@@ -32,9 +32,11 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.degree.DegreeCentralityFactory;
 import org.neo4j.gds.embeddings.fastrp.FastRP;
 import org.neo4j.gds.embeddings.fastrp.FastRPBaseConfig;
+import org.neo4j.gds.embeddings.fastrp.FastRPConfigTransformer;
 import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
+import org.neo4j.gds.embeddings.graphsage.TrainConfigTransformer;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
@@ -44,9 +46,11 @@ import org.neo4j.gds.embeddings.graphsage.algo.MultiLabelGraphSageTrain;
 import org.neo4j.gds.embeddings.graphsage.algo.SingleLabelGraphSageTrain;
 import org.neo4j.gds.embeddings.hashgnn.HashGNN;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNConfig;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNConfigTransformer;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
+import org.neo4j.gds.embeddings.node2vec.Node2VecConfigTransformer;
 import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -76,7 +80,7 @@ public class NodeEmbeddingAlgorithms {
         var task = createFastRPTask(graph, configuration.nodeSelfInfluence(), configuration.iterationWeights().size());
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
-        var parameters = configuration.toParameters();
+        var parameters = FastRPConfigTransformer.toParameters(configuration);
 
         var featureExtractors = FeatureExtraction.propertyExtractors(graph, parameters.featureProperties());
 
@@ -117,7 +121,7 @@ public class NodeEmbeddingAlgorithms {
         Graph graph,
         GraphSageTrainConfig configuration
     ) {
-        var parameters = configuration.toParameters();
+        var parameters = TrainConfigTransformer.toParameters(configuration);
 
         var task = Tasks.task(
             AlgorithmLabel.GraphSageTrain.asString(),
@@ -146,9 +150,10 @@ public class NodeEmbeddingAlgorithms {
     ) {
         String gdsVersion = GdsVersionInfoProvider.GDS_VERSION_INFO.gdsVersion();
 
+        var parameters = TrainConfigTransformer.toParameters(configuration);
         if (configuration.isMultiLabel()) return new MultiLabelGraphSageTrain(
             graph,
-            configuration.toParameters(),
+            parameters,
             configuration.projectedFeatureDimension().orElseThrow(),
             DefaultPool.INSTANCE,
             progressTracker,
@@ -158,7 +163,7 @@ public class NodeEmbeddingAlgorithms {
 
         return new SingleLabelGraphSageTrain(
             graph,
-            configuration.toParameters(),
+            parameters,
             DefaultPool.INSTANCE,
             progressTracker,
             gdsVersion,
@@ -170,7 +175,7 @@ public class NodeEmbeddingAlgorithms {
         var task = createHashGnnTask(graph, configuration);
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
-        var algorithm = new HashGNN(graph, configuration.toParameters(), progressTracker, terminationFlag);
+        var algorithm = new HashGNN(graph, HashGNNConfigTransformer.toParameters(configuration), progressTracker, terminationFlag);
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
@@ -185,7 +190,7 @@ public class NodeEmbeddingAlgorithms {
             configuration.sourceNodes(),
             configuration.randomSeed(),
             configuration.walkBufferSize(),
-            configuration.node2VecParameters(),
+            Node2VecConfigTransformer.node2VecParameters(configuration),
             progressTracker,
             terminationFlag
         );

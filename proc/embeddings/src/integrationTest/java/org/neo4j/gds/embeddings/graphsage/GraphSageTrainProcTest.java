@@ -175,8 +175,8 @@ class GraphSageTrainProcTest extends BaseProcTest {
         assertThat(trainConfig).isNotNull();
         assertThat(trainConfig.concurrency().value()).isEqualTo(1);
         assertThat(trainConfig.featureProperties()).containsExactly("age", "birth_year", "death_year");
-        assertThat(trainConfig.aggregator()).isEqualTo(Aggregator.AggregatorType.MEAN);
-        assertThat(trainConfig.activationFunction()).isEqualTo(ActivationFunction.SIGMOID);
+        assertThat(trainConfig.aggregator()).isEqualTo(AggregatorType.MEAN);
+        assertThat(trainConfig.activationFunction()).isEqualTo(ActivationFunctionType.SIGMOID);
         assertThat(trainConfig.embeddingDimension()).isEqualTo(64);
     }
 

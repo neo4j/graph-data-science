@@ -26,21 +26,21 @@ public class MeanAggregatingLayer implements Layer {
 
     private final int sampleSize;
     private final Weights<Matrix> weights;
-    private final ActivationFunction activationFunction;
+    private final ActivationFunctionWrapper activationFunctionWrapper;
 
     public MeanAggregatingLayer(
         Weights<Matrix> weights,
         int sampleSize,
-        ActivationFunction activationFunction
+        ActivationFunctionWrapper activationFunctionWrapper
     ) {
         this.sampleSize = sampleSize;
         this.weights = weights;
-        this.activationFunction = activationFunction;
+        this.activationFunctionWrapper = activationFunctionWrapper;
     }
 
     @Override
     public Aggregator aggregator() {
-        return new MeanAggregator(weights, activationFunction);
+        return new MeanAggregator(weights, activationFunctionWrapper);
     }
 
     @Override

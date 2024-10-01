@@ -32,7 +32,6 @@ import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.Vector;
 
 import java.util.List;
-import java.util.function.Function;
 
 public class MaxPoolingAggregator implements Aggregator {
 
@@ -40,23 +39,23 @@ public class MaxPoolingAggregator implements Aggregator {
     private final Weights<Matrix> selfWeights;
     private final Weights<Matrix> neighborsWeights;
     private final Weights<Vector> bias;
-    private final Function<Variable<Matrix>, Variable<Matrix>> activationFunction;
-    private final ActivationFunction activation;
+    private final ActivationFunction activationFunction;
+    private final ActivationFunctionType activationFunctionType;
 
     public MaxPoolingAggregator(
         Weights<Matrix> poolWeights,
         Weights<Matrix> selfWeights,
         Weights<Matrix> neighborsWeights,
         Weights<Vector> bias,
-        ActivationFunction activationFunction
+        ActivationFunctionWrapper activationFunctionWrapper
     ) {
         this.poolWeights = poolWeights;
         this.selfWeights = selfWeights;
         this.neighborsWeights = neighborsWeights;
         this.bias = bias;
 
-        this.activationFunction = activationFunction.activationFunction();
-        this.activation = activationFunction;
+        this.activationFunction = activationFunctionWrapper.activationFunction();
+        this.activationFunctionType = activationFunctionWrapper.activationFunctionType();
     }
 
     @Override
@@ -103,8 +102,8 @@ public class MaxPoolingAggregator implements Aggregator {
     }
 
     @Override
-    public ActivationFunction activationFunction() {
-        return activation;
+    public ActivationFunctionType activationFunctionType() {
+        return activationFunctionType;
     }
 
     public Matrix poolWeights() {

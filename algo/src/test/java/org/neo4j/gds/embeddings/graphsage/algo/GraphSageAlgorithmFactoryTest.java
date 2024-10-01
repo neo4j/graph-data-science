@@ -37,12 +37,13 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.ModelCatalogExtension;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
-import org.neo4j.gds.embeddings.graphsage.Aggregator;
+import org.neo4j.gds.embeddings.graphsage.AggregatorType;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.LayerConfig;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
+import org.neo4j.gds.embeddings.graphsage.TrainConfigTransformer;
 import org.neo4j.gds.gdl.GdlGraphs;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryRange;
@@ -165,7 +166,7 @@ class GraphSageAlgorithmFactoryTest {
 
             long minAggregatorMemory;
             long maxAggregatorMemory;
-            if (layerConfig.aggregatorType() == Aggregator.AggregatorType.MEAN) {
+            if (layerConfig.aggregatorType() == AggregatorType.MEAN) {
                 var featureOrEmbeddingSize = layerConfig.cols();
 
                 //   multi mean - new double[[..adjacency.length(=iterNodeCount)] * featureSize];
@@ -182,7 +183,7 @@ class GraphSageAlgorithmFactoryTest {
 
                 minAggregatorMemory = minMeans + minProduct + minActivation;
                 maxAggregatorMemory = maxMeans + maxProduct + maxActivation;
-            } else if (layerConfig.aggregatorType() == Aggregator.AggregatorType.POOL) {
+            } else if (layerConfig.aggregatorType() == AggregatorType.POOL) {
                 var minPreviousNodeCount = previousNodeCounts.getOne();
                 var maxPreviousNodeCount = previousNodeCounts.getTwo();
 
@@ -275,7 +276,7 @@ class GraphSageAlgorithmFactoryTest {
             .modelName("modelName")
             .featureProperties(List.of("a"))
             .sampleSizes(List.of(1, 2))
-            .aggregator(Aggregator.AggregatorType.MEAN)
+            .aggregator(AggregatorType.MEAN)
             .build();
 
         var model = Model.of(
@@ -325,7 +326,7 @@ class GraphSageAlgorithmFactoryTest {
             .modelName("modelName")
             .featureProperties(List.of("a"))
             .sampleSizes(List.of(1, 2))
-            .aggregator(Aggregator.AggregatorType.MEAN)
+            .aggregator(AggregatorType.MEAN)
             .build();
 
         var model = Model.of(
@@ -457,7 +458,7 @@ class GraphSageAlgorithmFactoryTest {
         var batchSizes = List.of(1, 100, 10_000);
         var nodePropertySizes = List.of(1, 9, 42);
         var embeddingDimensions = List.of(64, 256);
-        var aggregators = List.of(Aggregator.AggregatorType.MEAN, Aggregator.AggregatorType.POOL);
+        var aggregators = List.of(AggregatorType.MEAN, AggregatorType.POOL);
         var degreesAsProperty = List.of(true, false);
         var sampleSizesList = List.of(List.of(5, 100));
 
@@ -510,7 +511,7 @@ class GraphSageAlgorithmFactoryTest {
 
                                         return arguments(
                                             streamConfigProvider,
-                                            trainConfig.toMemoryEstimateParameters(),
+                                            TrainConfigTransformer.toMemoryEstimateParameters(trainConfig),
                                             nodeCount,
                                             hugeObjectArraySize
                                         );
