@@ -53,12 +53,14 @@ public class IndirectExposure extends Algorithm<HugeDoubleArray> {
 
     @Override
     public HugeDoubleArray compute() {
+        this.progressTracker.beginSubTask();
+
         var sanctionedProperty = graph.nodeProperties(config.sanctionedProperty());
         LongToBooleanFunction isSanctionedFn = (node) -> sanctionedProperty.longValue(node) == 1L;
         DegreeFunction totalTransfersFn = totalTransfersFunction();
         HugeAtomicBitSet visited = HugeAtomicBitSet.create(graph.nodeCount());
 
-        return Pregel.create(
+        var exposure = Pregel.create(
             graph,
             config,
             new IndirectExposureComputation(isSanctionedFn, totalTransfersFn, visited),
@@ -66,6 +68,10 @@ public class IndirectExposure extends Algorithm<HugeDoubleArray> {
             progressTracker,
             terminationFlag
         ).run().nodeValues().doubleProperties(IndirectExposureComputation.EXPOSURE);
+
+        this.progressTracker.endSubTask();
+
+        return exposure;
     }
 
     private DegreeFunction totalTransfersFunction() {

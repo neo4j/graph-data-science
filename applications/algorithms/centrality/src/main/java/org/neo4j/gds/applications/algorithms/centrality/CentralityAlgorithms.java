@@ -46,9 +46,11 @@ import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.degree.DegreeCentrality;
 import org.neo4j.gds.degree.DegreeCentralityConfig;
+import org.neo4j.gds.degree.DegreeCentralityFactory;
 import org.neo4j.gds.degree.DegreeCentralityResult;
 import org.neo4j.gds.harmonic.HarmonicCentrality;
 import org.neo4j.gds.harmonic.HarmonicCentralityBaseConfig;
@@ -58,6 +60,7 @@ import org.neo4j.gds.indirectExposure.IndirectExposureConfig;
 import org.neo4j.gds.influenceMaximization.CELF;
 import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationBaseConfig;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationFactory;
 import org.neo4j.gds.pagerank.ArticleRankComputation;
 import org.neo4j.gds.pagerank.ArticleRankConfig;
 import org.neo4j.gds.pagerank.DegreeFunctions;
@@ -68,6 +71,9 @@ import org.neo4j.gds.pagerank.PageRankComputation;
 import org.neo4j.gds.pagerank.PageRankConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.termination.TerminationFlag;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticleRank;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.EigenVector;
@@ -178,7 +184,11 @@ public class CentralityAlgorithms {
     }
 
     HugeDoubleArray indirectExposure(Graph graph, IndirectExposureConfig configuration) {
-        var task = Tasks.leaf(AlgorithmLabel.IndirectExposure.asString(), graph.nodeCount());
+        var task = Tasks.task(
+            AlgorithmLabel.IndirectExposure.asString(),
+            Tasks.leaf("TotalTransfers", graph.nodeCount()),
+            Pregel.progressTask(graph, configuration, "ExposurePropagation")
+        );
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
         var algorithm = new IndirectExposure(
