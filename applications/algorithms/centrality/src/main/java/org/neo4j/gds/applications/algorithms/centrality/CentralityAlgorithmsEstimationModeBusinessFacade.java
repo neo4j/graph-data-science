@@ -32,6 +32,8 @@ import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.degree.DegreeCentralityAlgorithmEstimateDefinition;
 import org.neo4j.gds.degree.DegreeCentralityConfig;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
+import org.neo4j.gds.indirectExposure.IndirectExposureConfig;
+import org.neo4j.gds.indirectExposure.IndirectExposureMemoryEstimationDefinition;
 import org.neo4j.gds.influenceMaximization.CELFMemoryEstimateDefinition;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationBaseConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -144,6 +146,10 @@ public class CentralityAlgorithmsEstimationModeBusinessFacade {
             graphNameOrConfiguration,
             memoryEstimation
         );
+    }
+
+    MemoryEstimation indirectExposure() {
+        return new IndirectExposureMemoryEstimationDefinition().memoryEstimation();
     }
 
 }

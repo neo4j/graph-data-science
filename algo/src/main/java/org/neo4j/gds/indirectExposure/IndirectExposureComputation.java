@@ -110,6 +110,6 @@ class IndirectExposureComputation implements PregelComputation<IndirectExposureC
 
     @Override
     public MemoryEstimateDefinition estimateDefinition(boolean isAsynchronous) {
-        return () -> Pregel.memoryEstimation(Map.of(), false, false);
+        return () -> Pregel.memoryEstimation(Map.of(EXPOSURE, ValueType.DOUBLE), false, false);
     }
 }

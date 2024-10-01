@@ -30,7 +30,6 @@ import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
-import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
 import org.neo4j.gds.degree.DegreeCentralityResult;
 import org.neo4j.gds.harmonic.HarmonicCentralityMutateConfig;
@@ -247,8 +246,7 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             IndirectExposure,
-            // TODO
-            estimation::pageRank,
+            estimation::indirectExposure,
             (graph, __) -> algorithms.indirectExposure(graph, configuration),
             mutateStep,
             resultBuilder
