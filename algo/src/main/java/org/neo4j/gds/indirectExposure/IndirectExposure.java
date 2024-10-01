@@ -39,7 +39,7 @@ public class IndirectExposure extends Algorithm<HugeDoubleArray> {
     private final IndirectExposureConfig config;
     private final ExecutorService executorService;
 
-    IndirectExposure(
+    public IndirectExposure(
         Graph graph,
         IndirectExposureConfig config,
         ExecutorService executorService,

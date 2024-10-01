@@ -56,7 +56,7 @@ public interface IndirectExposureConfig extends PregelConfig {
     ) {
         if (!graphStore.schema().filterRelationshipTypes(Set.copyOf(selectedRelationshipTypes)).isUndirected()) {
             throw new IllegalArgumentException(formatWithLocale(
-                "TriangleCount requires relationship projections to be UNDIRECTED. " +
+                "Indirect exposure requires relationship projections to be UNDIRECTED. " +
                     "Selected relationships `%s` are not all undirected.",
                 selectedRelationshipTypes.stream().map(RelationshipType::name).collect(Collectors.toSet())
             ));

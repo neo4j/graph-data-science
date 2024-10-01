@@ -30,10 +30,12 @@ import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
 import org.neo4j.gds.degree.DegreeCentralityResult;
 import org.neo4j.gds.harmonic.HarmonicCentralityMutateConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
+import org.neo4j.gds.indirectExposure.IndirectExposureMutateConfig;
 import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationMutateConfig;
 import org.neo4j.gds.pagerank.ArticleRankMutateConfig;
@@ -227,6 +229,24 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
             PageRank,
             estimation::pageRank,
             (graph, __) -> algorithms.pageRank(graph, configuration),
+            mutateStep,
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT indirectExposure(
+        GraphName graphName,
+        IndirectExposureMutateConfig configuration,
+        ResultBuilder<IndirectExposureMutateConfig, HugeDoubleArray, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var mutateStep = new IndirectExposureMutateStep(mutateNodeProperty, configuration);
+
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+            graphName,
+            configuration,
+            PageRank,
+            estimation::pageRank,
+            (graph, __) -> algorithms.indirectExposure(graph, configuration),
             mutateStep,
             resultBuilder
         );

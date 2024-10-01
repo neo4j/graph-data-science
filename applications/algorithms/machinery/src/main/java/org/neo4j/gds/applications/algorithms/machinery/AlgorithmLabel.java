@@ -49,6 +49,7 @@ public enum AlgorithmLabel implements Label {
     HarmonicCentrality("HarmonicCentrality"),
     HashGNN("HashGNN"),
     IndexInverse("IndexInverse"),
+    IndirectExposure("IndirectExposure"),
     K1Coloring("K1Coloring"),
     KCore("KCoreDecomposition"),
     KGE("KGE"),

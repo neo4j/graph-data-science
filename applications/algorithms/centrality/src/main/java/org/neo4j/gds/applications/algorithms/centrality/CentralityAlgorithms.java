@@ -42,6 +42,7 @@ import org.neo4j.gds.closeness.ClosenessCentralityBaseConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.closeness.DefaultCentralityComputer;
 import org.neo4j.gds.closeness.WassermanFaustCentralityComputer;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -52,6 +53,8 @@ import org.neo4j.gds.degree.DegreeCentralityResult;
 import org.neo4j.gds.harmonic.HarmonicCentrality;
 import org.neo4j.gds.harmonic.HarmonicCentralityBaseConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
+import org.neo4j.gds.indirectExposure.IndirectExposure;
+import org.neo4j.gds.indirectExposure.IndirectExposureConfig;
 import org.neo4j.gds.influenceMaximization.CELF;
 import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationBaseConfig;
@@ -174,6 +177,20 @@ public class CentralityAlgorithms {
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
+    HugeDoubleArray indirectExposure(Graph graph, IndirectExposureConfig configuration) {
+        var task = Tasks.leaf(AlgorithmLabel.IndirectExposure.asString(), graph.nodeCount());
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var algorithm = new IndirectExposure(
+            graph,
+            configuration,
+            DefaultPool.INSTANCE,
+            progressTracker
+        );
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+    }
+
     DegreeCentralityResult degreeCentrality(Graph graph, DegreeCentralityConfig configuration) {
         var parameters = configuration.toParameters();
 
@@ -192,7 +209,6 @@ public class CentralityAlgorithms {
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
-
 
     BitSet articulationPoints(Graph graph, AlgoBaseConfig configuration) {
 
