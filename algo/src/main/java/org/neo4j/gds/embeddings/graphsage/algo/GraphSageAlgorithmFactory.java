@@ -32,6 +32,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer.GraphSageTrainMetrics;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.neo4j.gds.embeddings.graphsage.algo.GraphSageModelResolver.resolveModel;
 import static org.neo4j.gds.ml.core.EmbeddingUtils.validateRelationshipWeightPropertyValue;
@@ -63,7 +64,8 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
             parameters.concurrency(),
             parameters.batchSize(),
             executorService,
-            progressTracker
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         );
     }
 

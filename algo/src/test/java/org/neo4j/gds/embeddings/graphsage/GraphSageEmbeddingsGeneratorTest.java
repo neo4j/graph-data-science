@@ -36,6 +36,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Collections;
 import java.util.List;
@@ -90,7 +91,8 @@ class GraphSageEmbeddingsGeneratorTest {
             new SingleLabelFeatureFunction(),
             parameters.randomSeed(),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         HugeObjectArray<double[]> embeddings = embeddingsGenerator.makeEmbeddings(weightedGraph, features);
@@ -133,7 +135,8 @@ class GraphSageEmbeddingsGeneratorTest {
             model.data().featureFunction(),
             model.trainConfig().randomSeed(),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var embeddings = embeddingsGenerator.makeEmbeddings(
@@ -189,7 +192,8 @@ class GraphSageEmbeddingsGeneratorTest {
             model.data().featureFunction(),
             model.trainConfig().randomSeed(),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var embeddings = embeddingsGenerator.makeEmbeddings(

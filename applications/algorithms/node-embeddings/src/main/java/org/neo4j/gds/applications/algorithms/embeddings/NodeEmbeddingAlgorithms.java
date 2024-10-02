@@ -111,7 +111,8 @@ public class NodeEmbeddingAlgorithms {
             parameters.concurrency(),
             parameters.batchSize(),
             DefaultPool.INSTANCE,
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
