@@ -19,12 +19,9 @@
  */
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.pipelines.NodeClassificationStreamResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -34,13 +31,12 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
 import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelineConstants.ESTIMATE_PREDICT_DESCRIPTION;
 import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelineConstants.PREDICT_DESCRIPTION;
 
-public class NodeClassificationPipelineStreamProc extends BaseProc {
+public class NodeClassificationPipelineStreamProc {
     @Context
-    public ModelCatalog internalModelCatalog;
+    public GraphDataScienceProcedures facade;
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.predict.stream", mode = Mode.READ)
     @Description(PREDICT_DESCRIPTION)
@@ -48,11 +44,7 @@ public class NodeClassificationPipelineStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        preparePipelineConfig(graphName, configuration);
-        return new ProcedureExecutor<>(
-            new NodeClassificationPipelineStreamSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.pipelines().nodeClassificationStream(graphName, configuration);
     }
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.predict.stream.estimate", mode = Mode.READ)
@@ -61,16 +53,6 @@ public class NodeClassificationPipelineStreamProc extends BaseProc {
         @Name(value = "graphName") Object graphName,
         @Name(value = "configuration") Map<String, Object> configuration
     ) {
-        preparePipelineConfig(graphName, configuration);
-        return new MemoryEstimationExecutor<>(
-            new NodeClassificationPipelineStreamSpec(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphName, configuration);
-    }
-
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withModelCatalog(internalModelCatalog);
+        return facade.pipelines().nodeClassificationStreamEstimate(graphName, configuration);
     }
 }

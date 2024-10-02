@@ -32,6 +32,7 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 class PipelineConfigurationParser {
@@ -66,9 +67,17 @@ class PipelineConfigurationParser {
     }
 
     NodeClassificationPredictPipelineMutateConfig parseNodeClassificationPredictPipelineMutateConfig(Map<String, Object> configuration) {
-        var wrapper = CypherMapWrapper.create(configuration);
+        return parseNodeClassificationPredictPipelineConfig(
+            NodeClassificationPredictPipelineMutateConfig::of,
+            configuration
+        );
+    }
 
-        return NodeClassificationPredictPipelineMutateConfig.of(user.getUsername(), wrapper);
+    NodeClassificationPredictPipelineStreamConfig parseNodeClassificationPredictPipelineStreamConfig(Map<String, Object> configuration) {
+        return parseNodeClassificationPredictPipelineConfig(
+            NodeClassificationPredictPipelineStreamConfig::of,
+            configuration
+        );
     }
 
     NodePropertyPredictionSplitConfig parseNodePropertyPredictionSplitConfig(Map<String, Object> rawConfiguration) {
@@ -101,6 +110,18 @@ class PipelineConfigurationParser {
         cypherConfig.requireOnlyKeysFrom(configurationKeys);
 
         return configuration;
+    }
+
+    /**
+     * Dumb scaffolding
+     */
+    private <CONFIGURATION> CONFIGURATION parseNodeClassificationPredictPipelineConfig(
+        BiFunction<String, CypherMapWrapper, CONFIGURATION> parser,
+        Map<String, Object> configuration
+    ) {
+        var wrapper = CypherMapWrapper.create(configuration);
+
+        return parser.apply(user.getUsername(), wrapper);
     }
 
     private TunableTrainerConfig parseTrainerConfiguration(

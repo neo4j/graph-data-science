@@ -29,6 +29,7 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.GraphStoreService;
+import org.neo4j.gds.applications.algorithms.machinery.Label;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.StandardLabel;
@@ -263,6 +264,62 @@ class PipelineApplications {
         return pipelineRepository.getSingle(user, pipelineName);
     }
 
+    MemoryEstimateResult nodeClassificationEstimate(
+        Object graphNameOrConfiguration,
+        NodeClassificationPredictPipelineBaseConfig configuration
+    ) {
+        var estimate = nodeClassificationMemoryEstimation(configuration);
+
+        var memoryEstimation = MemoryEstimations.builder("Node Classification Predict Pipeline Executor")
+            .add("Pipeline executor", estimate)
+            .build();
+
+        return algorithmEstimationTemplate.estimate(configuration, graphNameOrConfiguration, memoryEstimation);
+    }
+
+    PredictMutateResult nodeClassificationMutate(GraphName graphName, Map<String, Object> rawConfiguration) {
+        var configuration = pipelineConfigurationParser.parseNodeClassificationPredictPipelineMutateConfig(
+            rawConfiguration);
+        var label = new StandardLabel("NodeClassificationPredictPipelineMutate");
+        var computation = constructComputation(configuration, label);
+        var mutateStep = new NodeClassificationPredictPipelineMutateStep(gss, configuration);
+        var resultBuilder = new NodeClassificationPredictPipelineMutateResultBuilder(configuration);
+
+        return algorithmProcessingTemplate.processAlgorithmForMutate(
+            Optional.empty(),
+            graphName,
+            configuration,
+            Optional.empty(),
+            label,
+            () -> nodeClassificationMemoryEstimation(configuration),
+            computation,
+            mutateStep,
+            resultBuilder
+        );
+    }
+
+    Stream<NodeClassificationStreamResult> nodeClassificationStream(
+        GraphName graphName,
+        Map<String, Object> rawConfiguration
+    ) {
+        var configuration = pipelineConfigurationParser.parseNodeClassificationPredictPipelineStreamConfig(
+            rawConfiguration);
+        var label = new StandardLabel("NodeClassificationPredictPipelineStream");
+        var computation = constructComputation(configuration, label);
+        var resultBuilder = new NodeClassificationPredictPipelineStreamResultBuilder(configuration);
+
+        return algorithmProcessingTemplate.processAlgorithmForStream(
+            Optional.empty(),
+            graphName,
+            configuration,
+            Optional.empty(),
+            label,
+            () -> nodeClassificationMemoryEstimation(configuration),
+            computation,
+            resultBuilder
+        );
+    }
+
     NodeClassificationTrainingPipeline selectFeatures(
         PipelineName pipelineName,
         Iterable<NodeFeatureStep> nodeFeatureSteps
@@ -290,12 +347,11 @@ class PipelineApplications {
         return pipeline;
     }
 
-    PredictMutateResult nodeClassificationMutate(GraphName graphName, Map<String, Object> rawConfiguration) {
-        var configuration = pipelineConfigurationParser.parseNodeClassificationPredictPipelineMutateConfig(rawConfiguration);
-
-        var label = new StandardLabel("NodeClassificationPredictPipelineMutate");
-
-        var computation = NodeClassificationPredictPipelineMutateComputation.create(
+    private NodeClassificationPredictPipelineComputation constructComputation(
+        NodeClassificationPredictPipelineBaseConfig configuration,
+        Label label
+    ) {
+        return NodeClassificationPredictPipelineComputation.create(
             log,
             modelCatalog,
             closeableResourceRegistry,
@@ -315,41 +371,6 @@ class PipelineApplications {
             configuration,
             label
         );
-
-        var mutateStep = new NodeClassificationPredictPipelineMutateStep(gss, configuration);
-
-        var resultBuilder = new NodeClassificationPredictPipelineMutateResultBuilder(configuration);
-
-        return algorithmProcessingTemplate.processAlgorithmForMutate(
-            Optional.empty(),
-            graphName,
-            configuration,
-            Optional.empty(),
-            label,
-            () -> nodeClassificationMutateMemoryEstimation(configuration),
-            computation,
-            mutateStep,
-            resultBuilder
-        );
-    }
-
-    MemoryEstimateResult nodeClassificationMutateEstimate(
-        Object graphNameOrConfiguration,
-        NodeClassificationPredictPipelineMutateConfig configuration
-    ) {
-        var estimate = nodeClassificationMutateMemoryEstimation(configuration);
-
-        var memoryEstimation = MemoryEstimations.builder("Node Classification Predict Pipeline Executor")
-            .add("Pipeline executor", estimate)
-            .build();
-
-        return algorithmEstimationTemplate.estimate(configuration, graphNameOrConfiguration, memoryEstimation);
-    }
-
-    private MemoryEstimation nodeClassificationMutateMemoryEstimation(NodeClassificationPredictPipelineBaseConfig configuration) {
-        var model = getTrainedNCPipelineModel(configuration.modelName(), configuration.username());
-
-        return nodeClassificationPredictPipelineEstimator.estimate(model, configuration);
     }
 
     private Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> getTrainedNCPipelineModel(
@@ -363,5 +384,11 @@ class PipelineApplications {
             NodeClassificationPipelineTrainConfig.class,
             NodeClassificationPipelineModelInfo.class
         );
+    }
+
+    private MemoryEstimation nodeClassificationMemoryEstimation(NodeClassificationPredictPipelineBaseConfig configuration) {
+        var model = getTrainedNCPipelineModel(configuration.modelName(), configuration.username());
+
+        return nodeClassificationPredictPipelineEstimator.estimate(model, configuration);
     }
 }

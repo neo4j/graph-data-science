@@ -42,7 +42,7 @@ import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.termination.TerminationMonitor;
 
-final class NodeClassificationPredictPipelineMutateComputation implements Computation<NodeClassificationPipelineResult> {
+final class NodeClassificationPredictPipelineComputation implements Computation<NodeClassificationPipelineResult> {
     private final Log log;
     private final ModelCatalog modelCatalog;
 
@@ -64,10 +64,10 @@ final class NodeClassificationPredictPipelineMutateComputation implements Comput
     private final AlgorithmsProcedureFacade algorithmsProcedureFacade;
 
     private final TrainedNCPipelineModel trainedNCPipelineModel;
-    private final NodeClassificationPredictPipelineMutateConfig configuration;
+    private final NodeClassificationPredictPipelineBaseConfig configuration;
     private final Label label;
 
-    private NodeClassificationPredictPipelineMutateComputation(
+    private NodeClassificationPredictPipelineComputation(
         Log log,
         ModelCatalog modelCatalog,
         CloseableResourceRegistry closeableResourceRegistry,
@@ -84,7 +84,7 @@ final class NodeClassificationPredictPipelineMutateComputation implements Comput
         UserLogRegistryFactory userLogRegistryFactory,
         ProgressTrackerCreator progressTrackerCreator,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
-        NodeClassificationPredictPipelineMutateConfig configuration,
+        NodeClassificationPredictPipelineBaseConfig configuration,
         Label label,
         TrainedNCPipelineModel trainedNCPipelineModel
     ) {
@@ -109,7 +109,7 @@ final class NodeClassificationPredictPipelineMutateComputation implements Comput
         this.label = label;
     }
 
-    static NodeClassificationPredictPipelineMutateComputation create(
+    static NodeClassificationPredictPipelineComputation create(
         Log log,
         ModelCatalog modelCatalog,
         CloseableResourceRegistry closeableResourceRegistry,
@@ -126,12 +126,12 @@ final class NodeClassificationPredictPipelineMutateComputation implements Comput
         UserLogRegistryFactory userLogRegistryFactory,
         ProgressTrackerCreator progressTrackerCreator,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
-        NodeClassificationPredictPipelineMutateConfig configuration,
+        NodeClassificationPredictPipelineBaseConfig configuration,
         Label label
     ) {
         var trainedNCPipelineModel = new TrainedNCPipelineModel(modelCatalog);
 
-        return new NodeClassificationPredictPipelineMutateComputation(
+        return new NodeClassificationPredictPipelineComputation(
             log,
             modelCatalog,
             closeableResourceRegistry,

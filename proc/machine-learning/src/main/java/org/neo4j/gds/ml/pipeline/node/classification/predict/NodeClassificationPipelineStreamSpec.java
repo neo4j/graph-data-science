@@ -31,6 +31,8 @@ import org.neo4j.gds.ml.models.BaseModelData;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.procedures.pipelines.NodeClassificationPipelineResult;
 import org.neo4j.gds.procedures.pipelines.NodeClassificationPredictPipelineExecutor;
+import org.neo4j.gds.procedures.pipelines.NodeClassificationPredictPipelineStreamConfig;
+import org.neo4j.gds.procedures.pipelines.NodeClassificationStreamResult;
 
 import java.util.Arrays;
 import java.util.List;

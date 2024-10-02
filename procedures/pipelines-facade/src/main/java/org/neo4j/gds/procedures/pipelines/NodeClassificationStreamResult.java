@@ -17,22 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.node.classification.predict;
+package org.neo4j.gds.procedures.pipelines;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.procedures.pipelines.NodeClassificationPredictPipelineBaseConfig;
+import java.util.List;
 
-@Configuration
-public interface NodeClassificationPredictPipelineStreamConfig
-    extends NodeClassificationPredictPipelineBaseConfig
-{
-    @Override
-    default boolean includePredictedProbabilities() {
-        return false;
-    }
+public final class NodeClassificationStreamResult {
+    public long nodeId;
+    public long predictedClass;
+    public List<Double> predictedProbabilities;
 
-    static NodeClassificationPredictPipelineStreamConfig of(String username, CypherMapWrapper config) {
-        return new NodeClassificationPredictPipelineStreamConfigImpl(username, config);
+    public NodeClassificationStreamResult(long nodeId, long predictedClass, List<Double> predictedProbabilities) {
+        this.nodeId = nodeId;
+        this.predictedClass = predictedClass;
+        this.predictedProbabilities = predictedProbabilities;
     }
 }
