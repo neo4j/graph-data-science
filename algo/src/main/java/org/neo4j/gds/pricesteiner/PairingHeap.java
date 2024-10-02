@@ -39,7 +39,9 @@ public class PairingHeap {
     }
 
     public void  increaseValues(double value){
-        root.addOffset(value);
+        if (root!=null) {
+            root.addOffset(value);
+        }
     }
     public double minValue(){
         return root.value();

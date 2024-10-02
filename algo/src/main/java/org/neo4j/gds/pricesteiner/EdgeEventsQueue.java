@@ -26,18 +26,17 @@ import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 
     private final HugeObjectArray<PairingHeap> pairingHeaps;
     private final HugeLongPriorityQueue edgeEventsPriorityQueue;
-    private long maxClusterId;
     private long currentlyActive;
 
     EdgeEventsQueue(long nodeCount){
 
         this.pairingHeaps= HugeObjectArray.newArray(PairingHeap.class, 2*nodeCount);
-        this.edgeEventsPriorityQueue= HugeLongPriorityQueue.min(2*nodeCount);
-        this.maxClusterId = nodeCount-1;
+        this.edgeEventsPriorityQueue = HugeLongPriorityQueue.min(2*nodeCount);
+
         for (int i=0;i<nodeCount;i++){
             pairingHeaps.set(i, new PairingHeap());
         }
-        currentlyActive=nodeCount;
+        currentlyActive = nodeCount;
     }
     long currentlyActive(){
         return currentlyActive;
@@ -68,8 +67,8 @@ import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
     void addBothWays(long s, long t, long edgePart1, long edgePart2, double w){
         var pairingHeapOfs  = pairingHeaps.get(s);
         var pairingHeapOft  = pairingHeaps.get(t);
-        pairingHeapOfs.add(edgePart2,w);
-        pairingHeapOft.add(edgePart1,w);
+        pairingHeapOfs.add(edgePart1,w);
+        pairingHeapOft.add(edgePart2,w);
     }
 
      void addWithCheck(long s,  long edgePart, double w){
@@ -92,16 +91,21 @@ import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
     void mergeAndUpdate(long newCluster, long cluster1,long cluster2){
         pairingHeaps.set(newCluster,pairingHeaps.get(cluster1).join(pairingHeaps.get(cluster2)));
 
-        edgeEventsPriorityQueue.set(cluster1,Double.MAX_VALUE); // very-very bad way of removing from common heap-of-heaps
-        edgeEventsPriorityQueue.set(cluster2,Double.MAX_VALUE); //ditto
+        deactivateCluster(cluster1);
+        deactivateCluster(cluster2);
 
         edgeEventsPriorityQueue.add(newCluster, pairingHeaps.get(newCluster).minValue());
-        maxClusterId++;
         currentlyActive--;
     }
 
-    void performInitialAssignment(){
-        for (long u=0; u<=maxClusterId; u++){
+    void deactivateCluster(long clusterId){
+        // very-very bad way of removing from common heap-of-heaps
+        edgeEventsPriorityQueue.set(clusterId,Double.MAX_VALUE); //ditto
+
+    }
+
+    void performInitialAssignment(long nodeCount){
+        for (long u=0; u<nodeCount; u++){
             if (!pairingHeaps.get(u).empty()) {
                 edgeEventsPriorityQueue.add(u, pairingHeaps.get(u).minValue());
             }

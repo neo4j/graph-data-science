@@ -35,7 +35,7 @@ class EdgeEventsQueueTest {
         edgeEventsQueue.addBothWays(4, 5, 30, 31, 5);
         edgeEventsQueue.addBothWays(6, 7, 40, 41, 40);
 
-        edgeEventsQueue.performInitialAssignment();
+        edgeEventsQueue.performInitialAssignment(10);
         //CHECK 1
         assertThat(edgeEventsQueue.nextEventTime()).isEqualTo(5);
         var top1 = edgeEventsQueue.top();
@@ -104,7 +104,7 @@ class EdgeEventsQueueTest {
         edgeEventsQueue.addBothWays(0, 1, 10, 11, 10);
         edgeEventsQueue.addBothWays(0, 1, 20, 21, 20);
 
-        edgeEventsQueue.performInitialAssignment();
+        edgeEventsQueue.performInitialAssignment(10);
 
         edgeEventsQueue.mergeAndUpdate(11,0,1);
 

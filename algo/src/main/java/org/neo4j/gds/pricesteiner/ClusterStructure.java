@@ -24,6 +24,8 @@ import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 
+import java.util.function.LongPredicate;
+
 public class ClusterStructure {
 
     private final HugeLongArray parent; //TODO: enforce path-compression heuristic
@@ -31,9 +33,9 @@ public class ClusterStructure {
     private final HugeLongArray left;
     private final HugeLongArray right;
     private final HugeDoubleArray moat;
-    private final HugeDoubleArray totalMoat;
+    private final HugeDoubleArray subTotalMoat;
     private final long originalNodeCount;
-
+    private final ClusterActivity clusterActivity;
     private  long maxNumberOfClusters;
 
     ClusterStructure(long nodeCount){
@@ -42,22 +44,37 @@ public class ClusterStructure {
         this.clusterPrizes = HugeDoubleArray.newArray(2*nodeCount);
         this.parent.fill(-1L);
         this.maxNumberOfClusters = nodeCount;
-        this.totalMoat = HugeDoubleArray.newArray(2*nodeCount);
+        this.subTotalMoat = HugeDoubleArray.newArray(2*nodeCount);
         this.moat = HugeDoubleArray.newArray(2*nodeCount);
         this.left = HugeLongArray.newArray(nodeCount);
         this.right = HugeLongArray.newArray(nodeCount);
         this.originalNodeCount = nodeCount;
+        this.clusterActivity = new ClusterActivity(nodeCount);
     }
 
-    long merge(long cluster1,long cluster2){
+    long merge(long cluster1,long cluster2,double moat){
         var newCluster = maxNumberOfClusters++;
         parent.set(cluster1,newCluster);
         parent.set(cluster2,newCluster);
         clusterPrizes.set(newCluster, clusterPrizes.get(cluster1)+ clusterPrizes.get(cluster2));
-        totalMoat.set(newCluster, totalMoat.get(cluster1)+ totalMoat.get(cluster2));
+        var moat1 = moatAt(cluster1,moat);
+        var moat2 = moatAt(cluster2,moat);
+
+        subTotalMoat.set(newCluster, subTotalMoat.get(cluster1)+ subTotalMoat.get(cluster2) + moat1+ moat2);
+        deactivateCluster(cluster1,moat);
+        deactivateCluster(cluster2,moat);
+
+        clusterActivity.activateCluster(newCluster,moat);
         left.set(newCluster- originalNodeCount, cluster1);
         right.set(newCluster- originalNodeCount, cluster2);
         return  newCluster;
+    }
+    void  deactivateCluster(long clusterId, double moat){
+        if (clusterActivity.active(clusterId)) {
+            this.moat.set(clusterId,moatAt(clusterId,moat));
+            clusterActivity.deactivateCluster(clusterId, moat);
+
+        }
     }
 
     void setClusterPrize(long clusterId, double prize){
@@ -68,39 +85,20 @@ public class ClusterStructure {
         return clusterPrizes.get(clusterId);
     }
 
-    void increaseMoat(long clusterId, double val){
-        moat.addTo(clusterId,val);
-        totalMoat.addTo(clusterId,val);
-    }
-
-    void setMoat(long clusterId, double val){
-        double  moatToAdd =  val - moat.get(clusterId);
-        increaseMoat(clusterId,moatToAdd);
-    }
-
     double  tightnessTime(long clusterId, double currentMoat){
-            double  slack =   clusterPrizes.get(clusterId) - totalMoat.get(clusterId);
+            double  slack =  clusterPrizes.get(clusterId) - subTotalMoat.get(clusterId) - moatAt(clusterId,currentMoat);
             return  currentMoat + slack;
     }
 
-    ClusterMoatPair sumOnEdgePart(long node){
-        double sum=moat.get(node);
+    ClusterMoatPair sumOnEdgePart(long node, double currentMoat){
+        double sum=moatAt(node,currentMoat);
         long currentNode =node;
         while (parent.get(currentNode)!=-1){
             currentNode = parent.get(currentNode);
-            sum+= moat.get(currentNode);
+            sum+=  moatAt(currentNode,currentMoat);
         }
-        return new ClusterMoatPair(currentNode,sum);
-    }
 
-    double sumOnEdgePartOnly(long node){
-            double sum=moat.get(node);
-            long currentNode =node;
-            while (parent.get(currentNode)!=-1){
-                currentNode = parent.get(currentNode);
-                sum+= moat.get(currentNode);
-            }
-            return  sum;
+        return new ClusterMoatPair(currentNode,sum);
     }
 
     BitSet activeOriginalNodesOfCluster(long clusterId){
@@ -108,24 +106,58 @@ public class ClusterStructure {
 
         if (clusterId < originalNodeCount){
             bitSet.set(clusterId);
-            return  bitSet;
+            return bitSet;
         }
 
         HugeLongArrayStack stack= HugeLongArrayStack.newStack(originalNodeCount);
         stack.push(clusterId);
+
         while (!stack.isEmpty()){
             var  stackCluster = stack.pop();
-            if (stackCluster < originalNodeCount){
-                bitSet.set(stackCluster);
-            }else{
                 var adaptedIndex = stackCluster - originalNodeCount;
-                stack.push(left.get(adaptedIndex));
-                stack.push(right.get(adaptedIndex));
-            }
+                var leftChild = left.get(adaptedIndex);
+                var rightChild = right.get(adaptedIndex);
+                if (leftChild  < originalNodeCount) {
+                    bitSet.set(leftChild);
+                }else{
+                    stack.push(leftChild);
+                }
+                if (rightChild  < originalNodeCount) {
+                    bitSet.set(rightChild);
+                }else{
+                    stack.push(rightChild);
+                }
+
         }
         return  bitSet;
     }
 
+     double moatAt(long clusterId, double moat){
+        if (!clusterActivity.active(clusterId)) {
+            return this.moat.get(clusterId);
+        }
+        return  moat -  clusterActivity.activeSince(clusterId);
+    }
+
+    long numberOfActiveClusters(){
+        return  clusterActivity.numberOfActiveClusters();
+    }
+
+    LongPredicate active(){
+        return clusterActivity.active();
+    }
+
+    boolean active(long clusterId){
+        return clusterActivity.active(clusterId);
+    }
+
+    long singleActiveCluster(){
+        return  clusterActivity.firstActiveCluster();
+    }
+
+    double inactiveSince(long clusterId){
+        return  clusterActivity.inactiveSince(clusterId);
+    }
 
 }
  record ClusterMoatPair(long cluster, double totalMoat){}

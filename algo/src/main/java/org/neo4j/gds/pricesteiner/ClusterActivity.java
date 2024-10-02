@@ -24,48 +24,61 @@ import org.neo4j.gds.collections.ha.HugeDoubleArray;
 
 import java.util.function.LongPredicate;
 
- class ClusterActivity {
+class ClusterActivity {
 
     private final BitSet activeClusters;
     //TODO: we should not need to store this as we have the moat from the `ClusterStructure`, doing this now for the first draft.
-    private  final HugeDoubleArray inactiveSince;
-    private  long numberOfActiveClusters;
+    private final HugeDoubleArray inactiveSince;
+    private final HugeDoubleArray activeSince;
 
-     ClusterActivity(long nodeCount){
-        this.activeClusters = new BitSet(2*nodeCount);
-        this.inactiveSince   = HugeDoubleArray.newArray(2*nodeCount);
-         inactiveSince.fill(-1);
-         this.numberOfActiveClusters =nodeCount;
+    private long numberOfActiveClusters;
+
+    ClusterActivity(long nodeCount) {
+        this.activeClusters = new BitSet(2 * nodeCount);
+        this.inactiveSince = HugeDoubleArray.newArray(2 * nodeCount);
+        this.activeSince = HugeDoubleArray.newArray(2 * nodeCount);
+
+        this.numberOfActiveClusters = nodeCount;
+
+        inactiveSince.fill(-1);
+        activeSince.fill(0);
+        activeClusters.set(0, nodeCount);
     }
 
-    void deactivateCluster(long clusterId, double moat){
+    void deactivateCluster(long clusterId, double moat) {
         activeClusters.clear(clusterId);
         inactiveSince.set(clusterId, moat);
         this.numberOfActiveClusters--;
     }
 
-    void activateCluster(long clusterId){
-         activeClusters.set(clusterId);
-         this.numberOfActiveClusters++;
+    void activateCluster(long clusterId, double moat) {
+        activeClusters.set(clusterId);
+        activeSince.set(clusterId,moat);
+        this.numberOfActiveClusters++;
     }
 
-    long numberOfActiveClusters(){
-         return numberOfActiveClusters;
-    }
-    double inactiveSince(long clusterId){
-         return inactiveSince.get(clusterId);
-    }
-    LongPredicate active(){
-         return  activeClusters::get;
+    long numberOfActiveClusters() {
+        return numberOfActiveClusters;
     }
 
-    boolean active(long clusterId){
-         return activeClusters.get(clusterId);
+    double inactiveSince(long clusterId) {
+        return inactiveSince.get(clusterId);
     }
 
-    long firstActiveCluster(){
-         return  activeClusters.nextSetBit(0);
+    double activeSince(long clusterId) {
+        return activeSince.get(clusterId);
     }
 
+    LongPredicate active() {
+        return activeClusters::get;
+    }
+
+    boolean active(long clusterId) {
+        return activeClusters.get(clusterId);
+    }
+
+    long firstActiveCluster() {
+        return activeClusters.nextSetBit(0);
+    }
 
 }

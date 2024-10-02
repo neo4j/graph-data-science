@@ -41,63 +41,70 @@ public class StrongPruning {
         this.prizes = prizes;
         this.parentArray = HugeLongArray.newArray(treeStructure.originalNodeCount());
         this.parentCostArray = HugeDoubleArray.newArray(treeStructure.originalNodeCount());
-        parentArray.fill(-1L);
+            parentArray.fill(PriceSteinerTreeResult.PRUNED);
 
     }
 
     void performPruning(){
-
-        HugeLongArray queue= HugeLongArray.newArray(activeOriginalNodes.capacity());
-        HugeDoubleArray dp= HugeDoubleArray.newArray(treeStructure.originalNodeCount());
-        long totalPos=0;
-        long currentPos=0;
-        var tree= treeStructure.tree();
-        var degrees = treeStructure.degrees();
-
-        for (long u=0;u<degrees.size();++u){
-            if (degrees.get(u) ==1){
-                queue.set(totalPos++, u);
-            }
+        if (activeOriginalNodes.cardinality() ==1){
+            var singleActiveNode = activeOriginalNodes.nextSetBit(0);
+            parentArray.set(singleActiveNode,PriceSteinerTreeResult.ROOT);
 
         }
+        else {
+            HugeLongArray queue = HugeLongArray.newArray(activeOriginalNodes.capacity());
+            HugeDoubleArray dp = HugeDoubleArray.newArray(treeStructure.originalNodeCount());
+            long totalPos = 0;
+            long currentPos = 0;
+            var tree = treeStructure.tree();
+            var degrees = treeStructure.degrees();
 
-        while ( currentPos < totalPos){
-            var nextLeaf  = queue.get(currentPos++);
-
-            var parent = new MutableLong(-1);
-            var parentCost = new MutableDouble(-1);
-            dp.addTo(nextLeaf,prizes.applyAsDouble(nextLeaf));
-            degrees.set(nextLeaf,0);
-
-            tree.forEachRelationship(nextLeaf, 1.0, (s,t,w)->{
-                if (degrees.get(t) > 0){
-                    parent.set(t);
-                    parentCost.setValue(w);
-                    return false;
+            for (long u = 0; u < degrees.size(); ++u) {
+                if (degrees.get(u) == 1) {
+                    queue.set(totalPos++, u);
                 }
-                return  true;
-            });
-            var  actualParent = parent.get();
-            if (actualParent ==-1){
-                continue;
-            }
-            var  actualParentCost = parentCost.getValue().doubleValue();
 
-            parentArray.set(nextLeaf,actualParent);
-            parentCostArray.set(nextLeaf,actualParentCost);
-
-            if (Double.compare(actualParentCost, (dp.get(nextLeaf))) >=0){
-                setNodesAsInvalid(nextLeaf,queue,parent.get());
-            }else{
-                dp.addTo(actualParent, dp.get(nextLeaf) - actualParentCost );
             }
 
-            degrees.addTo(actualParent,-1);
-            if (degrees.get(actualParent)==1){
-                queue.set(totalPos++,actualParent);
+            long rootNode = -1;
+            while (currentPos < totalPos) {
+                var nextLeaf = queue.get(currentPos++);
+                rootNode = nextLeaf;
+                var parent = new MutableLong(-1);
+                var parentCost = new MutableDouble(-1);
+                dp.addTo(nextLeaf, prizes.applyAsDouble(nextLeaf));
+                degrees.set(nextLeaf, 0);
+
+                tree.forEachRelationship(nextLeaf, 1.0, (s, t, w) -> {
+                    if (degrees.get(t) > 0) {
+                        parent.set(t);
+                        parentCost.setValue(w);
+                        return false;
+                    }
+                    return true;
+                });
+                var actualParent = parent.get();
+                if (actualParent == -1) {
+                    continue;
+                }
+                var actualParentCost = parentCost.getValue().doubleValue();
+
+                parentArray.set(nextLeaf, actualParent);
+                parentCostArray.set(nextLeaf, actualParentCost);
+
+                if (Double.compare(actualParentCost, (dp.get(nextLeaf))) >= 0) {
+                    setNodesAsInvalid(nextLeaf, queue, parent.get());
+                } else {
+                    dp.addTo(actualParent, dp.get(nextLeaf) - actualParentCost);
+                }
+
+                degrees.addTo(actualParent, -1);
+                if (degrees.get(actualParent) == 1) {
+                    queue.set(totalPos++, actualParent);
+                }
             }
+            parentArray.set(rootNode, PriceSteinerTreeResult.ROOT);
         }
-
     }
 
     PriceSteinerTreeResult resultTree(){
@@ -112,7 +119,7 @@ public class StrongPruning {
             while (currentPosition < position.get()){
                 var node = helpingArray.get(currentPosition++);
                 activeOriginalNodes.clear(node);
-                parentArray.set(node,PCSTFast.PRUNED);
+                parentArray.set(node,PriceSteinerTreeResult.PRUNED);
                 tree.forEachRelationship(node, (s,t)->{
                     if (t != parentOfStart && activeOriginalNodes.get(t)){
                         helpingArray.set(position.getAndIncrement(),t);

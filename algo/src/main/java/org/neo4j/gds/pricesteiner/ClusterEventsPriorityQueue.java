@@ -37,7 +37,7 @@ public class ClusterEventsPriorityQueue {
             queue.pop();
             top=queue.top();
         }
-        return  queue.cost(top);
+        return queue.cost(top);
     }
 
     long topCluster(){

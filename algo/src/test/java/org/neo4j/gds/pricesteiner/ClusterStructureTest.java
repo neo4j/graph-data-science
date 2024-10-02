@@ -28,33 +28,32 @@ class ClusterStructureTest {
     @Test
     void shouldCreateNewClustersCorrectly() {
         var clusterStructure = new ClusterStructure(4);
-        assertThat(clusterStructure.merge(0, 1)).isEqualTo(4);
-        assertThat(clusterStructure.merge(2, 3)).isEqualTo(5);
-        assertThat(clusterStructure.merge(4, 5)).isEqualTo(6);
+        assertThat(clusterStructure.merge(0, 1,0)).isEqualTo(4);
+        assertThat(clusterStructure.merge(2, 3,0)).isEqualTo(5);
+        assertThat(clusterStructure.merge(4, 5,0)).isEqualTo(6);
 
         for (int i=0;i<6;++i) {
-            assertThat(clusterStructure.sumOnEdgePart(i).cluster()).isEqualTo(6);
+            assertThat(clusterStructure.sumOnEdgePart(i,10).cluster()).isEqualTo(6);
         }
     }
 
     @Test
     void shouldComputeMoatSumCorrectly(){
-        var clusterStructure =new  ClusterStructure(4);
+        var clusterStructure = new ClusterStructure(4);
 
-        clusterStructure.increaseMoat(0,3);
-        clusterStructure.increaseMoat(1,2);
-        clusterStructure.merge(0,1);
-        clusterStructure.increaseMoat(4,3);
+        clusterStructure.merge(0,1,3); //cluster 4
 
-        assertThat(clusterStructure.sumOnEdgePart(0).totalMoat()).isEqualTo(6);
+        assertThat(clusterStructure.sumOnEdgePart(0,3).totalMoat()).isEqualTo(3);
+        assertThat(clusterStructure.sumOnEdgePart(0,9).totalMoat()).isEqualTo(9);
 
-        clusterStructure.merge(2,3);
-        clusterStructure.increaseMoat(4,10);
-        clusterStructure.merge(4,5);
 
-        clusterStructure.increaseMoat(6,100);
+        clusterStructure.merge(2,3,0); //cluster 5
 
-        assertThat(clusterStructure.sumOnEdgePart(0).totalMoat()).isEqualTo(116);
+        clusterStructure.merge(4,5,9);
+
+        assertThat(clusterStructure.sumOnEdgePart(0,100).totalMoat()).isEqualTo(100);
+        assertThat(clusterStructure.sumOnEdgePart(3,100).totalMoat()).isEqualTo(100);
+
 
     }
 
@@ -65,7 +64,7 @@ class ClusterStructureTest {
         clusterStructure.setClusterPrize(1,20);
         assertThat(clusterStructure.clusterPrize(0)).isEqualTo(10);
         assertThat(clusterStructure.clusterPrize(1)).isEqualTo(20);
-        clusterStructure.merge(0,1);
+        clusterStructure.merge(0,1,0);
         assertThat(clusterStructure.clusterPrize(4)).isEqualTo(30);
     }
 
@@ -73,18 +72,16 @@ class ClusterStructureTest {
     void shouldComputeTightnessCorrectly(){
         var clusterStructure = new ClusterStructure(4);
         clusterStructure.setClusterPrize(0,10);
-        clusterStructure.increaseMoat(0,3);
         clusterStructure.setClusterPrize(1,20);
-        clusterStructure.increaseMoat(1,3);
-        clusterStructure.merge(0,1);
+        clusterStructure.merge(0,1,3);
         assertThat(clusterStructure.tightnessTime(4,3)).isEqualTo(27);
     }
 
     @Test
     void shouldFindOriginalNodesOfCluster(){
         var clusterStructure = new ClusterStructure(4);
-        clusterStructure.merge(0,1);
-        clusterStructure.merge(4,3);
+        clusterStructure.merge(0,1,0);
+        clusterStructure.merge(4,3,0);
         var activePredicate = clusterStructure.activeOriginalNodesOfCluster(5);
         assertThat(activePredicate.get(0)).isTrue();
         assertThat(activePredicate.get(1)).isTrue();

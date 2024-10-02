@@ -143,10 +143,10 @@ class StrongPruningTest {
             assertThat(resultTree.relationshipToParentCost().get(graph.toMappedNodeId("a6"))).isEqualTo(3);
             assertThat(resultTree.relationshipToParentCost().get(graph.toMappedNodeId("a7"))).isEqualTo(4);
 
-            assertThat(resultTree.parentArray().get(graph.toMappedNodeId("a5"))).isEqualTo(PCSTFast.PRUNED);
-            assertThat(resultTree.parentArray().get(graph.toMappedNodeId("a8"))).isEqualTo(PCSTFast.PRUNED);
-            assertThat(resultTree.parentArray().get(graph.toMappedNodeId("a9"))).isEqualTo(PCSTFast.PRUNED);
-            assertThat(resultTree.parentArray().get(graph.toMappedNodeId("a3"))).isEqualTo(PCSTFast.PRUNED);
+            assertThat(resultTree.parentArray().get(graph.toMappedNodeId("a5"))).isEqualTo(PriceSteinerTreeResult.PRUNED);
+            assertThat(resultTree.parentArray().get(graph.toMappedNodeId("a8"))).isEqualTo(PriceSteinerTreeResult.PRUNED);
+            assertThat(resultTree.parentArray().get(graph.toMappedNodeId("a9"))).isEqualTo(PriceSteinerTreeResult.PRUNED);
+            assertThat(resultTree.parentArray().get(graph.toMappedNodeId("a3"))).isEqualTo(PriceSteinerTreeResult.PRUNED);
 
         }
     }

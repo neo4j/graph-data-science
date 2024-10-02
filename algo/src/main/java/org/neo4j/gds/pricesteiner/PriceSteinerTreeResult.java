@@ -26,5 +26,9 @@ public record PriceSteinerTreeResult(
     HugeLongArray parentArray,
     HugeDoubleArray relationshipToParentCost
 ) {
+    public static final long  PRUNED=-2;
+    public static final long  ROOT=-1;
+
+
 
 }

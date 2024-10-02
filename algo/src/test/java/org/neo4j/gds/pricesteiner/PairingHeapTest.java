@@ -28,7 +28,11 @@ class PairingHeapTest {
     @Test
     void shouldBehaveLikeAQueue(){
         PairingHeap heap = new PairingHeap();
+        assertThat(heap.empty()).isTrue();
+
         heap.add(1,10);
+        assertThat(heap.empty()).isFalse();
+
         heap.add(2,11);
         assertThat(heap.minValue()).isEqualTo(10);
         assertThat(heap.minElement()).isEqualTo(1);
@@ -44,6 +48,9 @@ class PairingHeapTest {
         heap.pop();
         assertThat(heap.minValue()).isEqualTo(11);
         assertThat(heap.minElement()).isEqualTo(2);
+
+        heap.pop();
+        assertThat(heap.empty()).isTrue();
 
 
     }
@@ -160,7 +167,6 @@ class PairingHeapTest {
         assertThat(heap3.minValue()).isEqualTo(204); heap3.pop();
         assertThat(heap3.minValue()).isEqualTo(304); heap3.pop();
         assertThat(heap3.minValue()).isEqualTo(404);
-
 
     }
 

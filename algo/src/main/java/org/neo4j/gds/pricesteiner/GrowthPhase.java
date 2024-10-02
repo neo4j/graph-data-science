@@ -31,7 +31,6 @@ class GrowthPhase {
     private final ClusterStructure clusterStructure;
     private final Graph graph;
     private final ClusterEventsPriorityQueue clusterEventsPriorityQueue;
-    private final ClusterActivity clusterActivity;
     private final HugeLongArray edgeParts;
     private final HugeDoubleArray edgeCosts;
     private final EdgeEventsQueue edgeEventsQueue;
@@ -46,7 +45,6 @@ class GrowthPhase {
         this.graph = graph;
         this.clusterStructure = new ClusterStructure(graph.nodeCount());
         this.clusterEventsPriorityQueue = new ClusterEventsPriorityQueue(graph.nodeCount());
-        this.clusterActivity = new ClusterActivity(graph.nodeCount());
         this.edgeParts = HugeLongArray.newArray(graph.relationshipCount());
         this.edgeCosts = HugeDoubleArray.newArray(graph.relationshipCount() / 2);
         this.edgeEventsQueue = new EdgeEventsQueue(graph.nodeCount());
@@ -60,25 +58,27 @@ class GrowthPhase {
         initializeClusterPrizes();
         initializeEdgeParts();
         double moat;
-        while (clusterActivity.numberOfActiveClusters() > 1) {
+        int j=0;
+        while (clusterStructure.numberOfActiveClusters() > 1) {
             double edgeEventTime = edgeEventsQueue.nextEventTime();
-            double clusterEventTime = clusterEventsPriorityQueue.closestEvent(clusterActivity.active());
+            double clusterEventTime = clusterEventsPriorityQueue.closestEvent(clusterStructure.active());
             if (Double.compare(clusterEventTime, edgeEventTime) <= 0) {
                 moat = clusterEventTime;
                 deactivateCluster(moat, clusterEventsPriorityQueue.topCluster());
-
             } else {
-                //REMOVE
                 moat = edgeEventTime;
-                long uCluster = edgeEventsQueue.top();
+
                 long uPart = edgeEventsQueue.topEdgePart();
                 long vPart = otherEdgePart(uPart);
                 long u = edgeParts.get(uPart);
-                long v = edgeParts.get(vPart); //TODO: If we have already  processed other edge part (tight or delete), find shortcut to skip
+                long v = edgeParts.get(vPart);   //TODO: If we have already  processed other edge part (tight or delete), find shortcut to skip
 
-                var uClusterSum = clusterStructure.sumOnEdgePartOnly(u);
+                ClusterMoatPair cmu = clusterStructure.sumOnEdgePart(u,moat);
+                ClusterMoatPair cmv = clusterStructure.sumOnEdgePart(v,moat);
 
-                ClusterMoatPair cmv = clusterStructure.sumOnEdgePart(v);
+                var uCluster = cmu.cluster();
+                var uClusterSum = cmu.totalMoat();
+
                 var vCluster = cmv.cluster();
                 var vClusterSum = cmv.totalMoat();
 
@@ -89,7 +89,7 @@ class GrowthPhase {
                 }
 
                 long edgeId = partToEdgeId(uPart);
-                double r = edgeCosts.get(uPart) - uClusterSum - vClusterSum;
+                double r = edgeCosts.get(edgeId) - uClusterSum - vClusterSum;
                 if (Double.compare(r, 0) <= 0 || Double.compare(r, EPS) <= 0) {
                     mergeClusters(moat, uCluster, vCluster, edgeId);
                 } else {
@@ -100,7 +100,7 @@ class GrowthPhase {
                         uCluster,
                         vCluster,
                         r,
-                        clusterActivity.active(vCluster)
+                        clusterStructure.active(vCluster)
                     );
                 }
             }
@@ -110,14 +110,14 @@ class GrowthPhase {
             numberOfTreeEdges,
             edgeParts,
             edgeCosts,
-            clusterStructure.activeOriginalNodesOfCluster(clusterActivity.firstActiveCluster())
+            clusterStructure.activeOriginalNodesOfCluster(clusterStructure.singleActiveCluster())
         );
     }
 
     private void deactivateCluster(double moat, long clusterId) {
         clusterEventsPriorityQueue.pop();
-        clusterStructure.setMoat(clusterId, moat);
-        clusterActivity.deactivateCluster(clusterId, moat);
+        clusterStructure.deactivateCluster(clusterId, moat);
+        edgeEventsQueue.deactivateCluster(clusterId);
     }
 
     private void initializeEdgeParts() {
@@ -127,17 +127,20 @@ class GrowthPhase {
 
         for (long u = 0; u < nodeCount; ++u) {
             graph.forEachRelationship(u, 1.0, (s, t, w) -> {
-                var edgeId = counter.getAndIncrement();
-                var edgePart1 = 2 * edgeId;
-                var edgePart2 = 2 * edgeId + 1;
-                edgeCosts.set(edgeId, w);
-                edgeParts.set(2 * edgeId, s);
-                edgeParts.set(2 * edgeId + 1, t);
-                edgeEventsQueue.addBothWays(s, t, edgePart1, edgePart2, w / 2);
-                return t > s;
+
+                if (s > t) {
+                    var edgeId = counter.getAndIncrement();
+                    var edgePart1 = 2 * edgeId;
+                    var edgePart2 = 2 * edgeId + 1;
+                    edgeCosts.set(edgeId, w);
+                    edgeParts.set(2 * edgeId, s);
+                    edgeParts.set(2 * edgeId + 1, t);
+                    edgeEventsQueue.addBothWays(s, t, edgePart1, edgePart2, w / 2);
+                }
+                return  s > t;
             });
         }
-        edgeEventsQueue.performInitialAssignment();
+        edgeEventsQueue.performInitialAssignment(nodeCount);
     }
 
     private void initializeClusterPrizes() {
@@ -154,22 +157,19 @@ class GrowthPhase {
         long cluster2,
         long edgeId
     ) {
-        boolean cluster1Inactive = clusterActivity.active(cluster1);
-        boolean cluster2Inactive = clusterActivity.active(cluster2);
+        boolean cluster1Inactive = !clusterStructure.active(cluster1);
+        boolean cluster2Inactive = !clusterStructure.active(cluster2);
 
         if (cluster1Inactive) {
-            edgeEventsQueue.increaseValuesOnInactiveCluster(cluster1, moat - clusterActivity.inactiveSince(cluster1));
-        } else {
-            clusterActivity.deactivateCluster(cluster1, moat);
+            edgeEventsQueue.increaseValuesOnInactiveCluster(cluster1, moat - clusterStructure.inactiveSince(cluster1));
         }
         if (cluster2Inactive) {
-            edgeEventsQueue.increaseValuesOnInactiveCluster(cluster2, moat - clusterActivity.inactiveSince(cluster2));
-        } else {
-            clusterActivity.deactivateCluster(cluster2, moat);
+            edgeEventsQueue.increaseValuesOnInactiveCluster(cluster2, moat - clusterStructure.inactiveSince(cluster2));
         }
-        var newCluster = clusterStructure.merge(cluster1, cluster2);
+
+        var newCluster = clusterStructure.merge(cluster1, cluster2,moat);
+
         edgeEventsQueue.mergeAndUpdate(newCluster, cluster1, cluster2);
-        clusterActivity.activateCluster(newCluster);
         clusterEventsPriorityQueue.add(newCluster, clusterStructure.tightnessTime(newCluster, moat));
 
         addToTree(edgeId);
@@ -189,6 +189,10 @@ class GrowthPhase {
             edgeEventsQueue.addWithCheck(vCluster, uPart, moat + r / 2);
         } else {
             edgeEventsQueue.addWithCheck(uCluster, vPart, moat + r);
+            /*
+            * remember that we do a increase operation when merging queues, so the `moat` will become equal to mergeTimeStamp
+            * and processed next iteration
+            */
             edgeEventsQueue.addWithoutCheck(vCluster, uPart, moat);
         }
     }
@@ -205,8 +209,13 @@ class GrowthPhase {
         treeEdges.set(numberOfTreeEdges++, edgeId);
     }
 
+    ClusterStructure clusterStructure(){
+        return clusterStructure;
+    }
 }
 
-record GrowthResult(HugeLongArray treeEdges, long numberOfTreeEdges, HugeLongArray edgeParts, HugeDoubleArray edgeCosts,
-                    BitSet activeOriginalNodes) {
-}
+record GrowthResult(HugeLongArray treeEdges,
+                    long numberOfTreeEdges,
+                    HugeLongArray edgeParts,
+                    HugeDoubleArray edgeCosts,
+                    BitSet activeOriginalNodes) {}

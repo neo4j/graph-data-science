@@ -29,7 +29,6 @@ public class PCSTFast extends Algorithm<PriceSteinerTreeResult> {
 
     private final Graph graph;
     private final LongToDoubleFunction prizes; //figure out how to expose to user
-    public static final long  PRUNED=-2;
 
     public PCSTFast(Graph graph, LongToDoubleFunction prizes, ProgressTracker progressTracker) {
         super(progressTracker);
@@ -40,17 +39,20 @@ public class PCSTFast extends Algorithm<PriceSteinerTreeResult> {
     @Override
     public PriceSteinerTreeResult compute() {
 
-        var growthPhase =  new GrowthPhase(graph,prizes);
-        var growthResult = growthPhase.grow();
+        var growthResult = growthPhase();
         var treeStructure = TreeProducer.createTree(growthResult, graph.nodeCount(),graph.rootIdMap());
-        var activeOriginalNodes = growthResult.activeOriginalNodes();
-        var strongPruning = new StrongPruning(treeStructure,activeOriginalNodes,prizes);
+
+        var strongPruning = new StrongPruning(treeStructure,growthResult.activeOriginalNodes(),prizes);
         strongPruning.performPruning();
 
         return strongPruning.resultTree();
 
     }
 
+    private GrowthResult growthPhase(){
+        var growthPhase =  new GrowthPhase(graph,prizes);
+        return growthPhase.grow();
+    }
 
 
 }
