@@ -122,8 +122,6 @@ allprojects {
                             TestLogEvent.SKIPPED,
                             TestLogEvent.STANDARD_ERROR,
                             TestLogEvent.STANDARD_OUT
-                        exceptionFormat TestExceptionFormat.FULL
-                        showExceptions true
                         showCauses true
                         showStackTraces true
                     } else {
