@@ -16,7 +16,7 @@ To start a GDS Session, use the GDS Python Client, version `1.12` or later.
 
 Using the client, it is possible to
 
-* Create GDS Sessions connected to an AuraDB instance.
+* Create GDS Sessions connected to an AuraDB instance in the link:https://neo4j.com/docs/aura/auradb/#_plans[Virtual Dedicated Cloud] plan.
 * Create GDS Sessions connected to a self-hosted Neo4j DBMS, version `5.24.0` or newer.
 * Perform GDS algorithm computationsfootnote:limitations[See <<Limitations>>].
 ** Using any execution modes.
