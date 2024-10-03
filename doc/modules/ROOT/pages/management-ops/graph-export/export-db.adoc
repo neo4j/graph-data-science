@@ -3,6 +3,8 @@
 
 include::partial$/common-usage/not-on-aurads-note.adoc[]
 
+include::partial$/product-limitations/not-on-gds-session-note.adoc[]
+
 We can create new Neo4j databases from projected graphs stored in the graph catalog.
 All nodes, relationships and properties present in the projected graph are written to a new Neo4j database.
 This includes data that has been projected in `gds.graph.project` and data that has been added by running algorithms in `mutate` mode.
@@ -125,4 +127,3 @@ So we could for instance define a default value for our `myproperty`.
 ----
 CALL gds.graph.export('my-graph', { dbName: 'mydatabase', additionalNodeProperties: [{ myproperty: {defaultValue: 'my-default-value'}}] })
 ----
-

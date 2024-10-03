@@ -2,6 +2,8 @@
 [[catalog-model-publish]]
 = Publishing models
 
+include::partial$/product-limitations/not-on-gds-session-note.adoc[]
+
 By default, a trained model is visible only to the user that created it.
 Making a model accessible to other users can be achieved by publishing it.
 

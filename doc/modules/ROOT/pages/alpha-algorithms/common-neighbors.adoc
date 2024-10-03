@@ -3,6 +3,7 @@
 = Common Neighbors
 :description: This section describes the Common Neighbors algorithm in the Neo4j Graph Data Science library.
 
+include::partial$/product-limitations/not-on-gds-session-note.adoc[]
 
 Common neighbors captures the idea that two strangers who have a friend in common are more likely to be introduced than those who don't have any friends in common.
 

@@ -3,6 +3,7 @@
 = Same Community
 :description: This section describes the Same Community algorithm in the Neo4j Graph Data Science library.
 
+include::partial$/product-limitations/not-on-gds-session-note.adoc[]
 
 Same Community is a way of determining whether two nodes belong to the same community.
 These communities could be computed by using one of the xref:algorithms/community.adoc[Community detection].
