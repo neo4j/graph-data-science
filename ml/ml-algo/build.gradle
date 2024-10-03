@@ -20,6 +20,8 @@ dependencies {
         }
     }
 
+    implementation project(':ml-configs')
+
     implementation project(':algo-common')
     implementation project(':annotations')
     implementation project(':config-api')

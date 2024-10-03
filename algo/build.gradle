@@ -39,6 +39,7 @@ dependencies {
     // TODO: move the factories out
     implementation project(':centrality-configs')
     implementation project(':community-configs')
+    implementation project(':ml-configs')
     implementation project(':node-embeddings-configs')
     implementation project(':path-finding-configs')
     implementation project(':similarity-configs')

@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.algorithms.machinelearning;
 
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.ml.splitting.SplitRelationshipConfigTransformer;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsEstimateDefinition;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateConfig;
 
@@ -30,6 +31,6 @@ public class MachineLearningAlgorithmsEstimationModeBusinessFacade {
     }
 
     public MemoryEstimation splitRelationships(SplitRelationshipsMutateConfig configuration) {
-        return new SplitRelationshipsEstimateDefinition(configuration.toMemoryEstimateParameters()).memoryEstimation();
+        return new SplitRelationshipsEstimateDefinition(SplitRelationshipConfigTransformer.toMemoryEstimateParameters(configuration)).memoryEstimation();
     }
 }

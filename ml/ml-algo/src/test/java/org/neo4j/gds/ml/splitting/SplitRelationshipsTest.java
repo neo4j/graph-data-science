@@ -46,30 +46,7 @@ import static org.neo4j.gds.TestSupport.assertMemoryRange;
 class SplitRelationshipsTest {
 
     @GdlGraph(orientation = Orientation.UNDIRECTED, idOffset = 42)
-    static final String GRAPH_WITH_OFFSET =
-        "        CREATE" +
-        "        (a: Node)," +
-        "        (b: Node)," +
-        "        (c: Node)," +
-        "        (d: Node)," +
-        "        (e: Node)," +
-        "        (f: Node)," +
-        "        (g: Node)," +
-        "        (a)-[:REL]->(b)," +
-        "        (a)-[:REL]->(c)," +
-        "        (a)-[:REL]->(d)," +
-        "        (a)-[:REL]->(e)," +
-        "        (a)-[:REL]->(f)," +
-        "        (a)-[:REL]->(g)," +
-        "        (b)-[:REL]->(c)," +
-        "        (b)-[:REL]->(d)," +
-        "        (b)-[:REL]->(e)," +
-        "        (b)-[:REL]->(f)," +
-        "        (b)-[:REL2]->(g)," +
-        "        (c)-[:REL2]->(d)," +
-        "        (c)-[:REL2]->(e)," +
-        "        (c)-[:REL2]->(f)," +
-        "        (c)-[:REL2]->(g)";
+    static final String GRAPH_WITH_OFFSET = "        CREATE" + "        (a: Node)," + "        (b: Node)," + "        (c: Node)," + "        (d: Node)," + "        (e: Node)," + "        (f: Node)," + "        (g: Node)," + "        (a)-[:REL]->(b)," + "        (a)-[:REL]->(c)," + "        (a)-[:REL]->(d)," + "        (a)-[:REL]->(e)," + "        (a)-[:REL]->(f)," + "        (a)-[:REL]->(g)," + "        (b)-[:REL]->(c)," + "        (b)-[:REL]->(d)," + "        (b)-[:REL]->(e)," + "        (b)-[:REL]->(f)," + "        (b)-[:REL2]->(g)," + "        (c)-[:REL2]->(d)," + "        (c)-[:REL2]->(e)," + "        (c)-[:REL2]->(f)," + "        (c)-[:REL2]->(g)";
 
     @Inject
     private GraphStore graphStore;
@@ -96,16 +73,11 @@ class SplitRelationshipsTest {
     @Test
     void estimate() {
         var graphDimensions = GraphDimensions.of(1, 10_000);
-        var config = SplitRelationshipsMutateConfigImpl
-            .builder()
-            .negativeSamplingRatio(1.0)
-            .holdoutRelationshipType("HOLDOUT")
-            .remainingRelationshipType("REST")
-            .holdoutFraction(0.3)
-            .relationshipTypes(List.of(ElementProjection.PROJECT_ALL))
-            .build();
+        var config = SplitRelationshipsMutateConfigImpl.builder().negativeSamplingRatio(1.0).holdoutRelationshipType(
+            "HOLDOUT").remainingRelationshipType("REST").holdoutFraction(0.3).relationshipTypes(List.of(
+            ElementProjection.PROJECT_ALL)).build();
 
-        MemoryTree actualEstimate = new SplitRelationshipsEstimateDefinition(config.toMemoryEstimateParameters())
+        MemoryTree actualEstimate = new SplitRelationshipsEstimateDefinition(SplitRelationshipConfigTransformer.toMemoryEstimateParameters(config))
             .memoryEstimation()
             .estimate(graphDimensions, config.concurrency());
 
@@ -127,27 +99,24 @@ class SplitRelationshipsTest {
     void estimateWithTypes(List<String> relTypes, MemoryRange expectedMemory) {
         var nodeCount = 100;
         var relationshipCounts = Map.of(
-            RelationshipType.of("TYPE1"), 10L,
-            RelationshipType.of("TYPE2"), 20L,
-            RelationshipType.of("TYPE3"), 30L
+            RelationshipType.of("TYPE1"),
+            10L,
+            RelationshipType.of("TYPE2"),
+            20L,
+            RelationshipType.of("TYPE3"),
+            30L
         );
 
-        var graphDimensions = ImmutableGraphDimensions.builder()
-            .nodeCount(nodeCount)
-            .relationshipCounts(relationshipCounts)
-            .relCountUpperBound(relationshipCounts.values().stream().mapToLong(Long::longValue).sum())
-            .build();
+        var graphDimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).relationshipCounts(
+            relationshipCounts).relCountUpperBound(relationshipCounts.values()
+            .stream()
+            .mapToLong(Long::longValue)
+            .sum()).build();
 
-        var config = SplitRelationshipsMutateConfigImpl
-            .builder()
-            .negativeSamplingRatio(1.0)
-            .holdoutRelationshipType("HOLDOUT")
-            .remainingRelationshipType("REST")
-            .holdoutFraction(0.3)
-            .relationshipTypes(relTypes)
-            .build();
+        var config = SplitRelationshipsMutateConfigImpl.builder().negativeSamplingRatio(1.0).holdoutRelationshipType(
+            "HOLDOUT").remainingRelationshipType("REST").holdoutFraction(0.3).relationshipTypes(relTypes).build();
 
-        MemoryTree actualEstimate = new SplitRelationshipsEstimateDefinition(config.toMemoryEstimateParameters())
+        MemoryTree actualEstimate = new SplitRelationshipsEstimateDefinition(SplitRelationshipConfigTransformer.toMemoryEstimateParameters(config))
             .memoryEstimation()
             .estimate(graphDimensions, config.concurrency());
 
@@ -156,23 +125,18 @@ class SplitRelationshipsTest {
 
     @Test
     void estimateIndependentOfNodeCount() {
-        var config = SplitRelationshipsMutateConfigImpl
-            .builder()
-            .negativeSamplingRatio(1.0)
-            .holdoutRelationshipType("HOLDOUT")
-            .remainingRelationshipType("REST")
-            .holdoutFraction(0.3)
-            .relationshipTypes(List.of(ElementProjection.PROJECT_ALL))
-            .build();
+        var config = SplitRelationshipsMutateConfigImpl.builder().negativeSamplingRatio(1.0).holdoutRelationshipType(
+            "HOLDOUT").remainingRelationshipType("REST").holdoutFraction(0.3).relationshipTypes(List.of(
+            ElementProjection.PROJECT_ALL)).build();
 
         var graphDimensions = GraphDimensions.of(1, 10_000);
-        MemoryTree actualEstimate = new SplitRelationshipsEstimateDefinition(config.toMemoryEstimateParameters())
+        MemoryTree actualEstimate = new SplitRelationshipsEstimateDefinition(SplitRelationshipConfigTransformer.toMemoryEstimateParameters(config))
             .memoryEstimation()
             .estimate(graphDimensions, config.concurrency());
         assertMemoryRange(actualEstimate.memoryUsage(), MemoryRange.of(160_000, 208_000));
 
         graphDimensions = GraphDimensions.of(100_000, 10_000);
-        actualEstimate = new SplitRelationshipsEstimateDefinition(config.toMemoryEstimateParameters())
+        actualEstimate = new SplitRelationshipsEstimateDefinition(SplitRelationshipConfigTransformer.toMemoryEstimateParameters(config))
             .memoryEstimation()
             .estimate(graphDimensions, config.concurrency());
         assertMemoryRange(actualEstimate.memoryUsage(), MemoryRange.of(160_000, 208_000));
@@ -182,22 +146,21 @@ class SplitRelationshipsTest {
     void estimateDifferentSamplingRatios() {
         var graphDimensions = GraphDimensions.of(1, 10_000);
 
-        var configBuilder = SplitRelationshipsMutateConfigImpl
-            .builder()
+        var configBuilder = SplitRelationshipsMutateConfigImpl.builder()
             .holdoutRelationshipType("HOLDOUT")
             .remainingRelationshipType("REST")
             .holdoutFraction(0.3)
             .relationshipTypes(List.of(ElementProjection.PROJECT_ALL));
 
         var config = configBuilder.negativeSamplingRatio(1.0).build();
-        MemoryTree actualEstimate = new SplitRelationshipsEstimateDefinition(config.toMemoryEstimateParameters())
+        MemoryTree actualEstimate = new SplitRelationshipsEstimateDefinition(SplitRelationshipConfigTransformer.toMemoryEstimateParameters(config))
             .memoryEstimation()
             .estimate(graphDimensions, config.concurrency());
 
         assertMemoryRange(actualEstimate.memoryUsage(), MemoryRange.of(160_000, 208_000));
 
         config = configBuilder.negativeSamplingRatio(2.0).build();
-        actualEstimate = new SplitRelationshipsEstimateDefinition(config.toMemoryEstimateParameters())
+        actualEstimate = new SplitRelationshipsEstimateDefinition(SplitRelationshipConfigTransformer.toMemoryEstimateParameters(config))
             .memoryEstimation()
             .estimate(graphDimensions, config.concurrency());
 
@@ -208,21 +171,20 @@ class SplitRelationshipsTest {
     void estimateDifferentHoldoutFractions() {
         var graphDimensions = GraphDimensions.of(1, 10_000);
 
-        var configBuilder = SplitRelationshipsMutateConfigImpl
-            .builder()
+        var configBuilder = SplitRelationshipsMutateConfigImpl.builder()
             .holdoutRelationshipType("HOLDOUT")
             .remainingRelationshipType("REST")
             .negativeSamplingRatio(1.0)
             .relationshipTypes(List.of(ElementProjection.PROJECT_ALL));
 
         var config = configBuilder.holdoutFraction(0.3).build();
-        MemoryTree actualEstimate = new SplitRelationshipsEstimateDefinition(config.toMemoryEstimateParameters())
+        MemoryTree actualEstimate = new SplitRelationshipsEstimateDefinition(SplitRelationshipConfigTransformer.toMemoryEstimateParameters(config))
             .memoryEstimation()
             .estimate(graphDimensions, config.concurrency());
         assertMemoryRange(actualEstimate.memoryUsage(), MemoryRange.of(160_000, 208_000));
 
         config = configBuilder.holdoutFraction(0.1).build();
-        actualEstimate = new SplitRelationshipsEstimateDefinition(config.toMemoryEstimateParameters())
+        actualEstimate = new SplitRelationshipsEstimateDefinition(SplitRelationshipConfigTransformer.toMemoryEstimateParameters(config))
             .memoryEstimation()
             .estimate(graphDimensions, config.concurrency());
 

@@ -77,18 +77,4 @@ public interface KGEPredictBaseConfig extends AlgoBaseConfig {
     ) {
         targetNodeFilter().validate(graphStore, selectedLabels, "targetNodeFilter");
     }
-
-    @Configuration.Ignore
-    default KGEPredictParameters toParameters() {
-        return new KGEPredictParameters(
-            concurrency(),
-            sourceNodeFilter(),
-            targetNodeFilter(),
-            relationshipTypesFilter(),
-            relationshipTypeEmbedding(),
-            nodeEmbeddingProperty(),
-            scoringFunction(),
-            topK()
-        );
-    }
 }

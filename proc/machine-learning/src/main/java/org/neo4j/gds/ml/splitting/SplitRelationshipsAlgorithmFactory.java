@@ -42,7 +42,7 @@ public class SplitRelationshipsAlgorithmFactory extends GraphStoreAlgorithmFacto
 
     @Override
     public MemoryEstimation memoryEstimation(SplitRelationshipsMutateConfig configuration) {
-        return new SplitRelationshipsEstimateDefinition(configuration.toMemoryEstimateParameters())
+        return new SplitRelationshipsEstimateDefinition(SplitRelationshipConfigTransformer.toMemoryEstimateParameters(configuration))
             .memoryEstimation();
     }
 }

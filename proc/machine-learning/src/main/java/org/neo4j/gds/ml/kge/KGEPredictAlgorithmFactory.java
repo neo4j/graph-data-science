@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.kge;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.algorithms.machinelearning.KGEPredictBaseConfig;
+import org.neo4j.gds.algorithms.machinelearning.KGEPredictConfigTransformer;
 import org.neo4j.gds.algorithms.machinelearning.KGEPredictParameters;
 import org.neo4j.gds.algorithms.machinelearning.TopKMapComputer;
 import org.neo4j.gds.api.Graph;
@@ -76,7 +77,7 @@ public class KGEPredictAlgorithmFactory<CONFIG extends KGEPredictBaseConfig> ext
         CONFIG configuration,
         ProgressTracker progressTracker
     ) {
-        return build(graphStore, configuration.toParameters(), progressTracker);
+        return build(graphStore, KGEPredictConfigTransformer.toParameters(configuration), progressTracker);
     }
 
     @Override

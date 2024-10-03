@@ -373,6 +373,11 @@ project(':node-embeddings-configs').projectDir = file('procedures/facade-api/con
 include('node-embeddings-params')
 project(':node-embeddings-params').projectDir = file('algo-params/node-embeddings-params')
 
+include('ml-facade-api')
+project(':ml-facade-api').projectDir = file('procedures/facade-api/ml-facade-api')
+
+include('ml-configs')
+project(':ml-configs').projectDir = file('procedures/facade-api/configs/ml-configs')
 
 
 
@@ -382,4 +387,3 @@ project(':neo4j-kernel-adapter-5.23').projectDir = file('compatibility/5.23/neo4
 
 include('neo4j-kernel-adapter-5.24')
 project(':neo4j-kernel-adapter-5.24').projectDir = file('compatibility/5.24/neo4j-kernel-adapter')
-

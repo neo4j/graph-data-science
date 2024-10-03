@@ -22,6 +22,7 @@ package org.neo4j.gds.applications.algorithms.machinelearning;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.algorithms.machinelearning.KGEPredictBaseConfig;
 import org.neo4j.gds.algorithms.machinelearning.KGEPredictResult;
+import org.neo4j.gds.algorithms.machinelearning.KGEPredictConfigTransformer;
 import org.neo4j.gds.algorithms.machinelearning.TopKMapComputer;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -53,7 +54,7 @@ class MachineLearningAlgorithms {
 
         var sourceNodes = new BitSet(graph.nodeCount());
         var targetNodes = new BitSet(graph.nodeCount());
-        var parameters = configuration.toParameters();
+        var parameters = KGEPredictConfigTransformer.toParameters(configuration);
         var sourceNodeFilter = parameters.sourceNodeFilter().toNodeFilter(graph);
         var targetNodeFilter = parameters.targetNodeFilter().toNodeFilter(graph);
         graph.forEachNode(node -> {
