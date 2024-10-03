@@ -34,6 +34,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
 import java.util.Arrays;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -72,35 +73,39 @@ class StrongPruningTest {
         private TestGraph graph;
 
         @Test
-        void shouldMarkInvalidNodesCorrectly() {
-            var bitSet = new BitSet(graph.nodeCount());
-            for (int i = 0; i < graph.nodeCount(); ++i) {
-                bitSet.set(i);
-            }
-            var strongPruning = new StrongPruning(new TreeStructure(graph, null, graph.nodeCount()), bitSet, null);
+        void shouldPruneCorrectly(){
+            var strongPruning = new StrongPruning(
+                new TreeStructure(graph,  null, graph.nodeCount()),
+                null,
+               (x)->2
+            );
 
-            var a1 = graph.toMappedNodeId("a1");
-            var a2 = graph.toMappedNodeId("a2");
-            var a3 = graph.toMappedNodeId("a3");
-            var a4 = graph.toMappedNodeId("a4");
-            var a6 = graph.toMappedNodeId("a6");
-            var a7 = graph.toMappedNodeId("a7");
+            var parents=HugeLongArray.newArray(graph.nodeCount());
+            Function<Integer,Long> a =  (v) -> graph.toMappedNodeId("a"+v);
+            parents.set(a.apply(2),PriceSteinerTreeResult.ROOT);
+            parents.set(a.apply(4),a.apply(2));
+            parents.set(a.apply(6),a.apply(4));
+            parents.set(a.apply(7),PriceSteinerTreeResult.ROOT);
+            parents.set(a.apply(1),PriceSteinerTreeResult.ROOT);
+            parents.set(a.apply(3),a.apply(1));
+            parents.set(a.apply(5),PriceSteinerTreeResult.ROOT);
+            parents.set(a.apply(8),a.apply(5));
+            parents.set(a.apply(9),PriceSteinerTreeResult.ROOT);
 
-            strongPruning.setNodesAsInvalid(a4, HugeLongArray.newArray(graph.nodeCount()), a2);
+            strongPruning.pruneUnnecessarySubTrees(a.apply(5),HugeLongArray.newArray(graph.nodeCount()),parents);
+            assertThat(parents.get(a.apply(1))).isEqualTo(PriceSteinerTreeResult.PRUNED);
+            assertThat(parents.get(a.apply(2))).isEqualTo(PriceSteinerTreeResult.PRUNED);
+            assertThat(parents.get(a.apply(3))).isEqualTo(PriceSteinerTreeResult.PRUNED);
+            assertThat(parents.get(a.apply(4))).isEqualTo(PriceSteinerTreeResult.PRUNED);
+            assertThat(parents.get(a.apply(5))).isEqualTo(PriceSteinerTreeResult.ROOT);
+            assertThat(parents.get(a.apply(6))).isEqualTo(PriceSteinerTreeResult.PRUNED);
+            assertThat(parents.get(a.apply(7))).isEqualTo(PriceSteinerTreeResult.PRUNED);
+            assertThat(parents.get(a.apply(8))).isEqualTo(a.apply(5));
+            assertThat(parents.get(a.apply(9))).isEqualTo(PriceSteinerTreeResult.PRUNED);
 
-            assertThat(bitSet.cardinality()).isEqualTo(6);
-            assertThat(bitSet.get(a4)).isFalse();
-            assertThat(bitSet.get(a6)).isFalse();
-            assertThat(bitSet.get(a7)).isFalse();
 
-            strongPruning.setNodesAsInvalid(a2, HugeLongArray.newArray(graph.nodeCount()), a1);
-            assertThat(bitSet.cardinality()).isEqualTo(2);
-            assertThat(bitSet.get(a1)).isTrue();
-            assertThat(bitSet.get(a3)).isTrue();
 
-            strongPruning.setNodesAsInvalid(a3, HugeLongArray.newArray(graph.nodeCount()), a1);
-            assertThat(bitSet.cardinality()).isEqualTo(1);
-            assertThat(bitSet.get(a1)).isTrue();
+
         }
 
         @Test
@@ -117,6 +122,7 @@ class StrongPruningTest {
             for (long u = 1; u <= 9; ++u) {
                 prizes.set(graph.toMappedNodeId("a" + u), u);
             }
+            prizes.set(graph.toMappedNodeId("a2"),10);
 
             var strongPruning = new StrongPruning(
                 new TreeStructure(graph, degrees, graph.nodeCount()),
@@ -125,13 +131,6 @@ class StrongPruningTest {
             );
 
             strongPruning.performPruning();
-
-            assertThat(bitSet.cardinality()).isEqualTo(5);
-            assertThat(bitSet.get(graph.toMappedNodeId("a1"))).isTrue();
-            assertThat(bitSet.get(graph.toMappedNodeId("a2"))).isTrue();
-            assertThat(bitSet.get(graph.toMappedNodeId("a4"))).isTrue();
-            assertThat(bitSet.get(graph.toMappedNodeId("a6"))).isTrue();
-            assertThat(bitSet.get(graph.toMappedNodeId("a7"))).isTrue();
 
             var resultTree = strongPruning.resultTree();
             assertThat(resultTree.parentArray().get(graph.toMappedNodeId("a1"))).isEqualTo(graph.toMappedNodeId("a2"));
@@ -204,6 +203,51 @@ class StrongPruningTest {
                 arguments(105, 50, new long[]{1L, 2L})
             );
         }
+    }
+
+
+    @GdlExtension
+    @Nested
+    class GraphWhereRootIsNotTheOptimal {
+        @GdlGraph(orientation = Orientation.UNDIRECTED)
+        private static final String DB_CYPHER =
+            "CREATE " +
+                "  (a0:node)," +
+                "  (a1:node)," +
+                "  (a2:node)," +
+                "  (a3:node)," +
+                "(a0)-[:R{w:62}]->(a3)," +
+                "(a3)-[:R{w:15}]->(a2)," +
+                "(a1)-[:R{w:10}]->(a0),";
+
+
+        @Inject
+        private TestGraph graph;
+
+        @Test
+        void shouldApplyDynamicProgramming() {
+
+            var bitSet = new BitSet(graph.nodeCount());
+            for (int i = 0; i < graph.nodeCount(); ++i) {
+                bitSet.set(i);
+            }
+
+            HugeLongArray degrees = HugeLongArray.newArray(graph.nodeCount());
+            degrees.setAll(v -> graph.degree(v));
+
+
+            var strongPruning = new StrongPruning(
+                new TreeStructure(graph, degrees, graph.nodeCount()),
+                bitSet,
+                (v)->20d
+            );
+            strongPruning.performPruning();
+
+          var sp=strongPruning.resultTree();
+
+          assertThat(sp.parentArray().get(graph.toMappedNodeId("a0"))).isEqualTo(PriceSteinerTreeResult.ROOT);
+        }
+
     }
 
 

@@ -35,9 +35,9 @@ public class StrongPruning {
     private final HugeLongArray parentArray;
     private final HugeDoubleArray parentCostArray;
 
-    public StrongPruning(TreeStructure treeStructure, BitSet activeOriginalNodes, LongToDoubleFunction prizes) {
+    public StrongPruning(TreeStructure treeStructure, BitSet activeUnprunedOriginalNodes, LongToDoubleFunction prizes) {
         this.treeStructure = treeStructure;
-        this.activeOriginalNodes = activeOriginalNodes;
+        this.activeOriginalNodes = activeUnprunedOriginalNodes;
         this.prizes = prizes;
         this.parentArray = HugeLongArray.newArray(treeStructure.originalNodeCount());
         this.parentCostArray = HugeDoubleArray.newArray(treeStructure.originalNodeCount());
@@ -49,13 +49,14 @@ public class StrongPruning {
         if (activeOriginalNodes.cardinality() ==1){
             var singleActiveNode = activeOriginalNodes.nextSetBit(0);
             parentArray.set(singleActiveNode,PriceSteinerTreeResult.ROOT);
-
         }
         else {
-            HugeLongArray queue = HugeLongArray.newArray(activeOriginalNodes.capacity());
+            HugeLongArray queue = HugeLongArray.newArray(activeOriginalNodes.cardinality());
             HugeDoubleArray dp = HugeDoubleArray.newArray(treeStructure.originalNodeCount());
             long totalPos = 0;
             long currentPos = 0;
+
+            long bestSolutionIndex = -1;
             var tree = treeStructure.tree();
             var degrees = treeStructure.degrees();
 
@@ -63,13 +64,11 @@ public class StrongPruning {
                 if (degrees.get(u) == 1) {
                     queue.set(totalPos++, u);
                 }
-
             }
 
-            long rootNode = -1;
+
             while (currentPos < totalPos) {
                 var nextLeaf = queue.get(currentPos++);
-                rootNode = nextLeaf;
                 var parent = new MutableLong(-1);
                 var parentCost = new MutableDouble(-1);
                 dp.addTo(nextLeaf, prizes.applyAsDouble(nextLeaf));
@@ -84,18 +83,21 @@ public class StrongPruning {
                     return true;
                 });
                 var actualParent = parent.get();
+
+                parentArray.set(nextLeaf,PriceSteinerTreeResult.ROOT);
+                if (bestSolutionIndex == -1 || Double.compare(dp.get(bestSolutionIndex), dp.get(nextLeaf))< 0 ){
+                    bestSolutionIndex = nextLeaf;
+                }
+
                 if (actualParent == -1) {
                     continue;
                 }
-                var actualParentCost = parentCost.getValue().doubleValue();
+                var actualParentCost = parentCost.getValue();
 
-                parentArray.set(nextLeaf, actualParent);
-                parentCostArray.set(nextLeaf, actualParentCost);
-
-                if (Double.compare(actualParentCost, (dp.get(nextLeaf))) >= 0) {
-                    setNodesAsInvalid(nextLeaf, queue, parent.get());
-                } else {
+                if (Double.compare(actualParentCost, (dp.get(nextLeaf))) < 0) {
                     dp.addTo(actualParent, dp.get(nextLeaf) - actualParentCost);
+                    parentArray.set(nextLeaf, actualParent);
+                    parentCostArray.set(nextLeaf, actualParentCost);
                 }
 
                 degrees.addTo(actualParent, -1);
@@ -103,31 +105,39 @@ public class StrongPruning {
                     queue.set(totalPos++, actualParent);
                 }
             }
-            parentArray.set(rootNode, PriceSteinerTreeResult.ROOT);
+
+            pruneUnnecessarySubTrees(bestSolutionIndex,queue,parentArray);
+
         }
+
     }
 
+    void pruneUnnecessarySubTrees(long bestSolutionIndex, HugeLongArray helpingArray, HugeLongArray parentArray){
+        for (long u=0;u<treeStructure.tree().nodeCount();++u){
+            if (parentArray.get(u) == PriceSteinerTreeResult.ROOT  && u!= bestSolutionIndex ){
+                pruneSubtree(u,helpingArray,parentArray);
+            }
+        }
+    }
     PriceSteinerTreeResult resultTree(){
             return  new PriceSteinerTreeResult(parentArray,parentCostArray);
     }
+    private void pruneSubtree(long node, HugeLongArray helpingArray,HugeLongArray parents){
+        var tree = treeStructure.tree();
+        long currentPosition= 0;
+        MutableLong position=new MutableLong();
+        helpingArray.set(position.getAndIncrement(),node);
 
-    void setNodesAsInvalid(long startingNode, HugeLongArray helpingArray, long parentOfStart){
-            var tree = treeStructure.tree();
-            long currentPosition= 0;
-            MutableLong position=new MutableLong();
-            helpingArray.set(position.getAndIncrement(),startingNode);
-            while (currentPosition < position.get()){
-                var node = helpingArray.get(currentPosition++);
-                activeOriginalNodes.clear(node);
-                parentArray.set(node,PriceSteinerTreeResult.PRUNED);
-                tree.forEachRelationship(node, (s,t)->{
-                    if (t != parentOfStart && activeOriginalNodes.get(t)){
-                        helpingArray.set(position.getAndIncrement(),t);
-                    }
-                    return true;
-                });
-            }
+        while (currentPosition < position.get()){
+            var currentNode = helpingArray.get(currentPosition++);
+            parents.set(currentNode,PriceSteinerTreeResult.PRUNED);
+            tree.forEachRelationship(currentNode, (s,t)->{
+                if (parents.get(t)==s){
+                    helpingArray.set(position.getAndIncrement(),t);
+                }
+                return true;
+            });
+        }
     }
-
 
 }
