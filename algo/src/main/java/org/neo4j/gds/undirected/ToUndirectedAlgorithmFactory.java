@@ -55,7 +55,7 @@ public class ToUndirectedAlgorithmFactory extends GraphStoreAlgorithmFactory<ToU
 
     @Override
     public MemoryEstimation memoryEstimation(ToUndirectedConfig configuration) {
-        return new ToUndirectedMemoryEstimateDefinition(configuration.toMemoryEstimateParameters()).memoryEstimation();
+        return new ToUndirectedMemoryEstimateDefinition(ToUndirectedConfigTransformer.toMemoryEstimateParameters(configuration)).memoryEstimation();
     }
 
 }

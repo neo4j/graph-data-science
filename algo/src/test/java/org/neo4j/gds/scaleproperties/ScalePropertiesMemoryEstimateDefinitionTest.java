@@ -28,9 +28,6 @@ import org.neo4j.gds.gdl.GdlFactory;
 
 import java.util.List;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 class ScalePropertiesMemoryEstimateDefinitionTest {
 
     @Test
@@ -42,10 +39,7 @@ class ScalePropertiesMemoryEstimateDefinitionTest {
             "(d:A {a: -1, b: 23, c: 60, bAndC: [23.0, 60.0], longArrayB: [23L], floatArrayB: [23.0], doubleArray: [1.000000004d], mixedSizeArray: [1.0]}), " +
             "(e:A {a: -10, b: 24, c: 100, bAndC: [24.0, 100.0], longArrayB: [24L], floatArrayB: [24.0], doubleArray: [1.000000005d], mixedSizeArray: [1.0, 2.0]})");
 
-        var config= mock(ScalePropertiesBaseConfig.class);
-        when(config.nodeProperties()).thenReturn(List.of("bAndC", "longArrayB"));
-
-        var memoryEstimation = new ScalePropertiesMemoryEstimateDefinition(config.nodeProperties())
+        var memoryEstimation = new ScalePropertiesMemoryEstimateDefinition(List.of("bAndC", "longArrayB"))
             .memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
@@ -66,10 +60,7 @@ class ScalePropertiesMemoryEstimateDefinitionTest {
         long expectedMemory
     ) {
 
-        var config= mock(ScalePropertiesBaseConfig.class);
-        when(config.nodeProperties()).thenReturn(List.of("DUMMY"));
-
-        var memoryEstimation = new ScalePropertiesMemoryEstimateDefinition(config.nodeProperties())
+        var memoryEstimation = new ScalePropertiesMemoryEstimateDefinition(List.of("DUMMY"))
             .memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)

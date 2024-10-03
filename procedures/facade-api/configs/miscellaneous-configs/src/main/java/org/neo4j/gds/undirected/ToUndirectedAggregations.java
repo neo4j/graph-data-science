@@ -37,12 +37,12 @@ public abstract class ToUndirectedAggregations {
     abstract Optional<Aggregation> globalAggregation();
 
     public static ToUndirectedAggregations of(Object input) {
-        if (input instanceof ToUndirectedAggregations) {
-            return (ToUndirectedAggregations) input;
+        if (input instanceof ToUndirectedAggregations toUndirectedAggregations) {
+            return toUndirectedAggregations;
         }
 
-        if (input instanceof Aggregation) {
-            return new GlobalAggregation((Aggregation) input);
+        if (input instanceof Aggregation aggregation) {
+            return new GlobalAggregation(aggregation);
         }
 
         if (input instanceof String) {

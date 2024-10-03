@@ -51,7 +51,7 @@ public class InverseRelationshipsAlgorithmFactory extends GraphStoreAlgorithmFac
         InverseRelationshipsConfig configuration,
         ProgressTracker progressTracker
     ) {
-        return build(graphStore, configuration.toParameters(), progressTracker);
+        return build(graphStore, InverseRelationshipsConfigTransformer.toParameters(configuration), progressTracker);
     }
 
     @Override
@@ -70,7 +70,7 @@ public class InverseRelationshipsAlgorithmFactory extends GraphStoreAlgorithmFac
 
     @Override
     public Task progressTask(GraphStore graphStore, InverseRelationshipsConfig config) {
-        return progressTask(graphStore.nodeCount(), config.toParameters().internalRelationshipTypes(graphStore));
+        return progressTask(graphStore.nodeCount(), InverseRelationshipsConfigTransformer.toParameters(config).internalRelationshipTypes(graphStore));
     }
 
     @Override
