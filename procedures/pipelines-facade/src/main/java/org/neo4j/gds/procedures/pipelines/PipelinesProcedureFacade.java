@@ -271,7 +271,7 @@ public final class PipelinesProcedureFacade {
         var configuration = pipelineConfigurationParser.parseNodeClassificationPredictPipelineMutateConfig(
             rawConfiguration);
 
-        var result = pipelineApplications.nodeClassificationEstimate(
+        var result = pipelineApplications.nodeClassificationPredictEstimate(
             graphNameOrConfiguration,
             configuration
         );
@@ -301,7 +301,22 @@ public final class PipelinesProcedureFacade {
         var configuration = pipelineConfigurationParser.parseNodeClassificationPredictPipelineStreamConfig(
             rawConfiguration);
 
-        var result = pipelineApplications.nodeClassificationEstimate(
+        var result = pipelineApplications.nodeClassificationPredictEstimate(
+            graphNameOrConfiguration,
+            configuration
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<MemoryEstimateResult> nodeClassificationTrainEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    ) {
+        PipelineCompanion.preparePipelineConfig(graphNameOrConfiguration, rawConfiguration);
+        var configuration = pipelineConfigurationParser.parseNodeClassificationPipelineTrainConfig(rawConfiguration);
+
+        var result = pipelineApplications.nodeClassificationTrainEstimate(
             graphNameOrConfiguration,
             configuration
         );

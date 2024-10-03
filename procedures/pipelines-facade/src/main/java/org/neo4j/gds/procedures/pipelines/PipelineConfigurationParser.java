@@ -29,6 +29,7 @@ import org.neo4j.gds.ml.models.mlp.MLPClassifierTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
+import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
 
 import java.util.Collection;
 import java.util.Map;
@@ -67,17 +68,15 @@ class PipelineConfigurationParser {
     }
 
     NodeClassificationPredictPipelineMutateConfig parseNodeClassificationPredictPipelineMutateConfig(Map<String, Object> configuration) {
-        return parseNodeClassificationPredictPipelineConfig(
-            NodeClassificationPredictPipelineMutateConfig::of,
-            configuration
-        );
+        return parseNodeClassificationPipelineConfig(NodeClassificationPredictPipelineMutateConfig::of, configuration);
     }
 
     NodeClassificationPredictPipelineStreamConfig parseNodeClassificationPredictPipelineStreamConfig(Map<String, Object> configuration) {
-        return parseNodeClassificationPredictPipelineConfig(
-            NodeClassificationPredictPipelineStreamConfig::of,
-            configuration
-        );
+        return parseNodeClassificationPipelineConfig(NodeClassificationPredictPipelineStreamConfig::of, configuration);
+    }
+
+    NodeClassificationPipelineTrainConfig parseNodeClassificationPipelineTrainConfig(Map<String, Object> configuration) {
+        return parseNodeClassificationPipelineConfig(NodeClassificationPipelineTrainConfig::of, configuration);
     }
 
     NodePropertyPredictionSplitConfig parseNodePropertyPredictionSplitConfig(Map<String, Object> rawConfiguration) {
@@ -115,7 +114,7 @@ class PipelineConfigurationParser {
     /**
      * Dumb scaffolding
      */
-    private <CONFIGURATION> CONFIGURATION parseNodeClassificationPredictPipelineConfig(
+    private <CONFIGURATION> CONFIGURATION parseNodeClassificationPipelineConfig(
         BiFunction<String, CypherMapWrapper, CONFIGURATION> parser,
         Map<String, Object> configuration
     ) {

@@ -54,6 +54,7 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
+import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrain;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.termination.TerminationMonitor;
 
@@ -264,11 +265,11 @@ class PipelineApplications {
         return pipelineRepository.getSingle(user, pipelineName);
     }
 
-    MemoryEstimateResult nodeClassificationEstimate(
+    MemoryEstimateResult nodeClassificationPredictEstimate(
         Object graphNameOrConfiguration,
         NodeClassificationPredictPipelineBaseConfig configuration
     ) {
-        var estimate = nodeClassificationMemoryEstimation(configuration);
+        var estimate = nodeClassificationPredictMemoryEstimation(configuration);
 
         var memoryEstimation = MemoryEstimations.builder("Node Classification Predict Pipeline Executor")
             .add("Pipeline executor", estimate)
@@ -291,7 +292,7 @@ class PipelineApplications {
             configuration,
             Optional.empty(),
             label,
-            () -> nodeClassificationMemoryEstimation(configuration),
+            () -> nodeClassificationPredictMemoryEstimation(configuration),
             computation,
             mutateStep,
             resultBuilder
@@ -314,10 +315,36 @@ class PipelineApplications {
             configuration,
             Optional.empty(),
             label,
-            () -> nodeClassificationMemoryEstimation(configuration),
+            () -> nodeClassificationPredictMemoryEstimation(configuration),
             computation,
             resultBuilder
         );
+    }
+
+    MemoryEstimateResult nodeClassificationTrainEstimate(
+        Object graphNameOrConfiguration,
+        NodeClassificationPipelineTrainConfig configuration
+    ) {
+        var specifiedUser = new User(configuration.username(), false);
+        var pipelineName = PipelineName.parse(configuration.pipeline());
+
+        var pipeline = pipelineRepository.getNodeClassificationTrainingPipeline(
+            specifiedUser,
+            pipelineName
+        );
+
+        var estimate = NodeClassificationTrain.estimate(
+            pipeline,
+            configuration,
+            modelCatalog,
+            algorithmsProcedureFacade
+        );
+
+        var memoryEstimation = MemoryEstimations.builder("Node Classification Train")
+            .add(estimate)
+            .build();
+
+        return algorithmEstimationTemplate.estimate(configuration, graphNameOrConfiguration, memoryEstimation);
     }
 
     NodeClassificationTrainingPipeline selectFeatures(
@@ -386,7 +413,7 @@ class PipelineApplications {
         );
     }
 
-    private MemoryEstimation nodeClassificationMemoryEstimation(NodeClassificationPredictPipelineBaseConfig configuration) {
+    private MemoryEstimation nodeClassificationPredictMemoryEstimation(NodeClassificationPredictPipelineBaseConfig configuration) {
         var model = getTrainedNCPipelineModel(configuration.modelName(), configuration.username());
 
         return nodeClassificationPredictPipelineEstimator.estimate(model, configuration);
