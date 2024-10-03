@@ -1,0 +1,78 @@
+= GDS Sessions
+
+A GDS Session is a temporary compute environment for running GDS workloads.
+It is a service offered by Neo4j and runs within Neo4j's Aura cloud platform.
+
+A GDS Session reads data from a Neo4j DBMS through a _remote projection_, runs computations on the projected graph, and optionally writes the results back to the DBMS using _remote write-back_.
+
+NOTE: GDS Sessions are currently in Early Access and not available by default. Contact your account manager to get the feature enabled.
+
+
+== GDS Session management
+
+GDS Sessions, unlike GDS plugin, do not require any installation to a Neo4j DBMS.
+Instead, a GDS Session is started on-demand to perform GDS computations.
+To start a GDS Session, use the GDS Python Client, version `1.12` or later.
+
+Using the client, it is possible to
+
+* Create GDS Sessions connected to an AuraDB instance.
+* Create GDS Sessions connected to a self-hosted Neo4j DBMS, version `5.24.0` or newer.
+* Perform GDS algorithm computationsfootnote:limitations[See <<Limitations>>].
+** Using any execution modes.
+* Train machine learning modelsfootnote:limitations[].
+* Run machine learning prediction pipelinesfootnote:limitations[].
+* Write back results to a Neo4j DBMS.
+* Stream back results, to
+** the GDS Python Client.
+** an Arrow client for the GDS Arrow Server.
+* List running sessions in a specific Aura project.
+* Delete specific sessions.
+
+For a comprehensive API overview including examples and tutorials, see link:https://neo4j.com/docs/graph-data-science-client/current/gds-session/[the GDS Python Client manual].
+
+
+== Projecting a graph into a GDS Session
+
+Once you have a GDS Session, you can project a graph into it.
+This operation is called _remote projection_ because the data source is not a co-located database, but rather a remote one.
+
+A remote projection is similar to a xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[Cypher projection] and has a similar syntax.
+The projection query runs on the database server, but the GDS graph appears in the GDS Session's Graph Catalog.
+A key difference is also the name of the aggregating function, which is `gds.graph.project.remote`.
+
+Native projections are _not_ supported in GDS Sessions.
+
+
+== Writing back data to a Neo4j DBMS
+
+The GDS Session's in-memory graph is projected from data in a Neo4j DBMS, either an AuraDB instance or a self-managed server.
+Write-back operations will persist the data back to the same Neo4j DBMS server.
+Once all desired results have been written back to the database, the GDS Session can be deleted with no data loss.
+
+
+=== Limitations
+
+* Native projections are not supported, including
+** `gds.graph.project`
+** `gds.graph.project.estimate`
+* Model Catalog is supported with limitations:
+** Trained models can only be used for prediction using the same Session in which they were trained.
+After the Session is deleted, all trained models will be lost.
+** Model publishing is not supported, including
+*** `gds.model.publish`
+** Model persistence is not supported, including
+*** `gds.model.store`
+*** `gds.model.load`
+*** `gds.model.delete`
+* Topological Link Prediction algorithms are not supported, including
+** `gds.alpha.linkprediction.adamicAdar`
+** `gds.alpha.linkprediction.commonNeighbors`
+** `gds.alpha.linkprediction.preferentialAttachment`
+** `gds.alpha.linkprediction.resourceAllocation`
+** `gds.alpha.linkprediction.sameCommunity`
+** `gds.alpha.linkprediction.totalNeighbors`
+* Graph export is not supported, including
+** `gds.graph.export`
+** `gds.graph.export.csv`
+** `gds.graph.export.csv.estimate`
