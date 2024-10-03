@@ -87,7 +87,7 @@ public class LocalPageRankMutateStub<C extends RankConfig & MutateNodePropertyCo
         Map<String, Object> rawConfiguration
     ) {
         var shouldComputeCentralityDistribution = procedureReturnColumns.contains("centralityDistribution");
-        var resultBuilder = new PageRankResultBuilderForMutateMode(shouldComputeCentralityDistribution);
+        var resultBuilder = new PageRankResultBuilderForMutateMode<C>(shouldComputeCentralityDistribution);
 
         return genericStub.execute(
             graphNameAsString,
