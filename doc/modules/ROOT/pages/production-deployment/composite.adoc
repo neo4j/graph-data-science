@@ -48,7 +48,7 @@ Another use case is to replicate the graph's topology across multiple shards, wh
 
 In this scenario we need to set up the shards to run the Neo4j Graph Data Science library.
 
-Every shard that will run the Graph Data Science library should be configured just as a standalone GDS database would be, for more information see xref:installation/index.adoc[Installation].
+Every shard that will run the Graph Data Science library should be configured just as a standalone GDS database would be, for more information see xref:installation/installation.adoc[Installation].
 
 The composite database does not require any special configuration, i.e., the GDS library plugin does not need to be installed.
 However, the Composite database should be configured to handle the amount of data received from the shards.
@@ -118,7 +118,7 @@ CAUTION: Procedure `write` modes are not supported when GDS is hosted on a compo
 In this scenario we need to set up the proxy to run the Neo4j Graph Data Science library.
 
 The dbms that manages the composite database needs to have the GDS plugin installed and configured.
-For more information see xref:installation/index.adoc[Installation].
+For more information see xref:installation/installation.adoc[Installation].
 The proxy node should also be configured to handle the amount of data received from the shards as well as executing graph projections and algorithms.
 
 Fabric shards do not need any special configuration, i.e., the GDS library plugin does not need to be installed.
