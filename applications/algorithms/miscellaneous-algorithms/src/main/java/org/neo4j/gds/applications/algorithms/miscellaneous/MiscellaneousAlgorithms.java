@@ -33,6 +33,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.indexInverse.InverseRelationships;
 import org.neo4j.gds.indexInverse.InverseRelationshipsConfig;
+import org.neo4j.gds.indexInverse.InverseRelationshipsConfigTransformer;
 import org.neo4j.gds.scaleproperties.ScaleProperties;
 import org.neo4j.gds.scaleproperties.ScalePropertiesBaseConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
@@ -100,7 +101,7 @@ class MiscellaneousAlgorithms {
         GraphStore graphStore,
         InverseRelationshipsConfig configuration
     ) {
-        var parameters = configuration.toParameters();
+        var parameters = InverseRelationshipsConfigTransformer.toParameters(configuration);
         var relationshipTypes = parameters.internalRelationshipTypes(graphStore);
         List<Task> tasks = relationshipTypes.stream().flatMap(type -> Stream.of(
             Tasks.leaf(

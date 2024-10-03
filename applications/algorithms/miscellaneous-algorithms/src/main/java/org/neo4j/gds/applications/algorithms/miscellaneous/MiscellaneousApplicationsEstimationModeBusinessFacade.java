@@ -28,6 +28,7 @@ import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.scaleproperties.ScalePropertiesBaseConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesMemoryEstimateDefinition;
 import org.neo4j.gds.undirected.ToUndirectedConfig;
+import org.neo4j.gds.undirected.ToUndirectedConfigTransformer;
 import org.neo4j.gds.undirected.ToUndirectedMemoryEstimateDefinition;
 
 public class MiscellaneousApplicationsEstimationModeBusinessFacade {
@@ -63,6 +64,6 @@ public class MiscellaneousApplicationsEstimationModeBusinessFacade {
     }
 
     public MemoryEstimation toUndirected(ToUndirectedConfig configuration) {
-        return new ToUndirectedMemoryEstimateDefinition(configuration.toMemoryEstimateParameters()).memoryEstimation();
+        return new ToUndirectedMemoryEstimateDefinition(ToUndirectedConfigTransformer.toMemoryEstimateParameters(configuration)).memoryEstimation();
     }
 }

@@ -379,6 +379,12 @@ project(':ml-facade-api').projectDir = file('procedures/facade-api/ml-facade-api
 include('ml-configs')
 project(':ml-configs').projectDir = file('procedures/facade-api/configs/ml-configs')
 
+include('miscellaneous-facade-api')
+project(':miscellaneous-facade-api').projectDir = file('procedures/facade-api/miscellaneous-facade-api')
+
+include('miscellaneous-configs')
+project(':miscellaneous-configs').projectDir = file('procedures/facade-api/configs/miscellaneous-configs')
+
 
 
 
