@@ -185,7 +185,8 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
      *
      * We instrument with timings, to separate cross-cutting boilerplate from business logic.
      */
-    <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM, SIDE_EFFECT_METADATA> RESULT_TO_CALLER processAlgorithmAndAnySideEffects(
+    @Override
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM, SIDE_EFFECT_METADATA> RESULT_TO_CALLER processAlgorithmAndAnySideEffects(
         Optional<String> relationshipWeightOverride,
         GraphName graphName,
         CONFIGURATION configuration,

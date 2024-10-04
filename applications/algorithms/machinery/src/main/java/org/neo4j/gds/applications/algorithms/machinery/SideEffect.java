@@ -23,7 +23,7 @@ import org.neo4j.gds.core.loading.GraphResources;
 
 import java.util.Optional;
 
-interface SideEffect<RESULT_FROM_ALGORITHM, METADATA> {
+public interface SideEffect<RESULT_FROM_ALGORITHM, METADATA> {
     Optional<METADATA> process(
         GraphResources graphResources,
         Optional<RESULT_FROM_ALGORITHM> result
