@@ -28,11 +28,13 @@ import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.Computation;
 import org.neo4j.gds.applications.algorithms.machinery.GraphStoreService;
 import org.neo4j.gds.applications.algorithms.machinery.Label;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.StandardLabel;
+import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -52,9 +54,11 @@ import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationModelResult;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrain;
+import org.neo4j.gds.model.ModelConfig;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.termination.TerminationMonitor;
 
@@ -86,6 +90,8 @@ class PipelineApplications {
     private final ProgressTrackerCreator progressTrackerCreator;
 
     private final NodeClassificationPredictPipelineEstimator nodeClassificationPredictPipelineEstimator;
+    private final NodeClassificationTrainSideEffectsFactory nodeClassificationTrainSideEffectsFactory;
+
     private final AlgorithmsProcedureFacade algorithmsProcedureFacade;
     private final AlgorithmEstimationTemplate algorithmEstimationTemplate;
     private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
@@ -110,6 +116,7 @@ class PipelineApplications {
         PipelineConfigurationParser pipelineConfigurationParser,
         ProgressTrackerCreator progressTrackerCreator,
         NodeClassificationPredictPipelineEstimator nodeClassificationPredictPipelineEstimator,
+        NodeClassificationTrainSideEffectsFactory nodeClassificationTrainSideEffectsFactory,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
         AlgorithmProcessingTemplate algorithmProcessingTemplate
@@ -133,6 +140,7 @@ class PipelineApplications {
         this.pipelineConfigurationParser = pipelineConfigurationParser;
         this.progressTrackerCreator = progressTrackerCreator;
         this.nodeClassificationPredictPipelineEstimator = nodeClassificationPredictPipelineEstimator;
+        this.nodeClassificationTrainSideEffectsFactory = nodeClassificationTrainSideEffectsFactory;
         this.algorithmsProcedureFacade = algorithmsProcedureFacade;
         this.algorithmEstimationTemplate = algorithmEstimationTemplate;
         this.algorithmProcessingTemplate = algorithmProcessingTemplate;
@@ -141,6 +149,7 @@ class PipelineApplications {
     static PipelineApplications create(
         Log log,
         ModelCatalog modelCatalog,
+        ModelRepository modelRepository,
         PipelineRepository pipelineRepository,
         CloseableResourceRegistry closeableResourceRegistry,
         DatabaseId databaseId,
@@ -167,6 +176,12 @@ class PipelineApplications {
             algorithmsProcedureFacade
         );
 
+        var nodeClassificationTrainSideEffectsFactory = new NodeClassificationTrainSideEffectsFactory(
+            log,
+            modelCatalog,
+            modelRepository
+        );
+
         return new PipelineApplications(
             log,
             graphStoreService,
@@ -187,6 +202,7 @@ class PipelineApplications {
             pipelineConfigurationParser,
             progressTrackerCreator,
             nodeClassificationPredictPipelineEstimator,
+            nodeClassificationTrainSideEffectsFactory,
             algorithmsProcedureFacade,
             algorithmEstimationTemplate,
             algorithmProcessingTemplate
@@ -278,11 +294,10 @@ class PipelineApplications {
         return algorithmEstimationTemplate.estimate(configuration, graphNameOrConfiguration, memoryEstimation);
     }
 
-    PredictMutateResult nodeClassificationMutate(GraphName graphName, Map<String, Object> rawConfiguration) {
-        var configuration = pipelineConfigurationParser.parseNodeClassificationPredictPipelineMutateConfig(
-            rawConfiguration);
+    PredictMutateResult nodeClassificationPredictMutate(GraphName graphName, Map<String, Object> rawConfiguration) {
+        var configuration = pipelineConfigurationParser.parseNodeClassificationPredictMutateConfig(rawConfiguration);
         var label = new StandardLabel("NodeClassificationPredictPipelineMutate");
-        var computation = constructComputation(configuration, label);
+        var computation = constructPredictComputation(configuration, label);
         var mutateStep = new NodeClassificationPredictPipelineMutateStep(gss, configuration);
         var resultBuilder = new NodeClassificationPredictPipelineMutateResultBuilder(configuration);
 
@@ -299,14 +314,13 @@ class PipelineApplications {
         );
     }
 
-    Stream<NodeClassificationStreamResult> nodeClassificationStream(
+    Stream<NodeClassificationStreamResult> nodeClassificationPredictStream(
         GraphName graphName,
         Map<String, Object> rawConfiguration
     ) {
-        var configuration = pipelineConfigurationParser.parseNodeClassificationPredictPipelineStreamConfig(
-            rawConfiguration);
+        var configuration = pipelineConfigurationParser.parseNodeClassificationPredictStreamConfig(rawConfiguration);
         var label = new StandardLabel("NodeClassificationPredictPipelineStream");
-        var computation = constructComputation(configuration, label);
+        var computation = constructPredictComputation(configuration, label);
         var resultBuilder = new NodeClassificationPredictPipelineStreamResultBuilder(configuration);
 
         return algorithmProcessingTemplate.processAlgorithmForStream(
@@ -321,28 +335,37 @@ class PipelineApplications {
         );
     }
 
+    Stream<NodeClassificationPipelineTrainResult> nodeClassificationTrain(
+        GraphName graphName,
+        Map<String, Object> rawConfiguration
+    ) {
+        var configuration = pipelineConfigurationParser.parseNodeClassificationTrainConfig(rawConfiguration);
+
+        ensureTrainingModelCanBeStored(configuration);
+
+        var label = new StandardLabel("NodeClassificationPipelineTrain");
+        var computation = constructTrainComputation(configuration);
+        var sideEffects = nodeClassificationTrainSideEffectsFactory.create(configuration);
+        var resultRenderer = new NodeClassificationTrainResultRenderer();
+
+        return algorithmProcessingTemplate.processAlgorithmAndAnySideEffects(
+            Optional.empty(),
+            graphName,
+            configuration,
+            Optional.empty(),
+            label,
+            () -> nodeClassificationTrainEstimation(configuration),
+            computation,
+            Optional.of(sideEffects),
+            resultRenderer
+        );
+    }
+
     MemoryEstimateResult nodeClassificationTrainEstimate(
         Object graphNameOrConfiguration,
         NodeClassificationPipelineTrainConfig configuration
     ) {
-        var specifiedUser = new User(configuration.username(), false);
-        var pipelineName = PipelineName.parse(configuration.pipeline());
-
-        var pipeline = pipelineRepository.getNodeClassificationTrainingPipeline(
-            specifiedUser,
-            pipelineName
-        );
-
-        var estimate = NodeClassificationTrain.estimate(
-            pipeline,
-            configuration,
-            modelCatalog,
-            algorithmsProcedureFacade
-        );
-
-        var memoryEstimation = MemoryEstimations.builder("Node Classification Train")
-            .add(estimate)
-            .build();
+        var memoryEstimation = nodeClassificationTrainEstimation(configuration);
 
         return algorithmEstimationTemplate.estimate(configuration, graphNameOrConfiguration, memoryEstimation);
     }
@@ -374,11 +397,11 @@ class PipelineApplications {
         return pipeline;
     }
 
-    private NodeClassificationPredictPipelineComputation constructComputation(
+    private NodeClassificationPredictComputation constructPredictComputation(
         NodeClassificationPredictPipelineBaseConfig configuration,
         Label label
     ) {
-        return NodeClassificationPredictPipelineComputation.create(
+        return NodeClassificationPredictComputation.create(
             log,
             modelCatalog,
             closeableResourceRegistry,
@@ -400,6 +423,43 @@ class PipelineApplications {
         );
     }
 
+    private Computation<NodeClassificationModelResult> constructTrainComputation(
+        NodeClassificationPipelineTrainConfig configuration
+    ) {
+        return NodeClassificationTrainComputation.create(
+            log,
+            modelCatalog,
+            closeableResourceRegistry,
+            databaseId,
+            dependencyResolver,
+            metrics,
+            nodeLookup,
+            nodePropertyExporterBuilder,
+            procedureReturnColumns,
+            relationshipExporterBuilder,
+            taskRegistryFactory,
+            terminationMonitor,
+            user,
+            userLogRegistryFactory,
+            progressTrackerCreator,
+            algorithmsProcedureFacade,
+            configuration
+        );
+    }
+
+    /**
+     * We check up front that we can do the business logic around model storage.
+     * That could/ should perhaps be built in so that I as the dev won't forget.
+     * Not sure why it is like this.
+     */
+    private void ensureTrainingModelCanBeStored(ModelConfig configuration) {
+        modelCatalog.verifyModelCanBeStored(
+            user.getUsername(),
+            configuration.modelName(),
+            NodeClassificationTrainingPipeline.MODEL_TYPE
+        );
+    }
+
     private Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> getTrainedNCPipelineModel(
         String modelName,
         String username
@@ -417,5 +477,26 @@ class PipelineApplications {
         var model = getTrainedNCPipelineModel(configuration.modelName(), configuration.username());
 
         return nodeClassificationPredictPipelineEstimator.estimate(model, configuration);
+    }
+
+    private MemoryEstimation nodeClassificationTrainEstimation(NodeClassificationPipelineTrainConfig configuration) {
+        var specifiedUser = new User(configuration.username(), false);
+        var pipelineName = PipelineName.parse(configuration.pipeline());
+
+        var pipeline = pipelineRepository.getNodeClassificationTrainingPipeline(
+            specifiedUser,
+            pipelineName
+        );
+
+        var estimate = NodeClassificationTrain.estimate(
+            pipeline,
+            configuration,
+            modelCatalog,
+            algorithmsProcedureFacade
+        );
+
+        return MemoryEstimations.builder("Node Classification Train")
+            .add(estimate)
+            .build();
     }
 }

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml;
+package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.core.model.Model;
 
@@ -31,7 +31,7 @@ import static org.neo4j.gds.model.ModelConfig.MODEL_NAME_KEY;
 import static org.neo4j.gds.model.ModelConfig.MODEL_TYPE_KEY;
 
 public class MLTrainResult {
-
+    @SuppressWarnings("WeakerAccess")
     public final long trainMillis;
     public final Map<String, Object> modelInfo;
     public final Map<String, Object> configuration;
@@ -40,7 +40,7 @@ public class MLTrainResult {
         Optional<Model<?, ?, ?>> maybeTrainedModel,
         long trainMillis
     ) {
-        if(maybeTrainedModel.isPresent()) {
+        if (maybeTrainedModel.isPresent()) {
             var trainedModel = maybeTrainedModel.get();
             this.modelInfo = Stream.concat(
                 Map.of(
@@ -49,8 +49,9 @@ public class MLTrainResult {
                 ).entrySet().stream(),
                 trainedModel.customInfo().toMap().entrySet().stream()
             ).collect(Collectors.toMap(
-                Map.Entry::getKey,
-                Map.Entry::getValue)
+                    Map.Entry::getKey,
+                    Map.Entry::getValue
+                )
             );
             this.configuration = trainedModel.trainConfig().toMap();
         } else {

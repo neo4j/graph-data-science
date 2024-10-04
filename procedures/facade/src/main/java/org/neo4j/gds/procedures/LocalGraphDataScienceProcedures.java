@@ -194,6 +194,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
         var pipelinesProcedureFacade = PipelinesProcedureFacade.create(
             log,
             modelCatalog,
+            modelRepository,
             pipelineRepository,
             closeableResourceRegistry,
             requestScopedDependencies.getDatabaseId(),

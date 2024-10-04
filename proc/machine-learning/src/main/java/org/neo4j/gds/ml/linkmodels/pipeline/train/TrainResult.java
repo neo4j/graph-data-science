@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.train;
 
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.ml.MLTrainResult;
+import org.neo4j.gds.procedures.pipelines.MLTrainResult;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;

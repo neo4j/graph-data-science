@@ -22,7 +22,10 @@ package org.neo4j.gds.extension;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.core.model.Model;
 
-class DisableModelRepository implements ModelRepository {
+/**
+ * In OpenGDS, we disable model storing.
+ */
+class OpenModelRepository implements ModelRepository {
     private static final String ERROR_MESSAGE = """
                 Storing models is not available in openGDS.
                 Please consider licensing the Graph Data Science library.

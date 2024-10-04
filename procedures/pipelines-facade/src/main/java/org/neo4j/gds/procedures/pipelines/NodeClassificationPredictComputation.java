@@ -42,7 +42,7 @@ import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.termination.TerminationMonitor;
 
-final class NodeClassificationPredictPipelineComputation implements Computation<NodeClassificationPipelineResult> {
+final class NodeClassificationPredictComputation implements Computation<NodeClassificationPipelineResult> {
     private final Log log;
     private final ModelCatalog modelCatalog;
 
@@ -67,7 +67,7 @@ final class NodeClassificationPredictPipelineComputation implements Computation<
     private final NodeClassificationPredictPipelineBaseConfig configuration;
     private final Label label;
 
-    private NodeClassificationPredictPipelineComputation(
+    private NodeClassificationPredictComputation(
         Log log,
         ModelCatalog modelCatalog,
         CloseableResourceRegistry closeableResourceRegistry,
@@ -109,7 +109,7 @@ final class NodeClassificationPredictPipelineComputation implements Computation<
         this.label = label;
     }
 
-    static NodeClassificationPredictPipelineComputation create(
+    static NodeClassificationPredictComputation create(
         Log log,
         ModelCatalog modelCatalog,
         CloseableResourceRegistry closeableResourceRegistry,
@@ -131,7 +131,7 @@ final class NodeClassificationPredictPipelineComputation implements Computation<
     ) {
         var trainedNCPipelineModel = new TrainedNCPipelineModel(modelCatalog);
 
-        return new NodeClassificationPredictPipelineComputation(
+        return new NodeClassificationPredictComputation(
             log,
             modelCatalog,
             closeableResourceRegistry,

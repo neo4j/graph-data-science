@@ -55,6 +55,7 @@ class PipelinesProcedureFacadeTest {
             nodeClassificationPredictPipelineEstimator,
             null,
             null,
+            null,
             null
         );
         var facade = new PipelinesProcedureFacade(null, null, applications);
@@ -94,6 +95,7 @@ class PipelinesProcedureFacadeTest {
             null,
             null,
             nodeClassificationPredictPipelineEstimator,
+            null,
             null,
             null,
             null

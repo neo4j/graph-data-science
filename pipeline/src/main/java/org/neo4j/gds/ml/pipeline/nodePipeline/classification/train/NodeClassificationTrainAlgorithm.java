@@ -32,7 +32,7 @@ public class NodeClassificationTrainAlgorithm extends PipelineTrainAlgorithm<
     NodeClassificationPipelineTrainConfig,
     NodeFeatureStep> {
 
-    NodeClassificationTrainAlgorithm(
+    public NodeClassificationTrainAlgorithm(
         PipelineTrainer<NodeClassificationTrainResult> pipelineTrainer,
         NodeClassificationTrainingPipeline pipeline,
         GraphStore graphStore,

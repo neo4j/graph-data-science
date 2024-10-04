@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.pipeline.node.regression;
 
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.ml.MLTrainResult;
+import org.neo4j.gds.procedures.pipelines.MLTrainResult;
 import org.neo4j.gds.ml.models.Regressor;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionPipelineTrainConfig;

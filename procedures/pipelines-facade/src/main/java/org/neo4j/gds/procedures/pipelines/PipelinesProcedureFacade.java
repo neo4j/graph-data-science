@@ -30,6 +30,7 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTempla
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
@@ -73,6 +74,7 @@ public final class PipelinesProcedureFacade {
     public static PipelinesProcedureFacade create(
         Log log,
         ModelCatalog modelCatalog,
+        ModelRepository modelRepository,
         PipelineRepository pipelineRepository,
         CloseableResourceRegistry closeableResourceRegistry,
         DatabaseId databaseId,
@@ -101,6 +103,7 @@ public final class PipelinesProcedureFacade {
         var pipelineApplications = PipelineApplications.create(
             log,
             modelCatalog,
+            modelRepository,
             pipelineRepository,
             closeableResourceRegistry,
             databaseId,
@@ -256,7 +259,7 @@ public final class PipelinesProcedureFacade {
 
         var graphName = GraphName.parse(graphNameAsString);
 
-        var result = pipelineApplications.nodeClassificationMutate(graphName, configuration);
+        var result = pipelineApplications.nodeClassificationPredictMutate(graphName, configuration);
 
         return Stream.of(result);
     }
@@ -268,8 +271,7 @@ public final class PipelinesProcedureFacade {
         PipelineCompanion.preparePipelineConfig(graphNameOrConfiguration, rawConfiguration);
         nodeClassificationPredictConfigPreProcessor.enhanceInputWithPipelineParameters(rawConfiguration);
 
-        var configuration = pipelineConfigurationParser.parseNodeClassificationPredictPipelineMutateConfig(
-            rawConfiguration);
+        var configuration = pipelineConfigurationParser.parseNodeClassificationPredictMutateConfig(rawConfiguration);
 
         var result = pipelineApplications.nodeClassificationPredictEstimate(
             graphNameOrConfiguration,
@@ -288,7 +290,7 @@ public final class PipelinesProcedureFacade {
 
         var graphName = GraphName.parse(graphNameAsString);
 
-        return pipelineApplications.nodeClassificationStream(graphName, configuration);
+        return pipelineApplications.nodeClassificationPredictStream(graphName, configuration);
     }
 
     public Stream<MemoryEstimateResult> nodeClassificationStreamEstimate(
@@ -298,8 +300,7 @@ public final class PipelinesProcedureFacade {
         PipelineCompanion.preparePipelineConfig(graphNameOrConfiguration, rawConfiguration);
         nodeClassificationPredictConfigPreProcessor.enhanceInputWithPipelineParameters(rawConfiguration);
 
-        var configuration = pipelineConfigurationParser.parseNodeClassificationPredictPipelineStreamConfig(
-            rawConfiguration);
+        var configuration = pipelineConfigurationParser.parseNodeClassificationPredictStreamConfig(rawConfiguration);
 
         var result = pipelineApplications.nodeClassificationPredictEstimate(
             graphNameOrConfiguration,
@@ -309,12 +310,22 @@ public final class PipelinesProcedureFacade {
         return Stream.of(result);
     }
 
+    public Stream<NodeClassificationPipelineTrainResult> nodeClassificationTrain(
+        String graphNameAsString, Map<String, Object> configuration
+    ) {
+        PipelineCompanion.preparePipelineConfig(graphNameAsString, configuration);
+
+        var graphName = GraphName.parse(graphNameAsString);
+
+        return pipelineApplications.nodeClassificationTrain(graphName, configuration);
+    }
+
     public Stream<MemoryEstimateResult> nodeClassificationTrainEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> rawConfiguration
     ) {
         PipelineCompanion.preparePipelineConfig(graphNameOrConfiguration, rawConfiguration);
-        var configuration = pipelineConfigurationParser.parseNodeClassificationPipelineTrainConfig(rawConfiguration);
+        var configuration = pipelineConfigurationParser.parseNodeClassificationTrainConfig(rawConfiguration);
 
         var result = pipelineApplications.nodeClassificationTrainEstimate(
             graphNameOrConfiguration,

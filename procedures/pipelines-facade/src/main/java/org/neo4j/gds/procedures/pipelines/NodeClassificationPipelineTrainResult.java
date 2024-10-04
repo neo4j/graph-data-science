@@ -17,9 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.node.classification.predict;
+package org.neo4j.gds.procedures.pipelines;
 
-import org.neo4j.gds.ml.MLTrainResult;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationModelResult;
 import org.neo4j.gds.ml.training.TrainingStatistics;
 
@@ -28,6 +27,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public class NodeClassificationPipelineTrainResult extends MLTrainResult {
+    @SuppressWarnings("WeakerAccess")
     public final Map<String, Object> modelSelectionStats;
 
     public NodeClassificationPipelineTrainResult(

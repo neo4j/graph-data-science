@@ -19,12 +19,9 @@
  */
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.pipelines.NodeClassificationPipelineTrainResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -34,14 +31,9 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
-
-public class NodeClassificationPipelineTrainProc extends BaseProc {
+public class NodeClassificationPipelineTrainProc {
     @Context
     public GraphDataScienceProcedures facade;
-
-    @Context
-    public ModelCatalog modelCatalog;
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.train", mode = Mode.READ)
     @Description("Trains a node classification model based on a pipeline")
@@ -49,11 +41,7 @@ public class NodeClassificationPipelineTrainProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        preparePipelineConfig(graphName, configuration);
-        return new ProcedureExecutor<>(
-            new NodeClassificationPipelineTrainSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.pipelines().nodeClassificationTrain(graphName, configuration);
     }
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.train.estimate", mode = Mode.READ)
@@ -63,10 +51,5 @@ public class NodeClassificationPipelineTrainProc extends BaseProc {
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         return facade.pipelines().nodeClassificationTrainEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withModelCatalog(modelCatalog);
     }
 }

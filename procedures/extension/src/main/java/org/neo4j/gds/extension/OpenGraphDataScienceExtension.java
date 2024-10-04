@@ -70,7 +70,7 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
             featureTogglesRepository,
             Metrics.DISABLED, // no metrics in OpenGDS
             modelCatalog,
-            new DisableModelRepository(), // no model storing in OpenGDS
+            new OpenModelRepository(), // no model storing in OpenGDS
             Optional.empty(), // no extra checks in OpenGDS
             Optional.empty(), // no extra checks in OpenGDS
             Optional.empty() // no extra checks in OpenGDS

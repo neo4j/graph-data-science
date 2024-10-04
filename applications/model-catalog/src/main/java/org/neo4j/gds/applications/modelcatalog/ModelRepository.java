@@ -21,6 +21,9 @@ package org.neo4j.gds.applications.modelcatalog;
 
 import org.neo4j.gds.core.model.Model;
 
+/**
+ * A handy place to host business logic that's shared. Like, checks before storing.
+ */
 public interface ModelRepository {
     void store(Model<?, ?, ?> model);
 }
