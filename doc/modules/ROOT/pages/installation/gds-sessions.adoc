@@ -61,7 +61,7 @@ Write-back operations will persist the data back to the same Neo4j DBMS server.
 Once all desired results have been written back to the database, the GDS Session can be deleted with no data loss.
 
 
-=== Limitations
+== Limitations
 
 * Native projections are not supported, including
 ** `gds.graph.project`
