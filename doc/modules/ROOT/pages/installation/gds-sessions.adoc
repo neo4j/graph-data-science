@@ -1,18 +1,19 @@
 = GDS Sessions
 
-A GDS Session is a temporary compute environment for running GDS workloads.
-It is a service offered by Neo4j and runs within Neo4j's Aura cloud platform.
+NOTE: GDS Sessions are currently in Early Access and not available by default. Contact your account manager to get the feature enabled.
+
+A GDS Session is an on-demand ephemeral compute environment for running GDS workloads.
+It is offered as part of Neo4j Aura, a fast, scalable, always-on, fully automated cloud graph platform.
 
 A GDS Session reads data from a Neo4j DBMS through a _remote projection_, runs computations on the projected graph, and optionally writes the results back to the DBMS using _remote write-back_.
 
-NOTE: GDS Sessions are currently in Early Access and not available by default. Contact your account manager to get the feature enabled.
 
 
 == GDS Session management
 
 GDS Sessions, unlike GDS plugin, do not require any installation to a Neo4j DBMS.
 Instead, a GDS Session is started on-demand to perform GDS computations.
-To start a GDS Session, use the GDS Python Client, version `1.12` or later.
+To start a GDS Session, use the latest version of the link:https://neo4j.com/docs/graph-data-science-client/current/gds-session/[GDS Python Client].
 
 Using the client, it is possible to
 
