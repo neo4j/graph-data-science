@@ -15,21 +15,31 @@ GDS Sessions, unlike GDS plugin, do not require any installation to a Neo4j DBMS
 Instead, a GDS Session is started on-demand to perform GDS computations.
 To start a GDS Session, use the latest version of the link:https://neo4j.com/docs/graph-data-science-client/current/gds-session/[GDS Python Client].
 
-Using the client, it is possible to
+Using the client, it is possible to perform all operations on a GDS Session.
+For a comprehensive API overview including examples and tutorials, see link:https://neo4j.com/docs/graph-data-science-client/current/gds-session/[the GDS Python Client manual].
+
+
+=== Session lifecycle operations
 
 * Create GDS Sessions connected to an AuraDB instance in the link:https://neo4j.com/docs/aura/auradb/#_plans[Virtual Dedicated Cloud] plan.
 * Create GDS Sessions connected to a self-hosted Neo4j DBMS, version `5.24.0` or newer.
+* List running sessions in a specific Aura project.
+* Delete specific sessions.
+
+
+=== GDS workloads
+
 * Perform GDS algorithm computationsfootnote:limitations[See <<Limitations>>], including all execution modes.
 * Train machine learning modelsfootnote:limitations[].
 * Run machine learning prediction pipelinesfootnote:limitations[].
+
+
+=== Results processing
+
 * Write back results to a Neo4j DBMS.
 * Stream back results, to
 ** the GDS Python Client.
 ** an Arrow client for the GDS Arrow Server.
-* List running sessions in a specific Aura project.
-* Delete specific sessions.
-
-For a comprehensive API overview including examples and tutorials, see link:https://neo4j.com/docs/graph-data-science-client/current/gds-session/[the GDS Python Client manual].
 
 
 == Projecting a graph into a GDS Session
