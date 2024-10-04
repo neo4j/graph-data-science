@@ -51,7 +51,8 @@ A remote projection is similar to a xref:management-ops/graph-creation/graph-pro
 The projection query runs on the database server, but the GDS graph appears in the GDS Session's Graph Catalog.
 A key difference is also the name of the aggregating function, which is `gds.graph.project.remote`.
 
-Native projections are _not_ supported in GDS Sessions.
+The standard ways to project a graph with GDS plugin (Native projections, Cypher projections, Legacy Cypher projections) are _not_ supported in GDS Sessions.
+The projection must be triggered from the data source, which is a Neo4j DBMS or a client of the GDS Arrow Server (see xref:management-ops/graph-creation/graph-project-apache-arrow.adoc[]).
 
 
 == Writing back data to a Neo4j DBMS
@@ -66,6 +67,11 @@ Once all desired results have been written back to the database, the GDS Session
 * Native projections are not supported, including
 ** `gds.graph.project`
 ** `gds.graph.project.estimate`
+* Cypher projections are not supported, including
+** `gds.graph.project` (the aggregating function)
+* Legacy Cypher projections are not supported, including
+** `gds.graph.project.cypher`
+** `gds.graph.project.cypher.estimate`
 * Model Catalog is supported with limitations:
 ** Trained models can only be used for prediction using the same Session in which they were trained.
 After the Session is deleted, all trained models will be lost.
