@@ -76,3 +76,6 @@ After the Session is deleted, all trained models will be lost.
 ** `gds.graph.export`
 ** `gds.graph.export.csv`
 ** `gds.graph.export.csv.estimate`
+* Backup & Restore is not supported, including
+** `gds.backup`
+** `gds.restore`
