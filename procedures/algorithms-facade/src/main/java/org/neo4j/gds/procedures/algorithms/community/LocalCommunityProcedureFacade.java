@@ -22,11 +22,11 @@ package org.neo4j.gds.procedures.algorithms.community;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsStatsModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsWriteModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.community.CommunityApplications;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
 import org.neo4j.gds.conductance.ConductanceStreamConfig;
@@ -167,13 +167,13 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     }
 
     public static CommunityProcedureFacade create(
-        CommunityApplications communityApplications,
+        ApplicationsFacade applicationsFacade,
         GenericStub genericStub,
         CloseableResourceRegistry closeableResourceRegistry,
         ProcedureReturnColumns procedureReturnColumns,
         UserSpecificConfigurationParser configurationParser
     ) {
-
+        var communityApplications = applicationsFacade.community();
         var approximateMaximumKCutMutateStub = new LocalApproximateMaximumKCutMutateStub(
             genericStub,
             communityApplications.mutate(),

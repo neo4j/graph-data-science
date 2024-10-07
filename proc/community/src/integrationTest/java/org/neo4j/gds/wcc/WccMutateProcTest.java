@@ -623,7 +623,7 @@ class WccMutateProcTest extends BaseProcTest {
 
         var genericStub = new GenericStub(configurationParser, null);
         var communityProcedureFacade = LocalCommunityProcedureFacade.create(
-            applicationsFacade.community(),
+            applicationsFacade,
             genericStub,
             null,
             ProcedureReturnColumns.EMPTY,

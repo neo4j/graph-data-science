@@ -67,7 +67,7 @@ final class AlgorithmsProcedureFacadeFactory {
         );
 
         var communityProcedureFacade = LocalCommunityProcedureFacade.create(
-            applicationsFacade.community(),
+            applicationsFacade,
             genericStub,
             closeableResourceRegistry,
             procedureReturnColumns,

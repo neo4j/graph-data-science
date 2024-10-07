@@ -5,24 +5,19 @@ description = 'Neo4j Graph Data Science :: OpenGDS Procedure Facade'
 group = 'org.neo4j.gds'
 
 dependencies {
-    neodeps().each {
-        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
-            transitive = false
-        }
 
-        testImplementation(group: 'org.neo4j', name: it, version: ver.'neo4j')
-    }
+    // Neo4j Dependencies
+    compileOnly(
+        [group: 'org.neo4j', name: 'neo4j-graphdb-api', version: ver.'neo4j'],
+        [group: 'org.neo4j', name: 'neo4j-kernel', version: ver.'neo4j'],
+    )
 
     // the necessary GDS things
-    implementation project(':algo')
     implementation project(':algorithms-facade-api')
     implementation project(':algorithms-machinery')
     implementation project(':algorithms-procedure-facade')
-    implementation project(':algo-common')
     implementation project(':annotations')
     implementation project(':applications-facade')
-    implementation project(':centrality-algorithms')
-    implementation project(':community-algorithms')
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':core-write')
@@ -31,34 +26,23 @@ dependencies {
     implementation project(':graph-catalog-procedure-facade')
     implementation project(':graph-schema-api')
     implementation project(':graph-store-catalog-applications')
-    implementation project(':legacy-cypher-projection')
     implementation project(':logging')
     implementation project(':memory-estimation')
     implementation project(':memory-usage')
     implementation project(':metrics-api')
-    implementation project(':miscellaneous-algorithms')
-    implementation project(':ml-algo')
-    implementation project(':ml-api')
-    implementation project(':ml-core')
     implementation project(':model-catalog-api')
     implementation project(':model-catalog-applications')
     implementation project(':model-catalog-procedure-facade')
-    implementation project(':native-projection')
     implementation project(':neo4j-api')
-    implementation project(':node-embedding-algorithms')
     implementation project(':operations-applications')
     implementation project(':operations-procedure-facade')
-    implementation project(':path-finding-algorithms')
     implementation project(':pipeline')
     implementation project(':pipelines-procedure-facade')
     implementation project(':progress-tracking')
-    implementation project(':similarity-algorithms')
     implementation project(':string-formatting')
-    implementation project(':subgraph-filtering')
     implementation project(':termination')
     implementation project(':transaction')
 
-    compileOnly project(':pregel')
 
     compileOnly openGds.immutables.value
     compileOnly openGds.jetbrains.annotations

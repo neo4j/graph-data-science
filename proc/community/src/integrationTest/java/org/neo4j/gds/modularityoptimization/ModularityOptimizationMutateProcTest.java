@@ -551,7 +551,7 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
             algorithmProcessingTemplate
         );
         var communityProcedureFacade = LocalCommunityProcedureFacade.create(
-            applicationsFacade.community(),
+            applicationsFacade,
             genericStub,
             null,
             ProcedureReturnColumns.EMPTY,
