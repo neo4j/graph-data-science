@@ -103,9 +103,7 @@ public class GraphSageEmbeddingsGenerator {
         TerminationFlag terminationFlag
     ) {
         return () -> {
-            if(!terminationFlag.running()) {
-                return;
-            }
+            terminationFlag.assertRunning();
             List<SubGraph> subGraphs = GraphSageHelper.subGraphsPerLayer(
                 graph,
                 partition.stream().toArray(),

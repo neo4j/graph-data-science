@@ -56,6 +56,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.termination.TerminatedException;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Arrays;
@@ -64,6 +65,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.stream.LongStream;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.neo4j.gds.TestGdsVersion.testGdsVersion;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
@@ -314,17 +316,9 @@ class GraphSageTest {
             EmptyTaskRegistryFactory.INSTANCE
         );
         graphSage.setTerminationFlag(TerminationFlag.STOP_RUNNING);
-        graphSage.compute();
 
-        var messagesInOrder = log.getMessages(INFO);
-
-        assertThat(messagesInOrder)
-            // avoid asserting on the thread id
-            .extracting(removingThreadId())
-            .containsExactly(
-                "GraphSage :: Start",
-                "GraphSage 100%",
-                "GraphSage :: Finished"
-            );
+        assertThatThrownBy(graphSage::compute)
+            .isInstanceOf(TerminatedException.class)
+            .hasMessageContaining("The execution has been terminated.");
     }
 }
