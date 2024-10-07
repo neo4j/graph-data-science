@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 
-import org.neo4j.gds.config.ConcurrencyConfig;
+import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -41,7 +41,7 @@ class ComputationService {
         this.algorithmMetricsService = algorithmMetricsService;
     }
 
-    <CONFIGURATION extends ConcurrencyConfig, RESULT_FROM_ALGORITHM> RESULT_FROM_ALGORITHM computeAlgorithm(
+    <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM> RESULT_FROM_ALGORITHM computeAlgorithm(
         CONFIGURATION configuration,
         GraphResources graphResources,
         Label label,

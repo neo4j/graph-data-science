@@ -31,6 +31,8 @@ import org.neo4j.gds.mem.MemoryTree;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -118,5 +120,33 @@ class DefaultMemoryGuardTest {
         } catch (IllegalStateException e) {
             assertThat(e).hasMessage("Memory required to run yet another label (243b) exceeds available memory (42b)");
         }
+    }
+
+    @Test
+    void shouldRespectSudoFlag() {
+        var memoryGuard = new DefaultMemoryGuard(null, false, new MemoryGauge(new AtomicLong(42L)));
+
+        var graph = mock(Graph.class);
+        when(graph.nodeCount()).thenReturn(23L);
+        when(graph.relationshipCount()).thenReturn(87L);
+        var memoryEstimation = mock(MemoryEstimation.class);
+        var memoryTree = mock(MemoryTree.class);
+        var concurrency = new Concurrency(7);
+        when(memoryEstimation.estimate(GraphDimensions.of(23, 87), concurrency)).thenReturn(memoryTree);
+        when(memoryTree.memoryUsage()).thenReturn(MemoryRange.of(117, 243));
+
+        assertThatIllegalStateException().isThrownBy(() -> memoryGuard.assertAlgorithmCanRun(
+            new StandardLabel("some other label"),
+            new ExampleConfiguration(),
+            graph,
+            () -> memoryEstimation
+        ));
+
+        assertDoesNotThrow(() -> memoryGuard.assertAlgorithmCanRun(
+            new StandardLabel("some other label"),
+            new ExampleConfiguration(true), // now with sudo
+            graph,
+            () -> memoryEstimation
+        ));
     }
 }

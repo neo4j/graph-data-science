@@ -25,10 +25,23 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.Optional;
 
+/**
+ * A fake configuration that we can slowly build out
+ */
 class ExampleConfiguration implements AlgoBaseConfig, RelationshipWeightConfig {
+    private final boolean sudo;
+
+    ExampleConfiguration() {
+        this(false);
+    }
+
+    ExampleConfiguration(boolean sudo) {
+        this.sudo = sudo;
+    }
+
     @Override
-    public Optional<String> usernameOverride() {
-        throw new UnsupportedOperationException("TODO");
+    public Concurrency concurrency() {
+        return new Concurrency(7);
     }
 
     @Override
@@ -37,7 +50,12 @@ class ExampleConfiguration implements AlgoBaseConfig, RelationshipWeightConfig {
     }
 
     @Override
-    public Concurrency concurrency() {
-        return new Concurrency(7);
+    public boolean sudo() {
+        return sudo;
+    }
+
+    @Override
+    public Optional<String> usernameOverride() {
+        throw new UnsupportedOperationException("TODO");
     }
 }
