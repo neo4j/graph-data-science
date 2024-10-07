@@ -3,6 +3,7 @@
 :description: This section details projecting GDS graphs using `native` projections.
 :page-aliases: management-ops/projections/graph-project.adoc
 
+include::partial$/product-limitations/not-on-gds-session-note.adoc[]
 
 Native projections are the easiest way to create a xref:management-ops/index.adoc[GDS graph] from a Neo4j database.
 A native projection is entirely described by configuration parameters.

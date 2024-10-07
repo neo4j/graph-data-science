@@ -11,6 +11,8 @@ The plugin needs to be installed into the database and configured.
 
 [NOTE]
 ====
+xref:installation/gds-sessions.adoc[GDS Sessions] is the new fully managed, on-demand analytics-as-a-service offering in Neo4j Aura.
+
 link:https://neo4j.com/data-science-sandbox/[Neo4j Data Science Sandbox] is a free, cloud-based instance of Neo4j with GDS Community Edition preinstalled.
 
 link:https://neo4j.com/cloud/platform/aura-graph-data-science/[Neo4j AuraDS] is the fully managed version of Neo4j GDS Enterprise Edition which does not require any installation.

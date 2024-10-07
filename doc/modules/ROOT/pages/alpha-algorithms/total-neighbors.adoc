@@ -3,6 +3,7 @@
 = Total Neighbors
 :description: This section describes the Total Neighbors algorithm in the Neo4j Graph Data Science library.
 
+include::partial$/product-limitations/not-on-gds-session-note.adoc[]
 
 Total Neighbors computes the closeness of nodes, based on the number of unique neighbors that they have.
 It is based on the idea that the more connected a node is, the more likely it is to receive new links.
