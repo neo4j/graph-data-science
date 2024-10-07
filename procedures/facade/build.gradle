@@ -15,6 +15,7 @@ dependencies {
 
     // the necessary GDS things
     implementation project(':algo')
+    implementation project(':algorithms-facade-api')
     implementation project(':algorithms-machinery')
     implementation project(':algorithms-procedure-facade')
     implementation project(':algo-common')

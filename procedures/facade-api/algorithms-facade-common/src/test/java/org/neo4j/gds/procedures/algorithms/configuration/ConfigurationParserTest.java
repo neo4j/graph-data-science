@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.configuration;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.configuration.Default;
@@ -39,7 +40,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatException;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -51,7 +51,7 @@ class ConfigurationParserTest {
     @Test
     void shouldApplyDefaults() {
         var defaultsMock = mock(DefaultsConfiguration.class);
-        when(defaultsMock.apply(any(), any())).thenReturn(Map.of("concurrency", 8, "sudo", true));
+        when(defaultsMock.apply(ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(Map.of("concurrency", 8, "sudo", true));
 
         var configurationParser = new ConfigurationParser(defaultsMock, null);
 

@@ -11,19 +11,7 @@ dependencies {
         }
     }
 
-    api (
-        project(':centrality-facade-api'),
-        project(':community-facade-api'),
-        project(':miscellaneous-facade-api'),
-        project(':ml-facade-api'),
-        project(':node-embeddings-facade-api'),
-        project(':similarity-facade-api'),
-        project(':path-finding-facade-api'),
-    )
-
-    // TODO: remove this once we get all categories to `api` modules?
-    // We will still need something to expose this as API
-    api project(':algorithms-facade-common')
+    api project(':algorithms-facade-api')
 
     implementation project(':algo')
     implementation project(':algo-common')

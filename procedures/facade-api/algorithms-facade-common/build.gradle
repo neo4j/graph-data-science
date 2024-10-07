@@ -6,6 +6,8 @@ group = 'org.neo4j.gds'
 
 dependencies {
 
+    implementation project(':annotations')
+
     // `BaseConfig` lives here
     implementation project(':config-api')
 
@@ -16,8 +18,22 @@ dependencies {
     // this is needed because of `MemoryEstimateResult`
     implementation project(':algorithms-machinery')
 
+    implementation project(':defaults-and-limits-configuration')
+
     implementation project(':memory-usage')
 
     // only `JobIdConfig` is what we need from this module
     implementation project(':progress-tracking')
+
+    // test infrastructure
+    testImplementation platform(openGds.junit5bom)
+    testImplementation openGds.junit5.jupiter
+    testImplementation openGds.mockito.junit.jupiter
+    testImplementation openGds.assertj.core
+
+    // There are tests that use WccStreamConfig
+    testImplementation project(':community-configs')
+
+    testRuntimeOnly openGds.junit5.jupiter.engine
+
 }

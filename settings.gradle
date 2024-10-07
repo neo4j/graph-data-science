@@ -385,6 +385,8 @@ project(':miscellaneous-facade-api').projectDir = file('procedures/facade-api/mi
 include('miscellaneous-configs')
 project(':miscellaneous-configs').projectDir = file('procedures/facade-api/configs/miscellaneous-configs')
 
+include('algorithms-facade-api')
+project(':algorithms-facade-api').projectDir = file('procedures/algorithms-facade-api')
 
 
 

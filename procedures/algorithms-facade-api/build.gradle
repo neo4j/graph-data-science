@@ -1,0 +1,18 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Algorithms Procedure Facade API'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    api (
+        project(':centrality-facade-api'),
+        project(':community-facade-api'),
+        project(':miscellaneous-facade-api'),
+        project(':ml-facade-api'),
+        project(':node-embeddings-facade-api'),
+        project(':similarity-facade-api'),
+        project(':path-finding-facade-api'),
+        project(':algorithms-facade-common'),
+    )
+}
