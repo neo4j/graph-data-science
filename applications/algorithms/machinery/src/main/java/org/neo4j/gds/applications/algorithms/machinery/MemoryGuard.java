@@ -20,7 +20,7 @@
 package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.config.ConcurrencyConfig;
+import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
 
 import java.util.function.Supplier;
@@ -34,7 +34,7 @@ public interface MemoryGuard {
      */
     MemoryGuard DISABLED = new MemoryGuard() {
         @Override
-        public <CONFIGURATION extends ConcurrencyConfig> void assertAlgorithmCanRun(
+        public <CONFIGURATION extends AlgoBaseConfig> void assertAlgorithmCanRun(
             Label label,
             CONFIGURATION configuration,
             Graph graph,
@@ -49,7 +49,7 @@ public interface MemoryGuard {
      *
      * @throws IllegalStateException when there is not enough memory available to run the algorithm in the given configuration on the given graph
      */
-    <CONFIGURATION extends ConcurrencyConfig> void assertAlgorithmCanRun(
+    <CONFIGURATION extends AlgoBaseConfig> void assertAlgorithmCanRun(
         Label label,
         CONFIGURATION configuration,
         Graph graph,

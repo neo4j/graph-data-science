@@ -20,7 +20,7 @@
 package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.config.ConcurrencyConfig;
+import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.logging.Log;
@@ -42,12 +42,14 @@ public class DefaultMemoryGuard implements MemoryGuard {
     }
 
     @Override
-    public <CONFIGURATION extends ConcurrencyConfig> void assertAlgorithmCanRun(
+    public <CONFIGURATION extends AlgoBaseConfig> void assertAlgorithmCanRun(
         Label label,
         CONFIGURATION configuration,
         Graph graph,
         Supplier<MemoryEstimation> estimationFactory
     ) throws IllegalStateException {
+        if (configuration.sudo()) return;
+
         try {
             var memoryEstimation = estimationFactory.get();
 
