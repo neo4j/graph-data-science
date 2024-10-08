@@ -57,7 +57,7 @@ public final class DefaultNodeEmbeddingsWriteResult {
             0,
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             configurationMap
         );
     }

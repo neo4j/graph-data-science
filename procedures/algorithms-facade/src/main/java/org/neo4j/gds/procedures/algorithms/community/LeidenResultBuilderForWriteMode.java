@@ -75,7 +75,7 @@ class LeidenResultBuilderForWriteMode implements ResultBuilder<LeidenWriteConfig
             timings.preProcessingMillis,
             timings.computeMillis,
             communityStatistics.computeMilliseconds(),
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             nodePropertiesWrittenAndConvertedNodePropertyValues.getLeft().value(),
             communitySummary,
             Arrays.stream(leidenResult.modularities()).boxed().collect(Collectors.toList()),

@@ -65,7 +65,7 @@ public class PageRankResultBuilderForMutateMode<C extends RankConfig & MutateNod
             timings.preProcessingMillis,
             timings.computeMillis,
             pageRankDistribution.postProcessingMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             metadata.orElseThrow().value(),
             configurationMap
         );

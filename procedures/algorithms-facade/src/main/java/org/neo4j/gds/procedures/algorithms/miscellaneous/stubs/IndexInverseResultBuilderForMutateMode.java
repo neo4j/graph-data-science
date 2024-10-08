@@ -44,7 +44,7 @@ class IndexInverseResultBuilderForMutateMode implements ResultBuilder<InverseRel
         return new IndexInverseMutateResult(
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             0,
             graph.relationshipCount(),
             configuration.toMap()

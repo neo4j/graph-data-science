@@ -51,7 +51,7 @@ class SpanningTreeResultBuilderForWriteMode implements ResultBuilder<SpanningTre
 
         builder.withComputeMillis(timings.computeMillis);
         builder.withPreProcessingMillis(timings.preProcessingMillis);
-        builder.withWriteMillis(timings.mutateOrWriteMillis);
+        builder.withWriteMillis(timings.sideEffectMillis);
 
         metadata.ifPresent(rw -> builder.withRelationshipsWritten(rw.value()));
 

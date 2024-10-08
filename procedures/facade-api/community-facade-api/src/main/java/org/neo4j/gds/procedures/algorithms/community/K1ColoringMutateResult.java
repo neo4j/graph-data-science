@@ -73,7 +73,7 @@ public class K1ColoringMutateResult {
         return new K1ColoringMutateResult(
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             0,
             0,
             0,

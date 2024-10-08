@@ -46,7 +46,7 @@ class NodeClassificationPredictPipelineMutateResultBuilder implements ResultBuil
         return new PredictMutateResult(
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             metadata.orElseThrow().value(),
             this.configuration.toMap()
         );

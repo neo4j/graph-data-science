@@ -52,7 +52,7 @@ class ScalePropertiesResultBuilderForMutateMode implements ResultBuilder<ScalePr
             shouldDisplayScalerStatistics ? scalePropertiesResult.scalerStatistics() : null,
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             metadata.orElseThrow().value(),
             configuration.toMap()
         );

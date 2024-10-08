@@ -47,7 +47,7 @@ public class CelfResultBuilderForMutateMode implements ResultBuilder<InfluenceMa
             .withNodeCount(graph.nodeCount())
             .withPreProcessingMillis(timings.preProcessingMillis)
             .withComputeMillis(timings.computeMillis)
-            .withMutateMillis(timings.mutateOrWriteMillis)
+            .withMutateMillis(timings.sideEffectMillis)
             .withNodePropertiesWritten(metadata.orElseThrow().value())
             .withConfig(configuration)
             .build();

@@ -44,7 +44,7 @@ public final class IndexInverseMutateResult extends StandardMutateResult {
         return new IndexInverseMutateResult(
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             0,
             0,
             configurationMap

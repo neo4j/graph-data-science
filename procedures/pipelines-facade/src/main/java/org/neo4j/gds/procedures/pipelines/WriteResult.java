@@ -49,7 +49,7 @@ public final class WriteResult extends StandardWriteResult {
         return new WriteResult(
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             0,
             configurationMap
         );

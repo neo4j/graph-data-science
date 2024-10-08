@@ -42,7 +42,7 @@ public class RandomWalkResultBuilderForMutateMode implements ResultBuilder<Rando
             .withConfig(configuration)
             .withPreProcessingMillis(timings.preProcessingMillis)
             .withComputeMillis(timings.computeMillis)
-            .withMutateMillis(timings.mutateOrWriteMillis);
+            .withMutateMillis(timings.sideEffectMillis);
 
         metadata.ifPresent(nodePropertiesWritten -> resultBuilder.withNodePropertiesWritten(nodePropertiesWritten.value()));
 

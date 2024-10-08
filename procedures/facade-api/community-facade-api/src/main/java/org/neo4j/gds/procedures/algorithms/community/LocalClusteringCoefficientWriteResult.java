@@ -54,7 +54,7 @@ public final class LocalClusteringCoefficientWriteResult extends LocalClustering
             0,
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             0,
             configurationMap
         );

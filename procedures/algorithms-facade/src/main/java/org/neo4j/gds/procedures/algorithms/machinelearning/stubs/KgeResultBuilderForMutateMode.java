@@ -43,7 +43,7 @@ class KgeResultBuilderForMutateMode implements ResultBuilder<KGEPredictMutateCon
         return new KGEMutateResult(
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             metadata.orElseThrow().value(),
             configuration.toMap()
         );

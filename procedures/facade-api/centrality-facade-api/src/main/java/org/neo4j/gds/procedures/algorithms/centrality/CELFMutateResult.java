@@ -54,7 +54,7 @@ public final class CELFMutateResult {
 
     public static CELFMutateResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new CELFMutateResult(
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             0,
             timings.computeMillis,
             0,

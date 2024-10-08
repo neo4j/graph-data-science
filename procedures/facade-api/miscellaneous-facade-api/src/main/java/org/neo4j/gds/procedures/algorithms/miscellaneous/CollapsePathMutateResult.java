@@ -53,7 +53,7 @@ public class CollapsePathMutateResult {
         return new CollapsePathMutateResult(
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             0,
             configurationMap
         );

@@ -47,7 +47,7 @@ class CelfResultBuilderForWriteMode implements ResultBuilder<InfluenceMaximizati
 
         return Stream.of(
             new CELFWriteResult(
-                timings.mutateOrWriteMillis,
+                timings.sideEffectMillis,
                 nodePropertiesWritten.orElseThrow().value(),
                 timings.computeMillis,
                 celfResult.totalSpread(),

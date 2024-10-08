@@ -52,7 +52,7 @@ class ScalePropertiesResultBuilderForWriteMode implements ResultBuilder<ScalePro
             shouldDisplayScalerStatistics ? scalePropertiesResult.scalerStatistics() : null,
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             metadata.orElseThrow().value(),
             configuration.toMap()
         );

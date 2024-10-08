@@ -50,7 +50,7 @@ public final class ToUndirectedMutateResult extends StandardMutateResult {
         return new ToUndirectedMutateResult(
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             0,
             0,
             0,

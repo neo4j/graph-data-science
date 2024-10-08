@@ -293,7 +293,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
     ) {
         if (sideEffect.isEmpty()) return Optional.empty();
 
-        try (var ignored = ProgressTimer.start(timingsBuilder::withMutateOrWriteMillis)) {
+        try (var ignored = ProgressTimer.start(timingsBuilder::withSideEffectMillis)) { // rename
             return sideEffect.get().process(graphResources, result);
         }
     }

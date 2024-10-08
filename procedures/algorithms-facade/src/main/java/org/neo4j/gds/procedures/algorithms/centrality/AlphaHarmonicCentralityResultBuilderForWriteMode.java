@@ -59,7 +59,7 @@ class AlphaHarmonicCentralityResultBuilderForWriteMode implements ResultBuilder<
             graph.nodeCount(),
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             configuration.writeProperty(),
             centralityDistributionAndTiming.getLeft()
         );

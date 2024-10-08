@@ -50,7 +50,7 @@ public class IndirectExposureResultBuilderForMutateMode implements ResultBuilder
             indirectExposureResult.didConverge(),
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             metadata.orElseThrow().value(),
             configuration.toMap()
         );

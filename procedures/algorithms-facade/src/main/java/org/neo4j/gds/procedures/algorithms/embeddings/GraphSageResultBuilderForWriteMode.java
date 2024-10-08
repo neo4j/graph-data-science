@@ -48,7 +48,7 @@ class GraphSageResultBuilderForWriteMode implements ResultBuilder<GraphSageWrite
             nodePropertiesWritten.orElseThrow().value(),
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             configuration.toMap()
         );
 

@@ -59,7 +59,7 @@ public class K1ColoringWriteResult {
         return new K1ColoringWriteResult(
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             0,
             0,
             0,

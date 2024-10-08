@@ -48,7 +48,7 @@ class KCoreResultBuilderForWriteMode implements ResultBuilder<KCoreDecomposition
             timings.preProcessingMillis,
             timings.computeMillis,
             0,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             configuration.toMap()
         );
 

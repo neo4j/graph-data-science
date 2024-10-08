@@ -58,7 +58,7 @@ public final class ScalePropertiesMutateResult extends StandardMutateResult {
             Collections.emptyMap(),
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             0,
             configurationMap
         );

@@ -54,7 +54,7 @@ public final class CELFWriteResult {
 
     static CELFWriteResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
         return new CELFWriteResult(
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             0,
             timings.computeMillis,
             0,

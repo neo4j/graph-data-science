@@ -65,7 +65,7 @@ class PageRankResultBuilderForWriteMode<C extends RankConfig & WritePropertyConf
             timings.preProcessingMillis,
             timings.computeMillis,
             pageRankDistribution.postProcessingMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             metadata.orElseThrow().value(),
             configurationMap
         );

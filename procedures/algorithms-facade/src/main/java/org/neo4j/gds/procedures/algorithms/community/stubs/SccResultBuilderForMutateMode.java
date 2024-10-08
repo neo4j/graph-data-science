@@ -72,7 +72,7 @@ public class SccResultBuilderForMutateMode implements ResultBuilder<SccMutateCon
             timings.preProcessingMillis,
             timings.computeMillis,
             communityStatisticsWithTiming.getRight(),
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             metadata.orElseThrow().value(),
             configuration.toMap()
         );

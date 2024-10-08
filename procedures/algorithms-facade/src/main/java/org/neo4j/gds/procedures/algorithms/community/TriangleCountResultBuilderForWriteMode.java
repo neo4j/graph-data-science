@@ -47,7 +47,7 @@ class TriangleCountResultBuilderForWriteMode implements ResultBuilder<TriangleCo
             graph.nodeCount(),
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             metadata.orElseThrow().value(),
             configuration.toMap()
         );

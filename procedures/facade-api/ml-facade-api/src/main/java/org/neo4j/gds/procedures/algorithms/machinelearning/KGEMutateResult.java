@@ -50,7 +50,7 @@ public final class KGEMutateResult extends StandardMutateResult {
         return new KGEMutateResult(
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             0,
             configurationMap
         );

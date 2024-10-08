@@ -48,7 +48,7 @@ class FastRPResultBuilderForWriteMode implements ResultBuilder<FastRPWriteConfig
             nodePropertiesWritten.orElseThrow().value(),
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             configuration.toMap()
         );
 
