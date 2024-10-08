@@ -17,18 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.pricesteiner;
+package org.neo4j.gds.pcst;
 
-import org.neo4j.gds.collections.ha.HugeDoubleArray;
-import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.core.CypherMapWrapper;
 
-public record PriceSteinerTreeResult(
-    HugeLongArray parentArray,
-    HugeDoubleArray relationshipToParentCost
-) {
-    public static final long  PRUNED=-2;
-    public static final long  ROOT=-1;
+@Configuration
+public interface PCSTStreamConfig  extends PCSTBaseConfig {
 
-
-
+    static PCSTStreamConfig of(CypherMapWrapper userInput) {
+        return new PCSTStreamConfigImpl(userInput);
+    }
 }

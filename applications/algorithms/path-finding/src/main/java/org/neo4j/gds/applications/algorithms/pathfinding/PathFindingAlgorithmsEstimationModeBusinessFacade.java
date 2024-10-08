@@ -120,6 +120,9 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         throw new MemoryEstimationNotImplementedException();
     }
 
+    public MemoryEstimation pcst() {
+        throw new MemoryEstimationNotImplementedException();
+    }
     public MemoryEstimateResult randomWalk(
         RandomWalkBaseConfig configuration,
         Object graphNameOrConfiguration

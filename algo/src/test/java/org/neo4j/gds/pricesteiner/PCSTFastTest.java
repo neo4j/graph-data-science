@@ -61,13 +61,13 @@ class PCSTFastTest {
 
             var parentArray = result.parentArray();
 
-            assertThat(parentArray.get(graph.toMappedNodeId("a1"))).isEqualTo(PriceSteinerTreeResult.PRUNED);
-            assertThat(parentArray.get(graph.toMappedNodeId("a4"))).isEqualTo(PriceSteinerTreeResult.PRUNED);
+            assertThat(parentArray.get(graph.toMappedNodeId("a1"))).isEqualTo(PrizeSteinerTreeResult.PRUNED);
+            assertThat(parentArray.get(graph.toMappedNodeId("a4"))).isEqualTo(PrizeSteinerTreeResult.PRUNED);
 
             boolean par1 = (parentArray.get(graph.toMappedNodeId("a2")) == graph.toMappedNodeId("a3")) && (parentArray.get(
-                graph.toMappedNodeId("a3")) == PriceSteinerTreeResult.ROOT);
+                graph.toMappedNodeId("a3")) == PrizeSteinerTreeResult.ROOT);
             boolean par2 = (parentArray.get(graph.toMappedNodeId("a3")) == graph.toMappedNodeId("a2")) && (parentArray.get(
-                graph.toMappedNodeId("a2")) == PriceSteinerTreeResult.ROOT);
+                graph.toMappedNodeId("a2")) == PrizeSteinerTreeResult.ROOT);
             assertThat(par1 ^ par2).isTrue();
 
 

@@ -123,6 +123,7 @@ public class ConfigurationParsersForMutateMode {
             case NodeSimilarity -> NodeSimilarityMutateConfig::of;
             case Node2Vec -> Node2VecMutateConfig::of;
             case PageRank -> PageRankMutateConfig::of;
+            case PCST -> null;
             case RandomWalk -> null;
             case ScaleProperties -> ScalePropertiesMutateConfig::of;
             case SCC -> SccMutateConfig::of;
