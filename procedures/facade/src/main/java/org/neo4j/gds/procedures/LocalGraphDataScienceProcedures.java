@@ -206,6 +206,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
             writeContext.relationshipExporterBuilder(),
             requestScopedDependencies.getTaskRegistryFactory(),
             terminationMonitor,
+            requestScopedDependencies.getTerminationFlag(),
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getUserLogRegistryFactory(),
             progressTrackerCreator,

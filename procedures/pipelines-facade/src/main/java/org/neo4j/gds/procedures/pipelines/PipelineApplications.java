@@ -32,6 +32,7 @@ import org.neo4j.gds.applications.algorithms.machinery.Computation;
 import org.neo4j.gds.applications.algorithms.machinery.GraphStoreService;
 import org.neo4j.gds.applications.algorithms.machinery.Label;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.NodePropertyWriter;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.StandardLabel;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
@@ -60,6 +61,7 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassific
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrain;
 import org.neo4j.gds.model.ModelConfig;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.termination.TerminationMonitor;
 
 import java.util.Map;
@@ -69,7 +71,7 @@ import java.util.stream.Stream;
 
 class PipelineApplications {
     private final Log log;
-    private final GraphStoreService gss;
+    private final GraphStoreService graphStoreService;
     private final ModelCatalog modelCatalog;
     private final PipelineRepository pipelineRepository;
 
@@ -91,6 +93,8 @@ class PipelineApplications {
 
     private final NodeClassificationPredictPipelineEstimator nodeClassificationPredictPipelineEstimator;
     private final NodeClassificationTrainSideEffectsFactory nodeClassificationTrainSideEffectsFactory;
+
+    private final NodePropertyWriter nodePropertyWriter;
 
     private final AlgorithmsProcedureFacade algorithmsProcedureFacade;
     private final AlgorithmEstimationTemplate algorithmEstimationTemplate;
@@ -117,12 +121,13 @@ class PipelineApplications {
         ProgressTrackerCreator progressTrackerCreator,
         NodeClassificationPredictPipelineEstimator nodeClassificationPredictPipelineEstimator,
         NodeClassificationTrainSideEffectsFactory nodeClassificationTrainSideEffectsFactory,
+        NodePropertyWriter nodePropertyWriter,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
         AlgorithmProcessingTemplate algorithmProcessingTemplate
     ) {
         this.log = log;
-        this.gss = graphStoreService;
+        this.graphStoreService = graphStoreService;
         this.modelCatalog = modelCatalog;
         this.pipelineRepository = pipelineRepository;
         this.closeableResourceRegistry = closeableResourceRegistry;
@@ -141,6 +146,7 @@ class PipelineApplications {
         this.progressTrackerCreator = progressTrackerCreator;
         this.nodeClassificationPredictPipelineEstimator = nodeClassificationPredictPipelineEstimator;
         this.nodeClassificationTrainSideEffectsFactory = nodeClassificationTrainSideEffectsFactory;
+        this.nodePropertyWriter = nodePropertyWriter;
         this.algorithmsProcedureFacade = algorithmsProcedureFacade;
         this.algorithmEstimationTemplate = algorithmEstimationTemplate;
         this.algorithmProcessingTemplate = algorithmProcessingTemplate;
@@ -161,6 +167,7 @@ class PipelineApplications {
         RelationshipExporterBuilder relationshipExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
         TerminationMonitor terminationMonitor,
+        TerminationFlag terminationFlag,
         User user,
         UserLogRegistryFactory userLogRegistryFactory,
         PipelineConfigurationParser pipelineConfigurationParser,
@@ -180,6 +187,13 @@ class PipelineApplications {
             log,
             modelCatalog,
             modelRepository
+        );
+
+        var nodePropertyWriter = new NodePropertyWriter(
+            log,
+            nodePropertyExporterBuilder,
+            taskRegistryFactory,
+            terminationFlag
         );
 
         return new PipelineApplications(
@@ -203,6 +217,7 @@ class PipelineApplications {
             progressTrackerCreator,
             nodeClassificationPredictPipelineEstimator,
             nodeClassificationTrainSideEffectsFactory,
+            nodePropertyWriter,
             algorithmsProcedureFacade,
             algorithmEstimationTemplate,
             algorithmProcessingTemplate
@@ -298,7 +313,7 @@ class PipelineApplications {
         var configuration = pipelineConfigurationParser.parseNodeClassificationPredictMutateConfig(rawConfiguration);
         var label = new StandardLabel("NodeClassificationPredictPipelineMutate");
         var computation = constructPredictComputation(configuration, label);
-        var mutateStep = new NodeClassificationPredictPipelineMutateStep(gss, configuration);
+        var mutateStep = new NodeClassificationPredictPipelineMutateStep(graphStoreService, configuration);
         var resultBuilder = new NodeClassificationPredictPipelineMutateResultBuilder(configuration);
 
         return algorithmProcessingTemplate.processAlgorithmForMutate(
@@ -331,6 +346,26 @@ class PipelineApplications {
             label,
             () -> nodeClassificationPredictMemoryEstimation(configuration),
             computation,
+            resultBuilder
+        );
+    }
+
+    WriteResult nodeClassificationPredictWrite(GraphName graphName, Map<String, Object> rawConfiguration) {
+        var configuration = pipelineConfigurationParser.parseNodeClassificationPredictWriteConfig(rawConfiguration);
+        var label = new StandardLabel("NodeClassificationPredictPipelineWrite");
+        var computation = constructPredictComputation(configuration, label);
+        var writeStep = new NodeClassificationPredictPipelineWriteStep(nodePropertyWriter, configuration);
+        var resultBuilder = new NodeClassificationPredictPipelineWriteResultBuilder(configuration);
+
+        return algorithmProcessingTemplate.processAlgorithmForWrite(
+            Optional.empty(),
+            graphName,
+            configuration,
+            Optional.empty(),
+            label,
+            () -> nodeClassificationPredictMemoryEstimation(configuration),
+            computation,
+            writeStep,
             resultBuilder
         );
     }

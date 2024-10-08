@@ -79,7 +79,7 @@ class PipelineConfigurationParser {
         return parseNodeClassificationPipelineConfig(NodeClassificationPredictPipelineStreamConfig::of, configuration);
     }
 
-    NodeClassificationPredictPipelineWriteConfig parseNodeClassificationWriteConfig(Map<String, Object> configuration) {
+    NodeClassificationPredictPipelineWriteConfig parseNodeClassificationPredictWriteConfig(Map<String, Object> configuration) {
         return parseNodeClassificationPipelineConfig(NodeClassificationPredictPipelineWriteConfig::of, configuration);
     }
 

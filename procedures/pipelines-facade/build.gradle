@@ -31,6 +31,7 @@ dependencies {
     implementation project(':core')
     implementation project(':core-write')
     implementation project(':executor')
+    implementation project(':graph-schema-api')
     implementation project(':logging')
     implementation project(':memory-usage')
     implementation project(':metrics-api')

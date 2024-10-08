@@ -43,6 +43,7 @@ import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.termination.TerminationMonitor;
 
 import java.util.ArrayList;
@@ -86,6 +87,7 @@ public final class PipelinesProcedureFacade {
         RelationshipExporterBuilder relationshipExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
         TerminationMonitor terminationMonitor,
+        TerminationFlag terminationFlag,
         User user,
         UserLogRegistryFactory userLogRegistryFactory,
         ProgressTrackerCreator progressTrackerCreator,
@@ -115,6 +117,7 @@ public final class PipelinesProcedureFacade {
             relationshipExporterBuilder,
             taskRegistryFactory,
             terminationMonitor,
+            terminationFlag,
             user,
             userLogRegistryFactory,
             pipelineConfigurationParser,
@@ -335,12 +338,26 @@ public final class PipelinesProcedureFacade {
         return Stream.of(result);
     }
 
+    public Stream<WriteResult> nodeClassificationWrite(
+        String graphNameAsString,
+        Map<String, Object> configuration
+    ) {
+        PipelineCompanion.preparePipelineConfig(graphNameAsString, configuration);
+        nodeClassificationPredictConfigPreProcessor.enhanceInputWithPipelineParameters(configuration);
+
+        var graphName = GraphName.parse(graphNameAsString);
+
+        var result = pipelineApplications.nodeClassificationPredictWrite(graphName, configuration);
+
+        return Stream.of(result);
+    }
+
     public Stream<MemoryEstimateResult> nodeClassificationWriteEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> rawConfiguration
     ) {
         PipelineCompanion.preparePipelineConfig(graphNameOrConfiguration, rawConfiguration);
-        var configuration = pipelineConfigurationParser.parseNodeClassificationWriteConfig(rawConfiguration);
+        var configuration = pipelineConfigurationParser.parseNodeClassificationPredictWriteConfig(rawConfiguration);
 
         var result = pipelineApplications.nodeClassificationPredictEstimate(
             graphNameOrConfiguration,

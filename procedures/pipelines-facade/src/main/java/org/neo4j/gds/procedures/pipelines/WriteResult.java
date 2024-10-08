@@ -17,15 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.node.classification.predict;
+package org.neo4j.gds.procedures.pipelines;
 
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.procedures.algorithms.results.StandardWriteResult;
+import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
 public final class WriteResult extends StandardWriteResult {
-
     public final long nodePropertiesWritten;
 
     WriteResult(
@@ -45,8 +45,17 @@ public final class WriteResult extends StandardWriteResult {
         this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    static class Builder extends AbstractResultBuilder<WriteResult> {
+    static WriteResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+        return new WriteResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.mutateOrWriteMillis,
+            0,
+            configurationMap
+        );
+    }
 
+    public static class Builder extends AbstractResultBuilder<WriteResult> {
         @Override
         public WriteResult build() {
             return new WriteResult(
