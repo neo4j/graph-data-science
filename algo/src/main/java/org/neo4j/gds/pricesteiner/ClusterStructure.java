@@ -28,8 +28,9 @@ import java.util.function.LongPredicate;
 
 public class ClusterStructure {
 
-    private final HugeLongArray parent; //TODO: enforce path-compression heuristic
-    private final HugeDoubleArray clusterPrizes; //enforce path-compression heuristic
+    private final HugeDoubleArray skippedParentSum;
+    private final HugeLongArray parent;
+    private final HugeDoubleArray clusterPrizes;
     private final HugeLongArray left;
     private final HugeLongArray right;
     private final HugeDoubleArray moat;
@@ -45,6 +46,7 @@ public class ClusterStructure {
         this.parent.fill(-1L);
         this.maxNumberOfClusters = nodeCount;
         this.subTotalMoat = HugeDoubleArray.newArray(nodeCount);
+        this.skippedParentSum = HugeDoubleArray.newArray(2*nodeCount);
         this.moat = HugeDoubleArray.newArray(2*nodeCount);
         this.left = HugeLongArray.newArray(nodeCount);
         this.right = HugeLongArray.newArray(nodeCount);
@@ -92,11 +94,32 @@ public class ClusterStructure {
     }
 
     ClusterMoatPair sumOnEdgePart(long node, double currentMoat){
-        double sum=moatAt(node,currentMoat);
+        double sum = 0;
         long currentNode =node;
-        while (parent.get(currentNode)!=-1){
-            currentNode = parent.get(currentNode);
-            sum+=  moatAt(currentNode,currentMoat);
+
+        while (true){
+
+            var  parentNode = parent.get(currentNode);
+            double currentValue = moatAt(currentNode,currentMoat);
+
+            sum+=  currentValue;
+            if (parentNode== -1){
+                break;
+            }else{
+                var nextNextParent =  parent.get(parentNode);
+                double parentValue = moatAt(parentNode, currentMoat);
+                var nextParent =  parentNode;
+                if (nextNextParent !=-1){
+                    parent.set(currentNode, nextNextParent);
+                    skippedParentSum.addTo(currentNode, parentValue + skippedParentSum.get(parentNode));
+                    nextParent= nextNextParent;
+                }
+                sum += skippedParentSum.get(currentNode);
+                currentNode = nextParent;
+
+
+            }
+
         }
 
         return new ClusterMoatPair(currentNode,sum);

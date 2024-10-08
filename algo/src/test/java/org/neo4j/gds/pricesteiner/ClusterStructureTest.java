@@ -96,4 +96,42 @@ class ClusterStructureTest {
 
     }
 
+    @Test
+    void shouldEnsurePathFindingWork(){
+        var clusterStructure = new ClusterStructure(6);
+
+        clusterStructure.merge(0,1,10);
+        clusterStructure.merge(6,2,110);
+        clusterStructure.merge(7,3,1110);
+        clusterStructure.merge(8,4,11110);
+        clusterStructure.merge(9,5,111110);
+
+
+        double  expected = 10+100 + 1000 + 10_000 + 100_000 + 1_000_000;
+        assertThat(clusterStructure.sumOnEdgePart(0,1_111_110).totalMoat()).isEqualTo(expected);
+        assertThat(clusterStructure.sumOnEdgePart(0,1_111_110).totalMoat()).isEqualTo(expected);
+        assertThat(clusterStructure.sumOnEdgePart(0,1_111_110).totalMoat()).isEqualTo(expected);
+        assertThat(clusterStructure.sumOnEdgePart(0,1_111_110).totalMoat()).isEqualTo(expected);
+        assertThat(clusterStructure.sumOnEdgePart(0,1_111_110).totalMoat()).isEqualTo(expected);
+        assertThat(clusterStructure.sumOnEdgePart(0,1_111_110).totalMoat()).isEqualTo(expected);
+        assertThat(clusterStructure.sumOnEdgePart(0,1_111_110).totalMoat()).isEqualTo(expected);
+
+        assertThat(clusterStructure.sumOnEdgePart(6,1_111_110).totalMoat()).isEqualTo(expected - 10 );
+        assertThat(clusterStructure.sumOnEdgePart(6,1_111_110).totalMoat()).isEqualTo(expected - 10 );
+        assertThat(clusterStructure.sumOnEdgePart(6,1_111_110).totalMoat()).isEqualTo(expected - 10 );
+        assertThat(clusterStructure.sumOnEdgePart(6,1_111_110).totalMoat()).isEqualTo(expected - 10 );
+        assertThat(clusterStructure.sumOnEdgePart(6,1_111_110).totalMoat()).isEqualTo(expected - 10 );
+        assertThat(clusterStructure.sumOnEdgePart(6,1_111_110).totalMoat()).isEqualTo(expected - 10 );
+
+
+
+
+
+
+
+
+
+
+    }
+
 }
