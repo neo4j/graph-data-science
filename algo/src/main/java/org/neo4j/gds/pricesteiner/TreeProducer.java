@@ -56,8 +56,8 @@ public final class TreeProducer {
 
         for (long i =0; i<numberOfTreeEdges;++i){
             var edgeId = treeEdges.get(i);
-            var  u = edgeParts.get(2*edgeId);
-            var  v = edgeParts.get(2*edgeId+1);
+            var  u = Math.abs(edgeParts.get(2*edgeId));
+            var  v = Math.abs(edgeParts.get(2*edgeId+1));
             if (activePredicate.test(u) && activePredicate.test(v)){
                     degree.addTo(u,1);
                     degree.addTo(v,1);

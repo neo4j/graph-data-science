@@ -71,7 +71,13 @@ class GrowthPhase {
                 long uPart = edgeEventsQueue.topEdgePart();
                 long vPart = otherEdgePart(uPart);
                 long u = edgeParts.get(uPart);
-                long v = edgeParts.get(vPart);   //TODO: If we have already  processed other edge part (tight or delete), find shortcut to skip
+                long v = edgeParts.get(vPart);
+
+                edgeEventsQueue.pop();
+
+                if (u<0 || v<0) {
+                    continue;
+                }
 
                 ClusterMoatPair cmu = clusterStructure.sumOnEdgePart(u,moat);
                 ClusterMoatPair cmv = clusterStructure.sumOnEdgePart(v,moat);
@@ -82,9 +88,10 @@ class GrowthPhase {
                 var vCluster = cmv.cluster();
                 var vClusterSum = cmv.totalMoat();
 
-                edgeEventsQueue.pop();
 
                 if (vCluster == uCluster) {
+                    edgeParts.set(uPart,-u);
+                    edgeParts.set(vPart,-v);
                     continue;
                 }
 
@@ -103,6 +110,7 @@ class GrowthPhase {
                         clusterStructure.active(vCluster)
                     );
                 }
+
             }
 
         }
@@ -173,6 +181,8 @@ class GrowthPhase {
         clusterEventsPriorityQueue.add(newCluster, clusterStructure.tightnessTime(newCluster, moat));
 
         addToTree(edgeId);
+        edgeParts.set(2*edgeId,-edgeParts.get(2*edgeId));
+        edgeParts.set(2*edgeId+1,-edgeParts.get(2*edgeId+1));
     }
 
     private void generateNewEdgeEvents(
