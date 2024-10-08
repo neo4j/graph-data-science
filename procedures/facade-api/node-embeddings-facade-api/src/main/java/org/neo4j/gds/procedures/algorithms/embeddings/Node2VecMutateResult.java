@@ -53,7 +53,7 @@ public final class Node2VecMutateResult extends StandardMutateResult {
             0,
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             configurationMap,
             Collections.emptyList()
         );

@@ -43,7 +43,7 @@ class ToUndirectedResultBuilderForMutateMode implements ResultBuilder<ToUndirect
         return new ToUndirectedMutateResult(
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             0,
             graph.relationshipCount(),
             metadata.orElseThrow().value(),

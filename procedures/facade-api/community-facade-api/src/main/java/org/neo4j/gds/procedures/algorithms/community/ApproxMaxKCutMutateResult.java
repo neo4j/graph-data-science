@@ -59,7 +59,7 @@ public final class ApproxMaxKCutMutateResult extends StandardMutateResult {
             timings.preProcessingMillis,
             timings.computeMillis,
             0,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             configurationMap
         );
     }

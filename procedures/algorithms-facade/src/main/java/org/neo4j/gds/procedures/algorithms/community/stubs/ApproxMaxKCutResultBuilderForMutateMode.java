@@ -50,7 +50,7 @@ public class ApproxMaxKCutResultBuilderForMutateMode implements ResultBuilder<Ap
             timings.preProcessingMillis,
             timings.computeMillis,
             0,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             configurationMap
         );
     }

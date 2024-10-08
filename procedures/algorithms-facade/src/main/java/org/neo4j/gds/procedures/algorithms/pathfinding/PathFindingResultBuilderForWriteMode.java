@@ -42,7 +42,7 @@ class PathFindingResultBuilderForWriteMode<CONFIGURATION extends ToMapConvertibl
             timings.preProcessingMillis,
             timings.computeMillis,
             0, // yeah, I don't understand it either :shrug:
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             metadata.map(rw -> rw.value()).orElse(0L),
             configuration.toMap()
         );

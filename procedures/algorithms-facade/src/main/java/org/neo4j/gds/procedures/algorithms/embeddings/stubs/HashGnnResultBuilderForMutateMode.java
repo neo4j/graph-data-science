@@ -45,7 +45,7 @@ public class HashGnnResultBuilderForMutateMode implements ResultBuilder<HashGNNM
             metadata.orElseThrow().value(),
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             configuration.toMap()
         );
     }

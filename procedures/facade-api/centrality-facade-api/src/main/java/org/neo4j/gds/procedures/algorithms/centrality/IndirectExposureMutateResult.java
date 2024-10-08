@@ -41,7 +41,7 @@ public record IndirectExposureMutateResult(
             false,
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             0,
             configurationMap
         );

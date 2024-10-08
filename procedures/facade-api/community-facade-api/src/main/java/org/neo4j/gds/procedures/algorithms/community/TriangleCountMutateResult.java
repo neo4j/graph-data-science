@@ -57,7 +57,7 @@ public class TriangleCountMutateResult extends TriangleCountStatsResult {
             0,
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             0,
             configurationMap
         );

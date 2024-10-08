@@ -75,7 +75,7 @@ class LouvainResultBuilderForWriteMode implements ResultBuilder<LouvainWriteConf
             timings.preProcessingMillis,
             timings.computeMillis,
             communityStatistics.computeMilliseconds(),
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             metadata.orElseThrow().value(),
             configuration.toMap()
         );

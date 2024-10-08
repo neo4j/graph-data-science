@@ -58,7 +58,7 @@ public final class AlphaHarmonicWriteResult {
             0,
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             configuration.writeProperty(),
             Collections.emptyMap()
         );

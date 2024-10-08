@@ -29,7 +29,7 @@ class AlgorithmProcessingTimingsBuilder {
     // timings
     protected long preProcessingMillis = NOT_AVAILABLE;
     protected long computeMillis = NOT_AVAILABLE;
-    protected long mutateOrWriteMillis = NOT_AVAILABLE;
+    protected long sideEffectMillis = NOT_AVAILABLE; // rename
 
     public void withPreProcessingMillis(long preProcessingMillis) {
         this.preProcessingMillis = preProcessingMillis;
@@ -39,15 +39,15 @@ class AlgorithmProcessingTimingsBuilder {
         this.computeMillis = computeMillis;
     }
 
-    public void withMutateOrWriteMillis(long mutateOrWriteMillis) {
-        this.mutateOrWriteMillis = mutateOrWriteMillis;
+    public void withSideEffectMillis(long sideEffectMillis) {
+        this.sideEffectMillis = sideEffectMillis;
     }
 
     AlgorithmProcessingTimings build() {
         return new AlgorithmProcessingTimings(
             preProcessingMillis,
             computeMillis,
-            mutateOrWriteMillis
+            sideEffectMillis
         );
     }
 }

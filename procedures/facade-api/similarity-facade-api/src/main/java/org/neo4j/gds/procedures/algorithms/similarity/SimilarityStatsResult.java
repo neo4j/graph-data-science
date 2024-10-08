@@ -57,7 +57,7 @@ public class SimilarityStatsResult {
         return new SimilarityStatsResult(
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             0,
             0,
             Collections.emptyMap(),

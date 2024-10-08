@@ -68,7 +68,7 @@ class ModularityOptimizationResultBuilderForWriteMode implements ResultBuilder<M
             timings.preProcessingMillis,
             timings.computeMillis,
             communityStatistics.computeMilliseconds(),
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             modularityOptimizationResult.asNodeProperties().nodeCount(),
             modularityOptimizationResult.didConverge(),
             modularityOptimizationResult.ranIterations(),

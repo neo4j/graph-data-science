@@ -49,7 +49,7 @@ public final class KGEWriteResult {
         return new KGEWriteResult(
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             0,
             configurationMap
         );

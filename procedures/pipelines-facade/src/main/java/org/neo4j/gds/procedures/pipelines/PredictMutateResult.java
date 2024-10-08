@@ -49,7 +49,7 @@ public final class PredictMutateResult extends StandardMutateResult {
         return new PredictMutateResult(
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             0,
             configurationMap
         );

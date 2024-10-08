@@ -63,7 +63,7 @@ public class KnnWriteResult extends SimilarityWriteResult {
         return new KnnWriteResult(
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             0,
             0,
             0,
@@ -88,7 +88,7 @@ public class KnnWriteResult extends SimilarityWriteResult {
         return new KnnWriteResult(
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             0,
             nodesCompared,
             relationshipsWritten.value(),

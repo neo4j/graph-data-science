@@ -50,7 +50,7 @@ class K1ColoringResultBuilderForWriteMode implements ResultBuilder<K1ColoringWri
         var k1ColoringWriteResult = new K1ColoringWriteResult(
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             k1ColoringResult.colors().size(),
             usedColors,
             k1ColoringResult.ranIterations(),

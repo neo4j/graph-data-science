@@ -52,7 +52,7 @@ public class K1ColoringResultBuilderForMutateMode implements ResultBuilder<K1Col
         return new K1ColoringMutateResult(
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             k1ColoringResult.colors().size(),
             usedColors,
             k1ColoringResult.ranIterations(),

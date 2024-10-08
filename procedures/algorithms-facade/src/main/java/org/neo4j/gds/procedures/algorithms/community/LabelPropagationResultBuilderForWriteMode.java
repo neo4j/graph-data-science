@@ -73,7 +73,7 @@ class LabelPropagationResultBuilderForWriteMode implements ResultBuilder<LabelPr
             timings.preProcessingMillis,
             timings.computeMillis,
             communityStatistics.computeMilliseconds(),
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             nodePropertiesWrittenAndConvertedNodePropertyValues.getLeft().value(),
             configuration.toMap()
         );

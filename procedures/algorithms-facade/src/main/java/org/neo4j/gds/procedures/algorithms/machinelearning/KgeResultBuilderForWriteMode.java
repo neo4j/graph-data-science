@@ -43,7 +43,7 @@ class KgeResultBuilderForWriteMode implements ResultBuilder<KGEPredictWriteConfi
         var kgeWriteResult = new KGEWriteResult(
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             metadata.orElseThrow().value(),
             configuration.toMap()
         );

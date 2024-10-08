@@ -53,7 +53,7 @@ public class KCoreDecompositionWriteResult extends StandardWriteResult {
             timings.preProcessingMillis,
             timings.computeMillis,
             0,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             configurationMap
         );
     }

@@ -62,7 +62,7 @@ public final class PageRankMutateResult extends PageRankStatsResult {
             timings.preProcessingMillis,
             timings.computeMillis,
             0,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             0,
             configurationMap
         );

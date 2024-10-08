@@ -54,7 +54,7 @@ public final class CentralityWriteResult extends CentralityStatsResult {
             timings.preProcessingMillis,
             timings.computeMillis,
             0,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             Collections.emptyMap(),
             configurationMap
         );

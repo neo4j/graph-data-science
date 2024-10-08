@@ -78,7 +78,7 @@ class DefaultAlgorithmProcessingTemplateTest {
                 assertThat(result).hasValue("some result");
                 assertThat(timings.preProcessingMillis).isGreaterThan(-1);
                 assertThat(timings.computeMillis).isGreaterThan(-1);
-                assertThat(timings.mutateOrWriteMillis).isGreaterThan(-1);
+                assertThat(timings.sideEffectMillis).isGreaterThan(-1);
                 assertThat(metadata).hasValue("metadata from some side effect");
 
                 return "some rendered result";
@@ -129,7 +129,7 @@ class DefaultAlgorithmProcessingTemplateTest {
                 assertThat(result).hasValue("some other result");
                 assertThat(timings.preProcessingMillis).isGreaterThan(-1);
                 assertThat(timings.computeMillis).isGreaterThan(-1);
-                assertThat(timings.mutateOrWriteMillis).isEqualTo(-1); // no side effect, no timing
+                assertThat(timings.sideEffectMillis).isEqualTo(-1); // no side effect, no timing
                 assertThat(metadata).isEmpty();
 
                 return "some other rendered result";

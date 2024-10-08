@@ -25,11 +25,11 @@ package org.neo4j.gds.applications.algorithms.machinery;
 public class AlgorithmProcessingTimings {
     public final long preProcessingMillis;
     public final long computeMillis;
-    public final long mutateOrWriteMillis;
+    public final long sideEffectMillis; // rename
 
-    AlgorithmProcessingTimings(long preProcessingMillis, long computeMillis, long mutateOrWriteMillis) {
+    AlgorithmProcessingTimings(long preProcessingMillis, long computeMillis, long sideEffectMillis) {
         this.preProcessingMillis = preProcessingMillis;
         this.computeMillis = computeMillis;
-        this.mutateOrWriteMillis = mutateOrWriteMillis;
+        this.sideEffectMillis = sideEffectMillis;
     }
 }

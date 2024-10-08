@@ -58,7 +58,7 @@ public final class ScalePropertiesWriteResult extends StandardWriteResult {
             Collections.emptyMap(),
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             0,
             configurationMap
         );

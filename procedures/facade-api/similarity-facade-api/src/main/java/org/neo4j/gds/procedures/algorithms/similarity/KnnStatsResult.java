@@ -60,7 +60,7 @@ public class KnnStatsResult extends SimilarityStatsResult {
         return new KnnStatsResult(
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             0,
             0,
             Collections.emptyMap(),

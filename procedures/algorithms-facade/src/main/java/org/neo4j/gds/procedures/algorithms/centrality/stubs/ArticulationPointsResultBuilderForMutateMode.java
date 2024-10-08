@@ -46,7 +46,7 @@ public class ArticulationPointsResultBuilderForMutateMode implements ResultBuild
         return new ArticulationPointsMutateResult(
                 bitSet.cardinality(),
                 metadata.map(NodePropertiesWritten::value).orElseThrow(),
-                timings.mutateOrWriteMillis,
+                timings.sideEffectMillis,
                 timings.computeMillis,
                 configuration.toMap()
         );

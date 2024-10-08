@@ -73,7 +73,7 @@ class SccResultBuilderForWriteMode implements ResultBuilder<SccWriteConfig, Huge
             timings.preProcessingMillis,
             timings.computeMillis,
             communityStatisticsWithTiming.getRight(),
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             metadata.orElseThrow().value(),
             configuration.toMap()
         );

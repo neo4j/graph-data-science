@@ -65,7 +65,7 @@ public class ModularityOptimizationResultBuilderForMutateMode implements ResultB
             timings.preProcessingMillis,
             timings.computeMillis,
             communityStatisticsWithTiming.getRight(),
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             modularityOptimizationResult.asNodeProperties().nodeCount(),
             modularityOptimizationResult.didConverge(),
             modularityOptimizationResult.ranIterations(),

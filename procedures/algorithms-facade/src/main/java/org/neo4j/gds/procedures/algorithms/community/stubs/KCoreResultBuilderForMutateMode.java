@@ -48,7 +48,7 @@ public class KCoreResultBuilderForMutateMode implements ResultBuilder<KCoreDecom
             timings.preProcessingMillis,
             timings.computeMillis,
             0,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             configuration.toMap()
         );
     }

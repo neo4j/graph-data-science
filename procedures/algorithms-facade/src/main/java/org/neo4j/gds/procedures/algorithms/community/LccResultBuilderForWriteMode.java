@@ -50,7 +50,7 @@ class LccResultBuilderForWriteMode implements ResultBuilder<LocalClusteringCoeff
             localClusteringCoefficientResult.localClusteringCoefficients().size(),
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             metadata.orElseThrow().value(),
             configuration.toMap()
         );

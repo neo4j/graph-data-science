@@ -47,7 +47,7 @@ public class TriangleCountResultBuilderForMutateMode implements ResultBuilder<Tr
             graph.nodeCount(),
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             metadata.orElseThrow().value(),
             configuration.toMap()
         );

@@ -43,7 +43,7 @@ public class SteinerTreeResultBuilderForMutateMode implements ResultBuilder<Stei
 
         builder.withPreProcessingMillis(timings.preProcessingMillis);
         builder.withComputeMillis(timings.computeMillis);
-        builder.withMutateMillis(timings.mutateOrWriteMillis);
+        builder.withMutateMillis(timings.sideEffectMillis);
 
         metadata.ifPresent(rw -> builder.withRelationshipsWritten(rw.value()));
 

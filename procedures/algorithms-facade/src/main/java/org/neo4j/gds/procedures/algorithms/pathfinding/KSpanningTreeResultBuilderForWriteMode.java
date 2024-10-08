@@ -48,7 +48,7 @@ class KSpanningTreeResultBuilderForWriteMode implements ResultBuilder<KSpanningT
 
         builder.withPreProcessingMillis(timings.preProcessingMillis);
         builder.withComputeMillis(timings.computeMillis);
-        builder.withWriteMillis(timings.mutateOrWriteMillis);
+        builder.withWriteMillis(timings.sideEffectMillis);
 
         //builder.withNodePropertiesWritten(...);
 

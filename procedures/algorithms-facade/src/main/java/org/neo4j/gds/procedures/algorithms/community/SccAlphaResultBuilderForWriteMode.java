@@ -67,7 +67,7 @@ class SccAlphaResultBuilderForWriteMode implements ResultBuilder<SccAlphaWriteCo
             timings.preProcessingMillis,
             timings.computeMillis,
             communityStatisticsWithTiming.getRight(),
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             hugeLongArray.size(),
             communityStatisticsWithTiming.getLeft(),
             (long) communityDistribution.get("max"),

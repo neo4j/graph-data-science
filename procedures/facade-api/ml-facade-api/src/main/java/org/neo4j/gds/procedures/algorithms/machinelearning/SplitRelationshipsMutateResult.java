@@ -52,7 +52,7 @@ public class SplitRelationshipsMutateResult {
         return new SplitRelationshipsMutateResult(
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             0,
             configurationMap
         );

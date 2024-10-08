@@ -48,7 +48,7 @@ class ArticulationPointsResultBuilderForWriteMode implements ResultBuilder<Artic
             new ArticulationPointsWriteResult(
                 bitSet.cardinality(),
                 metadata.map(NodePropertiesWritten::value).orElseThrow(),
-                timings.mutateOrWriteMillis,
+                timings.sideEffectMillis,
                 timings.computeMillis,
                 configuration.toMap()
             )

@@ -59,7 +59,7 @@ public final class Node2VecWriteResult {
             0,
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             configurationMap,
             Collections.emptyList()
         );

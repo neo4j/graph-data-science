@@ -51,7 +51,7 @@ public class SpanningTreeResultBuilderForMutateMode implements ResultBuilder<Spa
 
         builder.withComputeMillis(timings.computeMillis);
         builder.withPreProcessingMillis(timings.preProcessingMillis);
-        builder.withMutateMillis(timings.mutateOrWriteMillis);
+        builder.withMutateMillis(timings.sideEffectMillis);
 
         metadata.ifPresent(rw -> builder.withRelationshipsWritten(rw.value()));
 

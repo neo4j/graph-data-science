@@ -43,7 +43,7 @@ class SplitRelationshipsResultBuilderForMutateMode implements ResultBuilder<Spli
         return new SplitRelationshipsMutateResult(
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             metadata.orElseThrow().value(),
             configuration.toMap()
         );

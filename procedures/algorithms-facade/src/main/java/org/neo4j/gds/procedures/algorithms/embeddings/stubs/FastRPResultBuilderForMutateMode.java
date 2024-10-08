@@ -45,7 +45,7 @@ public class FastRPResultBuilderForMutateMode implements ResultBuilder<FastRPMut
             metadata.orElseThrow().value(),
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.mutateOrWriteMillis,
+            timings.sideEffectMillis,
             configuration.toMap()
         );
     }
