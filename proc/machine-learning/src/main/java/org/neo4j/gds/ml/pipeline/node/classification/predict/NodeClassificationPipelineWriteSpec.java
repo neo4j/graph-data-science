@@ -31,6 +31,7 @@ import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.pipelines.NodeClassificationPipelineResult;
 import org.neo4j.gds.procedures.pipelines.NodeClassificationPredictConfigPreProcessor;
 import org.neo4j.gds.procedures.pipelines.NodeClassificationPredictPipelineExecutor;
+import org.neo4j.gds.procedures.pipelines.NodeClassificationPredictPipelineWriteConfig;
 import org.neo4j.gds.procedures.pipelines.PredictedProbabilities;
 
 import java.util.List;

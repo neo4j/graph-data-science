@@ -67,6 +67,10 @@ class PipelineConfigurationParser {
         );
     }
 
+    NodeClassificationPipelineTrainConfig parseNodeClassificationTrainConfig(Map<String, Object> configuration) {
+        return parseNodeClassificationPipelineConfig(NodeClassificationPipelineTrainConfig::of, configuration);
+    }
+
     NodeClassificationPredictPipelineMutateConfig parseNodeClassificationPredictMutateConfig(Map<String, Object> configuration) {
         return parseNodeClassificationPipelineConfig(NodeClassificationPredictPipelineMutateConfig::of, configuration);
     }
@@ -75,8 +79,8 @@ class PipelineConfigurationParser {
         return parseNodeClassificationPipelineConfig(NodeClassificationPredictPipelineStreamConfig::of, configuration);
     }
 
-    NodeClassificationPipelineTrainConfig parseNodeClassificationTrainConfig(Map<String, Object> configuration) {
-        return parseNodeClassificationPipelineConfig(NodeClassificationPipelineTrainConfig::of, configuration);
+    NodeClassificationPredictPipelineWriteConfig parseNodeClassificationWriteConfig(Map<String, Object> configuration) {
+        return parseNodeClassificationPipelineConfig(NodeClassificationPredictPipelineWriteConfig::of, configuration);
     }
 
     NodePropertyPredictionSplitConfig parseNodePropertyPredictionSplitConfig(Map<String, Object> rawConfiguration) {

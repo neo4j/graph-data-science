@@ -20,12 +20,12 @@
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -40,6 +40,9 @@ import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassifi
 import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelineConstants.PREDICT_DESCRIPTION;
 
 public class NodeClassificationPipelineWriteProc extends BaseProc {
+    @Context
+    public GraphDataScienceProcedures facade;
+
     @Context
     public ModelCatalog internalModelCatalog;
 
@@ -65,12 +68,7 @@ public class NodeClassificationPipelineWriteProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        preparePipelineConfig(graphNameOrConfiguration, algoConfiguration);
-        return new MemoryEstimationExecutor<>(
-            new NodeClassificationPipelineWriteSpec(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.pipelines().nodeClassificationWriteEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override

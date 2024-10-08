@@ -335,6 +335,21 @@ public final class PipelinesProcedureFacade {
         return Stream.of(result);
     }
 
+    public Stream<MemoryEstimateResult> nodeClassificationWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    ) {
+        PipelineCompanion.preparePipelineConfig(graphNameOrConfiguration, rawConfiguration);
+        var configuration = pipelineConfigurationParser.parseNodeClassificationWriteConfig(rawConfiguration);
+
+        var result = pipelineApplications.nodeClassificationPredictEstimate(
+            graphNameOrConfiguration,
+            configuration
+        );
+
+        return Stream.of(result);
+    }
+
     public Stream<NodePipelineInfoResult> selectFeatures(String pipelineNameAsString, Object nodeFeatureStepsAsObject) {
         var pipelineName = PipelineName.parse(pipelineNameAsString);
 
