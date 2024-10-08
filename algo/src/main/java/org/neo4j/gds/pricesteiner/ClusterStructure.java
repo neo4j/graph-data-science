@@ -44,7 +44,7 @@ public class ClusterStructure {
         this.clusterPrizes = HugeDoubleArray.newArray(2*nodeCount);
         this.parent.fill(-1L);
         this.maxNumberOfClusters = nodeCount;
-        this.subTotalMoat = HugeDoubleArray.newArray(2*nodeCount);
+        this.subTotalMoat = HugeDoubleArray.newArray(nodeCount);
         this.moat = HugeDoubleArray.newArray(2*nodeCount);
         this.left = HugeLongArray.newArray(nodeCount);
         this.right = HugeLongArray.newArray(nodeCount);
@@ -60,20 +60,21 @@ public class ClusterStructure {
         var moat1 = moatAt(cluster1,moat);
         var moat2 = moatAt(cluster2,moat);
 
-        subTotalMoat.set(newCluster, subTotalMoat.get(cluster1)+ subTotalMoat.get(cluster2) + moat1+ moat2);
+        long newClusterAdaptedIndex = newCluster - originalNodeCount;
+
+        subTotalMoat.set(newClusterAdaptedIndex, subTotalMoat(cluster1)+ subTotalMoat(cluster2) + moat1+ moat2);
         deactivateCluster(cluster1,moat);
         deactivateCluster(cluster2,moat);
 
         clusterActivity.activateCluster(newCluster,moat);
-        left.set(newCluster- originalNodeCount, cluster1);
-        right.set(newCluster- originalNodeCount, cluster2);
+        left.set(newClusterAdaptedIndex, cluster1);
+        right.set(newClusterAdaptedIndex, cluster2);
         return  newCluster;
     }
     void  deactivateCluster(long clusterId, double moat){
         if (clusterActivity.active(clusterId)) {
             this.moat.set(clusterId,moatAt(clusterId,moat));
             clusterActivity.deactivateCluster(clusterId, moat);
-
         }
     }
 
@@ -86,7 +87,7 @@ public class ClusterStructure {
     }
 
     double  tightnessTime(long clusterId, double currentMoat){
-            double  slack =  clusterPrizes.get(clusterId) - subTotalMoat.get(clusterId) - moatAt(clusterId,currentMoat);
+            double  slack =  clusterPrizes.get(clusterId) - subTotalMoat(clusterId) - moatAt(clusterId,currentMoat);
             return  currentMoat + slack;
     }
 
@@ -136,7 +137,7 @@ public class ClusterStructure {
         if (!clusterActivity.active(clusterId)) {
             return this.moat.get(clusterId);
         }
-        return  moat -  clusterActivity.activeSince(clusterId);
+        return  moat -  clusterActivity.relevantTime(clusterId);
     }
 
     long numberOfActiveClusters(){
@@ -156,7 +157,12 @@ public class ClusterStructure {
     }
 
     double inactiveSince(long clusterId){
-        return  clusterActivity.inactiveSince(clusterId);
+        return  clusterActivity.relevantTime(clusterId);
+    }
+
+    private double subTotalMoat(long clusterId){
+        if (clusterId < originalNodeCount) return 0;
+        return subTotalMoat.get(clusterId - originalNodeCount);
     }
 
 }
