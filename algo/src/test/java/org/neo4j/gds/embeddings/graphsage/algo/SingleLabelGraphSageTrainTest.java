@@ -20,16 +20,16 @@
 package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.ActivationFunctionType;
 import org.neo4j.gds.embeddings.graphsage.AggregatorType;
-import org.neo4j.gds.embeddings.graphsage.GraphSageTestGraph;
-import org.neo4j.gds.embeddings.graphsage.MultiLabelFeatureFunction;
+import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.gds.embeddings.graphsage.TrainConfigTransformer;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -39,6 +39,7 @@ import org.neo4j.gds.termination.TerminatedException;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -50,12 +51,22 @@ import static org.neo4j.gds.TestGdsVersion.testGdsVersion;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
-class MultiLabelGraphSageTrainTest {
+class SingleLabelGraphSageTrainTest {
 
-    private static final int PROJECTED_FEATURE_SIZE = 5;
+    @GdlGraph
+    private static final String DB_CYPHER =         " CREATE" +
+        "  (n0:Restaurant {dummyProp: 5.0, numEmployees: 2.0,   rating: 5.0, embedding: [1.0, 42.42] })" +
+        ", (n1:Restaurant {dummyProp: 5.0, numEmployees: 2.0,   rating: 5.0, embedding: [1.0, 42.42] })" +
+        ", (n4:Dish       {dummyProp: 5.0, numIngredients: 5.0, rating: 5.0})" +
+        ", (n5:Dish       {dummyProp: 5.0, numIngredients: 5.0, rating: 5.0})" +
+        ", (n6:Dish       {dummyProp: 5.0, numIngredients: 5.0, rating: 5.0})" +
 
-    @GdlGraph(graphNamePrefix = "weighted")
-    private static final String GDL = GraphSageTestGraph.GDL;
+        ", (n0)-[:SERVES { times: 5 }]->(n4)" +
+        ", (n4)-[:REPLACES { times: 5 }]->(n5)" +
+        ", (n5)-[:REPLACES { times: 5 }]->(n6)";
+
+    @Inject
+    private GraphStore graphStore;
 
     @GdlGraph(graphNamePrefix = "missingArray")
     public static final String MISSING_ARRAY_GRAPH =
@@ -85,9 +96,6 @@ class MultiLabelGraphSageTrainTest {
         "  (n0)-[:T]->(n1)";
 
     @Inject
-    private TestGraph weightedGraph;
-
-    @Inject
     private TestGraph missingArrayGraph;
 
     @Inject
@@ -96,37 +104,19 @@ class MultiLabelGraphSageTrainTest {
     @Inject
     private TestGraph unequalGraph;
 
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("featureSizes")
-    void shouldRunWithDifferentProjectedFeatureSizes(String name, GraphSageTrainConfig config) {
-        var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
-            weightedGraph,
-            TrainConfigTransformer.toParameters(config),
-            config.projectedFeatureDimension().get(),
-            DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE,
-            testGdsVersion,
-            config
-        );
-        // should not fail
-        multiLabelGraphSageTrain.compute();
-    }
-
     @Test
     void shouldStoreMultiLabelFeatureFunctionInModel() {
+        Graph weightedGraph = graphStore.getGraph(NodeLabel.of("Dish"), RelationshipType.of("REPLACES"), Optional.empty());
         var config = GraphSageTrainConfigImpl.builder()
             .modelUser("")
-            .featureProperties(List.of("numEmployees", "numIngredients", "rating", "numPurchases", "embedding"))
+            .featureProperties(List.of( "numIngredients", "rating"))
             .modelName("foo")
-            .projectedFeatureDimension(PROJECTED_FEATURE_SIZE)
             .relationshipWeightProperty("times")
             .build();
 
-        var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
+        var SingleLabelGraphSageTrain = new SingleLabelGraphSageTrain(
             weightedGraph,
             TrainConfigTransformer.toParameters(config),
-            PROJECTED_FEATURE_SIZE,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE,
@@ -134,8 +124,8 @@ class MultiLabelGraphSageTrainTest {
             config
         );
         // should not fail
-        var model = multiLabelGraphSageTrain.compute();
-        assertThat(model.data().featureFunction()).isExactlyInstanceOf(MultiLabelFeatureFunction.class);
+        var model = SingleLabelGraphSageTrain.compute();
+        assertThat(model.data().featureFunction()).isExactlyInstanceOf(SingleLabelFeatureFunction.class);
 
     }
 
@@ -143,12 +133,12 @@ class MultiLabelGraphSageTrainTest {
     void runsTrainingOnMultiLabelGraph() {
         String modelName = "gsModel";
 
-        int featureDimension = 5;
+        Graph weightedGraph = graphStore.getGraph(NodeLabel.of("Dish"), RelationshipType.of("REPLACES"), Optional.empty());
+
         var graphSageTrainConfig = GraphSageTrainConfigImpl.builder()
             .modelUser("")
             .concurrency(1)
-            .projectedFeatureDimension(featureDimension)
-            .featureProperties(List.of("numEmployees", "numIngredients", "rating", "numPurchases", "embedding"))
+            .featureProperties(List.of("numIngredients", "rating"))
             .aggregator(AggregatorType.MEAN)
             .activationFunction(ActivationFunctionType.SIGMOID)
             .embeddingDimension(64)
@@ -156,10 +146,9 @@ class MultiLabelGraphSageTrainTest {
             .relationshipWeightProperty("times")
             .build();
 
-        var graphSageTrain = new MultiLabelGraphSageTrain(
+        var graphSageTrain = new SingleLabelGraphSageTrain(
             weightedGraph,
             TrainConfigTransformer.toParameters(graphSageTrainConfig),
-            featureDimension,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE,
@@ -175,7 +164,7 @@ class MultiLabelGraphSageTrainTest {
         GraphSageTrainConfig trainConfig = model.trainConfig();
         assertNotNull(trainConfig);
         assertEquals(1, trainConfig.concurrency().value());
-        assertEquals(List.of("numEmployees", "numIngredients", "rating", "numPurchases", "embedding"), trainConfig.featureProperties());
+        assertEquals(List.of("numIngredients", "rating"), trainConfig.featureProperties());
         assertEquals("MEAN", AggregatorType.toString(trainConfig.aggregator()));
         assertEquals("SIGMOID", ActivationFunctionType.toString(trainConfig.activationFunction()));
         assertEquals(64, trainConfig.embeddingDimension());
@@ -198,15 +187,13 @@ class MultiLabelGraphSageTrainTest {
             .modelUser("")
             .featureProperties(List.of("p1", "p2"))
             .embeddingDimension(64)
-            .projectedFeatureDimension(PROJECTED_FEATURE_SIZE)
             .modelName("foo")
             .projectedFeatureDimension(featureDimension)
             .build();
 
-        var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
+        var SingleLabelGraphSageTrain = new SingleLabelGraphSageTrain(
             unequalGraph,
             TrainConfigTransformer.toParameters(config),
-            featureDimension,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE,
@@ -215,7 +202,7 @@ class MultiLabelGraphSageTrainTest {
         );
 
         assertThatExceptionOfType(IllegalArgumentException.class)
-            .isThrownBy(multiLabelGraphSageTrain::compute)
+            .isThrownBy(SingleLabelGraphSageTrain::compute)
             .withMessageContaining(
                 "The property `p2` contains arrays of differing lengths `1` and `2`."
             );
@@ -226,15 +213,13 @@ class MultiLabelGraphSageTrainTest {
             .modelUser("")
             .featureProperties(List.of("p1", "p2"))
             .embeddingDimension(64)
-            .projectedFeatureDimension(PROJECTED_FEATURE_SIZE)
             .modelName("foo")
             .projectedFeatureDimension(10)
             .build();
 
-        var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
+        var SingleLabelGraphSageTrain = new SingleLabelGraphSageTrain(
             graph,
             TrainConfigTransformer.toParameters(config),
-            PROJECTED_FEATURE_SIZE,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE,
@@ -242,7 +227,7 @@ class MultiLabelGraphSageTrainTest {
             config
         );
         assertThatExceptionOfType(IllegalArgumentException.class)
-            .isThrownBy(multiLabelGraphSageTrain::compute)
+            .isThrownBy(SingleLabelGraphSageTrain::compute)
             .withMessageContaining(
                 formatWithLocale("Missing node property for property key `%s` on node with id `%d`.", property, missingNode)
             );
@@ -254,7 +239,6 @@ class MultiLabelGraphSageTrainTest {
             .modelUser("")
             .featureProperties(List.of("numEmployees", "numIngredients", "rating", "numPurchases", "embedding"))
             .embeddingDimension(64)
-            .projectedFeatureDimension(PROJECTED_FEATURE_SIZE)
             .relationshipWeightProperty("times")
             .modelName("foo");
         return Stream.of(
@@ -272,11 +256,12 @@ class MultiLabelGraphSageTrainTest {
     @Test
     void testTermination() {
         String modelName = "gsModel";
+        Graph weightedGraph = graphStore.getGraph(NodeLabel.of("Dish"), RelationshipType.of("REPLACES"), Optional.empty());
 
         var graphSageTrainConfig = GraphSageTrainConfigImpl.builder()
             .modelUser("")
             .concurrency(1)
-            .featureProperties(List.of("numEmployees", "numIngredients", "rating", "numPurchases", "embedding"))
+            .featureProperties(List.of("rating"))
             .aggregator(AggregatorType.MEAN)
             .activationFunction(ActivationFunctionType.SIGMOID)
             .embeddingDimension(64)
@@ -284,10 +269,9 @@ class MultiLabelGraphSageTrainTest {
             .relationshipWeightProperty("times")
             .build();
 
-        var graphSageTrain = new MultiLabelGraphSageTrain(
+        var graphSageTrain = new SingleLabelGraphSageTrain(
             weightedGraph,
             TrainConfigTransformer.toParameters(graphSageTrainConfig),
-            PROJECTED_FEATURE_SIZE,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.STOP_RUNNING,

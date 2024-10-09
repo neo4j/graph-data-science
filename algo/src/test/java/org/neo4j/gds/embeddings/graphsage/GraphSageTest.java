@@ -152,6 +152,7 @@ class GraphSageTest {
             TrainConfigTransformer.toParameters(trainConfig),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE,
             testGdsVersion,
             trainConfig
         );
@@ -190,6 +191,7 @@ class GraphSageTest {
             TrainConfigTransformer.toParameters(trainConfig),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE,
             testGdsVersion,
             trainConfig
         );

@@ -78,7 +78,7 @@ class GraphSageEmbeddingsGeneratorTest {
 
         var features = GraphSageHelper.initializeSingleLabelFeatures(weightedGraph, parameters.featureProperties());
         var featureDimension = FeatureExtraction.featureCount(weightedGraph, parameters.featureProperties());
-        var trainModel = new GraphSageModelTrainer(parameters, featureDimension, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER);
+        var trainModel = new GraphSageModelTrainer(parameters, featureDimension, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE);
 
         GraphSageModelTrainer.ModelTrainResult result = trainModel.train(weightedGraph, features);
 
@@ -122,6 +122,7 @@ class GraphSageEmbeddingsGeneratorTest {
             5,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE,
             testGdsVersion,
             config
         );
@@ -179,6 +180,7 @@ class GraphSageEmbeddingsGeneratorTest {
             TrainConfigTransformer.toParameters(config),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE,
             testGdsVersion,
             config
         );

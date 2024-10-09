@@ -138,7 +138,8 @@ public class NodeEmbeddingAlgorithms {
         var algorithm = constructGraphSageTrainAlgorithm(
             graph,
             configuration,
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
@@ -147,7 +148,8 @@ public class NodeEmbeddingAlgorithms {
     private static GraphSageTrain constructGraphSageTrainAlgorithm(
         Graph graph,
         GraphSageTrainConfig configuration,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         String gdsVersion = GdsVersionInfoProvider.GDS_VERSION_INFO.gdsVersion();
 
@@ -158,6 +160,7 @@ public class NodeEmbeddingAlgorithms {
             configuration.projectedFeatureDimension().orElseThrow(),
             DefaultPool.INSTANCE,
             progressTracker,
+            terminationFlag,
             gdsVersion,
             configuration
         );
@@ -167,6 +170,7 @@ public class NodeEmbeddingAlgorithms {
             parameters,
             DefaultPool.INSTANCE,
             progressTracker,
+            terminationFlag,
             gdsVersion,
             configuration
         );

@@ -24,11 +24,13 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
+import org.neo4j.gds.termination.TerminationFlag;
 
 public abstract class GraphSageTrain extends Algorithm<Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>> {
 
-    protected GraphSageTrain(ProgressTracker progressTracker) {
+    protected GraphSageTrain(ProgressTracker progressTracker, TerminationFlag terminationFlag) {
         super(progressTracker);
+        setTerminationFlag(terminationFlag);
     }
 
 }

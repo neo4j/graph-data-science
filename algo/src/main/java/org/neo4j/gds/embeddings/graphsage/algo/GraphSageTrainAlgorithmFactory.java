@@ -23,12 +23,13 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.GdsVersionInfoProvider;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.embeddings.graphsage.TrainConfigTransformer;
-import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
+import org.neo4j.gds.embeddings.graphsage.TrainConfigTransformer;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.neo4j.gds.ml.core.EmbeddingUtils.validateRelationshipWeightPropertyValue;
 
@@ -59,8 +60,8 @@ public final class GraphSageTrainAlgorithmFactory extends GraphAlgorithmFactory<
 
         var parameters = TrainConfigTransformer.toParameters(configuration);
         return configuration.isMultiLabel()
-        ? new MultiLabelGraphSageTrain(graph, parameters, configuration.projectedFeatureDimension().get(), executorService, progressTracker, gdsVersion, configuration)
-        : new SingleLabelGraphSageTrain(graph, parameters, executorService, progressTracker, gdsVersion, configuration);
+        ? new MultiLabelGraphSageTrain(graph, parameters, configuration.projectedFeatureDimension().get(), executorService, progressTracker, TerminationFlag.RUNNING_TRUE, gdsVersion, configuration)
+        : new SingleLabelGraphSageTrain(graph, parameters, executorService, progressTracker, TerminationFlag.RUNNING_TRUE, gdsVersion, configuration);
     }
 
     public MemoryEstimation memoryEstimation(GraphSageTrainMemoryEstimateParameters parameters) {

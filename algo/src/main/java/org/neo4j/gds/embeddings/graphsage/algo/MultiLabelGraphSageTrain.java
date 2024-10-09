@@ -29,6 +29,7 @@ import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.MultiLabelFeatureFunction;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 import java.util.Optional;
@@ -57,10 +58,11 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
         int projectedFeatureDimension,
         ExecutorService executor,
         ProgressTracker progressTracker,
+        TerminationFlag terminationFlag,
         String gdsVersion,
         GraphSageTrainConfig config // TODO: Last trace of UI config in here--Once we attach Parameters to Models we can lose this too
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.featureDimension = projectedFeatureDimension;
         this.parameters = parameters;
@@ -72,6 +74,7 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
     @Override
     public Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> compute() {
         progressTracker.beginSubTask("GraphSageTrain");
+        terminationFlag.assertRunning();
         var multiLabelFeatureExtractors = GraphSageHelper.multiLabelFeatureExtractors(
             graph,
             parameters.featureProperties()
@@ -82,6 +85,7 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
             parameters,
             executor,
             progressTracker,
+            terminationFlag,
             multiLabelFeatureFunction,
             multiLabelFeatureFunction.weightsByLabel().values(),
             featureDimension
