@@ -413,8 +413,7 @@ class GraphImporterTest {
                 .build(),
             Capabilities.WriteMode.REMOTE,
             "",
-            progressTracker,
-            1
+            progressTracker
         );
 
         for (int i = 0; i < 2; i++) {

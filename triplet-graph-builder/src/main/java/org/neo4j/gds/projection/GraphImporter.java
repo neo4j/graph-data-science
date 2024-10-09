@@ -63,7 +63,6 @@ import static org.neo4j.gds.Orientation.UNDIRECTED;
 
 public final class GraphImporter {
 
-    private static final int PROGRESS_TRACKING_THRESHOLD = 10_000;
     public static final int NO_TARGET_NODE = -1;
 
     private final GraphProjectConfig config;
@@ -74,7 +73,7 @@ public final class GraphImporter {
     private final WriteMode writeMode;
     private final String query;
 
-    private final BatchingTaskProgressTracker progressTracker;
+    private final ProgressTracker progressTracker;
 
     private final Map<RelationshipType, RelationshipsBuilder> relImporters;
     private final ImmutableMutableGraphSchema.Builder graphSchemaBuilder;
@@ -96,35 +95,13 @@ public final class GraphImporter {
         String query,
         ProgressTracker progressTracker
     ) {
-        this(
-            config,
-            undirectedRelationshipTypes,
-            inverseIndexedRelationshipTypes,
-            idMapBuilder,
-            writeMode,
-            query,
-            progressTracker,
-            PROGRESS_TRACKING_THRESHOLD
-        );
-    }
-
-    GraphImporter(
-        GraphProjectConfig config,
-        List<String> undirectedRelationshipTypes,
-        List<String> inverseIndexedRelationshipTypes,
-        LazyIdMapBuilder idMapBuilder,
-        WriteMode writeMode,
-        String query,
-        ProgressTracker progressTracker,
-        int progressTrackingThreshold
-    ) {
         this.config = config;
         this.undirectedRelationshipTypes = undirectedRelationshipTypes;
         this.inverseIndexedRelationshipTypes = inverseIndexedRelationshipTypes;
         this.idMapBuilder = idMapBuilder;
         this.writeMode = writeMode;
         this.query = query;
-        this.progressTracker = new BatchingTaskProgressTracker(progressTracker, progressTrackingThreshold);
+        this.progressTracker = progressTracker;
         this.relImporters = new ConcurrentHashMap<>();
         this.graphSchemaBuilder = MutableGraphSchema.builder();
 
@@ -188,7 +165,6 @@ public final class GraphImporter {
         ProgressTimer timer,
         boolean hasSeenArbitraryId
     ) {
-        progressTracker.logRemainingProgress();
         progressTracker.endSubTask("Update aggregation");
         progressTracker.beginSubTask("Build graph store");
         progressTracker.beginSubTask("Nodes");
