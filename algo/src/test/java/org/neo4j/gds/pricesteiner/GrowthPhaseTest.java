@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -56,7 +57,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         void shouldFindOptimalSolution() {
             LongToDoubleFunction prizes = (x) -> 20.0;
 
-            var growthPhase = new GrowthPhase(graph, prizes);
+            var growthPhase = new GrowthPhase(graph, prizes, ProgressTracker.NULL_TRACKER);
             var result = growthPhase.grow();
 
             assertThat(result.activeOriginalNodes().get(graph.toMappedNodeId("a1"))).isFalse();
@@ -99,7 +100,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         void shouldExecuteGrowthPhaseCorrectly() {
             LongToDoubleFunction prizes = (x) -> 20.0;
 
-            var growthPhase = new GrowthPhase(graph, prizes);
+            var growthPhase = new GrowthPhase(graph, prizes,ProgressTracker.NULL_TRACKER);
            var growthResult = growthPhase.grow();
             var clusterStructure = growthPhase.clusterStructure();
 

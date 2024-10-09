@@ -62,6 +62,7 @@ import org.neo4j.gds.paths.yens.Yens;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.gds.pcst.PCSTBaseConfig;
 import org.neo4j.gds.pricesteiner.PCSTFast;
+import org.neo4j.gds.pricesteiner.PCSTProgressTrackerTaskCreator;
 import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
 import org.neo4j.gds.spanningtree.Prim;
 import org.neo4j.gds.spanningtree.SpanningTree;
@@ -248,10 +249,7 @@ public class PathFindingAlgorithms {
     }
 
     PrizeSteinerTreeResult pcst(Graph graph, PCSTBaseConfig configuration) {
-        var task = Tasks.iterativeOpen(
-            AlgorithmLabel.PCST.asString(),
-            List::of
-        );
+        var task = PCSTProgressTrackerTaskCreator.progressTask(graph.nodeCount(),graph.relationshipCount());
 
         var progressTracker = createProgressTracker(configuration, task);
         var prizeProperty = graph.nodeProperties(configuration.prizeProperty());

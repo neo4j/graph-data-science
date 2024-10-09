@@ -28,6 +28,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -77,7 +78,8 @@ class StrongPruningTest {
             var strongPruning = new StrongPruning(
                 new TreeStructure(graph,  null, graph.nodeCount()),
                 null,
-               (x)->2
+               (x)->2,
+                ProgressTracker.NULL_TRACKER
             );
 
             var parents=HugeLongArray.newArray(graph.nodeCount());
@@ -127,7 +129,8 @@ class StrongPruningTest {
             var strongPruning = new StrongPruning(
                 new TreeStructure(graph, degrees, graph.nodeCount()),
                 bitSet,
-                prizes::get
+                prizes::get,
+                ProgressTracker.NULL_TRACKER
             );
 
             strongPruning.performPruning();
@@ -184,7 +187,9 @@ class StrongPruningTest {
             var strongPruning = new StrongPruning(
                 new TreeStructure(graph, degrees, graph.nodeCount()),
                 bitSet,
-                prizes::get
+                prizes::get,
+                ProgressTracker.NULL_TRACKER
+
             );
             strongPruning.performPruning();
 
@@ -239,7 +244,9 @@ class StrongPruningTest {
             var strongPruning = new StrongPruning(
                 new TreeStructure(graph, degrees, graph.nodeCount()),
                 bitSet,
-                (v)->20d
+                (v)->20d,
+                ProgressTracker.NULL_TRACKER
+
             );
             strongPruning.performPruning();
 
