@@ -25,6 +25,7 @@ import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -67,7 +68,7 @@ class TreeProducerTest {
 
         var idMap = nodesBuilder.build().idMap();
 
-        var treeStructure = TreeProducer.createTree(growthResult,6, idMap);
+        var treeStructure = TreeProducer.createTree(growthResult,6, idMap, ProgressTracker.NULL_TRACKER);
 
         var degrees=treeStructure.degrees();
         var tree = treeStructure.tree();

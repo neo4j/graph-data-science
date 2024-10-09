@@ -27,6 +27,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.function.LongPredicate;
 
@@ -34,7 +35,9 @@ public final class TreeProducer {
 
     private TreeProducer() {}
 
-    static TreeStructure createTree(GrowthResult growthResult,long nodeCount, IdMap idMap){
+    static TreeStructure createTree(GrowthResult growthResult,long nodeCount, IdMap idMap, ProgressTracker progressTracker){
+
+        progressTracker.beginSubTask("Tree Creation");
 
         var treeEdges = growthResult.treeEdges();
         var numberOfTreeEdges = growthResult.numberOfTreeEdges();
@@ -62,11 +65,14 @@ public final class TreeProducer {
                     degree.addTo(u,1);
                     degree.addTo(v,1);
                     relationshipsBuilder.addFromInternal(u,v,edgeCosts.get(edgeId));
+                    progressTracker.logProgress();
             }
         }
         var singleTypeRelationships= relationshipsBuilder.build();
         var tree = GraphFactory.create(idMap, singleTypeRelationships);
 
+
+        progressTracker.endSubTask("Tree Creation");
         return new TreeStructure(tree,degree,  idMap.nodeCount());
 
 

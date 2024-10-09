@@ -24,6 +24,8 @@ import org.agrona.collections.MutableLong;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.function.LongToDoubleFunction;
 
@@ -34,18 +36,29 @@ public class StrongPruning {
     private final LongToDoubleFunction prizes;
     private final HugeLongArray parentArray;
     private final HugeDoubleArray parentCostArray;
+    private final ProgressTracker progressTracker;
+    private final TerminationFlag terminationFlag;
 
-    public StrongPruning(TreeStructure treeStructure, BitSet activeUnprunedOriginalNodes, LongToDoubleFunction prizes) {
+    public StrongPruning(TreeStructure treeStructure,
+        BitSet activeUnprunedOriginalNodes,
+        LongToDoubleFunction prizes,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
+    ) {
         this.treeStructure = treeStructure;
         this.activeOriginalNodes = activeUnprunedOriginalNodes;
         this.prizes = prizes;
         this.parentArray = HugeLongArray.newArray(treeStructure.originalNodeCount());
         this.parentCostArray = HugeDoubleArray.newArray(treeStructure.originalNodeCount());
-            parentArray.fill(PrizeSteinerTreeResult.PRUNED);
+        this.progressTracker = progressTracker;
+        this.terminationFlag = terminationFlag;
+        parentArray.fill(PrizeSteinerTreeResult.PRUNED);
 
     }
 
     void performPruning(){
+
+        progressTracker.beginSubTask("Pruning Phase");
         if (activeOriginalNodes.cardinality() ==1){
             var singleActiveNode = activeOriginalNodes.nextSetBit(0);
             parentArray.set(singleActiveNode, PrizeSteinerTreeResult.ROOT);
@@ -68,11 +81,13 @@ public class StrongPruning {
 
 
             while (currentPos < totalPos) {
+                terminationFlag.assertRunning();;
                 var nextLeaf = queue.get(currentPos++);
                 var parent = new MutableLong(-1);
                 var parentCost = new MutableDouble(-1);
                 dp.addTo(nextLeaf, prizes.applyAsDouble(nextLeaf));
                 degrees.set(nextLeaf, 0);
+                progressTracker.logProgress();
 
                 tree.forEachRelationship(nextLeaf, 1.0, (s, t, w) -> {
                     if (degrees.get(t) > 0) {
@@ -82,6 +97,7 @@ public class StrongPruning {
                     }
                     return true;
                 });
+
                 var actualParent = parent.get();
 
                 parentArray.set(nextLeaf, PrizeSteinerTreeResult.ROOT);
@@ -110,6 +126,9 @@ public class StrongPruning {
 
         }
 
+        progressTracker.endSubTask("Pruning Phase");
+
+
     }
 
     void pruneUnnecessarySubTrees(long bestSolutionIndex, HugeLongArray helpingArray, HugeLongArray parentArray){
@@ -122,7 +141,9 @@ public class StrongPruning {
     PrizeSteinerTreeResult resultTree(){
             return  new PrizeSteinerTreeResult(parentArray,parentCostArray);
     }
+
     private void pruneSubtree(long node, HugeLongArray helpingArray,HugeLongArray parents){
+        terminationFlag.assertRunning();
         var tree = treeStructure.tree();
         long currentPosition= 0;
         MutableLong position=new MutableLong();
@@ -130,7 +151,10 @@ public class StrongPruning {
 
         while (currentPosition < position.get()){
             var currentNode = helpingArray.get(currentPosition++);
+            progressTracker.logProgress();
+
             parents.set(currentNode, PrizeSteinerTreeResult.PRUNED);
+
             tree.forEachRelationship(currentNode, (s,t)->{
                 if (parents.get(t)==s){
                     helpingArray.set(position.getAndIncrement(),t);

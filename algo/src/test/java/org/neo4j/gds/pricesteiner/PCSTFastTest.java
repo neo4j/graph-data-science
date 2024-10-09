@@ -19,18 +19,26 @@
  */
 package org.neo4j.gds.pricesteiner;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.logging.GdsTestLog;
 
 import java.util.function.LongToDoubleFunction;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 @GdlExtension
 class PCSTFastTest {
@@ -72,5 +80,47 @@ class PCSTFastTest {
 
 
         }
+
+        @Test
+        void shouldLogProgress() {
+
+            var progressTask = PCSTProgressTrackerTaskCreator.progressTask(graph.nodeCount(),graph.relationshipCount());
+            var log = new GdsTestLog();
+            var progressTracker = new TaskProgressTracker(progressTask, log, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+
+           new PCSTFast(graph, x->20, progressTracker).compute();
+
+            Assertions.assertThat(log.getMessages(TestLog.INFO))
+                .extracting(removingThreadId())
+                .extracting(replaceTimings())
+                .containsExactly(
+                    "PrizeCollectingSteinerTree :: Start",
+                    "PrizeCollectingSteinerTree :: Growth Phase :: Start",
+                    "PrizeCollectingSteinerTree :: Growth Phase :: Initialization :: Start",
+                    "PrizeCollectingSteinerTree :: Growth Phase :: Initialization 16%",
+                    "PrizeCollectingSteinerTree :: Growth Phase :: Initialization 50%",
+                    "PrizeCollectingSteinerTree :: Growth Phase :: Initialization 83%",
+                    "PrizeCollectingSteinerTree :: Growth Phase :: Initialization 100%",
+                    "PrizeCollectingSteinerTree :: Growth Phase :: Initialization :: Finished",
+                    "PrizeCollectingSteinerTree :: Growth Phase :: Growing :: Start",
+                    "PrizeCollectingSteinerTree :: Growth Phase :: Growing 25%",
+                    "PrizeCollectingSteinerTree :: Growth Phase :: Growing 50%",
+                    "PrizeCollectingSteinerTree :: Growth Phase :: Growing 75%",
+                    "PrizeCollectingSteinerTree :: Growth Phase :: Growing 100%",
+                    "PrizeCollectingSteinerTree :: Growth Phase :: Growing :: Finished",
+                    "PrizeCollectingSteinerTree :: Growth Phase :: Finished",
+                    "PrizeCollectingSteinerTree :: Tree Creation :: Start",
+                    "PrizeCollectingSteinerTree :: Tree Creation 25%",
+                    "PrizeCollectingSteinerTree :: Tree Creation 100%",
+                    "PrizeCollectingSteinerTree :: Tree Creation :: Finished",
+                    "PrizeCollectingSteinerTree :: Pruning Phase :: Start",
+                    "PrizeCollectingSteinerTree :: Pruning Phase 25%",
+                    "PrizeCollectingSteinerTree :: Pruning Phase 50%",
+                    "PrizeCollectingSteinerTree :: Pruning Phase 100%",
+                    "PrizeCollectingSteinerTree :: Pruning Phase :: Finished",
+                    "PrizeCollectingSteinerTree :: Finished"
+                );
+        }
+
     }
 }

@@ -28,10 +28,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Arrays;
 import java.util.function.Function;
@@ -77,7 +79,9 @@ class StrongPruningTest {
             var strongPruning = new StrongPruning(
                 new TreeStructure(graph,  null, graph.nodeCount()),
                 null,
-               (x)->2
+               (x)->2,
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE
             );
 
             var parents=HugeLongArray.newArray(graph.nodeCount());
@@ -127,7 +131,10 @@ class StrongPruningTest {
             var strongPruning = new StrongPruning(
                 new TreeStructure(graph, degrees, graph.nodeCount()),
                 bitSet,
-                prizes::get
+                prizes::get,
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE
+
             );
 
             strongPruning.performPruning();
@@ -184,7 +191,11 @@ class StrongPruningTest {
             var strongPruning = new StrongPruning(
                 new TreeStructure(graph, degrees, graph.nodeCount()),
                 bitSet,
-                prizes::get
+                prizes::get,
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE
+
+
             );
             strongPruning.performPruning();
 
@@ -239,7 +250,9 @@ class StrongPruningTest {
             var strongPruning = new StrongPruning(
                 new TreeStructure(graph, degrees, graph.nodeCount()),
                 bitSet,
-                (v)->20d
+                (v)->20d,
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE
             );
             strongPruning.performPruning();
 

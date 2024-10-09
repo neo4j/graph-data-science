@@ -24,6 +24,8 @@ import org.agrona.collections.MutableLong;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.function.LongToDoubleFunction;
 
@@ -36,11 +38,13 @@ class GrowthPhase {
     private final EdgeEventsQueue edgeEventsQueue;
     private final LongToDoubleFunction prizes;
     private final HugeLongArray treeEdges;
+    private final ProgressTracker progressTracker;
+    private final TerminationFlag terminationFlag;
     private long numberOfTreeEdges;
 
     private final double EPS = 1E-6;
 
-    GrowthPhase(Graph graph, LongToDoubleFunction prizes) {
+    GrowthPhase(Graph graph, LongToDoubleFunction prizes, ProgressTracker progressTracker, TerminationFlag terminationFlag) {
         //TODO: INITIALIZE some of these data/structures with n memory instead of 2*n
         this.graph = graph;
         this.clusterStructure = new ClusterStructure(graph.nodeCount());
@@ -50,21 +54,30 @@ class GrowthPhase {
         this.edgeEventsQueue = new EdgeEventsQueue(graph.nodeCount());
         this.prizes = prizes;
         this.treeEdges = HugeLongArray.newArray(graph.nodeCount());
+        this.progressTracker = progressTracker;
+        this.terminationFlag = terminationFlag;
         numberOfTreeEdges = 0;
     }
 
     GrowthResult grow() {
         //initialization
+        progressTracker.beginSubTask("Growth Phase");
+
+        progressTracker.beginSubTask("Initialization");
         initializeClusterPrizes();
         initializeEdgeParts();
+        progressTracker.endSubTask("Initialization");
+
+        progressTracker.beginSubTask("Growing");
         double moat;
-        int j=0;
         while (clusterStructure.numberOfActiveClusters() > 1) {
+            terminationFlag.assertRunning();
             double edgeEventTime = edgeEventsQueue.nextEventTime();
             double clusterEventTime = clusterEventsPriorityQueue.closestEvent(clusterStructure.active());
             if (Double.compare(clusterEventTime, edgeEventTime) <= 0) {
                 moat = clusterEventTime;
                 deactivateCluster(moat, clusterEventsPriorityQueue.topCluster());
+                progressTracker.logProgress();
             } else {
                 moat = edgeEventTime;
 
@@ -99,6 +112,7 @@ class GrowthPhase {
                 double r = edgeCosts.get(edgeId) - uClusterSum - vClusterSum;
                 if (Double.compare(r, 0) <= 0 || Double.compare(r, EPS) <= 0) {
                     mergeClusters(moat, uCluster, vCluster, edgeId);
+                    progressTracker.logProgress();
                 } else {
                     generateNewEdgeEvents(
                         moat,
@@ -114,7 +128,10 @@ class GrowthPhase {
             }
 
         }
-        return new GrowthResult(treeEdges,
+        progressTracker.endSubTask("Growing");
+       progressTracker.endSubTask("Growth Phase");
+        return new GrowthResult(
+            treeEdges,
             numberOfTreeEdges,
             edgeParts,
             edgeCosts,
@@ -147,6 +164,7 @@ class GrowthPhase {
                 }
                 return  s > t;
             });
+            progressTracker.logProgress(graph.degree(u));
         }
         edgeEventsQueue.performInitialAssignment(nodeCount);
     }
