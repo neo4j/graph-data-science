@@ -23,7 +23,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 import org.neo4j.gds.settings.Neo4jSettings;
@@ -86,12 +86,12 @@ public class LinkPredictionTrainingPipeline extends TrainingPipeline<LinkFeature
         }
     }
 
-    public Map<String, List<String>> tasksByRelationshipProperty(ExecutionContext executionContext) {
+    public Map<String, List<String>> tasksByRelationshipProperty(ModelCatalog modelCatalog, String username) {
         Map<String, List<String>> tasksByRelationshipProperty = new HashMap<>();
 
         for (ExecutableNodePropertyStep existingStep : nodePropertySteps()) {
             Map<String, Object> config = existingStep.config();
-            Optional<String> maybeProperty = extractRelationshipProperty(executionContext, config);
+            Optional<String> maybeProperty = extractRelationshipProperty(config, modelCatalog, username);
 
             maybeProperty.ifPresent(property -> {
                 var tasks = tasksByRelationshipProperty.computeIfAbsent(property, key -> new ArrayList<>());
@@ -102,16 +102,17 @@ public class LinkPredictionTrainingPipeline extends TrainingPipeline<LinkFeature
         return tasksByRelationshipProperty;
     }
 
-    private static Optional<String> extractRelationshipProperty(
-        ExecutionContext executionContext,
-        Map<String, Object> config
+    private Optional<String> extractRelationshipProperty(
+        Map<String, Object> config,
+        ModelCatalog modelCatalog,
+        String username
     ) {
         if (config.containsKey(RELATIONSHIP_WEIGHT_PROPERTY)) {
             var existingProperty = (String) config.get(RELATIONSHIP_WEIGHT_PROPERTY);
             return Optional.of(existingProperty);
         } else if (config.containsKey(MODEL_NAME_KEY)) {
-            return Optional.ofNullable(executionContext.modelCatalog().getUntyped(
-                    executionContext.username(),
+            return Optional.ofNullable(modelCatalog.getUntyped(
+                    username,
                     ((String) config.get(MODEL_NAME_KEY))
                 ))
                 .map(Model::trainConfig)
@@ -122,8 +123,10 @@ public class LinkPredictionTrainingPipeline extends TrainingPipeline<LinkFeature
         return Optional.empty();
     }
 
-    public Optional<String> relationshipWeightProperty(ExecutionContext executionContext) {
-        var relationshipWeightPropertySet = tasksByRelationshipProperty(executionContext).entrySet();
+    public Optional<String> relationshipWeightProperty(ModelCatalog modelCatalog, String username) {
+        var relationshipWeightPropertySet = tasksByRelationshipProperty(
+            modelCatalog, username
+        ).entrySet();
         return relationshipWeightPropertySet.isEmpty()
             ? Optional.empty()
             : Optional.of(relationshipWeightPropertySet.iterator().next().getKey());

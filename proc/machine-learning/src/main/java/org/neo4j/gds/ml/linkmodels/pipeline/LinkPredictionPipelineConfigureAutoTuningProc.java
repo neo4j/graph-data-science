@@ -23,6 +23,7 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.ml.pipeline.PipelineCompanion;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
+import org.neo4j.gds.procedures.pipelines.PipelineInfoResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -42,7 +43,7 @@ public class LinkPredictionPipelineConfigureAutoTuningProc extends BaseProc {
             username(),
             pipelineName,
             configMap,
-            pipeline -> new PipelineInfoResult(pipelineName, (LinkPredictionTrainingPipeline) pipeline)
+            pipeline -> PipelineInfoResult.create(pipelineName, (LinkPredictionTrainingPipeline) pipeline)
         );
     }
 }

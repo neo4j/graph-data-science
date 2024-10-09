@@ -52,6 +52,7 @@ import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
@@ -67,7 +68,11 @@ import org.neo4j.gds.termination.TerminationMonitor;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static org.neo4j.gds.config.RelationshipWeightConfig.RELATIONSHIP_WEIGHT_PROPERTY;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class PipelineApplications {
     private final Log log;
@@ -224,7 +229,22 @@ class PipelineApplications {
         );
     }
 
-    NodeClassificationTrainingPipeline addNodeProperty(
+    LinkPredictionTrainingPipeline addNodePropertyToLinkPredictionPipeline(
+        PipelineName pipelineName,
+        String taskName,
+        Map<String, Object> procedureConfig
+    ) {
+        var pipeline = pipelineRepository.getLinkPredictionTrainingPipeline(user, pipelineName);
+        validateRelationshipProperty(pipeline, procedureConfig);
+
+        var nodePropertyStep = NodePropertyStepFactory.createNodePropertyStep(taskName, procedureConfig);
+
+        pipeline.addNodePropertyStep(nodePropertyStep);
+
+        return pipeline;
+    }
+
+    NodeClassificationTrainingPipeline addNodePropertyToNodeClassificationPipeline(
         PipelineName pipelineName,
         String taskName,
         Map<String, Object> procedureConfig
@@ -533,5 +553,34 @@ class PipelineApplications {
         return MemoryEstimations.builder("Node Classification Train")
             .add(estimate)
             .build();
+    }
+
+    /**
+     * check if adding would result in more than one relationshipWeightProperty
+     */
+    private void validateRelationshipProperty(
+        LinkPredictionTrainingPipeline pipeline,
+        Map<String, Object> procedureConfig
+    ) {
+        if (!procedureConfig.containsKey(RELATIONSHIP_WEIGHT_PROPERTY)) return;
+        var maybeRelationshipProperty = pipeline.relationshipWeightProperty(modelCatalog, user.getUsername());
+        if (maybeRelationshipProperty.isEmpty()) return;
+        var relationshipProperty = maybeRelationshipProperty.get();
+        var property = (String) procedureConfig.get(RELATIONSHIP_WEIGHT_PROPERTY);
+        if (relationshipProperty.equals(property)) return;
+
+        String tasks = pipeline.tasksByRelationshipProperty(modelCatalog, user.getUsername())
+            .get(relationshipProperty)
+            .stream()
+            .map(s -> "`" + s + "`")
+            .collect(Collectors.joining(", "));
+
+        throw new IllegalArgumentException(formatWithLocale(
+            "Node property steps added to a pipeline may not have different non-null values for `%s`. " +
+                "Pipeline already contains tasks %s which use the value `%s`.",
+            RELATIONSHIP_WEIGHT_PROPERTY,
+            tasks,
+            relationshipProperty
+        ));
     }
 }

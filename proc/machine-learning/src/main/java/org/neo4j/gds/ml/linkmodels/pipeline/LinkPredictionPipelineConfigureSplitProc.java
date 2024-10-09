@@ -24,6 +24,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
+import org.neo4j.gds.procedures.pipelines.PipelineInfoResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -47,6 +48,6 @@ public class LinkPredictionPipelineConfigureSplitProc extends BaseProc {
 
         pipeline.setSplitConfig(config);
 
-        return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
+        return Stream.of(PipelineInfoResult.create(pipelineName, pipeline));
     }
 }

@@ -23,6 +23,7 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.StringIdentifierValidations;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
+import org.neo4j.gds.procedures.pipelines.PipelineInfoResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -42,7 +43,7 @@ public class LinkPredictionPipelineCreateProc extends BaseProc {
         LinkPredictionTrainingPipeline pipeline = new LinkPredictionTrainingPipeline();
         PipelineCatalog.set(username(), pipelineName, pipeline);
 
-        return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
+        return Stream.of(PipelineInfoResult.create(pipelineName, pipeline));
     }
 
 }
