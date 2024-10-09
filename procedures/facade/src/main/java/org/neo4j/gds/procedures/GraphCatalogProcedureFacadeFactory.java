@@ -27,6 +27,7 @@ import org.neo4j.gds.applications.graphstorecatalog.GraphProjectMemoryUsageServi
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.procedures.catalog.DatabaseModeRestriction;
 import org.neo4j.gds.procedures.catalog.GraphCatalogProcedureFacade;
+import org.neo4j.gds.procedures.catalog.LocalGraphCatalogProcedureFacade;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -34,7 +35,7 @@ import org.neo4j.kernel.api.KernelTransaction;
 import java.util.function.Consumer;
 
 /**
- * Here we keep everything related to constructing the {@link org.neo4j.gds.procedures.catalog.GraphCatalogProcedureFacade}
+ * Here we keep everything related to constructing the {@link org.neo4j.gds.procedures.catalog.LocalGraphCatalogProcedureFacade}
  * from a {@link org.neo4j.kernel.api.procedure.Context}, at request time.
  * <p>
  * We can resolve things like user and database id here, construct termination flags, and such.
@@ -84,7 +85,7 @@ public class GraphCatalogProcedureFacadeFactory {
 
         var databaseModeRestriction = new DatabaseModeRestriction(graphDatabaseService);
 
-        return new GraphCatalogProcedureFacade(
+        return new LocalGraphCatalogProcedureFacade(
             requestScopedDependencies,
             streamCloser,
             graphDatabaseService,

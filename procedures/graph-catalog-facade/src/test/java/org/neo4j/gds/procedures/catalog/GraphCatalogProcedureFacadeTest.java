@@ -70,7 +70,7 @@ class GraphCatalogProcedureFacadeTest {
     @Test
     void shouldDetermineIfGraphExists() {
         var businessFacade = mock(GraphCatalogApplications.class);
-        var catalogFacade = new GraphCatalogProcedureFacade(
+        var catalogFacade = new LocalGraphCatalogProcedureFacade(
             RequestScopedDependencies.builder()
                 .with(DatabaseId.of("current database"))
                 .with(new User("current user", false))
@@ -100,7 +100,7 @@ class GraphCatalogProcedureFacadeTest {
         var businessFacade = mock(GraphCatalogApplications.class);
 
         var procedureContext =  WriteContext.builder().build();
-        var catalogFacade = new GraphCatalogProcedureFacade(
+        var catalogFacade = new LocalGraphCatalogProcedureFacade(
             RequestScopedDependencies.builder()
                 .with(new User("Bob", false))
                 .build(),
@@ -137,7 +137,7 @@ class GraphCatalogProcedureFacadeTest {
         var businessFacade = mock(GraphCatalogApplications.class);
         var procedureContext =  WriteContext.builder().build();
 
-        var catalogFacade = new GraphCatalogProcedureFacade(
+        var catalogFacade = new LocalGraphCatalogProcedureFacade(
             RequestScopedDependencies.builder()
                 .with(new User("Bob", false))
                 .build(),
@@ -186,7 +186,7 @@ class GraphCatalogProcedureFacadeTest {
         var businessFacade = mock(GraphCatalogApplications.class);
         var procedureContext =  WriteContext.builder().build();
 
-        var catalogFacade = new GraphCatalogProcedureFacade(
+        var catalogFacade = new LocalGraphCatalogProcedureFacade(
             RequestScopedDependencies.builder()
                 .with(new User("Bob", false))
                 .build(),
@@ -226,7 +226,7 @@ class GraphCatalogProcedureFacadeTest {
         var businessFacade = mock(GraphCatalogApplications.class);
         var procedureContext =  WriteContext.builder().build();
 
-        var catalogFacade = new GraphCatalogProcedureFacade(
+        var catalogFacade = new LocalGraphCatalogProcedureFacade(
             RequestScopedDependencies.builder()
                 .with(new User("Bob", false))
                 .build(),

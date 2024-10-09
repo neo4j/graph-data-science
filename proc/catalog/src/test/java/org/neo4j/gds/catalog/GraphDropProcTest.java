@@ -21,8 +21,8 @@ package org.neo4j.gds.catalog;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.procedures.LocalGraphDataScienceProcedures;
-import org.neo4j.gds.procedures.catalog.GraphCatalogProcedureFacade;
 import org.neo4j.gds.procedures.catalog.GraphInfo;
+import org.neo4j.gds.procedures.catalog.LocalGraphCatalogProcedureFacade;
 
 import java.util.stream.Stream;
 
@@ -37,7 +37,7 @@ class GraphDropProcTest {
         var procedure = new GraphDropProc(facade);
 
         var expectedResult = Stream.<GraphInfo>of();
-        var catalogFacade = mock(GraphCatalogProcedureFacade.class);
+        var catalogFacade = mock(LocalGraphCatalogProcedureFacade.class);
         when(facade.graphCatalog()).thenReturn(catalogFacade);
         when(catalogFacade.dropGraph("my graph", true, "some database", "some user")).thenReturn(expectedResult);
         var actualResult = procedure.dropGraph("my graph", true, "some database", "some user");

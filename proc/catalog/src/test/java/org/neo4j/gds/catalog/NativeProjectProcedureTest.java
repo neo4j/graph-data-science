@@ -21,7 +21,7 @@ package org.neo4j.gds.catalog;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.procedures.LocalGraphDataScienceProcedures;
-import org.neo4j.gds.procedures.catalog.GraphCatalogProcedureFacade;
+import org.neo4j.gds.procedures.catalog.LocalGraphCatalogProcedureFacade;
 import org.neo4j.gds.projection.GraphProjectNativeResult;
 
 import java.util.Map;
@@ -62,7 +62,7 @@ class NativeProjectProcedureTest {
             87,
             117
         ));
-        var catalogFacade = mock(GraphCatalogProcedureFacade.class);
+        var catalogFacade = mock(LocalGraphCatalogProcedureFacade.class);
         when(facade.graphCatalog()).thenReturn(catalogFacade);
         when(catalogFacade.nativeProject(
             "some graph",

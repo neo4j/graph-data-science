@@ -21,8 +21,8 @@ package org.neo4j.gds.catalog;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.procedures.LocalGraphDataScienceProcedures;
-import org.neo4j.gds.procedures.catalog.GraphCatalogProcedureFacade;
 import org.neo4j.gds.procedures.catalog.GraphInfoWithHistogram;
+import org.neo4j.gds.procedures.catalog.LocalGraphCatalogProcedureFacade;
 
 import java.util.stream.Stream;
 
@@ -37,7 +37,7 @@ class GraphListProcTest {
         var procedure = new GraphListProc(facade);
 
         var expectedResultStream = Stream.of(mock(GraphInfoWithHistogram.class));
-        var catalogFacade = mock(GraphCatalogProcedureFacade.class);
+        var catalogFacade = mock(LocalGraphCatalogProcedureFacade.class);
         when(facade.graphCatalog()).thenReturn(catalogFacade);
         when(catalogFacade.listGraphs("some graph")).thenReturn(expectedResultStream);
         var actualResultStream = procedure.listGraphs("some graph");
