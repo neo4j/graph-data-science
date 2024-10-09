@@ -40,17 +40,20 @@ class IndirectExposureComputation implements PregelComputation<IndirectExposureC
     static final String EXPOSURE = "exposure";
     private final DegreeFunction totalTransfers;
     private final HugeAtomicBitSet visited;
+    private final Reducer reducer;
 
     private LongToBooleanFunction isSanctioned;
 
     IndirectExposureComputation(
         LongToBooleanFunction isSanctioned,
         DegreeFunction totalTransfers,
-        HugeAtomicBitSet visited
+        HugeAtomicBitSet visited,
+        Reducer reducer
     ) {
         this.isSanctioned = isSanctioned;
         this.totalTransfers = totalTransfers;
         this.visited = visited;
+        this.reducer = reducer;
     }
 
     @Override
@@ -100,7 +103,7 @@ class IndirectExposureComputation implements PregelComputation<IndirectExposureC
 
     @Override
     public Optional<Reducer> reducer() {
-        return Optional.of(new Reducer.Max());
+        return Optional.of(this.reducer);
     }
 
     @Override

@@ -22,8 +22,10 @@ package org.neo4j.gds.indirectExposure;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.assertj.core.data.Offset;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -31,6 +33,9 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+
+import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -65,11 +70,42 @@ class IndirectExposureTest {
     @Inject
     private TestGraph graph;
 
-    @Test
-    void compute(SoftAssertions softly) {
+    static Stream<Arguments> exposures() {
+        return Stream.of(
+            Arguments.of("MAX", Map.of(
+                "e00", 1.0,
+                "e11", 0.200,
+                "e12", 0.154,
+                "e13", 0.167,
+                "e21", 0.200,
+                "e22", 0.055,
+                "e23", 0.090,
+                "e24", 0.167,
+                "e31", 0.026,
+                "e41", 0.026
+            )),
+            Arguments.of("SUM", Map.of(
+                "e00", 1.0,
+                "e11", 0.200,
+                "e12", 0.154,
+                "e13", 0.167,
+                "e21", 0.200,
+                "e22", 0.055,
+                "e23", 0.161,
+                "e24", 0.167,
+                "e31", 0.026,
+                "e41", 0.026
+            ))
+        );
+    }
+
+    @ParameterizedTest(name = "Exposure reducer: {0}")
+    @MethodSource("exposures")
+    void compute(String exposureReducer, Map<String, Double> expectedExposures, SoftAssertions softly) {
         var config = IndirectExposureConfigImpl.builder()
             .concurrency(1)
             .maxIterations(5)
+            .exposureReducer(exposureReducer)
             .sanctionedProperty("sanctioned")
             .relationshipWeightProperty("w")
             .build();
@@ -88,16 +124,10 @@ class IndirectExposureTest {
 
         var exposures = result.exposures();
 
-        softly.assertThat(exposures.get(graph.toMappedNodeId("e00"))).as("e00").isEqualTo(1.0);
-        softly.assertThat(exposures.get(graph.toMappedNodeId("e11"))).as("e11").isCloseTo(0.200, offset);
-        softly.assertThat(exposures.get(graph.toMappedNodeId("e12"))).as("e12").isCloseTo(0.154, offset);
-        softly.assertThat(exposures.get(graph.toMappedNodeId("e13"))).as("e13").isEqualTo(0.167, offset);
-        softly.assertThat(exposures.get(graph.toMappedNodeId("e21"))).as("e21").isEqualTo(0.200, offset);
-        softly.assertThat(exposures.get(graph.toMappedNodeId("e22"))).as("e22").isEqualTo(0.055, offset);
-        softly.assertThat(exposures.get(graph.toMappedNodeId("e23"))).as("e23").isEqualTo(0.090, offset);
-        softly.assertThat(exposures.get(graph.toMappedNodeId("e24"))).as("e24").isEqualTo(0.167, offset);
-        softly.assertThat(exposures.get(graph.toMappedNodeId("e31"))).as("e31").isEqualTo(0.026, offset);
-        softly.assertThat(exposures.get(graph.toMappedNodeId("e41"))).as("e41").isEqualTo(0.026, offset);
+        expectedExposures.forEach((nodeVariable, expectedExposure) -> softly
+            .assertThat(exposures.get(graph.toMappedNodeId(nodeVariable)))
+            .as(nodeVariable)
+            .isCloseTo(expectedExposure, offset));
     }
 
 }
