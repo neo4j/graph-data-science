@@ -2,7 +2,7 @@ plugins {
     // Apply the java plugin to add support for Java
     id 'java'
     // Used for building a standalone jar
-    id 'com.github.johnrengelman.shadow' version '8.1.0'
+    id 'com.gradleup.shadow' version '8.3.2'
 }
 
 ext {

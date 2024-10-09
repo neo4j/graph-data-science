@@ -1,5 +1,5 @@
 apply plugin: 'java-library'
-apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'com.gradleup.shadow'
 
 description = 'Neo4j Graph Data Science :: Open Packaging'
 group = 'org.neo4j.gds'
