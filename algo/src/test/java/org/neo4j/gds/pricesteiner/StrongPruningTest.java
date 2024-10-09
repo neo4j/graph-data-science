@@ -82,26 +82,26 @@ class StrongPruningTest {
 
             var parents=HugeLongArray.newArray(graph.nodeCount());
             Function<Integer,Long> a =  (v) -> graph.toMappedNodeId("a"+v);
-            parents.set(a.apply(2),PriceSteinerTreeResult.ROOT);
+            parents.set(a.apply(2), PrizeSteinerTreeResult.ROOT);
             parents.set(a.apply(4),a.apply(2));
             parents.set(a.apply(6),a.apply(4));
-            parents.set(a.apply(7),PriceSteinerTreeResult.ROOT);
-            parents.set(a.apply(1),PriceSteinerTreeResult.ROOT);
+            parents.set(a.apply(7), PrizeSteinerTreeResult.ROOT);
+            parents.set(a.apply(1), PrizeSteinerTreeResult.ROOT);
             parents.set(a.apply(3),a.apply(1));
-            parents.set(a.apply(5),PriceSteinerTreeResult.ROOT);
+            parents.set(a.apply(5), PrizeSteinerTreeResult.ROOT);
             parents.set(a.apply(8),a.apply(5));
-            parents.set(a.apply(9),PriceSteinerTreeResult.ROOT);
+            parents.set(a.apply(9), PrizeSteinerTreeResult.ROOT);
 
             strongPruning.pruneUnnecessarySubTrees(a.apply(5),HugeLongArray.newArray(graph.nodeCount()),parents);
-            assertThat(parents.get(a.apply(1))).isEqualTo(PriceSteinerTreeResult.PRUNED);
-            assertThat(parents.get(a.apply(2))).isEqualTo(PriceSteinerTreeResult.PRUNED);
-            assertThat(parents.get(a.apply(3))).isEqualTo(PriceSteinerTreeResult.PRUNED);
-            assertThat(parents.get(a.apply(4))).isEqualTo(PriceSteinerTreeResult.PRUNED);
-            assertThat(parents.get(a.apply(5))).isEqualTo(PriceSteinerTreeResult.ROOT);
-            assertThat(parents.get(a.apply(6))).isEqualTo(PriceSteinerTreeResult.PRUNED);
-            assertThat(parents.get(a.apply(7))).isEqualTo(PriceSteinerTreeResult.PRUNED);
+            assertThat(parents.get(a.apply(1))).isEqualTo(PrizeSteinerTreeResult.PRUNED);
+            assertThat(parents.get(a.apply(2))).isEqualTo(PrizeSteinerTreeResult.PRUNED);
+            assertThat(parents.get(a.apply(3))).isEqualTo(PrizeSteinerTreeResult.PRUNED);
+            assertThat(parents.get(a.apply(4))).isEqualTo(PrizeSteinerTreeResult.PRUNED);
+            assertThat(parents.get(a.apply(5))).isEqualTo(PrizeSteinerTreeResult.ROOT);
+            assertThat(parents.get(a.apply(6))).isEqualTo(PrizeSteinerTreeResult.PRUNED);
+            assertThat(parents.get(a.apply(7))).isEqualTo(PrizeSteinerTreeResult.PRUNED);
             assertThat(parents.get(a.apply(8))).isEqualTo(a.apply(5));
-            assertThat(parents.get(a.apply(9))).isEqualTo(PriceSteinerTreeResult.PRUNED);
+            assertThat(parents.get(a.apply(9))).isEqualTo(PrizeSteinerTreeResult.PRUNED);
 
 
 
@@ -142,10 +142,10 @@ class StrongPruningTest {
             assertThat(resultTree.relationshipToParentCost().get(graph.toMappedNodeId("a6"))).isEqualTo(3);
             assertThat(resultTree.relationshipToParentCost().get(graph.toMappedNodeId("a7"))).isEqualTo(4);
 
-            assertThat(resultTree.parentArray().get(graph.toMappedNodeId("a5"))).isEqualTo(PriceSteinerTreeResult.PRUNED);
-            assertThat(resultTree.parentArray().get(graph.toMappedNodeId("a8"))).isEqualTo(PriceSteinerTreeResult.PRUNED);
-            assertThat(resultTree.parentArray().get(graph.toMappedNodeId("a9"))).isEqualTo(PriceSteinerTreeResult.PRUNED);
-            assertThat(resultTree.parentArray().get(graph.toMappedNodeId("a3"))).isEqualTo(PriceSteinerTreeResult.PRUNED);
+            assertThat(resultTree.parentArray().get(graph.toMappedNodeId("a5"))).isEqualTo(PrizeSteinerTreeResult.PRUNED);
+            assertThat(resultTree.parentArray().get(graph.toMappedNodeId("a8"))).isEqualTo(PrizeSteinerTreeResult.PRUNED);
+            assertThat(resultTree.parentArray().get(graph.toMappedNodeId("a9"))).isEqualTo(PrizeSteinerTreeResult.PRUNED);
+            assertThat(resultTree.parentArray().get(graph.toMappedNodeId("a3"))).isEqualTo(PrizeSteinerTreeResult.PRUNED);
 
         }
     }
@@ -245,7 +245,7 @@ class StrongPruningTest {
 
           var sp=strongPruning.resultTree();
 
-          assertThat(sp.parentArray().get(graph.toMappedNodeId("a0"))).isEqualTo(PriceSteinerTreeResult.ROOT);
+          assertThat(sp.parentArray().get(graph.toMappedNodeId("a0"))).isEqualTo(PrizeSteinerTreeResult.ROOT);
         }
 
     }

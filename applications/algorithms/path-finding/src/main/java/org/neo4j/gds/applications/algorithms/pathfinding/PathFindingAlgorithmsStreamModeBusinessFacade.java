@@ -39,6 +39,8 @@ import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
 import org.neo4j.gds.paths.traverse.BfsStreamConfig;
 import org.neo4j.gds.paths.traverse.DfsStreamConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
+import org.neo4j.gds.pcst.PCSTStreamConfig;
+import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeStreamConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
@@ -55,6 +57,7 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DFS
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DeltaStepping;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Dijkstra;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.LongestPath;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PCST;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.RandomWalk;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SingleSourceDijkstra;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SteinerTree;
@@ -170,6 +173,22 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             resultBuilder
         );
     }
+
+    public <RESULT> Stream<RESULT> pcst(
+        GraphName graphName,
+        PCSTStreamConfig configuration,
+        StreamResultBuilder<PrizeSteinerTreeResult, RESULT> resultBuilder
+    ) {
+        return convenience.processRegularAlgorithmInStreamMode(
+            graphName,
+            configuration,
+            PCST,
+            estimation::pcst,
+            (graph, __) -> algorithms.pcst(graph, configuration),
+            resultBuilder
+        );
+    }
+
 
     public <RESULT> Stream<RESULT> randomWalk(
         GraphName graphName,

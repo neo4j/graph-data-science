@@ -60,6 +60,9 @@ import org.neo4j.gds.paths.traverse.BfsBaseConfig;
 import org.neo4j.gds.paths.traverse.DfsBaseConfig;
 import org.neo4j.gds.paths.yens.Yens;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
+import org.neo4j.gds.pcst.PCSTBaseConfig;
+import org.neo4j.gds.pricesteiner.PCSTFast;
+import org.neo4j.gds.pricesteiner.PrizeSteinerTreeResult;
 import org.neo4j.gds.spanningtree.Prim;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeBaseConfig;
@@ -244,6 +247,22 @@ public class PathFindingAlgorithms {
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, false);
     }
 
+    PrizeSteinerTreeResult pcst(Graph graph, PCSTBaseConfig configuration) {
+        var task = Tasks.iterativeOpen(
+            AlgorithmLabel.PCST.asString(),
+            List::of
+        );
+
+        var progressTracker = createProgressTracker(configuration, task);
+        var prizeProperty = graph.nodeProperties(configuration.prizeProperty());
+        var algorithm = new PCSTFast(
+            graph,
+            (v) -> Math.max(prizeProperty.longValue(v),0),
+            progressTracker
+        );
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+    }
     HugeAtomicLongArray randomWalkCountingNodeVisits(Graph graph, RandomWalkBaseConfig configuration) {
         var tasks = new ArrayList<Task>();
         if (graph.hasRelationshipProperty()) {

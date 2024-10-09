@@ -24,6 +24,8 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.RelationshipWeightConfig;
+import org.neo4j.gds.config.TargetNodesConfig;
 
 import java.util.Collection;
 import java.util.Set;
@@ -31,7 +33,7 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public interface KCoreDecompositionBaseConfig extends AlgoBaseConfig {
+public interface KCoreDecompositionBaseConfig extends AlgoBaseConfig, TargetNodesConfig, RelationshipWeightConfig {
 
     @Configuration.GraphStoreValidationCheck
     default void validateTargetRelIsUndirected(

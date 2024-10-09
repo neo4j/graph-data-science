@@ -41,14 +41,14 @@ public class StrongPruning {
         this.prizes = prizes;
         this.parentArray = HugeLongArray.newArray(treeStructure.originalNodeCount());
         this.parentCostArray = HugeDoubleArray.newArray(treeStructure.originalNodeCount());
-            parentArray.fill(PriceSteinerTreeResult.PRUNED);
+            parentArray.fill(PrizeSteinerTreeResult.PRUNED);
 
     }
 
     void performPruning(){
         if (activeOriginalNodes.cardinality() ==1){
             var singleActiveNode = activeOriginalNodes.nextSetBit(0);
-            parentArray.set(singleActiveNode,PriceSteinerTreeResult.ROOT);
+            parentArray.set(singleActiveNode, PrizeSteinerTreeResult.ROOT);
         }
         else {
             HugeLongArray queue = HugeLongArray.newArray(activeOriginalNodes.cardinality());
@@ -84,7 +84,7 @@ public class StrongPruning {
                 });
                 var actualParent = parent.get();
 
-                parentArray.set(nextLeaf,PriceSteinerTreeResult.ROOT);
+                parentArray.set(nextLeaf, PrizeSteinerTreeResult.ROOT);
                 if (bestSolutionIndex == -1 || Double.compare(dp.get(bestSolutionIndex), dp.get(nextLeaf))< 0 ){
                     bestSolutionIndex = nextLeaf;
                 }
@@ -114,13 +114,13 @@ public class StrongPruning {
 
     void pruneUnnecessarySubTrees(long bestSolutionIndex, HugeLongArray helpingArray, HugeLongArray parentArray){
         for (long u=0;u<treeStructure.tree().nodeCount();++u){
-            if (parentArray.get(u) == PriceSteinerTreeResult.ROOT  && u!= bestSolutionIndex ){
+            if (parentArray.get(u) == PrizeSteinerTreeResult.ROOT  && u!= bestSolutionIndex ){
                 pruneSubtree(u,helpingArray,parentArray);
             }
         }
     }
-    PriceSteinerTreeResult resultTree(){
-            return  new PriceSteinerTreeResult(parentArray,parentCostArray);
+    PrizeSteinerTreeResult resultTree(){
+            return  new PrizeSteinerTreeResult(parentArray,parentCostArray);
     }
     private void pruneSubtree(long node, HugeLongArray helpingArray,HugeLongArray parents){
         var tree = treeStructure.tree();
@@ -130,7 +130,7 @@ public class StrongPruning {
 
         while (currentPosition < position.get()){
             var currentNode = helpingArray.get(currentPosition++);
-            parents.set(currentNode,PriceSteinerTreeResult.PRUNED);
+            parents.set(currentNode, PrizeSteinerTreeResult.PRUNED);
             tree.forEachRelationship(currentNode, (s,t)->{
                 if (parents.get(t)==s){
                     helpingArray.set(position.getAndIncrement(),t);

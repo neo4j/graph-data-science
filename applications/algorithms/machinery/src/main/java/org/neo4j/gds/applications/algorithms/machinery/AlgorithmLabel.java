@@ -66,6 +66,7 @@ public enum AlgorithmLabel implements Label {
     NodeSimilarity("Node Similarity"),
     Node2Vec("Node2Vec"),
     PageRank("PageRank"),
+    PCST("PrizeCollectingSteinerTree"),
     RandomWalk("RandomWalk"),
     ScaleProperties("ScaleProperties"),
     SCC("SCC"),
@@ -132,6 +133,7 @@ public enum AlgorithmLabel implements Label {
             case NodeSimilarity -> NodeSimilarity;
             case Node2Vec -> Node2Vec;
             case PageRank -> PageRank;
+            case PCST -> PCST;
             case RandomWalk -> RandomWalk;
             case ScaleProperties -> ScaleProperties;
             case SCC -> SCC;

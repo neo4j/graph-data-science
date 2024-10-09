@@ -122,6 +122,7 @@ class StubbyHolder {
             case NodeSimilarity -> new NodeSimilarityStub();
             case Node2Vec -> new Node2VecStub();
             case PageRank -> new PageRankStub();
+            case PCST -> null;
             case RandomWalk -> new RandomWalkStub();
             case ScaleProperties -> new ScalePropertiesStub();
             case SCC -> new SccStub();
