@@ -59,10 +59,17 @@ public class IndirectExposure extends Algorithm<IndirectExposureResult> {
         DegreeFunction totalTransfersFn = totalTransfersFunction();
         HugeAtomicBitSet visited = HugeAtomicBitSet.create(graph.nodeCount());
 
+        var computation = new IndirectExposureComputation(
+            isSanctionedFn,
+            totalTransfersFn,
+            visited,
+            config.exposureReducer()
+        );
+
         var pregelResult = Pregel.create(
             graph,
             config,
-            new IndirectExposureComputation(isSanctionedFn, totalTransfersFn, visited),
+            computation,
             executorService,
             progressTracker,
             terminationFlag
