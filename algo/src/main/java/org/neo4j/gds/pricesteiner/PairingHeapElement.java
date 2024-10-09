@@ -19,38 +19,39 @@
  */
 package org.neo4j.gds.pricesteiner;
 
- class PairingHeapElement {
+class PairingHeapElement {
 
-    private long  pairingId;
+    private final long pairingId;
     private double value;
     private PairingHeapElement left;
     private PairingHeapElement next;
-    private  double childrenOffset;
+    private double childrenOffset;
 
     static PairingHeapElement create(long pairingId, double value) {
-        return  new PairingHeapElement(pairingId, value,null,null);
+        return new PairingHeapElement(pairingId, value, null, null);
     }
-    private PairingHeapElement(long pairingId, double value,PairingHeapElement left, PairingHeapElement next) {
+
+    private PairingHeapElement(long pairingId, double value, PairingHeapElement left, PairingHeapElement next) {
         this.pairingId = pairingId;
         this.value = value;
         this.left = left;
         this.next = next;
     }
 
-    void  addOffset(double v){
+    void addOffset(double v) {
         childrenOffset += v;
-        value+=v;
+        value += v;
     }
 
-    double childrenOffset(){
+    double childrenOffset() {
         return childrenOffset;
     }
 
     void addChild(PairingHeapElement child) {
-         if (left != null) {
+        if (left != null) {
             child.next = left;
-            }
-         left = child;
+        }
+        left = child;
     }
 
     long pairingId() {
@@ -61,11 +62,12 @@ package org.neo4j.gds.pricesteiner;
         return value;
     }
 
-    PairingHeapElement left() { return left; }
-     PairingHeapElement next() { return next; }
+    PairingHeapElement left() {return left;}
 
-     void nullifyNext(){
+    PairingHeapElement next() {return next;}
+
+    void nullifyNext() {
         next = null;
-     }
+    }
 
- }
+}

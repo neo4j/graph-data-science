@@ -19,38 +19,44 @@
  */
 package org.neo4j.gds.pricesteiner;
 
-public class PairingHeap {
-   private  PairingHeapElement root;
+import com.carrotsearch.hppc.ObjectArrayList;
 
-    public PairingHeap() {
+class PairingHeap {
+    private PairingHeapElement root;
+    private final ObjectArrayList<PairingHeapElement> helpingArray;
+
+    public PairingHeap(ObjectArrayList<PairingHeapElement> helpingArray) {
+        this.helpingArray = helpingArray;
         root = null;
     }
+
 
     public boolean empty() {
         return root == null;
     }
 
-    public void add(long  pairingId, double value) {
+    public void add(long pairingId, double value) {
         root = addNewElement(root, pairingId, value);
     }
 
-    public long minElement(){
+    public long minElement() {
         return root.pairingId();
     }
 
-    public void  increaseValues(double value){
-        if (root!=null) {
+    public void increaseValues(double value) {
+        if (root != null) {
             root.addOffset(value);
         }
     }
-    public double minValue(){
+
+    public double minValue() {
         return root.value();
     }
 
     public void pop() {
         var offset = root.childrenOffset();
-        root = delete(root);
-        if (root!=null) {
+        root = deleteNonRecursive(root);
+        if (root != null) {
             root.addOffset(offset);
         }
     }
@@ -60,8 +66,8 @@ public class PairingHeap {
         return this;
     }
 
-    private PairingHeapElement addNewElement(PairingHeapElement node, long  pairingId, double value) {
-        return meld(node, PairingHeapElement.create(pairingId,value));
+    private PairingHeapElement addNewElement(PairingHeapElement node, long pairingId, double value) {
+        return meld(node, PairingHeapElement.create(pairingId, value));
     }
 
     private PairingHeapElement meld(PairingHeapElement element1, PairingHeapElement element2) {
@@ -76,7 +82,7 @@ public class PairingHeap {
         PairingHeapElement parent = element1;
         PairingHeapElement child = element2;
 
-        if (element1.value() >  element2.value()) {
+        if (element1.value() > element2.value()) {
             parent = element2;
             child = element1;
         }
@@ -84,28 +90,55 @@ public class PairingHeap {
         parent.addChild(child);
         return parent;
     }
-    private PairingHeapElement delete(PairingHeapElement node) {
-        return mergePairs(node.left());
-    }
 
-    //TODO: make the delete non-recursive
-    private  PairingHeapElement deleteNonRecursive(PairingHeapElement node) {
-        var current = node.left();
-        return null;
-    }
-    private PairingHeapElement mergePairs(PairingHeapElement node) {
-        if (node == null || node.next() == null)
-            return node;
-        else {
-           var  element = node;
-           var  next = node.next();
-           var  nextNext = node.next().next();
+    private PairingHeapElement deleteNonRecursive(PairingHeapElement node) {
+        int position = 0; //settle with int indexing for the moment
+        var currentNode = node.left();
+        helpingArray.elementsCount = 0;
 
-            element.nullifyNext();
-            next.nullifyNext();
+        PairingHeapElement pre = null;
+        while (currentNode != null) {
 
-            return meld(meld(element, next), mergePairs(nextNext));
+            var next = currentNode.next();
+            currentNode.nullifyNext();
+
+            if (pre != null) {
+                var elementToAdd = meld(pre, currentNode); //do a meld on the fly, helps save some space
+                helpingArray.add(elementToAdd);
+                position++;
+                pre = null;
+            } else {
+                pre = currentNode;
+            }
+
+            currentNode = next;
         }
-    }
 
+        if (pre != null) {
+            helpingArray.add(pre);
+            position++;
+        }
+
+        if (position == 0) {
+            return null;
+        }
+
+        var stillLeft = position;
+        /*
+         * all we need to do is to make is meld logn times
+         * let us do it in the simplest way:
+         * iteration:
+         * if there are k elements left, meld a[0] with a[k-1], a[1] with a[k-2] etc
+         * this guarantees all active elements remain at positions a[0]....a[k/2]
+         */
+        while (stillLeft > 1) {
+            int j = stillLeft / 2;
+            int out = stillLeft - 1;
+            for (int i = 0; i < j; ++i) {
+                helpingArray.set(i, meld(helpingArray.get(i), helpingArray.get(out - i)));
+                stillLeft--;
+            }
+        }
+        return helpingArray.get(0);
+    }
 }

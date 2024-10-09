@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.pricesteiner;
 
+import com.carrotsearch.hppc.ObjectArrayList;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 
@@ -26,15 +27,16 @@ import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 
     private final HugeObjectArray<PairingHeap> pairingHeaps;
     private final HugeLongPriorityQueue edgeEventsPriorityQueue;
+    private final ObjectArrayList<PairingHeapElement> helpingArray;
     private long currentlyActive;
 
     EdgeEventsQueue(long nodeCount){
 
         this.pairingHeaps= HugeObjectArray.newArray(PairingHeap.class, 2*nodeCount);
         this.edgeEventsPriorityQueue = HugeLongPriorityQueue.min(2*nodeCount);
-
+        this.helpingArray= new ObjectArrayList<>(4096);
         for (int i=0;i<nodeCount;i++){
-            pairingHeaps.set(i, new PairingHeap());
+            pairingHeaps.set(i, new PairingHeap(helpingArray));
         }
         currentlyActive = nodeCount;
     }
