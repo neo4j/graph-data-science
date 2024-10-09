@@ -106,7 +106,7 @@ public interface ProgressLogger {
 
     default ProgressLogger finishSubTask(String subTaskName) {
         logFinish();
-        var endIndex = getTask().indexOf(TASK_SEPARATOR + subTaskName);
+        var endIndex = getTask().lastIndexOf(TASK_SEPARATOR + subTaskName);
         if (endIndex == -1) {
             throw new IllegalArgumentException("Unknown subtask: " + subTaskName);
         }
