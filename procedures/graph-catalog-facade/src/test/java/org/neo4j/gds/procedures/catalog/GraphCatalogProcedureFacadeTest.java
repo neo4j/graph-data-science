@@ -44,7 +44,6 @@ import org.neo4j.gds.api.properties.graph.GraphPropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.applications.ApplicationsFacadeBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
@@ -79,7 +78,7 @@ class GraphCatalogProcedureFacadeTest {
             null,
             null,
             null,
-            new ApplicationsFacadeBuilder().with(businessFacade).build().graphCatalog(),
+            businessFacade,
             WriteContext.builder().build(),
             null,
             null
@@ -108,7 +107,7 @@ class GraphCatalogProcedureFacadeTest {
             null,
             null,
             null,
-            new ApplicationsFacadeBuilder().with(businessFacade).build().graphCatalog(),
+            businessFacade,
             procedureContext,
             procedureReturnColumns,
             null
@@ -145,7 +144,7 @@ class GraphCatalogProcedureFacadeTest {
             null,
             null,
             null,
-            new ApplicationsFacadeBuilder().with(businessFacade).build().graphCatalog(),
+            businessFacade,
             procedureContext,
             procedureReturnColumns,
             null
@@ -194,7 +193,7 @@ class GraphCatalogProcedureFacadeTest {
             null,
             null,
             null,
-            new ApplicationsFacadeBuilder().with(businessFacade).build().graphCatalog(),
+            businessFacade,
             procedureContext,
             procedureReturnColumns,
             null
@@ -234,7 +233,7 @@ class GraphCatalogProcedureFacadeTest {
             null,
             null,
             null,
-            new ApplicationsFacadeBuilder().with(businessFacade).build().graphCatalog(),
+            businessFacade,
             procedureContext,
             procedureReturnColumns,
             null

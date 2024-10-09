@@ -5,19 +5,16 @@ description = 'Neo4j Graph Data Science :: Graph Catalog Procedure Facade'
 group = 'org.neo4j.gds'
 
 dependencies {
-    neodeps().each {
-        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
-            transitive = false
-        }
 
-        testImplementation(group: 'org.neo4j', name: it, version: ver.'neo4j')
-    }
+    // Neo4j Dependencies
+    compileOnly(
+        [group: 'org.neo4j', name: 'neo4j-graphdb-api', version: ver.'neo4j'],
+    )
 
+    // This is here because of `org.neo4j.gds.applications.algorithms.machinery.WriteContext`
+    // TODO: refactor the `WriteContext` - move it where it actually belongs.
     implementation project(':algorithms-machinery')
-    implementation project(':annotations')
-    implementation project(':applications-facade')
-    implementation project(':centrality-algorithms')
-    implementation project(':community-algorithms')
+
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':core-write')
@@ -26,20 +23,20 @@ dependencies {
     implementation project(':graph-store-catalog-applications')
     implementation project(':io-core')
     implementation project(':legacy-cypher-projection')
-    implementation project(':machine-learning-algorithms')
     implementation project(':memory-usage')
-    implementation project(':miscellaneous-algorithms')
-    implementation project(':model-catalog-applications')
     implementation project(':native-projection')
     implementation project(':neo4j-api')
-    implementation project(':node-embedding-algorithms')
-    implementation project(':operations-applications')
-    implementation project(':path-finding-algorithms')
     implementation project(':progress-tracking')
-    implementation project(':similarity-algorithms')
     implementation project(':subgraph-filtering')
     implementation project(':termination')
     implementation project(':transaction')
+
+    // Neo4j Dependencies
+    testImplementation(
+        [group: 'org.neo4j', name: 'neo4j-graphdb-api', version: ver.'neo4j']
+    )
+
+    testImplementation project(':annotations')
 
     testImplementation platform(openGds.junit5bom)
     testImplementation openGds.junit5.jupiter.api
