@@ -33,6 +33,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Arrays;
 import java.util.function.Function;
@@ -79,7 +80,8 @@ class StrongPruningTest {
                 new TreeStructure(graph,  null, graph.nodeCount()),
                 null,
                (x)->2,
-                ProgressTracker.NULL_TRACKER
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE
             );
 
             var parents=HugeLongArray.newArray(graph.nodeCount());
@@ -130,7 +132,9 @@ class StrongPruningTest {
                 new TreeStructure(graph, degrees, graph.nodeCount()),
                 bitSet,
                 prizes::get,
-                ProgressTracker.NULL_TRACKER
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE
+
             );
 
             strongPruning.performPruning();
@@ -188,7 +192,9 @@ class StrongPruningTest {
                 new TreeStructure(graph, degrees, graph.nodeCount()),
                 bitSet,
                 prizes::get,
-                ProgressTracker.NULL_TRACKER
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE
+
 
             );
             strongPruning.performPruning();
@@ -245,8 +251,8 @@ class StrongPruningTest {
                 new TreeStructure(graph, degrees, graph.nodeCount()),
                 bitSet,
                 (v)->20d,
-                ProgressTracker.NULL_TRACKER
-
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE
             );
             strongPruning.performPruning();
 

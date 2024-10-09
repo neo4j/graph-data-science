@@ -42,7 +42,7 @@ public class PCSTFast extends Algorithm<PrizeSteinerTreeResult> {
         var growthResult = growthPhase();
         var treeStructure = TreeProducer.createTree(growthResult, graph.nodeCount(),graph.rootIdMap(),progressTracker);
 
-        var strongPruning = new StrongPruning(treeStructure,growthResult.activeOriginalNodes(),prizes,progressTracker);
+        var strongPruning = new StrongPruning(treeStructure,growthResult.activeOriginalNodes(),prizes,progressTracker,terminationFlag);
         strongPruning.performPruning();
 
         progressTracker.endSubTask("PrizeCollectingSteinerTree");
@@ -51,7 +51,7 @@ public class PCSTFast extends Algorithm<PrizeSteinerTreeResult> {
     }
 
     private GrowthResult growthPhase(){
-        var growthPhase =  new GrowthPhase(graph,prizes, progressTracker);
+        var growthPhase =  new GrowthPhase(graph,prizes, progressTracker,terminationFlag);
         return growthPhase.grow();
     }
 

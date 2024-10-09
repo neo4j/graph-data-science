@@ -25,6 +25,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.function.LongToDoubleFunction;
 
@@ -38,11 +39,12 @@ class GrowthPhase {
     private final LongToDoubleFunction prizes;
     private final HugeLongArray treeEdges;
     private final ProgressTracker progressTracker;
+    private final TerminationFlag terminationFlag;
     private long numberOfTreeEdges;
 
     private final double EPS = 1E-6;
 
-    GrowthPhase(Graph graph, LongToDoubleFunction prizes, ProgressTracker progressTracker) {
+    GrowthPhase(Graph graph, LongToDoubleFunction prizes, ProgressTracker progressTracker, TerminationFlag terminationFlag) {
         //TODO: INITIALIZE some of these data/structures with n memory instead of 2*n
         this.graph = graph;
         this.clusterStructure = new ClusterStructure(graph.nodeCount());
@@ -53,6 +55,7 @@ class GrowthPhase {
         this.prizes = prizes;
         this.treeEdges = HugeLongArray.newArray(graph.nodeCount());
         this.progressTracker = progressTracker;
+        this.terminationFlag = terminationFlag;
         numberOfTreeEdges = 0;
     }
 
@@ -68,6 +71,7 @@ class GrowthPhase {
         progressTracker.beginSubTask("Growing");
         double moat;
         while (clusterStructure.numberOfActiveClusters() > 1) {
+            terminationFlag.assertRunning();
             double edgeEventTime = edgeEventsQueue.nextEventTime();
             double clusterEventTime = clusterEventsPriorityQueue.closestEvent(clusterStructure.active());
             if (Double.compare(clusterEventTime, edgeEventTime) <= 0) {

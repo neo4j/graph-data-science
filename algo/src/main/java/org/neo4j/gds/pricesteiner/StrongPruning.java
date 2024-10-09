@@ -25,6 +25,7 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.function.LongToDoubleFunction;
 
@@ -36,14 +37,21 @@ public class StrongPruning {
     private final HugeLongArray parentArray;
     private final HugeDoubleArray parentCostArray;
     private final ProgressTracker progressTracker;
+    private final TerminationFlag terminationFlag;
 
-    public StrongPruning(TreeStructure treeStructure, BitSet activeUnprunedOriginalNodes, LongToDoubleFunction prizes, ProgressTracker progressTracker) {
+    public StrongPruning(TreeStructure treeStructure,
+        BitSet activeUnprunedOriginalNodes,
+        LongToDoubleFunction prizes,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
+    ) {
         this.treeStructure = treeStructure;
         this.activeOriginalNodes = activeUnprunedOriginalNodes;
         this.prizes = prizes;
         this.parentArray = HugeLongArray.newArray(treeStructure.originalNodeCount());
         this.parentCostArray = HugeDoubleArray.newArray(treeStructure.originalNodeCount());
         this.progressTracker = progressTracker;
+        this.terminationFlag = terminationFlag;
         parentArray.fill(PrizeSteinerTreeResult.PRUNED);
 
     }
@@ -73,6 +81,7 @@ public class StrongPruning {
 
 
             while (currentPos < totalPos) {
+                terminationFlag.assertRunning();;
                 var nextLeaf = queue.get(currentPos++);
                 var parent = new MutableLong(-1);
                 var parentCost = new MutableDouble(-1);
@@ -134,6 +143,7 @@ public class StrongPruning {
     }
 
     private void pruneSubtree(long node, HugeLongArray helpingArray,HugeLongArray parents){
+        terminationFlag.assertRunning();
         var tree = treeStructure.tree();
         long currentPosition= 0;
         MutableLong position=new MutableLong();

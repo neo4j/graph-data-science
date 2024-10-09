@@ -28,6 +28,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.function.LongToDoubleFunction;
 
@@ -57,7 +58,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         void shouldFindOptimalSolution() {
             LongToDoubleFunction prizes = (x) -> 20.0;
 
-            var growthPhase = new GrowthPhase(graph, prizes, ProgressTracker.NULL_TRACKER);
+            var growthPhase = new GrowthPhase(graph, prizes, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE);
             var result = growthPhase.grow();
 
             assertThat(result.activeOriginalNodes().get(graph.toMappedNodeId("a1"))).isFalse();
@@ -100,7 +101,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         void shouldExecuteGrowthPhaseCorrectly() {
             LongToDoubleFunction prizes = (x) -> 20.0;
 
-            var growthPhase = new GrowthPhase(graph, prizes,ProgressTracker.NULL_TRACKER);
+            var growthPhase = new GrowthPhase(graph, prizes,ProgressTracker.NULL_TRACKER,TerminationFlag.RUNNING_TRUE);
            var growthResult = growthPhase.grow();
             var clusterStructure = growthPhase.clusterStructure();
 
