@@ -39,6 +39,7 @@ import org.neo4j.gds.core.loading.construction.NodeLabelToken;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.PropertyValues;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.progress.BatchingTaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -204,7 +205,7 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
         var idMapBuilder = idMapBuilder(config.readConcurrency());
 
         var taskVolume = queryEstimator.estimateRows(query);
-        var progressTracker = new TaskProgressTracker(
+        var internalProgressTracker = new TaskProgressTracker(
             GraphImporter.graphImporterTask(taskVolume),
             log,
             config.readConcurrency(),
@@ -212,6 +213,7 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
             TaskRegistryFactory.local(username, taskStore),
             EmptyUserLogRegistryFactory.INSTANCE
         );
+        var progressTracker = BatchingTaskProgressTracker.create(internalProgressTracker, taskVolume, config.readConcurrency());
 
         return new GraphImporter(
             config,

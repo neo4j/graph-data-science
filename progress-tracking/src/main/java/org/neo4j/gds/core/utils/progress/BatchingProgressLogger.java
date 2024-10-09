@@ -22,9 +22,9 @@ package org.neo4j.gds.core.utils.progress;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.utils.CloseableThreadLocal;
-import org.neo4j.gds.logging.Log;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.LongAdder;
@@ -49,7 +49,7 @@ public class BatchingProgressLogger implements ProgressLogger {
         return calculateBatchSize(Math.max(1L, task.getProgress().volume()), concurrency);
     }
 
-    private static long calculateBatchSize(long taskVolume, Concurrency concurrency) {
+    static long calculateBatchSize(long taskVolume, Concurrency concurrency) {
         // target 100 logs per full run (every 1 percent)
         var batchSize = taskVolume / 100;
         // split batchSize into thread-local chunks
