@@ -62,14 +62,18 @@ public final class PipelinesProcedureFacade {
 
     private final PipelineApplications pipelineApplications;
 
+    private final LinkPredictionFacade linkPredictionFacade;
+
     PipelinesProcedureFacade(
         NodeClassificationPredictConfigPreProcessor nodeClassificationPredictConfigPreProcessor,
         PipelineConfigurationParser pipelineConfigurationParser,
-        PipelineApplications pipelineApplications
+        PipelineApplications pipelineApplications,
+        LinkPredictionFacade linkPredictionFacade
     ) {
         this.nodeClassificationPredictConfigPreProcessor = nodeClassificationPredictConfigPreProcessor;
         this.pipelineConfigurationParser = pipelineConfigurationParser;
         this.pipelineApplications = pipelineApplications;
+        this.linkPredictionFacade = linkPredictionFacade;
     }
 
     public static PipelinesProcedureFacade create(
@@ -127,10 +131,13 @@ public final class PipelinesProcedureFacade {
             algorithmProcessingTemplate
         );
 
+        var linkPredictionFacade = new LinkPredictionFacade(pipelineApplications);
+
         return new PipelinesProcedureFacade(
             nodeClassificationPredictConfigPreProcessor,
             pipelineConfigurationParser,
-            pipelineApplications
+            pipelineApplications,
+            linkPredictionFacade
         );
     }
 
@@ -160,7 +167,11 @@ public final class PipelinesProcedureFacade {
     ) {
         var pipelineName = PipelineName.parse(pipelineNameAsString);
 
-        var pipeline = pipelineApplications.addNodeProperty(pipelineName, taskName, procedureConfig);
+        var pipeline = pipelineApplications.addNodePropertyToNodeClassificationPipeline(
+            pipelineName,
+            taskName,
+            procedureConfig
+        );
 
         var result = NodePipelineInfoResult.create(pipelineName, pipeline);
 
@@ -415,5 +426,9 @@ public final class PipelinesProcedureFacade {
         }
 
         throw new IllegalArgumentException("The value of `nodeProperties` is required to be a list of strings.");
+    }
+
+    public LinkPredictionFacade linkPrediction() {
+        return linkPredictionFacade;
     }
 }

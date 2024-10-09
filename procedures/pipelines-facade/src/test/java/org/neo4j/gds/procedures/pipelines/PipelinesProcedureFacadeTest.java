@@ -59,7 +59,7 @@ class PipelinesProcedureFacadeTest {
             null,
             null
         );
-        var facade = new PipelinesProcedureFacade(null, null, applications);
+        var facade = new PipelinesProcedureFacade(null, null, applications, null);
 
         var result = facade.createPipeline("myPipeline").findAny().orElseThrow();
 
@@ -102,7 +102,7 @@ class PipelinesProcedureFacadeTest {
             null,
             null
         );
-        var facade = new PipelinesProcedureFacade(null, null, applications);
+        var facade = new PipelinesProcedureFacade(null, null, applications, null);
 
         assertThatIllegalStateException()
             .isThrownBy(() -> facade.createPipeline("myPipeline"))
@@ -112,6 +112,7 @@ class PipelinesProcedureFacadeTest {
     @Test
     void shouldNotCreatePipelineWithInvalidName() {
         var facade = new PipelinesProcedureFacade(
+            null,
             null,
             null,
             null

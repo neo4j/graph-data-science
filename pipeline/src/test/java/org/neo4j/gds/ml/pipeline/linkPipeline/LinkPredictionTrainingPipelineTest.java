@@ -212,13 +212,13 @@ class LinkPredictionTrainingPipelineTest {
 
         var pipeline = new LinkPredictionTrainingPipeline();
 
-        assertThat(pipeline.relationshipWeightProperty(executionContext)).isEmpty();
+        assertThat(pipeline.relationshipWeightProperty(executionContext.modelCatalog(), executionContext.username())).isEmpty();
 
         var step = new TestNodePropertyStep(Map.of("relationshipWeightProperty", "myWeight"));
 
         pipeline.addNodePropertyStep(step);
 
-        assertThat(pipeline.relationshipWeightProperty(executionContext)).isPresent().get().isEqualTo("myWeight");
+        assertThat(pipeline.relationshipWeightProperty(executionContext.modelCatalog(), executionContext.username())).isPresent().get().isEqualTo("myWeight");
     }
 
     @Test
@@ -266,13 +266,13 @@ class LinkPredictionTrainingPipelineTest {
 
         var pipeline = new LinkPredictionTrainingPipeline();
 
-        assertThat(pipeline.relationshipWeightProperty(executionContext)).isEmpty();
+        assertThat(pipeline.relationshipWeightProperty(executionContext.modelCatalog(), executionContext.username())).isEmpty();
 
         var step = new TestNodePropertyStep(Map.of("modelName", modelName));
 
         pipeline.addNodePropertyStep(step);
 
-        assertThat(pipeline.relationshipWeightProperty(executionContext)).isPresent().get().isEqualTo("derivedWeight");
+        assertThat(pipeline.relationshipWeightProperty(executionContext.modelCatalog(), executionContext.username())).isPresent().get().isEqualTo("derivedWeight");
     }
 
     @Test
@@ -320,13 +320,13 @@ class LinkPredictionTrainingPipelineTest {
 
         var pipeline = new LinkPredictionTrainingPipeline();
 
-        assertThat(pipeline.relationshipWeightProperty(executionContext)).isEmpty();
+        assertThat(pipeline.relationshipWeightProperty(executionContext.modelCatalog(), executionContext.username())).isEmpty();
 
         var step = new TestNodePropertyStep(Map.of("modelName", modelName));
 
         pipeline.addNodePropertyStep(step);
 
-        assertThat(pipeline.relationshipWeightProperty(executionContext)).isEmpty();
+        assertThat(pipeline.relationshipWeightProperty(executionContext.modelCatalog(), executionContext.username())).isEmpty();
     }
 
     private static class TestNodePropertyStep implements ExecutableNodePropertyStep {

@@ -112,7 +112,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
         var splitEstimations = splitEstimation(
             pipeline.splitConfig(),
             configuration.targetRelationshipType(),
-            pipeline.relationshipWeightProperty(executionContext)
+            pipeline.relationshipWeightProperty(executionContext.modelCatalog(), executionContext.username())
         );
 
         MemoryEstimation maxOverNodePropertySteps = NodePropertyStepExecutor.estimateNodePropertySteps(
@@ -156,7 +156,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
 
     @Override
     public void splitDatasets() {
-        this.linkPredictionRelationshipSampler.splitAndSampleRelationships(pipeline.relationshipWeightProperty(executionContext));
+        this.linkPredictionRelationshipSampler.splitAndSampleRelationships(pipeline.relationshipWeightProperty(executionContext.modelCatalog(), executionContext.username()));
     }
 
     @Override

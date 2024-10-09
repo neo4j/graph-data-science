@@ -22,6 +22,7 @@ package org.neo4j.gds.procedures.pipelines;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 
 import java.util.Optional;
@@ -53,6 +54,10 @@ public class PipelineRepository {
 
     Stream<PipelineCatalog.PipelineCatalogEntry> getAll(User user) {
         return PipelineCatalog.getAllPipelines(user.getUsername());
+    }
+
+    LinkPredictionTrainingPipeline getLinkPredictionTrainingPipeline(User user, PipelineName pipelineName) {
+        return PipelineCatalog.getTyped(user.getUsername(), pipelineName.value, LinkPredictionTrainingPipeline.class);
     }
 
     NodeClassificationTrainingPipeline getNodeClassificationTrainingPipeline(User user, PipelineName pipelineName) {

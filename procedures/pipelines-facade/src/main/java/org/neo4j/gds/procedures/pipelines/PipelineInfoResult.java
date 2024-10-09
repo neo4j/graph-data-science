@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline;
+package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
@@ -26,9 +26,8 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-public class PipelineInfoResult {
+public final class PipelineInfoResult {
     public final String name;
     public final List<Map<String, Object>> nodePropertySteps;
     public final List<Map<String, Object>> featureSteps;
@@ -36,16 +35,38 @@ public class PipelineInfoResult {
     public final Map<String, Object> autoTuningConfig;
     public final Object parameterSpace;
 
-    PipelineInfoResult(String pipelineName, LinkPredictionTrainingPipeline pipeline) {
-        this.name = pipelineName;
-        this.nodePropertySteps = pipeline
+    private PipelineInfoResult(
+        String name,
+        List<Map<String, Object>> nodePropertySteps,
+        List<Map<String, Object>> featureSteps,
+        Map<String, Object> splitConfig,
+        Map<String, Object> autoTuningConfig,
+        Object parameterSpace
+    ) {
+        this.name = name;
+        this.nodePropertySteps = nodePropertySteps;
+        this.featureSteps = featureSteps;
+        this.splitConfig = splitConfig;
+        this.autoTuningConfig = autoTuningConfig;
+        this.parameterSpace = parameterSpace;
+    }
+
+    public static PipelineInfoResult create(String pipelineName, LinkPredictionTrainingPipeline pipeline) {
+        var nodePropertySteps = pipeline
             .nodePropertySteps()
             .stream()
             .map(ExecutableNodePropertyStep::toMap)
-            .collect(Collectors.toList());
-        this.featureSteps = pipeline.featureSteps().stream().map(LinkFeatureStep::toMap).collect(Collectors.toList());
-        this.splitConfig = pipeline.splitConfig().toMap();
-        this.autoTuningConfig = pipeline.autoTuningConfig().toMap();
-        this.parameterSpace = TrainingPipeline.toMapParameterSpace(pipeline.trainingParameterSpace());
+            .toList();
+
+        var featureSteps = pipeline.featureSteps().stream().map(LinkFeatureStep::toMap).toList();
+
+        return new PipelineInfoResult(
+            pipelineName,
+            nodePropertySteps,
+            featureSteps,
+            pipeline.splitConfig().toMap(),
+            pipeline.autoTuningConfig().toMap(),
+            TrainingPipeline.toMapParameterSpace(pipeline.trainingParameterSpace())
+        );
     }
 }

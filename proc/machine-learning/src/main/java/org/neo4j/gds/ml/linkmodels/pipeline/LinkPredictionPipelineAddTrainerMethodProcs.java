@@ -28,6 +28,7 @@ import org.neo4j.gds.ml.models.mlp.MLPClassifierTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
+import org.neo4j.gds.procedures.pipelines.PipelineInfoResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -56,7 +57,7 @@ public class LinkPredictionPipelineAddTrainerMethodProcs extends BaseProc {
             tunableTrainerConfig
         );
 
-        return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
+        return Stream.of(PipelineInfoResult.create(pipelineName, pipeline));
     }
 
     @Procedure(name = "gds.beta.pipeline.linkPrediction.addRandomForest", mode = READ)
@@ -75,7 +76,7 @@ public class LinkPredictionPipelineAddTrainerMethodProcs extends BaseProc {
             tunableTrainerConfig
         );
 
-        return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
+        return Stream.of(PipelineInfoResult.create(pipelineName, pipeline));
     }
 
     @Procedure(name = "gds.alpha.pipeline.linkPrediction.addRandomForest", mode = READ, deprecatedBy = "gds.beta.pipeline.linkPrediction.addRandomForest")
@@ -109,6 +110,6 @@ public class LinkPredictionPipelineAddTrainerMethodProcs extends BaseProc {
 
         pipeline.addTrainerConfig(TunableTrainerConfig.of(mlpClassifierConfig, TrainingMethod.MLPClassification));
 
-        return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
+        return Stream.of(PipelineInfoResult.create(pipelineName, pipeline));
     }
 }
