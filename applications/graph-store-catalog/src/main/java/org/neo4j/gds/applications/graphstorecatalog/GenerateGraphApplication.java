@@ -71,7 +71,13 @@ public class GenerateGraphApplication {
         long averageDegree,
         RandomGraphGeneratorConfig config
     ) {
-        GraphGenerationStats stats = new GraphGenerationStats(name, averageDegree, config);
+        var stats = new GraphGenerationStats(
+            name,
+            averageDegree,
+            config.relationshipDistribution().name(),
+            config.relationshipProperty(),
+            config.relationshipSeed()
+        );
 
         try (ProgressTimer ignored = ProgressTimer.start(time -> stats.generateMillis = time)) {
             RandomGraphGenerator generator = initializeGraphGenerator(config);

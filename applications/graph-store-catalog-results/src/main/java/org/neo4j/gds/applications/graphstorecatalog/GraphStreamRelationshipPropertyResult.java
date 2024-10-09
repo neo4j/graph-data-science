@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
-@SuppressWarnings("unused")
 public class GraphStreamRelationshipPropertyResult {
     public final long sourceNodeId;
     public final long targetNodeId;

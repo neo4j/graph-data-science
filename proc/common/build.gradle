@@ -16,6 +16,9 @@ dependencies {
     api project(':metrics-api')
     api(project(':model-catalog-api'))
 
+    // Bubble up `MemoryEstimateResult`
+    api project(':memory-usage')
+
     implementation project(':algo-common')
     implementation project(':algorithms-facade-api')
     implementation project(':algorithms-machinery')
@@ -31,7 +34,7 @@ dependencies {
     implementation project(':graph-store-catalog-applications')
     implementation project(':licensing')
     implementation project(':logging')
-    implementation project(':memory-usage')
+
     implementation project(':ml-algo')
     implementation project(':model-catalog-api')
     implementation project(':neo4j-api')

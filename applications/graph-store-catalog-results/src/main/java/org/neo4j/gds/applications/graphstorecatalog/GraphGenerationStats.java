@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
-import org.neo4j.gds.config.RandomGraphGeneratorConfig;
+import java.util.Map;
 
 public class GraphGenerationStats {
     public String name;
@@ -33,11 +33,17 @@ public class GraphGenerationStats {
     public Object relationshipDistribution;
     public Object relationshipProperty;
 
-    GraphGenerationStats(String graphName, double averageDegree, RandomGraphGeneratorConfig configuration) {
+    GraphGenerationStats(
+        String graphName,
+        double averageDegree,
+        String relationshipDistribution,
+        Map<String, Object> relationshipProperty,
+        Long relationshipSeed
+    ) {
         this.name = graphName;
         this.averageDegree = averageDegree;
-        this.relationshipDistribution = configuration.relationshipDistribution().name();
-        this.relationshipProperty = configuration.relationshipProperty();
-        this.relationshipSeed = configuration.relationshipSeed();
+        this.relationshipDistribution = relationshipDistribution;
+        this.relationshipProperty = relationshipProperty;
+        this.relationshipSeed = relationshipSeed;
     }
 }

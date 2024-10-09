@@ -23,6 +23,7 @@ dependencies {
     implementation project(':core-write')
     implementation project(':defaults-and-limits-configuration')
     implementation project(':executor')
+    api project(':graph-catalog-facade-api')
     implementation project(':graph-catalog-procedure-facade')
     implementation project(':graph-schema-api')
     implementation project(':graph-store-catalog-applications')

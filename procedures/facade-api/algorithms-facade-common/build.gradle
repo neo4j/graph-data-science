@@ -15,9 +15,6 @@ dependencies {
     // TODO: remove this dependency
     implementation project(':core')
 
-    // this is needed because of `MemoryEstimateResult`
-    implementation project(':algorithms-machinery')
-
     implementation project(':defaults-and-limits-configuration')
 
     implementation project(':memory-usage')

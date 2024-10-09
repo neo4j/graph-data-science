@@ -24,12 +24,10 @@ dependencies {
     implementation(openGds.opencypher.ccparser) {
         transitive = false
     }
-    // graph memory usage
-    implementation openGds.jol.core
 
     // the necessary GDS things for the extension to construct the application
-    implementation project(':algo')
     implementation project(':algorithms-machinery')
+    // TODO: This is only included because `org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException`
     implementation project(':algo-common')
     implementation project(':annotations')
     implementation project(':config-api')
@@ -48,6 +46,7 @@ dependencies {
     implementation project(':neo4j-api')
     implementation project(':neo4j-settings')
     implementation project(':progress-tracking')
+    implementation project(':graph-store-catalog-results')
     implementation project(':string-formatting')
     implementation project(':subgraph-filtering')
     implementation project(':termination')

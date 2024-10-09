@@ -1,0 +1,38 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Graph Store Catalog Results'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+
+    implementation project(':config-api')
+
+    // TODO:
+    //  `AbstractResultBuilder`
+    //  `GraphProjectResult`
+    //  `GraphDimensions`
+    //  live here 🙈move them away and don't bring the entire `:core` module!!!
+    // `GraphMemoryUsage` uses
+    implementation project(':core')
+
+    implementation openGds.jol.core
+
+    implementation project(':memory-usage')
+
+    // Because, why not 🤷
+    // `JobIdConfig` lives here, what can we do about it
+    implementation project(':progress-tracking')
+
+    implementation project(':string-formatting')
+
+    testImplementation openGds.assertj.core
+    testImplementation platform(openGds.junit5bom)
+    testImplementation openGds.junit5.jupiter.api
+    testImplementation openGds.junit5.jupiter.engine
+    testImplementation openGds.junit5.jupiter.params
+    testImplementation openGds.mockito.junit.jupiter
+
+    testImplementation project(":core-utils")
+    testImplementation project(":test-utils")
+}

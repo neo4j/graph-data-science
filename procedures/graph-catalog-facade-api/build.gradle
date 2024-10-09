@@ -1,0 +1,36 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Graph Catalog Procedure Facade API'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+
+    api project(':graph-store-catalog-results')
+
+    // `BaseConfig`
+    implementation project(':config-api')
+
+    // Because:
+    // `GraphDropNodePropertiesResult`
+    // `GraphDropRelationshipResult`
+    // live here for some reason, and why not bring it all in 🙈
+    implementation project(':core')
+
+    // `GraphSchema`
+    implementation project(':graph-schema-api')
+
+    // `GraphProjectCypherResult`
+    implementation project(':legacy-cypher-projection')
+
+    implementation project(':memory-usage')
+
+    // `GraphProjectNativeResult`
+    implementation project(':native-projection')
+
+    // `JobIdConfig`
+    implementation project(':progress-tracking')
+
+    // `GraphFilterResult` lives here, we don't want to bring it all in though...
+    implementation project(':subgraph-filtering')
+}

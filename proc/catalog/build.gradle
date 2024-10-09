@@ -24,6 +24,7 @@ dependencies {
     implementation project(':csv')
     implementation project(':executor')
     implementation project(':graph-catalog-procedure-facade')
+    implementation project(':graph-catalog-facade-api')
     implementation project(':graph-sampling')
     implementation project(':graph-schema-api')
     implementation project(':graph-store-catalog-applications')

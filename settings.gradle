@@ -388,6 +388,11 @@ project(':miscellaneous-configs').projectDir = file('procedures/facade-api/confi
 include('algorithms-facade-api')
 project(':algorithms-facade-api').projectDir = file('procedures/algorithms-facade-api')
 
+include('graph-catalog-facade-api')
+project(':graph-catalog-facade-api').projectDir = file('procedures/graph-catalog-facade-api')
+
+include('graph-store-catalog-results')
+project(':graph-store-catalog-results').projectDir = file('applications/graph-store-catalog-results')
 
 
 include('neo4j-kernel-adapter-5.23')

@@ -15,6 +15,7 @@ dependencies {
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':core-write')
+    implementation project(':graph-store-catalog-results')
     implementation project(':graph-schema-api')
     implementation project(':logging')
     implementation project(':memory-estimation')
