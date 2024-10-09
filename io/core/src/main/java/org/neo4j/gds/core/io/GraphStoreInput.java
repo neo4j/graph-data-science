@@ -233,7 +233,7 @@ public final class GraphStoreInput {
 
 
         @Override
-        public boolean next(InputChunk chunk) throws IOException {
+        public synchronized boolean next(InputChunk chunk) throws IOException {
             if (this.splits.isEmpty()) {
                 if (this.graphPropertyIterator.hasNext()) {
                     initializeSplits();
