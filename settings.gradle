@@ -394,6 +394,9 @@ project(':graph-catalog-facade-api').projectDir = file('procedures/graph-catalog
 include('graph-store-catalog-results')
 project(':graph-store-catalog-results').projectDir = file('applications/graph-store-catalog-results')
 
+include('model-catalog-facade-api')
+project(':model-catalog-facade-api').projectDir = file('procedures/model-catalog-facade-api')
+
 
 include('neo4j-kernel-adapter-5.23')
 project(':neo4j-kernel-adapter-5.23').projectDir = file('compatibility/5.23/neo4j-kernel-adapter')

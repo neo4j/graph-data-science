@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.model.catalog;
 
-import org.neo4j.gds.applications.modelcatalog.ModelExistsResult;
+import org.neo4j.gds.procedures.modelcatalog.ModelExistsResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;

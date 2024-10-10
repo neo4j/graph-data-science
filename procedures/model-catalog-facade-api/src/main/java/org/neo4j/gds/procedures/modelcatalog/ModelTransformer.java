@@ -17,19 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.modelcatalog;
+package org.neo4j.gds.procedures.modelcatalog;
 
 import org.neo4j.gds.core.model.Model;
 
-import java.util.Collection;
-import java.util.Optional;
+public final class ModelTransformer {
+    private ModelTransformer() {}
 
-public interface ModelCatalogApplications {
-    Model<?, ?, ?> drop(ModelName modelName, boolean failIfMissing);
-
-    Optional<Model<?, ?, ?>> exists(ModelName modelName);
-
-    Collection<Model<?, ?, ?>> list();
-
-    Model<?, ?, ?> lookup(ModelName modelName);
+    public static ModelCatalogResult toModelCatalogResult(Model<?, ?, ?> model) {
+        return new ModelCatalogResult(
+            model.name(),
+            model.algoType(),
+            model.customInfo().toMap(),
+            model.creationTime(),
+            model.trainConfig().toMap(),
+            model.graphSchema().toMapOld(),
+            model.loaded(),
+            model.stored(),
+            !model.sharedWith().isEmpty()
+        );
+    }
 }

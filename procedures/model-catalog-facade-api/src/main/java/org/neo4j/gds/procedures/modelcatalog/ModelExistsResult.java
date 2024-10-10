@@ -17,16 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.modelcatalog;
+package org.neo4j.gds.procedures.modelcatalog;
 
-public class ModelExistsResult {
-    public final String modelName;
-    public final String modelType;
-    public final boolean exists;
-
-    ModelExistsResult(String modelName, String modelType, boolean exists) {
-        this.modelName = modelName;
-        this.modelType = modelType;
-        this.exists = exists;
-    }
+public record ModelExistsResult(String modelName, String modelType, boolean exists) {
 }

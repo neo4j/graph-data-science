@@ -17,19 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.modelcatalog;
+package org.neo4j.gds.procedures.modelcatalog;
 
-import org.neo4j.gds.core.model.Model;
+import java.time.ZonedDateTime;
+import java.util.Map;
 
-import java.util.Collection;
-import java.util.Optional;
-
-public interface ModelCatalogApplications {
-    Model<?, ?, ?> drop(ModelName modelName, boolean failIfMissing);
-
-    Optional<Model<?, ?, ?>> exists(ModelName modelName);
-
-    Collection<Model<?, ?, ?>> list();
-
-    Model<?, ?, ?> lookup(ModelName modelName);
+public record ModelCatalogResult(
+    String modelName,
+    String modelType,
+    Map<String, Object> modelInfo,
+    ZonedDateTime creationTime,
+    Map<String, Object> trainConfig,
+    Map<String, Object> graphSchema,
+    boolean loaded,
+    boolean stored,
+    boolean published
+) {
 }

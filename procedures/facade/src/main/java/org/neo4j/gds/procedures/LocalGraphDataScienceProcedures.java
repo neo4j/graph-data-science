@@ -47,6 +47,7 @@ import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.catalog.GraphCatalogProcedureFacade;
+import org.neo4j.gds.procedures.modelcatalog.LocalModelCatalogProcedureFacade;
 import org.neo4j.gds.procedures.modelcatalog.ModelCatalogProcedureFacade;
 import org.neo4j.gds.procedures.operations.OperationsProcedureFacade;
 import org.neo4j.gds.procedures.pipelines.PipelineRepository;
@@ -187,7 +188,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
             procedureReturnColumns
         );
 
-        var modelCatalogProcedureFacade = new ModelCatalogProcedureFacade(applicationsFacade);
+        var modelCatalogProcedureFacade = new LocalModelCatalogProcedureFacade(applicationsFacade);
 
         var operationsProcedureFacade = new OperationsProcedureFacade(applicationsFacade);
 

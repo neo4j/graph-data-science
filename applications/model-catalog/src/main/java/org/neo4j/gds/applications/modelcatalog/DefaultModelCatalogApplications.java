@@ -47,14 +47,8 @@ public final class DefaultModelCatalogApplications implements ModelCatalogApplic
     }
 
     @Override
-    public ModelExistsResult exists(ModelName modelName) {
-        var untypedModel = modelCatalog.getUntyped(user.getUsername(), modelName.getValue());
-
-        var modelType = Optional.ofNullable(untypedModel).map(Model::algoType).orElse("n/a");
-
-        var exists = modelCatalog.exists(user.getUsername(), modelName.getValue());
-
-        return new ModelExistsResult(modelName.getValue(), modelType, exists);
+    public Optional<Model<?, ?, ?>> exists(ModelName modelName) {
+        return Optional.ofNullable(modelCatalog.getUntyped(user.getUsername(), modelName.getValue()));
     }
 
     @Override

@@ -17,19 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.modelcatalog;
+package org.neo4j.gds.procedures.modelcatalog;
 
-import org.neo4j.gds.core.model.Model;
+import java.util.stream.Stream;
 
-import java.util.Collection;
-import java.util.Optional;
+public interface ModelCatalogProcedureFacade {
+    String NO_VALUE = "__NO_VALUE";
 
-public interface ModelCatalogApplications {
-    Model<?, ?, ?> drop(ModelName modelName, boolean failIfMissing);
+    Stream<ModelCatalogResult> drop(String modelName, boolean failIfMissing);
 
-    Optional<Model<?, ?, ?>> exists(ModelName modelName);
+    Stream<ModelExistsResult> exists(String modelName);
 
-    Collection<Model<?, ?, ?>> list();
-
-    Model<?, ?, ?> lookup(ModelName modelName);
+    Stream<ModelCatalogResult> list(String modelName);
 }

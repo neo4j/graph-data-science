@@ -37,18 +37,18 @@ public class BetaModelCatalogResult {
     public final boolean shared;
 
     public BetaModelCatalogResult(ModelCatalogResult result) {
-        this.trainConfig = result.trainConfig;
-        this.graphSchema = result.graphSchema;
-        this.loaded = result.loaded;
-        this.stored = result.stored;
-        this.creationTime = result.creationTime;
-        this.shared = result.published;
+        this.trainConfig = result.trainConfig();
+        this.graphSchema = result.graphSchema();
+        this.loaded = result.loaded();
+        this.stored = result.stored();
+        this.creationTime = result.creationTime();
+        this.shared = result.published();
         this.modelInfo = Stream.concat(
             Map.of(
-                "modelName", result.modelName,
-                "modelType", result.modelType
+                "modelName", result.modelName(),
+                "modelType", result.modelType()
             ).entrySet().stream(),
-            result.modelInfo.entrySet().stream()
+            result.modelInfo().entrySet().stream()
         ).collect(Collectors.toMap(
                 Map.Entry::getKey,
                 Map.Entry::getValue

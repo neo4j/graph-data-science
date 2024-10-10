@@ -20,37 +20,41 @@
 package org.neo4j.gds.procedures.modelcatalog;
 
 import org.neo4j.gds.applications.ApplicationsFacade;
-import org.neo4j.gds.applications.modelcatalog.ModelExistsResult;
 
 import java.util.stream.Stream;
 
-public class ModelCatalogProcedureFacade {
-    public static final String NO_VALUE = "__NO_VALUE";
+public class LocalModelCatalogProcedureFacade implements ModelCatalogProcedureFacade {
 
     private final ModelNameValidationService modelNameValidationService = new ModelNameValidationService();
 
     private final ApplicationsFacade applicationsFacade;
 
-    public ModelCatalogProcedureFacade(ApplicationsFacade applicationsFacade) {
+    public LocalModelCatalogProcedureFacade(ApplicationsFacade applicationsFacade) {
         this.applicationsFacade = applicationsFacade;
     }
 
+    @Override
     public Stream<ModelCatalogResult> drop(String modelNameAsString, boolean failIfMissing) {
         var modelName = modelNameValidationService.validate(modelNameAsString);
 
         var model = applicationsFacade.modelCatalog().drop(modelName, failIfMissing);
 
-        return Stream.ofNullable(model).map(ModelCatalogResult::new);
+        return Stream.ofNullable(model).map(ModelTransformer::toModelCatalogResult);
     }
 
+    @Override
     public Stream<ModelExistsResult> exists(String modelNameAsString) {
         var modelName = modelNameValidationService.validate(modelNameAsString);
 
-        var result = applicationsFacade.modelCatalog().exists(modelName);
+        var result = applicationsFacade.modelCatalog()
+            .exists(modelName)
+            .map(model -> new ModelExistsResult(model.name(), model.algoType(), true))
+            .orElseGet(() -> new ModelExistsResult(modelNameAsString, "n/a", false));
 
         return Stream.of(result);
     }
 
+    @Override
     public Stream<ModelCatalogResult> list(String modelName) {
         if (modelName == null || modelName.equals(NO_VALUE)) return list();
 
@@ -60,7 +64,7 @@ public class ModelCatalogProcedureFacade {
     private Stream<ModelCatalogResult> list() {
         var models = applicationsFacade.modelCatalog().list();
 
-        return models.stream().map(ModelCatalogResult::new);
+        return models.stream().map(ModelTransformer::toModelCatalogResult);
     }
 
     private Stream<ModelCatalogResult> lookup(String modelNameAsString) {
@@ -70,7 +74,7 @@ public class ModelCatalogProcedureFacade {
 
         if (model == null) return Stream.empty();
 
-        var result = new ModelCatalogResult(model);
+        var result = ModelTransformer.toModelCatalogResult(model);
 
         return Stream.of(result);
     }
