@@ -28,6 +28,7 @@ import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.samplers.WeightedUniformSampler;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Arrays;
 import java.util.List;
@@ -39,10 +40,12 @@ final class BatchSampler {
     public static final double DEGREE_SMOOTHING_FACTOR = 0.75;
     private final Graph graph;
     private final ProgressTracker progressTracker;
+    private final TerminationFlag terminationFlag;
 
-    BatchSampler(Graph graph, ProgressTracker progressTracker) {
+    BatchSampler(Graph graph, ProgressTracker progressTracker, TerminationFlag terminationFlag) {
         this.graph = graph;
         this.progressTracker = progressTracker;
+        this.terminationFlag = terminationFlag;
     }
 
     List<long[]> extendedBatches(int batchSize, int searchDepth, long randomSeed) {
@@ -50,6 +53,8 @@ final class BatchSampler {
             graph.nodeCount(),
             batchSize,
             batch -> {
+                terminationFlag.assertRunning();
+
                 var localSeed = Math.toIntExact(Math.floorDiv(batch.startNode(), graph.nodeCount())) + randomSeed;
                 long[] extendedBatch = sampleNeighborAndNegativeNodePerBatchNode(batch, searchDepth, localSeed);
 
