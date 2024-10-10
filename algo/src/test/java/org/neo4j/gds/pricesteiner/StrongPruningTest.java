@@ -37,6 +37,7 @@ import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Arrays;
 import java.util.function.Function;
+import java.util.function.LongToDoubleFunction;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -261,6 +262,81 @@ class StrongPruningTest {
           assertThat(sp.parentArray().get(graph.toMappedNodeId("a0"))).isEqualTo(PrizeSteinerTreeResult.ROOT);
         }
 
+    }
+
+    @Nested
+    @GdlExtension
+    class HouseGraph{
+
+        @GdlGraph(orientation = Orientation.UNDIRECTED)
+        private static final String DB_CYPHER =
+            "CREATE " +
+                "  (a0:node)," +
+                "  (a1:node)," +
+                "  (a2:node)," +
+                "  (a3:node)," +
+                "  (a4:node)," +
+                "(a0)-[:R{w:10}]->(a1)," +
+                "(a2)-[:R{w:62}]->(a4)," +
+                "(a1)-[:R{w:54}]->(a4)," +
+                "(a2)-[:R{w:15}]->(a3),";
+
+        @Inject
+        private  TestGraph graph;
+
+
+        @Test
+        void shouldFindOptimal(){
+            HugeLongArray prizes = HugeLongArray.newArray(graph.nodeCount());
+            var a0 = graph.toMappedNodeId("a0");
+            var a1 = graph.toMappedNodeId("a1");
+            var a2 = graph.toMappedNodeId("a2");
+            var a3 = graph.toMappedNodeId("a3");
+            var a4 = graph.toMappedNodeId("a4");
+
+            prizes.set(a0,9);
+            prizes.set(a1,60);
+            prizes.set(a2,30);
+            prizes.set(a3,10);
+            prizes.set(a4,110);
+
+            var bitSet = new BitSet(graph.nodeCount());
+            for (int i = 0; i < graph.nodeCount(); ++i) {
+                bitSet.set(i);
+            }
+
+            HugeLongArray degrees = HugeLongArray.newArray(graph.nodeCount());
+            degrees.setAll(v -> graph.degree(v));
+            var strongPruning = new StrongPruning(
+                new TreeStructure(graph, degrees, graph.nodeCount()),
+                bitSet,
+                prizes::get,
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE
+            );
+            strongPruning.performPruning();
+
+            var sp=strongPruning.resultTree();
+        var parents = sp.parentArray();
+        var costs = sp.relationshipToParentCost();
+            LongToDoubleFunction costSupplier =  e -> {
+                if (parents.get(e) == PrizeSteinerTreeResult.ROOT )
+                    return  0;
+                if (parents.get(e) == PrizeSteinerTreeResult.PRUNED)
+                    return  Long.MIN_VALUE;
+                return costs.get(e);
+            };
+
+            assertThat(parents.get(a0)).isEqualTo(PrizeSteinerTreeResult.PRUNED);
+            assertThat(parents.get(a2)).isEqualTo(PrizeSteinerTreeResult.PRUNED);
+            assertThat(parents.get(a3)).isEqualTo(PrizeSteinerTreeResult.PRUNED);
+
+            double sum=costSupplier.applyAsDouble(a1) +costSupplier.applyAsDouble(a4);
+
+            assertThat(sum).isEqualTo(54);
+
+
+        }
     }
 
 
