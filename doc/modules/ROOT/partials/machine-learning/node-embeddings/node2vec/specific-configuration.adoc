@@ -10,7 +10,7 @@
 | negativeSamplingExponent | Float | 0.75 | yes | Exponent applied to the node frequency to obtain the negative sampling distribution. A value of 1.0 samples proportionally to the frequency. A value of 0.0 samples each node equally.
 | embeddingDimension | Integer | 128 | yes | Size of the computed node embeddings.
 | embeddingInitializer | String | NORMALIZED | yes | Method to initialize embeddings. Values are sampled uniformly from a range `[-a, a]`. With `NORMALIZED`, `a=0.5/embeddingDimension` and with `UNIFORM` instead `a=1`.
-| iterations | Integer | 1 | yes | Number of training iterations.
+| iterations | Integer | 1 | yes | Number of training iterations. Higher iterations still sample more random walks and therefore the set of walks will generally become more representative of the entire graph.
 | initialLearningRate | Float | 0.01 | yes | Learning rate used initially for training the neural network. The learning rate decreases after each training iteration.
 | minLearningRate | Float | 0.0001 | yes | Lower bound for learning rate as it is decreased during training.
 | randomSeed | Integer | random | yes | Seed value used to generate the random walks, which are used as the training set of the neural network. Note, that the generated embeddings are still nondeterministic.
