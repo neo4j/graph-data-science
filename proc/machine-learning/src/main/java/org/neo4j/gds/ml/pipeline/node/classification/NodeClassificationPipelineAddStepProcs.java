@@ -42,7 +42,7 @@ public class NodeClassificationPipelineAddStepProcs {
         @Name("procedureName") String taskName,
         @Name("procedureConfiguration") Map<String, Object> procedureConfig
     ) {
-        return facade.pipelines().addNodeProperty(pipelineName, taskName, procedureConfig);
+        return facade.pipelines().nodeClassification().addNodeProperty(pipelineName, taskName, procedureConfig);
     }
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.selectFeatures", mode = READ)
@@ -51,6 +51,6 @@ public class NodeClassificationPipelineAddStepProcs {
         @Name("pipelineName") String pipelineName,
         @Name("nodeProperties") Object nodeProperties
     ) {
-        return facade.pipelines().selectFeatures(pipelineName, nodeProperties);
+        return facade.pipelines().nodeClassification().selectFeatures(pipelineName, nodeProperties);
     }
 }

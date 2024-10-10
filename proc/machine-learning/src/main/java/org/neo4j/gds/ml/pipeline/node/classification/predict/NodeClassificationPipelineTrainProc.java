@@ -41,7 +41,7 @@ public class NodeClassificationPipelineTrainProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pipelines().nodeClassificationTrain(graphName, configuration);
+        return facade.pipelines().nodeClassification().train(graphName, configuration);
     }
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.train.estimate", mode = Mode.READ)
@@ -50,6 +50,6 @@ public class NodeClassificationPipelineTrainProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.pipelines().nodeClassificationTrainEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.pipelines().nodeClassification().trainEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

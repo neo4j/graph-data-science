@@ -44,7 +44,7 @@ public class NodeClassificationPipelineMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pipelines().nodeClassificationMutate(graphName, configuration);
+        return facade.pipelines().nodeClassification().mutate(graphName, configuration);
     }
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.predict.mutate.estimate", mode = Mode.READ)
@@ -53,6 +53,6 @@ public class NodeClassificationPipelineMutateProc {
         @Name(value = "graphName") Object graphNameOrConfiguration,
         @Name(value = "configuration") Map<String, Object> algorithmConfiguration
     ) {
-        return facade.pipelines().nodeClassificationMutateEstimate(graphNameOrConfiguration, algorithmConfiguration);
+        return facade.pipelines().nodeClassification().mutateEstimate(graphNameOrConfiguration, algorithmConfiguration);
     }
 }

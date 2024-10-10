@@ -22,13 +22,11 @@ package org.neo4j.gds.procedures.pipelines;
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -38,42 +36,30 @@ import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.Metrics;
-import org.neo4j.gds.ml.pipeline.PipelineCompanion;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.termination.TerminationMonitor;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public final class PipelinesProcedureFacade {
     public static final String NO_VALUE = "__NO_VALUE";
 
-    private final NodeClassificationPredictConfigPreProcessor nodeClassificationPredictConfigPreProcessor;
-    private final PipelineConfigurationParser pipelineConfigurationParser;
-
     private final PipelineApplications pipelineApplications;
 
     private final LinkPredictionFacade linkPredictionFacade;
+    private final NodeClassificationFacade nodeClassificationFacade;
 
     PipelinesProcedureFacade(
-        NodeClassificationPredictConfigPreProcessor nodeClassificationPredictConfigPreProcessor,
-        PipelineConfigurationParser pipelineConfigurationParser,
         PipelineApplications pipelineApplications,
-        LinkPredictionFacade linkPredictionFacade
+        LinkPredictionFacade linkPredictionFacade,
+        NodeClassificationFacade nodeClassificationFacade
     ) {
-        this.nodeClassificationPredictConfigPreProcessor = nodeClassificationPredictConfigPreProcessor;
-        this.pipelineConfigurationParser = pipelineConfigurationParser;
         this.pipelineApplications = pipelineApplications;
         this.linkPredictionFacade = linkPredictionFacade;
+        this.nodeClassificationFacade = nodeClassificationFacade;
     }
 
     public static PipelinesProcedureFacade create(
@@ -99,11 +85,6 @@ public final class PipelinesProcedureFacade {
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
         AlgorithmProcessingTemplate algorithmProcessingTemplate
     ) {
-        var nodeClassificationPredictConfigPreProcessor = new NodeClassificationPredictConfigPreProcessor(
-            modelCatalog,
-            user
-        );
-
         var pipelineConfigurationParser = new PipelineConfigurationParser(user);
 
         var pipelineApplications = PipelineApplications.create(
@@ -133,83 +114,18 @@ public final class PipelinesProcedureFacade {
 
         var linkPredictionFacade = new LinkPredictionFacade(pipelineConfigurationParser, pipelineApplications);
 
-        return new PipelinesProcedureFacade(
-            nodeClassificationPredictConfigPreProcessor,
+        var nodeClassificationFacade = NodeClassificationFacade.create(
+            modelCatalog,
+            user,
             pipelineConfigurationParser,
+            pipelineApplications
+        );
+
+        return new PipelinesProcedureFacade(
             pipelineApplications,
-            linkPredictionFacade
+            linkPredictionFacade,
+            nodeClassificationFacade
         );
-    }
-
-    public Stream<NodePipelineInfoResult> addLogisticRegression(
-        String pipelineName,
-        Map<String, Object> configuration
-    ) {
-        return configure(
-            pipelineName,
-            () -> pipelineConfigurationParser.parseLogisticRegressionTrainerConfig(configuration),
-            pipelineApplications::addTrainerConfiguration
-        );
-    }
-
-    public Stream<NodePipelineInfoResult> addMLP(String pipelineName, Map<String, Object> configuration) {
-        return configure(
-            pipelineName,
-            () -> pipelineConfigurationParser.parseMLPClassifierTrainConfig(configuration),
-            pipelineApplications::addTrainerConfiguration
-        );
-    }
-
-    public Stream<NodePipelineInfoResult> addNodeProperty(
-        String pipelineNameAsString,
-        String taskName,
-        Map<String, Object> procedureConfig
-    ) {
-        var pipelineName = PipelineName.parse(pipelineNameAsString);
-
-        var pipeline = pipelineApplications.addNodePropertyToNodeClassificationPipeline(
-            pipelineName,
-            taskName,
-            procedureConfig
-        );
-
-        var result = NodePipelineInfoResult.create(pipelineName, pipeline);
-
-        return Stream.of(result);
-    }
-
-    public Stream<NodePipelineInfoResult> addRandomForest(String pipelineName, Map<String, Object> configuration) {
-        return configure(
-            pipelineName,
-            () -> pipelineConfigurationParser.parseRandomForestClassifierTrainerConfig(configuration),
-            pipelineApplications::addTrainerConfiguration
-        );
-    }
-
-    public Stream<NodePipelineInfoResult> configureAutoTuning(String pipelineName, Map<String, Object> configuration) {
-        return configure(
-            pipelineName,
-            () -> pipelineConfigurationParser.parseAutoTuningConfig(configuration),
-            pipelineApplications::configureAutoTuning
-        );
-    }
-
-    public Stream<NodePipelineInfoResult> configureSplit(String pipelineName, Map<String, Object> configuration) {
-        return configure(
-            pipelineName,
-            () -> pipelineConfigurationParser.parseNodePropertyPredictionSplitConfig(configuration),
-            pipelineApplications::configureSplit
-        );
-    }
-
-    public Stream<NodePipelineInfoResult> createPipeline(String pipelineNameAsString) {
-        var pipelineName = PipelineName.parse(pipelineNameAsString);
-
-        var pipeline = pipelineApplications.createNodeClassificationTrainingPipeline(pipelineName);
-
-        var result = NodePipelineInfoResult.create(pipelineName, pipeline);
-
-        return Stream.of(result);
     }
 
     public Stream<PipelineCatalogResult> drop(
@@ -264,171 +180,11 @@ public final class PipelinesProcedureFacade {
         return Stream.of(result);
     }
 
-    public Stream<PredictMutateResult> nodeClassificationMutate(
-        String graphNameAsString,
-        Map<String, Object> configuration
-    ) {
-        PipelineCompanion.preparePipelineConfig(graphNameAsString, configuration);
-        nodeClassificationPredictConfigPreProcessor.enhanceInputWithPipelineParameters(configuration);
-
-        var graphName = GraphName.parse(graphNameAsString);
-
-        var result = pipelineApplications.nodeClassificationPredictMutate(graphName, configuration);
-
-        return Stream.of(result);
-    }
-
-    public Stream<MemoryEstimateResult> nodeClassificationMutateEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> rawConfiguration
-    ) {
-        PipelineCompanion.preparePipelineConfig(graphNameOrConfiguration, rawConfiguration);
-        nodeClassificationPredictConfigPreProcessor.enhanceInputWithPipelineParameters(rawConfiguration);
-
-        var configuration = pipelineConfigurationParser.parseNodeClassificationPredictMutateConfig(rawConfiguration);
-
-        var result = pipelineApplications.nodeClassificationPredictEstimate(
-            graphNameOrConfiguration,
-            configuration
-        );
-
-        return Stream.of(result);
-    }
-
-    public Stream<NodeClassificationStreamResult> nodeClassificationStream(
-        String graphNameAsString,
-        Map<String, Object> configuration
-    ) {
-        PipelineCompanion.preparePipelineConfig(graphNameAsString, configuration);
-        nodeClassificationPredictConfigPreProcessor.enhanceInputWithPipelineParameters(configuration);
-
-        var graphName = GraphName.parse(graphNameAsString);
-
-        return pipelineApplications.nodeClassificationPredictStream(graphName, configuration);
-    }
-
-    public Stream<MemoryEstimateResult> nodeClassificationStreamEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> rawConfiguration
-    ) {
-        PipelineCompanion.preparePipelineConfig(graphNameOrConfiguration, rawConfiguration);
-        nodeClassificationPredictConfigPreProcessor.enhanceInputWithPipelineParameters(rawConfiguration);
-
-        var configuration = pipelineConfigurationParser.parseNodeClassificationPredictStreamConfig(rawConfiguration);
-
-        var result = pipelineApplications.nodeClassificationPredictEstimate(
-            graphNameOrConfiguration,
-            configuration
-        );
-
-        return Stream.of(result);
-    }
-
-    public Stream<NodeClassificationPipelineTrainResult> nodeClassificationTrain(
-        String graphNameAsString, Map<String, Object> configuration
-    ) {
-        PipelineCompanion.preparePipelineConfig(graphNameAsString, configuration);
-
-        var graphName = GraphName.parse(graphNameAsString);
-
-        return pipelineApplications.nodeClassificationTrain(graphName, configuration);
-    }
-
-    public Stream<MemoryEstimateResult> nodeClassificationTrainEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> rawConfiguration
-    ) {
-        PipelineCompanion.preparePipelineConfig(graphNameOrConfiguration, rawConfiguration);
-        var configuration = pipelineConfigurationParser.parseNodeClassificationTrainConfig(rawConfiguration);
-
-        var result = pipelineApplications.nodeClassificationTrainEstimate(
-            graphNameOrConfiguration,
-            configuration
-        );
-
-        return Stream.of(result);
-    }
-
-    public Stream<WriteResult> nodeClassificationWrite(
-        String graphNameAsString,
-        Map<String, Object> configuration
-    ) {
-        PipelineCompanion.preparePipelineConfig(graphNameAsString, configuration);
-        nodeClassificationPredictConfigPreProcessor.enhanceInputWithPipelineParameters(configuration);
-
-        var graphName = GraphName.parse(graphNameAsString);
-
-        var result = pipelineApplications.nodeClassificationPredictWrite(graphName, configuration);
-
-        return Stream.of(result);
-    }
-
-    public Stream<MemoryEstimateResult> nodeClassificationWriteEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> rawConfiguration
-    ) {
-        PipelineCompanion.preparePipelineConfig(graphNameOrConfiguration, rawConfiguration);
-        var configuration = pipelineConfigurationParser.parseNodeClassificationPredictWriteConfig(rawConfiguration);
-
-        var result = pipelineApplications.nodeClassificationPredictEstimate(
-            graphNameOrConfiguration,
-            configuration
-        );
-
-        return Stream.of(result);
-    }
-
-    public Stream<NodePipelineInfoResult> selectFeatures(String pipelineNameAsString, Object nodeFeatureStepsAsObject) {
-        var pipelineName = PipelineName.parse(pipelineNameAsString);
-
-        var nodeFeatureSteps = parseNodeProperties(nodeFeatureStepsAsObject);
-
-        var pipeline = pipelineApplications.selectFeatures(pipelineName, nodeFeatureSteps);
-
-        var result = NodePipelineInfoResult.create(pipelineName, pipeline);
-
-        return Stream.of(result);
-    }
-
-    private <CONFIGURATION> Stream<NodePipelineInfoResult> configure(
-        String pipelineNameAsString,
-        Supplier<CONFIGURATION> configurationSupplier,
-        BiFunction<PipelineName, CONFIGURATION, NodeClassificationTrainingPipeline> configurationAction
-    ) {
-        var pipelineName = PipelineName.parse(pipelineNameAsString);
-
-        var configuration = configurationSupplier.get();
-
-        var pipeline = configurationAction.apply(pipelineName, configuration);
-
-        var result = NodePipelineInfoResult.create(pipelineName, pipeline);
-
-        return Stream.of(result);
-    }
-
-    private List<NodeFeatureStep> parseNodeProperties(Object nodeProperties) {
-        if (nodeProperties instanceof String) return List.of(NodeFeatureStep.of((String) nodeProperties));
-
-        if (nodeProperties instanceof List) {
-            //noinspection rawtypes
-            var propertiesList = (List) nodeProperties;
-
-            var nodeFeatureSteps = new ArrayList<NodeFeatureStep>(propertiesList.size());
-
-            for (Object o : propertiesList) {
-                if (o instanceof String)
-                    nodeFeatureSteps.add(NodeFeatureStep.of((String) o));
-                else
-                    throw new IllegalArgumentException("The list `nodeProperties` is required to contain only strings.");
-            }
-
-            return nodeFeatureSteps;
-        }
-
-        throw new IllegalArgumentException("The value of `nodeProperties` is required to be a list of strings.");
-    }
-
     public LinkPredictionFacade linkPrediction() {
         return linkPredictionFacade;
+    }
+
+    public NodeClassificationFacade nodeClassification() {
+        return nodeClassificationFacade;
     }
 }

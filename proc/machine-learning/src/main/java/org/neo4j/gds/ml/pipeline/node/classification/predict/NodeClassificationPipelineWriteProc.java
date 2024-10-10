@@ -44,7 +44,7 @@ public class NodeClassificationPipelineWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pipelines().nodeClassificationWrite(graphName, configuration);
+        return facade.pipelines().nodeClassification().write(graphName, configuration);
     }
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.predict.write.estimate", mode = Mode.READ)
@@ -53,6 +53,6 @@ public class NodeClassificationPipelineWriteProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.pipelines().nodeClassificationWriteEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.pipelines().nodeClassification().writeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

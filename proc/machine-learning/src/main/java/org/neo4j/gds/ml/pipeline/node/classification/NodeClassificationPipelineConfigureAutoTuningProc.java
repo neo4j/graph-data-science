@@ -38,6 +38,6 @@ public class NodeClassificationPipelineConfigureAutoTuningProc {
     @Procedure(name = "gds.alpha.pipeline.nodeClassification.configureAutoTuning", mode = READ)
     @Description("Configures the auto-tuning of the node classification pipeline.")
     public Stream<NodePipelineInfoResult> configureAutoTuning(@Name("pipelineName") String pipelineName, @Name("configuration") Map<String, Object> configMap) {
-        return facade.pipelines().configureAutoTuning(pipelineName, configMap);
+        return facade.pipelines().nodeClassification().configureAutoTuning(pipelineName, configMap);
     }
 }

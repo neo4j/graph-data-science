@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
-class PipelinesProcedureFacadeTest {
+class NodeClassificationFacadeTest {
     @Test
     void createPipeline() {
         var repository = new PipelineRepository();
@@ -59,7 +59,9 @@ class PipelinesProcedureFacadeTest {
             null,
             null
         );
-        var facade = new PipelinesProcedureFacade(null, null, applications, null);
+        var facade2 = new PipelinesProcedureFacade(applications, null, null);
+
+        var facade = new NodeClassificationFacade(null, null, applications);
 
         var result = facade.createPipeline("myPipeline").findAny().orElseThrow();
 
@@ -102,7 +104,7 @@ class PipelinesProcedureFacadeTest {
             null,
             null
         );
-        var facade = new PipelinesProcedureFacade(null, null, applications, null);
+        var facade = new NodeClassificationFacade(null, null, applications);
 
         assertThatIllegalStateException()
             .isThrownBy(() -> facade.createPipeline("myPipeline"))
@@ -111,8 +113,7 @@ class PipelinesProcedureFacadeTest {
 
     @Test
     void shouldNotCreatePipelineWithInvalidName() {
-        var facade = new PipelinesProcedureFacade(
-            null,
+        var facade = new NodeClassificationFacade(
             null,
             null,
             null

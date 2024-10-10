@@ -44,7 +44,7 @@ public class NodeClassificationPipelineStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pipelines().nodeClassificationStream(graphName, configuration);
+        return facade.pipelines().nodeClassification().stream(graphName, configuration);
     }
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.predict.stream.estimate", mode = Mode.READ)
@@ -53,6 +53,6 @@ public class NodeClassificationPipelineStreamProc {
         @Name(value = "graphName") Object graphName,
         @Name(value = "configuration") Map<String, Object> configuration
     ) {
-        return facade.pipelines().nodeClassificationStreamEstimate(graphName, configuration);
+        return facade.pipelines().nodeClassification().streamEstimate(graphName, configuration);
     }
 }

@@ -42,7 +42,7 @@ public class NodeClassificationPipelineAddTrainerMethodProcs {
         @Name("pipelineName") String pipelineName,
         @Name(value = "config", defaultValue = "{}") Map<String, Object> logisticRegressionClassifierConfig
     ) {
-        return facade.pipelines().addLogisticRegression(pipelineName, logisticRegressionClassifierConfig);
+        return facade.pipelines().nodeClassification().addLogisticRegression(pipelineName, logisticRegressionClassifierConfig);
     }
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.addRandomForest", mode = READ)
@@ -51,7 +51,7 @@ public class NodeClassificationPipelineAddTrainerMethodProcs {
         @Name("pipelineName") String pipelineName,
         @Name(value = "config") Map<String, Object> randomForestClassifierConfig
     ) {
-        return facade.pipelines().addRandomForest(pipelineName, randomForestClassifierConfig);
+        return facade.pipelines().nodeClassification().addRandomForest(pipelineName, randomForestClassifierConfig);
     }
 
     @Procedure(name = "gds.alpha.pipeline.nodeClassification.addRandomForest", mode = READ, deprecatedBy = "gds.beta.pipeline.nodeClassification.addRandomForest")
@@ -74,6 +74,6 @@ public class NodeClassificationPipelineAddTrainerMethodProcs {
         @Name("pipelineName") String pipelineName,
         @Name(value = "config", defaultValue = "{}") Map<String, Object> mlpClassifierConfig
     ) {
-        return facade.pipelines().addMLP(pipelineName, mlpClassifierConfig);
+        return facade.pipelines().nodeClassification().addMLP(pipelineName, mlpClassifierConfig);
     }
 }

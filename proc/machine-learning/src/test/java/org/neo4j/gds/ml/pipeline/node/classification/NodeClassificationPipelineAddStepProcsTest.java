@@ -66,8 +66,7 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
             null,
             null,
             null
-
-        ).createPipeline("myPipeline");
+        ).nodeClassification().createPipeline("myPipeline");
     }
 
     @AfterEach
