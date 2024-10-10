@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.pricesteiner;
 
+import com.carrotsearch.hppc.ObjectArrayList;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,8 +27,29 @@ import static org.assertj.core.api.Assertions.assertThat;
 class PairingHeapTest {
 
     @Test
+    void shouldPopAndAddEvents(){
+
+        PairingHeap heap1 = new PairingHeap(new ObjectArrayList<>());
+        heap1.add(1,10);
+        heap1.add(2,20);
+        heap1.add(3,30);
+        heap1.add(4,40);
+        assertThat(heap1.minValue()).isEqualTo(10);
+        heap1.pop();
+        assertThat(heap1.minValue()).isEqualTo(20);
+        heap1.pop();
+        assertThat(heap1.minValue()).isEqualTo(30);
+        heap1.pop();
+        assertThat(heap1.minValue()).isEqualTo(40);
+        heap1.add(5,5);
+        assertThat(heap1.minValue()).isEqualTo(5);
+        heap1.pop();
+        assertThat(heap1.minValue()).isEqualTo(40);
+    }
+
+    @Test
     void shouldBehaveLikeAQueue(){
-        PairingHeap heap = new PairingHeap();
+        PairingHeap heap = new PairingHeap(new ObjectArrayList<>());
         assertThat(heap.empty()).isTrue();
 
         heap.add(1,10);
@@ -56,15 +78,17 @@ class PairingHeapTest {
     }
     @Test
     void shouldMergeQueues(){
-        PairingHeap heap1 = new PairingHeap();
-        PairingHeap heap2 = new PairingHeap();
+        PairingHeap heap1 = new PairingHeap(new ObjectArrayList<>());
+        PairingHeap heap2 = new PairingHeap(new ObjectArrayList<>());
 
-        for (int i=0;i<=4;i+=2) {
-            heap1.add(i, i);
-        }
-        for (int i=1;i<=5;i+=2) {
-            heap2.add(i, i);
-        }
+
+        heap1.add(0,0);
+        heap1.add(2,2);
+        heap1.add(4,4);
+
+        heap2.add(1,1);
+        heap2.add(3,3);
+        heap2.add(5,5);
 
         heap2.join(heap1);
 
@@ -78,7 +102,7 @@ class PairingHeapTest {
 
     @Test
     void shouldWorkWithOffsets(){
-        PairingHeap heap1 = new PairingHeap();
+        PairingHeap heap1 = new PairingHeap(new ObjectArrayList<>());
         heap1.add(1,10);
         heap1.add(2,20);
         heap1.add(3,30);
@@ -99,14 +123,16 @@ class PairingHeapTest {
 
     @Test
     void shouldWorkWithOffsetsOnMeldedHeaps(){
-        PairingHeap heap1 = new PairingHeap();
+        ObjectArrayList<PairingHeapElement> helpingArray = new ObjectArrayList<>();
+
+        PairingHeap heap1 = new PairingHeap(helpingArray);
         heap1.add(1,10);
         heap1.add(2,30);
         heap1.add(3,50);
         heap1.add(4,70);
        heap1.increaseValues(1);
 
-        PairingHeap heap2 = new PairingHeap();
+        PairingHeap heap2 = new PairingHeap(helpingArray);
         heap2.add(1,20);
         heap2.add(2,40);
         heap2.add(3,60);
@@ -129,14 +155,16 @@ class PairingHeapTest {
 
     @Test
     void shouldWorkWithOffsetsOnManyMeldedHeaps(){
-        PairingHeap heap1 = new PairingHeap();
+        ObjectArrayList<PairingHeapElement> helpingArray = new ObjectArrayList<>();
+
+        PairingHeap heap1 = new PairingHeap(helpingArray);
         heap1.add(1,10);
         heap1.add(2,30);
         heap1.add(3,50);
         heap1.add(4,70);
         heap1.increaseValues(1);
 
-        PairingHeap heap2 = new PairingHeap();
+        PairingHeap heap2 = new PairingHeap(helpingArray);
         heap2.add(1,20);
         heap2.add(2,40);
         heap2.add(3,60);
@@ -147,7 +175,7 @@ class PairingHeapTest {
 
         heap2.increaseValues(1);
 
-        PairingHeap heap3 = new PairingHeap();
+        PairingHeap heap3 = new PairingHeap(helpingArray);
         heap3.add(1,0);
         heap3.add(2,200);
         heap3.add(3,300);
