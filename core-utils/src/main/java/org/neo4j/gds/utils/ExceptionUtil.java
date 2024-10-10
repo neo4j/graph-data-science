@@ -31,6 +31,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public final class ExceptionUtil {
 
@@ -93,6 +94,13 @@ public final class ExceptionUtil {
         AutoCloseable... closeables
     ) throws E {
         closeAll(handler, Arrays.asList(closeables));
+    }
+
+    public static <E extends Exception> void closeAll(
+        CheckedConsumer<Exception, E> handler,
+        Stream<AutoCloseable> closeables
+    ) throws E {
+        closeAll(handler, closeables.iterator());
     }
 
     public static <E extends Exception> void closeAll(
