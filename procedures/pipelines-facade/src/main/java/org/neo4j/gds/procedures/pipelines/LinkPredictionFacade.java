@@ -23,10 +23,30 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public class LinkPredictionFacade {
+    private final PipelineConfigurationParser pipelineConfigurationParser;
     private final PipelineApplications pipelineApplications;
 
-    LinkPredictionFacade(PipelineApplications pipelineApplications) {
+    LinkPredictionFacade(
+        PipelineConfigurationParser pipelineConfigurationParser,
+        PipelineApplications pipelineApplications
+    ) {
+        this.pipelineConfigurationParser = pipelineConfigurationParser;
         this.pipelineApplications = pipelineApplications;
+    }
+
+    public Stream<PipelineInfoResult> addFeature(
+        String pipelineNameAsString,
+        String featureType,
+        Map<String, Object> rawConfiguration
+    ) {
+        var pipelineName = PipelineName.parse(pipelineNameAsString);
+        var configuration = pipelineConfigurationParser.parseLinkFeatureStepConfiguration(rawConfiguration);
+
+        var pipeline = pipelineApplications.addFeature(pipelineName, featureType, configuration);
+
+        var result = PipelineInfoResult.create(pipelineName.value, pipeline);
+
+        return Stream.of(result);
     }
 
     public Stream<PipelineInfoResult> addNodeProperty(

@@ -52,7 +52,9 @@ import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStepFactory;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
+import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.LinkFeatureStepConfiguration;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
@@ -227,6 +229,20 @@ class PipelineApplications {
             algorithmEstimationTemplate,
             algorithmProcessingTemplate
         );
+    }
+
+    LinkPredictionTrainingPipeline addFeature(
+        PipelineName pipelineName,
+        String featureType,
+        LinkFeatureStepConfiguration configuration
+    ) {
+        var pipeline = pipelineRepository.getLinkPredictionTrainingPipeline(user, pipelineName);
+
+        var featureStep = LinkFeatureStepFactory.create(featureType, configuration);
+
+        pipeline.addFeatureStep(featureStep);
+
+        return pipeline;
     }
 
     LinkPredictionTrainingPipeline addNodePropertyToLinkPredictionPipeline(
