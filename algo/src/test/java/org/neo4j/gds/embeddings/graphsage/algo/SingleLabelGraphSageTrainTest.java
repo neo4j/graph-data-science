@@ -105,7 +105,7 @@ class SingleLabelGraphSageTrainTest {
     private TestGraph unequalGraph;
 
     @Test
-    void shouldStoreMultiLabelFeatureFunctionInModel() {
+    void shouldStoreSingleLabelFeatureFunctionInModel() {
         Graph weightedGraph = graphStore.getGraph(NodeLabel.of("Dish"), RelationshipType.of("REPLACES"), Optional.empty());
         var config = GraphSageTrainConfigImpl.builder()
             .modelUser("")
@@ -130,7 +130,7 @@ class SingleLabelGraphSageTrainTest {
     }
 
     @Test
-    void runsTrainingOnMultiLabelGraph() {
+    void runsTrainingOnSingleLabelGraph() {
         String modelName = "gsModel";
 
         Graph weightedGraph = graphStore.getGraph(NodeLabel.of("Dish"), RelationshipType.of("REPLACES"), Optional.empty());
