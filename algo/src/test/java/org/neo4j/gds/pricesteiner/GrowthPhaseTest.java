@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -30,9 +31,11 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.List;
 import java.util.function.LongToDoubleFunction;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 
 @GdlExtension
  class GrowthPhaseTest {
@@ -62,14 +65,22 @@ import static org.assertj.core.api.Assertions.assertThat;
             var result = growthPhase.grow();
 
             assertThat(result.activeOriginalNodes().get(graph.toMappedNodeId("a1"))).isFalse();
-            assertThat(result.activeOriginalNodes().get(graph.toMappedNodeId("a2"))).isTrue();
-            assertThat(result.activeOriginalNodes().get(graph.toMappedNodeId("a3"))).isTrue();
+            var a2 = graph.toMappedNodeId("a2");
+            var a3= graph.toMappedNodeId("a3");
+            assertThat(result.activeOriginalNodes().get(a2)).isTrue();
+            assertThat(result.activeOriginalNodes().get(a3)).isTrue();
             assertThat(result.activeOriginalNodes().get(graph.toMappedNodeId("a4"))).isFalse();
 
+            assertThat(result.numberOfTreeEdges()).isEqualTo(1L);
+
+            var treeEdges = result.treeEdges();
+            var treeEdgePairs = result.edgeParts();
+
+            var u =- treeEdgePairs.get(2*treeEdges.get(0));
+            var v = -treeEdgePairs.get(2*treeEdges.get(0) + 1);
+            assertThat(List.of(u,v)).asInstanceOf(LIST).containsExactlyInAnyOrder(a2,a3);
+
         }
-
-
-
 
     }
 
@@ -143,7 +154,77 @@ import static org.assertj.core.api.Assertions.assertThat;
             assertThat(activeNodes.get(2)).isTrue();
             assertThat(activeNodes.get(3)).isTrue();
 
+        }
 
+        @Test
+        void shouldExecuteGrowthPhaseCorrectlyWithUniqueWeights() {
+
+            HugeLongArray prizes = HugeLongArray.newArray(graph.nodeCount());
+            prizes.set(graph.toMappedNodeId("a0"),9);
+            prizes.set(graph.toMappedNodeId("a1"),60);
+            prizes.set(graph.toMappedNodeId("a2"),30);
+            prizes.set(graph.toMappedNodeId("a3"),10);
+            prizes.set(graph.toMappedNodeId("a4"),110);
+
+            var growthPhase = new GrowthPhase(
+                graph,
+                prizes::get,
+                ProgressTracker.NULL_TRACKER,
+                TerminationFlag.RUNNING_TRUE
+            );
+            var growthResult = growthPhase.grow();
+            var clusterStructure = growthPhase.clusterStructure();
+
+
+            assertThat(clusterStructure.inactiveSince(0)).isEqualTo(5.0);
+            assertThat(clusterStructure.inactiveSince(1)).isEqualTo(5.0);
+
+            assertThat(clusterStructure.inactiveSince(2)).isEqualTo(7.5);
+            assertThat(clusterStructure.inactiveSince(3)).isEqualTo(7.5);
+
+            assertThat(clusterStructure.inactiveSince(4)).isEqualTo(27);
+            assertThat(clusterStructure.inactiveSince(5)).isEqualTo(27);
+
+            assertThat(clusterStructure.inactiveSince(6)).isEqualTo(31);
+            assertThat(clusterStructure.inactiveSince(7)).isEqualTo(31);
+
+
+            assertThat(clusterStructure.active(8)).isTrue();
+
+            assertThat(clusterStructure.moatAt(0,31)).isEqualTo(5);
+            assertThat(clusterStructure.moatAt(1,31)).isEqualTo(5);
+
+            assertThat(clusterStructure.moatAt(2,31)).isEqualTo(7.5);
+            assertThat(clusterStructure.moatAt(3,31)).isEqualTo(7.5);
+
+            assertThat(clusterStructure.moatAt(4,31)).isEqualTo(27);
+
+            assertThat(clusterStructure.moatAt(5,31)).isEqualTo(22);
+            assertThat(clusterStructure.moatAt(6,31)).isEqualTo(23.5);
+            assertThat(clusterStructure.moatAt(7,31)).isEqualTo(4);
+
+
+            for (long u=0;u< graph.nodeCount();++u){
+                assertThat(clusterStructure.sumOnEdgePart(u,31))
+                    .satisfies( clusterMoatPair->{
+                        assertThat(clusterMoatPair.totalMoat()).isEqualTo(31);
+                        assertThat(clusterMoatPair.cluster()).isEqualTo(8);
+                    });
+            }
+
+
+            BitSet activeNodes = growthResult.activeOriginalNodes();
+
+            assertThat(activeNodes.cardinality()).isEqualTo(5L);
+
+            var treeEdges = growthResult.treeEdges();
+            var treeEdgeWeights = growthResult.edgeCosts();
+
+            LongToDoubleFunction  costSupplier  =  e ->  treeEdgeWeights.get(treeEdges.get(e));
+            assertThat(List.of(costSupplier.applyAsDouble(0),
+                costSupplier.applyAsDouble(1),
+                costSupplier.applyAsDouble(2),
+                costSupplier.applyAsDouble(3))).asInstanceOf(LIST).containsExactlyInAnyOrder(10.0,62.0,54.0,15.0);
 
         }
     }

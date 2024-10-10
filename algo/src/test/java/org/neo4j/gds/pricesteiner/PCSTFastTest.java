@@ -35,6 +35,7 @@ import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.logging.GdsTestLog;
 
 import java.util.function.LongToDoubleFunction;
+import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
@@ -122,5 +123,58 @@ class PCSTFastTest {
                 );
         }
 
+    }
+
+    @Nested
+    @GdlExtension
+    class HouseGraph{
+
+        @GdlGraph(orientation = Orientation.UNDIRECTED)
+        private static final String DB_CYPHER =
+            "CREATE " +
+                "  (a0:node)," +
+                "  (a1:node)," +
+                "  (a2:node)," +
+                "  (a3:node)," +
+                "  (a4:node)," +
+                "(a0)-[:R{w:10}]->(a1)," +
+                "(a0)-[:R{w:72}]->(a3)," +
+                "(a1)-[:R{w:74}]->(a2)," +
+                "(a1)-[:R{w:62}]->(a3)," +
+                "(a1)-[:R{w:54}]->(a4)," +
+                "(a2)-[:R{w:15}]->(a3)," +
+                "(a2)-[:R{w:62}]->(a4)";
+
+
+        @Inject
+        private  TestGraph graph;
+
+        @Test
+        void shouldFindCorrectAnswer() {
+            LongToDoubleFunction prizes = (x) -> 20.0;
+
+            var pcst =new PCSTFast(graph,prizes,ProgressTracker.NULL_TRACKER);
+            var result =pcst.compute();
+
+            var a0 = graph.toMappedNodeId("a0");
+            var a1 = graph.toMappedNodeId("a1");
+
+            var parents =result.parentArray();
+
+            boolean case1 =   parents.get(a0) == a1 &&  parents.get(a1) == PrizeSteinerTreeResult.ROOT;
+            boolean case2 =   parents.get(a1) == a0 &&  parents.get(a0) == PrizeSteinerTreeResult.ROOT;
+
+            assertThat(
+                LongStream
+                    .range(0, graph.nodeCount())
+                    .filter(v -> v != a0 && v != a1)
+                    .map(parents::get)
+                    .filter(v -> v != PrizeSteinerTreeResult.PRUNED)
+                    .count())
+                .isEqualTo(0l);
+
+            assertThat(case1 ^ case2).isTrue();
+
+        }
     }
 }
