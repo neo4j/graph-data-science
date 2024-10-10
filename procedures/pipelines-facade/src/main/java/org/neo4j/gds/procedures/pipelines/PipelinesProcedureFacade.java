@@ -131,7 +131,7 @@ public final class PipelinesProcedureFacade {
             algorithmProcessingTemplate
         );
 
-        var linkPredictionFacade = new LinkPredictionFacade(pipelineApplications);
+        var linkPredictionFacade = new LinkPredictionFacade(pipelineConfigurationParser, pipelineApplications);
 
         return new PipelinesProcedureFacade(
             nodeClassificationPredictConfigPreProcessor,

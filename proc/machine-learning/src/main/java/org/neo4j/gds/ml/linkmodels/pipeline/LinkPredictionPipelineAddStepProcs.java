@@ -20,11 +20,6 @@
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStepFactory;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
-import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.LinkFeatureStepConfigurationImpl;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.pipelines.PipelineInfoResult;
 import org.neo4j.procedure.Context;
@@ -58,12 +53,6 @@ public class LinkPredictionPipelineAddStepProcs extends BaseProc {
         @Name("featureType") String featureType,
         @Name("configuration") Map<String, Object> config
     ) {
-        var pipeline = PipelineCatalog.getTyped(username(), pipelineName, LinkPredictionTrainingPipeline.class);
-
-        var parsedConfig = new LinkFeatureStepConfigurationImpl(CypherMapWrapper.create(config));
-
-        pipeline.addFeatureStep(LinkFeatureStepFactory.create(featureType, parsedConfig));
-
-        return Stream.of(PipelineInfoResult.create(pipelineName, pipeline));
+        return facade.pipelines().linkPrediction().addFeature(pipelineName, featureType, config);
     }
 }

@@ -27,7 +27,6 @@ import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -61,11 +60,6 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
 
     @Test
     void shouldAddNodePropertyStep() {
-        var orderedConfigs = new LinkedHashMap<>();
-        orderedConfigs.put("mutateProperty", "pr");
-        orderedConfigs.put("contextNodeLabels", List.of());
-        orderedConfigs.put("contextRelationshipTypes", List.of());
-
         assertCypherResult("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('myPipeline', 'pageRank', {mutateProperty: 'pr'})",
             List.of(Map.of("name", "myPipeline",
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
@@ -211,7 +205,7 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
     @Test
     void shouldThrowIfPipelineDoesntExistForFeatureStep() {
         assertError(
-            "CALL gds.beta.pipeline.linkPrediction.addFeature('ceci nest pas une pipe', 'hadamard', {nodeProperties: 'pr'})",
+            "CALL gds.beta.pipeline.linkPrediction.addFeature('ceci nest pas une pipe', 'hadamard', {nodeProperties: ['pr']})",
             "Pipeline with name `ceci nest pas une pipe` does not exist for user ``."
         );
     }
@@ -251,10 +245,10 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
     }
 
     @Test
-    void shouldThrowIfAddingFeatureToANonPipeline() {
+    void shouldThrowIfAddingFeatureToANonLPPipeline() {
         PipelineCatalog.set(getUsername(), "ncPipe", new NodeClassificationTrainingPipeline());
         assertError(
-            "CALL gds.beta.pipeline.linkPrediction.addFeature('ncPipe', 'pageRank', {mutateProperty: 'pr'})",
+            "CALL gds.beta.pipeline.linkPrediction.addFeature('ncPipe', 'pageRank', {nodeProperties: ['pr']})",
             "The pipeline `ncPipe` is of type `Node classification training pipeline`, but expected type `Link prediction training pipeline`"
         );
     }
