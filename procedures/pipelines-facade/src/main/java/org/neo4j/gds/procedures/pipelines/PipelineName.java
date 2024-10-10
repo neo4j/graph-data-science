@@ -22,7 +22,7 @@ package org.neo4j.gds.procedures.pipelines;
 import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.StringIdentifierValidations;
 
-final class PipelineName {
+public final class PipelineName {
     final String value;
 
     private PipelineName(String value) {

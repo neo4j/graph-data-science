@@ -24,26 +24,29 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.pipeline.PipelineCompanion;
+import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public final class NodeClassificationFacade {
+    private final Configurer configurer;
     private final NodeClassificationPredictConfigPreProcessor nodeClassificationPredictConfigPreProcessor;
+
     private final PipelineConfigurationParser pipelineConfigurationParser;
     private final PipelineApplications pipelineApplications;
 
     NodeClassificationFacade(
+        Configurer configurer,
         NodeClassificationPredictConfigPreProcessor nodeClassificationPredictConfigPreProcessor,
         PipelineConfigurationParser pipelineConfigurationParser,
         PipelineApplications pipelineApplications
     ) {
+        this.configurer = configurer;
         this.nodeClassificationPredictConfigPreProcessor = nodeClassificationPredictConfigPreProcessor;
         this.pipelineConfigurationParser = pipelineConfigurationParser;
         this.pipelineApplications = pipelineApplications;
@@ -53,14 +56,17 @@ public final class NodeClassificationFacade {
         ModelCatalog modelCatalog,
         User user,
         PipelineConfigurationParser pipelineConfigurationParser,
-        PipelineApplications pipelineApplications
+        PipelineApplications pipelineApplications,
+        PipelineRepository pipelineRepository
     ) {
+        var configurer = new Configurer(pipelineRepository, user);
         var nodeClassificationPredictConfigPreProcessor = new NodeClassificationPredictConfigPreProcessor(
             modelCatalog,
             user
         );
 
         return new NodeClassificationFacade(
+            configurer,
             nodeClassificationPredictConfigPreProcessor,
             pipelineConfigurationParser,
             pipelineApplications
@@ -71,18 +77,18 @@ public final class NodeClassificationFacade {
         String pipelineName,
         Map<String, Object> configuration
     ) {
-        return configure(
+        return configurer.configureNodeClassificationTrainingPipeline(
             pipelineName,
             () -> pipelineConfigurationParser.parseLogisticRegressionTrainerConfig(configuration),
-            pipelineApplications::addTrainerConfiguration
+            TrainingPipeline::addTrainerConfig
         );
     }
 
     public Stream<NodePipelineInfoResult> addMLP(String pipelineName, Map<String, Object> configuration) {
-        return configure(
+        return configurer.configureNodeClassificationTrainingPipeline(
             pipelineName,
             () -> pipelineConfigurationParser.parseMLPClassifierTrainConfig(configuration),
-            pipelineApplications::addTrainerConfiguration
+            TrainingPipeline::addTrainerConfig
         );
     }
 
@@ -105,28 +111,26 @@ public final class NodeClassificationFacade {
     }
 
     public Stream<NodePipelineInfoResult> addRandomForest(String pipelineName, Map<String, Object> configuration) {
-        return configure(
+        return configurer.configureNodeClassificationTrainingPipeline(
             pipelineName,
-            () -> pipelineConfigurationParser.parseRandomForestClassifierTrainerConfig(
-                configuration),
-            pipelineApplications::addTrainerConfiguration
+            () -> pipelineConfigurationParser.parseRandomForestClassifierTrainerConfig(configuration),
+            TrainingPipeline::addTrainerConfig
         );
     }
 
     public Stream<NodePipelineInfoResult> configureAutoTuning(String pipelineName, Map<String, Object> configuration) {
-        return configure(
+        return configurer.configureNodeClassificationTrainingPipeline(
             pipelineName,
             () -> pipelineConfigurationParser.parseAutoTuningConfig(configuration),
-            pipelineApplications::configureAutoTuning
+            TrainingPipeline::setAutoTuningConfig
         );
     }
 
     public Stream<NodePipelineInfoResult> configureSplit(String pipelineName, Map<String, Object> configuration) {
-        return configure(
+        return configurer.configureNodeClassificationTrainingPipeline(
             pipelineName,
-            () -> pipelineConfigurationParser.parseNodePropertyPredictionSplitConfig(
-                configuration),
-            pipelineApplications::configureSplit
+            () -> pipelineConfigurationParser.parseNodePropertyPredictionSplitConfig(configuration),
+            NodeClassificationTrainingPipeline::setSplitConfig
         );
     }
 
@@ -276,22 +280,6 @@ public final class NodeClassificationFacade {
             graphNameOrConfiguration,
             configuration
         );
-
-        return Stream.of(result);
-    }
-
-    private <CONFIGURATION> Stream<NodePipelineInfoResult> configure(
-        String pipelineNameAsString,
-        Supplier<CONFIGURATION> configurationSupplier,
-        BiFunction<PipelineName, CONFIGURATION, NodeClassificationTrainingPipeline> configurationAction
-    ) {
-        var pipelineName = PipelineName.parse(pipelineNameAsString);
-
-        var configuration = configurationSupplier.get();
-
-        var pipeline = configurationAction.apply(pipelineName, configuration);
-
-        var result = NodePipelineInfoResult.create(pipelineName, pipeline);
 
         return Stream.of(result);
     }

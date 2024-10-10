@@ -51,6 +51,14 @@ public final class PipelineInfoResult {
         this.parameterSpace = parameterSpace;
     }
 
+    public static PipelineInfoResult create(PipelineName pipelineName, LinkPredictionTrainingPipeline pipeline) {
+        return create(pipelineName.value, pipeline);
+    }
+
+    /**
+     * @deprecated migrate to the other one
+     */
+    @Deprecated
     public static PipelineInfoResult create(String pipelineName, LinkPredictionTrainingPipeline pipeline) {
         var nodePropertySteps = pipeline
             .nodePropertySteps()

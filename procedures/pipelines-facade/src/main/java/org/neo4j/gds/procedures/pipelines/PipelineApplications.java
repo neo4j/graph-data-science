@@ -47,8 +47,6 @@ import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.ml.models.Classifier;
-import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
-import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
@@ -56,7 +54,6 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStepFactory;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.LinkFeatureStepConfiguration;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationModelResult;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineModelInfo;
@@ -69,7 +66,6 @@ import org.neo4j.gds.termination.TerminationMonitor;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -274,23 +270,6 @@ class PipelineApplications {
         return pipeline;
     }
 
-    NodeClassificationTrainingPipeline addTrainerConfiguration(
-        PipelineName pipelineName,
-        TunableTrainerConfig configuration
-    ) {
-        return configure(pipelineName, pipeline -> pipeline.addTrainerConfig(configuration));
-    }
-
-    NodeClassificationTrainingPipeline configureAutoTuning(PipelineName pipelineName, AutoTuningConfig configuration) {
-        return configure(pipelineName, pipeline -> pipeline.setAutoTuningConfig(configuration));
-    }
-
-    NodeClassificationTrainingPipeline configureSplit(
-        PipelineName pipelineName, NodePropertyPredictionSplitConfig configuration
-    ) {
-        return configure(pipelineName, pipeline -> pipeline.setSplitConfig(configuration));
-    }
-
     NodeClassificationTrainingPipeline createNodeClassificationTrainingPipeline(PipelineName pipelineName) {
         return pipelineRepository.createNodeClassificationTrainingPipeline(user, pipelineName);
     }
@@ -450,20 +429,6 @@ class PipelineApplications {
         for (NodeFeatureStep nodeFeatureStep : nodeFeatureSteps) {
             pipeline.addFeatureStep(nodeFeatureStep);
         }
-
-        return pipeline;
-    }
-
-    private NodeClassificationTrainingPipeline configure(
-        PipelineName pipelineName,
-        Consumer<NodeClassificationTrainingPipeline> configurationAction
-    ) {
-        var pipeline = pipelineRepository.getNodeClassificationTrainingPipeline(
-            user,
-            pipelineName
-        );
-
-        configurationAction.accept(pipeline);
 
         return pipeline;
     }

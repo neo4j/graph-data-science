@@ -19,19 +19,36 @@
  */
 package org.neo4j.gds.procedures.pipelines;
 
+import org.neo4j.gds.api.User;
+import org.neo4j.gds.ml.pipeline.TrainingPipeline;
+
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class LinkPredictionFacade {
+public final class LinkPredictionFacade {
+    private final Configurer configurer;
+
     private final PipelineConfigurationParser pipelineConfigurationParser;
     private final PipelineApplications pipelineApplications;
 
-    LinkPredictionFacade(
-        PipelineConfigurationParser pipelineConfigurationParser,
+    private LinkPredictionFacade(
+        Configurer configurer, PipelineConfigurationParser pipelineConfigurationParser,
         PipelineApplications pipelineApplications
     ) {
+        this.configurer = configurer;
         this.pipelineConfigurationParser = pipelineConfigurationParser;
         this.pipelineApplications = pipelineApplications;
+    }
+
+    static LinkPredictionFacade create(
+        User user,
+        PipelineConfigurationParser pipelineConfigurationParser,
+        PipelineApplications pipelineApplications,
+        PipelineRepository pipelineRepository
+    ) {
+        var configurer = new Configurer(pipelineRepository, user);
+
+        return new LinkPredictionFacade(configurer, pipelineConfigurationParser, pipelineApplications);
     }
 
     public Stream<PipelineInfoResult> addFeature(
@@ -44,9 +61,17 @@ public class LinkPredictionFacade {
 
         var pipeline = pipelineApplications.addFeature(pipelineName, featureType, configuration);
 
-        var result = PipelineInfoResult.create(pipelineName.value, pipeline);
+        var result = PipelineInfoResult.create(pipelineName, pipeline);
 
         return Stream.of(result);
+    }
+
+    public Stream<PipelineInfoResult> addLogisticRegression(String pipelineName, Map<String, Object> configuration) {
+        return configurer.configureLinkPredictionTrainingPipeline(
+            pipelineName,
+            () -> pipelineConfigurationParser.parseLogisticRegressionTrainerConfig(configuration),
+            TrainingPipeline::addTrainerConfig
+        );
     }
 
     public Stream<PipelineInfoResult> addNodeProperty(
@@ -62,7 +87,7 @@ public class LinkPredictionFacade {
             procedureConfig
         );
 
-        var result = PipelineInfoResult.create(pipelineName.value, pipeline);
+        var result = PipelineInfoResult.create(pipelineName, pipeline);
 
         return Stream.of(result);
     }

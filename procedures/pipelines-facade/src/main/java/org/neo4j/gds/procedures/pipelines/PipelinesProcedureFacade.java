@@ -112,13 +112,19 @@ public final class PipelinesProcedureFacade {
             algorithmProcessingTemplate
         );
 
-        var linkPredictionFacade = new LinkPredictionFacade(pipelineConfigurationParser, pipelineApplications);
+        var linkPredictionFacade = LinkPredictionFacade.create(
+            user,
+            pipelineConfigurationParser,
+            pipelineApplications,
+            pipelineRepository
+        );
 
         var nodeClassificationFacade = NodeClassificationFacade.create(
             modelCatalog,
             user,
             pipelineConfigurationParser,
-            pipelineApplications
+            pipelineApplications,
+            pipelineRepository
         );
 
         return new PipelinesProcedureFacade(

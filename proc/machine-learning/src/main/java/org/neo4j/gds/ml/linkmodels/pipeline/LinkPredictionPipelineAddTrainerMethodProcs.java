@@ -23,12 +23,13 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.ConfigKeyValidation;
 import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
-import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.mlp.MLPClassifierTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.pipelines.PipelineInfoResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -40,6 +41,8 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 
 public class LinkPredictionPipelineAddTrainerMethodProcs extends BaseProc {
+    @Context
+    public GraphDataScienceProcedures facade;
 
     @Procedure(name = "gds.beta.pipeline.linkPrediction.addLogisticRegression", mode = READ)
     @Description("Add a logistic regression configuration to the parameter space of the link prediction train pipeline.")
@@ -47,17 +50,7 @@ public class LinkPredictionPipelineAddTrainerMethodProcs extends BaseProc {
         @Name("pipelineName") String pipelineName,
         @Name(value = "config", defaultValue = "{}") Map<String, Object> logisticRegressionClassifierConfig
     ) {
-        var pipeline = PipelineCatalog.getTyped(username(), pipelineName, LinkPredictionTrainingPipeline.class);
-
-        var allowedKeys = LogisticRegressionTrainConfig.DEFAULT.configKeys();
-        ConfigKeyValidation.requireOnlyKeysFrom(allowedKeys, logisticRegressionClassifierConfig.keySet());
-
-        var tunableTrainerConfig = TunableTrainerConfig.of(logisticRegressionClassifierConfig, TrainingMethod.LogisticRegression);
-        pipeline.addTrainerConfig(
-            tunableTrainerConfig
-        );
-
-        return Stream.of(PipelineInfoResult.create(pipelineName, pipeline));
+        return facade.pipelines().linkPrediction().addLogisticRegression(pipelineName, logisticRegressionClassifierConfig);
     }
 
     @Procedure(name = "gds.beta.pipeline.linkPrediction.addRandomForest", mode = READ)

@@ -61,7 +61,7 @@ class NodeClassificationFacadeTest {
         );
         var facade2 = new PipelinesProcedureFacade(applications, null, null);
 
-        var facade = new NodeClassificationFacade(null, null, applications);
+        var facade = new NodeClassificationFacade(null, null, null, applications);
 
         var result = facade.createPipeline("myPipeline").findAny().orElseThrow();
 
@@ -104,7 +104,7 @@ class NodeClassificationFacadeTest {
             null,
             null
         );
-        var facade = new NodeClassificationFacade(null, null, applications);
+        var facade = new NodeClassificationFacade(null, null, null, applications);
 
         assertThatIllegalStateException()
             .isThrownBy(() -> facade.createPipeline("myPipeline"))
@@ -113,11 +113,7 @@ class NodeClassificationFacadeTest {
 
     @Test
     void shouldNotCreatePipelineWithInvalidName() {
-        var facade = new NodeClassificationFacade(
-            null,
-            null,
-            null
-        );
+        var facade = new NodeClassificationFacade(null, null, null, null);
 
         assertThatIllegalArgumentException()
             .isThrownBy(() -> facade.createPipeline("   blanks!"))
