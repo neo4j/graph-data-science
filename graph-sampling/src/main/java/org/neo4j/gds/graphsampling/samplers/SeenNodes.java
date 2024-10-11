@@ -26,6 +26,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Arrays;
 
@@ -40,14 +41,16 @@ public interface SeenNodes {
     long totalExpectedNodes();
 
     static SeenNodes create(
-        Graph inputGraph, ProgressTracker progressTracker, boolean nodeLabelStratification,
+        Graph inputGraph, ProgressTracker progressTracker, TerminationFlag terminationFlag,
+        boolean nodeLabelStratification,
         Concurrency concurrency, double samplingRatio
     ) {
         if (nodeLabelStratification) {
             var nodeLabelHistogram = NodeLabelHistogram.compute(
                 inputGraph,
                 concurrency,
-                progressTracker
+                progressTracker,
+                terminationFlag
             );
 
             return new SeenNodes.SeenNodesByLabelSet(inputGraph, nodeLabelHistogram, samplingRatio);

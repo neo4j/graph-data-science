@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.graphsampling;
 
-public interface RandomWalkBasedNodesSampler extends NodesSampler {
+public abstract class RandomWalkBasedNodesSampler extends NodesSampler {
 
-    long startNodesCount();
+    public abstract long startNodesCount();
 
 }

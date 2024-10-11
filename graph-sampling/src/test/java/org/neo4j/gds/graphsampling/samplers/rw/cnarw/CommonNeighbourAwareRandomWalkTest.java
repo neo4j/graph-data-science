@@ -27,7 +27,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -37,6 +36,9 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.graphsampling.config.CommonNeighbourAwareRandomWalkConfig;
 import org.neo4j.gds.graphsampling.config.CommonNeighbourAwareRandomWalkConfigImpl;
+import org.neo4j.gds.mem.MemoryRange;
+import org.neo4j.gds.termination.TerminatedException;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -47,6 +49,7 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.Orientation.NATURAL;
 import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
@@ -649,5 +652,22 @@ class CommonNeighbourAwareRandomWalkTest {
             new Concurrency(1),
             MemoryRange.of(124_272L)
         );
+    }
+
+    @Test
+    void checkTerminationFlag() {
+        var config = CommonNeighbourAwareRandomWalkConfigImpl.builder()
+            .startNodes(List.of(naturalIdFunction.of("a")))
+            .relationshipWeightProperty("prop")
+            .samplingRatio(0.5)
+            .restartProbability(0.1)
+            .randomSeed(42L)
+            .concurrency(1)
+            .build();
+        var cnarw = new CommonNeighbourAwareRandomWalk(config);
+        cnarw.setTerminationFlag(TerminationFlag.STOP_RUNNING);
+        assertThatThrownBy(() -> cnarw.compute(naturalGraph, ProgressTracker.NULL_TRACKER))
+            .isInstanceOf(TerminatedException.class)
+            .hasMessageContaining("The execution has been terminated.");
     }
 }

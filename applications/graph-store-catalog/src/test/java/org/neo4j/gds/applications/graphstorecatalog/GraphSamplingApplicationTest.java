@@ -38,6 +38,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Map;
@@ -118,6 +119,7 @@ class GraphSamplingApplicationTest {
             EmptyUserLogRegistryFactory.INSTANCE,
             graphStore,
             GraphProjectConfig.emptyWithName("user", "graph"),
+            TerminationFlag.RUNNING_TRUE,
             GraphName.parse("graph"),
             GraphName.parse("sample"),
             mapConfiguration,
@@ -157,6 +159,7 @@ class GraphSamplingApplicationTest {
             EmptyUserLogRegistryFactory.INSTANCE,
             graphStore,
             GraphProjectConfig.emptyWithName("user", "graph"),
+            TerminationFlag.RUNNING_TRUE,
             GraphName.parse("graph"),
             GraphName.parse("sample"),
             mapConfiguration,
@@ -196,6 +199,7 @@ class GraphSamplingApplicationTest {
             EmptyUserLogRegistryFactory.INSTANCE,
             graphStore,
             GraphProjectConfig.emptyWithName("user", "graph"),
+            TerminationFlag.RUNNING_TRUE,
             GraphName.parse("graph"),
             GraphName.parse("sample"),
             Map.of(
@@ -239,6 +243,7 @@ class GraphSamplingApplicationTest {
             EmptyUserLogRegistryFactory.INSTANCE,
             graphStore,
             GraphProjectConfig.emptyWithName("user", "graph"),
+            TerminationFlag.RUNNING_TRUE,
             GraphName.parse("graph"),
             GraphName.parse("sample"),
             Map.of(

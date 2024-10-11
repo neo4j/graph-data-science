@@ -591,6 +591,7 @@ public class LocalGraphCatalogProcedureFacade implements GraphCatalogProcedureFa
             requestScopedDependencies.getDatabaseId(),
             requestScopedDependencies.getTaskRegistryFactory(),
             requestScopedDependencies.getUserLogRegistryFactory(),
+            requestScopedDependencies.getTerminationFlag(),
             graphName,
             originGraphName,
             configuration
@@ -610,6 +611,7 @@ public class LocalGraphCatalogProcedureFacade implements GraphCatalogProcedureFa
             requestScopedDependencies.getDatabaseId(),
             requestScopedDependencies.getTaskRegistryFactory(),
             requestScopedDependencies.getUserLogRegistryFactory(),
+            requestScopedDependencies.getTerminationFlag(),
             graphName,
             originGraphName,
             configuration

@@ -43,7 +43,7 @@ import org.neo4j.gds.graphsampling.samplers.rw.WalkerProducer;
 import java.util.Optional;
 import java.util.SplittableRandom;
 
-public class RandomWalkWithRestarts implements RandomWalkBasedNodesSampler {
+public class RandomWalkWithRestarts extends RandomWalkBasedNodesSampler {
     public static final double QUALITY_MOMENTUM = 0.9;
     private static final double QUALITY_THRESHOLD_BASE = 0.05;
     public static final int MAX_WALKS_PER_START = 100;
@@ -69,6 +69,7 @@ public class RandomWalkWithRestarts implements RandomWalkBasedNodesSampler {
         var seenNodes = SeenNodes.create(
             inputGraph,
             progressTracker,
+            terminationFlag,
             config.nodeLabelStratification(),
             concurrency,
             config.samplingRatio()
@@ -94,7 +95,8 @@ public class RandomWalkWithRestarts implements RandomWalkBasedNodesSampler {
                 rng.split(),
                 inputGraph.concurrentCopy(),
                 config,
-                progressTracker
+                progressTracker,
+                terminationFlag
             )
         );
 

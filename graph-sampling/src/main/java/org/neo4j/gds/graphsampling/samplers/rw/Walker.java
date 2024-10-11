@@ -27,6 +27,7 @@ import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.graphsampling.samplers.SeenNodes;
 import org.neo4j.gds.graphsampling.samplers.rw.rwr.RandomWalkWithRestarts;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.SplittableRandom;
@@ -41,6 +42,7 @@ public class Walker implements Runnable {
     protected final Graph inputGraph;
     private final double restartProbability;
     protected final ProgressTracker progressTracker;
+    private final TerminationFlag terminationFlag;
 
     private final LongSet startNodesUsed;
 
@@ -55,6 +57,7 @@ public class Walker implements Runnable {
         Graph inputGraph,
         double restartProbability,
         ProgressTracker progressTracker,
+        TerminationFlag terminationFlag,
         NextNodeStrategy nextNodeStrategy
     ) {
         this.seenNodes = seenNodes;
@@ -65,6 +68,7 @@ public class Walker implements Runnable {
         this.inputGraph = inputGraph;
         this.restartProbability = restartProbability;
         this.progressTracker = progressTracker;
+        this.terminationFlag = terminationFlag;
         this.startNodesUsed = new LongHashSet();
         this.nextNodeStrategy = nextNodeStrategy;
     }
@@ -78,7 +82,7 @@ public class Walker implements Runnable {
         int nodesConsidered = 1;
         int walksLeft = (int) Math.round(walkQualities.nodeQuality(currentStartNodePosition) * RandomWalkWithRestarts.MAX_WALKS_PER_START);
 
-        while (!seenNodes.hasSeenEnough()) {
+        while (!seenNodes.hasSeenEnough() && terminationFlag.running()) {
             if (seenNodes.addNode(currentNode)) {
                 addedNodes++;
             }
@@ -118,6 +122,7 @@ public class Walker implements Runnable {
                 nodesConsidered++;
             }
         }
+        terminationFlag.assertRunning();
     }
 
     private double computeDegree(long currentNode) {

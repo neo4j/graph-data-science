@@ -45,6 +45,7 @@ import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Map;
@@ -57,18 +58,21 @@ public class GraphSampleConstructor {
     private final GraphStore inputGraphStore;
     private final NodesSampler nodesSampler;
     private final ProgressTracker progressTracker;
+    private final TerminationFlag terminationFlag;
 
     public GraphSampleConstructor(
         GraphSampleAlgoConfig config,
         GraphStore inputGraphStore,
         NodesSampler nodesSampler,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         this.config = config;
         this.concurrency = config.concurrency();
         this.inputGraphStore = inputGraphStore;
         this.nodesSampler = nodesSampler;
         this.progressTracker = progressTracker;
+        this.terminationFlag = terminationFlag;
     }
 
     public GraphStore compute() {
@@ -79,6 +83,8 @@ public class GraphSampleConstructor {
             config.internalRelationshipTypes(inputGraphStore),
             config.relationshipWeightProperty()
         );
+        nodesSampler.setTerminationFlag(terminationFlag);
+
         var sampledNodesBitSet = nodesSampler.compute(inputGraph, progressTracker);
 
         progressTracker.beginSubTask("Construct graph");

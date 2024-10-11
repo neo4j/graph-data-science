@@ -27,6 +27,7 @@ import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 import org.neo4j.gds.graphsampling.samplers.SeenNodes;
 import org.neo4j.gds.graphsampling.samplers.rw.cnarw.CNARWNodeSamplingStrategySupplier;
 import org.neo4j.gds.graphsampling.samplers.rw.rwr.RWRNodeSamplingStrategySupplier;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.SplittableRandom;
@@ -47,7 +48,8 @@ private final NodeSamplingStrategySupplier nodeSamplingStrategySupplier;
         SplittableRandom split,
         Graph concurrentCopy,
         RandomWalkWithRestartsConfig config,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         return new Walker(
             seenNodes,
@@ -58,6 +60,7 @@ private final NodeSamplingStrategySupplier nodeSamplingStrategySupplier;
             concurrentCopy,
             config.restartProbability(),
             progressTracker,
+            terminationFlag,
             nodeSamplingStrategySupplier.apply(concurrentCopy, split, totalWeights)
         );
     }

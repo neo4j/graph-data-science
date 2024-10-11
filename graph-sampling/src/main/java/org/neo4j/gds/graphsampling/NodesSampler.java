@@ -24,11 +24,25 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.termination.TerminationFlag;
 
-public interface NodesSampler {
-    HugeAtomicBitSet compute(Graph inputGraph, ProgressTracker progressTracker);
+public abstract class NodesSampler {
+    protected abstract HugeAtomicBitSet compute(
+        Graph inputGraph,
+        ProgressTracker progressTracker
+    );
 
-    Task progressTask(GraphStore graphStore);
+    protected abstract Task progressTask(GraphStore graphStore);
 
-    String progressTaskName();
+    protected abstract String progressTaskName();
+
+    protected volatile TerminationFlag terminationFlag = TerminationFlag.RUNNING_TRUE;
+
+    public void setTerminationFlag(TerminationFlag terminationFlag) {
+        this.terminationFlag = terminationFlag;
+    }
+
+    public TerminationFlag getTerminationFlag() {
+        return terminationFlag;
+    }
 }

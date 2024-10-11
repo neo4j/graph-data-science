@@ -32,6 +32,7 @@ import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.graphsampling.GraphSampleConstructor;
 import org.neo4j.gds.graphsampling.RandomWalkSamplerType;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 
@@ -50,6 +51,7 @@ public final class GraphSamplingApplication {
         UserLogRegistryFactory userLogRegistryFactory,
         GraphStore graphStore,
         GraphProjectConfig graphProjectConfig,
+        TerminationFlag terminationFlag,
         GraphName originGraphName,
         GraphName graphName,
         Map<String, Object> configuration,
@@ -73,7 +75,8 @@ public final class GraphSamplingApplication {
                 samplerConfig,
                 graphStore,
                 samplerAlgorithm,
-                progressTracker
+                progressTracker,
+                terminationFlag
             );
             var sampledGraphStore = graphSampleConstructor.compute();
 

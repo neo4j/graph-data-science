@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.graphsampling;
 
+import org.neo4j.gds.termination.TerminationFlag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -98,7 +99,7 @@ class GraphSampleConstructorTest {
     @Inject
     private IdFunction undirectedIdFunction;
 
-    static class TestNodesSampler implements NodesSampler {
+    static class TestNodesSampler extends NodesSampler {
 
         private final List<Long> originalIds;
 
@@ -151,7 +152,8 @@ class GraphSampleConstructorTest {
             config,
             naturalGraphStore,
             new TestNodesSampler(originalIds),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var subgraph = graphConstructor.compute();
@@ -208,7 +210,8 @@ class GraphSampleConstructorTest {
             config,
             undirectedGraphStore,
             new TestNodesSampler(originalIds),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var sampledGraph = graphConstructor.compute();
@@ -272,7 +275,8 @@ class GraphSampleConstructorTest {
             config,
             naturalGraphStore,
             new TestNodesSampler(originalIds),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var subgraph = graphConstructor.compute();
@@ -310,7 +314,8 @@ class GraphSampleConstructorTest {
             config,
             naturalGraphStore,
             rwr,
-            progressTracker
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         );
         rwrGraphConstructor.compute();
 

@@ -31,6 +31,8 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfigImpl;
+import org.neo4j.gds.termination.TerminatedException;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,6 +41,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 @GdlExtension
 class RandomWalkWithRestartsTest {
@@ -168,6 +171,7 @@ class RandomWalkWithRestartsTest {
         for (int i = 0; i < 250; i++) {
             var rwr = new RandomWalkWithRestarts(config);
             var nodes = rwr.compute(graph, ProgressTracker.NULL_TRACKER);
+
             if (rwr.startNodesUsed().contains(idFunction.of("x1")) || rwr
                 .startNodesUsed()
                 .contains(idFunction.of("x2"))) {
@@ -375,5 +379,25 @@ class RandomWalkWithRestartsTest {
         assertThat(casesPassedX1 / validCases).isCloseTo(0.33, Offset.offset(0.02));
         assertThat(casesPassedX2 / validCases).isCloseTo(0.33, Offset.offset(0.02));
         assertThat(casesPassedX3 / validCases).isCloseTo(0.33, Offset.offset(0.02));
+    }
+
+    @Test
+    void checkTerminationFlag() {
+        var config = RandomWalkWithRestartsConfigImpl.builder()
+            .startNodes(List.of(idFunction.of("a")))
+            .samplingRatio(0.5)
+            .restartProbability(0.1)
+            .randomSeed(42L)
+            .concurrency(1)
+            .nodeLabelStratification(true)
+            .build();
+
+        var rwr = new RandomWalkWithRestarts(config);
+        rwr.setTerminationFlag(TerminationFlag.STOP_RUNNING);
+        var graph = getGraph(config);
+
+        assertThatThrownBy(() -> rwr.compute(graph, ProgressTracker.NULL_TRACKER))
+            .isInstanceOf(TerminatedException.class)
+            .hasMessageContaining("The execution has been terminated.");
     }
 }

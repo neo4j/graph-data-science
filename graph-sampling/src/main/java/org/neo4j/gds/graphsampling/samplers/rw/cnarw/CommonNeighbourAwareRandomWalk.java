@@ -27,8 +27,6 @@ import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -41,13 +39,15 @@ import org.neo4j.gds.graphsampling.samplers.rw.InitialStartQualities;
 import org.neo4j.gds.graphsampling.samplers.rw.WalkQualities;
 import org.neo4j.gds.graphsampling.samplers.rw.Walker;
 import org.neo4j.gds.graphsampling.samplers.rw.WalkerProducer;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
 
 import java.util.Optional;
 import java.util.SplittableRandom;
 
 import static org.neo4j.gds.graphsampling.samplers.rw.RandomWalkCompanion.initializeTotalWeights;
 
-public class CommonNeighbourAwareRandomWalk implements RandomWalkBasedNodesSampler {
+public class CommonNeighbourAwareRandomWalk extends RandomWalkBasedNodesSampler {
     private LongHashSet startNodesUsed;
 
     private static final double QUALITY_THRESHOLD_BASE = 0.05;
@@ -71,6 +71,7 @@ public class CommonNeighbourAwareRandomWalk implements RandomWalkBasedNodesSampl
         var seenNodes = SeenNodes.create(
             inputGraph,
             progressTracker,
+            terminationFlag,
             config.nodeLabelStratification(),
             concurrency,
             config.samplingRatio()
@@ -93,7 +94,8 @@ public class CommonNeighbourAwareRandomWalk implements RandomWalkBasedNodesSampl
                 rng.split(),
                 inputGraph.concurrentCopy(),
                 config,
-                progressTracker
+                progressTracker,
+                terminationFlag
             )
         );
 

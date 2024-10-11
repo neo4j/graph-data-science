@@ -255,6 +255,7 @@ public interface GraphCatalogApplications {
         DatabaseId databaseId,
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory,
+        TerminationFlag terminationFlag,
         String graphName,
         String originGraphName,
         Map<String, Object> configuration
@@ -265,6 +266,7 @@ public interface GraphCatalogApplications {
         DatabaseId databaseId,
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory,
+        TerminationFlag terminationFlag,
         String graphName,
         String originGraphName,
         Map<String, Object> configuration
