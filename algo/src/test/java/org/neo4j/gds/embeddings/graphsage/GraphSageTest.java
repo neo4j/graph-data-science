@@ -56,6 +56,8 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.GdsTestLog;
+import org.neo4j.gds.termination.TerminatedException;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Arrays;
 import java.util.List;
@@ -63,6 +65,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.stream.LongStream;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.neo4j.gds.TestGdsVersion.testGdsVersion;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
@@ -149,6 +152,7 @@ class GraphSageTest {
             TrainConfigTransformer.toParameters(trainConfig),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE,
             testGdsVersion,
             trainConfig
         );
@@ -187,6 +191,7 @@ class GraphSageTest {
             TrainConfigTransformer.toParameters(trainConfig),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE,
             testGdsVersion,
             trainConfig
         );
@@ -212,7 +217,8 @@ class GraphSageTest {
             new Concurrency(4),
             2,
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         assertThat(graphSage.compute().embeddings().size()).isEqualTo(predictNodeCount);
@@ -279,5 +285,42 @@ class GraphSageTest {
                 "GraphSage 100%",
                 "GraphSage :: Finished"
             );
+    }
+
+    @Test
+    void testTermination() {
+        var trainConfig = configBuilder
+            .modelName(MODEL_NAME)
+            .featureProperties(List.of("f1"))
+            .relationshipWeightProperty("weight")
+            .build();
+
+        var graphSageTrain = new GraphSageTrainAlgorithmFactory().build(
+            graph,
+            trainConfig,
+            ProgressTracker.NULL_TRACKER
+        );
+
+        modelCatalog.set(graphSageTrain.compute());
+
+        var streamConfig = GraphSageStreamConfigImpl
+            .builder()
+            .modelUser("")
+            .modelName(MODEL_NAME)
+            .batchSize(1)
+            .build();
+
+        var log = new GdsTestLog();
+        var graphSage = new GraphSageAlgorithmFactory<>(modelCatalog).build(
+            graph,
+            streamConfig,
+            log,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+        graphSage.setTerminationFlag(TerminationFlag.STOP_RUNNING);
+
+        assertThatThrownBy(graphSage::compute)
+            .isInstanceOf(TerminatedException.class)
+            .hasMessageContaining("The execution has been terminated.");
     }
 }

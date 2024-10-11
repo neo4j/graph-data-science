@@ -40,6 +40,7 @@ import org.neo4j.gds.ml.core.subgraph.SubGraph;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,15 +67,17 @@ public class GraphSageModelTrainer {
     private final ExecutorService executor;
     private final ProgressTracker progressTracker;
     private final Layer[] layers;
+    private final TerminationFlag terminationFlag;
 
-    public GraphSageModelTrainer(GraphSageTrainParameters parameters, int featureDimension, ExecutorService executor, ProgressTracker progressTracker) {
-        this(parameters, executor, progressTracker, new SingleLabelFeatureFunction(), Collections.emptyList(), featureDimension);
+    public GraphSageModelTrainer(GraphSageTrainParameters parameters, int featureDimension, ExecutorService executor, ProgressTracker progressTracker, TerminationFlag terminationFlag) {
+        this(parameters, executor, progressTracker, terminationFlag, new SingleLabelFeatureFunction(), Collections.emptyList(), featureDimension);
     }
 
     public GraphSageModelTrainer(
         GraphSageTrainParameters parameters,
         ExecutorService executor,
         ProgressTracker progressTracker,
+        TerminationFlag terminationFlag,
         FeatureFunction featureFunction,
         Collection<Weights<Matrix>> labelProjectionWeights,
         int featureDimension
@@ -84,6 +87,7 @@ public class GraphSageModelTrainer {
         this.labelProjectionWeights = labelProjectionWeights;
         this.executor = executor;
         this.progressTracker = progressTracker;
+        this.terminationFlag = terminationFlag;
         this.randomSeed = parameters.randomSeed().orElseGet(() -> ThreadLocalRandom.current().nextLong());
         this.layers = parameters.layerConfigs(featureDimension)
             .stream()
@@ -114,7 +118,7 @@ public class GraphSageModelTrainer {
 
         progressTracker.beginSubTask("Prepare batches");
 
-        var batchSampler = new BatchSampler(graph, progressTracker);
+        var batchSampler = new BatchSampler(graph, progressTracker, terminationFlag);
 
         List<long[]> extendedBatches = batchSampler
             .extendedBatches(parameters.batchSize(), parameters.searchDepth(), randomSeed);
@@ -135,6 +139,7 @@ public class GraphSageModelTrainer {
 
         for (int epoch = 1; epoch <= epochs && !converged; epoch++) {
             progressTracker.beginSubTask("Epoch");
+            terminationFlag.assertRunning();
             // also tried using random.nextLong() but this somehow had a worse quality
             long epochLocalSeed = epoch + randomSeed;
 
@@ -254,6 +259,7 @@ public class GraphSageModelTrainer {
         int maxIterations = parameters.maxIterations();
         for (; iteration <= maxIterations; iteration++) {
             progressTracker.beginSubTask("Iteration");
+            terminationFlag.assertRunning();
 
             var sampledBatchTasks = sampledBatchTaskSupplier.get();
 

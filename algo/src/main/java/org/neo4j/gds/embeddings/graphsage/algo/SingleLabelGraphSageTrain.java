@@ -26,6 +26,7 @@ import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.concurrent.ExecutorService;
 
@@ -45,10 +46,11 @@ public class SingleLabelGraphSageTrain extends GraphSageTrain {
         GraphSageTrainParameters parameters,
         ExecutorService executor,
         ProgressTracker progressTracker,
+        TerminationFlag terminationFlag,
         String gdsVersion,
         GraphSageTrainConfig config // TODO: Last trace of UI config in here--Once we attach Parameters to Models we can lose this too
     ) {
-        super(progressTracker);
+        super(progressTracker, terminationFlag);
         this.graph = graph;
         this.parameters = parameters;
         this.executor = executor;
@@ -65,7 +67,8 @@ public class SingleLabelGraphSageTrain extends GraphSageTrain {
             parameters,
             featureDimension,
             executor,
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
 
         GraphSageModelTrainer.ModelTrainResult trainResult = graphSageModel.train(

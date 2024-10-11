@@ -30,6 +30,7 @@ import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.Layer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.concurrent.ExecutorService;
 
@@ -52,7 +53,8 @@ public class GraphSage extends Algorithm<GraphSageResult> {
         Concurrency concurrency,
         int batchSize,
         ExecutorService executor,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -60,6 +62,7 @@ public class GraphSage extends Algorithm<GraphSageResult> {
         this.batchSize = batchSize;
         this.model = model;
         this.executor = executor;
+        this.terminationFlag = terminationFlag;
     }
 
     @Override
@@ -73,7 +76,8 @@ public class GraphSage extends Algorithm<GraphSageResult> {
             model.data().featureFunction(),
             model.trainConfig().randomSeed(),
             executor,
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
 
         GraphSageTrainConfig trainConfig = model.trainConfig();

@@ -19,6 +19,7 @@ dependencies {
     implementation project(':subgraph-filtering')
     implementation project(':memory-usage')
     implementation project(':string-formatting')
+    implementation project(':termination')
 
     compileOnly openGds.immutables.value.annotations
     compileOnly openGds.jetbrains.annotations
@@ -34,6 +35,7 @@ dependencies {
     testImplementation project(':core-test-utils')
     testImplementation project(':logging')
     testImplementation project(':test-utils')
+    testImplementation project(':termination')
     testCompileOnly openGds.immutables.value.annotations
     testCompileOnly openGds.immutables.builder
     testCompileOnly openGds.jetbrains.annotations

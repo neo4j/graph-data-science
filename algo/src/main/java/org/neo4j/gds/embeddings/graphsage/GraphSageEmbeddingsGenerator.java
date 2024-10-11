@@ -20,9 +20,9 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -30,6 +30,7 @@ import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.subgraph.SubGraph;
 import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Optional;
@@ -44,6 +45,7 @@ public class GraphSageEmbeddingsGenerator {
     private final long randomSeed;
     private final ExecutorService executor;
     private final ProgressTracker progressTracker;
+    private final TerminationFlag terminationFlag;
 
     public GraphSageEmbeddingsGenerator(
         Layer[] layers,
@@ -52,7 +54,8 @@ public class GraphSageEmbeddingsGenerator {
         FeatureFunction featureFunction,
         Optional<Long> randomSeed,
         ExecutorService executor,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         this.layers = layers;
         this.batchSize = batchSize;
@@ -61,6 +64,7 @@ public class GraphSageEmbeddingsGenerator {
         this.randomSeed = randomSeed.orElseGet(() -> ThreadLocalRandom.current().nextLong());
         this.executor = executor;
         this.progressTracker = progressTracker;
+        this.terminationFlag = terminationFlag;
     }
 
     public HugeObjectArray<double[]> makeEmbeddings(
@@ -77,7 +81,7 @@ public class GraphSageEmbeddingsGenerator {
         var tasks = PartitionUtils.rangePartitionWithBatchSize(
             graph.nodeCount(),
             batchSize,
-            partition -> createEmbeddings(graph.concurrentCopy(), partition, features, result)
+            partition -> createEmbeddings(graph.concurrentCopy(), partition, features, result, terminationFlag)
         );
 
         RunWithConcurrency.builder()
@@ -95,9 +99,11 @@ public class GraphSageEmbeddingsGenerator {
         Graph graph,
         Partition partition,
         HugeObjectArray<double[]> features,
-        HugeObjectArray<double[]> result
+        HugeObjectArray<double[]> result,
+        TerminationFlag terminationFlag
     ) {
         return () -> {
+            terminationFlag.assertRunning();
             List<SubGraph> subGraphs = GraphSageHelper.subGraphsPerLayer(
                 graph,
                 partition.stream().toArray(),
