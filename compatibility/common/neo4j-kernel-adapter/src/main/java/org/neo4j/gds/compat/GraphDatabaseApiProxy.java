@@ -31,9 +31,11 @@ import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.security.LoginContext;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.api.procedure.CallableProcedure;
 import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
 import org.neo4j.kernel.api.procedure.CallableUserFunction;
+import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
@@ -69,6 +71,12 @@ public final class GraphDatabaseApiProxy {
 
     public static DependencyResolver dependencyResolver(GraphDatabaseService db) {
         return cast(db).getDependencyResolver();
+    }
+
+    public static <T> T lookupComponentProvider(Context ctx, Class<T> component, boolean safe)
+    throws ProcedureException {
+        var globalProcedures = resolveDependency(ctx.dependencyResolver(), GlobalProcedures.class);
+        return globalProcedures.getCurrentView().lookupComponentProvider(component, safe).apply(ctx);
     }
 
     public static void registerProcedures(GraphDatabaseService db, Class<?>... procedureClasses)
@@ -239,6 +247,9 @@ public final class GraphDatabaseApiProxy {
     }
 
     private static void rethrowUnlessDuplicateRegistration(ProcedureException e) throws KernelException {
-        Neo4jProxy.rethrowUnlessDuplicateRegistration(e);
+        if (e.status() == Status.Procedure.ProcedureRegistrationFailed && e.getMessage().contains("already in use")) {
+            return;
+        }
+        throw e;
     }
 }

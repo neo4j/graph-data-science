@@ -27,7 +27,6 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
 import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.api.PropertyState;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.ConfigKeyValidation;
 import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -49,6 +48,7 @@ import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.UserAggregationReducer;
 import org.neo4j.internal.kernel.api.procs.UserAggregationUpdater;
+import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.impl.util.ValueUtils;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.NoValue;
@@ -282,7 +282,8 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
             result = buildGraph();
         } catch (Exception e) {
             projectionMetric.failed(e);
-            throw Neo4jProxy.procedureCallFailed(
+            throw new ProcedureException(
+                Status.Procedure.ProcedureCallFailed,
                 e,
                 "Failed to invoke function `%s`: Caused by: %s",
                 CypherAggregation.FUNCTION_NAME,

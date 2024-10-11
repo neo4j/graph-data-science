@@ -20,7 +20,6 @@
 package org.neo4j.gds.legacycypherprojection;
 
 import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.RecordsBatchBuffer;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.graphdb.security.AuthorizationViolationException;
@@ -30,6 +29,7 @@ import org.neo4j.kernel.impl.query.Neo4jTransactionalContextFactory;
 import org.neo4j.kernel.impl.query.QueryExecution;
 import org.neo4j.kernel.impl.query.QueryExecutionConfiguration;
 import org.neo4j.kernel.impl.query.QueryExecutionEngine;
+import org.neo4j.kernel.impl.query.QueryExecutionKernelException;
 import org.neo4j.kernel.impl.query.QuerySubscriber;
 import org.neo4j.kernel.impl.query.TransactionalContextFactory;
 import org.neo4j.kernel.impl.util.ValueUtils;
@@ -162,8 +162,12 @@ abstract class CypherRecordLoader<R> {
         var context = contextFactory.newContext(tx, query, convertedParams, QueryExecutionConfiguration.DEFAULT_CONFIG);
         try {
             return executionEngine.executeQuery(query, convertedParams, context, false, subscriber);
+        } catch (RuntimeException re) {
+            throw re;
+        } catch (QueryExecutionKernelException e) {
+            throw e.asUserException();
         } catch (Exception e) {
-            throw Neo4jProxy.queryExceptionAsRuntimeException(e);
+            throw new RuntimeException(e);
         }
     }
 

@@ -35,7 +35,6 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.DimensionsMap;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
@@ -59,7 +58,7 @@ import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.values.GdsValue;
 import org.neo4j.gds.values.primitive.PrimitiveValues;
-import org.neo4j.values.storable.ArrayValue;
+import org.neo4j.values.SequenceValue;
 import org.neo4j.values.storable.Values;
 import org.s1ck.gdl.GDLHandler;
 import org.s1ck.gdl.model.Element;
@@ -422,9 +421,10 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
             gdlHandler.getVertices().forEach(v -> v.getProperties().forEach((propertyKey, propertyValue) -> {
                 if (propertyValue instanceof List<?>) {
                     var array = convertListProperty(((List<?>) propertyValue));
+                    var listValue = (SequenceValue) Values.of(array);
                     nodePropertyDimensions.put(
                         propertyKey,
-                        Optional.of(Neo4jProxy.sequenceSizeAsInt((ArrayValue) Values.of(array)))
+                        Optional.of(listValue.intSize())
                     );
                 } else {
                     nodePropertyDimensions.put(propertyKey, Optional.of(1));

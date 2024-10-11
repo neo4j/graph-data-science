@@ -29,6 +29,6 @@ class Neo4jProxyTest {
     @Test
     void shouldLoadProxySuccessfully() {
         // Any access to the proxy will trigger loading an implementation
-        assertThatCode(() -> Neo4jProxy.sequenceSizeAsInt(Values.EMPTY_BOOLEAN_ARRAY)).doesNotThrowAnyException();
+        assertThatCode(() -> Values.EMPTY_BOOLEAN_ARRAY.intSize()).doesNotThrowAnyException();
     }
 }
