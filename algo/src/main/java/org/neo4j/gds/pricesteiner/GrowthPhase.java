@@ -213,15 +213,15 @@ class GrowthPhase {
         boolean vClusterActive
     ) {
         if (vClusterActive) {
-            edgeEventsQueue.addWithCheck(uCluster, vPart, moat + r / 2);
-            edgeEventsQueue.addWithCheck(vCluster, uPart, moat + r / 2);
+            edgeEventsQueue.addWithCheck(uCluster, uPart, moat + r / 2);
+            edgeEventsQueue.addWithCheck(vCluster, vPart, moat + r / 2);
         } else {
-            edgeEventsQueue.addWithCheck(uCluster, vPart, moat + r);
+            edgeEventsQueue.addWithCheck(uCluster, uPart, moat + r);
             /*
             * remember that we do a increase operation when merging queues, so the `moat` will become equal to mergeTimeStamp
             * and processed next iteration
             */
-            edgeEventsQueue.addWithoutCheck(vCluster, uPart, moat);
+            edgeEventsQueue.addWithoutCheck(vCluster, vPart, moat);
         }
     }
 

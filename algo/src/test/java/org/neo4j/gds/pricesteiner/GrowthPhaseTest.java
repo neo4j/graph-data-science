@@ -229,5 +229,66 @@ import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
         }
     }
 
+    @Nested
+    @GdlExtension
+    class DisconnectedAndParallelEdgesGraph{
+
+        @GdlGraph(orientation = Orientation.UNDIRECTED)
+        private static final String DB_CYPHER =
+            "CREATE " +
+                "(a0:Node{prize: 4.0})," +
+                "(a1:Node{prize: 9.0})," +
+                "(a2:Node{prize: 8.0})," +
+                "(a3:Node{prize: 0.0})," +
+                "(a4:Node{prize: 7.0})," +
+                "(a0)-[:R{w:7.0}]->(a3)," +
+                "(a1)-[:R{w:3.0}]->(a3)," +
+                "(a1)-[:R{w:2.0}]->(a3)," +
+                "(a2)-[:R{w:4.0}]->(a4)," +
+                "(a2)-[:R{w:4.0}]->(a4)";
+
+        @Inject
+        private  TestGraph graph;
+
+        @Test
+        void shouldFindCorrectAnswer() {
+
+            var  prizes = graph.nodeProperties("prize");
+
+            var growthPhase =   new GrowthPhase(graph, prizes::doubleValue,ProgressTracker.NULL_TRACKER,TerminationFlag.RUNNING_TRUE);
+            growthPhase.grow();
+
+            var clusterStructure = growthPhase.clusterStructure();
+
+            var a0 = graph.toMappedNodeId("a0");
+            var a1 = graph.toMappedNodeId("a1");
+            var a2 = graph.toMappedNodeId("a2");
+            var a3 = graph.toMappedNodeId("a3");
+            var a4 = graph.toMappedNodeId("a4");
+
+            assertThat(clusterStructure.inactiveSince(a3)).isEqualTo(0);
+
+            assertThat(clusterStructure.inactiveSince(a1)).isEqualTo(2);
+
+            assertThat(clusterStructure.inactiveSince(a2)).isEqualTo(2);
+            assertThat(clusterStructure.inactiveSince(a4)).isEqualTo(2);
+
+            assertThat(clusterStructure.inactiveSince(a0)).isEqualTo(4);
+
+            assertThat(clusterStructure.inactiveSince(7)).isEqualTo(9);
+
+            var lastCluster = clusterStructure.singleActiveCluster();
+
+            var otherCluster = 5; //trick to find correct placement
+            if (lastCluster ==5 ){
+                otherCluster= 6;
+            }
+            assertThat(clusterStructure.inactiveSince(otherCluster)).isEqualTo(5);
+
+
+        }
+
+    }
+
 
 }
