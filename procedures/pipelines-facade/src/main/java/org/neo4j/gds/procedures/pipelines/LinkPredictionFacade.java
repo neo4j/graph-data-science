@@ -91,4 +91,20 @@ public final class LinkPredictionFacade {
 
         return Stream.of(result);
     }
+
+    public Stream<PipelineInfoResult> addRandomForest(String pipelineName, Map<String, Object> configuration) {
+        return configurer.configureLinkPredictionTrainingPipeline(
+            pipelineName,
+            () -> pipelineConfigurationParser.parseRandomForestClassifierTrainerConfig(configuration),
+            TrainingPipeline::addTrainerConfig
+        );
+    }
+
+    public Stream<PipelineInfoResult> addMLP(String pipelineName, Map<String, Object> configuration) {
+        return configurer.configureLinkPredictionTrainingPipeline(
+            pipelineName,
+            () -> pipelineConfigurationParser.parseMLPClassifierTrainConfig(configuration),
+            TrainingPipeline::addTrainerConfig
+        );
+    }
 }

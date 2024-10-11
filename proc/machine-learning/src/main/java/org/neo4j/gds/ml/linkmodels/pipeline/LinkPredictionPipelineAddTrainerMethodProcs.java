@@ -20,13 +20,6 @@
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.ConfigKeyValidation;
-import org.neo4j.gds.ml.api.TrainingMethod;
-import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
-import org.neo4j.gds.ml.models.mlp.MLPClassifierTrainConfig;
-import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
-import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.pipelines.PipelineInfoResult;
 import org.neo4j.procedure.Context;
@@ -50,7 +43,10 @@ public class LinkPredictionPipelineAddTrainerMethodProcs extends BaseProc {
         @Name("pipelineName") String pipelineName,
         @Name(value = "config", defaultValue = "{}") Map<String, Object> logisticRegressionClassifierConfig
     ) {
-        return facade.pipelines().linkPrediction().addLogisticRegression(pipelineName, logisticRegressionClassifierConfig);
+        return facade.pipelines().linkPrediction().addLogisticRegression(
+            pipelineName,
+            logisticRegressionClassifierConfig
+        );
     }
 
     @Procedure(name = "gds.beta.pipeline.linkPrediction.addRandomForest", mode = READ)
@@ -59,17 +55,7 @@ public class LinkPredictionPipelineAddTrainerMethodProcs extends BaseProc {
         @Name("pipelineName") String pipelineName,
         @Name(value = "config") Map<String, Object> randomForestClassifierConfig
     ) {
-        var pipeline = PipelineCatalog.getTyped(username(), pipelineName, LinkPredictionTrainingPipeline.class);
-
-        var allowedKeys = RandomForestClassifierTrainerConfig.DEFAULT.configKeys();
-        ConfigKeyValidation.requireOnlyKeysFrom(allowedKeys, randomForestClassifierConfig.keySet());
-
-        var tunableTrainerConfig = TunableTrainerConfig.of(randomForestClassifierConfig, TrainingMethod.RandomForestClassification);
-        pipeline.addTrainerConfig(
-            tunableTrainerConfig
-        );
-
-        return Stream.of(PipelineInfoResult.create(pipelineName, pipeline));
+        return facade.pipelines().linkPrediction().addRandomForest(pipelineName, randomForestClassifierConfig);
     }
 
     @Procedure(name = "gds.alpha.pipeline.linkPrediction.addRandomForest", mode = READ, deprecatedBy = "gds.beta.pipeline.linkPrediction.addRandomForest")
@@ -80,10 +66,8 @@ public class LinkPredictionPipelineAddTrainerMethodProcs extends BaseProc {
         @Name("pipelineName") String pipelineName,
         @Name(value = "config") Map<String, Object> randomForestClassifierConfig
     ) {
-        executionContext()
-            .metrics()
-            .deprecatedProcedures().called("gds.alpha.pipeline.linkPrediction.addRandomForest");
-        executionContext()
+        facade.deprecatedProcedures().called("gds.alpha.pipeline.linkPrediction.addRandomForest");
+        facade
             .log()
             .warn(
                 "Procedure `gds.alpha.pipeline.linkPrediction.addRandomForest` has been deprecated, please use `gds.beta.pipeline.linkPrediction.addRandomForest`.");
@@ -96,13 +80,6 @@ public class LinkPredictionPipelineAddTrainerMethodProcs extends BaseProc {
         @Name("pipelineName") String pipelineName,
         @Name(value = "config", defaultValue = "{}") Map<String, Object> mlpClassifierConfig
     ) {
-        var pipeline = PipelineCatalog.getTyped(username(), pipelineName, LinkPredictionTrainingPipeline.class);
-
-        var allowedKeys = MLPClassifierTrainConfig.DEFAULT.configKeys();
-        ConfigKeyValidation.requireOnlyKeysFrom(allowedKeys, mlpClassifierConfig.keySet());
-
-        pipeline.addTrainerConfig(TunableTrainerConfig.of(mlpClassifierConfig, TrainingMethod.MLPClassification));
-
-        return Stream.of(PipelineInfoResult.create(pipelineName, pipeline));
+        return facade.pipelines().linkPrediction().addMLP(pipelineName, mlpClassifierConfig);
     }
 }
