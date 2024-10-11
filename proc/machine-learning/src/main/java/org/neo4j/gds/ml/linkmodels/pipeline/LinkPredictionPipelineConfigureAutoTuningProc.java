@@ -19,11 +19,9 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.ml.pipeline.PipelineCompanion;
-import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.pipelines.PipelineInfoResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -33,17 +31,13 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class LinkPredictionPipelineConfigureAutoTuningProc extends BaseProc {
+public class LinkPredictionPipelineConfigureAutoTuningProc {
+    @Context
+    public GraphDataScienceProcedures facade;
 
     @Procedure(name = "gds.alpha.pipeline.linkPrediction.configureAutoTuning", mode = READ)
     @Description("Configures the auto-tuning of the link prediction pipeline.")
     public Stream<PipelineInfoResult> configureAutoTuning(@Name("pipelineName") String pipelineName, @Name("configuration") Map<String, Object> configMap) {
-        PipelineCatalog.getTyped(username(), pipelineName, LinkPredictionTrainingPipeline.class);
-        return PipelineCompanion.configureAutoTuning(
-            username(),
-            pipelineName,
-            configMap,
-            pipeline -> PipelineInfoResult.create(pipelineName, (LinkPredictionTrainingPipeline) pipeline)
-        );
+        return facade.pipelines().linkPrediction().configureAutoTuning(pipelineName, configMap);
     }
 }

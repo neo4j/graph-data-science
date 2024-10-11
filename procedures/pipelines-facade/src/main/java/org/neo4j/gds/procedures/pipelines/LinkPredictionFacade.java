@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -74,6 +75,14 @@ public final class LinkPredictionFacade {
         );
     }
 
+    public Stream<PipelineInfoResult> addMLP(String pipelineName, Map<String, Object> configuration) {
+        return configurer.configureLinkPredictionTrainingPipeline(
+            pipelineName,
+            () -> pipelineConfigurationParser.parseMLPClassifierTrainConfig(configuration),
+            TrainingPipeline::addTrainerConfig
+        );
+    }
+
     public Stream<PipelineInfoResult> addNodeProperty(
         String pipelineNameAsString,
         String taskName,
@@ -100,11 +109,29 @@ public final class LinkPredictionFacade {
         );
     }
 
-    public Stream<PipelineInfoResult> addMLP(String pipelineName, Map<String, Object> configuration) {
+    public Stream<PipelineInfoResult> configureAutoTuning(String pipelineName, Map<String, Object> configuration) {
         return configurer.configureLinkPredictionTrainingPipeline(
             pipelineName,
-            () -> pipelineConfigurationParser.parseMLPClassifierTrainConfig(configuration),
-            TrainingPipeline::addTrainerConfig
+            () -> pipelineConfigurationParser.parseAutoTuningConfig(configuration),
+            TrainingPipeline::setAutoTuningConfig
         );
+    }
+
+    public Stream<PipelineInfoResult> configureSplit(String pipelineName, Map<String, Object> configuration) {
+        return configurer.configureLinkPredictionTrainingPipeline(
+            pipelineName,
+            () -> pipelineConfigurationParser.parseLinkPredictionSplitConfig(configuration),
+            LinkPredictionTrainingPipeline::setSplitConfig
+        );
+    }
+
+    public Stream<PipelineInfoResult> createPipeline(String pipelineNameAsString) {
+        var pipelineName = PipelineName.parse(pipelineNameAsString);
+
+        var pipeline = pipelineApplications.createLinkPredictionTrainingPipeline(pipelineName);
+
+        var result = PipelineInfoResult.create(pipelineName, pipeline);
+
+        return Stream.of(result);
     }
 }

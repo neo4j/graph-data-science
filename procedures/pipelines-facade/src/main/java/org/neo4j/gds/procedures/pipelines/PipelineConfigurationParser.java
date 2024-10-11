@@ -28,6 +28,7 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.mlp.MLPClassifierTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.LinkFeatureStepConfiguration;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.LinkFeatureStepConfigurationImpl;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
@@ -57,6 +58,14 @@ class PipelineConfigurationParser {
         var wrapper = CypherMapWrapper.create(configuration);
 
         return new LinkFeatureStepConfigurationImpl(wrapper);
+    }
+
+    LinkPredictionSplitConfig parseLinkPredictionSplitConfig(Map<String, Object> rawConfiguration) {
+        return parseConfiguration(
+            rawConfiguration,
+            LinkPredictionSplitConfig::of,
+            LinkPredictionSplitConfig::configKeys
+        );
     }
 
     TunableTrainerConfig parseLogisticRegressionTrainerConfig(Map<String, Object> configuration) {

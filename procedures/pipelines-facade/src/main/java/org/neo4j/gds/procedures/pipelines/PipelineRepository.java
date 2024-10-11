@@ -33,6 +33,14 @@ import java.util.stream.Stream;
  * For now this is the groundwork, rolling out this half way house.
  */
 public class PipelineRepository {
+    LinkPredictionTrainingPipeline createLinkPredictionTrainingPipeline(User user, PipelineName pipelineName) {
+        var pipeline = new LinkPredictionTrainingPipeline();
+
+        PipelineCatalog.set(user.getUsername(), pipelineName.value, pipeline);
+
+        return pipeline;
+    }
+
     NodeClassificationTrainingPipeline createNodeClassificationTrainingPipeline(User user, PipelineName pipelineName) {
         var pipeline = new NodeClassificationTrainingPipeline();
 

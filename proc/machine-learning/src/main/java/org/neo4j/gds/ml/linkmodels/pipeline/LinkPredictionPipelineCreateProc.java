@@ -19,11 +19,9 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.StringIdentifierValidations;
-import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.pipelines.PipelineInfoResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -32,18 +30,13 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-@SuppressWarnings("immutables:subtype")
-public class LinkPredictionPipelineCreateProc extends BaseProc {
+public class LinkPredictionPipelineCreateProc {
+    @Context
+    public GraphDataScienceProcedures facade;
 
     @Procedure(name = "gds.beta.pipeline.linkPrediction.create", mode = READ)
     @Description("Creates a link prediction pipeline in the pipeline catalog.")
     public Stream<PipelineInfoResult> create(@Name("pipelineName") String input) {
-        var pipelineName = StringIdentifierValidations.validateNoWhiteCharacter(input, "pipelineName");
-
-        LinkPredictionTrainingPipeline pipeline = new LinkPredictionTrainingPipeline();
-        PipelineCatalog.set(username(), pipelineName, pipeline);
-
-        return Stream.of(PipelineInfoResult.create(pipelineName, pipeline));
+        return facade.pipelines().linkPrediction().createPipeline(input);
     }
-
 }

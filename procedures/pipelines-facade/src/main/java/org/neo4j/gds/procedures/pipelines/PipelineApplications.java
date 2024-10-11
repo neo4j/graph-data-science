@@ -270,6 +270,10 @@ class PipelineApplications {
         return pipeline;
     }
 
+    LinkPredictionTrainingPipeline createLinkPredictionTrainingPipeline(PipelineName pipelineName) {
+        return pipelineRepository.createLinkPredictionTrainingPipeline(user, pipelineName);
+    }
+
     NodeClassificationTrainingPipeline createNodeClassificationTrainingPipeline(PipelineName pipelineName) {
         return pipelineRepository.createNodeClassificationTrainingPipeline(user, pipelineName);
     }

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.pipelines.PipelineInfoResult;
 import org.neo4j.procedure.Context;
@@ -33,7 +32,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class LinkPredictionPipelineAddTrainerMethodProcs extends BaseProc {
+public class LinkPredictionPipelineAddTrainerMethodProcs {
     @Context
     public GraphDataScienceProcedures facade;
 
