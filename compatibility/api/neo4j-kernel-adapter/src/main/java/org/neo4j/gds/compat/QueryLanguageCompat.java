@@ -30,6 +30,7 @@ import java.lang.invoke.MethodType;
 import java.util.EnumMap;
 import java.util.stream.Stream;
 
+@CompatSince(minor = 25)
 public final class QueryLanguageCompat {
 
     private QueryLanguageCompat() {}
