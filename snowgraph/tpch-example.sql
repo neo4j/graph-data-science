@@ -39,6 +39,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -- 1. Data preparation,
 -- 2. Application setup, and
 -- 3. Graph analysis.
+-- The first two parts need to be executed only once, while the third part can be executed multiple times with different parameters or algorithms.
+
 
 -- ==================================================
 -- 1. Data preparation
@@ -114,12 +116,12 @@ SELECT count(*) FROM relationships;
 -- 2. Application setup
 -- ==================================================
 
--- ====
--- Setup compute pool and application
--- ====
+-- We start by switching to the Neo4j_GDS application.
 USE DATABASE Neo4j_GDS;
 
--- We create a compute pool to execute the service on
+-- Next, we create a compute pool to run the GDS service.
+-- For our example, we use a large compute pool as the node similarity algorithm is computationally intensive.
+-- Note, that the compute pool must use exactly one compute node as GDS scales vertically.
 CREATE COMPUTE POOL IF NOT EXISTS Neo4j_GDS_pool
   FOR APPLICATION Neo4j_GDS
   MIN_NODES = 1
@@ -128,6 +130,7 @@ CREATE COMPUTE POOL IF NOT EXISTS Neo4j_GDS_pool
   AUTO_RESUME = true;
 GRANT USAGE ON COMPUTE POOL Neo4j_GDS_pool TO APPLICATION Neo4j_GDS;
 
+-- Next, we create a warehouse that the GDS application will use to execute queries.
 CREATE WAREHOUSE IF NOT EXISTS Neo4j_GDS_warehouse
   WAREHOUSE_SIZE='MEDIUM'
   AUTO_SUSPEND = 180
@@ -135,13 +138,16 @@ CREATE WAREHOUSE IF NOT EXISTS Neo4j_GDS_warehouse
   INITIALLY_SUSPENDED = false;
 GRANT USAGE ON WAREHOUSE Neo4j_GDS_warehouse TO APPLICATION Neo4j_GDS;
 
-GRANT USAGE ON WAREHOUSE Neo4j_GDS_warehouse TO APPLICATION Neo4j_GDS;
-GRANT USAGE ON DATABASE  tpch_example        TO APPLICATION Neo4j_GDS;
-GRANT USAGE ON SCHEMA    tpch_example.gds    TO APPLICATION Neo4j_GDS;
-GRANT SELECT ON ALL TABLES IN SCHEMA tpch_example.gds TO APPLICATION Neo4j_GDS;
-GRANT SELECT ON ALL VIEWS  IN SCHEMA tpch_example.gds TO APPLICATION Neo4j_GDS;
-GRANT CREATE TABLE ON SCHEMA tpch_example.gds TO APPLICATION Neo4j_GDS;
+-- The following grants are necessary for the GDS application to read and write data.
+-- The next queries are required to read from our prepared views.
+GRANT USAGE ON DATABASE             tpch_example     TO APPLICATION Neo4j_GDS;
+GRANT USAGE ON SCHEMA               tpch_example.gds TO APPLICATION Neo4j_GDS;
+GRANT SELECT ON ALL VIEWS IN SCHEMA tpch_example.gds TO APPLICATION Neo4j_GDS;
+-- This grant is necessary to enable write back of algorithm results.
+GRANT CREATE TABLE ON SCHEMA        tpch_example.gds TO APPLICATION Neo4j_GDS;
 
+-- We have now prepared the environment to properly run the GDS application and can start with our analysis.
+-- Note, that data preparation and application setup only need to be done once.
 
 -- ==================================================
 -- 3. Graph analysis
