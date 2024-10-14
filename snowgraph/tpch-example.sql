@@ -168,7 +168,7 @@ SELECT gds.write_relationships('parts_in_orders', {
 
 -- Grant select privilege to your role on the new table create by GDS
 
---GRANT SELECT ON tpch_example.gds.part_similar_to_part TO ROLE <your_role>; 
+GRANT SELECT ON tpch_example.gds.part_similar_to_part TO ROLE <your_role>; 
 
 -- Select most similar parts based on the algorithm result.
 SELECT DISTINCT p_source.p_name, p_target.p_name, sim.similarity
