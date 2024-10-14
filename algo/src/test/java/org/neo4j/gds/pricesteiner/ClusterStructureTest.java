@@ -75,6 +75,8 @@ class ClusterStructureTest {
         clusterStructure.setClusterPrize(1,20);
         clusterStructure.merge(0,1,3);
         assertThat(clusterStructure.tightnessTime(4,3)).isEqualTo(27);
+        assertThat(clusterStructure.tightnessTime(4,7)).isEqualTo(27);
+
     }
 
     @Test
