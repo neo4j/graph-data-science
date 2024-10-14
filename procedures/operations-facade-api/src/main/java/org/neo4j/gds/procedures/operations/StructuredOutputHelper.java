@@ -21,12 +21,11 @@ package org.neo4j.gds.procedures.operations;
 
 import org.neo4j.gds.core.utils.progress.tasks.Progress;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.utils.StringFormatting;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class StructuredOutputHelper {
 
@@ -42,7 +41,7 @@ public final class StructuredOutputHelper {
      */
     public static String progressBar(Progress progress, int progressBarLength) {
         if (progress.volume() == Task.UNKNOWN_VOLUME) {
-            return formatWithLocale("[~~~~%s~~~]", UNKNOWN);
+            return StringFormatting.formatWithLocale("[~~~~%s~~~]", UNKNOWN);
         }
 
         var progressPercentage = progress.relativeProgress();
@@ -53,7 +52,7 @@ public final class StructuredOutputHelper {
 
         var progressBarContent = filledProgressBar + remainingProgressBar;
 
-        return formatWithLocale("[%s]", progressBarContent);
+        return StringFormatting.formatWithLocale("[%s]", progressBarContent);
     }
 
     public static String computeProgress(Progress progress) {

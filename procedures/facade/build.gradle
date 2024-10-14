@@ -37,6 +37,7 @@ dependencies {
     implementation project(':model-catalog-procedure-facade')
     implementation project(':neo4j-api')
     implementation project(':operations-applications')
+    api project(':operations-facade-api')
     implementation project(':operations-procedure-facade')
     implementation project(':pipeline')
     implementation project(':pipelines-procedure-facade')

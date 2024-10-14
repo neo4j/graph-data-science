@@ -1,0 +1,26 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Operations Procedure Facade API'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+
+    implementation openGds.commons.lang3
+
+    // Because `org.neo4j.gds.core.utils.ClockService`
+    implementation project(':core-utils')
+
+    // Because of `UserLogEntry`
+    implementation project(':progress-tracking')
+
+    implementation project(':string-formatting')
+
+    testImplementation platform(openGds.junit5bom)
+    testImplementation openGds.junit5.jupiter.api
+    testImplementation openGds.junit5.jupiter.params
+    testRuntimeOnly openGds.junit5.jupiter.engine
+
+    testImplementation openGds.assertj.core
+
+}

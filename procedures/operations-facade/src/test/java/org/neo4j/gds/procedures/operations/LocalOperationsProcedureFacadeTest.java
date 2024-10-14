@@ -21,7 +21,7 @@ package org.neo4j.gds.procedures.operations;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.applications.ApplicationsFacadeBuilder;
+import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.operations.OperationsApplications;
 import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class OperationsProcedureFacadeTest {
+class LocalOperationsProcedureFacadeTest {
     @Test
     void shouldQueryUserLog() {
         var userLogStore = mock(UserLogStore.class);
@@ -45,8 +45,10 @@ class OperationsProcedureFacadeTest {
                 .with(userLogStore)
                 .build()
         );
-        var applicationsFacade = new ApplicationsFacadeBuilder().with(operationsApplications).build();
-        var operationsProcedureFacade = new OperationsProcedureFacade(applicationsFacade);
+        var applicationsFacade = mock(ApplicationsFacade.class);
+        when(applicationsFacade.operations()).thenReturn(operationsApplications);
+
+        var operationsProcedureFacade = new LocalOperationsProcedureFacade(applicationsFacade);
 
         var expectedWarnings = Stream.of(
             new UserLogEntry(new LeafTask("lt", 42), "going once"),

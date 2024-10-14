@@ -20,7 +20,7 @@ dependencies {
     implementation project(':logging')
     implementation project(':memory-usage')
     implementation project(':opengds-procedure-facade')
-    implementation project(':operations-procedure-facade')
+    implementation project(':operations-facade-api')
     implementation project(':proc-common')
     implementation project(':proc-embeddings')
     implementation project(':progress-tracking')
