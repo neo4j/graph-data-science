@@ -153,40 +153,51 @@ GRANT CREATE TABLE ON SCHEMA        tpch_example.gds TO APPLICATION Neo4j_GDS;
 -- 3. Graph analysis
 -- ==================================================
 
--- Create a new GDS session
+-- The first step is to create a new GDS session.
+-- Creating the session will start a container service on the given compute pool.
+-- In addition, all the service functions that allow us to interact with the GDS service are created.
+-- A session can be used by many users, but only one session can be active at a time.
 CALL gds.create_session('Neo4j_GDS_pool', 'Neo4j_GDS_warehouse');
 
--- Project node and relationship view into GDS graph
+-- Once the session is started, we can project our node and relationship views into a GDS in-memory graph.
+-- The graph will be identified by the name "parts_in_orders".
+-- The mandatory parameters are the node table and the relationship table, which we point those to our prepared views.
+-- We also specify the optional read concurrency to optimize building the graph projection.
+-- The concurrency can be set to the number of cores available on the compute pool node.
 SELECT gds.graph_project('parts_in_orders', {
     'nodeTable':         'tpch_example.gds.nodes',
     'relationshipTable': 'tpch_example.gds.relationships',
     'readConcurrency':   28
 });
 
--- Run node similarity and produce new relationships to represent similarity
--- This takes about ten minutes
+-- The graph we project is a so-called bipartite graph, as it contains two types of nodes and all relationships point from one type to the other.
+-- The node similarity algorithm looks at all pairs of nodes of the first type and calculates the similarity for each pair based on common relationships.
+-- In our case, the algorithm will calculate the similarity between two parts based on the orders in which they appear.
+-- The algorithm produces new relationships between parts, the relationship property is the similarity score.
+-- For further information on the node similarity algorithm, please refer to the GDS documentation:
+-- https://neo4j.com/docs/graph-data-science/current/algorithms/node-similarity/
 SELECT gds.node_similarity('parts_in_orders', {
     'mutateRelationshipType': 'SIMILAR_TO',
     'mutateProperty':         'similarity',
     'concurrency':            28
 });
 
--- Write relationships back to Snowflake
+-- Once the algorithm has finished, we can write the results back to Snowflake tables for further analysis.
+-- We want to write back the similarity relationships between parts.
+-- The specified table will contain the globally unique source and target node ids and the similarity score.
 SELECT gds.write_relationships('parts_in_orders', {
     'relationshipType':     'SIMILAR_TO',
     'relationshipProperty': 'similarity',
     'table':                'tpch_example.gds.part_similar_to_part'
 });
 
--- ==================================================
--- 3. result analysis
--- ==================================================
-
--- Grant select privilege to your role on the new table create by GDS
-
+-- After writing the table, we need to ensure that our current role is allowed to read it.
+-- Alternatively, we can also grant access to all future tables created by the application.
 GRANT SELECT ON tpch_example.gds.part_similar_to_part TO ROLE <your_role>; 
 
--- Select most similar parts based on the algorithm result.
+-- Since the results are now stored in Snowflake, we can query them and join them with our original data.
+-- For example, we can find the names of the most similar parts based on the similarity score.
+-- Simply speaking, this could be used as a recommendation system for parts.
 SELECT DISTINCT p_source.p_name, p_target.p_name, sim.similarity
 FROM snowflake_sample_data.tpch_sf1.part p_source
 JOIN tpch_example.gds.node_mapping_parts nmp_source
@@ -200,6 +211,8 @@ JOIN snowflake_sample_data.tpch_sf1.part p_target
 ORDER BY sim.similarity DESC
 LIMIT 10;
 
--- Stop the GDS session
+-- The GDS service is a long-running service and should be stopped when not in use.
+-- Once we completed our analysis, we can stop the session, which suspends the container service.
+-- We can restart the session at any time to continue our analysis.
 CALL Neo4j_GDS.gds.stop_session();
 
