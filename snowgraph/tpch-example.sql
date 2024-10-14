@@ -76,9 +76,9 @@ CREATE OR REPLACE TABLE node_mapping_orders(gdsId, o_orderkey) AS
 -- Note, that the view must contain a column named "nodeId" to be recognized by GDS.
 -- Any additional column will be used as node property, but we don't need that for this example.
 CREATE OR REPLACE VIEW nodes(nodeId) AS
-    SELECT nmp.gdsId
+    SELECT nmp.gdsId FROM node_mapping_parts nmp
     UNION
-    SELECT nmo.gdsId;
+    SELECT nmo.gdsId FROM node_mapping_orders nmo;
 
 -- Let's quickly verify the cardinality of our views.
 -- As it is the union of parts and orders, we expect 1,700,000 rows.
