@@ -30,11 +30,10 @@ public class ClusterStructure {
 
     private final HugeDoubleArray skippedParentSum;
     private final HugeLongArray parent;
-    private final HugeDoubleArray clusterPrizes;
+    private final HugeDoubleArray initialMoatLeft;
     private final HugeLongArray left;
     private final HugeLongArray right;
     private final HugeDoubleArray moat;
-    private final HugeDoubleArray subTotalMoat;
     private final long originalNodeCount;
     private final ClusterActivity clusterActivity;
     private  long maxNumberOfClusters;
@@ -42,10 +41,9 @@ public class ClusterStructure {
     ClusterStructure(long nodeCount){
 
         this.parent = HugeLongArray.newArray(2*nodeCount);
-        this.clusterPrizes = HugeDoubleArray.newArray(2*nodeCount);
+        this.initialMoatLeft = HugeDoubleArray.newArray(2*nodeCount);
         this.parent.fill(-1L);
         this.maxNumberOfClusters = nodeCount;
-        this.subTotalMoat = HugeDoubleArray.newArray(nodeCount);
         this.skippedParentSum = HugeDoubleArray.newArray(2*nodeCount);
         this.moat = HugeDoubleArray.newArray(2*nodeCount);
         this.left = HugeLongArray.newArray(nodeCount);
@@ -58,13 +56,12 @@ public class ClusterStructure {
         var newCluster = maxNumberOfClusters++;
         parent.set(cluster1,newCluster);
         parent.set(cluster2,newCluster);
-        clusterPrizes.set(newCluster, clusterPrizes.get(cluster1)+ clusterPrizes.get(cluster2));
         var moat1 = moatAt(cluster1,moat);
         var moat2 = moatAt(cluster2,moat);
+        initialMoatLeft.set(newCluster, initialMoatLeft.get(cluster1)+ initialMoatLeft.get(cluster2) - moat1- moat2);
 
         long newClusterAdaptedIndex = newCluster - originalNodeCount;
 
-        subTotalMoat.set(newClusterAdaptedIndex, subTotalMoat(cluster1)+ subTotalMoat(cluster2) + moat1+ moat2);
         deactivateCluster(cluster1,moat);
         deactivateCluster(cluster2,moat);
 
@@ -81,15 +78,15 @@ public class ClusterStructure {
     }
 
     void setClusterPrize(long clusterId, double prize){
-        clusterPrizes.set(clusterId, prize);
+        initialMoatLeft.set(clusterId, prize);
     }
 
     double clusterPrize(long clusterId){
-        return clusterPrizes.get(clusterId);
+        return initialMoatLeft.get(clusterId);
     }
 
     double  tightnessTime(long clusterId, double currentMoat){
-            double  slack =  clusterPrizes.get(clusterId) - subTotalMoat(clusterId) - moatAt(clusterId,currentMoat);
+            double  slack =  initialMoatLeft.get(clusterId) - moatAt(clusterId,currentMoat);
             return  currentMoat + slack;
     }
 
@@ -183,10 +180,7 @@ public class ClusterStructure {
         return  clusterActivity.relevantTime(clusterId);
     }
 
-    private double subTotalMoat(long clusterId){
-        if (clusterId < originalNodeCount) return 0;
-        return subTotalMoat.get(clusterId - originalNodeCount);
-    }
+
 
 }
  record ClusterMoatPair(long cluster, double totalMoat){}
