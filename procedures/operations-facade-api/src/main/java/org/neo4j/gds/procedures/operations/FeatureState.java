@@ -19,10 +19,4 @@
  */
 package org.neo4j.gds.procedures.operations;
 
-public final class FeatureState {
-    public final boolean enabled;
-
-    public FeatureState(boolean enabled) {
-        this.enabled = enabled;
-    }
-}
+public record FeatureState(boolean enabled) {}
