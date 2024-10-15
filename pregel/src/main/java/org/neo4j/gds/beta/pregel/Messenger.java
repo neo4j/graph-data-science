@@ -23,7 +23,7 @@ public interface Messenger<ITERATOR extends Messages.MessageIterator> {
 
     void initIteration(int iteration);
 
-    void sendTo(long targetNodeId, double message);
+    void sendTo(long sourceNodeId, long targetNodeId, double message);
 
     ITERATOR messageIterator();
 

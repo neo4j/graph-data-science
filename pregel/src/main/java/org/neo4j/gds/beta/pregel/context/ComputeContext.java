@@ -153,7 +153,7 @@ public class ComputeContext<CONFIG extends PregelConfig> extends NodeCentricCont
      * @throws ArrayIndexOutOfBoundsException if the node is in the not in id space
      */
     public void sendTo(long targetNodeId, double message) {
-        messenger.sendTo(targetNodeId, message);
+        messenger.sendTo(this.nodeId, targetNodeId, message);
         this.hasSendMessage.setValue(true);
     }
 

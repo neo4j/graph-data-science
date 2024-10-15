@@ -39,7 +39,7 @@ public class SyncQueueMessenger implements Messenger<PrimitiveSyncDoubleQueues.I
     }
 
     @Override
-    public void sendTo(long targetNodeId, double message) {
+    public void sendTo(long sourceNodeId, long targetNodeId, double message) {
         queues.push(targetNodeId, message);
     }
 

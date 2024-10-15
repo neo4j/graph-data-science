@@ -77,7 +77,7 @@ public class ReducingMessenger implements Messenger<ReducingMessenger.SingleMess
     }
 
     @Override
-    public void sendTo(long targetNodeId, double message) {
+    public void sendTo(long sourceNodeId, long targetNodeId, double message) {
         sendArray.update(
             targetNodeId,
             current -> reducer.reduce(current, message)
