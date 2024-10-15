@@ -47,7 +47,7 @@ class PipelineConfigurationParser {
     }
 
     AutoTuningConfig parseAutoTuningConfig(Map<String, Object> rawConfiguration) {
-        return parseConfiguration(
+        return parseConfigurationWithValidation(
             rawConfiguration,
             AutoTuningConfig::of,
             AutoTuningConfig::configKeys
@@ -60,8 +60,12 @@ class PipelineConfigurationParser {
         return new LinkFeatureStepConfigurationImpl(wrapper);
     }
 
+    LinkPredictionPredictPipelineMutateConfig parseLinkPredictionPredictPipelineMutateConfig(Map<String, Object> configuration) {
+        return parseConfiguration(LinkPredictionPredictPipelineMutateConfig::of, configuration);
+    }
+
     LinkPredictionSplitConfig parseLinkPredictionSplitConfig(Map<String, Object> rawConfiguration) {
-        return parseConfiguration(
+        return parseConfigurationWithValidation(
             rawConfiguration,
             LinkPredictionSplitConfig::of,
             LinkPredictionSplitConfig::configKeys
@@ -85,23 +89,23 @@ class PipelineConfigurationParser {
     }
 
     NodeClassificationPipelineTrainConfig parseNodeClassificationTrainConfig(Map<String, Object> configuration) {
-        return parseNodeClassificationPipelineConfig(NodeClassificationPipelineTrainConfig::of, configuration);
+        return parseConfiguration(NodeClassificationPipelineTrainConfig::of, configuration);
     }
 
     NodeClassificationPredictPipelineMutateConfig parseNodeClassificationPredictMutateConfig(Map<String, Object> configuration) {
-        return parseNodeClassificationPipelineConfig(NodeClassificationPredictPipelineMutateConfig::of, configuration);
+        return parseConfiguration(NodeClassificationPredictPipelineMutateConfig::of, configuration);
     }
 
     NodeClassificationPredictPipelineStreamConfig parseNodeClassificationPredictStreamConfig(Map<String, Object> configuration) {
-        return parseNodeClassificationPipelineConfig(NodeClassificationPredictPipelineStreamConfig::of, configuration);
+        return parseConfiguration(NodeClassificationPredictPipelineStreamConfig::of, configuration);
     }
 
     NodeClassificationPredictPipelineWriteConfig parseNodeClassificationPredictWriteConfig(Map<String, Object> configuration) {
-        return parseNodeClassificationPipelineConfig(NodeClassificationPredictPipelineWriteConfig::of, configuration);
+        return parseConfiguration(NodeClassificationPredictPipelineWriteConfig::of, configuration);
     }
 
     NodePropertyPredictionSplitConfig parseNodePropertyPredictionSplitConfig(Map<String, Object> rawConfiguration) {
-        return parseConfiguration(
+        return parseConfigurationWithValidation(
             rawConfiguration,
             NodePropertyPredictionSplitConfig::of,
             NodePropertyPredictionSplitConfig::configKeys
@@ -116,7 +120,7 @@ class PipelineConfigurationParser {
         );
     }
 
-    private <CONFIGURATION> CONFIGURATION parseConfiguration(
+    private <CONFIGURATION> CONFIGURATION parseConfigurationWithValidation(
         Map<String, Object> rawConfiguration,
         Function<CypherMapWrapper, CONFIGURATION> parser,
         Function<CONFIGURATION, Collection<String>> configurationKeyAccessor
@@ -135,7 +139,7 @@ class PipelineConfigurationParser {
     /**
      * Dumb scaffolding
      */
-    private <CONFIGURATION> CONFIGURATION parseNodeClassificationPipelineConfig(
+    private <CONFIGURATION> CONFIGURATION parseConfiguration(
         BiFunction<String, CypherMapWrapper, CONFIGURATION> parser,
         Map<String, Object> configuration
     ) {

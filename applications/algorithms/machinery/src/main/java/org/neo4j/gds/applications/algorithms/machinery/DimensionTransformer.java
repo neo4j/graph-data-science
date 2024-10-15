@@ -17,23 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.predict;
+package org.neo4j.gds.applications.algorithms.machinery;
 
-import org.junit.jupiter.api.Test;
-import org.neo4j.gds.procedures.pipelines.MutateResult;
+import org.neo4j.gds.core.GraphDimensions;
 
-import static org.assertj.core.api.Assertions.assertThatNoException;
+/**
+ * For some algorithms we can transform dimensions intelligently,
+ * to give better estimates
+ */
+public interface DimensionTransformer {
+    DimensionTransformer DISABLED = graphDimensions -> graphDimensions;
 
-class PathFindingMutateResultTest {
-
-    @Test
-    void shouldRecordResults() {
-        var resultWithHistogramBuilder = new MutateResult.Builder().withHistogram();
-        assertThatNoException().isThrownBy(() -> {
-            resultWithHistogramBuilder.recordHistogramValue(0.9);
-            resultWithHistogramBuilder.recordHistogramValue(5E-10);
-            resultWithHistogramBuilder.recordHistogramValue(5E-20);
-        });
-    }
-
+    GraphDimensions transform(GraphDimensions graphDimensions);
 }

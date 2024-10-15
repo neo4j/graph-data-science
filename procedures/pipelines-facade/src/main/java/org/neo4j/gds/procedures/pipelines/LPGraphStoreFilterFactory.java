@@ -17,13 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.predict;
+package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.config.ElementTypeValidator;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.utils.StringJoining;
 
@@ -43,10 +43,10 @@ public final class LPGraphStoreFilterFactory {
     private LPGraphStoreFilterFactory() {}
 
     public static LPGraphStoreFilter generate(
+        Log log,
         LinkPredictionTrainConfig trainConfig,
         LinkPredictionPredictPipelineBaseConfig predictConfig,
-        GraphStore graphStore,
-        ProgressTracker progressTracker
+        GraphStore graphStore
     ) {
         var sourceNodeLabels = predictConfig
             .sourceNodeLabel()
@@ -84,7 +84,7 @@ public final class LPGraphStoreFilterFactory {
             .predictRelationshipTypes(predictRelTypes)
             .build();
 
-        progressTracker.logInfo(formatWithLocale("The graph filters used for filtering in prediction is %s", filter));
+        log.info(formatWithLocale("The graph filters used for filtering in prediction is %s", filter));
 
         return filter;
     }

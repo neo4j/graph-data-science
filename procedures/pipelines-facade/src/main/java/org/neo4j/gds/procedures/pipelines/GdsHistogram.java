@@ -17,23 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.predict;
+package org.neo4j.gds.procedures.pipelines;
 
-import org.junit.jupiter.api.Test;
-import org.neo4j.gds.procedures.pipelines.MutateResult;
+import java.util.Collections;
+import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThatNoException;
+public interface GdsHistogram {
+    GdsHistogram DISABLED = new GdsHistogram() {
+        @Override
+        public void onPredictedLink(double probability) {
+            // do nothing
+        }
 
-class PathFindingMutateResultTest {
+        @Override
+        public Map<String, Object> finalise() {
+            return Collections.emptyMap();
+        }
+    };
 
-    @Test
-    void shouldRecordResults() {
-        var resultWithHistogramBuilder = new MutateResult.Builder().withHistogram();
-        assertThatNoException().isThrownBy(() -> {
-            resultWithHistogramBuilder.recordHistogramValue(0.9);
-            resultWithHistogramBuilder.recordHistogramValue(5E-10);
-            resultWithHistogramBuilder.recordHistogramValue(5E-20);
-        });
-    }
+    void onPredictedLink(double probability);
 
+    Map<String, Object> finalise();
 }

@@ -34,6 +34,7 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassific
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.procedures.pipelines.NodeClassificationPredictPipelineBaseConfig;
 import org.neo4j.gds.procedures.pipelines.NodeClassificationPredictPipelineExecutor;
+import org.neo4j.gds.procedures.pipelines.TrainedNCPipelineModel;
 
 public class NodeClassificationPredictPipelineAlgorithmFactory
     <CONFIG extends NodeClassificationPredictPipelineBaseConfig>
@@ -92,11 +93,9 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        var model = getTrainedNCPipelineModel(
-            this.modelCatalog,
-            configuration.modelName(),
-            configuration.username()
-        );
+        var trainedNCPipelineModel = new TrainedNCPipelineModel(modelCatalog);
+
+        var model = trainedNCPipelineModel.get(configuration.modelName(), configuration.username());
 
         return MemoryEstimations.builder(NodeClassificationPredictPipelineExecutor.class.getSimpleName())
             .add("Pipeline executor", NodeClassificationPredictPipelineExecutor.estimate(model, configuration, modelCatalog, executionContext.algorithmsProcedureFacade()))
@@ -108,12 +107,8 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
         String modelName,
         String username
     ) {
-        return modelCatalog.get(
-            username,
-            modelName,
-            Classifier.ClassifierData.class,
-            NodeClassificationPipelineTrainConfig.class,
-            NodeClassificationPipelineModelInfo.class
-        );
+        var trainedNCPipelineModel = new TrainedNCPipelineModel(modelCatalog);
+
+        return trainedNCPipelineModel.get(modelName, username);
     }
 }

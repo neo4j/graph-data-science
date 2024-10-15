@@ -66,6 +66,15 @@ public class AlgorithmEstimationTemplate {
         Object graphNameOrConfiguration,
         MemoryEstimation memoryEstimation
     ) {
+        return estimate(configuration, graphNameOrConfiguration, memoryEstimation, DimensionTransformer.DISABLED);
+    }
+
+    public <CONFIGURATION extends AlgoBaseConfig> MemoryEstimateResult estimate(
+        CONFIGURATION configuration,
+        Object graphNameOrConfiguration,
+        MemoryEstimation memoryEstimation,
+        DimensionTransformer dimensionTransformer
+    ) {
         var estimationBuilder = MemoryEstimations.builder("Memory Estimation");
 
         if (graphNameOrConfiguration instanceof Map graphConfig) {
@@ -76,10 +85,14 @@ public class AlgorithmEstimationTemplate {
 
             estimationBuilder.add("graph", graphMemoryEstimation.estimateMemoryUsageAfterLoading());
 
+            var graphDimensions = graphMemoryEstimation.dimensions();
+
+            var transformedDimensions = dimensionTransformer.transform(graphDimensions);
+
             return estimate(
                 estimationBuilder,
                 memoryEstimation,
-                graphMemoryEstimation.dimensions(),
+                transformedDimensions,
                 configuration.concurrency()
             );
         }
@@ -89,7 +102,9 @@ public class AlgorithmEstimationTemplate {
 
             var graphDimensions = dimensionsFromActualGraph(graphName, configuration);
 
-            return estimate(estimationBuilder, memoryEstimation, graphDimensions, configuration.concurrency());
+            var transformedDimensions = dimensionTransformer.transform(graphDimensions);
+
+            return estimate(estimationBuilder, memoryEstimation, transformedDimensions, configuration.concurrency());
         }
 
         throw new IllegalArgumentException(formatWithLocale(

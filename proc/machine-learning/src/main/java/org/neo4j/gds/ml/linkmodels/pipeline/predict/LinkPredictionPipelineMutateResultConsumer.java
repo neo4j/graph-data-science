@@ -31,6 +31,9 @@ import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
+import org.neo4j.gds.procedures.pipelines.LinkPredictionPredictPipelineExecutor;
+import org.neo4j.gds.procedures.pipelines.LinkPredictionPredictPipelineMutateConfig;
+import org.neo4j.gds.procedures.pipelines.MutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.termination.TerminationFlag;
 

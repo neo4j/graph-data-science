@@ -22,17 +22,17 @@ package org.neo4j.gds.procedures.pipelines;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.models.Classifier;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineModelInfo;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
+import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 
-public class TrainedNCPipelineModel {
+public class TrainedLPPipelineModel {
     private final ModelCatalog modelCatalog;
 
-    public TrainedNCPipelineModel(ModelCatalog modelCatalog) {
+    public TrainedLPPipelineModel(ModelCatalog modelCatalog) {
         this.modelCatalog = modelCatalog;
     }
 
-    public Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> get(
+    public Model<Classifier.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> get(
         String modelName,
         String username
     ) {
@@ -40,8 +40,8 @@ public class TrainedNCPipelineModel {
             username,
             modelName,
             Classifier.ClassifierData.class,
-            NodeClassificationPipelineTrainConfig.class,
-            NodeClassificationPipelineModelInfo.class
+            LinkPredictionTrainConfig.class,
+            LinkPredictionModelInfo.class
         );
     }
 }

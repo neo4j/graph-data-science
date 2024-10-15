@@ -17,23 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.predict;
+package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.MutateRelationshipConfig;
-import org.neo4j.gds.config.MutateRelationshipPropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Configuration
-public interface LinkPredictionPredictPipelineMutateConfig extends LinkPredictionPredictPipelineBaseConfig,
-    MutateRelationshipConfig,
-    MutateRelationshipPropertyConfig {
-    @Override
-    default String mutateProperty() {
-        return "probability";
-    }
-
-    static LinkPredictionPredictPipelineMutateConfig of(String username, CypherMapWrapper config) {
-        return new LinkPredictionPredictPipelineMutateConfigImpl(username, config);
+public interface LinkPredictionPredictPipelineStreamConfig extends LinkPredictionPredictPipelineBaseConfig {
+    
+    static LinkPredictionPredictPipelineStreamConfig of(String username, CypherMapWrapper config) {
+        return new LinkPredictionPredictPipelineStreamConfigImpl(username, config);
     }
 }

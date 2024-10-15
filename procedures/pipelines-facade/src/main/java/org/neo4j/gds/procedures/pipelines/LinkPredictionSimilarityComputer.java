@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.predict;
+package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.ml.models.Classifier;
@@ -27,12 +27,12 @@ import org.neo4j.gds.similarity.knn.NeighborFilter;
 import org.neo4j.gds.similarity.knn.NeighborFilterFactory;
 import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
 
-class LinkPredictionSimilarityComputer implements SimilarityComputer {
+public class LinkPredictionSimilarityComputer implements SimilarityComputer {
     private static final int POSITIVE_CLASS_INDEX = (int) EdgeSplitter.POSITIVE;
     private final LinkFeatureExtractor linkFeatureExtractor;
     private final Classifier classifier;
 
-    LinkPredictionSimilarityComputer(
+    public LinkPredictionSimilarityComputer(
         LinkFeatureExtractor linkFeatureExtractor,
         Classifier classifier
     ) {
@@ -51,7 +51,7 @@ class LinkPredictionSimilarityComputer implements SimilarityComputer {
         return linkFeatureExtractor.isSymmetric();
     }
 
-    static final class LinkFilter implements NeighborFilter {
+    public static final class LinkFilter implements NeighborFilter {
 
         private final LPNodeFilter sourceNodeFilter;
         private final LPNodeFilter targetNodeFilter;
@@ -85,7 +85,7 @@ class LinkPredictionSimilarityComputer implements SimilarityComputer {
         }
     }
 
-    static class LinkFilterFactory implements NeighborFilterFactory {
+    public static class LinkFilterFactory implements NeighborFilterFactory {
 
         private final Graph graph;
 
@@ -93,7 +93,7 @@ class LinkPredictionSimilarityComputer implements SimilarityComputer {
 
         private final LPNodeFilter targetNodeFilter;
 
-        LinkFilterFactory(Graph graph, LPNodeFilter sourceNodeFilter, LPNodeFilter targetNodeFilter) {
+        public LinkFilterFactory(Graph graph, LPNodeFilter sourceNodeFilter, LPNodeFilter targetNodeFilter) {
             this.graph = graph;
             this.sourceNodeFilter = sourceNodeFilter;
             this.targetNodeFilter = targetNodeFilter;

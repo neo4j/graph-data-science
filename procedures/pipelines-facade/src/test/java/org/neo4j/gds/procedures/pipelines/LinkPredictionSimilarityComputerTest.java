@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.predict;
+package org.neo4j.gds.procedures.pipelines;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
@@ -29,13 +29,13 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionSimilarityComputer.LinkFilterFactory;
 import org.neo4j.gds.ml.models.logisticregression.ImmutableLogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.CosineFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
+import org.neo4j.gds.procedures.pipelines.LinkPredictionSimilarityComputer.LinkFilterFactory;
 import org.neo4j.gds.similarity.knn.NeighborFilter;
 
 import java.util.List;

@@ -17,23 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.predict;
+package org.neo4j.gds.procedures.pipelines;
 
-import org.junit.jupiter.api.Test;
-import org.neo4j.gds.procedures.pipelines.MutateResult;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.config.MutateRelationshipConfig;
+import org.neo4j.gds.config.MutateRelationshipPropertyConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
-import static org.assertj.core.api.Assertions.assertThatNoException;
-
-class PathFindingMutateResultTest {
-
-    @Test
-    void shouldRecordResults() {
-        var resultWithHistogramBuilder = new MutateResult.Builder().withHistogram();
-        assertThatNoException().isThrownBy(() -> {
-            resultWithHistogramBuilder.recordHistogramValue(0.9);
-            resultWithHistogramBuilder.recordHistogramValue(5E-10);
-            resultWithHistogramBuilder.recordHistogramValue(5E-20);
-        });
+@Configuration
+public interface LinkPredictionPredictPipelineMutateConfig extends LinkPredictionPredictPipelineBaseConfig,
+    MutateRelationshipConfig,
+    MutateRelationshipPropertyConfig {
+    @Override
+    default String mutateProperty() {
+        return "probability";
     }
 
+    static LinkPredictionPredictPipelineMutateConfig of(String username, CypherMapWrapper config) {
+        return new LinkPredictionPredictPipelineMutateConfigImpl(username, config);
+    }
 }

@@ -38,6 +38,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfigImpl;
+import org.neo4j.gds.procedures.pipelines.LinkPredictionPredictPipelineStreamConfig;
 
 import java.util.List;
 import java.util.Map;

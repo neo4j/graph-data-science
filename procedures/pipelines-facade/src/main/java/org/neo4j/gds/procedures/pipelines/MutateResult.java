@@ -17,24 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.predict;
+package org.neo4j.gds.procedures.pipelines;
 
 import org.HdrHistogram.ConcurrentDoubleHistogram;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.core.ProcedureConstants;
+import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.result.HistogramUtils;
-import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
 
+import java.util.Collections;
 import java.util.Map;
 
 public final class MutateResult extends StandardMutateResult {
-
     public final long relationshipsWritten;
     public final Map<String, Object> probabilityDistribution;
     public final Map<String, Object> samplingStats;
 
-    private MutateResult(
+    MutateResult(
         long preProcessingMillis,
         long computeMillis,
         long mutateMillis,
@@ -56,10 +57,20 @@ public final class MutateResult extends StandardMutateResult {
         this.samplingStats = samplingStats;
     }
 
-    static class Builder extends AbstractResultBuilder<MutateResult> {
+    static MutateResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+        return new MutateResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.sideEffectMillis,
+            0,
+            configurationMap,
+            Collections.emptyMap(),
+            Collections.emptyMap()
+        );
+    }
 
+    public static class Builder extends AbstractResultBuilder<MutateResult> {
         private Map<String, Object> samplingStats = null;
-
         @Nullable
         private ConcurrentDoubleHistogram histogram = null;
 
@@ -76,7 +87,7 @@ public final class MutateResult extends StandardMutateResult {
             );
         }
 
-        Builder withHistogram() {
+        public Builder withHistogram() {
             if (histogram != null) {
                 return this;
             }
@@ -85,7 +96,7 @@ public final class MutateResult extends StandardMutateResult {
             return this;
         }
 
-        void recordHistogramValue(double value) {
+        public void recordHistogramValue(double value) {
             if (histogram == null) {
                 return;
             }
@@ -95,7 +106,7 @@ public final class MutateResult extends StandardMutateResult {
             if (value >= 1E-6) histogram.recordValue(value); else histogram.recordValue(1E-6);
         }
 
-        Builder withSamplingStats(Map<String, Object> samplingStats) {
+        public Builder withSamplingStats(Map<String, Object> samplingStats) {
             this.samplingStats = samplingStats;
             return this;
         }

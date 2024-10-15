@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.predict;
+package org.neo4j.gds.procedures.pipelines;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.assertMemoryRange;
-import static org.neo4j.gds.ml.linkmodels.pipeline.predict.ApproximateLinkPredictionTest.compareWithPrecision;
+import static org.neo4j.gds.procedures.pipelines.ApproximateLinkPredictionTest.compareWithPrecision;
 
 @GdlExtension
 class ExhaustiveLinkPredictionTest {

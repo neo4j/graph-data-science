@@ -30,6 +30,9 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.models.ClassifierFactory;
+import org.neo4j.gds.procedures.pipelines.LPGraphStoreFilterFactory;
+import org.neo4j.gds.procedures.pipelines.LinkPredictionPredictPipelineBaseConfig;
+import org.neo4j.gds.procedures.pipelines.LinkPredictionPredictPipelineExecutor;
 
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.getTrainedLPPipelineModel;
 import static org.neo4j.gds.ml.pipeline.PipelineCompanion.ANONYMOUS_GRAPH;
@@ -71,7 +74,7 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
         );
 
         var trainConfig = model.trainConfig();
-        var lpGraphStoreFilter = LPGraphStoreFilterFactory.generate(trainConfig, configuration, graphStore, progressTracker);
+        var lpGraphStoreFilter = LPGraphStoreFilterFactory.generate(executionContext.log(), trainConfig, configuration, graphStore);
 
         return new LinkPredictionPredictPipelineExecutor(
             model.customInfo().pipeline(),
@@ -117,7 +120,7 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
             .get(CatalogRequest.of(config.username(), executionContext.databaseId()), config.graphName())
             .graphStore();
 
-        var lpNodeLabelFilter = LPGraphStoreFilterFactory.generate(model.trainConfig(), config, graphStore, ProgressTracker.NULL_TRACKER);
+        var lpNodeLabelFilter = LPGraphStoreFilterFactory.generate(executionContext.log(), model.trainConfig(), config, graphStore);
 
         //Taking nodePropertyStepsLabels since they are superset of source&target nodeLabels, to give the upper bound estimation
         //In the future we can add nodeCount per label info to GraphDimensions to make more exact estimations

@@ -19,12 +19,9 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.pipelines.MutateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -36,12 +33,10 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.ESTIMATE_PREDICT_DESCRIPTION;
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.PREDICT_DESCRIPTION;
-import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
 
-public class LinkPredictionPipelineMutateProc extends BaseProc {
-
+public class LinkPredictionPipelineMutateProc {
     @Context
-    public ModelCatalog modelCatalog;
+    public GraphDataScienceProcedures facade;
 
     @Procedure(name = "gds.beta.pipeline.linkPrediction.predict.mutate", mode = Mode.READ)
     @Description(PREDICT_DESCRIPTION)
@@ -49,12 +44,7 @@ public class LinkPredictionPipelineMutateProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        preparePipelineConfig(graphName, configuration);
-
-        return new ProcedureExecutor<>(
-            new LinkPredictionPipelineMutateSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.pipelines().linkPrediction().mutate(graphName, configuration);
     }
 
     @Procedure(name = "gds.beta.pipeline.linkPrediction.predict.mutate.estimate", mode = Mode.READ)
@@ -63,17 +53,6 @@ public class LinkPredictionPipelineMutateProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        preparePipelineConfig(graphNameOrConfiguration, algoConfiguration);
-        return new MemoryEstimationExecutor<>(
-            new LinkPredictionPipelineMutateSpec(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.pipelines().linkPrediction().mutateEstimate(graphNameOrConfiguration, algoConfiguration);
     }
-
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withModelCatalog(modelCatalog);
-    }
-
 }

@@ -25,6 +25,7 @@ import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
+import org.neo4j.gds.procedures.pipelines.TrainedLPPipelineModel;
 
 import java.util.List;
 import java.util.Map;
@@ -47,6 +48,6 @@ public final class LinkPredictionPipelineCompanion {
         String pipelineName,
         String username
     ) {
-        return modelCatalog.get(username, pipelineName, Classifier.ClassifierData.class, LinkPredictionTrainConfig.class, LinkPredictionModelInfo.class);
+        return new TrainedLPPipelineModel(modelCatalog).get(pipelineName, username);
     }
 }

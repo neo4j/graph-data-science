@@ -17,17 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.predict;
+package org.neo4j.gds.procedures.pipelines;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfigImpl;
 
@@ -35,7 +35,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.gds.ml.linkmodels.pipeline.predict.LPGraphStoreFilterFactory.generate;
+import static org.neo4j.gds.procedures.pipelines.LPGraphStoreFilterFactory.generate;
 
 @GdlExtension
 class LPGraphFilterFactoryTest {
@@ -78,7 +78,7 @@ class LPGraphFilterFactoryTest {
             .topN(42)
             .build();
 
-        var labelFilter = generate(trainConfig, predictConfig, multiLabelGraphStore, ProgressTracker.NULL_TRACKER);
+        var labelFilter = generate(Log.noOpLog(), trainConfig, predictConfig, multiLabelGraphStore);
 
         assertThat(labelFilter.sourceNodeLabels()).containsExactly(NodeLabel.of("A"));
         assertThat(labelFilter.targetNodeLabels()).containsExactly(NodeLabel.of("B"));
@@ -103,7 +103,7 @@ class LPGraphFilterFactoryTest {
             .topN(42)
             .build();
 
-        var filter = generate(trainConfig, predictConfig, multiLabelGraphStore, ProgressTracker.NULL_TRACKER);
+        var filter = generate(Log.noOpLog(), trainConfig, predictConfig, multiLabelGraphStore);
 
         assertThat(filter.sourceNodeLabels()).containsExactly(NodeLabel.of("B"));
         assertThat(filter.targetNodeLabels()).containsExactly(NodeLabel.of("A"));
@@ -138,10 +138,10 @@ class LPGraphFilterFactoryTest {
 
         // only validates train here as predict config is already validated in before
         assertThatThrownBy(() -> generate(
+            Log.noOpLog(),
             trainConfig,
             predictConfig,
-            multiLabelGraphStore,
-            ProgressTracker.NULL_TRACKER
+            multiLabelGraphStore
         ))
             .hasMessage("Could not find the specified `targetNodeLabel` from the model's train config of ['INVALID_2']. " +
                         "Available labels are ['A', 'B', 'C'].");
@@ -173,10 +173,10 @@ class LPGraphFilterFactoryTest {
 
         // only validates train here as predict config is already validated in before
         assertThatThrownBy(() -> generate(
+            Log.noOpLog(),
             trainConfig,
             predictConfig,
-            multiLabelGraphStore,
-            ProgressTracker.NULL_TRACKER
+            multiLabelGraphStore
         ))
             .hasMessage("Could not find the specified `relationshipTypes` from the model's predict config of ['INVALID']. " +
                         "Available relationship types are ['CONTEXT', 'CONTEXT_NEW', 'OTHER', 'T'].");

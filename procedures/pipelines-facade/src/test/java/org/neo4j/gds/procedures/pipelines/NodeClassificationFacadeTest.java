@@ -48,7 +48,9 @@ class NodeClassificationFacadeTest {
             null,
             null,
             null,
+            null,
             new User("me", false),
+            null,
             null,
             null,
             null,
@@ -57,10 +59,10 @@ class NodeClassificationFacadeTest {
             null,
             null,
             null,
+            null,
+            null,
             null
         );
-        var facade2 = new PipelinesProcedureFacade(applications, null, null);
-
         var facade = new NodeClassificationFacade(null, null, null, applications);
 
         var result = facade.createPipeline("myPipeline").findAny().orElseThrow();
@@ -93,11 +95,15 @@ class NodeClassificationFacadeTest {
             null,
             null,
             null,
+            null,
             new User("me", false),
             null,
             null,
             null,
+            null,
             nodeClassificationPredictPipelineEstimator,
+            null,
+            null,
             null,
             null,
             null,

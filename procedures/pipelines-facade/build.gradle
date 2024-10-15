@@ -22,6 +22,7 @@ dependencies {
         testImplementation(group: 'org.neo4j', name: it, version: ver.'neo4j')
     }
 
+    implementation project(':algo')
     implementation project(':algo-common')
     implementation project(':algorithms-facade-api')
     implementation project(':algorithms-machinery')
@@ -29,6 +30,7 @@ dependencies {
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')
+    implementation project(':core-utils')
     implementation project(':core-write')
     implementation project(':executor')
     implementation project(':graph-schema-api')
@@ -41,10 +43,18 @@ dependencies {
     implementation project(':model-catalog-api')
     implementation project(':model-catalog-applications')
     implementation project(':neo4j-api')
+    implementation project(':open-model-catalog')
     implementation project(':pipeline')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':termination')
+
+    testAnnotationProcessor project(':annotations')
+    testAnnotationProcessor project(':config-generator')
+
+    testCompileOnly openGds.immutables.value.annotations
+    testCompileOnly openGds.immutables.builder
+    testCompileOnly openGds.jetbrains.annotations
 
     testImplementation platform(openGds.junit5bom)
     testImplementation openGds.junit5.jupiter.api
@@ -53,4 +63,6 @@ dependencies {
     testImplementation openGds.mockito.junit.jupiter
 
     testRuntimeOnly openGds.junit5.jupiter.engine
+
+    testImplementation project(':test-utils')
 }

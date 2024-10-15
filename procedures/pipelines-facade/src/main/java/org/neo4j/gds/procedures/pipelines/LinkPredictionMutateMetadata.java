@@ -17,15 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.predict;
+package org.neo4j.gds.procedures.pipelines;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 
-@Configuration
-public interface LinkPredictionPredictPipelineStreamConfig extends LinkPredictionPredictPipelineBaseConfig {
-    
-    static LinkPredictionPredictPipelineStreamConfig of(String username, CypherMapWrapper config) {
-        return new LinkPredictionPredictPipelineStreamConfigImpl(username, config);
-    }
-}
+import java.util.Map;
+
+/**
+ * Just a holder of fields
+ */
+public record LinkPredictionMutateMetadata(RelationshipsWritten relationshipsWritten, Map<String, Object> probabilityDistribution) {}

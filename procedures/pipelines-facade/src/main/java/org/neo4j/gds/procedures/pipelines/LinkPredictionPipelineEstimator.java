@@ -21,27 +21,31 @@ package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.ml.models.Classifier;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineModelInfo;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
+import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 
-public class TrainedNCPipelineModel {
+class LinkPredictionPipelineEstimator {
     private final ModelCatalog modelCatalog;
+    private final AlgorithmsProcedureFacade algorithmsProcedureFacade;
 
-    public TrainedNCPipelineModel(ModelCatalog modelCatalog) {
+    LinkPredictionPipelineEstimator(ModelCatalog modelCatalog, AlgorithmsProcedureFacade algorithmsProcedureFacade) {
         this.modelCatalog = modelCatalog;
+        this.algorithmsProcedureFacade = algorithmsProcedureFacade;
     }
 
-    public Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> get(
-        String modelName,
-        String username
+    MemoryEstimation estimate(
+        Model<Classifier.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> model,
+        LinkPredictionPredictPipelineBaseConfig configuration
     ) {
-        return modelCatalog.get(
-            username,
-            modelName,
-            Classifier.ClassifierData.class,
-            NodeClassificationPipelineTrainConfig.class,
-            NodeClassificationPipelineModelInfo.class
+        return LinkPredictionPredictPipelineExecutor.estimate(
+            modelCatalog,
+            model.customInfo().pipeline(),
+            configuration,
+            model.data(),
+            algorithmsProcedureFacade
         );
     }
 }

@@ -36,7 +36,7 @@ import org.neo4j.gds.applications.algorithms.machinery.NodePropertyWriter;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.StandardLabel;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
-import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
@@ -46,7 +46,6 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.metrics.Metrics;
-import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
@@ -56,7 +55,6 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.LinkFeatureStepConfi
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationModelResult;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrain;
 import org.neo4j.gds.model.ModelConfig;
@@ -88,12 +86,14 @@ class PipelineApplications {
     private final RelationshipExporterBuilder relationshipExporterBuilder;
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationMonitor terminationMonitor;
+    private final TerminationFlag terminationFlag;
     private final User user;
     private final UserLogRegistryFactory userLogRegistryFactory;
 
     private final PipelineConfigurationParser pipelineConfigurationParser;
     private final ProgressTrackerCreator progressTrackerCreator;
 
+    private final LinkPredictionPipelineEstimator linkPredictionPipelineEstimator;
     private final NodeClassificationPredictPipelineEstimator nodeClassificationPredictPipelineEstimator;
     private final NodeClassificationTrainSideEffectsFactory nodeClassificationTrainSideEffectsFactory;
 
@@ -102,6 +102,9 @@ class PipelineApplications {
     private final AlgorithmsProcedureFacade algorithmsProcedureFacade;
     private final AlgorithmEstimationTemplate algorithmEstimationTemplate;
     private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
+
+    private final TrainedLPPipelineModel trainedLPPipelineModel;
+    private final TrainedNCPipelineModel trainedNCPipelineModel;
 
     PipelineApplications(
         Log log,
@@ -118,16 +121,20 @@ class PipelineApplications {
         RelationshipExporterBuilder relationshipExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
         TerminationMonitor terminationMonitor,
+        TerminationFlag terminationFlag,
         User user,
         UserLogRegistryFactory userLogRegistryFactory,
         PipelineConfigurationParser pipelineConfigurationParser,
         ProgressTrackerCreator progressTrackerCreator,
+        LinkPredictionPipelineEstimator linkPredictionPipelineEstimator,
         NodeClassificationPredictPipelineEstimator nodeClassificationPredictPipelineEstimator,
         NodeClassificationTrainSideEffectsFactory nodeClassificationTrainSideEffectsFactory,
         NodePropertyWriter nodePropertyWriter,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
-        AlgorithmProcessingTemplate algorithmProcessingTemplate
+        AlgorithmProcessingTemplate algorithmProcessingTemplate,
+        TrainedLPPipelineModel trainedLPPipelineModel,
+        TrainedNCPipelineModel trainedNCPipelineModel
     ) {
         this.log = log;
         this.graphStoreService = graphStoreService;
@@ -143,16 +150,20 @@ class PipelineApplications {
         this.relationshipExporterBuilder = relationshipExporterBuilder;
         this.taskRegistryFactory = taskRegistryFactory;
         this.terminationMonitor = terminationMonitor;
+        this.terminationFlag = terminationFlag;
         this.user = user;
         this.userLogRegistryFactory = userLogRegistryFactory;
         this.pipelineConfigurationParser = pipelineConfigurationParser;
         this.progressTrackerCreator = progressTrackerCreator;
+        this.linkPredictionPipelineEstimator = linkPredictionPipelineEstimator;
         this.nodeClassificationPredictPipelineEstimator = nodeClassificationPredictPipelineEstimator;
         this.nodeClassificationTrainSideEffectsFactory = nodeClassificationTrainSideEffectsFactory;
         this.nodePropertyWriter = nodePropertyWriter;
         this.algorithmsProcedureFacade = algorithmsProcedureFacade;
         this.algorithmEstimationTemplate = algorithmEstimationTemplate;
         this.algorithmProcessingTemplate = algorithmProcessingTemplate;
+        this.trainedLPPipelineModel = trainedLPPipelineModel;
+        this.trainedNCPipelineModel = trainedNCPipelineModel;
     }
 
     static PipelineApplications create(
@@ -181,6 +192,11 @@ class PipelineApplications {
     ) {
         var graphStoreService = new GraphStoreService(log);
 
+        var linkPredictionPipelineEstimator = new LinkPredictionPipelineEstimator(
+            modelCatalog,
+            algorithmsProcedureFacade
+        );
+
         var nodeClassificationPredictPipelineEstimator = new NodeClassificationPredictPipelineEstimator(
             modelCatalog,
             algorithmsProcedureFacade
@@ -199,6 +215,9 @@ class PipelineApplications {
             terminationFlag
         );
 
+        var trainedLPPipelineModel = new TrainedLPPipelineModel(modelCatalog);
+        var trainedNCPipelineModel = new TrainedNCPipelineModel(modelCatalog);
+
         return new PipelineApplications(
             log,
             graphStoreService,
@@ -214,16 +233,20 @@ class PipelineApplications {
             relationshipExporterBuilder,
             taskRegistryFactory,
             terminationMonitor,
+            terminationFlag,
             user,
             userLogRegistryFactory,
             pipelineConfigurationParser,
             progressTrackerCreator,
+            linkPredictionPipelineEstimator,
             nodeClassificationPredictPipelineEstimator,
             nodeClassificationTrainSideEffectsFactory,
             nodePropertyWriter,
             algorithmsProcedureFacade,
             algorithmEstimationTemplate,
-            algorithmProcessingTemplate
+            algorithmProcessingTemplate,
+            trainedLPPipelineModel,
+            trainedNCPipelineModel
         );
     }
 
@@ -315,6 +338,57 @@ class PipelineApplications {
         return pipelineRepository.getSingle(user, pipelineName);
     }
 
+    MemoryEstimateResult linkPredictionEstimate(
+        Object graphNameOrConfiguration,
+        LinkPredictionPredictPipelineBaseConfig configuration
+    ) {
+        var estimate = linkPredictionMemoryEstimation(configuration);
+
+        var memoryEstimation = MemoryEstimations.builder("Link Prediction Pipeline Executor")
+            .add("Pipeline executor", estimate)
+            .build();
+
+        var dimensionTransformer = new DimensionTransformerForLinkPrediction(
+            log,
+            new GraphStoreCatalogService(), databaseId,
+            trainedLPPipelineModel,
+            configuration
+        );
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation,
+            dimensionTransformer
+        );
+    }
+
+    MutateResult linkPredictionMutate(GraphName graphName, Map<String, Object> rawConfiguration) {
+        var configuration = pipelineConfigurationParser.parseLinkPredictionPredictPipelineMutateConfig(rawConfiguration);
+        var label = new StandardLabel("LinkPredictionPipelineMutate");
+        var computation = constructLinkPredictionComputation(configuration, label);
+        var mutateStep = new LinkPredictionPipelineMutateStep(
+            log,
+            configuration,
+            terminationFlag,
+            trainedLPPipelineModel,
+            procedureReturnColumns.contains("probabilityDistribution")
+        );
+        var resultBuilder = new LinkPredictionPipelineMutateResultBuilder();
+
+        return algorithmProcessingTemplate.processAlgorithmForMutate(
+            Optional.empty(),
+            graphName,
+            configuration,
+            Optional.empty(),
+            label,
+            () -> linkPredictionMemoryEstimation(configuration),
+            computation,
+            mutateStep,
+            resultBuilder
+        );
+    }
+
     MemoryEstimateResult nodeClassificationPredictEstimate(
         Object graphNameOrConfiguration,
         NodeClassificationPredictPipelineBaseConfig configuration
@@ -331,7 +405,7 @@ class PipelineApplications {
     PredictMutateResult nodeClassificationPredictMutate(GraphName graphName, Map<String, Object> rawConfiguration) {
         var configuration = pipelineConfigurationParser.parseNodeClassificationPredictMutateConfig(rawConfiguration);
         var label = new StandardLabel("NodeClassificationPredictPipelineMutate");
-        var computation = constructPredictComputation(configuration, label);
+        var computation = constructNodeClassificationPredictComputation(configuration, label);
         var mutateStep = new NodeClassificationPredictPipelineMutateStep(graphStoreService, configuration);
         var resultBuilder = new NodeClassificationPredictPipelineMutateResultBuilder(configuration);
 
@@ -354,7 +428,7 @@ class PipelineApplications {
     ) {
         var configuration = pipelineConfigurationParser.parseNodeClassificationPredictStreamConfig(rawConfiguration);
         var label = new StandardLabel("NodeClassificationPredictPipelineStream");
-        var computation = constructPredictComputation(configuration, label);
+        var computation = constructNodeClassificationPredictComputation(configuration, label);
         var resultBuilder = new NodeClassificationPredictPipelineStreamResultBuilder(configuration);
 
         return algorithmProcessingTemplate.processAlgorithmForStream(
@@ -372,7 +446,7 @@ class PipelineApplications {
     WriteResult nodeClassificationPredictWrite(GraphName graphName, Map<String, Object> rawConfiguration) {
         var configuration = pipelineConfigurationParser.parseNodeClassificationPredictWriteConfig(rawConfiguration);
         var label = new StandardLabel("NodeClassificationPredictPipelineWrite");
-        var computation = constructPredictComputation(configuration, label);
+        var computation = constructNodeClassificationPredictComputation(configuration, label);
         var writeStep = new NodeClassificationPredictPipelineWriteStep(nodePropertyWriter, configuration);
         var resultBuilder = new NodeClassificationPredictPipelineWriteResultBuilder(configuration);
 
@@ -437,7 +511,33 @@ class PipelineApplications {
         return pipeline;
     }
 
-    private NodeClassificationPredictComputation constructPredictComputation(
+    private LinkPredictionComputation constructLinkPredictionComputation(
+        LinkPredictionPredictPipelineBaseConfig configuration,
+        Label label
+    ) {
+        return LinkPredictionComputation.create(
+            log,
+            modelCatalog,
+            closeableResourceRegistry,
+            databaseId,
+            dependencyResolver,
+            metrics,
+            nodeLookup,
+            nodePropertyExporterBuilder,
+            procedureReturnColumns,
+            relationshipExporterBuilder,
+            taskRegistryFactory,
+            terminationMonitor,
+            user,
+            userLogRegistryFactory,
+            progressTrackerCreator,
+            algorithmsProcedureFacade,
+            configuration,
+            label
+        );
+    }
+
+    private NodeClassificationPredictComputation constructNodeClassificationPredictComputation(
         NodeClassificationPredictPipelineBaseConfig configuration,
         Label label
     ) {
@@ -500,21 +600,18 @@ class PipelineApplications {
         );
     }
 
-    private Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> getTrainedNCPipelineModel(
-        String modelName,
-        String username
-    ) {
-        return modelCatalog.get(
-            username,
-            modelName,
-            Classifier.ClassifierData.class,
-            NodeClassificationPipelineTrainConfig.class,
-            NodeClassificationPipelineModelInfo.class
-        );
+    private MemoryEstimation linkPredictionMemoryEstimation(LinkPredictionPredictPipelineBaseConfig configuration) {
+        var modelName = configuration.modelName();
+        var username = configuration.username();
+        var model = trainedLPPipelineModel.get(modelName, username);
+
+        return linkPredictionPipelineEstimator.estimate(model, configuration);
     }
 
     private MemoryEstimation nodeClassificationPredictMemoryEstimation(NodeClassificationPredictPipelineBaseConfig configuration) {
-        var model = getTrainedNCPipelineModel(configuration.modelName(), configuration.username());
+        var modelName = configuration.modelName();
+        var username = configuration.username();
+        var model = trainedNCPipelineModel.get(modelName, username);
 
         return nodeClassificationPredictPipelineEstimator.estimate(model, configuration);
     }

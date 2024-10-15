@@ -19,7 +19,10 @@
  */
 package org.neo4j.gds.procedures.pipelines;
 
+import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.ml.pipeline.PipelineCompanion;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 
@@ -131,6 +134,38 @@ public final class LinkPredictionFacade {
         var pipeline = pipelineApplications.createLinkPredictionTrainingPipeline(pipelineName);
 
         var result = PipelineInfoResult.create(pipelineName, pipeline);
+
+        return Stream.of(result);
+    }
+
+    public Stream<MutateResult> mutate(
+        String graphNameAsString,
+        Map<String, Object> configuration
+    ) {
+        PipelineCompanion.preparePipelineConfig(graphNameAsString, configuration);
+
+        var graphName = GraphName.parse(graphNameAsString);
+
+        var result = pipelineApplications.linkPredictionMutate(
+            graphName,
+            configuration
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<MemoryEstimateResult> mutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    ) {
+        PipelineCompanion.preparePipelineConfig(graphNameOrConfiguration, rawConfiguration);
+
+        var configuration = pipelineConfigurationParser.parseLinkPredictionPredictPipelineMutateConfig(rawConfiguration);
+
+        var result = pipelineApplications.linkPredictionEstimate(
+            graphNameOrConfiguration,
+            configuration
+        );
 
         return Stream.of(result);
     }
