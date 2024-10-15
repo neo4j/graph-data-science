@@ -19,16 +19,7 @@
  */
 package org.neo4j.gds.api;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
-public final class GraphName {
-    private final String value;
-
-    private GraphName(String value) {
-        this.value = value;
-    }
-
+public record GraphName(String value) {
     /**
      * Trim the incoming string and use that.
      */
@@ -37,21 +28,6 @@ public final class GraphName {
     }
 
     public String getValue() {
-        return value;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return EqualsBuilder.reflectionEquals(this, obj);
-    }
-
-    @Override
-    public int hashCode() {
-        return HashCodeBuilder.reflectionHashCode(this);
-    }
-
-    @Override
-    public String toString() {
         return value;
     }
 }

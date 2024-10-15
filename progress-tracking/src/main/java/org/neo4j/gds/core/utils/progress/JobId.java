@@ -23,6 +23,8 @@ import java.util.Locale;
 import java.util.UUID;
 
 public record JobId(String value) {
+    public static final JobId EMPTY = new JobId("");
+
     public JobId() {
         this(UUID.randomUUID().toString());
     }
