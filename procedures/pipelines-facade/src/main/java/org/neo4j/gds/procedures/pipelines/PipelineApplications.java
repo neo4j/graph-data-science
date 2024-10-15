@@ -389,6 +389,24 @@ class PipelineApplications {
         );
     }
 
+    Stream<StreamResult> linkPredictionStream(GraphName graphName, Map<String, Object> rawConfiguration) {
+        var configuration = pipelineConfigurationParser.parseLinkPredictionPredictPipelineStreamConfig(rawConfiguration);
+        var label = new StandardLabel("LinkPredictionPipelineStream");
+        var computation = constructLinkPredictionComputation(configuration, label);
+        var resultBuilder = new LinkPredictionPipelineStreamResultBuilder(log, trainedLPPipelineModel, configuration);
+
+        return algorithmProcessingTemplate.processAlgorithmForStream(
+            Optional.empty(),
+            graphName,
+            configuration,
+            Optional.empty(),
+            label,
+            () -> linkPredictionMemoryEstimation(configuration),
+            computation,
+            resultBuilder
+        );
+    }
+
     MemoryEstimateResult nodeClassificationPredictEstimate(
         Object graphNameOrConfiguration,
         NodeClassificationPredictPipelineBaseConfig configuration

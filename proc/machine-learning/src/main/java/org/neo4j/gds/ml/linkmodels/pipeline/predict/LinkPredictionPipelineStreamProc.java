@@ -19,12 +19,9 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.pipelines.StreamResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -36,14 +33,10 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.ESTIMATE_PREDICT_DESCRIPTION;
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.PREDICT_DESCRIPTION;
-import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
 
-public class LinkPredictionPipelineStreamProc extends BaseProc {
+public class LinkPredictionPipelineStreamProc {
     @Context
     public GraphDataScienceProcedures facade;
-
-    @Context
-    public ModelCatalog modelCatalog;
 
     @Procedure(name = "gds.beta.pipeline.linkPrediction.predict.stream", mode = Mode.READ)
     @Description(PREDICT_DESCRIPTION)
@@ -51,11 +44,7 @@ public class LinkPredictionPipelineStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        preparePipelineConfig(graphName, configuration);
-        return new ProcedureExecutor<>(
-            new LinkPredictionPipelineStreamSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.pipelines().linkPrediction().stream(graphName, configuration);
     }
 
     @Procedure(name = "gds.beta.pipeline.linkPrediction.predict.stream.estimate", mode = Mode.READ)
@@ -66,10 +55,4 @@ public class LinkPredictionPipelineStreamProc extends BaseProc {
     ) {
         return facade.pipelines().linkPrediction().streamEstimate(graphNameOrConfiguration, algoConfiguration);
     }
-
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withModelCatalog(modelCatalog);
-    }
-
 }
