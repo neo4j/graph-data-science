@@ -169,4 +169,20 @@ public final class LinkPredictionFacade {
 
         return Stream.of(result);
     }
+
+    public Stream<MemoryEstimateResult> streamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> rawConfiguration
+    ) {
+        PipelineCompanion.preparePipelineConfig(graphNameOrConfiguration, rawConfiguration);
+
+        var configuration = pipelineConfigurationParser.parseLinkPredictionPredictPipelineStreamConfig(rawConfiguration);
+
+        var result = pipelineApplications.linkPredictionEstimate(
+            graphNameOrConfiguration,
+            configuration
+        );
+
+        return Stream.of(result);
+    }
 }
