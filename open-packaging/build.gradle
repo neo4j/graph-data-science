@@ -19,7 +19,7 @@ dependencies {
 }
 
 tasks.register("licenseFile") {
-    outputs.file(distributionLicenseFile)
+    outputs.file(file("$publicDir/LICENSE.txt"))
 }
 
 tasks.register("checkLicensesFile") {
