@@ -52,6 +52,8 @@ import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStepFactory;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.LinkFeatureStepConfiguration;
+import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
+import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainPipelineExecutor;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationModelResult;
@@ -407,6 +409,26 @@ class PipelineApplications {
         );
     }
 
+    MemoryEstimateResult linkPredictionTrainEstimate(
+        Object graphNameOrConfiguration,
+        LinkPredictionTrainConfig configuration
+    ) {
+        var estimate = linkPredictionTrainMemoryEstimation(configuration);
+
+        var memoryEstimation = MemoryEstimations.builder("Link Prediction Pipeline Executor")
+            .add("Pipeline executor", estimate)
+            .build();
+
+        var dimensionTransformer = new DimensionTransformerForLinkPredictionTrain(pipelineRepository, configuration);
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation,
+            dimensionTransformer
+        );
+    }
+
     MemoryEstimateResult nodeClassificationPredictEstimate(
         Object graphNameOrConfiguration,
         NodeClassificationPredictPipelineBaseConfig configuration
@@ -624,6 +646,28 @@ class PipelineApplications {
         var model = trainedLPPipelineModel.get(modelName, username);
 
         return linkPredictionPipelineEstimator.estimate(model, configuration);
+    }
+
+    private MemoryEstimation linkPredictionTrainMemoryEstimation(LinkPredictionTrainConfig configuration) {
+        var specifiedUser = new User(configuration.username(), false);
+        var pipelineName = PipelineName.parse(configuration.pipeline());
+
+        var pipeline = pipelineRepository.getLinkPredictionTrainingPipeline(
+            specifiedUser,
+            pipelineName
+        );
+
+        var estimate = LinkPredictionTrainPipelineExecutor.estimate(
+            pipeline,
+            configuration,
+            modelCatalog,
+            algorithmsProcedureFacade,
+            user.getUsername()
+        );
+
+        return MemoryEstimations.builder("LinkPredictionPipelineTrain")
+            .add(estimate)
+            .build();
     }
 
     private MemoryEstimation nodeClassificationPredictMemoryEstimation(NodeClassificationPredictPipelineBaseConfig configuration) {

@@ -501,7 +501,13 @@ final class LinkPredictionTrainPipelineExecutorTest {
             );
 
             var actualRange = LinkPredictionTrainPipelineExecutor
-                .estimate(ImmutableExecutionContext.EMPTY, pipeline, config)
+                .estimate(
+                    pipeline,
+                    config,
+                    ImmutableExecutionContext.EMPTY.modelCatalog(),
+                    ImmutableExecutionContext.EMPTY.algorithmsProcedureFacade(),
+                    ImmutableExecutionContext.EMPTY.username()
+                )
                 .estimate(graphDimensions, config.concurrency())
                 .memoryUsage();
 
@@ -523,9 +529,11 @@ final class LinkPredictionTrainPipelineExecutorTest {
             LinkPredictionTrainingPipeline pipeline = new LinkPredictionTrainingPipeline();
 
             assertThatThrownBy(() -> LinkPredictionTrainPipelineExecutor.estimate(
-                ExecutionContext.EMPTY,
                 pipeline,
-                config
+                config,
+                ExecutionContext.EMPTY.modelCatalog(),
+                ExecutionContext.EMPTY.algorithmsProcedureFacade(),
+                ExecutionContext.EMPTY.username()
             ))
                 .hasMessage("Need at least one model candidate for training.");
         }

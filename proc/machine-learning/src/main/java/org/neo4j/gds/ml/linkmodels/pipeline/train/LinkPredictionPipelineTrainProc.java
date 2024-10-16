@@ -22,10 +22,10 @@ package org.neo4j.gds.ml.linkmodels.pipeline.train;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.ml.pipeline.PipelineCompanion;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -38,6 +38,8 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 
 public class LinkPredictionPipelineTrainProc extends BaseProc {
+    @Context
+    public GraphDataScienceProcedures facade;
 
     @Context
     public ModelCatalog modelCatalog;
@@ -61,12 +63,7 @@ public class LinkPredictionPipelineTrainProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        PipelineCompanion.preparePipelineConfig(graphNameOrConfiguration, algoConfiguration);
-        return new MemoryEstimationExecutor<>(
-            new LinkPredictionPipelineTrainSpec(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.pipelines().linkPrediction().trainEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override

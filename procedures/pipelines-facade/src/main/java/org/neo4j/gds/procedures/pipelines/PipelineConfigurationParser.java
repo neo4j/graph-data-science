@@ -31,6 +31,7 @@ import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.LinkFeatureStepConfiguration;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.LinkFeatureStepConfigurationImpl;
+import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
 
@@ -74,6 +75,10 @@ class PipelineConfigurationParser {
 
     LinkPredictionPredictPipelineStreamConfig parseLinkPredictionPredictPipelineStreamConfig(Map<String, Object> configuration) {
         return parseConfiguration(LinkPredictionPredictPipelineStreamConfig::of, configuration);
+    }
+
+    LinkPredictionTrainConfig parseLinkPredictionTrainConfig(Map<String, Object> configuration) {
+        return parseConfiguration(LinkPredictionTrainConfig::of, configuration);
     }
 
     TunableTrainerConfig parseLogisticRegressionTrainerConfig(Map<String, Object> configuration) {
