@@ -121,6 +121,22 @@ class EdgeEventsQueueTest {
         assertThat(edgeEventsQueue.top()).isEqualTo(11L);
         assertThat(edgeEventsQueue.nextEventTime()).isEqualTo(20);
 
+    }
+
+    @Test
+    void shouldReAddCorrectly(){
+
+        var edgeEventsQueue = new EdgeEventsQueue(2);
+        edgeEventsQueue.addBothWays(0,1,0,1,10);
+        edgeEventsQueue.performInitialAssignment(2);
+        edgeEventsQueue.deactivateCluster(1);
+        assertThat(edgeEventsQueue.top()).isEqualTo(0);
+        edgeEventsQueue.pop();
+        assertThat(edgeEventsQueue.nextEventTime()).isEqualTo(Double.MAX_VALUE);
+        edgeEventsQueue.addWithCheck(0,0,10);
+        assertThat(edgeEventsQueue.top()).isEqualTo(0);
+        assertThat(edgeEventsQueue.nextEventTime()).isEqualTo(10);
+
 
     }
 

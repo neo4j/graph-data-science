@@ -76,7 +76,7 @@ import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
      void addWithCheck(long s,  long edgePart, double w){
          var pairingHeapOfs  = pairingHeaps.get(s);
          pairingHeapOfs.add(edgePart,w);
-         if (w < edgeEventsPriorityQueue.cost(s)){
+         if (!edgeEventsPriorityQueue.containsElement(s) || w  < edgeEventsPriorityQueue.cost(s)){
                edgeEventsPriorityQueue.set(s, w);
          }
      }
