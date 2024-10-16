@@ -19,13 +19,9 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.train;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.ProcedureExecutor;
-import org.neo4j.gds.ml.pipeline.PipelineCompanion;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.pipelines.LinkPredictionTrainResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -37,24 +33,17 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class LinkPredictionPipelineTrainProc extends BaseProc {
+public class LinkPredictionPipelineTrainProc {
     @Context
     public GraphDataScienceProcedures facade;
 
-    @Context
-    public ModelCatalog modelCatalog;
-
     @Procedure(name = "gds.beta.pipeline.linkPrediction.train", mode = Mode.READ)
     @Description("Trains a link prediction model based on a pipeline")
-    public Stream<TrainResult> train(
+    public Stream<LinkPredictionTrainResult> train(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> config
     ) {
-        PipelineCompanion.preparePipelineConfig(graphName, config);
-        return new ProcedureExecutor<>(
-            new LinkPredictionPipelineTrainSpec(),
-            executionContext()
-        ).compute(graphName, config);
+        return facade.pipelines().linkPrediction().train(graphName, config);
     }
 
     @Procedure(name = "gds.beta.pipeline.linkPrediction.train.estimate", mode = READ)
@@ -64,10 +53,5 @@ public class LinkPredictionPipelineTrainProc extends BaseProc {
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         return facade.pipelines().linkPrediction().trainEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withModelCatalog(modelCatalog);
     }
 }

@@ -19,31 +19,17 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.applications.services.GraphDimensionFactory;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.BaseConfig;
-import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.core.DimensionsMap;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
 import org.neo4j.gds.core.loading.ImmutableCatalogRequest;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
 
@@ -84,45 +70,12 @@ public final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
     @Override
     public GraphDimensions graphDimensions() {
         var graphStore = graphStore();
+        var configuration = config;
 
-        Collection<NodeLabel> labelFilter = ElementTypeValidator.resolve(graphStore, config.nodeLabels());
-        Collection<RelationshipType> typeFilter = ElementTypeValidator.resolveTypes(
-            graphStore,
-            config.relationshipTypes()
-        );
-
-        // validate the filters here as well as the other validation happens after the memory estimation
-        config.graphStoreValidation(graphStore, labelFilter, typeFilter);
-
-        Graph filteredGraph = graphStore.getGraph(labelFilter, typeFilter, Optional.empty());
-        long relCount = filteredGraph.relationshipCount();
-
-        var relationshipTypeTokens = new HashMap<String, Integer>();
-        var i = 0;
-        for (String key : graphStore.relationshipPropertyKeys()) {
-            relationshipTypeTokens.put(key, i++);
-        }
-
-        var nodePropertyDimensions = filteredGraph
-            .availableNodeProperties()
-            .stream()
-            .collect(Collectors.toMap(
-                Function.identity(),
-                property -> filteredGraph
-                    .nodeProperties(property)
-                    .dimension()
-            ));
-
-        return ImmutableGraphDimensions.builder()
-            .nodeCount(filteredGraph.nodeCount())
-            .relationshipCounts(filteredGraphRelationshipCounts(typeFilter.stream(), filteredGraph))
-            .relCountUpperBound(relCount)
-            .relationshipPropertyTokens(relationshipTypeTokens)
-            .nodePropertyDimensions(new DimensionsMap(nodePropertyDimensions))
-            .build();
+        return new GraphDimensionFactory().create(graphStore, configuration);
     }
 
-    public static GraphStoreCatalogEntry graphStoreFromCatalog(
+    private static GraphStoreCatalogEntry graphStoreFromCatalog(
         String graphName,
         BaseConfig config,
         String username,
@@ -136,23 +89,5 @@ public final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
             isGdsAdmin
         );
         return GraphStoreCatalog.get(request, graphName);
-    }
-
-    private static Map<RelationshipType, Long> filteredGraphRelationshipCounts(
-        Stream<RelationshipType> typeFilter,
-        Graph filteredGraph
-    ) {
-        var relCount = filteredGraph.relationshipCount();
-        return Stream.concat(typeFilter, Stream.of(RelationshipType.ALL_RELATIONSHIPS))
-            .distinct()
-            .collect(Collectors.toMap(
-                    Function.identity(),
-                    key -> key == RelationshipType.ALL_RELATIONSHIPS
-                        ? relCount
-                        : filteredGraph
-                            .relationshipTypeFilteredGraph(Set.of(key))
-                            .relationshipCount()
-                )
-            );
     }
 }

@@ -63,7 +63,8 @@ class DefaultAlgorithmProcessingTemplateTest {
             graphResources,
             new StandardLabel("some compute job"),
             null,
-            null
+            null,
+            DimensionTransformer.DISABLED
         )).thenReturn("some result");
         Object renderedResult = template.processAlgorithmAndAnySideEffects(
             Optional.empty(),
@@ -71,6 +72,7 @@ class DefaultAlgorithmProcessingTemplateTest {
             configuration,
             Optional.empty(),
             new StandardLabel("some compute job"),
+            DimensionTransformer.DISABLED,
             null,
             null,
             Optional.of((__, ___) -> Optional.of("metadata from some side effect")),
@@ -114,7 +116,8 @@ class DefaultAlgorithmProcessingTemplateTest {
             graphResources,
             new StandardLabel("some other compute job"),
             null,
-            null
+            null,
+            DimensionTransformer.DISABLED
         )).thenReturn("some other result");
         Object renderedResult = template.processAlgorithmAndAnySideEffects(
             Optional.empty(),
@@ -122,6 +125,7 @@ class DefaultAlgorithmProcessingTemplateTest {
             configuration,
             Optional.empty(),
             new StandardLabel("some other compute job"),
+            DimensionTransformer.DISABLED,
             null,
             null,
             Optional.empty(),

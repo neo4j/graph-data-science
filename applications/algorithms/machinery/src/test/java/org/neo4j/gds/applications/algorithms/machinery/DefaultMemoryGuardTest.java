@@ -20,7 +20,8 @@
 package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.applications.services.GraphDimensionFactory;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -46,11 +47,17 @@ import static org.mockito.Mockito.when;
 class DefaultMemoryGuardTest {
     @Test
     void shouldAllowExecution() {
-        var memoryGuard = new DefaultMemoryGuard(null, false, new MemoryGauge(new AtomicLong(42L)));
+        var graphDimensionFactory = mock(GraphDimensionFactory.class);
+        var memoryGuard = new DefaultMemoryGuard(
+            null,
+            graphDimensionFactory,
+            false,
+            new MemoryGauge(new AtomicLong(42L))
+        );
 
-        var graph = mock(Graph.class);
-        when(graph.nodeCount()).thenReturn(23L);
-        when(graph.relationshipCount()).thenReturn(87L);
+        var graphStore = mock(GraphStore.class);
+        var configuration = new ExampleConfiguration();
+        when(graphDimensionFactory.create(graphStore, configuration)).thenReturn(GraphDimensions.of(23L, 87L));
         var memoryEstimation = mock(MemoryEstimation.class);
         var memoryTree = mock(MemoryTree.class);
         var concurrency = new Concurrency(7);
@@ -59,33 +66,41 @@ class DefaultMemoryGuardTest {
 
         // there is enough memory available
         memoryGuard.assertAlgorithmCanRun(
+            () -> memoryEstimation,
+            graphStore,
+            configuration,
             new StandardLabel("some label"),
-            new ExampleConfiguration(),
-            graph,
-            () -> memoryEstimation
+            DimensionTransformer.DISABLED
         );
     }
 
     @Test
     void shouldGuardExecutionUsingMinimumEstimate() {
-        var memoryGuard = new DefaultMemoryGuard(null, false, new MemoryGauge(new AtomicLong(42L)));
+        var graphDimensionFactory = mock(GraphDimensionFactory.class);
+        var memoryGuard = new DefaultMemoryGuard(
+            null,
+            graphDimensionFactory,
+            false,
+            new MemoryGauge(new AtomicLong(42L))
+        );
 
-        var graph = mock(Graph.class);
-        when(graph.nodeCount()).thenReturn(23L);
-        when(graph.relationshipCount()).thenReturn(87L);
+        var graphStore = mock(GraphStore.class);
+        var configuration = new ExampleConfiguration();
+        when(graphDimensionFactory.create(graphStore, configuration)).thenReturn(GraphDimensions.of(23L, 87L));
         var memoryEstimation = mock(MemoryEstimation.class);
         var memoryTree = mock(MemoryTree.class);
         var concurrency = new Concurrency(7);
-        when(memoryEstimation.estimate(GraphDimensions.of(23, 87), concurrency)).thenReturn(memoryTree);
+        when(memoryEstimation.estimate(GraphDimensions.of(23L, 87L), concurrency)).thenReturn(memoryTree);
         when(memoryTree.memoryUsage()).thenReturn(MemoryRange.of(117, 243));
 
         // uh oh
         try {
             memoryGuard.assertAlgorithmCanRun(
+                () -> memoryEstimation,
+                graphStore,
+                configuration,
                 new StandardLabel("some other label"),
-                new ExampleConfiguration(),
-                graph,
-                () -> memoryEstimation
+                DimensionTransformer.DISABLED
             );
 
             fail();
@@ -96,24 +111,31 @@ class DefaultMemoryGuardTest {
 
     @Test
     void shouldGuardExecutionUsingMaximumEstimate() {
-        var memoryGuard = new DefaultMemoryGuard(null, true, new MemoryGauge(new AtomicLong(42L)));
+        var graphDimensionFactory = mock(GraphDimensionFactory.class);
+        var memoryGuard = new DefaultMemoryGuard(
+            null,
+            graphDimensionFactory,
+            true,
+            new MemoryGauge(new AtomicLong(42L))
+        );
 
-        var graph = mock(Graph.class);
-        when(graph.nodeCount()).thenReturn(23L);
-        when(graph.relationshipCount()).thenReturn(87L);
+        var graphStore = mock(GraphStore.class);
+        var configuration = new ExampleConfiguration();
+        when(graphDimensionFactory.create(graphStore, configuration)).thenReturn(GraphDimensions.of(23L, 87L));
         var memoryEstimation = mock(MemoryEstimation.class);
         var memoryTree = mock(MemoryTree.class);
         var concurrency = new Concurrency(7);
-        when(memoryEstimation.estimate(GraphDimensions.of(23, 87), concurrency)).thenReturn(memoryTree);
+        when(memoryEstimation.estimate(GraphDimensions.of(23L, 87L), concurrency)).thenReturn(memoryTree);
         when(memoryTree.memoryUsage()).thenReturn(MemoryRange.of(117, 243));
 
         // uh oh
         try {
             memoryGuard.assertAlgorithmCanRun(
+                () -> memoryEstimation,
+                graphStore,
+                configuration,
                 new StandardLabel("yet another label"),
-                new ExampleConfiguration(),
-                graph,
-                () -> memoryEstimation
+                DimensionTransformer.DISABLED
             );
 
             fail();
@@ -124,29 +146,38 @@ class DefaultMemoryGuardTest {
 
     @Test
     void shouldRespectSudoFlag() {
-        var memoryGuard = new DefaultMemoryGuard(null, false, new MemoryGauge(new AtomicLong(42L)));
+        var graphDimensionFactory = mock(GraphDimensionFactory.class);
+        var memoryGuard = new DefaultMemoryGuard(
+            null,
+            graphDimensionFactory,
+            false,
+            new MemoryGauge(new AtomicLong(42L))
+        );
 
-        var graph = mock(Graph.class);
-        when(graph.nodeCount()).thenReturn(23L);
-        when(graph.relationshipCount()).thenReturn(87L);
+        var graphStore = mock(GraphStore.class);
+        var configuration = new ExampleConfiguration();
+        when(graphDimensionFactory.create(graphStore, configuration)).thenReturn(GraphDimensions.of(23L, 87L));
         var memoryEstimation = mock(MemoryEstimation.class);
         var memoryTree = mock(MemoryTree.class);
         var concurrency = new Concurrency(7);
-        when(memoryEstimation.estimate(GraphDimensions.of(23, 87), concurrency)).thenReturn(memoryTree);
+        when(memoryEstimation.estimate(GraphDimensions.of(23L, 87L), concurrency)).thenReturn(memoryTree);
         when(memoryTree.memoryUsage()).thenReturn(MemoryRange.of(117, 243));
 
         assertThatIllegalStateException().isThrownBy(() -> memoryGuard.assertAlgorithmCanRun(
+            () -> memoryEstimation,
+            graphStore,
+            configuration,
             new StandardLabel("some other label"),
-            new ExampleConfiguration(),
-            graph,
-            () -> memoryEstimation
+            DimensionTransformer.DISABLED
         ));
 
+        // now with sudo
         assertDoesNotThrow(() -> memoryGuard.assertAlgorithmCanRun(
+            () -> memoryEstimation,
+            graphStore,
+            new ExampleConfiguration(true),
             new StandardLabel("some other label"),
-            new ExampleConfiguration(true), // now with sudo
-            graph,
-            () -> memoryEstimation
+            DimensionTransformer.DISABLED
         ));
     }
 }

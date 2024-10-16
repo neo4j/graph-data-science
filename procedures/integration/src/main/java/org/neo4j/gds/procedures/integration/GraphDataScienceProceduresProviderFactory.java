@@ -111,7 +111,7 @@ final class GraphDataScienceProceduresProviderFactory {
     ) {
         var catalogProcedureFacadeFactory = new GraphCatalogProcedureFacadeFactory(log);
 
-        var memoryGuard = new DefaultMemoryGuard(log, useMaxMemoryEstimation, memoryGauge);
+        var memoryGuard = DefaultMemoryGuard.create(log, useMaxMemoryEstimation, memoryGauge);
 
         return new GraphDataScienceProceduresProvider(
             log,

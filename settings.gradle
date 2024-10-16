@@ -128,6 +128,9 @@ project(':path-finding-algorithms').projectDir = file('applications/algorithms/p
 include('similarity-algorithms')
 project(':similarity-algorithms').projectDir = file('applications/algorithms/similarity')
 
+include('application-services')
+project(':application-services').projectDir = file('applications/services')
+
 include('applications-facade')
 project(':applications-facade').projectDir = file('applications/facade')
 

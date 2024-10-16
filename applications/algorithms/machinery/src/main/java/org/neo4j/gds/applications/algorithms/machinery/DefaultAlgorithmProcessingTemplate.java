@@ -86,6 +86,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             configuration,
             postGraphStoreLoadValidationHooks,
             label,
+            DimensionTransformer.DISABLED,
             estimationSupplier,
             computation,
             Optional.of(mutateEffect),
@@ -112,6 +113,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             configuration,
             postGraphStoreLoadValidationHooks,
             label,
+            DimensionTransformer.DISABLED,
             estimationSupplier,
             computation,
             Optional.empty(),
@@ -138,6 +140,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             configuration,
             postGraphStoreLoadValidationHooks,
             label,
+            DimensionTransformer.DISABLED,
             estimationSupplier,
             computation,
             Optional.empty(),
@@ -166,6 +169,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             configuration,
             postGraphStoreLoadValidationHooks,
             label,
+            DimensionTransformer.DISABLED,
             estimationSupplier,
             computation,
             Optional.of(writeEffect),
@@ -192,7 +196,8 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         CONFIGURATION configuration,
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
         Label label,
-        Supplier<MemoryEstimation> estimationFactory,
+        DimensionTransformer dimensionTransformer,
+        Supplier<MemoryEstimation> estimationSupplier,
         Computation<RESULT_FROM_ALGORITHM> computation,
         Optional<SideEffect<RESULT_FROM_ALGORITHM, SIDE_EFFECT_METADATA>> sideEffect,
         ResultRenderer<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, SIDE_EFFECT_METADATA> resultRenderer
@@ -212,9 +217,10 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             configuration,
             graphResources,
             label,
-            estimationFactory,
+            estimationSupplier,
             computation,
-            timingsBuilder
+            timingsBuilder,
+            dimensionTransformer
         );
 
         var metadata = processSideEffect(timingsBuilder, graphResources, result, sideEffect);
@@ -268,7 +274,8 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         Label label,
         Supplier<MemoryEstimation> estimationSupplier,
         Computation<RESULT_FROM_ALGORITHM> computation,
-        AlgorithmProcessingTimingsBuilder timingsBuilder
+        AlgorithmProcessingTimingsBuilder timingsBuilder,
+        DimensionTransformer dimensionTransformer
     ) {
         if (graphResources.graph().isEmpty()) return Optional.empty();
 
@@ -278,7 +285,8 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
                 graphResources,
                 label,
                 estimationSupplier,
-                computation
+                computation,
+                dimensionTransformer
             );
 
             return Optional.ofNullable(result);

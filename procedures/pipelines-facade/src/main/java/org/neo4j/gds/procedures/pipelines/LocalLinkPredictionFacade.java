@@ -210,6 +210,18 @@ public final class LocalLinkPredictionFacade implements LinkPredictionFacade {
     }
 
     @Override
+    public Stream<LinkPredictionTrainResult> train(
+        String graphNameAsString,
+        Map<String, Object> configuration
+    ) {
+        PipelineCompanion.preparePipelineConfig(graphNameAsString, configuration);
+
+        var graphName = GraphName.parse(graphNameAsString);
+
+        return pipelineApplications.linkPredictionTrain(graphName, configuration);
+    }
+
+    @Override
     public Stream<MemoryEstimateResult> trainEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> rawConfiguration

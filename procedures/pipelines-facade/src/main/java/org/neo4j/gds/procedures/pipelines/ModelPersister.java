@@ -20,29 +20,34 @@
 package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
+import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
 
 /**
- * Just squirreling away some scaffolding
+ * A small service that might ought to go under {@link org.neo4j.gds.applications.modelcatalog.ModelRepository}.
  */
-class NodeClassificationTrainSideEffectsFactory {
+class ModelPersister {
     private final Log log;
     private final ModelCatalog modelCatalog;
     private final ModelRepository modelRepository;
 
-    public NodeClassificationTrainSideEffectsFactory(
-        Log log,
-        ModelCatalog modelCatalog,
-        ModelRepository modelRepository
-    ) {
+    ModelPersister(Log log, ModelCatalog modelCatalog, ModelRepository modelRepository) {
         this.log = log;
         this.modelCatalog = modelCatalog;
         this.modelRepository = modelRepository;
     }
 
-    NodeClassificationTrainSideEffects create(NodeClassificationPipelineTrainConfig computation) {
-        return new NodeClassificationTrainSideEffects(log, modelCatalog, modelRepository, computation);
+    void persistModel(Model<?, ?, ?> model, boolean persistToDisk) {
+        modelCatalog.set(model);
+
+        if (!persistToDisk) return; // all done
+
+        try {
+            modelRepository.store(model);
+        } catch (Exception e) { // this is terrifying engineering, inherited from ...
+            log.error("Failed to store model to disk after training.", e);
+            throw e;
+        }
     }
 }

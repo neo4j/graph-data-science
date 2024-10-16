@@ -110,6 +110,7 @@ public interface AlgorithmProcessingTemplate {
         CONFIGURATION configuration,
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
         Label label,
+        DimensionTransformer dimensionTransformer,
         Supplier<MemoryEstimation> estimationFactory,
         Computation<RESULT_FROM_ALGORITHM> computation,
         Optional<SideEffect<RESULT_FROM_ALGORITHM, SIDE_EFFECT_METADATA>> sideEffect,

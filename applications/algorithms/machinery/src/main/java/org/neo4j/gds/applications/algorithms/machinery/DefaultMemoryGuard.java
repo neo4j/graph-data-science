@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 
-import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.applications.services.GraphDimensionFactory;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -30,32 +30,48 @@ import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.function.Supplier;
 
-public class DefaultMemoryGuard implements MemoryGuard {
+public final class DefaultMemoryGuard implements MemoryGuard {
     private final Log log;
+    private final GraphDimensionFactory graphDimensionFactory;
     private final boolean useMaxMemoryEstimation;
     private final MemoryGauge memoryGauge;
 
-    public DefaultMemoryGuard(Log log, boolean useMaxMemoryEstimation, MemoryGauge memoryGauge) {
+    DefaultMemoryGuard(
+        Log log,
+        GraphDimensionFactory graphDimensionFactory,
+        boolean useMaxMemoryEstimation,
+        MemoryGauge memoryGauge
+    ) {
         this.log = log;
+        this.graphDimensionFactory = graphDimensionFactory;
         this.useMaxMemoryEstimation = useMaxMemoryEstimation;
         this.memoryGauge = memoryGauge;
     }
 
+    public static DefaultMemoryGuard create(Log log, boolean useMaxMemoryEstimation, MemoryGauge memoryGauge) {
+        var graphDimensionFactory = new GraphDimensionFactory();
+
+        return new DefaultMemoryGuard(log, graphDimensionFactory, useMaxMemoryEstimation, memoryGauge);
+    }
+
     @Override
     public <CONFIGURATION extends AlgoBaseConfig> void assertAlgorithmCanRun(
-        Label label,
+        Supplier<MemoryEstimation> estimationFactory,
+        GraphStore graphStore,
         CONFIGURATION configuration,
-        Graph graph,
-        Supplier<MemoryEstimation> estimationFactory
+        Label label,
+        DimensionTransformer dimensionTransformer
     ) throws IllegalStateException {
         if (configuration.sudo()) return;
 
         try {
             var memoryEstimation = estimationFactory.get();
 
-            var graphDimensions = GraphDimensions.of(graph.nodeCount(), graph.relationshipCount());
+            var graphDimensions = graphDimensionFactory.create(graphStore, configuration);
 
-            var memoryTree = memoryEstimation.estimate(graphDimensions, configuration.concurrency());
+            var transformedGraphDimensions = dimensionTransformer.transform(graphDimensions);
+
+            var memoryTree = memoryEstimation.estimate(transformedGraphDimensions, configuration.concurrency());
 
             var memoryRange = memoryTree.memoryUsage();
 

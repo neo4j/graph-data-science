@@ -27,8 +27,8 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.Computation;
+import org.neo4j.gds.applications.algorithms.machinery.Label;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -39,20 +39,16 @@ import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.ml.pipeline.PipelineCompanion;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureProducer;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationModelResult;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrain;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrainAlgorithm;
+import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
+import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainPipelineExecutor;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.termination.TerminationMonitor;
 
-final class NodeClassificationTrainComputation implements Computation<NodeClassificationModelResult> {
-    private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
-
+final class LinkPredictionTrainComputation implements Computation<LinkPredictionTrainPipelineExecutor.LinkPredictionTrainPipelineResult> {
     private final Log log;
     private final ModelCatalog modelCatalog;
     private final PipelineRepository pipelineRepository;
+
     private final CloseableResourceRegistry closeableResourceRegistry;
     private final DatabaseId databaseId;
     private final DependencyResolver dependencyResolver;
@@ -63,12 +59,17 @@ final class NodeClassificationTrainComputation implements Computation<NodeClassi
     private final RelationshipExporterBuilder relationshipExporterBuilder;
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationMonitor terminationMonitor;
+    private final User user;
     private final UserLogRegistryFactory userLogRegistryFactory;
-    private final ProgressTrackerCreator progressTrackerCreator;
-    private final AlgorithmsProcedureFacade algorithmsProcedureFacade;
-    private final NodeClassificationPipelineTrainConfig configuration;
 
-    private NodeClassificationTrainComputation(
+    private final ProgressTrackerCreator progressTrackerCreator;
+
+    private final AlgorithmsProcedureFacade algorithmsProcedureFacade;
+
+    private final LinkPredictionTrainConfig configuration;
+    private final Label label;
+
+    private LinkPredictionTrainComputation(
         Log log,
         ModelCatalog modelCatalog,
         PipelineRepository pipelineRepository,
@@ -82,10 +83,12 @@ final class NodeClassificationTrainComputation implements Computation<NodeClassi
         RelationshipExporterBuilder relationshipExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
         TerminationMonitor terminationMonitor,
+        User user,
         UserLogRegistryFactory userLogRegistryFactory,
         ProgressTrackerCreator progressTrackerCreator,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
-        NodeClassificationPipelineTrainConfig configuration
+        LinkPredictionTrainConfig configuration,
+        Label label
     ) {
         this.log = log;
         this.modelCatalog = modelCatalog;
@@ -100,13 +103,15 @@ final class NodeClassificationTrainComputation implements Computation<NodeClassi
         this.relationshipExporterBuilder = relationshipExporterBuilder;
         this.taskRegistryFactory = taskRegistryFactory;
         this.terminationMonitor = terminationMonitor;
+        this.user = user;
         this.userLogRegistryFactory = userLogRegistryFactory;
         this.progressTrackerCreator = progressTrackerCreator;
         this.algorithmsProcedureFacade = algorithmsProcedureFacade;
         this.configuration = configuration;
+        this.label = label;
     }
 
-    static Computation<NodeClassificationModelResult> create(
+    static LinkPredictionTrainComputation create(
         Log log,
         ModelCatalog modelCatalog,
         PipelineRepository pipelineRepository,
@@ -120,12 +125,14 @@ final class NodeClassificationTrainComputation implements Computation<NodeClassi
         RelationshipExporterBuilder relationshipExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
         TerminationMonitor terminationMonitor,
+        User user,
         UserLogRegistryFactory userLogRegistryFactory,
         ProgressTrackerCreator progressTrackerCreator,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
-        NodeClassificationPipelineTrainConfig configuration
+        LinkPredictionTrainConfig configuration,
+        Label label
     ) {
-        return new NodeClassificationTrainComputation(
+        return new LinkPredictionTrainComputation(
             log,
             modelCatalog,
             pipelineRepository,
@@ -139,30 +146,50 @@ final class NodeClassificationTrainComputation implements Computation<NodeClassi
             relationshipExporterBuilder,
             taskRegistryFactory,
             terminationMonitor,
+            user,
             userLogRegistryFactory,
             progressTrackerCreator,
             algorithmsProcedureFacade,
-            configuration
+            configuration,
+            label
         );
     }
 
     @Override
-    public NodeClassificationModelResult compute(Graph graph, GraphStore graphStore) {
+    public LinkPredictionTrainPipelineExecutor.LinkPredictionTrainPipelineResult compute(
+        Graph graph,
+        GraphStore graphStore
+    ) {
         var user = new User(configuration.username(), false);
         var pipelineName = PipelineName.parse(configuration.pipeline());
-        var pipeline = pipelineRepository.getNodeClassificationTrainingPipeline(
+        var pipeline = pipelineRepository.getLinkPredictionTrainingPipeline(
             user,
             pipelineName
         );
 
         PipelineCompanion.validateMainMetric(pipeline, configuration.metrics().get(0).toString());
 
+        var relationshipCount = configuration
+            .internalRelationshipTypes(graphStore)
+            .stream()
+            .mapToLong(graphStore::relationshipCount)
+            .sum();
+
+        var task = LinkPredictionTrainPipelineExecutor.progressTask(
+            label.asString(),
+            pipeline,
+            relationshipCount
+        );
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        // this is the literal worst. packing up request things, with application deps,
+        // and shipping it blindly.
         var executionContext = ImmutableExecutionContext.builder()
             .algorithmsProcedureFacade(algorithmsProcedureFacade)
             .closeableResourceRegistry(closeableResourceRegistry)
             .databaseId(databaseId)
             .dependencyResolver(dependencyResolver)
-            .isGdsAdmin(user.isAdmin())
+            .isGdsAdmin(this.user.isAdmin())
             .log(log)
             .metrics(metrics)
             .modelCatalog(modelCatalog)
@@ -173,37 +200,17 @@ final class NodeClassificationTrainComputation implements Computation<NodeClassi
             .taskRegistryFactory(taskRegistryFactory)
             .terminationMonitor(terminationMonitor)
             .userLogRegistryFactory(userLogRegistryFactory)
-            .username(user.getUsername())
+            .username(this.user.getUsername())
             .build();
 
-        var task = NodeClassificationTrain.progressTask(pipeline, graphStore.nodeCount());
-        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
-
-        var nodeFeatureProducer = NodeFeatureProducer.create(
-            graphStore,
+        var pipelineExecutor = new LinkPredictionTrainPipelineExecutor(
+            pipeline,
             configuration,
             executionContext,
-            progressTracker
-        );
-
-        nodeFeatureProducer.validateNodePropertyStepsContextConfigs(pipeline.nodePropertySteps());
-
-        var pipelineTrainer = NodeClassificationTrain.create(
             graphStore,
-            pipeline,
-            configuration,
-            nodeFeatureProducer,
             progressTracker
         );
 
-        var algorithm = new NodeClassificationTrainAlgorithm(
-            pipelineTrainer,
-            pipeline,
-            graphStore,
-            configuration,
-            progressTracker
-        );
-
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return pipelineExecutor.compute();
     }
 }

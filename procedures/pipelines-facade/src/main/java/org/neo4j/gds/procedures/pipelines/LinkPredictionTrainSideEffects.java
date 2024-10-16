@@ -21,22 +21,16 @@ package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.applications.algorithms.machinery.SideEffect;
 import org.neo4j.gds.core.loading.GraphResources;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationModelResult;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
+import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
+import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainPipelineExecutor;
 
 import java.util.Optional;
 
-/**
- * We store in catalog and optionally on disk
- */
-class NodeClassificationTrainSideEffects implements SideEffect<NodeClassificationModelResult, Void> {
+class LinkPredictionTrainSideEffects implements SideEffect<LinkPredictionTrainPipelineExecutor.LinkPredictionTrainPipelineResult, Void> {
+    private final LinkPredictionTrainConfig configuration;
     private final ModelPersister modelPersister;
-    private final NodeClassificationPipelineTrainConfig configuration;
 
-    NodeClassificationTrainSideEffects(
-        ModelPersister modelPersister,
-        NodeClassificationPipelineTrainConfig configuration
-    ) {
+    LinkPredictionTrainSideEffects(ModelPersister modelPersister, LinkPredictionTrainConfig configuration) {
         this.modelPersister = modelPersister;
         this.configuration = configuration;
     }
@@ -44,12 +38,12 @@ class NodeClassificationTrainSideEffects implements SideEffect<NodeClassificatio
     @Override
     public Optional<Void> process(
         GraphResources graphResources,
-        Optional<NodeClassificationModelResult> result
+        Optional<LinkPredictionTrainPipelineExecutor.LinkPredictionTrainPipelineResult> result
     ) {
         if (result.isEmpty()) return Optional.empty();
 
-        var nodeClassificationModelResult = result.get();
-        var model = nodeClassificationModelResult.model();
+        var linkPredictionTrainPipelineResult = result.get();
+        var model = linkPredictionTrainPipelineResult.model();
 
         modelPersister.persistModel(model, configuration.storeModelToDisk());
 

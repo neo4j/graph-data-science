@@ -1,0 +1,12 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Application Services'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    implementation project(":graph-dimensions")
+    implementation project(":config-api")
+    implementation project(":core")
+    implementation project(":progress-tracking")
+}

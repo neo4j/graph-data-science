@@ -46,9 +46,10 @@ class ComputationService {
         GraphResources graphResources,
         Label label,
         Supplier<MemoryEstimation> estimationSupplier,
-        Computation<RESULT_FROM_ALGORITHM> computation
+        Computation<RESULT_FROM_ALGORITHM> computation,
+        DimensionTransformer dimensionTransformer
     ) {
-        memoryGuard.assertAlgorithmCanRun(label, configuration, graphResources.graph(), estimationSupplier);
+        memoryGuard.assertAlgorithmCanRun(estimationSupplier, graphResources.graphStore(), configuration, label, dimensionTransformer);
 
         return computeWithMetrics(graphResources, label, computation);
     }

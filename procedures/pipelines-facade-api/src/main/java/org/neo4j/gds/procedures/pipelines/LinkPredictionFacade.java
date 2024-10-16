@@ -69,6 +69,11 @@ public interface LinkPredictionFacade {
         Map<String, Object> rawConfiguration
     );
 
+    Stream<LinkPredictionTrainResult> train(
+        String graphNameAsString,
+        Map<String, Object> configuration
+    );
+
     Stream<MemoryEstimateResult> trainEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> rawConfiguration

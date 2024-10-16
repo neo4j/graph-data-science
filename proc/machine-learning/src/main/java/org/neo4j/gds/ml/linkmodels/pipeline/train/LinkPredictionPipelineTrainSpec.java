@@ -31,6 +31,7 @@ import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainPipelineExecutor;
+import org.neo4j.gds.procedures.pipelines.LinkPredictionTrainResult;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.List;
@@ -43,7 +44,7 @@ public class LinkPredictionPipelineTrainSpec implements AlgorithmSpec<
     LinkPredictionTrainPipelineExecutor,
     LinkPredictionTrainPipelineExecutor.LinkPredictionTrainPipelineResult,
     LinkPredictionTrainConfig,
-    Stream<TrainResult>,
+    Stream<LinkPredictionTrainResult>,
     LinkPredictionTrainPipelineAlgorithmFactory
     > {
     @Override
@@ -63,7 +64,7 @@ public class LinkPredictionPipelineTrainSpec implements AlgorithmSpec<
     }
 
     @Override
-    public ComputationResultConsumer<LinkPredictionTrainPipelineExecutor, LinkPredictionTrainPipelineExecutor.LinkPredictionTrainPipelineResult, LinkPredictionTrainConfig, Stream<TrainResult>> computationResultConsumer() {
+    public ComputationResultConsumer<LinkPredictionTrainPipelineExecutor, LinkPredictionTrainPipelineExecutor.LinkPredictionTrainPipelineResult, LinkPredictionTrainConfig, Stream<LinkPredictionTrainResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             return computationResult.result().map(result -> {
                 var model = result.model();
@@ -84,7 +85,7 @@ public class LinkPredictionPipelineTrainSpec implements AlgorithmSpec<
                         throw e;
                     }
                 }
-                return Stream.of(new TrainResult(model, result.trainingStatistics(), computationResult.computeMillis()
+                return Stream.of(new LinkPredictionTrainResult(model, result.trainingStatistics(), computationResult.computeMillis()
                 ));
             }).orElseGet(Stream::empty);
         };

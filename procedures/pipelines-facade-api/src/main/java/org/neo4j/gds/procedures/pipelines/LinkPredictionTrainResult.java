@@ -17,10 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.train;
+package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.procedures.pipelines.MLTrainResult;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
@@ -29,11 +28,10 @@ import org.neo4j.gds.ml.training.TrainingStatistics;
 import java.util.Map;
 import java.util.Optional;
 
-public class TrainResult extends MLTrainResult {
-
+public class LinkPredictionTrainResult extends MLTrainResult {
     public final Map<String, Object> modelSelectionStats;
 
-    TrainResult(
+    public LinkPredictionTrainResult(
         Model<Classifier.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> model,
         TrainingStatistics trainingStatistics,
         long trainMillis

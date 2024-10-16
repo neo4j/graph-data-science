@@ -48,6 +48,7 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
             null,
             null,
             null,
+            null,
             new PipelineRepository(),
             null,
             null,
@@ -320,6 +321,7 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
     private GraphDataScienceProcedures buildFacade() {
         return new GraphDataScienceProceduresBuilder(Log.noOpLog())
             .with(LocalPipelinesProcedureFacade.create(
+                null,
                 null,
                 null,
                 null,

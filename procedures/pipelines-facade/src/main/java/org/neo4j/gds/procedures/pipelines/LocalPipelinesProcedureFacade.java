@@ -29,6 +29,7 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTempla
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
+import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
@@ -51,7 +52,7 @@ public final class LocalPipelinesProcedureFacade implements PipelinesProcedureFa
     private final LinkPredictionFacade linkPredictionFacade;
     private final NodeClassificationFacade nodeClassificationFacade;
 
-    LocalPipelinesProcedureFacade(
+    private LocalPipelinesProcedureFacade(
         PipelineApplications pipelineApplications,
         LinkPredictionFacade linkPredictionFacade,
         NodeClassificationFacade nodeClassificationFacade
@@ -63,6 +64,7 @@ public final class LocalPipelinesProcedureFacade implements PipelinesProcedureFa
 
     public static PipelinesProcedureFacade create(
         Log log,
+        GraphStoreCatalogService graphStoreCatalogService,
         ModelCatalog modelCatalog,
         ModelRepository modelRepository,
         PipelineRepository pipelineRepository,
@@ -88,6 +90,7 @@ public final class LocalPipelinesProcedureFacade implements PipelinesProcedureFa
 
         var pipelineApplications = PipelineApplications.create(
             log,
+            graphStoreCatalogService,
             modelCatalog,
             modelRepository,
             pipelineRepository,
