@@ -111,6 +111,15 @@ public final class Pregel<CONFIG extends PregelConfig> {
         boolean isQueueBased,
         boolean isAsync
     ) {
+        return memoryEstimation(propertiesMap, isQueueBased, isAsync, false);
+    }
+
+    public static MemoryEstimation memoryEstimation(
+        Map<String, ValueType> propertiesMap,
+        boolean isQueueBased,
+        boolean isAsync,
+        boolean isTrackingSender
+    ) {
         var estimationBuilder = MemoryEstimations.builder(Pregel.class)
             .perNode("vote bits", HugeAtomicBitSet::memoryEstimation)
             .perThread("compute steps", MemoryEstimations.builder(PartitionedComputeStep.class).build())
@@ -123,7 +132,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
                 estimationBuilder.add("message queues", SyncQueueMessenger.memoryEstimation());
             }
         } else {
-            estimationBuilder.add("message arrays", ReducingMessenger.memoryEstimation());
+            estimationBuilder.add("message arrays", ReducingMessenger.memoryEstimation(isTrackingSender));
         }
 
         return estimationBuilder.build();
@@ -169,7 +178,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
         var reducer = computation.reducer();
 
         this.messenger = reducer.isPresent()
-            ? new ReducingMessenger(graph, config, reducer.get())
+            ? ReducingMessenger.create(graph, config, reducer.get())
             : config.isAsynchronous()
                 ? new AsyncQueueMessenger(graph.nodeCount())
                 : new SyncQueueMessenger(graph.nodeCount());

@@ -87,6 +87,15 @@ public class ComputeContext<CONFIG extends PregelConfig> extends NodeCentricCont
     }
 
     /**
+     * Returns the node value for the given node-id and node schema key.
+     *
+     * @throws IllegalArgumentException if the key does not exist or the value is not a long
+     */
+    public long longNodeValue(String key, long nodeId) {
+        return nodeValue.longValue(key, nodeId);
+    }
+
+    /**
      * Returns the node value for the given node schema key.
      *
      * @throws IllegalArgumentException if the key does not exist or the value is not a long array

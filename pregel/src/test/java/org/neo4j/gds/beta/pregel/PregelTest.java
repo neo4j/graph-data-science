@@ -395,8 +395,24 @@ class PregelTest {
     static Stream<Arguments> estimations() {
         return Stream.of(
             // queue based sync
-            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, false, 7441752L),
-            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, false, 7442256L),
+            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(),
+                true,
+                false,
+                false,
+                7441752L
+            ),
+            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(),
+                true,
+                false,
+                true, // sender tracking must not make a difference
+                7441752L
+            ),
+            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(),
+                true,
+                false,
+                false,
+                7442256L
+            ),
             Arguments.of(1, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
                     .add("key2", ValueType.DOUBLE)
@@ -404,6 +420,7 @@ class PregelTest {
                     .add("key4", ValueType.DOUBLE_ARRAY)
                     .build(),
                 true,
+                false,
                 false,
                 9441824L
             ),
@@ -415,12 +432,23 @@ class PregelTest {
                     .build(),
                 true,
                 false,
+                false,
                 9442328L
             ),
 
             // queue based async
-            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, true, 3841688L),
-            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), true, true, 3842192L),
+            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(),
+                true,
+                true,
+                false,
+                3841688L
+            ),
+            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(),
+                true,
+                true,
+                false,
+                3842192L
+            ),
             Arguments.of(1, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
                     .add("key2", ValueType.DOUBLE)
@@ -429,6 +457,7 @@ class PregelTest {
                     .build(),
                 true,
                 true,
+                false,
                 5841760L
             ),
             Arguments.of(10, new PregelSchema.Builder()
@@ -439,18 +468,36 @@ class PregelTest {
                     .build(),
                 true,
                 true,
+                false,
                 5842264L
             ),
 
-            // array based
-            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(), false, false, 241584L),
-            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(), false, false, 242088L),
+            // reducer (array) based
+            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(),
+                false,
+                false,
+                false,
+                241584L
+            ),
+            Arguments.of(1, new PregelSchema.Builder().add("key", ValueType.LONG).build(),
+                false,
+                false,
+                true,
+                401664L
+            ),
+            Arguments.of(10, new PregelSchema.Builder().add("key", ValueType.LONG).build(),
+                false,
+                false,
+                false,
+                242088L
+            ),
             Arguments.of(1, new PregelSchema.Builder()
                     .add("key1", ValueType.LONG)
                     .add("key2", ValueType.DOUBLE)
                     .add("key3", ValueType.LONG_ARRAY)
                     .add("key4", ValueType.DOUBLE_ARRAY)
                     .build(),
+                false,
                 false,
                 false,
                 2241656L
@@ -461,6 +508,7 @@ class PregelTest {
                     .add("key3", ValueType.LONG_ARRAY)
                     .add("key4", ValueType.DOUBLE_ARRAY)
                     .build(),
+                false,
                 false,
                 false,
                 2242160L
@@ -538,6 +586,7 @@ class PregelTest {
         PregelSchema pregelSchema,
         boolean isQueueBased,
         boolean isAsync,
+        boolean isTrackingSender,
         long expectedBytes
     ) {
         var dimensions = ImmutableGraphDimensions.builder()
@@ -548,7 +597,7 @@ class PregelTest {
         assertEquals(
             MemoryRange.of(expectedBytes).max,
             Pregel
-                .memoryEstimation(pregelSchema.propertiesMap(), isQueueBased, isAsync)
+                .memoryEstimation(pregelSchema.propertiesMap(), isQueueBased, isAsync, isTrackingSender)
                 .estimate(dimensions, new Concurrency(concurrency))
                 .memoryUsage().max
         );

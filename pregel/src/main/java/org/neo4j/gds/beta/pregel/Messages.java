@@ -22,6 +22,7 @@ package org.neo4j.gds.beta.pregel;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
+import java.util.OptionalLong;
 import java.util.PrimitiveIterator;
 
 public final class Messages implements Iterable<Double> {
@@ -33,7 +34,12 @@ public final class Messages implements Iterable<Double> {
     }
 
     public interface MessageIterator extends PrimitiveIterator.OfDouble {
+
         boolean isEmpty();
+
+        default OptionalLong sender() {
+            return OptionalLong.empty();
+        }
     }
 
     private final MessageIterator iterator;
@@ -42,12 +48,32 @@ public final class Messages implements Iterable<Double> {
         this.iterator = iterator;
     }
 
+    /**
+     * Returns a iterator that can be used to iterate over the messages.
+     */
     @NotNull
     public PrimitiveIterator.OfDouble doubleIterator() {
-        return iterator;
+        return this.iterator;
     }
 
+    /**
+     * Indicates if there are messages present.
+     */
     public boolean isEmpty() {
-        return iterator.isEmpty();
+        return this.iterator.isEmpty();
+    }
+
+    /**
+     * If the computation defined a {@link org.neo4j.gds.beta.pregel.Reducer}, this method will
+     * return the sender of the aggregated message. Depending on the reducer implementation, the
+     * sender is deterministically defined by the reducer, e.g., for Max or Min. In any other case,
+     * the sender will be one of the node ids that sent messages to that node.
+     * <p>
+     * Note, that {@link PregelConfig#trackSender()} must return true to enable sender tracking.
+     *
+     * @return the sender of an aggregated message or an empty optional if no reducer is defined
+     */
+    public OptionalLong sender() {
+        return this.iterator.sender();
     }
 }

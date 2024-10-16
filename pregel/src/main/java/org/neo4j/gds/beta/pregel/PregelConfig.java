@@ -47,4 +47,9 @@ public interface PregelConfig extends
     default boolean useForkJoin() {
         return partitioning() == Partitioning.AUTO;
     }
+
+    @Configuration.Ignore
+    default boolean trackSender() {
+        return false;
+    }
 }

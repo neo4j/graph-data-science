@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.beta.pregel;
 
+import java.util.OptionalLong;
+
 public interface Messenger<ITERATOR extends Messages.MessageIterator> {
 
     void initIteration(int iteration);
@@ -28,6 +30,10 @@ public interface Messenger<ITERATOR extends Messages.MessageIterator> {
     ITERATOR messageIterator();
 
     void initMessageIterator(ITERATOR messageIterator, long nodeId, boolean isFirstIteration);
+
+    default OptionalLong sender(long nodeId) {
+        return OptionalLong.empty();
+    }
 
     void release();
 }
