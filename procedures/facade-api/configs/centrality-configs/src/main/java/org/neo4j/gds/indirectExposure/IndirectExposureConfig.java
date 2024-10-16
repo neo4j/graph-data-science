@@ -25,8 +25,6 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.beta.pregel.Partitioning;
 import org.neo4j.gds.beta.pregel.PregelConfig;
-import org.neo4j.gds.beta.pregel.Reducer;
-import org.neo4j.gds.beta.pregel.Reducers;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 
 import java.util.Collection;
@@ -40,10 +38,10 @@ public interface IndirectExposureConfig extends PregelConfig {
 
     String sanctionedProperty();
 
-    @Configuration.ConvertWith(method = "org.neo4j.gds.beta.pregel.Reducers#parse")
-    @Configuration.ToMapValue("org.neo4j.gds.beta.pregel.Reducers#toString")
-    default Reducer exposureReducer() {
-        return new Reducer.Sum();
+    @Override
+    @Configuration.Ignore
+    default boolean trackSender() {
+        return true;
     }
 
     @Override
@@ -65,19 +63,6 @@ public interface IndirectExposureConfig extends PregelConfig {
                 formatWithLocale(
                     "Indirect exposure requires `%s` to be set.",
                     RelationshipWeightConfig.RELATIONSHIP_WEIGHT_PROPERTY
-                ));
-        }
-    }
-
-    @Configuration.Check
-    default void validateExposureReducerIsSupported() {
-        var reducer = exposureReducer();
-
-        if (!(reducer instanceof Reducer.Sum || reducer instanceof Reducer.Max)) {
-            throw new IllegalArgumentException(
-                formatWithLocale(
-                    "Aggregation function `%s` is not supported for indirect exposure. Must be `MAX` or `SUM`.",
-                    Reducers.toString(reducer)
                 ));
         }
     }

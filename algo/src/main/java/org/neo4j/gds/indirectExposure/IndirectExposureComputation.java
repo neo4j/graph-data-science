@@ -38,29 +38,34 @@ import java.util.Optional;
 class IndirectExposureComputation implements PregelComputation<IndirectExposureConfig> {
 
     static final String EXPOSURE = "exposure";
+    static final String HOP = "hop";
+    static final String PARENT = "parent";
+    static final String ROOT = "root";
+
     private final DegreeFunction totalTransfers;
     private final HugeAtomicBitSet visited;
-    private final Reducer reducer;
 
     private LongToBooleanFunction isSanctioned;
 
     IndirectExposureComputation(
         LongToBooleanFunction isSanctioned,
         DegreeFunction totalTransfers,
-        HugeAtomicBitSet visited,
-        Reducer reducer
+        HugeAtomicBitSet visited
     ) {
         this.isSanctioned = isSanctioned;
         this.totalTransfers = totalTransfers;
         this.visited = visited;
-        this.reducer = reducer;
     }
 
     @Override
     public void init(InitContext<IndirectExposureConfig> context) {
         var isSanctioned = this.isSanctioned.valueOf(context.nodeId());
         if (isSanctioned) {
+            long originalId = context.toOriginalId(context.nodeId());
             context.setNodeValue(EXPOSURE, 1.0);
+            context.setNodeValue(HOP, 0L);
+            context.setNodeValue(ROOT, originalId);
+            context.setNodeValue(PARENT, originalId);
             this.visited.set(context.nodeId());
         }
     }
@@ -77,6 +82,7 @@ class IndirectExposureComputation implements PregelComputation<IndirectExposureC
             }
             context.sendToNeighbors(exposure);
         } else {
+            // Each node is only visited once.
             if (this.visited.getAndSet(context.nodeId())) {
                 context.voteToHalt();
                 return;
@@ -84,10 +90,16 @@ class IndirectExposureComputation implements PregelComputation<IndirectExposureC
             var totalTransfers = this.totalTransfers.get(context.nodeId());
             // we take the first value as we use a MAX reducer
             var parentExposure = messages.doubleIterator().nextDouble();
+            // since we use a MAX reducer, we can get the sender of the reduced message
+            var sender = messages.sender().orElseThrow();
             // normalize the exposure
             var newExposure = parentExposure / totalTransfers;
-
+            // update node state
             context.setNodeValue(EXPOSURE, newExposure);
+            context.setNodeValue(PARENT, context.toOriginalId(sender));
+            context.setNodeValue(HOP, context.superstep());
+            context.setNodeValue(ROOT, context.longNodeValue(ROOT, sender));
+            // propagate the exposure to neighbors
             context.sendToNeighbors(newExposure);
         }
 
@@ -97,13 +109,16 @@ class IndirectExposureComputation implements PregelComputation<IndirectExposureC
     @Override
     public PregelSchema schema(IndirectExposureConfig config) {
         return new PregelSchema.Builder()
-            .add(EXPOSURE, ValueType.DOUBLE, PregelSchema.Visibility.PUBLIC)
+            .add(EXPOSURE, ValueType.DOUBLE, PregelSchema.Visibility.PRIVATE)
+            .add(HOP, ValueType.LONG, PregelSchema.Visibility.PRIVATE)
+            .add(PARENT, ValueType.LONG, PregelSchema.Visibility.PRIVATE)
+            .add(ROOT, ValueType.LONG, PregelSchema.Visibility.PRIVATE)
             .build();
     }
 
     @Override
     public Optional<Reducer> reducer() {
-        return Optional.of(this.reducer);
+        return Optional.of(new Reducer.Max());
     }
 
     @Override
@@ -113,6 +128,13 @@ class IndirectExposureComputation implements PregelComputation<IndirectExposureC
 
     @Override
     public MemoryEstimateDefinition estimateDefinition(boolean isAsynchronous) {
-        return () -> Pregel.memoryEstimation(Map.of(EXPOSURE, ValueType.DOUBLE), false, false);
+        return () -> Pregel.memoryEstimation(
+            Map.of(
+                EXPOSURE, ValueType.DOUBLE,
+                HOP, ValueType.LONG,
+                PARENT, ValueType.LONG,
+                ROOT, ValueType.LONG
+            ), false, false, true
+        );
     }
 }

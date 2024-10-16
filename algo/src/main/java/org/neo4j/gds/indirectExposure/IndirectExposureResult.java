@@ -23,11 +23,15 @@ import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 
 import java.util.function.LongToDoubleFunction;
 
 public record IndirectExposureResult(
     HugeDoubleArray exposures,
+    HugeLongArray roots,
+    HugeLongArray parents,
+    HugeLongArray hops,
     int iterations,
     boolean didConverge
 ) implements CentralityAlgorithmResult {

@@ -62,8 +62,7 @@ public class IndirectExposure extends Algorithm<IndirectExposureResult> {
         var computation = new IndirectExposureComputation(
             isSanctionedFn,
             totalTransfersFn,
-            visited,
-            config.exposureReducer()
+            visited
         );
 
         var pregelResult = Pregel.create(
@@ -79,6 +78,9 @@ public class IndirectExposure extends Algorithm<IndirectExposureResult> {
 
         return new IndirectExposureResult(
             pregelResult.nodeValues().doubleProperties(IndirectExposureComputation.EXPOSURE),
+            pregelResult.nodeValues().longProperties(IndirectExposureComputation.ROOT),
+            pregelResult.nodeValues().longProperties(IndirectExposureComputation.PARENT),
+            pregelResult.nodeValues().longProperties(IndirectExposureComputation.HOP),
             pregelResult.ranIterations(),
             pregelResult.didConverge()
         );

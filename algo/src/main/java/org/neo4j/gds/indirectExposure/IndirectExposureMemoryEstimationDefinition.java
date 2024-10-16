@@ -33,7 +33,12 @@ public class IndirectExposureMemoryEstimationDefinition implements MemoryEstimat
     public MemoryEstimation memoryEstimation() {
         return MemoryEstimations.builder()
             .add(new DegreeCentralityAlgorithmEstimateDefinition(true).memoryEstimation())
-            .add(Pregel.memoryEstimation(Map.of(IndirectExposureComputation.EXPOSURE, ValueType.DOUBLE), false, false))
+            .add(Pregel.memoryEstimation(
+                Map.of(IndirectExposureComputation.EXPOSURE, ValueType.DOUBLE),
+                false,
+                false,
+                true
+            ))
             .build();
     }
 }
