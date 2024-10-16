@@ -19,13 +19,10 @@
  */
 package org.neo4j.gds.indirectExposure;
 
-import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-
-import java.util.function.LongToDoubleFunction;
 
 public record IndirectExposureResult(
     HugeDoubleArray exposures,
@@ -34,14 +31,20 @@ public record IndirectExposureResult(
     HugeLongArray hops,
     int iterations,
     boolean didConverge
-) implements CentralityAlgorithmResult {
-    @Override
-    public NodePropertyValues nodePropertyValues() {
+) {
+    public NodePropertyValues exposureValues() {
         return NodePropertyValuesAdapter.adapt(exposures);
     }
 
-    @Override
-    public LongToDoubleFunction centralityScoreProvider() {
-        return exposures::get;
+    public NodePropertyValues hopValues() {
+        return NodePropertyValuesAdapter.adapt(hops);
+    }
+
+    public NodePropertyValues parentValues() {
+        return NodePropertyValuesAdapter.adapt(parents);
+    }
+
+    public NodePropertyValues rootValues() {
+        return NodePropertyValuesAdapter.adapt(roots);
     }
 }

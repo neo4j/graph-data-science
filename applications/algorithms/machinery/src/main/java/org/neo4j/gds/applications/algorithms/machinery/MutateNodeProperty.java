@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
@@ -27,6 +28,7 @@ import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.huge.FilteredNodePropertyValues;
 import org.neo4j.gds.logging.Log;
 
+import java.util.Collection;
 import java.util.HashSet;
 
 public class MutateNodeProperty {
@@ -40,11 +42,24 @@ public class MutateNodeProperty {
         Graph graph,
         GraphStore graphStore,
         MutateNodePropertyConfig configuration,
+        NodePropertyValues nodePropertyValues)
+    {
+       return mutateNodeProperties(
+           graph,
+           graphStore,
+           configuration.nodeLabelIdentifiers(graphStore),
+           configuration.mutateProperty(),
+           nodePropertyValues
+       );
+    }
+
+    public NodePropertiesWritten mutateNodeProperties(
+        Graph graph,
+        GraphStore graphStore,
+        Collection<NodeLabel> labelsToUpdate,
+        String mutateProperty,
         NodePropertyValues nodePropertyValues
     ) {
-        var labelsToUpdate = configuration.nodeLabelIdentifiers(graphStore);
-        var mutateProperty = configuration.mutateProperty();
-
         var maybeFilteredNodePropertyValues = graph
             .asNodeFilteredGraph()
             .map(filteredGraph ->
