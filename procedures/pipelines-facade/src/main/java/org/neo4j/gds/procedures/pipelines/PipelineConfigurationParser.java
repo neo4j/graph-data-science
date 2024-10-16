@@ -72,6 +72,10 @@ class PipelineConfigurationParser {
         );
     }
 
+    LinkPredictionPredictPipelineStreamConfig parseLinkPredictionPredictPipelineStreamConfig(Map<String, Object> configuration) {
+        return parseConfiguration(LinkPredictionPredictPipelineStreamConfig::of, configuration);
+    }
+
     TunableTrainerConfig parseLogisticRegressionTrainerConfig(Map<String, Object> configuration) {
         return parseTrainerConfiguration(
             configuration,

@@ -28,6 +28,7 @@ import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 import org.neo4j.gds.procedures.pipelines.LinkPredictionPredictPipelineExecutor;
 import org.neo4j.gds.procedures.pipelines.LinkPredictionPredictPipelineStreamConfig;
+import org.neo4j.gds.procedures.pipelines.StreamResult;
 
 import java.util.Collection;
 import java.util.stream.Stream;
