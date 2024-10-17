@@ -46,10 +46,11 @@ class IndirectExposureMutateStep implements MutateStep<IndirectExposureResult, N
         GraphStore graphStore,
         IndirectExposureResult result
     ) {
-        var exposuresWritten = mutate(graph, graphStore, config.exposureProperty(), result.exposureValues());
-        var hopsWritten = mutate(graph, graphStore, config.hopProperty(), result.hopValues());
-        var parentsWritten = mutate(graph, graphStore, config.parentProperty(), result.parentValues());
-        var rootsWritten = mutate(graph, graphStore, config.rootProperty(), result.rootValues());
+        var mutateProperties = this.config.mutateProperties();
+        var exposuresWritten = mutate(graph, graphStore, mutateProperties.exposures(), result.exposureValues());
+        var hopsWritten = mutate(graph, graphStore, mutateProperties.hops(), result.hopValues());
+        var parentsWritten = mutate(graph, graphStore, mutateProperties.parents(), result.parentValues());
+        var rootsWritten = mutate(graph, graphStore, mutateProperties.roots(), result.rootValues());
 
         return new NodePropertiesWritten(
             exposuresWritten.value() + hopsWritten.value() + parentsWritten.value() + rootsWritten.value()

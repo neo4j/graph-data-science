@@ -23,50 +23,74 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Collection;
+import java.util.Map;
 
 import static org.neo4j.gds.core.StringIdentifierValidations.emptyToNull;
 import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteCharacter;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Configuration
-public interface IndirectExposureMutateConfig extends IndirectExposureConfig, MutateNodePropertyConfig {
+public interface IndirectExposureMutateConfig extends IndirectExposureConfig {
 
-    /**
-     * Will take the value of the mutateProperty if not explicitly set.
-     */
-    default String exposureProperty() {
-        return mutateProperty();
+    @Configuration
+    interface MutateProperties {
+        String exposures();
+
+        String hops();
+
+        String parents();
+
+        String roots();
+
+        @SuppressWarnings("unchecked")
+        static MutateProperties parse(Object o) {
+            if (o instanceof MutateProperties m) {
+                return m;
+            } else if (o instanceof Map<?, ?> m) {
+                var mapWrapper = CypherMapWrapper.create((Map<String, Object>) m);
+                return new MutatePropertiesImpl(mapWrapper);
+            }
+            throw new IllegalArgumentException(formatWithLocale(
+                "Expected MutateProperties or Map. Got %s.",
+                o.getClass().getSimpleName()
+            ));
+        }
+
+        static Map<String, Object> toMap(MutateProperties mutateProperties) {
+            return Map.of(
+                "exposures", mutateProperties.exposures(),
+                "hops", mutateProperties.hops(),
+                "parents", mutateProperties.parents(),
+                "roots", mutateProperties.roots()
+            );
+        }
     }
 
-    String hopProperty();
-
-    String parentProperty();
-
-    String rootProperty();
+    @Configuration.ConvertWith(method = "org.neo4j.gds.indirectExposure.IndirectExposureMutateConfig.MutateProperties#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.indirectExposure.IndirectExposureMutateConfig.MutateProperties#toMap")
+    MutateProperties mutateProperties();
 
     @Configuration.Check
     default void validateMutateProperties() {
-        validateNoWhiteCharacter(emptyToNull(exposureProperty()), "exposureProperty");
-        validateNoWhiteCharacter(emptyToNull(hopProperty()), "hopProperty");
-        validateNoWhiteCharacter(emptyToNull(parentProperty()), "parentProperty");
-        validateNoWhiteCharacter(emptyToNull(rootProperty()), "Property");
+        validateNoWhiteCharacter(emptyToNull(mutateProperties().exposures()), "exposureMutateProperty");
+        validateNoWhiteCharacter(emptyToNull(mutateProperties().hops()), "hopMutateProperty");
+        validateNoWhiteCharacter(emptyToNull(mutateProperties().parents()), "parentMutateProperty");
+        validateNoWhiteCharacter(emptyToNull(mutateProperties().roots()), "rootMutateProperty");
     }
 
-    @Override
     @Configuration.GraphStoreValidationCheck
     default void validateMutateProperty(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
-        Collection<RelationshipType> selectedRelationshipTypes
+        Collection<RelationshipType> ignored
     ) {
-        validateMutateProperty(graphStore, selectedLabels, exposureProperty());
-        validateMutateProperty(graphStore, selectedLabels, hopProperty());
-        validateMutateProperty(graphStore, selectedLabels, parentProperty());
-        validateMutateProperty(graphStore, selectedLabels, rootProperty());
+        validateMutateProperty(graphStore, selectedLabels, mutateProperties().exposures());
+        validateMutateProperty(graphStore, selectedLabels, mutateProperties().hops());
+        validateMutateProperty(graphStore, selectedLabels, mutateProperties().parents());
+        validateMutateProperty(graphStore, selectedLabels, mutateProperties().roots());
     }
 
     static void validateMutateProperty(
