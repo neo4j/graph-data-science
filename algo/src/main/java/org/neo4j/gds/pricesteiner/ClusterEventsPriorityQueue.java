@@ -48,8 +48,8 @@ public class ClusterEventsPriorityQueue {
             queue.pop();
     }
 
-    void add(long cluster, double sumOfPrizes){
-        queue.add(cluster, sumOfPrizes);
+    void add(long cluster, double remainingMoat){
+        queue.add(cluster, remainingMoat);
     }
 
 }
