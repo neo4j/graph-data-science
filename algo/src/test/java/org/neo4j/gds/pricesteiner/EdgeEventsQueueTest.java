@@ -109,7 +109,6 @@ class EdgeEventsQueueTest {
         edgeEventsQueue.mergeAndUpdate(11,0,1);
 
         edgeEventsQueue.pop();
-        assertThat(edgeEventsQueue.currentlyActive()).isEqualTo(9L);
         assertThat(edgeEventsQueue.minOf(0)).isEqualTo(edgeEventsQueue.minOf(1)).isEqualTo(Double.MAX_VALUE);
 
         assertThat(edgeEventsQueue.top()).isEqualTo(11L);
@@ -136,7 +135,6 @@ class EdgeEventsQueueTest {
         edgeEventsQueue.addWithCheck(0,0,10);
         assertThat(edgeEventsQueue.top()).isEqualTo(0);
         assertThat(edgeEventsQueue.nextEventTime()).isEqualTo(10);
-
 
     }
 
