@@ -70,6 +70,10 @@ class GrowthPhase {
 
         progressTracker.beginSubTask("Growing");
         double moat;
+
+        ClusterMoatPair clusterMoatPairOfu = new ClusterMoatPair();
+        ClusterMoatPair clusterMoatPairOfv = new ClusterMoatPair();
+
         while (clusterStructure.numberOfActiveClusters() > 1) {
             terminationFlag.assertRunning();
             double edgeEventTime = edgeEventsQueue.nextEventTime();
@@ -92,14 +96,14 @@ class GrowthPhase {
                     continue;
                 }
 
-                ClusterMoatPair cmu = clusterStructure.sumOnEdgePart(u,moat);
-                ClusterMoatPair cmv = clusterStructure.sumOnEdgePart(v,moat);
+                clusterStructure.sumOnEdgePart(u,moat,clusterMoatPairOfu);
+                 clusterStructure.sumOnEdgePart(v,moat,clusterMoatPairOfv);
 
-                var uCluster = cmu.cluster();
-                var uClusterSum = cmu.totalMoat();
+                var uCluster = clusterMoatPairOfu.cluster();
+                var uClusterSum = clusterMoatPairOfu.totalMoat();
 
-                var vCluster = cmv.cluster();
-                var vClusterSum = cmv.totalMoat();
+                var vCluster = clusterMoatPairOfv.cluster();
+                var vClusterSum = clusterMoatPairOfv.totalMoat();
 
 
                 if (vCluster == uCluster) {
