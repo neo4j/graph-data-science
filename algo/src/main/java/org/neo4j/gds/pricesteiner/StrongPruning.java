@@ -79,7 +79,6 @@ public class StrongPruning {
                 }
             }
 
-
             while (currentPos < totalPos) {
                 terminationFlag.assertRunning();;
                 var nextLeaf = queue.get(currentPos++);
@@ -145,8 +144,8 @@ public class StrongPruning {
     private void pruneSubtree(long node, HugeLongArray helpingArray,HugeLongArray parents){
         terminationFlag.assertRunning();
         var tree = treeStructure.tree();
-        long currentPosition= 0;
-        MutableLong position=new MutableLong();
+        long currentPosition = 0;
+        MutableLong position = new MutableLong();
         helpingArray.set(position.getAndIncrement(),node);
 
         while (currentPosition < position.get()){
