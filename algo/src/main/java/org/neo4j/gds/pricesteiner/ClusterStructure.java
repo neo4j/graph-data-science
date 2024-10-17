@@ -81,7 +81,7 @@ public class ClusterStructure {
         initialMoatLeft.set(clusterId, prize);
     }
 
-    double clusterPrize(long clusterId){
+    double moatLeft(long clusterId){
         return initialMoatLeft.get(clusterId);
     }
 
@@ -90,16 +90,16 @@ public class ClusterStructure {
             return  currentMoat + slack;
     }
 
-    ClusterMoatPair sumOnEdgePart(long node, double currentMoat){
+    void sumOnEdgePart(long node, double currentMoat, ClusterMoatPair clusterMoatPair){
         double sum = 0;
-        long currentNode =node;
+        long currentNode = node;
 
         while (true){
 
             var  parentNode = parent.get(currentNode);
             double currentValue = moatAt(currentNode,currentMoat);
 
-            sum+=  currentValue;
+            sum+= currentValue;
             if (parentNode== -1){
                 break;
             }else{
@@ -113,24 +113,21 @@ public class ClusterStructure {
                 }
                 sum += skippedParentSum.get(currentNode);
                 currentNode = nextParent;
-
-
             }
 
         }
-
-        return new ClusterMoatPair(currentNode,sum);
+        clusterMoatPair.assign(currentNode,sum);
     }
 
     BitSet activeOriginalNodesOfCluster(long clusterId){
-        BitSet bitSet=new BitSet(originalNodeCount);
+        BitSet bitSet = new BitSet(originalNodeCount);
 
         if (clusterId < originalNodeCount){
             bitSet.set(clusterId);
             return bitSet;
         }
 
-        HugeLongArrayStack stack= HugeLongArrayStack.newStack(originalNodeCount);
+        HugeLongArrayStack stack = HugeLongArrayStack.newStack(originalNodeCount);
         stack.push(clusterId);
 
         while (!stack.isEmpty()){
@@ -183,7 +180,6 @@ public class ClusterStructure {
 
 
 }
- record ClusterMoatPair(long cluster, double totalMoat){}
 
 
 

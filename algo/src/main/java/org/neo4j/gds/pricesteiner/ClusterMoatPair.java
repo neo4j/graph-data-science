@@ -19,37 +19,21 @@
  */
 package org.neo4j.gds.pricesteiner;
 
-import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
+ class ClusterMoatPair {
 
-import java.util.function.LongPredicate;
+    private long  cluster;
+    private double totalMoat;
 
-public class ClusterEventsPriorityQueue {
-
-    private final HugeLongPriorityQueue queue;
-
-    public ClusterEventsPriorityQueue(long nodeCount) {
-        this.queue = HugeLongPriorityQueue.min(nodeCount*2);
+    void assign(long cluster, double totalMoat){
+        this.cluster = cluster;
+        this.totalMoat = totalMoat;
     }
 
-    double closestEvent(LongPredicate allowed){
-        var top=queue.top();
-        while (!allowed.test(top)){
-            queue.pop();
-            top=queue.top();
-        }
-        return queue.cost(top);
+    long cluster(){
+        return cluster;
     }
 
-    long topCluster(){
-        return queue.top();
+    double totalMoat(){
+        return  totalMoat;
     }
-
-    void pop(){
-            queue.pop();
-    }
-
-    void add(long cluster, double remainingMoat){
-        queue.add(cluster, remainingMoat);
-    }
-
 }

@@ -140,12 +140,19 @@ import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 
             assertThat(clusterStructure.moatAt(7,31)).isEqualTo(0);
 
-            assertThat(clusterStructure.sumOnEdgePart(0,31).cluster()).isEqualTo(7);
-            assertThat(clusterStructure.sumOnEdgePart(1,31).cluster()).isEqualTo(7);
-            assertThat(clusterStructure.sumOnEdgePart(2,31).cluster()).isEqualTo(7);
-            assertThat(clusterStructure.sumOnEdgePart(3,31).cluster()).isEqualTo(7);
+            ClusterMoatPair clusterMoatPair=new ClusterMoatPair();
+            clusterStructure.sumOnEdgePart(0,31,clusterMoatPair);
+            assertThat(clusterMoatPair.cluster()).isEqualTo(7);
 
-            assertThat(clusterStructure.sumOnEdgePart(4,31).cluster()).isEqualTo(4);
+            clusterStructure.sumOnEdgePart(1,31,clusterMoatPair);
+            assertThat(clusterMoatPair.cluster()).isEqualTo(7);
+            clusterStructure.sumOnEdgePart(2,31,clusterMoatPair);
+            assertThat(clusterMoatPair.cluster()).isEqualTo(7);
+            clusterStructure.sumOnEdgePart(3,31,clusterMoatPair);
+            assertThat(clusterMoatPair.cluster()).isEqualTo(7);
+
+            clusterStructure.sumOnEdgePart(4,31,clusterMoatPair);
+            assertThat(clusterMoatPair.cluster()).isEqualTo(4);
 
             BitSet activeNodes = growthResult.activeOriginalNodes();
             assertThat(activeNodes.cardinality()).isEqualTo(4L);
@@ -205,10 +212,12 @@ import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 
 
             for (long u=0;u< graph.nodeCount();++u){
-                assertThat(clusterStructure.sumOnEdgePart(u,31))
-                    .satisfies( clusterMoatPair->{
-                        assertThat(clusterMoatPair.totalMoat()).isEqualTo(31);
-                        assertThat(clusterMoatPair.cluster()).isEqualTo(8);
+                ClusterMoatPair clusterMoatPair=new ClusterMoatPair();
+                clusterStructure.sumOnEdgePart(u,31,clusterMoatPair);
+                assertThat(clusterMoatPair)
+                    .satisfies( cmp->{
+                        assertThat(cmp.totalMoat()).isEqualTo(31);
+                        assertThat(cmp.cluster()).isEqualTo(8);
                     });
             }
 

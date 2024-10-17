@@ -27,24 +27,21 @@ import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 
     private final HugeObjectArray<PairingHeap> pairingHeaps;
     private final HugeLongPriorityQueue edgeEventsPriorityQueue;
-    private final ObjectArrayList<PairingHeapElement> helpingArray;
-    private long currentlyActive;
 
     EdgeEventsQueue(long nodeCount){
 
         this.pairingHeaps= HugeObjectArray.newArray(PairingHeap.class, 2*nodeCount);
         this.edgeEventsPriorityQueue = HugeLongPriorityQueue.min(2*nodeCount);
-        this.helpingArray= new ObjectArrayList<>(4096);
+        ObjectArrayList<PairingHeapElement> helpingArray = new ObjectArrayList<>(4096);
+
         for (int i=0;i<nodeCount;i++){
             pairingHeaps.set(i, new PairingHeap(helpingArray));
         }
-        currentlyActive = nodeCount;
+
     }
-    long currentlyActive(){
-        return currentlyActive;
-    }
+
     double nextEventTime(){
-        return  edgeEventsPriorityQueue.cost(edgeEventsPriorityQueue.top());
+        return edgeEventsPriorityQueue.cost(edgeEventsPriorityQueue.top());
     }
 
     long top(){
@@ -80,6 +77,7 @@ import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
                edgeEventsPriorityQueue.set(s, w);
          }
      }
+
      void addWithoutCheck(long s,  long edgePart, double w){
          var pairingHeapOfs  = pairingHeaps.get(s);
          pairingHeapOfs.add(edgePart,w);
@@ -97,13 +95,11 @@ import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
         deactivateCluster(cluster2);
 
         edgeEventsPriorityQueue.add(newCluster, pairingHeaps.get(newCluster).minValue());
-        currentlyActive--;
     }
 
     void deactivateCluster(long clusterId){
         // very-very bad way of removing from common heap-of-heaps
         edgeEventsPriorityQueue.set(clusterId,Double.MAX_VALUE); //ditto
-
     }
 
     void performInitialAssignment(long nodeCount){

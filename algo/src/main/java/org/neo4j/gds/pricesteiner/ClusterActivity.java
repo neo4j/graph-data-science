@@ -61,7 +61,6 @@ class ClusterActivity {
         return relevantTime.get(clusterId);
     }
 
-
     LongPredicate active() {
         return activeClusters::get;
     }

@@ -70,6 +70,10 @@ class GrowthPhase {
 
         progressTracker.beginSubTask("Growing");
         double moat;
+
+        ClusterMoatPair clusterMoatPairOfu = new ClusterMoatPair();
+        ClusterMoatPair clusterMoatPairOfv = new ClusterMoatPair();
+
         while (clusterStructure.numberOfActiveClusters() > 1) {
             terminationFlag.assertRunning();
             double edgeEventTime = edgeEventsQueue.nextEventTime();
@@ -92,14 +96,14 @@ class GrowthPhase {
                     continue;
                 }
 
-                ClusterMoatPair cmu = clusterStructure.sumOnEdgePart(u,moat);
-                ClusterMoatPair cmv = clusterStructure.sumOnEdgePart(v,moat);
+                 clusterStructure.sumOnEdgePart(u,moat,clusterMoatPairOfu);
+                 clusterStructure.sumOnEdgePart(v,moat,clusterMoatPairOfv);
 
-                var uCluster = cmu.cluster();
-                var uClusterSum = cmu.totalMoat();
+                var uCluster = clusterMoatPairOfu.cluster();
+                var uClusterSum = clusterMoatPairOfu.totalMoat();
 
-                var vCluster = cmv.cluster();
-                var vClusterSum = cmv.totalMoat();
+                var vCluster = clusterMoatPairOfv.cluster();
+                var vClusterSum = clusterMoatPairOfv.totalMoat();
 
 
                 if (vCluster == uCluster) {
@@ -160,9 +164,10 @@ class GrowthPhase {
                     edgeCosts.set(edgeId, w);
                     edgeParts.set(2 * edgeId, s);
                     edgeParts.set(2 * edgeId + 1, t);
-                    edgeEventsQueue.addBothWays(s, t, edgePart1, edgePart2, w / 2);
+                    edgeEventsQueue.addBothWays(s, t, edgePart1, edgePart2, w / 2.0);
+                    return true;
                 }
-                return  s > t;
+                return false;
             });
             progressTracker.logProgress(graph.degree(u));
         }
@@ -173,7 +178,7 @@ class GrowthPhase {
         for (long u = 0; u < graph.nodeCount(); ++u) {
             double prize = prizes.applyAsDouble(u);
             clusterStructure.setClusterPrize(u, prize);
-            clusterEventsPriorityQueue.add(u, clusterStructure.tightnessTime(u, 0));
+            clusterEventsPriorityQueue.add(u, prize);
         }
     }
 
@@ -193,13 +198,13 @@ class GrowthPhase {
             edgeEventsQueue.increaseValuesOnInactiveCluster(cluster2, moat - clusterStructure.inactiveSince(cluster2));
         }
 
-        var newCluster = clusterStructure.merge(cluster1, cluster2,moat);
+        var newCluster = clusterStructure.merge(cluster1, cluster2, moat);
 
         edgeEventsQueue.mergeAndUpdate(newCluster, cluster1, cluster2);
         clusterEventsPriorityQueue.add(newCluster, clusterStructure.tightnessTime(newCluster, moat));
 
         addToTree(edgeId);
-        edgeParts.set(2*edgeId,-edgeParts.get(2*edgeId));
+        edgeParts.set(2*edgeId, -edgeParts.get(2*edgeId)); //signal that edge id has been used
         edgeParts.set(2*edgeId+1,-edgeParts.get(2*edgeId+1));
     }
 

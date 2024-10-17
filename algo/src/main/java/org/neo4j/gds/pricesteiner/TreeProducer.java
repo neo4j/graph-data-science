@@ -24,7 +24,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -49,11 +48,10 @@ public final class TreeProducer {
 
         RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
-            .relationshipType(RelationshipType.of("_IGNORED_"))
+            .relationshipType(RelationshipType.of("TREE"))
             .orientation(Orientation.UNDIRECTED)
             .addPropertyConfig(GraphFactory.PropertyConfig.builder()
-                .propertyKey("property")
-                .aggregation(Aggregation.SUM)
+                .propertyKey("weight")
                 .build())
             .build();
 
@@ -71,10 +69,8 @@ public final class TreeProducer {
         var singleTypeRelationships= relationshipsBuilder.build();
         var tree = GraphFactory.create(idMap, singleTypeRelationships);
 
-
         progressTracker.endSubTask("Tree Creation");
         return new TreeStructure(tree,degree,  idMap.nodeCount());
-
 
     }
 
