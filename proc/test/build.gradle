@@ -42,6 +42,7 @@ dependencies {
     implementation project(':pipelines-procedure-facade')
     implementation project(':pregel')
     implementation project(':procedure-integration')
+    implementation project(':procedures-facade-api')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':termination')

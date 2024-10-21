@@ -39,10 +39,12 @@ dependencies {
     implementation project(':model-catalog-api')
     implementation project(':neo4j-api')
     implementation project(':neo4j-log-adapter')
+    // this is needed because of `TransactionNodeLookup` 🙈
     implementation project(':opengds-procedure-facade')
     implementation project(':open-licensing')
     implementation project(':pregel')
     implementation project(':procedure-integration')
+    implementation project(':procedures-facade-api')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':termination')

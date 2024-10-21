@@ -40,6 +40,7 @@ dependencies {
     implementation project(':proc-catalog')
     implementation project(':proc-community')
     implementation project(':proc-sysinfo')
+    implementation project(':procedures-facade-api')
     implementation project(':procedure-integration')
     implementation project(':progress-tracking')
     implementation project(':subgraph-filtering')

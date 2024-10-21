@@ -18,7 +18,10 @@ dependencies {
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':executor')
-    implementation project(':opengds-procedure-facade')
+
+//    implementation project(':opengds-procedure-facade')
+    implementation project(':procedures-facade-api')
+
     implementation project(':pipeline')
     implementation project(':pipelines-facade-api')
     implementation project(':proc-common')

@@ -21,7 +21,10 @@ dependencies {
     implementation project(':executor')
     implementation project(':logging')
     implementation project(':neo4j-api')
-    implementation project(':opengds-procedure-facade')
+
+//    implementation project(':opengds-procedure-facade')
+    implementation project(':procedures-facade-api')
+
     implementation project(':pregel')
     implementation project(':proc-common')
     implementation project(':progress-tracking')

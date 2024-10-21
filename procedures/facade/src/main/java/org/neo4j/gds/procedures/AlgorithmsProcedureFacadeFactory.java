@@ -33,6 +33,7 @@ import org.neo4j.gds.procedures.algorithms.miscellaneous.LocalMiscellaneousProce
 import org.neo4j.gds.procedures.algorithms.pathfinding.LocalPathFindingProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.similarity.LocalSimilarityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
+import org.neo4j.gds.transaction.TransactionNodeLookup;
 import org.neo4j.kernel.api.KernelTransaction;
 
 /**

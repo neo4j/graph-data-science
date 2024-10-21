@@ -39,6 +39,7 @@ dependencies {
     implementation project(':opengds-procedure-facade')
     implementation project(':operations-applications')
     implementation project(':pipelines-procedure-facade')
+    implementation project(':procedures-facade-api')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':termination')

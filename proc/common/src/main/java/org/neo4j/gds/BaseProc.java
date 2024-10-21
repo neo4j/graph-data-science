@@ -31,7 +31,7 @@ import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.ProcedureCallContextReturnColumns;
 import org.neo4j.gds.procedures.TransactionCloseableResourceRegistry;
-import org.neo4j.gds.procedures.TransactionNodeLookup;
+import org.neo4j.gds.transaction.TransactionNodeLookup;
 import org.neo4j.gds.termination.TransactionTerminationMonitor;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.gds.transaction.EmptyTransactionContext;

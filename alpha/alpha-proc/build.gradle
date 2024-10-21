@@ -36,7 +36,10 @@ dependencies {
     implementation project(':memory-usage')
     implementation project(':neo4j-api')
     implementation project(':operations-procedure-facade')
-    implementation project(':opengds-procedure-facade')
+
+//    implementation project(':opengds-procedure-facade')
+    implementation project(':procedures-facade-api')
+
     implementation project(':pregel')
     implementation project(':proc-catalog')
     implementation project(':proc-pregel')
@@ -57,4 +60,5 @@ dependencies {
     testImplementation openGds.mockito.junit.jupiter
 
     testImplementation project(':opengds-extension')
+    testImplementation project(':opengds-procedure-facade')
 }

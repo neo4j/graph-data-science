@@ -1,0 +1,25 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Procedures Facade API'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    compileOnly(group: 'org.neo4j', name: 'neo4j-kernel-api', version: ver.'neo4j') { transitive = false }
+
+    api(
+        project(':graph-catalog-facade-api'),
+        project(':model-catalog-facade-api'),
+        project(':operations-facade-api'),
+        project(':logging'),
+        project(':pipelines-facade-api'),
+        project(':algorithms-facade-api'),
+        project(':metrics-api'),
+    )
+
+    // `User` is here 🙈
+    implementation project(':core')
+
+
+    implementation project(':neo4j-api')
+}
