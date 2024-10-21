@@ -14,7 +14,7 @@ dependencies {
 
     compileOnly project(':logging')
 
-    implementation project(':algorithms-procedure-facade')
+//    implementation project(':algorithms-procedure-facade')
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':executor')
