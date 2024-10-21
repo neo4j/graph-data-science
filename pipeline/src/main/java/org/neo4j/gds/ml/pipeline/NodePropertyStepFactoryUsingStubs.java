@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.pipeline;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
-import org.neo4j.gds.procedures.algorithms.CanonicalProcedureName;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 
 import java.util.List;

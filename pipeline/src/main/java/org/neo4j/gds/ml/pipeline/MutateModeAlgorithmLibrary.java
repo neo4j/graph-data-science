@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.pipeline;
 
 import org.neo4j.gds.applications.algorithms.metadata.Algorithm;
-import org.neo4j.gds.procedures.algorithms.CanonicalProcedureName;
 
 import java.util.Arrays;
 import java.util.HashMap;

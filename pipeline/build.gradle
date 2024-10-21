@@ -35,7 +35,7 @@ dependencies {
 
     implementation openGds.reflections
 
-    implementation project(':algo')
+//    implementation project(':algo')
     implementation project(':algo-common')
     implementation project(':algorithms-facade-api')
     implementation project(':algorithms-machinery')

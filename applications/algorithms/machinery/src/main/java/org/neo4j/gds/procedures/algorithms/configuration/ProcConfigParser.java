@@ -21,6 +21,8 @@ package org.neo4j.gds.procedures.algorithms.configuration;
 
 import java.util.Map;
 
+// This is only used in the `executor` framework: `ExecutorSpec` and `ProcedureExecutorSpec`
+@Deprecated(forRemoval = true)
 @FunctionalInterface
 public interface ProcConfigParser<CONFIG> {
     CONFIG processInput(Map<String, Object> configuration);

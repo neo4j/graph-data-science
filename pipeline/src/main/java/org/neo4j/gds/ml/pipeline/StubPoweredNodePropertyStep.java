@@ -31,7 +31,6 @@ import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.CanonicalProcedureName;
 
 import java.util.Collection;
 import java.util.HashMap;

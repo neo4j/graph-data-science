@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms;
+package org.neo4j.gds.ml.pipeline;
 
 import org.apache.commons.lang3.StringUtils;
 
