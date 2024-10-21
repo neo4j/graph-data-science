@@ -54,12 +54,15 @@ dependencies {
     implementation project(':operations-applications')
     implementation project(':operations-procedure-facade')
     implementation project(':pipeline')
-    implementation project(':pipelines-procedure-facade')
+    implementation project(':pipelines-facade-api')
     implementation project(':proc-common')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':termination')
     implementation project(':transaction')
+
+    // TODO: This is needed for some specifications - remove!!!
+    implementation project(':pipelines-procedure-facade')
 
     implementation openGds.hdrhistogram
 

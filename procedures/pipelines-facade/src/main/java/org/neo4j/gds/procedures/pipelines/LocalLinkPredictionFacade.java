@@ -29,13 +29,13 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public final class LinkPredictionFacade {
+public final class LocalLinkPredictionFacade implements LinkPredictionFacade {
     private final Configurer configurer;
 
     private final PipelineConfigurationParser pipelineConfigurationParser;
     private final PipelineApplications pipelineApplications;
 
-    private LinkPredictionFacade(
+    private LocalLinkPredictionFacade(
         Configurer configurer, PipelineConfigurationParser pipelineConfigurationParser,
         PipelineApplications pipelineApplications
     ) {
@@ -52,9 +52,10 @@ public final class LinkPredictionFacade {
     ) {
         var configurer = new Configurer(pipelineRepository, user);
 
-        return new LinkPredictionFacade(configurer, pipelineConfigurationParser, pipelineApplications);
+        return new LocalLinkPredictionFacade(configurer, pipelineConfigurationParser, pipelineApplications);
     }
 
+    @Override
     public Stream<PipelineInfoResult> addFeature(
         String pipelineNameAsString,
         String featureType,
@@ -65,11 +66,12 @@ public final class LinkPredictionFacade {
 
         var pipeline = pipelineApplications.addFeature(pipelineName, featureType, configuration);
 
-        var result = PipelineInfoResult.create(pipelineName, pipeline);
+        var result = PipelineInfoResultTransformer.create(pipelineName, pipeline);
 
         return Stream.of(result);
     }
 
+    @Override
     public Stream<PipelineInfoResult> addLogisticRegression(String pipelineName, Map<String, Object> configuration) {
         return configurer.configureLinkPredictionTrainingPipeline(
             pipelineName,
@@ -78,6 +80,7 @@ public final class LinkPredictionFacade {
         );
     }
 
+    @Override
     public Stream<PipelineInfoResult> addMLP(String pipelineName, Map<String, Object> configuration) {
         return configurer.configureLinkPredictionTrainingPipeline(
             pipelineName,
@@ -86,6 +89,7 @@ public final class LinkPredictionFacade {
         );
     }
 
+    @Override
     public Stream<PipelineInfoResult> addNodeProperty(
         String pipelineNameAsString,
         String taskName,
@@ -99,11 +103,12 @@ public final class LinkPredictionFacade {
             procedureConfig
         );
 
-        var result = PipelineInfoResult.create(pipelineName, pipeline);
+        var result = PipelineInfoResultTransformer.create(pipelineName, pipeline);
 
         return Stream.of(result);
     }
 
+    @Override
     public Stream<PipelineInfoResult> addRandomForest(String pipelineName, Map<String, Object> configuration) {
         return configurer.configureLinkPredictionTrainingPipeline(
             pipelineName,
@@ -112,6 +117,7 @@ public final class LinkPredictionFacade {
         );
     }
 
+    @Override
     public Stream<PipelineInfoResult> configureAutoTuning(String pipelineName, Map<String, Object> configuration) {
         return configurer.configureLinkPredictionTrainingPipeline(
             pipelineName,
@@ -120,6 +126,7 @@ public final class LinkPredictionFacade {
         );
     }
 
+    @Override
     public Stream<PipelineInfoResult> configureSplit(String pipelineName, Map<String, Object> configuration) {
         return configurer.configureLinkPredictionTrainingPipeline(
             pipelineName,
@@ -128,16 +135,18 @@ public final class LinkPredictionFacade {
         );
     }
 
+    @Override
     public Stream<PipelineInfoResult> createPipeline(String pipelineNameAsString) {
         var pipelineName = PipelineName.parse(pipelineNameAsString);
 
         var pipeline = pipelineApplications.createLinkPredictionTrainingPipeline(pipelineName);
 
-        var result = PipelineInfoResult.create(pipelineName, pipeline);
+        var result = PipelineInfoResultTransformer.create(pipelineName, pipeline);
 
         return Stream.of(result);
     }
 
+    @Override
     public Stream<MutateResult> mutate(
         String graphNameAsString,
         Map<String, Object> configuration
@@ -154,6 +163,7 @@ public final class LinkPredictionFacade {
         return Stream.of(result);
     }
 
+    @Override
     public Stream<MemoryEstimateResult> mutateEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> rawConfiguration
@@ -170,6 +180,7 @@ public final class LinkPredictionFacade {
         return Stream.of(result);
     }
 
+    @Override
     public Stream<StreamResult> stream(
         String graphNameAsString,
         Map<String, Object> configuration
@@ -181,6 +192,7 @@ public final class LinkPredictionFacade {
         return pipelineApplications.linkPredictionStream(graphName, configuration);
     }
 
+    @Override
     public Stream<MemoryEstimateResult> streamEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> rawConfiguration
@@ -197,6 +209,7 @@ public final class LinkPredictionFacade {
         return Stream.of(result);
     }
 
+    @Override
     public Stream<MemoryEstimateResult> trainEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> rawConfiguration

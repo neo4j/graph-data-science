@@ -20,7 +20,7 @@ dependencies {
     implementation project(':executor')
     implementation project(':opengds-procedure-facade')
     implementation project(':pipeline')
-    implementation project(':pipelines-procedure-facade')
+    implementation project(':pipelines-facade-api')
     implementation project(':proc-common')
     implementation project(':string-formatting')
 

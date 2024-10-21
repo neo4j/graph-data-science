@@ -24,32 +24,10 @@ import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 
-import java.util.List;
-import java.util.Map;
+public final class PipelineInfoResultTransformer {
 
-public final class PipelineInfoResult {
-    public final String name;
-    public final List<Map<String, Object>> nodePropertySteps;
-    public final List<Map<String, Object>> featureSteps;
-    public final Map<String, Object> splitConfig;
-    public final Map<String, Object> autoTuningConfig;
-    public final Object parameterSpace;
 
-    private PipelineInfoResult(
-        String name,
-        List<Map<String, Object>> nodePropertySteps,
-        List<Map<String, Object>> featureSteps,
-        Map<String, Object> splitConfig,
-        Map<String, Object> autoTuningConfig,
-        Object parameterSpace
-    ) {
-        this.name = name;
-        this.nodePropertySteps = nodePropertySteps;
-        this.featureSteps = featureSteps;
-        this.splitConfig = splitConfig;
-        this.autoTuningConfig = autoTuningConfig;
-        this.parameterSpace = parameterSpace;
-    }
+    private PipelineInfoResultTransformer() {}
 
     public static PipelineInfoResult create(PipelineName pipelineName, LinkPredictionTrainingPipeline pipeline) {
         return create(pipelineName.value, pipeline);

@@ -44,15 +44,14 @@ import org.neo4j.gds.termination.TerminationMonitor;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public final class PipelinesProcedureFacade {
-    public static final String NO_VALUE = "__NO_VALUE";
+public final class LocalPipelinesProcedureFacade implements PipelinesProcedureFacade {
 
     private final PipelineApplications pipelineApplications;
 
     private final LinkPredictionFacade linkPredictionFacade;
     private final NodeClassificationFacade nodeClassificationFacade;
 
-    PipelinesProcedureFacade(
+    LocalPipelinesProcedureFacade(
         PipelineApplications pipelineApplications,
         LinkPredictionFacade linkPredictionFacade,
         NodeClassificationFacade nodeClassificationFacade
@@ -112,14 +111,14 @@ public final class PipelinesProcedureFacade {
             algorithmProcessingTemplate
         );
 
-        var linkPredictionFacade = LinkPredictionFacade.create(
+        var linkPredictionFacade = LocalLinkPredictionFacade.create(
             user,
             pipelineConfigurationParser,
             pipelineApplications,
             pipelineRepository
         );
 
-        var nodeClassificationFacade = NodeClassificationFacade.create(
+        var nodeClassificationFacade = LocalNodeClassificationFacade.create(
             modelCatalog,
             user,
             pipelineConfigurationParser,
@@ -127,13 +126,14 @@ public final class PipelinesProcedureFacade {
             pipelineRepository
         );
 
-        return new PipelinesProcedureFacade(
+        return new LocalPipelinesProcedureFacade(
             pipelineApplications,
             linkPredictionFacade,
             nodeClassificationFacade
         );
     }
 
+    @Override
     public Stream<PipelineCatalogResult> drop(
         String pipelineNameAsString,
         boolean failIfMissing
@@ -143,32 +143,34 @@ public final class PipelinesProcedureFacade {
         if (failIfMissing) {
             var result = pipelineApplications.dropAcceptingFailure(pipelineName);
 
-            return Stream.of(PipelineCatalogResult.create(result, pipelineName.value));
+            return Stream.of(PipelineCatalogResultTransformer.create(result, pipelineName.value));
         }
 
         var result = pipelineApplications.dropSilencingFailure(pipelineName);
 
-        return Stream.ofNullable(result).map(pipeline -> PipelineCatalogResult.create(pipeline, pipelineName.value));
+        return Stream.ofNullable(result).map(pipeline -> PipelineCatalogResultTransformer.create(pipeline, pipelineName.value));
     }
 
+    @Override
     public Stream<PipelineExistsResult> exists(String pipelineNameAsString) {
         var pipelineName = PipelineName.parse(pipelineNameAsString);
 
         var pipelineType = pipelineApplications.exists(pipelineName);
 
-        if (pipelineType.isEmpty()) return Stream.of(PipelineExistsResult.empty(pipelineName));
+        if (pipelineType.isEmpty()) return Stream.of(PipelineExistsResult.empty(pipelineName.value));
 
         var result = new PipelineExistsResult(pipelineName.value, pipelineType.get(), true);
 
         return Stream.of(result);
     }
 
+    @Override
     public Stream<PipelineCatalogResult> list(String pipelineNameAsString) {
         if (pipelineNameAsString == null || pipelineNameAsString.equals(NO_VALUE)) {
             var pipelineEntries = pipelineApplications.getAll();
 
             return pipelineEntries.map(
-                entry -> PipelineCatalogResult.create(
+                entry -> PipelineCatalogResultTransformer.create(
                     entry.pipeline(),
                     entry.pipelineName()
                 )
@@ -181,15 +183,17 @@ public final class PipelinesProcedureFacade {
 
         if (pipeline.isEmpty()) return Stream.empty();
 
-        var result = PipelineCatalogResult.create(pipeline.get(), pipelineName.value);
+        var result = PipelineCatalogResultTransformer.create(pipeline.get(), pipelineName.value);
 
         return Stream.of(result);
     }
 
+    @Override
     public LinkPredictionFacade linkPrediction() {
         return linkPredictionFacade;
     }
 
+    @Override
     public NodeClassificationFacade nodeClassification() {
         return nodeClassificationFacade;
     }

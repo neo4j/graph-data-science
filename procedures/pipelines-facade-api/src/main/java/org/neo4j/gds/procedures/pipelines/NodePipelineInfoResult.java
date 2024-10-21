@@ -20,15 +20,14 @@
 package org.neo4j.gds.procedures.pipelines;
 
 import java.util.List;
+import java.util.Map;
 
-public final class NodeClassificationStreamResult {
-    public long nodeId;
-    public long predictedClass;
-    public List<Double> predictedProbabilities;
-
-    public NodeClassificationStreamResult(long nodeId, long predictedClass, List<Double> predictedProbabilities) {
-        this.nodeId = nodeId;
-        this.predictedClass = predictedClass;
-        this.predictedProbabilities = predictedProbabilities;
-    }
+public record NodePipelineInfoResult(
+    String name,
+    List<Map<String, Object>> nodePropertySteps,
+    List<String> featureProperties,
+    Map<String, Object> splitConfig,
+    Map<String, Object> autoTuningConfig,
+    Map<String, List<Map<String, Object>>> parameterSpace
+) {
 }

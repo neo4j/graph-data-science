@@ -51,7 +51,7 @@ class Configurer {
             pipelineName -> pipelineRepository.getLinkPredictionTrainingPipeline(user, pipelineName),
             configurationSupplier,
             action,
-            PipelineInfoResult::create
+            PipelineInfoResultTransformer::create
         );
     }
 
@@ -68,7 +68,7 @@ class Configurer {
             pipelineName -> pipelineRepository.getNodeClassificationTrainingPipeline(user, pipelineName),
             configurationSupplier,
             action,
-            NodePipelineInfoResult::create
+            NodePipelineInfoResultTransformer::create
         );
     }
 

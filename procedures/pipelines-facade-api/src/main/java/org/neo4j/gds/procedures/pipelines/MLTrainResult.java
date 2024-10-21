@@ -20,15 +20,13 @@
 package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.model.ModelConfig;
 
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static org.neo4j.gds.model.ModelConfig.MODEL_NAME_KEY;
-import static org.neo4j.gds.model.ModelConfig.MODEL_TYPE_KEY;
 
 public class MLTrainResult {
     @SuppressWarnings("WeakerAccess")
@@ -44,8 +42,8 @@ public class MLTrainResult {
             var trainedModel = maybeTrainedModel.get();
             this.modelInfo = Stream.concat(
                 Map.of(
-                    MODEL_NAME_KEY, trainedModel.name(),
-                    MODEL_TYPE_KEY, trainedModel.algoType()
+                    ModelConfig.MODEL_NAME_KEY, trainedModel.name(),
+                    ModelConfig.MODEL_TYPE_KEY, trainedModel.algoType()
                 ).entrySet().stream(),
                 trainedModel.customInfo().toMap().entrySet().stream()
             ).collect(Collectors.toMap(

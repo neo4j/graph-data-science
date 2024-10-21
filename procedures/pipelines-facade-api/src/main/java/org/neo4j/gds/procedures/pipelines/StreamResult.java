@@ -19,18 +19,5 @@
  */
 package org.neo4j.gds.procedures.pipelines;
 
-public class PipelineExistsResult {
-    public final String pipelineName;
-    public final String pipelineType;
-    public final boolean exists;
-
-    PipelineExistsResult(String pipelineName, String pipelineType, boolean exists) {
-        this.pipelineName = pipelineName;
-        this.pipelineType = pipelineType;
-        this.exists = exists;
-    }
-
-    static PipelineExistsResult empty(PipelineName pipelineName) {
-        return new PipelineExistsResult(pipelineName.value, "n/a", false);
-    }
+public record StreamResult(long node1, long node2, double probability) {
 }

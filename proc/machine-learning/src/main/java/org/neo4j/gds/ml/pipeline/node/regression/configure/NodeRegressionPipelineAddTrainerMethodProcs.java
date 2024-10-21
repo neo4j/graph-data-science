@@ -28,6 +28,7 @@ import org.neo4j.gds.ml.models.randomforest.RandomForestRegressorTrainerConfig;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.procedures.pipelines.NodePipelineInfoResult;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainingPipeline;
+import org.neo4j.gds.procedures.pipelines.NodePipelineInfoResultTransformer;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -52,7 +53,7 @@ public class NodeRegressionPipelineAddTrainerMethodProcs extends BaseProc {
 
         pipeline.addTrainerConfig(TunableTrainerConfig.of(configuration, TrainingMethod.LinearRegression));
 
-        return Stream.of(NodePipelineInfoResult.create(pipelineName, pipeline));
+        return Stream.of(NodePipelineInfoResultTransformer.create(pipelineName, pipeline));
     }
 
     @Procedure(name = "gds.alpha.pipeline.nodeRegression.addRandomForest", mode = READ)
@@ -68,6 +69,6 @@ public class NodeRegressionPipelineAddTrainerMethodProcs extends BaseProc {
 
         pipeline.addTrainerConfig(TunableTrainerConfig.of(configuration, TrainingMethod.RandomForestRegression));
 
-        return Stream.of(NodePipelineInfoResult.create(pipelineName, pipeline));
+        return Stream.of(NodePipelineInfoResultTransformer.create(pipelineName, pipeline));
     }
 }

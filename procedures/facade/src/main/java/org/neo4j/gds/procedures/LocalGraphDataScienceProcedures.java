@@ -51,6 +51,7 @@ import org.neo4j.gds.procedures.modelcatalog.LocalModelCatalogProcedureFacade;
 import org.neo4j.gds.procedures.modelcatalog.ModelCatalogProcedureFacade;
 import org.neo4j.gds.procedures.operations.LocalOperationsProcedureFacade;
 import org.neo4j.gds.procedures.operations.OperationsProcedureFacade;
+import org.neo4j.gds.procedures.pipelines.LocalPipelinesProcedureFacade;
 import org.neo4j.gds.procedures.pipelines.PipelineRepository;
 import org.neo4j.gds.procedures.pipelines.PipelinesProcedureFacade;
 import org.neo4j.gds.termination.TerminationMonitor;
@@ -193,7 +194,7 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
 
         var operationsProcedureFacade = new LocalOperationsProcedureFacade(applicationsFacade);
 
-        var pipelinesProcedureFacade = PipelinesProcedureFacade.create(
+        var pipelinesProcedureFacade = LocalPipelinesProcedureFacade.create(
             log,
             modelCatalog,
             modelRepository,

@@ -33,14 +33,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public final class NodeClassificationFacade {
+public final class LocalNodeClassificationFacade implements NodeClassificationFacade {
     private final Configurer configurer;
     private final NodeClassificationPredictConfigPreProcessor nodeClassificationPredictConfigPreProcessor;
 
     private final PipelineConfigurationParser pipelineConfigurationParser;
     private final PipelineApplications pipelineApplications;
 
-    NodeClassificationFacade(
+    LocalNodeClassificationFacade(
         Configurer configurer,
         NodeClassificationPredictConfigPreProcessor nodeClassificationPredictConfigPreProcessor,
         PipelineConfigurationParser pipelineConfigurationParser,
@@ -65,7 +65,7 @@ public final class NodeClassificationFacade {
             user
         );
 
-        return new NodeClassificationFacade(
+        return new LocalNodeClassificationFacade(
             configurer,
             nodeClassificationPredictConfigPreProcessor,
             pipelineConfigurationParser,
@@ -73,6 +73,7 @@ public final class NodeClassificationFacade {
         );
     }
 
+    @Override
     public Stream<NodePipelineInfoResult> addLogisticRegression(
         String pipelineName,
         Map<String, Object> configuration
@@ -84,6 +85,7 @@ public final class NodeClassificationFacade {
         );
     }
 
+    @Override
     public Stream<NodePipelineInfoResult> addMLP(String pipelineName, Map<String, Object> configuration) {
         return configurer.configureNodeClassificationTrainingPipeline(
             pipelineName,
@@ -92,6 +94,7 @@ public final class NodeClassificationFacade {
         );
     }
 
+    @Override
     public Stream<NodePipelineInfoResult> addNodeProperty(
         String pipelineNameAsString,
         String taskName,
@@ -105,11 +108,12 @@ public final class NodeClassificationFacade {
             procedureConfig
         );
 
-        var result = NodePipelineInfoResult.create(pipelineName, pipeline);
+        var result = NodePipelineInfoResultTransformer.create(pipelineName, pipeline);
 
         return Stream.of(result);
     }
 
+    @Override
     public Stream<NodePipelineInfoResult> addRandomForest(String pipelineName, Map<String, Object> configuration) {
         return configurer.configureNodeClassificationTrainingPipeline(
             pipelineName,
@@ -118,6 +122,7 @@ public final class NodeClassificationFacade {
         );
     }
 
+    @Override
     public Stream<NodePipelineInfoResult> configureAutoTuning(String pipelineName, Map<String, Object> configuration) {
         return configurer.configureNodeClassificationTrainingPipeline(
             pipelineName,
@@ -126,6 +131,7 @@ public final class NodeClassificationFacade {
         );
     }
 
+    @Override
     public Stream<NodePipelineInfoResult> configureSplit(String pipelineName, Map<String, Object> configuration) {
         return configurer.configureNodeClassificationTrainingPipeline(
             pipelineName,
@@ -134,16 +140,18 @@ public final class NodeClassificationFacade {
         );
     }
 
+    @Override
     public Stream<NodePipelineInfoResult> createPipeline(String pipelineNameAsString) {
         var pipelineName = PipelineName.parse(pipelineNameAsString);
 
         var pipeline = pipelineApplications.createNodeClassificationTrainingPipeline(pipelineName);
 
-        var result = NodePipelineInfoResult.create(pipelineName, pipeline);
+        var result = NodePipelineInfoResultTransformer.create(pipelineName, pipeline);
 
         return Stream.of(result);
     }
 
+    @Override
     public Stream<PredictMutateResult> mutate(
         String graphNameAsString,
         Map<String, Object> configuration
@@ -161,6 +169,7 @@ public final class NodeClassificationFacade {
         return Stream.of(result);
     }
 
+    @Override
     public Stream<MemoryEstimateResult> mutateEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> rawConfiguration
@@ -179,6 +188,7 @@ public final class NodeClassificationFacade {
         return Stream.of(result);
     }
 
+    @Override
     public Stream<NodePipelineInfoResult> selectFeatures(String pipelineNameAsString, Object nodeFeatureStepsAsObject) {
         var pipelineName = PipelineName.parse(pipelineNameAsString);
 
@@ -186,11 +196,12 @@ public final class NodeClassificationFacade {
 
         var pipeline = pipelineApplications.selectFeatures(pipelineName, nodeFeatureSteps);
 
-        var result = NodePipelineInfoResult.create(pipelineName, pipeline);
+        var result = NodePipelineInfoResultTransformer.create(pipelineName, pipeline);
 
         return Stream.of(result);
     }
 
+    @Override
     public Stream<NodeClassificationStreamResult> stream(
         String graphNameAsString,
         Map<String, Object> configuration
@@ -203,6 +214,7 @@ public final class NodeClassificationFacade {
         return pipelineApplications.nodeClassificationPredictStream(graphName, configuration);
     }
 
+    @Override
     public Stream<MemoryEstimateResult> streamEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> rawConfiguration
@@ -221,6 +233,7 @@ public final class NodeClassificationFacade {
         return Stream.of(result);
     }
 
+    @Override
     public Stream<NodeClassificationPipelineTrainResult> train(
         String graphNameAsString,
         Map<String, Object> configuration
@@ -232,6 +245,7 @@ public final class NodeClassificationFacade {
         return pipelineApplications.nodeClassificationTrain(graphName, configuration);
     }
 
+    @Override
     public Stream<MemoryEstimateResult> trainEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> rawConfiguration
@@ -247,6 +261,7 @@ public final class NodeClassificationFacade {
         return Stream.of(result);
     }
 
+    @Override
     public Stream<WriteResult> write(String graphNameAsString, Map<String, Object> configuration) {
         PipelineCompanion.preparePipelineConfig(graphNameAsString, configuration);
         nodeClassificationPredictConfigPreProcessor.enhanceInputWithPipelineParameters(configuration);
@@ -261,6 +276,7 @@ public final class NodeClassificationFacade {
         return Stream.of(result);
     }
 
+    @Override
     public Stream<MemoryEstimateResult> writeEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> rawConfiguration

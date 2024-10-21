@@ -45,6 +45,7 @@ dependencies {
     implementation project(':neo4j-api')
     implementation project(':open-model-catalog')
     implementation project(':pipeline')
+    implementation project(':pipelines-facade-api')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':termination')

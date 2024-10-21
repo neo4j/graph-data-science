@@ -24,33 +24,11 @@ import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 
-import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
-public final class NodePipelineInfoResult {
-    public final String name;
-    public final List<Map<String, Object>> nodePropertySteps;
-    public final List<String> featureProperties;
-    public final Map<String, Object> splitConfig;
-    public final Map<String, Object> autoTuningConfig;
-    public final Object parameterSpace;
+public final class NodePipelineInfoResultTransformer {
 
-    private NodePipelineInfoResult(
-        String name,
-        List<Map<String, Object>> nodePropertySteps,
-        List<String> featureProperties,
-        Map<String, Object> splitConfig,
-        Map<String, Object> autoTuningConfig,
-        Map<String, List<Map<String, Object>>> parameterSpace
-    ) {
-        this.name = name;
-        this.nodePropertySteps = nodePropertySteps;
-        this.featureProperties = featureProperties;
-        this.splitConfig = splitConfig;
-        this.autoTuningConfig = autoTuningConfig;
-        this.parameterSpace = parameterSpace;
-    }
+    private NodePipelineInfoResultTransformer() {}
 
     static NodePipelineInfoResult create(PipelineName pipelineName, NodeClassificationTrainingPipeline pipeline) {
         return create(pipelineName.value, pipeline);

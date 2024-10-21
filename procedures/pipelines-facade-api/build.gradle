@@ -1,0 +1,39 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Pipelines Procedure Facade API'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+
+    compileOnly openGds.jetbrains.annotations
+
+    // `HistogramUtils` - do this need to be in `:algo-common` 🤔
+    implementation project(':algo-common')
+
+    implementation project(':algorithms-facade-common')
+
+    // Because of `AlgorithmProcessingTimings`
+    implementation project(':algorithms-machinery')
+
+    // `BaseConfig`
+    implementation project(':config-api')
+
+    // `AbstractResultBuilder`
+    implementation project(':core')
+
+    // `NodeClassificationModelResult` 🙈
+    implementation project(':pipeline')
+
+    implementation project(':memory-usage')
+
+    // `TrainingStatistics` --> TODO: move this out of here
+    implementation project(':ml-algo')
+
+    // `ModelConfig`
+    implementation project(':model-catalog-api')
+
+    // `JobIdConfig`
+    implementation project(':progress-tracking')
+
+}

@@ -19,14 +19,13 @@
  */
 package org.neo4j.gds.procedures.pipelines;
 
-public final class StreamResult {
-    public final long node1;
-    public final long node2;
-    public final double probability;
+import java.time.ZonedDateTime;
+import java.util.Map;
 
-    public StreamResult(long node1, long node2, double probability) {
-        this.node1 = node1;
-        this.node2 = node2;
-        this.probability = probability;
-    }
+public record PipelineCatalogResult(
+    Map<String, Object> pipelineInfo,
+    String pipelineName,
+    String pipelineType,
+    ZonedDateTime creationTime
+) {
 }

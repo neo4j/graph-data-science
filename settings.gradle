@@ -400,6 +400,8 @@ project(':model-catalog-facade-api').projectDir = file('procedures/model-catalog
 include('operations-facade-api')
 project(':operations-facade-api').projectDir = file('procedures/operations-facade-api')
 
+include('pipelines-facade-api')
+project(':pipelines-facade-api').projectDir = file('procedures/pipelines-facade-api')
 
 include('neo4j-kernel-adapter-5.23')
 project(':neo4j-kernel-adapter-5.23').projectDir = file('compatibility/5.23/neo4j-kernel-adapter')

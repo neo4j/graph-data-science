@@ -29,9 +29,9 @@ import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.GraphDataScienceProceduresBuilder;
+import org.neo4j.gds.procedures.pipelines.LocalPipelinesProcedureFacade;
 import org.neo4j.gds.procedures.pipelines.NodeClassificationPipelineCompanion;
 import org.neo4j.gds.procedures.pipelines.PipelineRepository;
-import org.neo4j.gds.procedures.pipelines.PipelinesProcedureFacade;
 
 import java.util.List;
 import java.util.Map;
@@ -44,7 +44,7 @@ import static org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplit
 class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
     @BeforeEach
     void setUp() {
-        PipelinesProcedureFacade.create(
+        LocalPipelinesProcedureFacade.create(
             null,
             null,
             null,
@@ -85,15 +85,15 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
             "pageRank",
             Map.of("mutateProperty", "pr")
         ).findFirst().orElseThrow();
-        assertThat(result.name).isEqualTo("myPipeline");
-        assertThat(result.splitConfig).isEqualTo(DEFAULT_CONFIG.toMap());
-        assertThat(result.nodePropertySteps).isEqualTo(List.of(
+        assertThat(result.name()).isEqualTo("myPipeline");
+        assertThat(result.splitConfig()).isEqualTo(DEFAULT_CONFIG.toMap());
+        assertThat(result.nodePropertySteps()).isEqualTo(List.of(
             Map.of(
                 "name", "gds.pageRank.mutate",
                 "config", Map.of("mutateProperty", "pr", "contextNodeLabels", List.of(), "contextRelationshipTypes", List.of())
             )));
-        assertThat(result.featureProperties).isEqualTo(List.of());
-        assertThat(result.parameterSpace).isEqualTo(NodeClassificationPipelineCompanion.DEFAULT_PARAM_CONFIG);
+        assertThat(result.featureProperties()).isEqualTo(List.of());
+        assertThat(result.parameterSpace()).isEqualTo(NodeClassificationPipelineCompanion.DEFAULT_PARAM_CONFIG);
     }
 
     @Test
@@ -106,11 +106,11 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
 
         var result = procedure.selectFeatures("myPipeline", List.of("pr", "pr2")).findFirst().orElseThrow();
 
-        assertThat(result.name).isEqualTo("myPipeline");
-        assertThat(result.splitConfig).isEqualTo(DEFAULT_CONFIG.toMap());
-        assertThat(result.nodePropertySteps).isEqualTo(List.of());
-        assertThat(result.featureProperties).isEqualTo(List.of("test", "pr", "pr2"));
-        assertThat(result.parameterSpace).isEqualTo(NodeClassificationPipelineCompanion.DEFAULT_PARAM_CONFIG);
+        assertThat(result.name()).isEqualTo("myPipeline");
+        assertThat(result.splitConfig()).isEqualTo(DEFAULT_CONFIG.toMap());
+        assertThat(result.nodePropertySteps()).isEqualTo(List.of());
+        assertThat(result.featureProperties()).isEqualTo(List.of("test", "pr", "pr2"));
+        assertThat(result.parameterSpace()).isEqualTo(NodeClassificationPipelineCompanion.DEFAULT_PARAM_CONFIG);
     }
 
     @Test
@@ -181,15 +181,15 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
             "myPipeline",
             "pr2"
         ).findFirst().orElseThrow();
-        assertThat(result.name).isEqualTo("myPipeline");
-        assertThat(result.splitConfig).isEqualTo(DEFAULT_CONFIG.toMap());
-        assertThat(result.nodePropertySteps).isEqualTo(List.of(
+        assertThat(result.name()).isEqualTo("myPipeline");
+        assertThat(result.splitConfig()).isEqualTo(DEFAULT_CONFIG.toMap());
+        assertThat(result.nodePropertySteps()).isEqualTo(List.of(
             Map.of(
                 "name", "gds.pageRank.mutate",
                 "config", Map.of("mutateProperty", "pr", "contextNodeLabels", List.of(), "contextRelationshipTypes", List.of())
             )));
-        assertThat(result.featureProperties).isEqualTo(List.of("pr", "pr2"));
-        assertThat(result.parameterSpace).isEqualTo(NodeClassificationPipelineCompanion.DEFAULT_PARAM_CONFIG);
+        assertThat(result.featureProperties()).isEqualTo(List.of("pr", "pr2"));
+        assertThat(result.parameterSpace()).isEqualTo(NodeClassificationPipelineCompanion.DEFAULT_PARAM_CONFIG);
     }
 
     @Test
@@ -208,9 +208,9 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
             "pageRank",
             Map.of("mutateProperty", "pr2", "contextNodeLabels", List.of("A"), "contextRelationshipTypes", List.of("T"))
         ).findFirst().orElseThrow();
-        assertThat(result.name).isEqualTo("myPipeline");
-        assertThat(result.splitConfig).isEqualTo(DEFAULT_CONFIG.toMap());
-        assertThat(result.nodePropertySteps).isEqualTo(List.of(
+        assertThat(result.name()).isEqualTo("myPipeline");
+        assertThat(result.splitConfig()).isEqualTo(DEFAULT_CONFIG.toMap());
+        assertThat(result.nodePropertySteps()).isEqualTo(List.of(
                 Map.of(
                     "name", "gds.pageRank.mutate",
                     "config", Map.of("mutateProperty", "pr", "contextNodeLabels", List.of(), "contextRelationshipTypes", List.of())
@@ -221,8 +221,8 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
                 )
             )
         );
-        assertThat(result.featureProperties).isEqualTo(List.of());
-        assertThat(result.parameterSpace).isEqualTo(NodeClassificationPipelineCompanion.DEFAULT_PARAM_CONFIG);
+        assertThat(result.featureProperties()).isEqualTo(List.of());
+        assertThat(result.parameterSpace()).isEqualTo(NodeClassificationPipelineCompanion.DEFAULT_PARAM_CONFIG);
     }
 
     @Test
@@ -319,7 +319,7 @@ class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
 
     private GraphDataScienceProcedures buildFacade() {
         return new GraphDataScienceProceduresBuilder(Log.noOpLog())
-            .with(PipelinesProcedureFacade.create(
+            .with(LocalPipelinesProcedureFacade.create(
                 null,
                 null,
                 null,

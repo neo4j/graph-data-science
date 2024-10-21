@@ -63,15 +63,15 @@ class NodeClassificationFacadeTest {
             null,
             null
         );
-        var facade = new NodeClassificationFacade(null, null, null, applications);
+        var facade = new LocalNodeClassificationFacade(null, null, null, applications);
 
         var result = facade.createPipeline("myPipeline").findAny().orElseThrow();
 
-        assertThat(result.name).isEqualTo("myPipeline");
-        assertThat(result.nodePropertySteps).isEqualTo(List.of());
-        assertThat(result.featureProperties).isEqualTo(List.of());
-        assertThat(result.splitConfig).isEqualTo(NodeClassificationPipelineCompanion.DEFAULT_SPLIT_CONFIG);
-        assertThat(result.parameterSpace).isEqualTo(NodeClassificationPipelineCompanion.DEFAULT_PARAM_CONFIG);
+        assertThat(result.name()).isEqualTo("myPipeline");
+        assertThat(result.nodePropertySteps()).isEqualTo(List.of());
+        assertThat(result.featureProperties()).isEqualTo(List.of());
+        assertThat(result.splitConfig()).isEqualTo(NodeClassificationPipelineCompanion.DEFAULT_SPLIT_CONFIG);
+        assertThat(result.parameterSpace()).isEqualTo(NodeClassificationPipelineCompanion.DEFAULT_PARAM_CONFIG);
 
         assertThat(repository.exists(new User("me", false), PipelineName.parse("myPipeline"))).isTrue();
     }
@@ -110,7 +110,7 @@ class NodeClassificationFacadeTest {
             null,
             null
         );
-        var facade = new NodeClassificationFacade(null, null, null, applications);
+        var facade = new LocalNodeClassificationFacade(null, null, null, applications);
 
         assertThatIllegalStateException()
             .isThrownBy(() -> facade.createPipeline("myPipeline"))
@@ -119,7 +119,7 @@ class NodeClassificationFacadeTest {
 
     @Test
     void shouldNotCreatePipelineWithInvalidName() {
-        var facade = new NodeClassificationFacade(null, null, null, null);
+        var facade = new LocalNodeClassificationFacade(null, null, null, null);
 
         assertThatIllegalArgumentException()
             .isThrownBy(() -> facade.createPipeline("   blanks!"))

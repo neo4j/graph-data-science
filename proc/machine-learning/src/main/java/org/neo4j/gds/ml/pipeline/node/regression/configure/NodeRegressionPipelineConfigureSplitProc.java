@@ -25,6 +25,7 @@ import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.procedures.pipelines.NodePipelineInfoResult;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainingPipeline;
+import org.neo4j.gds.procedures.pipelines.NodePipelineInfoResultTransformer;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -50,6 +51,6 @@ public class NodeRegressionPipelineConfigureSplitProc extends BaseProc {
 
         pipeline.setSplitConfig(config);
 
-        return Stream.of(NodePipelineInfoResult.create(pipelineName, pipeline));
+        return Stream.of(NodePipelineInfoResultTransformer.create(pipelineName, pipeline));
     }
 }

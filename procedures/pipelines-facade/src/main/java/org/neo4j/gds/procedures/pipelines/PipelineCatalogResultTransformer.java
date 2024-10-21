@@ -21,28 +21,11 @@ package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 
-import java.time.ZonedDateTime;
-import java.util.Map;
+final class PipelineCatalogResultTransformer {
 
-public final class PipelineCatalogResult {
-    public final Map<String, Object> pipelineInfo;
-    public final String pipelineName;
-    public final String pipelineType;
-    public final ZonedDateTime creationTime;
+    private PipelineCatalogResultTransformer() {}
 
-    private PipelineCatalogResult(
-        Map<String, Object> pipelineInfo,
-        String pipelineName,
-        String pipelineType,
-        ZonedDateTime creationTime
-    ) {
-        this.pipelineInfo = pipelineInfo;
-        this.pipelineName = pipelineName;
-        this.pipelineType = pipelineType;
-        this.creationTime = creationTime;
-    }
-
-    public static PipelineCatalogResult create(TrainingPipeline<?> pipeline, String pipelineName) {
+    static PipelineCatalogResult create(TrainingPipeline<?> pipeline, String pipelineName) {
         return new PipelineCatalogResult(pipeline.toMap(), pipelineName, pipeline.type(), pipeline.creationTime());
     }
 }

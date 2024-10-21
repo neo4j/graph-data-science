@@ -40,6 +40,7 @@ dependencies {
     api project(':operations-facade-api')
     implementation project(':operations-procedure-facade')
     implementation project(':pipeline')
+    implementation project(':pipelines-facade-api')
     implementation project(':pipelines-procedure-facade')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')

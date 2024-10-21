@@ -59,9 +59,12 @@ dependencies {
     testImplementation project(':native-projection')
     testImplementation project(':proc-test')
     testImplementation project(':proc-common')
+
     testCompileOnly openGds.immutables.value.annotations
     testCompileOnly openGds.immutables.builder
     testCompileOnly openGds.jetbrains.annotations
+
+    testCompileOnly project(':pipelines-facade-api')
 
     testImplementation project(':opengds-extension')
 

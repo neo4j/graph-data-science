@@ -24,6 +24,7 @@ import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.procedures.pipelines.NodePipelineInfoResult;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainingPipeline;
+import org.neo4j.gds.procedures.pipelines.NodePipelineInfoResultTransformer;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -48,7 +49,7 @@ public class NodeRegressionPipelineAddStepProcs extends BaseProc {
 
         pipeline.addNodePropertyStep(createNodePropertyStep(taskName, procedureConfig));
 
-        return Stream.of(NodePipelineInfoResult.create(pipelineName, pipeline));
+        return Stream.of(NodePipelineInfoResultTransformer.create(pipelineName, pipeline));
     }
 
     @Procedure(name = "gds.alpha.pipeline.nodeRegression.selectFeatures", mode = READ)
@@ -74,6 +75,6 @@ public class NodeRegressionPipelineAddStepProcs extends BaseProc {
             throw new IllegalArgumentException("The value of `featureProperties` is required to be a list of strings.");
         }
 
-        return Stream.of(NodePipelineInfoResult.create(pipelineName, pipeline));
+        return Stream.of(NodePipelineInfoResultTransformer.create(pipelineName, pipeline));
     }
 }
