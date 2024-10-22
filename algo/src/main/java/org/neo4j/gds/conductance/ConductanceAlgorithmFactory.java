@@ -26,6 +26,8 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
+import static org.neo4j.gds.conductance.ConductanceConfigTransformer.toParameters;
+
 public class ConductanceAlgorithmFactory<CONFIG extends ConductanceBaseConfig> extends GraphAlgorithmFactory<Conductance, CONFIG> {
 
     public ConductanceAlgorithmFactory() {
@@ -55,7 +57,7 @@ public class ConductanceAlgorithmFactory<CONFIG extends ConductanceBaseConfig> e
         CONFIG config,
         ProgressTracker progressTracker
     ) {
-        return build(graph, config.toParameters(), progressTracker);
+        return build(graph, toParameters(config), progressTracker);
     }
     public Task progressTask(long nodeCount) {
         return Tasks.task(

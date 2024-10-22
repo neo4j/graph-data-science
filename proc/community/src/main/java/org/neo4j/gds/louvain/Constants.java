@@ -17,10 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.triangle;
+package org.neo4j.gds.louvain;
 
-final class LocalClusteringCoefficientCompanion {
-    static final String LOCAL_CLUSTERING_COEFFICIENT_DESCRIPTION = "The local clustering coefficient is a metric quantifying how connected the neighborhood of a node is.";
+final class Constants {
+    static final String LOUVAIN_DESCRIPTION = "The Louvain method for community detection is an algorithm for detecting communities in networks.";
 
-    private LocalClusteringCoefficientCompanion() {}
+    private Constants() {}
 }

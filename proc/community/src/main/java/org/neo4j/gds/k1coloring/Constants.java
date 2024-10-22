@@ -17,10 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.louvain;
+package org.neo4j.gds.k1coloring;
 
-final class LouvainConstants {
-    static final String LOUVAIN_DESCRIPTION = "The Louvain method for community detection is an algorithm for detecting communities in networks.";
+final class Constants {
+    static final String K1_COLORING_DESCRIPTION = "The K-1 Coloring algorithm assigns a color to every node in the graph.";
 
-    private LouvainConstants() {}
+    private Constants() {}
+
 }

@@ -30,6 +30,7 @@ import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.conductance.Conductance;
 import org.neo4j.gds.conductance.ConductanceBaseConfig;
+import org.neo4j.gds.conductance.ConductanceConfigTransformer;
 import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ConcurrencyConfig;
@@ -129,7 +130,7 @@ public class CommunityAlgorithms {
         );
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
-        var parameters = configuration.toParameters();
+        var parameters = ConductanceConfigTransformer.toParameters(configuration);
 
         var algorithm = new Conductance(
             graph,

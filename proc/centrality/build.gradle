@@ -40,14 +40,15 @@ dependencies {
         }
     }
 
-    testAnnotationProcessor project(':annotations')
+    integrationTestAnnotationProcessor project(':annotations')
 
-    testImplementation project(':proc-test')
-    testImplementation project(':proc-common')
-    testImplementation project(':graph-schema-api')
-    testCompileOnly openGds.immutables.value.annotations
-    testCompileOnly openGds.immutables.builder
-    testCompileOnly openGds.jetbrains.annotations
+    integrationTestImplementation project(':algo-common')
+    integrationTestImplementation project(':proc-test')
+    integrationTestImplementation project(':proc-common')
+    integrationTestImplementation project(':graph-schema-api')
+    integrationTestCompileOnly openGds.immutables.value.annotations
+    integrationTestCompileOnly openGds.immutables.builder
+    integrationTestCompileOnly openGds.jetbrains.annotations
 
-    testImplementation project(':opengds-extension')
+    integrationTestImplementation project(':opengds-extension')
 }

@@ -12,7 +12,6 @@ dependencies {
     annotationProcessor openGds.immutables.builder
     annotationProcessor openGds.immutables.value
 
-    api(project(':algo'))
     api project(':metrics-api')
     api(project(':model-catalog-api'))
 

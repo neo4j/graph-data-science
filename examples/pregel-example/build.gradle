@@ -9,6 +9,8 @@ dependencies {
     annotationProcessor project(':config-generator')
     annotationProcessor project(':pregel-proc-generator')
 
+    implementation project(':algo')
+
     implementation project(':algorithms-machinery')
     implementation project(':algorithms-procedure-facade')
     implementation project(':algo-common')

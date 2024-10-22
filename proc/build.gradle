@@ -47,6 +47,8 @@ dependencies {
     testCompileOnly openGds.immutables.value.annotations
     testCompileOnly openGds.jetbrains.annotations
 
+    testImplementation project(':algo')
+
     testImplementation project(':executor')
     testImplementation project(':legacy-cypher-projection')
     testImplementation project(':open-model-catalog')

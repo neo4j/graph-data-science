@@ -26,6 +26,9 @@ dependencies {
     implementation project(':ml-configs')
     implementation project(':ml-facade-api')
 
+    // TODO: remove this fella
+    implementation project(':algo')
+
     implementation project(':algorithms-machinery')
 //    implementation project(':algorithms-procedure-facade')
     implementation project(':algo-common')

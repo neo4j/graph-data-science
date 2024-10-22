@@ -7,6 +7,9 @@ group = 'org.neo4j.gds'
 dependencies {
     annotationProcessor project(':procedure-collector')
 
+    // TODO: remove this fella
+    implementation project(':algo')
+
     implementation project(':algorithms-machinery')
 //    implementation project(':algorithms-procedure-facade')
     implementation project(':algo-common')

@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
-import static org.neo4j.gds.triangle.LocalClusteringCoefficientCompanion.LOCAL_CLUSTERING_COEFFICIENT_DESCRIPTION;
+import static org.neo4j.gds.triangle.Constants.LOCAL_CLUSTERING_COEFFICIENT_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 

@@ -11,6 +11,8 @@ dependencies {
     annotationProcessor openGds.immutables.builder
     annotationProcessor openGds.immutables.value
 
+    // TODO: remove this fella
+    implementation project(':algo')
     implementation project(':algo-common')
     implementation project(':algorithms-machinery')
 //    implementation project(':algorithms-procedure-facade')
