@@ -1,6 +1,6 @@
 * xref:index.adoc[]
 * xref:introduction.adoc[]
-* xref:installation/installation.adoc[]
+* xref:installation/index.adoc[]
 ** xref:installation/supported-neo4j-versions.adoc[]
 ** xref:installation/neo4j-desktop.adoc[]
 ** xref:installation/neo4j-server.adoc[]
