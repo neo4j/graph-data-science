@@ -15,7 +15,7 @@ dependencies {
 
     implementation project(':annotations')
     implementation project(':algo-common')
-//    implementation project(':algorithms-procedure-facade')
+    implementation project(':algorithms-facade-api')
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':core-write')
@@ -32,10 +32,11 @@ dependencies {
 
     testCompileOnly openGds.immutables.builder
 
+    testImplementation project(':algorithms-machinery')
     testImplementation project(':memory-usage')
     testImplementation project(':licensing')
     testImplementation project(':logging')
-    testImplementation project(':opengds-procedure-facade')
+    testImplementation project(':procedures-facade-api')
     testImplementation project(':open-licensing')
     testImplementation project(':test-utils')
     testImplementation project(':proc-catalog')

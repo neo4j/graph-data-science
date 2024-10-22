@@ -17,12 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.traverse;
+package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.procedures.algorithms.pathfinding.PathFactoryFacade;
-import org.neo4j.gds.procedures.algorithms.pathfinding.TraverseStreamComputationResultConsumer;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;

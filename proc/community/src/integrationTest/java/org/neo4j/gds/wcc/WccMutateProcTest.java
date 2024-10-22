@@ -74,7 +74,6 @@ import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.GraphDataScienceProceduresBuilder;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.community.LocalCommunityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.community.WccMutateResult;
@@ -105,6 +104,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
 import static org.neo4j.gds.NodeLabel.ALL_NODES;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
@@ -633,9 +633,11 @@ class WccMutateProcTest extends BaseProcTest {
             )
         );
 
-        return new GraphDataScienceProceduresBuilder(Log.noOpLog())
-            .with(new AlgorithmsProcedureFacade(null, communityProcedureFacade, null, null, null, null, null))
-            .with(DeprecatedProceduresMetricService.DISABLED)
-            .build();
+        var graphDataScienceProceduresMock = mock(GraphDataScienceProcedures.class);
+        var algorithmsProcedureFacade = new AlgorithmsProcedureFacade(null, communityProcedureFacade, null, null, null, null, null);
+        when(graphDataScienceProceduresMock.algorithms())
+            .thenReturn(algorithmsProcedureFacade);
+        when(graphDataScienceProceduresMock.deprecatedProcedures()).thenReturn(DeprecatedProceduresMetricService.DISABLED);
+        return graphDataScienceProceduresMock;
     }
 }

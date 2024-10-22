@@ -46,6 +46,9 @@ dependencies {
     testImplementation openGds.mockito.junit.jupiter
     testImplementation openGds.assertj.core
 
+    testImplementation group: 'org.neo4j', name: 'neo4j-graphdb-api', version: ver.'neo4j'
+    testImplementation group: 'org.neo4j', name: 'neo4j-kernel-api', version: ver.'neo4j'
+
     testRuntimeOnly openGds.junit5.jupiter.engine
 
 

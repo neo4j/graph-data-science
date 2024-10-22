@@ -55,6 +55,7 @@ import org.neo4j.gds.procedures.pipelines.LocalPipelinesProcedureFacade;
 import org.neo4j.gds.procedures.pipelines.PipelineRepository;
 import org.neo4j.gds.procedures.pipelines.PipelinesProcedureFacade;
 import org.neo4j.gds.termination.TerminationMonitor;
+import org.neo4j.gds.transaction.TransactionCloseableResourceRegistry;
 import org.neo4j.gds.transaction.TransactionNodeLookup;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;

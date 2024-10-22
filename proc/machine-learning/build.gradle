@@ -76,7 +76,9 @@ dependencies {
     testCompileOnly openGds.immutables.builder
     testCompileOnly openGds.jetbrains.annotations
 
+    testImplementation project(':algorithms-procedure-facade')
     testImplementation project(':logging')
+    testImplementation project(':opengds-procedure-facade')
     testImplementation project(':open-model-catalog')
     testImplementation project(':proc-test')
     testImplementation project(':proc-common')
