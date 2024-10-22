@@ -11,11 +11,9 @@ dependencies {
     annotationProcessor openGds.immutables.value
 
     implementation project(':annotations')
-    implementation project(':algo')
     implementation project(':algorithms-facade-api')
     implementation project(':algorithms-machinery')
     implementation project(':algo-common')
-    implementation project(':algorithms-procedure-facade')
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':core-write')
