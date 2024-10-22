@@ -9,6 +9,8 @@ dependencies {
 
     implementation project(':algo')
     implementation project(':algo-common')
+    implementation project(':algorithms-facade-common')
+
     implementation project(':algorithms-machinery')
 
     // `CypherMapWrapper`
@@ -24,6 +26,8 @@ dependencies {
     implementation project(':node-embeddings-facade-api')
 
     implementation project(':path-finding-configs')
+    implementation project(':path-finding-facade-api')
+
 
     // `BaseConfig`
     implementation project(':config-api')
@@ -45,6 +49,8 @@ dependencies {
     implementation project(':proc-common')
 
     implementation project(':progress-tracking')
+
+    implementation project(':termination')
 
     integrationTestImplementation project(':proc-catalog')
     integrationTestImplementation project(':proc-test')

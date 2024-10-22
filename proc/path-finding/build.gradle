@@ -8,55 +8,30 @@ dependencies {
     annotationProcessor project(':annotations')
     annotationProcessor project(':procedure-collector')
 
-    annotationProcessor openGds.immutables.builder
-    annotationProcessor openGds.immutables.value
-    annotationProcessor group: 'org.neo4j', name: 'annotations', version: ver.'neo4j'
-
-    // TODO: remove this fella
-    implementation project(':algo')
-
-    implementation project(':algorithms-machinery')
-//    implementation project(':algorithms-procedure-facade')
-    implementation project(':algo-common')
-    implementation project(':annotations')
-    implementation project(':config-api')
-    implementation project(':core')
-    implementation project(':core-write')
-    implementation project(':executor')
-    implementation project(':graph-schema-api')
-    implementation project(':logging')
-    implementation project(':memory-usage')
-    implementation project(':neo4j-api')
-
-//    implementation project(':opengds-procedure-facade')
     implementation project(':procedures-facade-api')
-
     implementation project(':proc-common')
-    implementation project(':path-finding-algorithms')
-    implementation project(':progress-tracking')
-    implementation project(':string-formatting')
-    implementation project(':termination')
-    implementation project(':transaction')
 
-    compileOnly openGds.immutables.value.annotations
-    compileOnly openGds.jetbrains.annotations
-
-    neodeps().each {
-        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
-            transitive = false
-        }
-    }
+    compileOnly group: 'org.neo4j', name: 'neo4j-procedure-api', version: ver.neo4j
 
     testAnnotationProcessor project(':annotations')
 
+    testImplementation project(':annotations')
+
+    testImplementation project(':algo-common')
+    testImplementation project(':config-api')
+    testImplementation project(':core')
+    testImplementation project(':neo4j-api')
+    testImplementation project(':neo4j-kernel-adapter')
     testImplementation project(':proc-test')
+    testImplementation project(':proc-common')
+    testImplementation project(':progress-tracking')
     testImplementation project(':graph-schema-api')
-    testImplementation openGds.mockito.junit.jupiter
+    testImplementation project(':string-formatting')
+    testImplementation project(':test-utils')
+
     testCompileOnly openGds.immutables.value.annotations
     testCompileOnly openGds.immutables.builder
     testCompileOnly openGds.jetbrains.annotations
 
     testImplementation project(':opengds-extension')
-
-    integrationTestImplementation project(':legacy-cypher-projection')
 }
