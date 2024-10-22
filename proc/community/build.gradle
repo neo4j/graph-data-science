@@ -5,74 +5,40 @@ description = 'Neo4j Graph Data Science :: Procedures :: Community'
 group = 'org.neo4j.gds'
 
 dependencies {
-    annotationProcessor project(':annotations')
     annotationProcessor project(':procedure-collector')
 
-    annotationProcessor openGds.immutables.builder
-    annotationProcessor openGds.immutables.value
-
-    // TODO: remove this fella
-    implementation project(':algo')
-    implementation project(':algo-common')
-    implementation project(':algorithms-machinery')
-//    implementation project(':algorithms-procedure-facade')
-    implementation project(':applications-facade')
-    implementation project(':annotations')
-    implementation project(':config-api')
-    implementation project(':collections')
-    implementation project(':core')
-    implementation project(':core-write')
-    implementation project(':defaults-and-limits-configuration')
-    implementation project(':executor')
-    implementation project(':graph-catalog-procedure-facade')
-    implementation project(':graph-schema-api')
-    implementation project(':graph-store-catalog-applications')
-    implementation project(':logging')
-    implementation project(':memory-estimation')
-    implementation project(':model-catalog-applications')
-    implementation project(':model-catalog-procedure-facade')
-    implementation project(':neo4j-api')
-    implementation project(':node-embedding-algorithms')
-
-//    implementation project(':opengds-procedure-facade')
     implementation project(':procedures-facade-api')
-
-    implementation project(':operations-applications')
-    implementation project(':operations-procedure-facade')
-    implementation project(':pipelines-procedure-facade')
     implementation project(':proc-common')
-    implementation project(':progress-tracking')
-    implementation project(':string-formatting')
-    implementation project(':termination')
-    implementation project(':transaction')
 
-    compileOnly openGds.immutables.value.annotations
-    compileOnly openGds.jetbrains.annotations
+    compileOnly group: 'org.neo4j', name: 'neo4j-procedure-api', version: ver.neo4j
 
-    neodeps().each {
-        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
-            transitive = false
-        }
-    }
+    // Test dependencies
+    // TODO: trim this as much as possible
+    integrationTestImplementation project(':metrics-api')
+    integrationTestImplementation project(':logging')
+    integrationTestImplementation project(':memory-usage')
+    integrationTestImplementation project(':native-projection')
+    integrationTestImplementation project(':proc-test')
 
-    testAnnotationProcessor project(':annotations')
-    testAnnotationProcessor project(':config-generator')
+    integrationTestCompileOnly openGds.immutables.builder
 
-    testImplementation project(':metrics-api')
-    testImplementation project(':logging')
-    testImplementation project(':memory-usage')
-    testImplementation project(':native-projection')
-    testImplementation project(':proc-test')
-    testImplementation project(':proc-common')
+    integrationTestImplementation project(':opengds-extension')
 
-    testCompileOnly openGds.immutables.value.annotations
-    testCompileOnly openGds.immutables.builder
-    testCompileOnly openGds.jetbrains.annotations
-
-    testCompileOnly project(':pipelines-facade-api')
-
-    testImplementation project(':opengds-extension')
-
+    integrationTestImplementation project(':algorithms-machinery')
     integrationTestImplementation project(':algorithms-procedure-facade')
-    integrationTestImplementation project(':community-algorithms')
+    integrationTestImplementation project(':annotations')
+    integrationTestImplementation project(':core')
+    integrationTestImplementation project(':graph-projection-api')
+    integrationTestImplementation project(':graph-schema-api')
+    integrationTestImplementation project(':neo4j-api')
+    integrationTestImplementation project(':string-formatting')
+    integrationTestImplementation project(':termination')
+    integrationTestImplementation project(':applications-facade')
+    integrationTestImplementation project(':defaults-and-limits-configuration')
+    integrationTestImplementation project(':progress-tracking')
+    integrationTestImplementation project(':graph-store-catalog-applications')
+    integrationTestImplementation project(':operations-applications')
+    integrationTestImplementation project(':model-catalog-applications')
+    integrationTestImplementation project(':transaction')
+    integrationTestImplementation project(':config-api')
 }

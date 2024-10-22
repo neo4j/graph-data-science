@@ -17,6 +17,9 @@ dependencies {
     implementation project(':centrality-configs')
     implementation project(':centrality-facade-api')
 
+    implementation project(':community-configs')
+    implementation project(':community-facade-api')
+
     // `BaseConfig`
     implementation project(':config-api')
 

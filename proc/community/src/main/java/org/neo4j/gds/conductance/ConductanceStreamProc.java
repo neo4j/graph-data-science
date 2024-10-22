@@ -30,11 +30,13 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.conductance.Conductance.CONDUCTANCE_DESCRIPTION;
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class ConductanceStreamProc {
+
+    private static final String CONDUCTANCE_DESCRIPTION = "Evaluates a division of nodes into communities based on the proportion of relationships that cross community boundaries.";
+
     @Context
     public GraphDataScienceProcedures facade;
 
