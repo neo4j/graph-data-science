@@ -406,6 +406,9 @@ project(':pipelines-facade-api').projectDir = file('procedures/pipelines-facade-
 include('procedures-facade-api')
 project(':procedures-facade-api').projectDir = file('procedures/procedures-facade-api')
 
+include('algorithm-specifications')
+project(':algorithm-specifications').projectDir = file('algorithm-specifications')
+
 
 include('neo4j-kernel-adapter-5.23')
 project(':neo4j-kernel-adapter-5.23').projectDir = file('compatibility/5.23/neo4j-kernel-adapter')

@@ -1,0 +1,42 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Algorithm Specifications'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    annotationProcessor project(':procedure-collector')
+
+    implementation project(':algo')
+    implementation project(':algo-common')
+    implementation project(':algorithms-machinery')
+
+    // `CypherMapWrapper`
+    implementation project(':annotations')
+
+    implementation project(':centrality-configs')
+    implementation project(':centrality-facade-api')
+
+    // `BaseConfig`
+    implementation project(':config-api')
+
+    // `WritePropertyConfig` and others
+    implementation project(':core')
+
+    implementation project(':executor')
+
+    // `PageRank` and variants need this
+    implementation project(':pregel')
+
+    // `NullComputationResultConsumer`
+    implementation project(':proc-common')
+
+    implementation project(':progress-tracking')
+
+    integrationTestImplementation project(':proc-catalog')
+    integrationTestImplementation project(':proc-test')
+    integrationTestImplementation project(':test-utils')
+
+    integrationTestImplementation project(':opengds-extension')
+
+}

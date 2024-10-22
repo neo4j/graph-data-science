@@ -29,7 +29,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.harmonic.HarmonicCentralityCompanion.HARMONIC_CENTRALITY_DESCRIPTION;
+import static org.neo4j.gds.harmonic.Constants.HARMONIC_CENTRALITY_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class HarmonicCentralityStatsProc {

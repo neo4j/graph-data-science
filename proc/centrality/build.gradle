@@ -8,44 +8,21 @@ dependencies {
     annotationProcessor project(':annotations')
     annotationProcessor project(':procedure-collector')
 
-    annotationProcessor openGds.immutables.builder
-    annotationProcessor openGds.immutables.value
-
-    implementation project(':algo-common')
-    implementation project(':algorithms-machinery')
-//    implementation project(':algorithms-procedure-facade')
-    implementation project(':annotations')
-    implementation project(':config-api')
-    implementation project(':core')
-    implementation project(':core-write')
-    implementation project(':executor')
-    implementation project(':logging')
-    implementation project(':neo4j-api')
-
-//    implementation project(':opengds-procedure-facade')
     implementation project(':procedures-facade-api')
-
-    implementation project(':pregel')
     implementation project(':proc-common')
-    implementation project(':progress-tracking')
-    implementation project(':string-formatting')
-    implementation project(':termination')
-    implementation project(':transaction')
 
-    compileOnly openGds.immutables.value.annotations
-    compileOnly openGds.jetbrains.annotations
-    neodeps().each {
-        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
-            transitive = false
-        }
-    }
+    compileOnly group: 'org.neo4j', name: 'neo4j-procedure-api', version: ver.neo4j
 
     integrationTestAnnotationProcessor project(':annotations')
 
     integrationTestImplementation project(':algo-common')
+    integrationTestImplementation project(':core')
+    integrationTestImplementation project(':neo4j-kernel-adapter')
     integrationTestImplementation project(':proc-test')
     integrationTestImplementation project(':proc-common')
     integrationTestImplementation project(':graph-schema-api')
+    integrationTestImplementation project(':string-formatting')
+
     integrationTestCompileOnly openGds.immutables.value.annotations
     integrationTestCompileOnly openGds.immutables.builder
     integrationTestCompileOnly openGds.jetbrains.annotations
