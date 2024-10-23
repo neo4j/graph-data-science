@@ -33,7 +33,7 @@ import org.neo4j.gds.procedures.algorithms.embeddings.GraphSageTrainResult;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPH_SAGE_DESCRIPTION;
+import static org.neo4j.gds.embeddings.graphsage.Constants.GRAPH_SAGE_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.TRAIN;
 
 @GdsCallable(name = "gds.beta.graphSage.train", description = GRAPH_SAGE_DESCRIPTION, executionMode = TRAIN)

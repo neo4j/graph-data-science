@@ -25,36 +25,36 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
-import org.neo4j.gds.procedures.algorithms.embeddings.Node2VecStreamResult;
+import org.neo4j.gds.procedures.algorithms.embeddings.Node2VecWriteResult;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.STREAM;
+import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 
 @GdsCallable(
-    name = "gds.node2vec.stream",
-    aliases = "gds.beta.node2vec.stream",
-    description = Node2VecCompanion.NODE2VEC_DESCRIPTION,
-    executionMode = STREAM
+    name = "gds.node2vec.write",
+    aliases = "gds.beta.node2vec.write",
+    description = Constants.NODE2VEC_DESCRIPTION,
+    executionMode = WRITE_NODE_PROPERTY
 )
-public class Node2VecStreamSpec implements AlgorithmSpec<Node2Vec, Node2VecResult, Node2VecStreamConfig, Stream<Node2VecStreamResult>, Node2VecAlgorithmFactory<Node2VecStreamConfig>> {
+public class Node2VecWriteSpec implements AlgorithmSpec<Node2Vec, Node2VecResult, Node2VecWriteConfig, Stream<Node2VecWriteResult>, Node2VecAlgorithmFactory<Node2VecWriteConfig>> {
     @Override
     public String name() {
-        return "Node2VecStream";
+        return "Node2VecWrite";
     }
 
     @Override
-    public Node2VecAlgorithmFactory<Node2VecStreamConfig> algorithmFactory(ExecutionContext executionContext) {
+    public Node2VecAlgorithmFactory<Node2VecWriteConfig> algorithmFactory(ExecutionContext executionContext) {
         return new Node2VecAlgorithmFactory<>();
     }
 
     @Override
-    public NewConfigFunction<Node2VecStreamConfig> newConfigFunction() {
-        return (__, userInput) -> Node2VecStreamConfig.of(userInput);
+    public NewConfigFunction<Node2VecWriteConfig> newConfigFunction() {
+        return (__, userInput) -> Node2VecWriteConfig.of(userInput);
     }
 
     @Override
-    public ComputationResultConsumer<Node2Vec, Node2VecResult, Node2VecStreamConfig, Stream<Node2VecStreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Node2Vec, Node2VecResult, Node2VecWriteConfig, Stream<Node2VecWriteResult>> computationResultConsumer() {
         return new NullComputationResultConsumer<>();
     }
 }

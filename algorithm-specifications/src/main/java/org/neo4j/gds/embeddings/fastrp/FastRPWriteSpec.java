@@ -23,33 +23,34 @@ import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
-import org.neo4j.gds.procedures.algorithms.embeddings.FastRPStatsResult;
+import org.neo4j.gds.procedures.algorithms.embeddings.DefaultNodeEmbeddingsWriteResult;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.STATS;
+import static org.neo4j.gds.embeddings.fastrp.Constants.FASTRP_DESCRIPTION;
 
-@GdsCallable(name = "gds.fastRP.stats", description = "Random Projection produces node embeddings via the fastrp algorithm", executionMode = STATS)
-public class FastRPStatsSpec implements AlgorithmSpec<FastRP, FastRPResult, FastRPStatsConfig, Stream<FastRPStatsResult>, FastRPFactory<FastRPStatsConfig>> {
+@GdsCallable(name = "gds.fastRP.write", description = FASTRP_DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
+public class FastRPWriteSpec implements AlgorithmSpec<FastRP, FastRPResult, FastRPWriteConfig, Stream<DefaultNodeEmbeddingsWriteResult>, FastRPFactory<FastRPWriteConfig>> {
     @Override
     public String name() {
-        return "FastRPStats";
+        return "FastRPWrite";
     }
 
     @Override
-    public FastRPFactory<FastRPStatsConfig> algorithmFactory(ExecutionContext executionContext) {
+    public FastRPFactory<FastRPWriteConfig> algorithmFactory(ExecutionContext executionContext) {
         return new FastRPFactory<>();
     }
 
     @Override
-    public NewConfigFunction<FastRPStatsConfig> newConfigFunction() {
-        return (__, userInput) -> FastRPStatsConfig.of(userInput);
+    public NewConfigFunction<FastRPWriteConfig> newConfigFunction() {
+        return (__, userInput) -> FastRPWriteConfig.of(userInput);
     }
 
     @Override
-    public ComputationResultConsumer<FastRP, FastRPResult, FastRPStatsConfig, Stream<FastRPStatsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<FastRP, FastRPResult, FastRPWriteConfig, Stream<DefaultNodeEmbeddingsWriteResult>> computationResultConsumer() {
         return new NullComputationResultConsumer<>();
     }
 }

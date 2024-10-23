@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.node2vec;
+package org.neo4j.gds.embeddings.fastrp;
 
 import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
@@ -25,36 +25,31 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
-import org.neo4j.gds.procedures.algorithms.embeddings.Node2VecMutateResult;
+import org.neo4j.gds.procedures.algorithms.embeddings.FastRPStreamResult;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
+import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
-@GdsCallable(
-    name = "gds.node2vec.mutate",
-    aliases = "gds.beta.node2vec.mutate",
-    description = Node2VecCompanion.NODE2VEC_DESCRIPTION,
-    executionMode = MUTATE_NODE_PROPERTY
-)
-public class Node2VecMutateSpec implements AlgorithmSpec<Node2Vec, Node2VecResult, Node2VecMutateConfig, Stream<Node2VecMutateResult>, Node2VecAlgorithmFactory<Node2VecMutateConfig>> {
+@GdsCallable(name = "gds.fastRP.stream", description = Constants.FASTRP_DESCRIPTION, executionMode = STREAM)
+public class FastRPStreamSpec implements AlgorithmSpec<FastRP, FastRPResult, FastRPStreamConfig, Stream<FastRPStreamResult>, FastRPFactory<FastRPStreamConfig>> {
     @Override
     public String name() {
-        return "Node2VecMutate";
+        return "FastRPStream";
     }
 
     @Override
-    public Node2VecAlgorithmFactory<Node2VecMutateConfig> algorithmFactory(ExecutionContext executionContext) {
-        return new Node2VecAlgorithmFactory<>();
+    public FastRPFactory<FastRPStreamConfig> algorithmFactory(ExecutionContext executionContext) {
+        return new FastRPFactory<>();
     }
 
     @Override
-    public NewConfigFunction<Node2VecMutateConfig> newConfigFunction() {
-        return (__, userInput) -> Node2VecMutateConfig.of(userInput);
+    public NewConfigFunction<FastRPStreamConfig> newConfigFunction() {
+        return (__, userInput) -> FastRPStreamConfig.of(userInput);
     }
 
     @Override
-    public ComputationResultConsumer<Node2Vec, Node2VecResult, Node2VecMutateConfig, Stream<Node2VecMutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<FastRP, FastRPResult, FastRPStreamConfig, Stream<FastRPStreamResult>> computationResultConsumer() {
         return new NullComputationResultConsumer<>();
     }
 }

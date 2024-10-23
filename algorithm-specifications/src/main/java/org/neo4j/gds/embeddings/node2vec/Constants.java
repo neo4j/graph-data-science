@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
-final class Node2VecCompanion {
+final class Constants {
     static final String NODE2VEC_DESCRIPTION = "The Node2Vec algorithm computes embeddings for nodes based on random walks.";
 
-    private Node2VecCompanion() {}
+    private Constants() {}
 }

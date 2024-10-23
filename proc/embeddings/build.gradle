@@ -8,52 +8,31 @@ dependencies {
     annotationProcessor project(':annotations')
     annotationProcessor project(':procedure-collector')
 
-    annotationProcessor openGds.immutables.builder
-    annotationProcessor openGds.immutables.value
-
-    // TODO: remove this fella
-    implementation project(':algo')
-
-    implementation project(':algo-common')
-    implementation project(':algorithms-machinery')
-//    implementation project(':algorithms-procedure-facade')
-    implementation project(':annotations')
-    implementation project(':config-api')
-    implementation project(':core')
-    implementation project(':core-write')
-    implementation project(':executor')
-    implementation project(':logging')
-    implementation project(':ml-core')
-    implementation project(':graph-schema-api')
-    implementation project(':model-catalog-api')
-
-//    implementation project(':opengds-procedure-facade')
     implementation project(':procedures-facade-api')
-
-    implementation project(':progress-tracking')
     implementation project(':proc-common')
-    implementation project(':string-formatting')
-    implementation project(':transaction')
-    implementation project(':ml-algo')
 
-    compileOnly openGds.immutables.value.annotations
-    compileOnly openGds.jetbrains.annotations
-    neodeps().each {
-        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
-            transitive = false
-        }
-    }
+    compileOnly group: 'org.neo4j', name: 'neo4j-procedure-api', version: ver.neo4j
 
-    testAnnotationProcessor project(':annotations')
+    integrationTestAnnotationProcessor project(':annotations')
 
-    testCompileOnly openGds.immutables.builder
+    integrationTestCompileOnly openGds.immutables.builder
 
-    testImplementation project(':native-projection')
-    testImplementation project(':open-model-catalog')
-    testImplementation project(':proc-test')
-    testImplementation project(':licensing')
-    testImplementation project(':open-licensing')
-    testImplementation project(':test-utils')
+    integrationTestImplementation project(':algo')
+    integrationTestImplementation project(':annotations')
+    integrationTestImplementation project(':config-api')
+    integrationTestImplementation project(':core')
+    integrationTestImplementation project(':graph-projection-api')
+    integrationTestImplementation project(':graph-schema-api')
+    integrationTestImplementation project(':licensing')
+    integrationTestImplementation project(':ml-algo')
+    integrationTestImplementation project(':ml-core')
+    integrationTestImplementation project(':native-projection')
+    integrationTestImplementation project(':open-model-catalog')
+    integrationTestImplementation project(':open-licensing')
+    integrationTestImplementation project(':proc-test')
+    integrationTestImplementation project(':progress-tracking')
+    integrationTestImplementation project(':string-formatting')
+    integrationTestImplementation project(':test-utils')
 
-    testImplementation project(':opengds-extension')
+    integrationTestImplementation project(':opengds-extension')
 }

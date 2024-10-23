@@ -20,6 +20,11 @@ dependencies {
     implementation project(':community-configs')
     implementation project(':community-facade-api')
 
+    implementation project(':node-embeddings-configs')
+    implementation project(':node-embeddings-facade-api')
+
+    implementation project(':path-finding-configs')
+
     // `BaseConfig`
     implementation project(':config-api')
 
@@ -27,6 +32,11 @@ dependencies {
     implementation project(':core')
 
     implementation project(':executor')
+
+    // `TrainBaseConfig`
+    implementation project(':ml-algo')
+
+//    implementation project(':model-catalog-api')
 
     // `PageRank` and variants need this
     implementation project(':pregel')

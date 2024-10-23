@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.fastrp;
+package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
@@ -25,31 +25,36 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
-import org.neo4j.gds.procedures.algorithms.embeddings.FastRPStreamResult;
+import org.neo4j.gds.procedures.algorithms.embeddings.Node2VecStreamResult;
 
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
-@GdsCallable(name = "gds.fastRP.stream", description = FastRPCompanion.FASTRP_DESCRIPTION, executionMode = STREAM)
-public class FastRPStreamSpec implements AlgorithmSpec<FastRP, FastRPResult, FastRPStreamConfig, Stream<FastRPStreamResult>, FastRPFactory<FastRPStreamConfig>> {
+@GdsCallable(
+    name = "gds.node2vec.stream",
+    aliases = "gds.beta.node2vec.stream",
+    description = Constants.NODE2VEC_DESCRIPTION,
+    executionMode = STREAM
+)
+public class Node2VecStreamSpec implements AlgorithmSpec<Node2Vec, Node2VecResult, Node2VecStreamConfig, Stream<Node2VecStreamResult>, Node2VecAlgorithmFactory<Node2VecStreamConfig>> {
     @Override
     public String name() {
-        return "FastRPStream";
+        return "Node2VecStream";
     }
 
     @Override
-    public FastRPFactory<FastRPStreamConfig> algorithmFactory(ExecutionContext executionContext) {
-        return new FastRPFactory<>();
+    public Node2VecAlgorithmFactory<Node2VecStreamConfig> algorithmFactory(ExecutionContext executionContext) {
+        return new Node2VecAlgorithmFactory<>();
     }
 
     @Override
-    public NewConfigFunction<FastRPStreamConfig> newConfigFunction() {
-        return (__, userInput) -> FastRPStreamConfig.of(userInput);
+    public NewConfigFunction<Node2VecStreamConfig> newConfigFunction() {
+        return (__, userInput) -> Node2VecStreamConfig.of(userInput);
     }
 
     @Override
-    public ComputationResultConsumer<FastRP, FastRPResult, FastRPStreamConfig, Stream<FastRPStreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Node2Vec, Node2VecResult, Node2VecStreamConfig, Stream<Node2VecStreamResult>> computationResultConsumer() {
         return new NullComputationResultConsumer<>();
     }
 }

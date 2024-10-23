@@ -34,7 +34,7 @@ import org.neo4j.gds.procedures.algorithms.embeddings.DefaultNodeEmbeddingsWrite
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPH_SAGE_DESCRIPTION;
+import static org.neo4j.gds.embeddings.graphsage.Constants.GRAPH_SAGE_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 
 @GdsCallable(name = "gds.beta.graphSage.write", description = GRAPH_SAGE_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)

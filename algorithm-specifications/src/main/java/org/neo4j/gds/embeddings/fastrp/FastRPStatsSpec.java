@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.hashgnn;
+package org.neo4j.gds.embeddings.fastrp;
 
 import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
@@ -25,33 +25,31 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
-import org.neo4j.gds.procedures.algorithms.embeddings.DefaultNodeEmbeddingMutateResult;
+import org.neo4j.gds.procedures.algorithms.embeddings.FastRPStatsResult;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.embeddings.hashgnn.HashGNNProcCompanion.HASH_GNN_DESCRIPTION;
-import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
+import static org.neo4j.gds.executor.ExecutionMode.STATS;
 
-@GdsCallable(name = "gds.hashgnn.mutate", aliases = {"gds.beta.hashgnn.mutate"}, description = HASH_GNN_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class HashGNNMutateSpec implements AlgorithmSpec<HashGNN, HashGNNResult, HashGNNMutateConfig, Stream<DefaultNodeEmbeddingMutateResult>, HashGNNFactory<HashGNNMutateConfig>> {
-
+@GdsCallable(name = "gds.fastRP.stats", description = Constants.FASTRP_DESCRIPTION, executionMode = STATS)
+public class FastRPStatsSpec implements AlgorithmSpec<FastRP, FastRPResult, FastRPStatsConfig, Stream<FastRPStatsResult>, FastRPFactory<FastRPStatsConfig>> {
     @Override
     public String name() {
-        return "HashGNNMutate";
+        return "FastRPStats";
     }
 
     @Override
-    public HashGNNFactory<HashGNNMutateConfig> algorithmFactory(ExecutionContext executionContext) {
-        return new HashGNNFactory<>();
+    public FastRPFactory<FastRPStatsConfig> algorithmFactory(ExecutionContext executionContext) {
+        return new FastRPFactory<>();
     }
 
     @Override
-    public NewConfigFunction<HashGNNMutateConfig> newConfigFunction() {
-        return (___,config) -> HashGNNMutateConfig.of(config);
+    public NewConfigFunction<FastRPStatsConfig> newConfigFunction() {
+        return (__, userInput) -> FastRPStatsConfig.of(userInput);
     }
 
     @Override
-    public ComputationResultConsumer<HashGNN, HashGNNResult, HashGNNMutateConfig, Stream<DefaultNodeEmbeddingMutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<FastRP, FastRPResult, FastRPStatsConfig, Stream<FastRPStatsResult>> computationResultConsumer() {
         return new NullComputationResultConsumer<>();
     }
 }

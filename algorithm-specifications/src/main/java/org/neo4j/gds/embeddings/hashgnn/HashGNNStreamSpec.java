@@ -29,7 +29,7 @@ import org.neo4j.gds.procedures.algorithms.embeddings.HashGNNStreamResult;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.embeddings.hashgnn.HashGNNProcCompanion.HASH_GNN_DESCRIPTION;
+import static org.neo4j.gds.embeddings.hashgnn.Constants.HASH_GNN_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
 @GdsCallable(name = "gds.hashgnn.stream", aliases = {"gds.beta.hashgnn.stream"}, description = HASH_GNN_DESCRIPTION, executionMode = STREAM)

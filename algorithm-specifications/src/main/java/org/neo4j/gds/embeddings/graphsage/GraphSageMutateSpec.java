@@ -22,46 +22,46 @@ package org.neo4j.gds.embeddings.graphsage;
 import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMutateConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageStreamConfig;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
-import org.neo4j.gds.procedures.algorithms.embeddings.GraphSageStreamResult;
+import org.neo4j.gds.procedures.algorithms.embeddings.DefaultNodeEmbeddingMutateResult;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPH_SAGE_DESCRIPTION;
-import static org.neo4j.gds.executor.ExecutionMode.STREAM;
+import static org.neo4j.gds.embeddings.graphsage.Constants.GRAPH_SAGE_DESCRIPTION;
+import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 
-@GdsCallable(name = "gds.beta.graphSage.stream", description = GRAPH_SAGE_DESCRIPTION, executionMode = STREAM)
-public class GraphSageStreamSpec implements AlgorithmSpec<GraphSage, GraphSageResult, GraphSageStreamConfig, Stream<GraphSageStreamResult>, GraphSageAlgorithmFactory<GraphSageStreamConfig>> {
+@GdsCallable(name = "gds.beta.graphSage.mutate", description = GRAPH_SAGE_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
+public class GraphSageMutateSpec implements AlgorithmSpec<GraphSage, GraphSageResult, GraphSageMutateConfig, Stream<DefaultNodeEmbeddingMutateResult>, GraphSageAlgorithmFactory<GraphSageMutateConfig>> {
 
     @Override
     public String name() {
-        return "GraphSageStream";
+        return "GraphSageMutate";
     }
 
     @Override
-    public GraphSageAlgorithmFactory<GraphSageStreamConfig> algorithmFactory(ExecutionContext executionContext) {
+    public GraphSageAlgorithmFactory<GraphSageMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new GraphSageAlgorithmFactory<>(executionContext.modelCatalog());
     }
 
     @Override
-    public NewConfigFunction<GraphSageStreamConfig> newConfigFunction() {
-        return GraphSageStreamConfig::of;
+    public NewConfigFunction<GraphSageMutateConfig> newConfigFunction() {
+        return GraphSageMutateConfig::of;
     }
 
     @Override
-    public ComputationResultConsumer<GraphSage, GraphSageResult, GraphSageStreamConfig, Stream<GraphSageStreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<GraphSage, GraphSageResult, GraphSageMutateConfig, Stream<DefaultNodeEmbeddingMutateResult>> computationResultConsumer() {
         return new NullComputationResultConsumer<>();
     }
 
     @Override
-    public ValidationConfiguration<GraphSageStreamConfig> validationConfig(ExecutionContext executionContext) {
+    public ValidationConfiguration<GraphSageMutateConfig> validationConfig(ExecutionContext executionContext) {
         return new GraphSageConfigurationValidation<>(executionContext.modelCatalog());
     }
 }

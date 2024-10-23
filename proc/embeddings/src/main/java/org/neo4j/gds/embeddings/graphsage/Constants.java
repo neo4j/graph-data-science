@@ -17,10 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.hashgnn;
+package org.neo4j.gds.embeddings.graphsage;
 
-final class HashGNNProcCompanion {
-    static final String HASH_GNN_DESCRIPTION = "HashGNN creates node embeddings by hashing and message passing.";
+final class Constants {
 
-    private HashGNNProcCompanion() {}
+    static final String GRAPH_SAGE_DESCRIPTION = "The GraphSage algorithm inductively computes embeddings for nodes based on a their features and neighborhoods.";
+
+    private Constants() {}
+
 }

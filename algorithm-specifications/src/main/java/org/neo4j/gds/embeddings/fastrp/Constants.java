@@ -19,25 +19,10 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
-import org.neo4j.gds.api.properties.nodes.EmptyFloatArrayNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.executor.ComputationResult;
-
-final class FastRPCompanion {
+final class Constants {
 
     static final String FASTRP_DESCRIPTION = "Random Projection produces node embeddings via the fastrp algorithm";
 
-    private FastRPCompanion() {}
-
-    static <CONFIG extends FastRPBaseConfig> NodePropertyValues nodeProperties(ComputationResult<FastRP, FastRPResult, CONFIG> computationResult) {
-        return computationResult.result()
-            .map(result -> NodePropertyValuesAdapter.adapt(result.embeddings()))
-            .orElse(EmptyFloatArrayNodePropertyValues.INSTANCE);
-    }
-
-    static NodePropertyValues nodeProperties(FastRPResult result) {
-        return NodePropertyValuesAdapter.adapt(result.embeddings());
-    }
+    private Constants() {}
 
 }
