@@ -25,32 +25,32 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
-import org.neo4j.gds.procedures.algorithms.similarity.SimilarityStatsResult;
+import org.neo4j.gds.procedures.algorithms.similarity.SimilarityMutateResult;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.STATS;
-import static org.neo4j.gds.similarity.nodesim.NodeSimilarityProc.NODE_SIMILARITY_DESCRIPTION;
+import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
+import static org.neo4j.gds.similarity.nodesim.Constants.NODE_SIMILARITY_DESCRIPTION;
 
-@GdsCallable(name = "gds.nodeSimilarity.stats", description = NODE_SIMILARITY_DESCRIPTION, executionMode = STATS)
-public class NodeSimilarityStatsSpecification implements AlgorithmSpec<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStatsConfig, Stream<SimilarityStatsResult>, NodeSimilarityFactory<NodeSimilarityStatsConfig>> {
+@GdsCallable(name = "gds.nodeSimilarity.mutate", description = NODE_SIMILARITY_DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
+public class NodeSimilarityMutateSpecification implements AlgorithmSpec<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig, Stream<SimilarityMutateResult>, NodeSimilarityFactory<NodeSimilarityMutateConfig>> {
     @Override
     public String name() {
-        return "NodeSimilarityStats";
+        return "NodeSimilarityMutate";
     }
 
     @Override
-    public NodeSimilarityFactory<NodeSimilarityStatsConfig> algorithmFactory(ExecutionContext executionContext) {
+    public NodeSimilarityFactory<NodeSimilarityMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new NodeSimilarityFactory<>();
     }
 
     @Override
-    public NewConfigFunction<NodeSimilarityStatsConfig> newConfigFunction() {
-        return (__, userInput) -> NodeSimilarityStatsConfig.of(userInput);
+    public NewConfigFunction<NodeSimilarityMutateConfig> newConfigFunction() {
+        return (__, userInput) -> NodeSimilarityMutateConfig.of(userInput);
     }
 
     @Override
-    public ComputationResultConsumer<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStatsConfig, Stream<SimilarityStatsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<NodeSimilarity, NodeSimilarityResult, NodeSimilarityMutateConfig, Stream<SimilarityMutateResult>> computationResultConsumer() {
         return new NullComputationResultConsumer<>();
     }
 }

@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
-import static org.neo4j.gds.similarity.nodesim.NodeSimilarityProc.NODE_SIMILARITY_DESCRIPTION;
+import static org.neo4j.gds.similarity.nodesim.Constants.NODE_SIMILARITY_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class NodeSimilarityStatsProc {

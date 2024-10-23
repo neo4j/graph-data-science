@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.similarity.filteredknn;
 
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.similarity.KnnStatsResult;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
-import static org.neo4j.gds.similarity.filteredknn.FilteredKnnConstants.PROCEDURE_DESCRIPTION;
+import static org.neo4j.gds.similarity.filteredknn.Constants.FILTERED_KNN_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public final class FilteredKnnStatsProc {
@@ -40,7 +40,7 @@ public final class FilteredKnnStatsProc {
     public GraphDataScienceProcedures facade;
 
     @Procedure(name = "gds.knn.filtered.stats", mode = READ)
-    @Description(PROCEDURE_DESCRIPTION)
+    @Description(FILTERED_KNN_DESCRIPTION)
     public Stream<KnnStatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -58,7 +58,7 @@ public final class FilteredKnnStatsProc {
     }
 
     @Procedure(name = "gds.alpha.knn.filtered.stats", mode = READ, deprecatedBy = "gds.knn.filtered.stats")
-    @Description(PROCEDURE_DESCRIPTION)
+    @Description(FILTERED_KNN_DESCRIPTION)
     @Internal
     @Deprecated
     public Stream<KnnStatsResult> alphaStats(

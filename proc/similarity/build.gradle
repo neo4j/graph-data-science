@@ -11,44 +11,19 @@ dependencies {
     annotationProcessor openGds.immutables.builder
     annotationProcessor openGds.immutables.value
 
-    // TODO: remove this fella
-    implementation project(':algo')
-
-    implementation project(':algorithms-machinery')
-//    implementation project(':algorithms-procedure-facade')
-    implementation project(':algo-common')
-    implementation project(':annotations')
-    implementation project(':config-api')
-    implementation project(':core')
-    implementation project(':core-write')
-    implementation project(':executor')
-    implementation project(':graph-schema-api')
-    implementation project(':logging')
-    implementation project(':memory-usage')
-    implementation project(':neo4j-api')
-
-//    implementation project(':opengds-procedure-facade')
     implementation project(':procedures-facade-api')
-
     implementation project(':proc-common')
-    implementation project(':progress-tracking')
-    implementation project(':string-formatting')
-    implementation project(':termination')
-    implementation project(':transaction')
-
-    implementation openGds.hdrhistogram
 
     compileOnly openGds.immutables.value.annotations
     compileOnly openGds.jetbrains.annotations
 
-
-    neodeps().each {
-        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
-            transitive = false
-        }
-    }
+    compileOnly group: 'org.neo4j', name: 'neo4j-procedure-api', version: ver.neo4j
 
     testAnnotationProcessor project(':annotations')
+
+    testImplementation project(':core')
+    testImplementation project(':graph-projection-api')
+    testImplementation project(':string-formatting')
 
     testImplementation project(':proc-test')
     testImplementation project(':proc-common')
@@ -56,7 +31,6 @@ dependencies {
     testCompileOnly openGds.immutables.value.annotations
     testCompileOnly openGds.immutables.builder
     testCompileOnly openGds.jetbrains.annotations
-
 
     testImplementation project(':opengds-extension')
 }

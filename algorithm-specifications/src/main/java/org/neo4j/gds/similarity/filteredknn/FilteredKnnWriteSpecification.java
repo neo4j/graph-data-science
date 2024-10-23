@@ -34,7 +34,7 @@ import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
 @GdsCallable(
     name = "gds.knn.filtered.write",
     aliases = {"gds.alpha.knn.filtered.write"},
-    description = FilteredKnnConstants.PROCEDURE_DESCRIPTION,
+    description = Constants.FILTERED_KNN_DESCRIPTION,
     executionMode = WRITE_RELATIONSHIP
 )
 public class FilteredKnnWriteSpecification implements AlgorithmSpec<FilteredKnn, FilteredKnnResult, FilteredKnnWriteConfig, Stream<KnnWriteResult>, FilteredKnnFactory<FilteredKnnWriteConfig>> {

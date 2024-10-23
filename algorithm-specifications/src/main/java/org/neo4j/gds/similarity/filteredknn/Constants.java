@@ -17,14 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.similarity.filterednodesim;
+package org.neo4j.gds.similarity.filteredknn;
 
 final class Constants {
-    static final String FILTERED_NODE_SIMILARITY_DESCRIPTION =
-        "The Filtered Node Similarity algorithm compares a set of nodes based on the nodes they are connected to. " +
-            "Two nodes are considered similar if they share many of the same neighbors. " +
-            "The algorithm computes pair-wise similarities based on Jaccard or Overlap metrics. " +
-            "The filtered variant supports limiting which nodes to compare via source and target node filters.";
+    static final String FILTERED_KNN_DESCRIPTION =
+        "The k-nearest neighbor graph algorithm constructs relationships between nodes if the distance " +
+        "between two nodes is among the k nearest distances compared to other nodes. " +
+        "KNN computes distances based on the similarity of node properties. " +
+        "Filtered KNN extends this functionality, allowing filtering on source nodes and target nodes, respectively.";
 
     private Constants() {}
 }

@@ -23,35 +23,34 @@ import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
-import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.procedures.algorithms.similarity.SimilarityWriteResult;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.similarity.nodesim.NodeSimilarityProc.NODE_SIMILARITY_DESCRIPTION;
+import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
+import static org.neo4j.gds.similarity.nodesim.Constants.NODE_SIMILARITY_DESCRIPTION;
 
-@GdsCallable(name = "gds.nodeSimilarity.stream", description = NODE_SIMILARITY_DESCRIPTION, executionMode = ExecutionMode.STREAM)
-public class NodeSimilarityStreamSpecification implements AlgorithmSpec<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStreamConfig, Stream<SimilarityResult>, NodeSimilarityFactory<NodeSimilarityStreamConfig>> {
-
+@GdsCallable(name = "gds.nodeSimilarity.write", description = NODE_SIMILARITY_DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
+public class NodeSimilarityWriteSpecification implements AlgorithmSpec<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig, Stream<SimilarityWriteResult>, NodeSimilarityFactory<NodeSimilarityWriteConfig>> {
     @Override
     public String name() {
-        return "NodeSimilarityStream";
+        return "NodeSimilarityWrite";
     }
 
     @Override
-    public NodeSimilarityFactory<NodeSimilarityStreamConfig> algorithmFactory(ExecutionContext executionContext) {
+    public NodeSimilarityFactory<NodeSimilarityWriteConfig> algorithmFactory(ExecutionContext executionContext) {
         return new NodeSimilarityFactory<>();
     }
 
     @Override
-    public NewConfigFunction<NodeSimilarityStreamConfig> newConfigFunction() {
-        return (__, userInput) -> NodeSimilarityStreamConfig.of(userInput);
+    public NewConfigFunction<NodeSimilarityWriteConfig> newConfigFunction() {
+        return (__, userInput) -> NodeSimilarityWriteConfig.of(userInput);
     }
 
     @Override
-    public ComputationResultConsumer<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStreamConfig, Stream<SimilarityResult>> computationResultConsumer() {
+    public ComputationResultConsumer<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig, Stream<SimilarityWriteResult>> computationResultConsumer() {
         return new NullComputationResultConsumer<>();
     }
 }

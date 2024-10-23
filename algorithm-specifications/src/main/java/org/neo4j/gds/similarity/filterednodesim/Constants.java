@@ -17,23 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.similarity.nodesim;
+package org.neo4j.gds.similarity.filterednodesim;
 
-import org.neo4j.gds.procedures.algorithms.similarity.SimilarityMutateResult;
-import org.neo4j.gds.similarity.SimilarityResultBuilder;
+final class Constants {
+    static final String FILTERED_NODE_SIMILARITY_DESCRIPTION =
+        "The Filtered Node Similarity algorithm compares a set of nodes based on the nodes they are connected to. " +
+            "Two nodes are considered similar if they share many of the same neighbors. " +
+            "The algorithm computes pair-wise similarities based on Jaccard or Overlap metrics. " +
+            "The filtered variant supports limiting which nodes to compare via source and target node filters.";
 
-public class NodeSimilarityMutateResultBuilder extends SimilarityResultBuilder<SimilarityMutateResult> {
-    @Override
-    public SimilarityMutateResult build() {
-        return new SimilarityMutateResult(
-            preProcessingMillis,
-            computeMillis,
-            mutateMillis,
-            postProcessingMillis,
-            nodesCompared,
-            relationshipsWritten,
-            distribution(),
-            config.toMap()
-        );
-    }
+    private Constants() {}
 }

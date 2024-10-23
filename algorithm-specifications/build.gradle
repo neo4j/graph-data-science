@@ -28,6 +28,9 @@ dependencies {
     implementation project(':path-finding-configs')
     implementation project(':path-finding-facade-api')
 
+    implementation project(':similarity-configs')
+    implementation project(':similarity-facade-api')
+
 
     // `BaseConfig`
     implementation project(':config-api')

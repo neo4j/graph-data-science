@@ -25,32 +25,32 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
-import org.neo4j.gds.procedures.algorithms.similarity.SimilarityWriteResult;
+import org.neo4j.gds.procedures.algorithms.similarity.SimilarityStatsResult;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
-import static org.neo4j.gds.similarity.nodesim.NodeSimilarityProc.NODE_SIMILARITY_DESCRIPTION;
+import static org.neo4j.gds.executor.ExecutionMode.STATS;
+import static org.neo4j.gds.similarity.nodesim.Constants.NODE_SIMILARITY_DESCRIPTION;
 
-@GdsCallable(name = "gds.nodeSimilarity.write", description = NODE_SIMILARITY_DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
-public class NodeSimilarityWriteSpecification implements AlgorithmSpec<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig, Stream<SimilarityWriteResult>, NodeSimilarityFactory<NodeSimilarityWriteConfig>> {
+@GdsCallable(name = "gds.nodeSimilarity.stats", description = NODE_SIMILARITY_DESCRIPTION, executionMode = STATS)
+public class NodeSimilarityStatsSpecification implements AlgorithmSpec<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStatsConfig, Stream<SimilarityStatsResult>, NodeSimilarityFactory<NodeSimilarityStatsConfig>> {
     @Override
     public String name() {
-        return "NodeSimilarityWrite";
+        return "NodeSimilarityStats";
     }
 
     @Override
-    public NodeSimilarityFactory<NodeSimilarityWriteConfig> algorithmFactory(ExecutionContext executionContext) {
+    public NodeSimilarityFactory<NodeSimilarityStatsConfig> algorithmFactory(ExecutionContext executionContext) {
         return new NodeSimilarityFactory<>();
     }
 
     @Override
-    public NewConfigFunction<NodeSimilarityWriteConfig> newConfigFunction() {
-        return (__, userInput) -> NodeSimilarityWriteConfig.of(userInput);
+    public NewConfigFunction<NodeSimilarityStatsConfig> newConfigFunction() {
+        return (__, userInput) -> NodeSimilarityStatsConfig.of(userInput);
     }
 
     @Override
-    public ComputationResultConsumer<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig, Stream<SimilarityWriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStatsConfig, Stream<SimilarityStatsResult>> computationResultConsumer() {
         return new NullComputationResultConsumer<>();
     }
 }

@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
-import static org.neo4j.gds.similarity.filteredknn.FilteredKnnConstants.PROCEDURE_DESCRIPTION;
+import static org.neo4j.gds.similarity.filteredknn.Constants.FILTERED_KNN_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class FilteredKnnStreamProc {
@@ -40,7 +40,7 @@ public class FilteredKnnStreamProc {
     public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.knn.filtered.stream", mode = READ)
-    @Description(PROCEDURE_DESCRIPTION)
+    @Description(FILTERED_KNN_DESCRIPTION)
     public Stream<SimilarityStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -58,7 +58,7 @@ public class FilteredKnnStreamProc {
     }
 
     @Procedure(value = "gds.alpha.knn.filtered.stream", mode = READ, deprecatedBy = "gds.knn.filtered.stream")
-    @Description(PROCEDURE_DESCRIPTION)
+    @Description(FILTERED_KNN_DESCRIPTION)
     @Internal
     @Deprecated
     public Stream<SimilarityStreamResult> alphaStream(

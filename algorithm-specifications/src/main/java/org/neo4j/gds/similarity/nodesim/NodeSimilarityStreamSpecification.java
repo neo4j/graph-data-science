@@ -17,44 +17,41 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.similarity.filteredknn;
+package org.neo4j.gds.similarity.nodesim;
 
 import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
-import org.neo4j.gds.procedures.algorithms.similarity.KnnStatsResult;
+import org.neo4j.gds.similarity.SimilarityResult;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.STATS;
+import static org.neo4j.gds.similarity.nodesim.Constants.NODE_SIMILARITY_DESCRIPTION;
 
-@GdsCallable(
-    name = "gds.alpha.knn.filtered.stats",
-    aliases = {"gds.knn.filtered.stats"},
-    description = FilteredKnnConstants.PROCEDURE_DESCRIPTION,
-    executionMode = STATS
-)
-public class FilteredKnnStatsSpecification implements AlgorithmSpec<FilteredKnn, FilteredKnnResult, FilteredKnnStatsConfig, Stream<KnnStatsResult>, FilteredKnnFactory<FilteredKnnStatsConfig>> {
+@GdsCallable(name = "gds.nodeSimilarity.stream", description = NODE_SIMILARITY_DESCRIPTION, executionMode = ExecutionMode.STREAM)
+public class NodeSimilarityStreamSpecification implements AlgorithmSpec<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStreamConfig, Stream<SimilarityResult>, NodeSimilarityFactory<NodeSimilarityStreamConfig>> {
+
     @Override
     public String name() {
-        return "FilteredKnnStats";
+        return "NodeSimilarityStream";
     }
 
     @Override
-    public FilteredKnnFactory<FilteredKnnStatsConfig> algorithmFactory(ExecutionContext executionContext) {
-        return new FilteredKnnFactory<>();
+    public NodeSimilarityFactory<NodeSimilarityStreamConfig> algorithmFactory(ExecutionContext executionContext) {
+        return new NodeSimilarityFactory<>();
     }
 
     @Override
-    public NewConfigFunction<FilteredKnnStatsConfig> newConfigFunction() {
-        return (__, userInput) -> FilteredKnnStatsConfig.of(userInput);
+    public NewConfigFunction<NodeSimilarityStreamConfig> newConfigFunction() {
+        return (__, userInput) -> NodeSimilarityStreamConfig.of(userInput);
     }
 
     @Override
-    public ComputationResultConsumer<FilteredKnn, FilteredKnnResult, FilteredKnnStatsConfig, Stream<KnnStatsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<NodeSimilarity, NodeSimilarityResult, NodeSimilarityStreamConfig, Stream<SimilarityResult>> computationResultConsumer() {
         return new NullComputationResultConsumer<>();
     }
 }

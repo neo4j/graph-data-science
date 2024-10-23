@@ -23,38 +23,38 @@ import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
-import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.procedures.algorithms.similarity.KnnStatsResult;
 
 import java.util.stream.Stream;
 
-@GdsCallable(
-    name = "gds.knn.filtered.stream",
-    aliases = {"gds.alpha.knn.filtered.stream"},
-    description = FilteredKnnConstants.PROCEDURE_DESCRIPTION,
-    executionMode = ExecutionMode.STREAM
-)
-public class FilteredKnnStreamSpecification implements AlgorithmSpec<FilteredKnn, FilteredKnnResult, FilteredKnnStreamConfig, Stream<SimilarityResult>, FilteredKnnFactory<FilteredKnnStreamConfig>> {
+import static org.neo4j.gds.executor.ExecutionMode.STATS;
 
+@GdsCallable(
+    name = "gds.alpha.knn.filtered.stats",
+    aliases = {"gds.knn.filtered.stats"},
+    description = Constants.FILTERED_KNN_DESCRIPTION,
+    executionMode = STATS
+)
+public class FilteredKnnStatsSpecification implements AlgorithmSpec<FilteredKnn, FilteredKnnResult, FilteredKnnStatsConfig, Stream<KnnStatsResult>, FilteredKnnFactory<FilteredKnnStatsConfig>> {
     @Override
     public String name() {
-        return "FilteredKnnStream";
+        return "FilteredKnnStats";
     }
 
     @Override
-    public FilteredKnnFactory<FilteredKnnStreamConfig> algorithmFactory(ExecutionContext executionContext) {
+    public FilteredKnnFactory<FilteredKnnStatsConfig> algorithmFactory(ExecutionContext executionContext) {
         return new FilteredKnnFactory<>();
     }
 
     @Override
-    public NewConfigFunction<FilteredKnnStreamConfig> newConfigFunction() {
-        return (__, userInput) -> FilteredKnnStreamConfig.of(userInput);
+    public NewConfigFunction<FilteredKnnStatsConfig> newConfigFunction() {
+        return (__, userInput) -> FilteredKnnStatsConfig.of(userInput);
     }
 
     @Override
-    public ComputationResultConsumer<FilteredKnn, FilteredKnnResult, FilteredKnnStreamConfig, Stream<SimilarityResult>> computationResultConsumer() {
+    public ComputationResultConsumer<FilteredKnn, FilteredKnnResult, FilteredKnnStatsConfig, Stream<KnnStatsResult>> computationResultConsumer() {
         return new NullComputationResultConsumer<>();
     }
 }

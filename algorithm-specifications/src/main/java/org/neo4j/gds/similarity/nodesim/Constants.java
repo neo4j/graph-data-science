@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.similarity.nodesim;
 
-public final class NodeSimilarityProc {
+final class Constants {
 
     static final String NODE_SIMILARITY_DESCRIPTION =
         "The Node Similarity algorithm compares a set of nodes based on the nodes they are connected to. " +
         "Two nodes are considered similar if they share many of the same neighbors. " +
         "Node Similarity computes pair-wise similarities based on the Jaccard metric.";
 
-    private NodeSimilarityProc() {}
+    private Constants() {}
 }
