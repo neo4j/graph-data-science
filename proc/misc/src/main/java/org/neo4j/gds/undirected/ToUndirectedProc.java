@@ -43,7 +43,7 @@ public class ToUndirectedProc {
     @Deprecated(forRemoval = true)
     @Procedure(
         value = "gds.beta.graph.relationships.toUndirected", mode = READ,
-        deprecatedBy = ToUndirectedSpec.CALLABLE_NAME
+        deprecatedBy = Constants.CALLABLE_NAME
     )
     @Description(TO_UNDIRECTED_DESCRIPTION)
     public Stream<ToUndirectedMutateResult> mutateDeprecated(

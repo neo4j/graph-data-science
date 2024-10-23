@@ -22,6 +22,9 @@ dependencies {
     implementation project(':community-configs')
     implementation project(':community-facade-api')
 
+    implementation project(':miscellaneous-configs')
+    implementation project(':miscellaneous-facade-api')
+
     implementation project(':node-embeddings-configs')
     implementation project(':node-embeddings-facade-api')
 

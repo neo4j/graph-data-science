@@ -34,8 +34,7 @@ import org.neo4j.gds.scaleproperties.ScalePropertiesWriteConfig;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.scaling.ScalePropertiesProc.SCALE_PROPERTIES_DESCRIPTION;
-import static org.neo4j.gds.scaling.ScalePropertiesProc.validateLegacyScalers;
+import static org.neo4j.gds.scaling.Constants.SCALE_PROPERTIES_DESCRIPTION;
 
 @GdsCallable(name = "gds.scaleProperties.write", description = SCALE_PROPERTIES_DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
 public class ScalePropertiesWriteSpec implements AlgorithmSpec<ScaleProperties, ScalePropertiesResult, ScalePropertiesWriteConfig, Stream<ScalePropertiesWriteResult>, ScalePropertiesFactory<ScalePropertiesWriteConfig>> {
@@ -52,11 +51,7 @@ public class ScalePropertiesWriteSpec implements AlgorithmSpec<ScaleProperties, 
 
     @Override
     public NewConfigFunction<ScalePropertiesWriteConfig> newConfigFunction() {
-        return (__, userInput) -> {
-            var config = ScalePropertiesWriteConfig.of(userInput);
-            validateLegacyScalers(config, false);
-            return config;
-        };
+        return (__, userInput) -> ScalePropertiesWriteConfig.of(userInput);
     }
 
     @Override

@@ -21,7 +21,6 @@ package org.neo4j.gds.undirected;
 
 final class Constants {
     static final String TO_UNDIRECTED_DESCRIPTION = "The ToUndirected procedure converts directed relationships to undirected relationships";
-    static final String CALLABLE_NAME = "gds.graph.relationships.toUndirected";
 
     private Constants() {}
 }

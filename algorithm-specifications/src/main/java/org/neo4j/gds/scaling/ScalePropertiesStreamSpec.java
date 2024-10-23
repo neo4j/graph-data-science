@@ -34,8 +34,7 @@ import org.neo4j.gds.scaleproperties.ScalePropertiesStreamConfig;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.scaling.ScalePropertiesProc.SCALE_PROPERTIES_DESCRIPTION;
-import static org.neo4j.gds.scaling.ScalePropertiesProc.validateLegacyScalers;
+import static org.neo4j.gds.scaling.Constants.SCALE_PROPERTIES_DESCRIPTION;
 
 @GdsCallable(name = "gds.scaleProperties.stream", aliases = {"gds.alpha.scaleProperties.stream"}, description = SCALE_PROPERTIES_DESCRIPTION, executionMode = STREAM)
 public class ScalePropertiesStreamSpec implements AlgorithmSpec<ScaleProperties, ScalePropertiesResult, ScalePropertiesStreamConfig, Stream<ScalePropertiesStreamResult>, ScalePropertiesFactory<ScalePropertiesStreamConfig>> {
@@ -58,11 +57,7 @@ public class ScalePropertiesStreamSpec implements AlgorithmSpec<ScaleProperties,
 
     @Override
     public NewConfigFunction<ScalePropertiesStreamConfig> newConfigFunction() {
-        return (__, userInput) -> {
-            var config = ScalePropertiesStreamConfig.of(userInput);
-            validateLegacyScalers(config, allowL1L2Scalers);
-            return config;
-        };
+        return (__, userInput) -> ScalePropertiesStreamConfig.of(userInput);
     }
 
     @Override

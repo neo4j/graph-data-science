@@ -17,11 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.undirected;
+package org.neo4j.gds.walking;
 
 final class Constants {
-    static final String TO_UNDIRECTED_DESCRIPTION = "The ToUndirected procedure converts directed relationships to undirected relationships";
-    static final String CALLABLE_NAME = "gds.graph.relationships.toUndirected";
+    static final String COLLAPSE_PATH_DESCRIPTION = "Collapse Path algorithm is a traversal algorithm capable of creating relationships between the start and end nodes of a traversal";
 
     private Constants() {}
 }

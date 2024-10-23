@@ -7,49 +7,28 @@ group = 'org.neo4j.gds'
 dependencies {
     annotationProcessor project(':procedure-collector')
 
-    // TODO: remove this fella
-    implementation project(':algo')
-
-    implementation project(':algorithms-machinery')
-//    implementation project(':algorithms-procedure-facade')
-    implementation project(':algo-common')
-    implementation project(':annotations')
-    implementation project(':config-api')
-    implementation project(':core')
-    implementation project(':core-write')
-    implementation project(':core-utils')
-    implementation project(':csv')
-    implementation project(':executor')
-    implementation project(':logging')
-    implementation project(':memory-usage')
-
-//    implementation project(':opengds-procedure-facade')
+    implementation project(':neo4j-kernel-adapter')
     implementation project(':procedures-facade-api')
-
-    implementation project(':operations-facade-api')
     implementation project(':proc-common')
-    implementation project(':proc-embeddings')
     implementation project(':progress-tracking')
-    implementation project(':string-formatting')
-    implementation project(':transaction')
 
     compileOnly openGds.jetbrains.annotations
 
     compileOnly openGds.immutables.builder
     compileOnly openGds.immutables.value.annotations
 
-    neodeps().each {
-        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
-            transitive = false
-        }
-    }
+    compileOnly group: 'org.neo4j', name: 'neo4j-procedure-api', version: ver.neo4j
+    compileOnly group: 'org.neo4j', name: 'neo4j-kernel-api', version: ver.neo4j
 
     testCompileOnly openGds.immutables.builder
 
-
+    testImplementation project(':core')
+    testImplementation project(':core-utils')
+    testImplementation project(':executor')
     testImplementation project(':graph-schema-api')
     testImplementation project(':ml-core')
     testImplementation project(':proc-test')
+    testImplementation project(':string-formatting')
 
     testImplementation project(':opengds-extension')
 }

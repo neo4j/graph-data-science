@@ -25,41 +25,43 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
-import org.neo4j.gds.procedures.algorithms.miscellaneous.ScalePropertiesStatsResult;
+import org.neo4j.gds.procedures.algorithms.miscellaneous.ScalePropertiesMutateResult;
 import org.neo4j.gds.scaleproperties.ScaleProperties;
 import org.neo4j.gds.scaleproperties.ScalePropertiesFactory;
+import org.neo4j.gds.scaleproperties.ScalePropertiesMutateConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
-import org.neo4j.gds.scaleproperties.ScalePropertiesStatsConfig;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.scaling.ScalePropertiesProc.SCALE_PROPERTIES_DESCRIPTION;
-import static org.neo4j.gds.scaling.ScalePropertiesProc.validateLegacyScalers;
+import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
+import static org.neo4j.gds.scaling.Constants.SCALE_PROPERTIES_DESCRIPTION;
 
-@GdsCallable(name = "gds.scaleProperties.stats", description = SCALE_PROPERTIES_DESCRIPTION, executionMode = STREAM)
-public class ScalePropertiesStatsSpec implements AlgorithmSpec<ScaleProperties, ScalePropertiesResult, ScalePropertiesStatsConfig, Stream<ScalePropertiesStatsResult>, ScalePropertiesFactory<ScalePropertiesStatsConfig>> {
-    @Override
-    public String name() {
-        return "ScalePropertiesStats";
+@GdsCallable(name = "gds.scaleProperties.mutate", aliases = {"gds.alpha.scaleProperties.mutate"}, description = SCALE_PROPERTIES_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
+public class ScalePropertiesMutateSpec implements AlgorithmSpec<ScaleProperties, ScalePropertiesResult, ScalePropertiesMutateConfig, Stream<ScalePropertiesMutateResult>, ScalePropertiesFactory<ScalePropertiesMutateConfig>> {
+
+    private boolean allowL1L2Scalers = false;
+
+    void setAllowL1L2Scalers(boolean allowL1L2Scalers) {
+        this.allowL1L2Scalers = allowL1L2Scalers;
     }
 
     @Override
-    public ScalePropertiesFactory<ScalePropertiesStatsConfig> algorithmFactory(ExecutionContext executionContext) {
+    public String name() {
+        return "ScalePropertiesMutate";
+    }
+
+    @Override
+    public ScalePropertiesFactory<ScalePropertiesMutateConfig> algorithmFactory(ExecutionContext executionContext) {
         return new ScalePropertiesFactory<>();
     }
 
     @Override
-    public NewConfigFunction<ScalePropertiesStatsConfig> newConfigFunction() {
-        return (__, userInput) -> {
-            var config = ScalePropertiesStatsConfig.of(userInput);
-            validateLegacyScalers(config, false);
-            return config;
-        };
+    public NewConfigFunction<ScalePropertiesMutateConfig> newConfigFunction() {
+        return (__, userInput) -> ScalePropertiesMutateConfig.of(userInput);
     }
 
     @Override
-    public ComputationResultConsumer<ScaleProperties, ScalePropertiesResult, ScalePropertiesStatsConfig, Stream<ScalePropertiesStatsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<ScaleProperties, ScalePropertiesResult, ScalePropertiesMutateConfig, Stream<ScalePropertiesMutateResult>> computationResultConsumer() {
         return new NullComputationResultConsumer<>();
     }
 }

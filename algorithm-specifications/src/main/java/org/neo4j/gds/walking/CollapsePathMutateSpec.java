@@ -31,12 +31,12 @@ import org.neo4j.gds.procedures.algorithms.miscellaneous.CollapsePathMutateResul
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
-import static org.neo4j.gds.walking.CollapsePathMutateProc.DESCRIPTION;
+import static org.neo4j.gds.walking.Constants.COLLAPSE_PATH_DESCRIPTION;
 
 @GdsCallable(
     name = "gds.collapsePath.mutate",
     aliases = "gds.beta.collapsePath.mutate",
-    description = DESCRIPTION,
+    description = COLLAPSE_PATH_DESCRIPTION,
     executionMode = MUTATE_RELATIONSHIP
 )
 public class CollapsePathMutateSpec implements AlgorithmSpec<CollapsePath, SingleTypeRelationships, CollapsePathConfig,Stream<CollapsePathMutateResult>, CollapsePathAlgorithmFactory> {

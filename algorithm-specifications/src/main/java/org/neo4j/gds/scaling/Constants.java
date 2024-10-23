@@ -17,11 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.undirected;
+package org.neo4j.gds.scaling;
 
 final class Constants {
-    static final String TO_UNDIRECTED_DESCRIPTION = "The ToUndirected procedure converts directed relationships to undirected relationships";
-    static final String CALLABLE_NAME = "gds.graph.relationships.toUndirected";
-
+    
     private Constants() {}
+
+    static final String SCALE_PROPERTIES_DESCRIPTION = "Scale node properties";
+
 }
