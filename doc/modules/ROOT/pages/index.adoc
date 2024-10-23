@@ -24,7 +24,7 @@ endif::[]
 The manual covers the following areas:
 
 * xref:introduction.adoc[Introduction] -- An introduction to the Neo4j Graph Data Science library.
-* xref:installation/installation.adoc[Installation] -- Instructions for how to install and use the Neo4j Graph Data Science library.
+* xref:installation/index.adoc[Installation] -- Instructions for how to install and use the Neo4j Graph Data Science library.
 * xref:common-usage/index.adoc[Common usage] -- General usage patterns and recommendations for getting the most out of the Neo4j Graph Data Science library.
 * xref:management-ops/index.adoc[Graph management] -- A detailed guide to the graph catalog and utility procedures included in the Neo4j Graph Data Science library.
 * xref:algorithms/index.adoc[Graph algorithms] -- A detailed guide to each algorithm in their respective categories, including use-cases and examples.

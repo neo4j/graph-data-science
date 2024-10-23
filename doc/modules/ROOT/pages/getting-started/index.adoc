@@ -3,7 +3,7 @@
 :description: This chapter gives users the basic information to start using the Neo4j Graph Data Science library.
 :keywords: GDS, getting started
 
-After xref:installation/installation.adoc[installation], you can start using the GDS library in two main ways:
+After xref:installation/index.adoc[installation], you can start using the GDS library in two main ways:
 
 * To run one or more algorithms on an in-memory graph, inspect the result of the computation, and potentially write it back to Neo4j.
 * To configure a machine learning pipeline and use it to train a model, then use the model for prediction.
