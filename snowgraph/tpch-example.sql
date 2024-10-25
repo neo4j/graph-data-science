@@ -32,7 +32,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 --
 -- * Neo4j Graph Data Science application is installed correctly and called "Neo4j_GDS"
 -- * Neo4j Graph Data Science application has been granted the CREATE COMPUTE POOL privilege
--- * The current role can create databases, schemas and warehouses
+-- * Neo4j Graph Data Science application has been granted the CREATE WAREHOUSE privilege
+-- * The current role can create databases and schemas
 -- * The current role has granted the application role Neo4j_GDS.app_user
 -- * The current role has access to the Snowflake sample data set (database "snowflake_sample_data")
 --
@@ -120,13 +121,15 @@ SELECT count(*) FROM relationships;
 -- We start by switching to the Neo4j_GDS application.
 USE DATABASE Neo4j_GDS;
 
--- Next, we create a warehouse that the GDS application will use to execute queries.
-CREATE WAREHOUSE IF NOT EXISTS Neo4j_GDS_warehouse
-  WAREHOUSE_SIZE='MEDIUM'
-  AUTO_SUSPEND = 180
-  AUTO_RESUME = true
-  INITIALLY_SUSPENDED = false;
-GRANT USAGE ON WAREHOUSE Neo4j_GDS_warehouse TO APPLICATION Neo4j_GDS;
+-- Next, we want to consider the warehouse that the GDS application will use to execute queries.
+-- For this example a MEDIUM size warehouse, so we configure the application's warehouse accordingly
+ALTER WAREHOUSE Neo4j_GDS_app_warehouse
+  WAREHOUSE_SIZE='MEDIUM';
+-- A highly performant warehouse will speed up graph projections but does not affect algorithm computation.
+-- It can therefore be a good idea to alter the warehouse size and make other configuration changes to increase performance when projecting larger amounts of data.
+-- The warehouse can then be brought back to a less expensive configuration after the projection is done.
+-- ALTER WAREHOUSE Neo4j_GDS_app_warehouse
+--   WAREHOUSE_SIZE='X-SMALL';
 
 -- The following grants are necessary for the GDS application to read and write data.
 -- The next queries are required to read from our prepared views.
@@ -158,7 +161,7 @@ GRANT CREATE TABLE ON SCHEMA        tpch_example.gds TO APPLICATION Neo4j_GDS;
 -- Creating the session will start a container service on the selected compute pool.
 -- In addition, all the service functions that allow us to interact with the GDS service are created.
 -- A session can be used by many users, but only one session can be active at a time.
-CALL gds.create_session('CPU_X64_L', 'Neo4j_GDS_warehouse');
+CALL gds.create_session('CPU_X64_L');
 
 -- Once the session is started, we can project our node and relationship views into a GDS in-memory graph.
 -- The graph will be identified by the name "parts_in_orders".
