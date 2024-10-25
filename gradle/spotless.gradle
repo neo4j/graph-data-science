@@ -13,7 +13,7 @@ allprojects { proj ->
                 java {
                     removeUnusedImports()
 
-                    eclipse().configFile(rootProject.file("public/etc/codestyle.xml"))
+                    eclipse().configFile(rootProject.file("$publicDir/etc/codestyle.xml"))
                 }
             }
 
