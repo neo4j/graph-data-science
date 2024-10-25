@@ -31,7 +31,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -- For this example to run, we make the following assumptions:
 --
 -- * Neo4j Graph Data Science application is installed correctly and called "Neo4j_GDS"
--- * The current role can create databases and schemas, compute pools and warehouses
+-- * Neo4j Graph Data Science application has been granted the CREATE COMPUTE POOL privilege
+-- * The current role can create databases, schemas and warehouses
 -- * The current role has granted the application role Neo4j_GDS.app_user
 -- * The current role has access to the Snowflake sample data set (database "snowflake_sample_data")
 --
@@ -119,17 +120,6 @@ SELECT count(*) FROM relationships;
 -- We start by switching to the Neo4j_GDS application.
 USE DATABASE Neo4j_GDS;
 
--- Next, we create a compute pool to run the GDS service.
--- For our example, we use a large compute pool as the node similarity algorithm is computationally intensive.
--- Note, that the compute pool must use exactly one compute node as GDS scales vertically.
-CREATE COMPUTE POOL IF NOT EXISTS Neo4j_GDS_pool
-  FOR APPLICATION Neo4j_GDS
-  MIN_NODES = 1
-  MAX_NODES = 1
-  INSTANCE_FAMILY = CPU_X64_L
-  AUTO_RESUME = true;
-GRANT USAGE ON COMPUTE POOL Neo4j_GDS_pool TO APPLICATION Neo4j_GDS;
-
 -- Next, we create a warehouse that the GDS application will use to execute queries.
 CREATE WAREHOUSE IF NOT EXISTS Neo4j_GDS_warehouse
   WAREHOUSE_SIZE='MEDIUM'
@@ -149,15 +139,26 @@ GRANT CREATE TABLE ON SCHEMA        tpch_example.gds TO APPLICATION Neo4j_GDS;
 -- We have now prepared the environment to properly run the GDS application and can start with our analysis.
 -- Note, that data preparation and application setup only need to be done once.
 
+-- Our final preparation is to select a compute pool to run the GDS service.
+-- Available compute pools to select from are:
+-- * CPU_X64_XS
+-- * CPU_X64_M
+-- * CPU_X64_L
+-- * HIGHMEM_X64_S
+-- * HIGHMEM_X64_M
+--
+-- For our example, we use a large compute pool as the node similarity algorithm is computationally intensive, but without extra memory because the graph is quite small.
+-- We select: CPU_X64_L
+
 -- ==================================================
 -- 3. Graph analysis
 -- ==================================================
 
 -- The first step is to create a new GDS session.
--- Creating the session will start a container service on the given compute pool.
+-- Creating the session will start a container service on the selected compute pool.
 -- In addition, all the service functions that allow us to interact with the GDS service are created.
 -- A session can be used by many users, but only one session can be active at a time.
-CALL gds.create_session('Neo4j_GDS_pool', 'Neo4j_GDS_warehouse');
+CALL gds.create_session('CPU_X64_L', 'Neo4j_GDS_warehouse');
 
 -- Once the session is started, we can project our node and relationship views into a GDS in-memory graph.
 -- The graph will be identified by the name "parts_in_orders".
