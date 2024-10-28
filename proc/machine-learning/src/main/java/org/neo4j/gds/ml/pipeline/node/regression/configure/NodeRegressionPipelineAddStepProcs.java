@@ -19,24 +19,21 @@
  */
 package org.neo4j.gds.ml.pipeline.node.regression.configure;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.pipelines.NodePipelineInfoResult;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
-import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainingPipeline;
-import org.neo4j.gds.procedures.pipelines.NodePipelineInfoResultTransformer;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.ml.pipeline.NodePropertyStepFactory.createNodePropertyStep;
 import static org.neo4j.procedure.Mode.READ;
 
-public class NodeRegressionPipelineAddStepProcs extends BaseProc {
+public class NodeRegressionPipelineAddStepProcs {
+    @Context
+    public GraphDataScienceProcedures facade;
 
     @Procedure(name = "gds.alpha.pipeline.nodeRegression.addNodeProperty", mode = READ)
     @Description("Add a node property step to an existing node regression training pipeline.")
@@ -45,11 +42,7 @@ public class NodeRegressionPipelineAddStepProcs extends BaseProc {
         @Name("procedureName") String taskName,
         @Name("procedureConfiguration") Map<String, Object> procedureConfig
     ) {
-        var pipeline = PipelineCatalog.getTyped(username(), pipelineName, NodeRegressionTrainingPipeline.class);
-
-        pipeline.addNodePropertyStep(createNodePropertyStep(taskName, procedureConfig));
-
-        return Stream.of(NodePipelineInfoResultTransformer.create(pipelineName, pipeline));
+        return facade.pipelines().nodeRegression().addNodeProperty(pipelineName, taskName, procedureConfig);
     }
 
     @Procedure(name = "gds.alpha.pipeline.nodeRegression.selectFeatures", mode = READ)
@@ -58,23 +51,6 @@ public class NodeRegressionPipelineAddStepProcs extends BaseProc {
         @Name("pipelineName") String pipelineName,
         @Name("featureProperties") Object featureProperties
     ) {
-        var pipeline = PipelineCatalog.getTyped(username(), pipelineName, NodeRegressionTrainingPipeline.class);
-
-        if (featureProperties instanceof String) {
-            pipeline.addFeatureStep(NodeFeatureStep.of((String) featureProperties));
-        } else if (featureProperties instanceof List) {
-            var propertiesList = (List<?>) featureProperties;
-            for (Object o : propertiesList) {
-                if (!(o instanceof String)) {
-                    throw new IllegalArgumentException("The list `featureProperties` is required to contain only strings.");
-                }
-
-                pipeline.addFeatureStep(NodeFeatureStep.of((String) o));
-            }
-        } else {
-            throw new IllegalArgumentException("The value of `featureProperties` is required to be a list of strings.");
-        }
-
-        return Stream.of(NodePipelineInfoResultTransformer.create(pipelineName, pipeline));
+        return facade.pipelines().nodeRegression().selectFeatures(pipelineName, featureProperties);
     }
 }

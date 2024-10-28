@@ -25,15 +25,14 @@ import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.pipeline.PipelineCompanion;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
 public final class LocalNodeClassificationFacade implements NodeClassificationFacade {
+    private final NodeFeatureStepsParser nodeFeatureStepsParser = new NodeFeatureStepsParser();
+
     private final Configurer configurer;
     private final NodeClassificationPredictConfigPreProcessor nodeClassificationPredictConfigPreProcessor;
 
@@ -192,9 +191,9 @@ public final class LocalNodeClassificationFacade implements NodeClassificationFa
     public Stream<NodePipelineInfoResult> selectFeatures(String pipelineNameAsString, Object nodeFeatureStepsAsObject) {
         var pipelineName = PipelineName.parse(pipelineNameAsString);
 
-        var nodeFeatureSteps = parseNodeProperties(nodeFeatureStepsAsObject);
+        var nodeFeatureSteps = nodeFeatureStepsParser.parse(nodeFeatureStepsAsObject, "nodeProperties");
 
-        var pipeline = pipelineApplications.selectFeatures(pipelineName, nodeFeatureSteps);
+        var pipeline = pipelineApplications.selectFeaturesForClassification(pipelineName, nodeFeatureSteps);
 
         var result = NodePipelineInfoResultTransformer.create(pipelineName, pipeline);
 
@@ -290,27 +289,5 @@ public final class LocalNodeClassificationFacade implements NodeClassificationFa
         );
 
         return Stream.of(result);
-    }
-
-    private List<NodeFeatureStep> parseNodeProperties(Object nodeProperties) {
-        if (nodeProperties instanceof String) return List.of(NodeFeatureStep.of((String) nodeProperties));
-
-        if (nodeProperties instanceof List) {
-            //noinspection rawtypes
-            var propertiesList = (List) nodeProperties;
-
-            var nodeFeatureSteps = new ArrayList<NodeFeatureStep>(propertiesList.size());
-
-            for (Object o : propertiesList) {
-                if (o instanceof String)
-                    nodeFeatureSteps.add(NodeFeatureStep.of((String) o));
-                else
-                    throw new IllegalArgumentException("The list `nodeProperties` is required to contain only strings.");
-            }
-
-            return nodeFeatureSteps;
-        }
-
-        throw new IllegalArgumentException("The value of `nodeProperties` is required to be a list of strings.");
     }
 }

@@ -22,7 +22,6 @@ package org.neo4j.gds.procedures.pipelines;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyTrainingPipeline;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 
 import java.util.stream.Collectors;
 
@@ -30,7 +29,7 @@ public final class NodePipelineInfoResultTransformer {
 
     private NodePipelineInfoResultTransformer() {}
 
-    static NodePipelineInfoResult create(PipelineName pipelineName, NodeClassificationTrainingPipeline pipeline) {
+    static NodePipelineInfoResult create(PipelineName pipelineName, NodePropertyTrainingPipeline pipeline) {
         return create(pipelineName.value, pipeline);
     }
 

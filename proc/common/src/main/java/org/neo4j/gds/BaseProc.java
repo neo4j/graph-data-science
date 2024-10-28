@@ -81,17 +81,6 @@ public abstract class BaseProc {
         return username.username();
     }
 
-    protected boolean isGdsAdmin() {
-        if (transaction == null) {
-            // No transaction available (likely we're in a test), no-one is admin here
-            return false;
-        }
-        // this should be the same as the predefined role from enterprise-security
-        // com.neo4j.server.security.enterprise.auth.plugin.api.PredefinedRoles.ADMIN
-        String PREDEFINED_ADMIN_ROLE = "admin";
-        return transaction.securityContext().roles().contains(PREDEFINED_ADMIN_ROLE);
-    }
-
     public ExecutionContext executionContext() {
         return databaseService == null
             ? ExecutionContext.EMPTY

@@ -23,9 +23,17 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public interface NodeRegressionFacade {
+    Stream<NodePipelineInfoResult> addNodeProperty(
+        String pipelineName,
+        String taskName,
+        Map<String, Object> procedureConfig
+    );
+
     Stream<PredictMutateResult> mutate(String graphName, Map<String, Object> configuration);
 
     Stream<NodeRegressionStreamResult> stream(String graphName, Map<String, Object> configuration);
+
+    Stream<NodePipelineInfoResult> selectFeatures(String pipelineName, Object featureProperties);
 
     Stream<NodeRegressionPipelineTrainResult> train(String graphName, Map<String, Object> configuration);
 }

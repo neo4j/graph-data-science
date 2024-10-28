@@ -64,6 +64,7 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassific
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrain;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionPipelineTrainConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainResult;
+import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainingPipeline;
 import org.neo4j.gds.model.ModelConfig;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -291,6 +292,20 @@ class PipelineApplications {
         Map<String, Object> procedureConfig
     ) {
         var pipeline = pipelineRepository.getNodeClassificationTrainingPipeline(user, pipelineName);
+
+        var nodePropertyStep = NodePropertyStepFactory.createNodePropertyStep(taskName, procedureConfig);
+
+        pipeline.addNodePropertyStep(nodePropertyStep);
+
+        return pipeline;
+    }
+
+    NodeRegressionTrainingPipeline addNodePropertyToNodeRegressionPipeline(
+        PipelineName pipelineName,
+        String taskName,
+        Map<String, Object> procedureConfig
+    ) {
+        var pipeline = pipelineRepository.getNodeRegressionTrainingPipeline(user, pipelineName);
 
         var nodePropertyStep = NodePropertyStepFactory.createNodePropertyStep(taskName, procedureConfig);
 
@@ -640,17 +655,35 @@ class PipelineApplications {
         );
     }
 
-    NodeClassificationTrainingPipeline selectFeatures(
+    NodeClassificationTrainingPipeline selectFeaturesForClassification(
         PipelineName pipelineName,
         Iterable<NodeFeatureStep> nodeFeatureSteps
     ) {
         var pipeline = pipelineRepository.getNodeClassificationTrainingPipeline(user, pipelineName);
 
+        addFeatureSteps(nodeFeatureSteps, pipeline);
+
+        return pipeline;
+    }
+
+    NodeRegressionTrainingPipeline selectFeaturesForRegression(
+        PipelineName pipelineName,
+        Iterable<NodeFeatureStep> nodeFeatureSteps
+    ) {
+        var pipeline = pipelineRepository.getNodeRegressionTrainingPipeline(user, pipelineName);
+
+        addFeatureSteps(nodeFeatureSteps, pipeline);
+
+        return pipeline;
+    }
+
+    private void addFeatureSteps(
+        Iterable<NodeFeatureStep> nodeFeatureSteps,
+        TrainingPipeline<NodeFeatureStep> pipeline
+    ) {
         for (NodeFeatureStep nodeFeatureStep : nodeFeatureSteps) {
             pipeline.addFeatureStep(nodeFeatureStep);
         }
-
-        return pipeline;
     }
 
     private LinkPredictionComputation constructLinkPredictionComputation(

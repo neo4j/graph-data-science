@@ -28,8 +28,9 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 final class LocalNodeRegressionFacade implements NodeRegressionFacade {
-    private final NodeRegressionPredictConfigPreProcessor nodeRegressionPredictConfigPreProcessor;
+    private final NodeFeatureStepsParser nodeFeatureStepsParser = new NodeFeatureStepsParser();
 
+    private final NodeRegressionPredictConfigPreProcessor nodeRegressionPredictConfigPreProcessor;
     private final PipelineApplications pipelineApplications;
 
     private LocalNodeRegressionFacade(
@@ -48,6 +49,25 @@ final class LocalNodeRegressionFacade implements NodeRegressionFacade {
         var nodeRegressionPredictConfigPreProcessor = new NodeRegressionPredictConfigPreProcessor(modelCatalog, user);
 
         return new LocalNodeRegressionFacade(nodeRegressionPredictConfigPreProcessor, pipelineApplications);
+    }
+
+    @Override
+    public Stream<NodePipelineInfoResult> addNodeProperty(
+        String pipelineNameAsString,
+        String taskName,
+        Map<String, Object> procedureConfig
+    ) {
+        var pipelineName = PipelineName.parse(pipelineNameAsString);
+
+        var pipeline = pipelineApplications.addNodePropertyToNodeRegressionPipeline(
+            pipelineName,
+            taskName,
+            procedureConfig
+        );
+
+        var result = NodePipelineInfoResultTransformer.create(pipelineName, pipeline);
+
+        return Stream.of(result);
     }
 
     @Override
@@ -76,7 +96,26 @@ final class LocalNodeRegressionFacade implements NodeRegressionFacade {
     }
 
     @Override
-    public Stream<NodeRegressionPipelineTrainResult> train(String graphNameAsString, Map<String, Object> configuration) {
+    public Stream<NodePipelineInfoResult> selectFeatures(String pipelineNameAsString, Object nodeFeatureStepsAsObject) {
+        var pipelineName = PipelineName.parse(pipelineNameAsString);
+
+        var nodeFeatureSteps = nodeFeatureStepsParser.parse(nodeFeatureStepsAsObject, "featureProperties");
+
+        var pipeline = pipelineApplications.selectFeaturesForRegression(
+            pipelineName,
+            nodeFeatureSteps
+        );
+
+        var result = NodePipelineInfoResultTransformer.create(pipelineName, pipeline);
+
+        return Stream.of(result);
+    }
+
+    @Override
+    public Stream<NodeRegressionPipelineTrainResult> train(
+        String graphNameAsString,
+        Map<String, Object> configuration
+    ) {
         PipelineCompanion.preparePipelineConfig(graphNameAsString, configuration);
 
         var graphName = GraphName.parse(graphNameAsString);
