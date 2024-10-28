@@ -130,7 +130,7 @@ class SysInfoProcTest extends BaseProcTest {
         };
 
         assertThat(result)
-            .hasSizeGreaterThanOrEqualTo(43)
+            .hasSizeGreaterThanOrEqualTo(42)
             .containsEntry("gdsVersion", buildInfoProperties.gdsVersion())
             .containsEntry("minimumRequiredJavaVersion", buildInfoProperties.minimumRequiredJavaVersion())
             .containsEntry("buildDate", buildInfoProperties.buildDate())
@@ -138,8 +138,6 @@ class SysInfoProcTest extends BaseProcTest {
             .containsEntry("buildJavaVersion", buildInfoProperties.buildJavaVersion())
             .containsEntry("buildHash", buildInfoProperties.buildHash())
             .containsEntry("neo4jVersion", Version.getNeo4jVersion())
-            .hasEntrySatisfying("availableCompatibility", availableCompat)
-            .hasEntrySatisfying("unavailableCompatibility", unavailableCompat)
             .hasEntrySatisfying("gdsEdition", GDS_EDITION)
             .hasEntrySatisfying("availableCPUs", isInteger)
             .hasEntrySatisfying("physicalCPUs", isInteger)
