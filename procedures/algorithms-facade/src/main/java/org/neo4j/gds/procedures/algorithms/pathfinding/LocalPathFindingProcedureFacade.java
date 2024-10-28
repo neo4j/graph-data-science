@@ -51,6 +51,7 @@ import org.neo4j.gds.paths.traverse.BfsStreamConfig;
 import org.neo4j.gds.paths.traverse.DfsStreamConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensWriteConfig;
+import org.neo4j.gds.pcst.PCSTStreamConfig;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.BFSMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.BellmanFordMutateStub;
@@ -571,6 +572,20 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
         return streamModeBusinessFacade.longestPath(
             GraphName.parse(graphName),
             configurationParser.parseConfiguration(configuration, DagLongestPathStreamConfig::of),
+            resultBuilder
+        );
+    }
+
+    @Override
+    public Stream<SteinerTreeStreamResult> prizeCollectingSteinerTreeStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+
+        var resultBuilder  = new PrizeCollectingSteinerTreeResultBuilderForStreamMode();
+        return streamModeBusinessFacade.pcst(
+            GraphName.parse(graphName),
+            configurationParser.parseConfiguration(configuration, PCSTStreamConfig::of),
             resultBuilder
         );
     }

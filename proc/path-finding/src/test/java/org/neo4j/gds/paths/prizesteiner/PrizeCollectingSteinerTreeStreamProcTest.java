@@ -17,11 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.steiner;
+package org.neo4j.gds.paths.prizesteiner;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
@@ -35,46 +34,38 @@ import java.util.concurrent.atomic.LongAdder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class SteinerTreeStreamProcTest extends BaseProcTest {
+class PrizeCollectingSteinerTreeStreamProcTest  extends BaseProcTest {
 
     @Neo4jGraph
-    static final String DB_CYPHER = "CREATE(a:Node) " +
-                                    "CREATE(b:Node) " +
-                                    "CREATE(c:Node) " +
-                                    "CREATE (a)-[:TYPE {cost:1.0}]->(b) ";
+    static final String DB_CYPHER =
+        "CREATE(a:Node{p:100.0}) " +
+        "CREATE(b:Node{p:100.0}) " +
+        "CREATE(c:Node{p:169.0}) " +
+        "CREATE (a)-[:TYPE {cost:60.0}]->(b) ";
 
     @Inject
     private IdFunction idFunction;
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(SteinerTreeStreamProc.class, GraphProjectProc.class);
+
+        registerProcedures(PrizeCollectingSteinerTreeStreamProc.class, GraphProjectProc.class);
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .graphProject()
             .withAnyLabel()
-            .withRelationshipType("TYPE", Orientation.NATURAL)
+            .withNodeProperty("p")
+            .withRelationshipType("TYPE", Orientation.UNDIRECTED)
             .withRelationshipProperty("cost")
             .yields();
         runQuery(createQuery);
     }
 
-
-    private long getSourceNode() {
-        return idFunction.of("a");
-    }
-
-    private long getTerminal() {
-        return idFunction.of("b");
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"gds.steinerTree", "gds.beta.steinerTree"})
-    void testYields(String procedure) {
+    @Test
+    void testYields() {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
-            .algo(procedure)
+            .algo("gds.prizeSteinerTree")
             .streamMode()
-            .addParameter("sourceNode", getSourceNode())
-            .addParameter("targetNodes", List.of(getTerminal()))
+             .addParameter("prizeProperty","p")
             .addParameter("relationshipWeightProperty", "cost")
             .yields(
                 "nodeId", "parentId", "weight"
@@ -89,17 +80,15 @@ class SteinerTreeStreamProcTest extends BaseProcTest {
                 assertThat(next.get("nodeId")).isInstanceOf(Long.class);
                 assertThat(next.get("parentId")).isInstanceOf(Long.class);
                 assertThat(next.get("weight")).isInstanceOf(Double.class);
-                assertThat((long) next.get("nodeId")).isIn(List.of(getSourceNode(),getTerminal()));
-                assertThat((long) next.get("parentId")).isEqualTo(getSourceNode());
-                assertThat((double) next.get("weight")).isIn(0.0, 1.0);
+                assertThat((long) next.get("nodeId")).isIn(List.of(idFunction.of("a"), idFunction.of("b")));
+                assertThat((long) next.get("parentId")).isIn(List.of(idFunction.of("a"), idFunction.of("b")));
+                assertThat((double) next.get("weight")).isEqualTo(60.0);
                 nodeCount.increment();
             }
 
             return true;
 
         });
-        assertThat(nodeCount.intValue()).isEqualTo(2);
+        assertThat(nodeCount.intValue()).isEqualTo(1);
     }
-    
-
 }

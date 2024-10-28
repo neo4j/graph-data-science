@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.pcst;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.Collection;
@@ -35,11 +35,9 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Configuration
-public interface PCSTBaseConfig extends AlgoBaseConfig {
+public interface PCSTBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig {
 
-    default @Nullable String prizeProperty() {
-        return null;
-    }
+     String prizeProperty();
 
         @Configuration.GraphStoreValidationCheck
         default void validateTargetRelIsUndirected(

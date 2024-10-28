@@ -282,7 +282,7 @@ public class PathFindingAlgorithms {
         var prizeProperty = graph.nodeProperties(configuration.prizeProperty());
         var algorithm = new PCSTFast(
             graph,
-            (v) -> Math.max(prizeProperty.longValue(v), 0),
+            (v) -> Math.max(prizeProperty.doubleValue(v), 0),
             progressTracker
         );
 
