@@ -64,4 +64,14 @@ final class LocalNodeRegressionFacade implements NodeRegressionFacade {
 
         return Stream.of(result);
     }
+
+    @Override
+    public Stream<NodeRegressionStreamResult> stream(String graphNameAsString, Map<String, Object> configuration) {
+        PipelineCompanion.preparePipelineConfig(graphNameAsString, configuration);
+        nodeRegressionPredictConfigPreProcessor.enhanceInputWithPipelineParameters(configuration);
+
+        var graphName = GraphName.parse(graphNameAsString);
+
+        return pipelineApplications.nodeRegressionPredictStream(graphName, configuration);
+    }
 }

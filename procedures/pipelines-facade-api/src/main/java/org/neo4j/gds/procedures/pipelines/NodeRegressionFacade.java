@@ -24,4 +24,6 @@ import java.util.stream.Stream;
 
 public interface NodeRegressionFacade {
     Stream<PredictMutateResult> mutate(String graphName, Map<String, Object> configuration);
+
+    Stream<NodeRegressionStreamResult> stream(String graphName, Map<String, Object> configuration);
 }

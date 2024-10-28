@@ -17,14 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.node.regression.predict;
+package org.neo4j.gds.procedures.pipelines;
 
-public final class StreamResult {
-
+public final class NodeRegressionStreamResult {
     public long nodeId;
     public double predictedValue;
 
-    StreamResult(long nodeId, double predictedValue) {
+    public NodeRegressionStreamResult(long nodeId, double predictedValue) {
         this.nodeId = nodeId;
         this.predictedValue = predictedValue;
     }

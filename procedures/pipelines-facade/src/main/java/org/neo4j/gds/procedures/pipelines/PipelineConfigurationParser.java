@@ -113,16 +113,23 @@ class PipelineConfigurationParser {
         return parseConfiguration(NodeClassificationPredictPipelineWriteConfig::of, configuration);
     }
 
-    NodeRegressionPredictPipelineMutateConfig parseNodeRegressionPredictPipelineMutateConfig(Map<String, Object> configuration) {
-        return parseConfiguration(NodeRegressionPredictPipelineMutateConfig::of, configuration);
-    }
-
     NodePropertyPredictionSplitConfig parseNodePropertyPredictionSplitConfig(Map<String, Object> rawConfiguration) {
         return parseConfigurationWithValidation(
             rawConfiguration,
             NodePropertyPredictionSplitConfig::of,
             NodePropertyPredictionSplitConfig::configKeys
         );
+    }
+
+    /**
+     * Someone didn't want to shell out for a stream subtype...
+     */
+    NodeRegressionPredictPipelineBaseConfig parseNodeRegressionPredictBaseConfig(Map<String, Object> configuration) {
+        return parseConfiguration(NodeRegressionPredictPipelineBaseConfig::of, configuration);
+    }
+
+    NodeRegressionPredictPipelineMutateConfig parseNodeRegressionPredictPipelineMutateConfig(Map<String, Object> configuration) {
+        return parseConfiguration(NodeRegressionPredictPipelineMutateConfig::of, configuration);
     }
 
     TunableTrainerConfig parseRandomForestClassifierTrainerConfig(Map<String, Object> configuration) {

@@ -32,6 +32,7 @@ import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.pipelines.NodeRegressionPredictConfigPreProcessor;
 import org.neo4j.gds.procedures.pipelines.NodeRegressionPredictPipelineBaseConfig;
 import org.neo4j.gds.procedures.pipelines.NodeRegressionPredictPipelineExecutor;
+import org.neo4j.gds.procedures.pipelines.NodeRegressionStreamResult;
 
 import java.util.Map;
 import java.util.stream.LongStream;
@@ -50,7 +51,7 @@ public class NodeRegressionPipelineStreamSpec
         NodeRegressionPredictPipelineExecutor,
         HugeDoubleArray,
         NodeRegressionPredictPipelineBaseConfig,
-        Stream<StreamResult>,
+        Stream<NodeRegressionStreamResult>,
         NodeRegressionPredictPipelineAlgorithmFactory<NodeRegressionPredictPipelineBaseConfig>> {
     @Override
     public String name() {
@@ -75,7 +76,7 @@ public class NodeRegressionPipelineStreamSpec
     }
 
     @Override
-    public ComputationResultConsumer<NodeRegressionPredictPipelineExecutor, HugeDoubleArray, NodeRegressionPredictPipelineBaseConfig, Stream<StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<NodeRegressionPredictPipelineExecutor, HugeDoubleArray, NodeRegressionPredictPipelineBaseConfig, Stream<NodeRegressionStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) ->
             runWithExceptionLogging(
                 "Result streaming failed",
@@ -87,7 +88,7 @@ public class NodeRegressionPipelineStreamSpec
                         return LongStream
                             .range(IdMap.START_NODE_ID, graph.nodeCount())
                             .filter(nodePropertyValues::hasValue)
-                            .mapToObj(nodeId -> new StreamResult(
+                            .mapToObj(nodeId -> new NodeRegressionStreamResult(
                                 graph.toOriginalNodeId(nodeId),
                                 nodePropertyValues.doubleValue(nodeId)
                             ));

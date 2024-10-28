@@ -486,6 +486,27 @@ class PipelineApplications {
         );
     }
 
+    Stream<NodeRegressionStreamResult> nodeRegressionPredictStream(
+        GraphName graphName,
+        Map<String, Object> rawConfiguration
+    ) {
+        var configuration = pipelineConfigurationParser.parseNodeRegressionPredictBaseConfig(rawConfiguration);
+        var label = new StandardLabel("NodeRegressionPredictPipelineStream");
+        var computation = constructNodeRegressionPredictComputation(configuration, label);
+        var resultBuilder = new NodeRegressionPredictPipelineStreamResultBuilder();
+
+        return algorithmProcessingTemplate.processAlgorithmForStream(
+            Optional.empty(),
+            graphName,
+            configuration,
+            Optional.empty(),
+            label,
+            this::nodeRegressionPredictMemoryEstimation,
+            computation,
+            resultBuilder
+        );
+    }
+
     WriteResult nodeClassificationPredictWrite(GraphName graphName, Map<String, Object> rawConfiguration) {
         var configuration = pipelineConfigurationParser.parseNodeClassificationPredictWriteConfig(rawConfiguration);
         var label = new StandardLabel("NodeClassificationPredictPipelineWrite");
@@ -711,7 +732,7 @@ class PipelineApplications {
     }
 
     private Computation<HugeDoubleArray> constructNodeRegressionPredictComputation(
-        NodeRegressionPredictPipelineMutateConfig configuration,
+        NodeRegressionPredictPipelineBaseConfig configuration,
         Label label
     ) {
         return NodeRegressionPredictComputation.create(

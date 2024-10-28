@@ -19,10 +19,8 @@
  */
 package org.neo4j.gds.ml.pipeline.node.regression.predict;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.pipelines.NodeRegressionStreamResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -32,29 +30,18 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
 import static org.neo4j.gds.ml.pipeline.node.regression.NodeRegressionProcCompanion.PREDICT_DESCRIPTION;
 
-public class NodeRegressionPipelineStreamProc extends BaseProc {
-
+public class NodeRegressionPipelineStreamProc {
     @Context
-    public ModelCatalog internalModelCatalog;
+    public GraphDataScienceProcedures facade;
 
     @Procedure(name = "gds.alpha.pipeline.nodeRegression.predict.stream", mode = Mode.READ)
     @Description(PREDICT_DESCRIPTION)
-    public Stream<StreamResult> stream(
+    public Stream<NodeRegressionStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration") Map<String, Object> configuration
     ) {
-        preparePipelineConfig(graphName, configuration);
-        return new ProcedureExecutor<>(
-            new NodeRegressionPipelineStreamSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
-    }
-
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withModelCatalog(internalModelCatalog);
+        return facade.pipelines().nodeRegression().stream(graphName, configuration);
     }
 }
