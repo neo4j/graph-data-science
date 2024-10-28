@@ -34,6 +34,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.LinkFeatureStepConfi
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
+import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionPipelineTrainConfig;
 
 import java.util.Collection;
 import java.util.Map;
@@ -130,6 +131,10 @@ class PipelineConfigurationParser {
 
     NodeRegressionPredictPipelineMutateConfig parseNodeRegressionPredictPipelineMutateConfig(Map<String, Object> configuration) {
         return parseConfiguration(NodeRegressionPredictPipelineMutateConfig::of, configuration);
+    }
+
+    NodeRegressionPipelineTrainConfig parseNodeRegressionTrainConfig(Map<String, Object> configuration) {
+        return parseConfiguration(NodeRegressionPipelineTrainConfig::of, configuration);
     }
 
     TunableTrainerConfig parseRandomForestClassifierTrainerConfig(Map<String, Object> configuration) {

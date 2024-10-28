@@ -62,6 +62,8 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationT
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationModelResult;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrain;
+import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionPipelineTrainConfig;
+import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainResult;
 import org.neo4j.gds.model.ModelConfig;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -412,6 +414,34 @@ class PipelineApplications {
         );
     }
 
+    Stream<LinkPredictionTrainResult> linkPredictionTrain(GraphName graphName, Map<String, Object> rawConfiguration) {
+        var configuration = pipelineConfigurationParser.parseLinkPredictionTrainConfig(rawConfiguration);
+
+        ensureTrainingModelCanBeStored(configuration);
+
+        var label = new StandardLabel("LinkPredictionPipelineTrain");
+        var dimensionTransformer = new DimensionTransformerForLinkPredictionTrain(
+            pipelineRepository,
+            configuration
+        );
+        var computation = constructLinkPredictionTrainComputation(configuration, label);
+        var sideEffects = new LinkPredictionTrainSideEffects(modelPersister, configuration);
+        var resultRenderer = new LinkPredictionTrainResultRenderer();
+
+        return algorithmProcessingTemplate.processAlgorithmAndAnySideEffects(
+            Optional.empty(),
+            graphName,
+            configuration,
+            Optional.empty(),
+            label,
+            dimensionTransformer,
+            () -> linkPredictionTrainMemoryEstimation(configuration),
+            computation,
+            Optional.of(sideEffects),
+            resultRenderer
+        );
+    }
+
     MemoryEstimateResult linkPredictionTrainEstimate(
         Object graphNameOrConfiguration,
         LinkPredictionTrainConfig configuration
@@ -486,27 +516,6 @@ class PipelineApplications {
         );
     }
 
-    Stream<NodeRegressionStreamResult> nodeRegressionPredictStream(
-        GraphName graphName,
-        Map<String, Object> rawConfiguration
-    ) {
-        var configuration = pipelineConfigurationParser.parseNodeRegressionPredictBaseConfig(rawConfiguration);
-        var label = new StandardLabel("NodeRegressionPredictPipelineStream");
-        var computation = constructNodeRegressionPredictComputation(configuration, label);
-        var resultBuilder = new NodeRegressionPredictPipelineStreamResultBuilder();
-
-        return algorithmProcessingTemplate.processAlgorithmForStream(
-            Optional.empty(),
-            graphName,
-            configuration,
-            Optional.empty(),
-            label,
-            this::nodeRegressionPredictMemoryEstimation,
-            computation,
-            resultBuilder
-        );
-    }
-
     WriteResult nodeClassificationPredictWrite(GraphName graphName, Map<String, Object> rawConfiguration) {
         var configuration = pipelineConfigurationParser.parseNodeClassificationPredictWriteConfig(rawConfiguration);
         var label = new StandardLabel("NodeClassificationPredictPipelineWrite");
@@ -524,58 +533,6 @@ class PipelineApplications {
             computation,
             writeStep,
             resultBuilder
-        );
-    }
-
-    private MemoryEstimation nodeRegressionPredictMemoryEstimation() {
-        throw new MemoryEstimationNotImplementedException();
-    }
-
-    PredictMutateResult nodeRegressionPredictMutate(GraphName graphName, Map<String, Object> rawConfiguration) {
-        var configuration = pipelineConfigurationParser.parseNodeRegressionPredictPipelineMutateConfig(rawConfiguration);
-        var label = new StandardLabel("NodeRegressionPredictPipelineMutate");
-        var computation = constructNodeRegressionPredictComputation(configuration, label);
-        var mutateStep = new NodeRegressionPredictPipelineMutateStep(graphStoreService, configuration);
-        var resultBuilder = new NodeRegressionPredictPipelineMutateResultBuilder(configuration);
-
-        return algorithmProcessingTemplate.processAlgorithmForMutate(
-            Optional.empty(),
-            graphName,
-            configuration,
-            Optional.empty(),
-            label,
-            this::nodeRegressionPredictMemoryEstimation,
-            computation,
-            mutateStep,
-            resultBuilder
-        );
-    }
-
-    Stream<LinkPredictionTrainResult> linkPredictionTrain(GraphName graphName, Map<String, Object> rawConfiguration) {
-        var configuration = pipelineConfigurationParser.parseLinkPredictionTrainConfig(rawConfiguration);
-
-        ensureTrainingModelCanBeStored(configuration);
-
-        var label = new StandardLabel("LinkPredictionPipelineTrain");
-        var dimensionTransformer = new DimensionTransformerForLinkPredictionTrain(
-            pipelineRepository,
-            configuration
-        );
-        var computation = constructLinkPredictionTrainComputation(configuration, label);
-        var sideEffects = new LinkPredictionTrainSideEffects(modelPersister, configuration);
-        var resultRenderer = new LinkPredictionTrainResultRenderer();
-
-        return algorithmProcessingTemplate.processAlgorithmAndAnySideEffects(
-            Optional.empty(),
-            graphName,
-            configuration,
-            Optional.empty(),
-            label,
-            dimensionTransformer,
-            () -> linkPredictionTrainMemoryEstimation(configuration),
-            computation,
-            Optional.of(sideEffects),
-            resultRenderer
         );
     }
 
@@ -613,6 +570,74 @@ class PipelineApplications {
         var memoryEstimation = nodeClassificationTrainEstimation(configuration);
 
         return algorithmEstimationTemplate.estimate(configuration, graphNameOrConfiguration, memoryEstimation);
+    }
+
+    Stream<NodeRegressionStreamResult> nodeRegressionPredictStream(
+        GraphName graphName,
+        Map<String, Object> rawConfiguration
+    ) {
+        var configuration = pipelineConfigurationParser.parseNodeRegressionPredictBaseConfig(rawConfiguration);
+        var label = new StandardLabel("NodeRegressionPredictPipelineStream");
+        var computation = constructNodeRegressionPredictComputation(configuration, label);
+        var resultBuilder = new NodeRegressionPredictPipelineStreamResultBuilder();
+
+        return algorithmProcessingTemplate.processAlgorithmForStream(
+            Optional.empty(),
+            graphName,
+            configuration,
+            Optional.empty(),
+            label,
+            this::nodeRegressionPredictMemoryEstimation,
+            computation,
+            resultBuilder
+        );
+    }
+
+    PredictMutateResult nodeRegressionPredictMutate(GraphName graphName, Map<String, Object> rawConfiguration) {
+        var configuration = pipelineConfigurationParser.parseNodeRegressionPredictPipelineMutateConfig(rawConfiguration);
+        var label = new StandardLabel("NodeRegressionPredictPipelineMutate");
+        var computation = constructNodeRegressionPredictComputation(configuration, label);
+        var mutateStep = new NodeRegressionPredictPipelineMutateStep(graphStoreService, configuration);
+        var resultBuilder = new NodeRegressionPredictPipelineMutateResultBuilder(configuration);
+
+        return algorithmProcessingTemplate.processAlgorithmForMutate(
+            Optional.empty(),
+            graphName,
+            configuration,
+            Optional.empty(),
+            label,
+            this::nodeRegressionPredictMemoryEstimation,
+            computation,
+            mutateStep,
+            resultBuilder
+        );
+    }
+
+    Stream<NodeRegressionPipelineTrainResult> nodeRegressionTrain(
+        GraphName graphName,
+        Map<String, Object> rawConfiguration
+    ) {
+        var configuration = pipelineConfigurationParser.parseNodeRegressionTrainConfig(rawConfiguration);
+
+        ensureTrainingModelCanBeStored(configuration);
+
+        var label = new StandardLabel("NodeRegressionPipelineTrain");
+        var computation = constructNodeRegressionTrainComputation(configuration);
+        var sideEffects = new NodeRegressionTrainSideEffects(modelPersister, configuration);
+        var resultRenderer = new NodeRegressionTrainResultRenderer();
+
+        return algorithmProcessingTemplate.processAlgorithmAndAnySideEffects(
+            Optional.empty(),
+            graphName,
+            configuration,
+            Optional.empty(),
+            label,
+            DimensionTransformer.DISABLED,
+            this::nodeRegressionTrainEstimation,
+            computation,
+            Optional.of(sideEffects),
+            resultRenderer
+        );
     }
 
     NodeClassificationTrainingPipeline selectFeatures(
@@ -731,6 +756,30 @@ class PipelineApplications {
         );
     }
 
+    private Computation<NodeRegressionTrainResult.NodeRegressionTrainPipelineResult> constructNodeRegressionTrainComputation(
+        NodeRegressionPipelineTrainConfig configuration
+    ) {
+        return NodeRegressionTrainComputation.create(
+            log,
+            modelCatalog,
+            pipelineRepository,
+            closeableResourceRegistry,
+            databaseId,
+            dependencyResolver,
+            metrics,
+            nodeLookup,
+            nodePropertyExporterBuilder,
+            procedureReturnColumns,
+            relationshipExporterBuilder,
+            taskRegistryFactory,
+            terminationMonitor,
+            userLogRegistryFactory,
+            progressTrackerCreator,
+            algorithmsProcedureFacade,
+            configuration
+        );
+    }
+
     private Computation<HugeDoubleArray> constructNodeRegressionPredictComputation(
         NodeRegressionPredictPipelineBaseConfig configuration,
         Label label
@@ -806,6 +855,14 @@ class PipelineApplications {
         var model = trainedNCPipelineModel.get(modelName, username);
 
         return nodeClassificationPredictPipelineEstimator.estimate(model, configuration);
+    }
+
+    private MemoryEstimation nodeRegressionPredictMemoryEstimation() {
+        throw new MemoryEstimationNotImplementedException();
+    }
+
+    private MemoryEstimation nodeRegressionTrainEstimation() {
+        throw new MemoryEstimationNotImplementedException();
     }
 
     private MemoryEstimation nodeClassificationTrainEstimation(NodeClassificationPipelineTrainConfig configuration) {

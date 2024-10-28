@@ -31,7 +31,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionPipelineTrainConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainAlgorithm;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainPipelineAlgorithmFactory;
-import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainResult;
+import org.neo4j.gds.procedures.pipelines.NodeRegressionPipelineTrainResult;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.List;
@@ -42,9 +42,9 @@ import static org.neo4j.gds.executor.ExecutionMode.TRAIN;
 @GdsCallable(name = "gds.alpha.pipeline.nodeRegression.train", description = "Trains a node regression model based on a pipeline", executionMode = TRAIN)
 public class NodeRegressionPipelineTrainSpec implements AlgorithmSpec<
     NodeRegressionTrainAlgorithm,
-    NodeRegressionTrainResult.NodeRegressionTrainPipelineResult,
+    org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainResult.NodeRegressionTrainPipelineResult,
     NodeRegressionPipelineTrainConfig,
-    Stream<TrainResult>,
+    Stream<NodeRegressionPipelineTrainResult>,
     NodeRegressionTrainPipelineAlgorithmFactory> {
     @Override
     public String name() {
@@ -62,7 +62,7 @@ public class NodeRegressionPipelineTrainSpec implements AlgorithmSpec<
     }
 
     @Override
-    public ComputationResultConsumer<NodeRegressionTrainAlgorithm, NodeRegressionTrainResult.NodeRegressionTrainPipelineResult, NodeRegressionPipelineTrainConfig, Stream<TrainResult>> computationResultConsumer() {
+    public ComputationResultConsumer<NodeRegressionTrainAlgorithm, org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainResult.NodeRegressionTrainPipelineResult, NodeRegressionPipelineTrainConfig, Stream<NodeRegressionPipelineTrainResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             return computationResult.result().map(result -> {
                 var model = result.model();
@@ -83,7 +83,7 @@ public class NodeRegressionPipelineTrainSpec implements AlgorithmSpec<
                         throw e;
                     }
                 }
-                return Stream.of(new TrainResult(model, result.trainingStatistics(), computationResult.computeMillis()
+                return Stream.of(new NodeRegressionPipelineTrainResult(model, result.trainingStatistics(), computationResult.computeMillis()
                 ));
             }).orElseGet(Stream::empty);
         };

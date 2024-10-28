@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.pipeline.nodePipeline.regression;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.pipeline.PipelineTrainAlgorithm;
+import org.neo4j.gds.ml.pipeline.PipelineTrainer;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainResult.NodeRegressionTrainPipelineResult;
 
@@ -31,8 +32,8 @@ public class NodeRegressionTrainAlgorithm extends PipelineTrainAlgorithm<
     NodeRegressionPipelineTrainConfig,
     NodeFeatureStep> {
 
-    NodeRegressionTrainAlgorithm(
-        NodeRegressionTrain pipelineTrainer,
+    public NodeRegressionTrainAlgorithm(
+        PipelineTrainer<NodeRegressionTrainResult> pipelineTrainer,
         NodeRegressionTrainingPipeline pipeline,
         GraphStore graphStore,
         NodeRegressionPipelineTrainConfig config,

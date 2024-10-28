@@ -26,4 +26,6 @@ public interface NodeRegressionFacade {
     Stream<PredictMutateResult> mutate(String graphName, Map<String, Object> configuration);
 
     Stream<NodeRegressionStreamResult> stream(String graphName, Map<String, Object> configuration);
+
+    Stream<NodeRegressionPipelineTrainResult> train(String graphName, Map<String, Object> configuration);
 }

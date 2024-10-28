@@ -17,10 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.node.regression;
+package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.procedures.pipelines.MLTrainResult;
 import org.neo4j.gds.ml.models.Regressor;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionPipelineTrainConfig;
@@ -29,11 +28,10 @@ import org.neo4j.gds.ml.training.TrainingStatistics;
 import java.util.Map;
 import java.util.Optional;
 
-public class TrainResult extends MLTrainResult {
-
+public class NodeRegressionPipelineTrainResult extends MLTrainResult {
     public final Map<String, Object> modelSelectionStats;
 
-    TrainResult(
+    public NodeRegressionPipelineTrainResult(
         Model<Regressor.RegressorData, NodeRegressionPipelineTrainConfig, NodeRegressionPipelineModelInfo> model,
         TrainingStatistics trainingStatistics,
         long trainMillis

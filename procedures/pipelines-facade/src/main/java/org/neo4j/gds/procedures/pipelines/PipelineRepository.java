@@ -24,6 +24,7 @@ import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainingPipeline;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -73,6 +74,14 @@ public class PipelineRepository {
             user.getUsername(),
             pipelineName.value,
             NodeClassificationTrainingPipeline.class
+        );
+    }
+
+    NodeRegressionTrainingPipeline getNodeRegressionTrainingPipeline(User user, PipelineName pipelineName) {
+        return PipelineCatalog.getTyped(
+            user.getUsername(),
+            pipelineName.value,
+            NodeRegressionTrainingPipeline.class
         );
     }
 
