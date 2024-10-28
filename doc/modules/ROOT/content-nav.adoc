@@ -99,6 +99,7 @@
 *** xref:algorithms/minimum-weight-spanning-tree.adoc[]
 *** xref:algorithms/k-minimum-weight-spanning-tree.adoc[]
 *** xref:algorithms/directed-steiner-tree.adoc[]
+*** xref:algorithms/prize-collecting-steiner-tree.adoc[]
 *** xref:algorithms/all-pairs-shortest-path.adoc[]
 *** xref:algorithms/random-walk.adoc[]
 *** xref:algorithms/bfs.adoc[]

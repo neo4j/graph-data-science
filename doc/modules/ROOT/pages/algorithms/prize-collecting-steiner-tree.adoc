@@ -1,0 +1,165 @@
+[[algorithms-prize-steiner-tree]]
+= Minimum Directed Steiner Tree
+:description: This section describes the Prize-Collecting Steiner Tree algorithm in the Neo4j Graph Data Science library.
+:entity: relationship
+:result: weight
+:algorithm: Prize-Collecting Steiner Tree algorithm
+
+:undirected:
+:weighted:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+
+== Introduction
+
+A spanning tree is a graph such that there is exactly one path between any two nodes in the set.
+A graph can have many possible spanning tree subsets depending on the set of nodes/relationships selected.
+
+Given a weighted graph where each node has a prize, the Prize-Collecting Steiner Tree problem asks for the  spanning tree that  satisfies the following conditions:
+
+- the sum of prizes for the nodes in the graph is mximized.
+- the sum of weights of relationships and prizes for nodes not in the tree is minimized.
+
+The two constraints can combined to form a single maximization problem by simpling  subtracting the second constraint for the former.
+
+The Prize-Collecting Steiner Tree is NP-Complete and no efficient exact algorithms is known.
+The Neo4j GDS Library implements a practical   https://people.csail.mit.edu/ludwigs/papers/dimacs14_fastpcst.pdf[2-approximate algorithm] from the literature.
+This means that the returned answer should be at least half as good as the optimal answer.
+
+[[algorithms-prize-steiner-tree-considerations]]
+== Considerations
+
+By default, the Prize-Collecting Steiner Tree problem considers prizes only for nodes.
+In some cases, however, it can be useful to also consider prizes on relationships.
+The GDS implementation can handle prizes for relationships through the following transformation:
+Given a relationship with weight `w` and prize `p`,
+we suggest to replace `w` with `w' = w - p`.
+This should be done as a pre-processing step prior to projecting the in-memory graph.
+
+
+[[algorithms-prize-steiner-tree-syntax]]
+== Syntax
+
+.Prize-collecting Steiner Tree syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-stream]
+======
+.Run the algorithm in stream mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.steinerTree.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodeId: Integer,
+  parentId: Integer,
+  weight: Float
+----
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name | Type | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+include::partial$/algorithms/prize-steiner/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name     | Type    | Description
+| nodeId   | Integer | A node in the discovered spanning tree.
+| parentId | Integer | The parent of nodeId in the spanning tree or nodeId if it is equal to the source node.
+| weight   | Float   | The weight of the relationship from parentId to nodeId.
+|===
+
+======
+
+
+====
+
+
+[[algorithms-directed-steiner-tree-sample]]
+== Examples
+
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
+:algorithm-name: {algorithm}
+:graph-description: road network
+:image-file: steiner-graph.svg
+include::partial$/algorithms/shared/examples-intro.adoc[]
+
+
+.The following will create the sample graph depicted in the figure:
+[source, cypher, role=noplay setup-query]
+----
+CREATE (a:Place {id: 'A', prize: 5.0}),
+       (b:Place {id: 'B', prize: 20.0}),
+       (c:Place {id: 'C',prize: 11.0}),
+       (d:Place {id: 'D',prize: 10.0}),
+       (e:Place {id: 'E',prize: 8.0}),
+       (f:Place {id: 'F',prize: 1.0}),
+       (a)-[:LINK {cost:10}]->(f),
+       (a)-[:LINK {cost:3}]->(b),
+       (a)-[:LINK {cost:7}]->(e),
+       (b)-[:LINK {cost:1}]->(c),
+       (c)-[:LINK {cost:4}]->(d),
+       (c)-[:LINK {cost:6}]->(e),
+       (f)-[:LINK {cost:3}]->(d);
+----
+
+.The following will project and store a named graph:
+[source, cypher, role=noplay graph-project-query]
+----
+MATCH (source:Place)-[r:LINK]->(target:Place)
+RETURN gds.graph.project(
+  'graph',
+  source,
+  target,
+{
+    sourceNodeProperties: source { .prize },
+    targetNodeProperties: target { .prize },
+    relationshipProperties: r { .cost }
+  },
+  { undirectedRelationshipTypes: ['*'] }
+)
+----
+
+[[algorithms-prize-tree-examples-sream]]
+=== Stream
+:!stream-details:
+
+include::partial$/algorithms/shared/examples-stream-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the Prize-Collecting Steiner Tree algorithm in stream mode and return results for each valid node.
+[source,cypher,role=noplay]
+----
+
+CALL gds.prizeSteinerTree.stream('graph', {
+  relationshipWeightProperty: 'cost',
+  prizeProperty: 'prize'
+})
+YIELD nodeId,parentId, weight
+RETURN gds.util.asNode(nodeId).id AS node, gds.util.asNode(parentId).id AS parent,weight
+ORDER BY node
+----
+
+.Results
+[opts="header"]
+|===
+| node | parent | weight
+| "A"  | "B"    | 3.0
+| "B"  | "C"    | 1.0
+| "D"  | "C"    | 4.0
+| "E"  | "C"    | 6.0
+|===
+--
+
+The algorithm finds a tree cntaing A,B,C,D, and E.
+The node F is skipped  because it's price is very low and connecting it with the other nodes would yield an inferior solution.
