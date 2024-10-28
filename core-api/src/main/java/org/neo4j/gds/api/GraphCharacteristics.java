@@ -24,6 +24,8 @@ import org.neo4j.gds.api.schema.Direction;
 
 import java.util.Objects;
 
+import static org.neo4j.gds.api.schema.Direction.fromOrientation;
+
 /**
  * Graph characteristics describe certain capabilities of the graph.
  * <p>
@@ -127,7 +129,7 @@ public final class GraphCharacteristics {
         }
 
         public Builder withOrientation(Orientation orientation) {
-            return withDirection(Direction.fromOrientation(orientation));
+            return withDirection(fromOrientation(orientation));
         }
 
         public Builder withDirection(Direction direction) {

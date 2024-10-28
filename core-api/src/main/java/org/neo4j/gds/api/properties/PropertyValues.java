@@ -20,14 +20,13 @@
 package org.neo4j.gds.api.properties;
 
 import org.neo4j.gds.api.nodeproperties.ValueType;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+import org.neo4j.gds.utils.StringFormatting;
 
 public interface PropertyValues {
 
     ValueType valueType();
 
     default UnsupportedOperationException unsupportedTypeException(ValueType expectedType) {
-        return new UnsupportedOperationException(formatWithLocale("Tried to retrieve a value of type %s value from properties of type %s", expectedType, valueType()));
+        return new UnsupportedOperationException(StringFormatting.formatWithLocale("Tried to retrieve a value of type %s value from properties of type %s", expectedType, valueType()));
     }
 }

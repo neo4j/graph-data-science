@@ -1,0 +1,31 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Core API'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    annotationProcessor project(':annotations')
+
+    annotationProcessor openGds.immutables.builder
+    annotationProcessor openGds.immutables.value
+
+    compileOnly openGds.immutables.builder
+    compileOnly openGds.immutables.value.annotations
+
+    compileOnly openGds.jetbrains.annotations
+
+    implementation project(':annotations')
+    implementation project(':collections')
+    implementation project(':concurrency')
+    implementation project(':core-utils')
+    implementation project(':graph-projection-api')
+    implementation project(':graph-schema-api')
+    implementation project(':string-formatting')
+
+    implementation openGds.hdrhistogram
+    implementation openGds.hppc
+
+    testImplementation project(':test-utils')
+
+}

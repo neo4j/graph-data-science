@@ -89,7 +89,7 @@ public interface Graph extends IdMap, NodePropertyContainer, Degrees, Relationsh
     static long nthTarget(Graph graph, long sourceNodeId, int offset) {
         class FindNth implements RelationshipConsumer {
             private int remaining = offset;
-            private long target = NOT_FOUND;
+            private long target = IdMap.NOT_FOUND;
 
             @Override
             public boolean accept(long sourceNodeId, long targetNodeId) {
@@ -102,7 +102,7 @@ public interface Graph extends IdMap, NodePropertyContainer, Degrees, Relationsh
         }
 
         if (offset >= graph.degree(sourceNodeId)) {
-            return NOT_FOUND;
+            return IdMap.NOT_FOUND;
         }
 
         assert offset >= 0 : "offset must be positive, got " + offset;

@@ -38,6 +38,7 @@ dependencies {
     implementation project(':concurrency-validation-api')
 
     api(
+        project(':core-api'),
             project(':neo4j-kernel-adapter'),
             project(':graph-projection-api'),
             project(':graph-dimensions'),

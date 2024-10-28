@@ -412,6 +412,8 @@ project(':procedures-facade-api').projectDir = file('procedures/procedures-facad
 include('algorithm-specifications')
 project(':algorithm-specifications').projectDir = file('algorithm-specifications')
 
+include('core-api')
+project(':core-api').projectDir = file('core-api')
 
 
 include('neo4j-kernel-adapter-5.24')
