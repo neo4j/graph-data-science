@@ -27,6 +27,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.function.LongPredicate;
 import java.util.function.LongToDoubleFunction;
 
 class GrowthPhase {
@@ -40,6 +41,8 @@ class GrowthPhase {
     private final HugeLongArray treeEdges;
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
+    private final ClusterMoatPair clusterMoatPairOfu = new ClusterMoatPair();
+    private final ClusterMoatPair clusterMoatPairOfv = new ClusterMoatPair();
     private long numberOfTreeEdges;
 
     private final double EPS = 1E-6;
@@ -66,13 +69,13 @@ class GrowthPhase {
         progressTracker.beginSubTask("Initialization");
         initializeClusterPrizes();
         initializeEdgeParts();
+        setUpCusterQueue(clusterStructure().active(), clusterStructure.maxActiveCluster());
         progressTracker.endSubTask("Initialization");
 
         progressTracker.beginSubTask("Growing");
         double moat;
 
-        ClusterMoatPair clusterMoatPairOfu = new ClusterMoatPair();
-        ClusterMoatPair clusterMoatPairOfv = new ClusterMoatPair();
+
 
         while (clusterStructure.numberOfActiveClusters() > 1) {
             terminationFlag.assertRunning();
@@ -159,26 +162,75 @@ class GrowthPhase {
 
                 if (s > t) {
                     var edgeId = counter.getAndIncrement();
-                    var edgePart1 = 2 * edgeId;
-                    var edgePart2 = 2 * edgeId + 1;
+
                     edgeCosts.set(edgeId, w);
                     edgeParts.set(2 * edgeId, s);
                     edgeParts.set(2 * edgeId + 1, t);
-                    edgeEventsQueue.addBothWays(s, t, edgePart1, edgePart2, w / 2.0);
+
+                    clusterStructure.sumOnEdgePart(s,0.0, clusterMoatPairOfu);
+                    clusterStructure.sumOnEdgePart(t,0.0, clusterMoatPairOfv);
+
+                    var cluster1 = clusterMoatPairOfu.cluster();
+                    var cluster2 = clusterMoatPairOfv.cluster();
+
+                    if (w>=0) {
+                        handlePositiveEdge(edgeId, cluster1, cluster2, w);
+                    }else{
+                        handleNegativeEdge(edgeId,cluster1,cluster2,w);
+                    }
                     return true;
                 }
                 return false;
             });
             progressTracker.logProgress(graph.degree(u));
         }
-        edgeEventsQueue.performInitialAssignment(nodeCount);
+        edgeEventsQueue.performInitialAssignment(clusterStructure.maxActiveCluster(),clusterStructure.active());
     }
 
+    private void handlePositiveEdge(long edgeId, long cluster1, long cluster2,  double w){
+        if (cluster1!=cluster2) {
+            var edgePart1 = 2 * edgeId;
+            var edgePart2 = 2 * edgeId + 1;
+            edgeEventsQueue.addBothWays(cluster1, cluster2, edgePart1, edgePart2, w / 2.0);
+        }
+
+    }
+    private void handleNegativeEdge(long edgeId, long cluster1, long cluster2, double w){
+            if (cluster1 != cluster2){
+                var newCluster =clusterStructure.merge(cluster1,cluster2,0.0);
+                edgeEventsQueue.mergeWithoutUpdates(newCluster,cluster1,cluster2);
+                clusterStructure.addToInitialMoatLeft(newCluster,-w);
+                addToTree(edgeId);
+            }
+            /*
+             * note the following:
+             *  assume (a)-[:w1]-(b) and (a)-[:w2]-(b)  with both w1,w2 <0
+             *  the algorithm will keep the first one it treats, even though the other one might be preferable (higher prize)
+             * Note that the pcst default algorithm by breaking into (a)-(n1)-(b) and (a)-(n2)-(b) can include both n1,n2 for the solution in G, but the transformation
+             * does not!
+             * In other words, solution(G) can be smaller than solution(G')
+             * ---
+             * We can do better than this if needed.
+             *  One idea is gathering the negative edges, sorting them,  and iterating over them ala prim algorithm etc..
+             *  Another is keeping  a dynamic  tree and  replace edges by performing an st query
+             * for (a,b) which will identify the worst edge on the path from a to b and replace it with a better one.
+             * Noting this for potential future work.
+             *.
+             */
+    }
     private void initializeClusterPrizes() {
         for (long u = 0; u < graph.nodeCount(); ++u) {
             double prize = prizes.applyAsDouble(u);
             clusterStructure.setClusterPrize(u, prize);
-            clusterEventsPriorityQueue.add(u, prize);
+        }
+    }
+
+    private void setUpCusterQueue(LongPredicate isActive, long maxCount) {
+        for (long u = 0; u < maxCount; ++u) {
+           if (isActive.test(u)){
+               var tightnessTime = clusterStructure.tightnessTime(u,0.0);
+               clusterEventsPriorityQueue.add(u,tightnessTime);
+           }
         }
     }
 

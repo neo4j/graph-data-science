@@ -85,6 +85,14 @@ public class ClusterStructure {
         return initialMoatLeft.get(clusterId);
     }
 
+    void addToInitialMoatLeft(long clusterId, double value){
+        initialMoatLeft.addTo(clusterId,value);
+    }
+
+    long maxActiveCluster(){
+        return  clusterActivity.maxActiveCluster();
+    }
+
     double  tightnessTime(long clusterId, double currentMoat){
             double  slack =  initialMoatLeft.get(clusterId) - moatAt(clusterId,currentMoat);
             return  currentMoat + slack;

@@ -30,13 +30,14 @@ class ClusterActivity {
     private final HugeDoubleArray relevantTime;
 
     private long numberOfActiveClusters;
+    private long maxActiveCluster;
 
     ClusterActivity(long nodeCount) {
         this.activeClusters = new BitSet(2 * nodeCount);
         this.relevantTime = HugeDoubleArray.newArray(2 * nodeCount);
 
         this.numberOfActiveClusters = nodeCount;
-
+        this.maxActiveCluster = nodeCount;
         relevantTime.fill(0);
         activeClusters.set(0, nodeCount);
     }
@@ -51,8 +52,12 @@ class ClusterActivity {
         activeClusters.set(clusterId);
         relevantTime.set(clusterId,moat);
         this.numberOfActiveClusters++;
+        this.maxActiveCluster++;
     }
 
+    long maxActiveCluster(){
+        return  maxActiveCluster;
+    }
     long numberOfActiveClusters() {
         return numberOfActiveClusters;
     }
