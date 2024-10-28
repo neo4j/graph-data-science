@@ -38,6 +38,8 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
+import org.neo4j.gds.procedures.pipelines.NodeRegressionPredictPipelineBaseConfigImpl;
+import org.neo4j.gds.procedures.pipelines.NodeRegressionPredictPipelineExecutor;
 import org.neo4j.gds.test.TestProc;
 
 import java.util.ArrayList;

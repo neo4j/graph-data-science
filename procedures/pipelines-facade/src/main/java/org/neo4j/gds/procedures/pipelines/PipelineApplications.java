@@ -37,12 +37,14 @@ import org.neo4j.gds.applications.algorithms.machinery.NodePropertyWriter;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.StandardLabel;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
+import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
@@ -504,6 +506,30 @@ class PipelineApplications {
         );
     }
 
+    private MemoryEstimation nodeRegressionPredictMemoryEstimation() {
+        throw new MemoryEstimationNotImplementedException();
+    }
+
+    PredictMutateResult nodeRegressionPredictMutate(GraphName graphName, Map<String, Object> rawConfiguration) {
+        var configuration = pipelineConfigurationParser.parseNodeRegressionPredictPipelineMutateConfig(rawConfiguration);
+        var label = new StandardLabel("NodeRegressionPredictPipelineMutate");
+        var computation = constructNodeRegressionPredictComputation(configuration, label);
+        var mutateStep = new NodeRegressionPredictPipelineMutateStep(graphStoreService, configuration);
+        var resultBuilder = new NodeRegressionPredictPipelineMutateResultBuilder(configuration);
+
+        return algorithmProcessingTemplate.processAlgorithmForMutate(
+            Optional.empty(),
+            graphName,
+            configuration,
+            Optional.empty(),
+            label,
+            this::nodeRegressionPredictMemoryEstimation,
+            computation,
+            mutateStep,
+            resultBuilder
+        );
+    }
+
     Stream<LinkPredictionTrainResult> linkPredictionTrain(GraphName graphName, Map<String, Object> rawConfiguration) {
         var configuration = pipelineConfigurationParser.parseLinkPredictionTrainConfig(rawConfiguration);
 
@@ -681,6 +707,32 @@ class PipelineApplications {
             progressTrackerCreator,
             algorithmsProcedureFacade,
             configuration
+        );
+    }
+
+    private Computation<HugeDoubleArray> constructNodeRegressionPredictComputation(
+        NodeRegressionPredictPipelineMutateConfig configuration,
+        Label label
+    ) {
+        return NodeRegressionPredictComputation.create(
+            log,
+            modelCatalog,
+            closeableResourceRegistry,
+            databaseId,
+            dependencyResolver,
+            metrics,
+            nodeLookup,
+            nodePropertyExporterBuilder,
+            procedureReturnColumns,
+            relationshipExporterBuilder,
+            taskRegistryFactory,
+            terminationMonitor,
+            user,
+            userLogRegistryFactory,
+            progressTrackerCreator,
+            algorithmsProcedureFacade,
+            configuration,
+            label
         );
     }
 

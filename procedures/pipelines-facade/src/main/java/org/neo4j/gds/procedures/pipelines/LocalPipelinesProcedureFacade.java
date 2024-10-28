@@ -46,20 +46,22 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 public final class LocalPipelinesProcedureFacade implements PipelinesProcedureFacade {
-
     private final PipelineApplications pipelineApplications;
 
     private final LinkPredictionFacade linkPredictionFacade;
     private final NodeClassificationFacade nodeClassificationFacade;
+    private final NodeRegressionFacade nodeRegressionFacade;
 
     private LocalPipelinesProcedureFacade(
         PipelineApplications pipelineApplications,
         LinkPredictionFacade linkPredictionFacade,
-        NodeClassificationFacade nodeClassificationFacade
+        NodeClassificationFacade nodeClassificationFacade,
+        NodeRegressionFacade nodeRegressionFacade
     ) {
         this.pipelineApplications = pipelineApplications;
         this.linkPredictionFacade = linkPredictionFacade;
         this.nodeClassificationFacade = nodeClassificationFacade;
+        this.nodeRegressionFacade = nodeRegressionFacade;
     }
 
     public static PipelinesProcedureFacade create(
@@ -129,10 +131,13 @@ public final class LocalPipelinesProcedureFacade implements PipelinesProcedureFa
             pipelineRepository
         );
 
+        var nodeRegressionFacade = LocalNodeRegressionFacade.create(modelCatalog, user, pipelineApplications);
+
         return new LocalPipelinesProcedureFacade(
             pipelineApplications,
             linkPredictionFacade,
-            nodeClassificationFacade
+            nodeClassificationFacade,
+            nodeRegressionFacade
         );
     }
 
@@ -151,7 +156,11 @@ public final class LocalPipelinesProcedureFacade implements PipelinesProcedureFa
 
         var result = pipelineApplications.dropSilencingFailure(pipelineName);
 
-        return Stream.ofNullable(result).map(pipeline -> PipelineCatalogResultTransformer.create(pipeline, pipelineName.value));
+        if (result == null) return Stream.empty();
+
+        var pipelineCatalogResult = PipelineCatalogResultTransformer.create(result, pipelineName.value);
+
+        return Stream.of(pipelineCatalogResult);
     }
 
     @Override
@@ -199,5 +208,10 @@ public final class LocalPipelinesProcedureFacade implements PipelinesProcedureFa
     @Override
     public NodeClassificationFacade nodeClassification() {
         return nodeClassificationFacade;
+    }
+
+    @Override
+    public NodeRegressionFacade nodeRegression() {
+        return nodeRegressionFacade;
     }
 }

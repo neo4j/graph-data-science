@@ -19,23 +19,9 @@
  */
 package org.neo4j.gds.procedures.pipelines;
 
+import java.util.Map;
 import java.util.stream.Stream;
 
-public interface PipelinesProcedureFacade {
-    String NO_VALUE = "__NO_VALUE";
-
-    Stream<PipelineCatalogResult> drop(
-        String pipelineNameAsString,
-        boolean failIfMissing
-    );
-
-    Stream<PipelineExistsResult> exists(String pipelineNameAsString);
-
-    Stream<PipelineCatalogResult> list(String pipelineNameAsString);
-
-    LinkPredictionFacade linkPrediction();
-
-    NodeClassificationFacade nodeClassification();
-
-    NodeRegressionFacade nodeRegression();
+public interface NodeRegressionFacade {
+    Stream<PredictMutateResult> mutate(String graphName, Map<String, Object> configuration);
 }

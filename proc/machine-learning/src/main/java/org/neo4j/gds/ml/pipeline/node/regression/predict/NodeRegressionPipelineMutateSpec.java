@@ -31,6 +31,9 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
+import org.neo4j.gds.procedures.pipelines.NodeRegressionPredictConfigPreProcessor;
+import org.neo4j.gds.procedures.pipelines.NodeRegressionPredictPipelineExecutor;
+import org.neo4j.gds.procedures.pipelines.NodeRegressionPredictPipelineMutateConfig;
 import org.neo4j.gds.procedures.pipelines.PredictMutateResult;
 
 import java.util.List;
@@ -70,7 +73,7 @@ public class NodeRegressionPipelineMutateSpec
 
     @Override
     public void preProcessConfig(Map<String, Object> userInput, ExecutionContext executionContext) {
-        NodeRegressionPipelineCompanion.enhanceUserInput(userInput, executionContext);
+        NodeRegressionPredictConfigPreProcessor.enhanceInputWithPipelineParameters(userInput, executionContext);
     }
 
     @Override

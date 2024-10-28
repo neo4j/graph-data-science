@@ -33,6 +33,8 @@ import org.neo4j.gds.ml.models.randomforest.RandomForestRegressor;
 import org.neo4j.gds.ml.models.randomforest.RandomForestRegressorData;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionPipelineTrainConfig;
+import org.neo4j.gds.procedures.pipelines.NodeRegressionPredictPipelineBaseConfig;
+import org.neo4j.gds.procedures.pipelines.NodeRegressionPredictPipelineExecutor;
 
 public class NodeRegressionPredictPipelineAlgorithmFactory
     <CONFIG extends NodeRegressionPredictPipelineBaseConfig>

@@ -17,8 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.node.regression.predict;import org.jetbrains.annotations.NotNull;
+package org.neo4j.gds.procedures.pipelines;
+
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.models.BaseModelData;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPipelineBaseTrainConfig;
@@ -27,21 +30,34 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-final class NodeRegressionPipelineCompanion {
-    private NodeRegressionPipelineCompanion() {}
+public class NodeRegressionPredictConfigPreProcessor {
+    private final ModelCatalog modelCatalog;
+    private final User user;
 
-    @NotNull
-    static Map<String, Object> enhanceUserInput(
+    NodeRegressionPredictConfigPreProcessor(ModelCatalog modelCatalog, User user) {
+        this.modelCatalog = modelCatalog;
+        this.user = user;
+    }
+
+    public static void enhanceInputWithPipelineParameters(
         Map<String, Object> userInput,
         ExecutionContext executionContext
     ) {
-        return Optional.ofNullable(userInput.get("modelName"))
+        var modelCatalog = executionContext.modelCatalog();
+        var user = new User(executionContext.username(), executionContext.isGdsAdmin());
+
+        var preProcessor = new NodeRegressionPredictConfigPreProcessor(modelCatalog, user);
+
+        preProcessor.enhanceInputWithPipelineParameters(userInput);
+    }
+
+    void enhanceInputWithPipelineParameters(Map<String, Object> userInput) {
+        Optional.ofNullable(userInput.get("modelName"))
             .map(modelName -> {
-                var modelCatalog = executionContext.modelCatalog();
                 assert modelCatalog != null : "ModelCatalog should have been set in the ExecutionContext by this point!!!";
 
                 var trainedModel = modelCatalog.get(
-                    executionContext.username(),
+                    user.getUsername(),
                     (String) modelName,
                     BaseModelData.class,
                     NodePropertyPipelineBaseTrainConfig.class,
@@ -59,7 +75,6 @@ final class NodeRegressionPipelineCompanion {
                 userInput.put("targetNodeLabels", combinedTargetNodeLabels);
                 userInput.put("relationshipTypes", combinedRelationshipTypes);
                 return userInput;
-            })
-            .orElse(userInput);
+            });
     }
 }

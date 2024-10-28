@@ -19,10 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline.node.regression.predict;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.pipelines.PredictMutateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -33,13 +30,11 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
 import static org.neo4j.gds.ml.pipeline.node.regression.NodeRegressionProcCompanion.PREDICT_DESCRIPTION;
 
-public class NodeRegressionPipelineMutateProc extends BaseProc {
-
+public class NodeRegressionPipelineMutateProc {
     @Context
-    public ModelCatalog modelCatalog;
+    public GraphDataScienceProcedures facade;
 
     @Procedure(name = "gds.alpha.pipeline.nodeRegression.predict.mutate", mode = Mode.READ)
     @Description(PREDICT_DESCRIPTION)
@@ -47,16 +42,6 @@ public class NodeRegressionPipelineMutateProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        preparePipelineConfig(graphName, configuration);
-        return new ProcedureExecutor<>(
-            new NodeRegressionPipelineMutateSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.pipelines().nodeRegression().mutate(graphName, configuration);
     }
-
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withModelCatalog(modelCatalog);
-    }
-
 }
