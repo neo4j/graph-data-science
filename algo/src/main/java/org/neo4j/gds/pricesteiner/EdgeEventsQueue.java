@@ -23,7 +23,9 @@ import com.carrotsearch.hppc.ObjectArrayList;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 
- class EdgeEventsQueue {
+import java.util.function.LongPredicate;
+
+class EdgeEventsQueue {
 
     private final HugeObjectArray<PairingHeap> pairingHeaps;
     private final HugeLongPriorityQueue edgeEventsPriorityQueue;
@@ -88,6 +90,11 @@ import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
         pairingHeaps.get(clusterId).increaseValues(value);
     }
 
+
+    void mergeWithoutUpdates(long newCluster, long cluster1, long cluster2){
+        pairingHeaps.set(newCluster,pairingHeaps.get(cluster1).join(pairingHeaps.get(cluster2)));
+
+    }
     void mergeAndUpdate(long newCluster, long cluster1,long cluster2){
         pairingHeaps.set(newCluster,pairingHeaps.get(cluster1).join(pairingHeaps.get(cluster2)));
 
@@ -102,9 +109,9 @@ import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
         edgeEventsPriorityQueue.set(clusterId,Double.MAX_VALUE); //ditto
     }
 
-    void performInitialAssignment(long nodeCount){
-        for (long u=0; u<nodeCount; u++){
-            if (!pairingHeaps.get(u).empty()) {
+    void performInitialAssignment(long activeClusters, LongPredicate isActive){
+        for (long u=0; u<activeClusters; u++){
+            if ( isActive.test(u) && !pairingHeaps.get(u).empty()) {
                 edgeEventsPriorityQueue.add(u, pairingHeaps.get(u).minValue());
             }
         }

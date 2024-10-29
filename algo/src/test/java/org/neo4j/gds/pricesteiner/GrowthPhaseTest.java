@@ -299,5 +299,67 @@ import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 
     }
 
+    @Nested
+    @GdlExtension
+    class NegativeEdgesGraph{
+
+        @GdlGraph(orientation = Orientation.UNDIRECTED)
+        private static final String DB_CYPHER =
+            "CREATE " +
+                "(a0:Node{prize: 4.0})," +
+                "(a1:Node{prize: 4.0})," +
+                "(a2:Node{prize: 4.0})," +
+                "(a3:Node{prize: 4.0})," +
+                "(a0)-[:R{w:-5.0}]->(a1)," +
+                "(a0)-[:R{w:-10.0}]->(a3)," +
+                "(a1)-[:R{w:-500.0}]->(a3)," +
+                "(a1)-[:R{w:-20.0}]->(a2)," +
+                "(a2)-[:R{w:-25.0}]->(a3)";
+        @Inject
+        private  TestGraph graph;
+
+        @Test
+        void shouldFindCorrectAnswer() {
+
+            var  prizes = graph.nodeProperties("prize");
+
+            var growthPhase =  new GrowthPhase(graph, prizes::doubleValue,ProgressTracker.NULL_TRACKER,TerminationFlag.RUNNING_TRUE);
+            var result= growthPhase.grow();
+
+            var clusterStructure = growthPhase.clusterStructure();
+
+            var a0 = graph.toMappedNodeId("a0");
+            var a1 = graph.toMappedNodeId("a1");
+            var a2 = graph.toMappedNodeId("a2");
+            var a3 = graph.toMappedNodeId("a3");
+            assertThat(clusterStructure.inactiveSince(a1)).isEqualTo(0);
+            assertThat(clusterStructure.inactiveSince(a0)).isEqualTo(0);
+            assertThat(clusterStructure.inactiveSince(a2)).isEqualTo(0);
+            assertThat(clusterStructure.inactiveSince(a3)).isEqualTo(0);
+
+            assertThat(clusterStructure.tightnessTime(6,0)).isEqualTo(4*4 +5 + 10 + 20);
+
+            var edges = result.treeEdges();
+            var edgeCosts = result.edgeCosts();
+            var edgeParts = result.edgeParts();
+            var numberOfEdges = result.numberOfTreeEdges();
+
+            assertThat(numberOfEdges).isEqualTo(3);
+            assertThat(edgeCosts.get((edges.get(0)))).isEqualTo(-5);
+            assertThat(edgeCosts.get((edges.get(1)))).isEqualTo(-20);
+            assertThat(edgeCosts.get((edges.get(2)))).isEqualTo(-10);
+
+            assertThat(edgeParts.get(2*edges.get(0))).isEqualTo(a1);
+            assertThat(edgeParts.get(2*edges.get(0)+1)).isEqualTo(a0);
+
+            assertThat(edgeParts.get(2*edges.get(1))).isEqualTo(a2);
+            assertThat(edgeParts.get(2*edges.get(1)+1)).isEqualTo(a1);
+
+            assertThat(edgeParts.get(2*edges.get(2))).isEqualTo(a3);
+            assertThat(edgeParts.get(2*edges.get(2)+1)).isEqualTo(a0);
+
+        }
+
+    }
 
 }
