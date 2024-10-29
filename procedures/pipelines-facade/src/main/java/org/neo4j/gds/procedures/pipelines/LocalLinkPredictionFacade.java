@@ -75,7 +75,7 @@ public final class LocalLinkPredictionFacade implements LinkPredictionFacade {
     public Stream<PipelineInfoResult> addLogisticRegression(String pipelineName, Map<String, Object> configuration) {
         return configurer.configureLinkPredictionTrainingPipeline(
             pipelineName,
-            () -> pipelineConfigurationParser.parseLogisticRegressionTrainerConfig(configuration),
+            () -> pipelineConfigurationParser.parseLogisticRegressionTrainerConfigForLinkPredictionOrNodeClassification(configuration),
             TrainingPipeline::addTrainerConfig
         );
     }
@@ -112,7 +112,7 @@ public final class LocalLinkPredictionFacade implements LinkPredictionFacade {
     public Stream<PipelineInfoResult> addRandomForest(String pipelineName, Map<String, Object> configuration) {
         return configurer.configureLinkPredictionTrainingPipeline(
             pipelineName,
-            () -> pipelineConfigurationParser.parseRandomForestClassifierTrainerConfig(configuration),
+            () -> pipelineConfigurationParser.parseRandomForestClassifierTrainerConfigForLinkPredictionOrNodeClassification(configuration),
             TrainingPipeline::addTrainerConfig
         );
     }

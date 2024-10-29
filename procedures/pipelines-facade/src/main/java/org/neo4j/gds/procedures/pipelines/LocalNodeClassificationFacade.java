@@ -79,7 +79,7 @@ public final class LocalNodeClassificationFacade implements NodeClassificationFa
     ) {
         return configurer.configureNodeClassificationTrainingPipeline(
             pipelineName,
-            () -> pipelineConfigurationParser.parseLogisticRegressionTrainerConfig(configuration),
+            () -> pipelineConfigurationParser.parseLogisticRegressionTrainerConfigForLinkPredictionOrNodeClassification(configuration),
             TrainingPipeline::addTrainerConfig
         );
     }
@@ -116,7 +116,7 @@ public final class LocalNodeClassificationFacade implements NodeClassificationFa
     public Stream<NodePipelineInfoResult> addRandomForest(String pipelineName, Map<String, Object> configuration) {
         return configurer.configureNodeClassificationTrainingPipeline(
             pipelineName,
-            () -> pipelineConfigurationParser.parseRandomForestClassifierTrainerConfig(configuration),
+            () -> pipelineConfigurationParser.parseRandomForestClassifierTrainerConfigForLinkPredictionOrNodeClassification(configuration),
             TrainingPipeline::addTrainerConfig
         );
     }

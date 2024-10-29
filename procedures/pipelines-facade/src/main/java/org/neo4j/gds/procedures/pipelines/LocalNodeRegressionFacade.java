@@ -23,6 +23,8 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.ml.pipeline.PipelineCompanion;
+import org.neo4j.gds.ml.pipeline.TrainingPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainingPipeline;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -30,32 +32,57 @@ import java.util.stream.Stream;
 final class LocalNodeRegressionFacade implements NodeRegressionFacade {
     private final NodeFeatureStepsParser nodeFeatureStepsParser = new NodeFeatureStepsParser();
 
+    private final Configurer configurer;
     private final NodeRegressionPredictConfigPreProcessor nodeRegressionPredictConfigPreProcessor;
+
+    private final PipelineConfigurationParser pipelineConfigurationParser;
     private final PipelineApplications pipelineApplications;
 
     private LocalNodeRegressionFacade(
+        Configurer configurer,
         NodeRegressionPredictConfigPreProcessor nodeRegressionPredictConfigPreProcessor,
+        PipelineConfigurationParser pipelineConfigurationParser,
         PipelineApplications pipelineApplications
     ) {
+        this.configurer = configurer;
         this.nodeRegressionPredictConfigPreProcessor = nodeRegressionPredictConfigPreProcessor;
+        this.pipelineConfigurationParser = pipelineConfigurationParser;
         this.pipelineApplications = pipelineApplications;
     }
 
     static NodeRegressionFacade create(
         ModelCatalog modelCatalog,
         User user,
-        PipelineApplications pipelineApplications
+        PipelineConfigurationParser pipelineConfigurationParser,
+        PipelineApplications pipelineApplications,
+        PipelineRepository pipelineRepository
     ) {
+        var configurer = new Configurer(pipelineRepository, user);
         var nodeRegressionPredictConfigPreProcessor = new NodeRegressionPredictConfigPreProcessor(modelCatalog, user);
 
-        return new LocalNodeRegressionFacade(nodeRegressionPredictConfigPreProcessor, pipelineApplications);
+        return new LocalNodeRegressionFacade(
+            configurer,
+            nodeRegressionPredictConfigPreProcessor,
+            pipelineConfigurationParser,
+            pipelineApplications
+        );
+    }
+
+    @Override
+    public Stream<NodePipelineInfoResult> addLogisticRegression(
+        String pipelineName,
+        Map<String, Object> configuration
+    ) {
+        return configurer.configureNodeRegressionTrainingPipeline(
+            pipelineName,
+            () -> pipelineConfigurationParser.parseLogisticRegressionTrainerConfigForNodeRegression(configuration),
+            TrainingPipeline::addTrainerConfig
+        );
     }
 
     @Override
     public Stream<NodePipelineInfoResult> addNodeProperty(
-        String pipelineNameAsString,
-        String taskName,
-        Map<String, Object> procedureConfig
+        String pipelineNameAsString, String taskName, Map<String, Object> procedureConfig
     ) {
         var pipelineName = PipelineName.parse(pipelineNameAsString);
 
@@ -71,16 +98,51 @@ final class LocalNodeRegressionFacade implements NodeRegressionFacade {
     }
 
     @Override
+    public Stream<NodePipelineInfoResult> addRandomForest(String pipelineName, Map<String, Object> configuration) {
+        return configurer.configureNodeRegressionTrainingPipeline(
+            pipelineName,
+            () -> pipelineConfigurationParser.parseRandomForestClassifierTrainerConfigForNodeRegression(configuration),
+            TrainingPipeline::addTrainerConfig
+        );
+    }
+
+    @Override
+    public Stream<NodePipelineInfoResult> configureAutoTuning(String pipelineName, Map<String, Object> configuration) {
+        return configurer.configureNodeRegressionTrainingPipeline(
+            pipelineName,
+            () -> pipelineConfigurationParser.parseAutoTuningConfig(configuration),
+            TrainingPipeline::setAutoTuningConfig
+        );
+    }
+
+    @Override
+    public Stream<NodePipelineInfoResult> configureSplit(String pipelineName, Map<String, Object> configuration) {
+        return configurer.configureNodeRegressionTrainingPipeline(
+            pipelineName,
+            () -> pipelineConfigurationParser.parseNodePropertyPredictionSplitConfig(configuration),
+            NodeRegressionTrainingPipeline::setSplitConfig
+        );
+    }
+
+    @Override
+    public Stream<NodePipelineInfoResult> createPipeline(String pipelineNameAsString) {
+        var pipelineName = PipelineName.parse(pipelineNameAsString);
+
+        var pipeline = pipelineApplications.createNodeRegressionTrainingPipeline(pipelineName);
+
+        var result = NodePipelineInfoResultTransformer.create(pipelineName, pipeline);
+
+        return Stream.of(result);
+    }
+
+    @Override
     public Stream<PredictMutateResult> mutate(String graphNameAsString, Map<String, Object> configuration) {
         PipelineCompanion.preparePipelineConfig(graphNameAsString, configuration);
         nodeRegressionPredictConfigPreProcessor.enhanceInputWithPipelineParameters(configuration);
 
         var graphName = GraphName.parse(graphNameAsString);
 
-        var result = pipelineApplications.nodeRegressionPredictMutate(
-            graphName,
-            configuration
-        );
+        var result = pipelineApplications.nodeRegressionPredictMutate(graphName, configuration);
 
         return Stream.of(result);
     }
@@ -101,10 +163,7 @@ final class LocalNodeRegressionFacade implements NodeRegressionFacade {
 
         var nodeFeatureSteps = nodeFeatureStepsParser.parse(nodeFeatureStepsAsObject, "featureProperties");
 
-        var pipeline = pipelineApplications.selectFeaturesForRegression(
-            pipelineName,
-            nodeFeatureSteps
-        );
+        var pipeline = pipelineApplications.selectFeaturesForRegression(pipelineName, nodeFeatureSteps);
 
         var result = NodePipelineInfoResultTransformer.create(pipelineName, pipeline);
 

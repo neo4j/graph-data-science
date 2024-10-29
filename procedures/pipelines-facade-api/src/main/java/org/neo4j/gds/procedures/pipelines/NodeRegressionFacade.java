@@ -23,11 +23,21 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public interface NodeRegressionFacade {
+    Stream<NodePipelineInfoResult> addLogisticRegression(String pipelineName, Map<String, Object> configuration);
+
     Stream<NodePipelineInfoResult> addNodeProperty(
         String pipelineName,
         String taskName,
         Map<String, Object> procedureConfig
     );
+
+    Stream<NodePipelineInfoResult> addRandomForest(String pipelineName, Map<String, Object> configuration);
+
+    Stream<NodePipelineInfoResult> configureAutoTuning(String pipelineName, Map<String, Object> configuration);
+
+    Stream<NodePipelineInfoResult> configureSplit(String pipelineName, Map<String, Object> configuration);
+
+    Stream<NodePipelineInfoResult> createPipeline(String pipelineName);
 
     Stream<PredictMutateResult> mutate(String graphName, Map<String, Object> configuration);
 

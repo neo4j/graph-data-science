@@ -131,7 +131,13 @@ public final class LocalPipelinesProcedureFacade implements PipelinesProcedureFa
             pipelineRepository
         );
 
-        var nodeRegressionFacade = LocalNodeRegressionFacade.create(modelCatalog, user, pipelineApplications);
+        var nodeRegressionFacade = LocalNodeRegressionFacade.create(
+            modelCatalog,
+            user,
+            pipelineConfigurationParser,
+            pipelineApplications,
+            pipelineRepository
+        );
 
         return new LocalPipelinesProcedureFacade(
             pipelineApplications,

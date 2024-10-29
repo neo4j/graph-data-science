@@ -19,16 +19,9 @@
  */
 package org.neo4j.gds.ml.pipeline.node.regression.configure;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.ConfigKeyValidation;
-import org.neo4j.gds.ml.api.TrainingMethod;
-import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
-import org.neo4j.gds.ml.models.linearregression.LinearRegressionTrainConfig;
-import org.neo4j.gds.ml.models.randomforest.RandomForestRegressorTrainerConfig;
-import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.pipelines.NodePipelineInfoResult;
-import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainingPipeline;
-import org.neo4j.gds.procedures.pipelines.NodePipelineInfoResultTransformer;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -38,7 +31,9 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class NodeRegressionPipelineAddTrainerMethodProcs extends BaseProc {
+public class NodeRegressionPipelineAddTrainerMethodProcs {
+    @Context
+    public GraphDataScienceProcedures facade;
 
     @Procedure(name = "gds.alpha.pipeline.nodeRegression.addLinearRegression", mode = READ)
     @Description("Add a linear regression model candidate to a node regression pipeline.")
@@ -46,14 +41,7 @@ public class NodeRegressionPipelineAddTrainerMethodProcs extends BaseProc {
         @Name("pipelineName") String pipelineName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var pipeline = PipelineCatalog.getTyped(username(), pipelineName, NodeRegressionTrainingPipeline.class);
-
-        var allowedKeys = LinearRegressionTrainConfig.DEFAULT.configKeys();
-        ConfigKeyValidation.requireOnlyKeysFrom(allowedKeys, configuration.keySet());
-
-        pipeline.addTrainerConfig(TunableTrainerConfig.of(configuration, TrainingMethod.LinearRegression));
-
-        return Stream.of(NodePipelineInfoResultTransformer.create(pipelineName, pipeline));
+        return facade.pipelines().nodeRegression().addLogisticRegression(pipelineName, configuration);
     }
 
     @Procedure(name = "gds.alpha.pipeline.nodeRegression.addRandomForest", mode = READ)
@@ -62,13 +50,6 @@ public class NodeRegressionPipelineAddTrainerMethodProcs extends BaseProc {
         @Name("pipelineName") String pipelineName,
         @Name(value = "configuration") Map<String, Object> configuration
     ) {
-        var pipeline = PipelineCatalog.getTyped(username(), pipelineName, NodeRegressionTrainingPipeline.class);
-
-        var allowedKeys = RandomForestRegressorTrainerConfig.DEFAULT.configKeys();
-        ConfigKeyValidation.requireOnlyKeysFrom(allowedKeys, configuration.keySet());
-
-        pipeline.addTrainerConfig(TunableTrainerConfig.of(configuration, TrainingMethod.RandomForestRegression));
-
-        return Stream.of(NodePipelineInfoResultTransformer.create(pipelineName, pipeline));
+        return facade.pipelines().nodeRegression().addRandomForest(pipelineName, configuration);
     }
 }
