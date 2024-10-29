@@ -21,7 +21,6 @@ package org.neo4j.gds.junit.annotation;
 
 @SuppressWarnings("all") // squelch checkstyle
 public enum Neo4jVersion {
-    V_5_24(24),
     V_5_25(25),
     V_5_26(26),
     ;
