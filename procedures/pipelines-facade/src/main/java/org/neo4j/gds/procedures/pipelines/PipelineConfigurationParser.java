@@ -27,6 +27,7 @@ import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.mlp.MLPClassifierTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
+import org.neo4j.gds.ml.models.randomforest.RandomForestRegressorTrainerConfig;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.LinkFeatureStepConfiguration;
@@ -49,11 +50,7 @@ class PipelineConfigurationParser {
     }
 
     AutoTuningConfig parseAutoTuningConfig(Map<String, Object> rawConfiguration) {
-        return parseConfigurationWithValidation(
-            rawConfiguration,
-            AutoTuningConfig::of,
-            AutoTuningConfig::configKeys
-        );
+        return parseConfigurationWithValidation(rawConfiguration, AutoTuningConfig::of, AutoTuningConfig::configKeys);
     }
 
     LinkFeatureStepConfiguration parseLinkFeatureStepConfiguration(Map<String, Object> configuration) {
@@ -82,11 +79,19 @@ class PipelineConfigurationParser {
         return parseConfiguration(LinkPredictionTrainConfig::of, configuration);
     }
 
-    TunableTrainerConfig parseLogisticRegressionTrainerConfig(Map<String, Object> configuration) {
+    TunableTrainerConfig parseLogisticRegressionTrainerConfigForLinkPredictionOrNodeClassification(Map<String, Object> configuration) {
         return parseTrainerConfiguration(
             configuration,
             LogisticRegressionTrainConfig.DEFAULT.configKeys(),
             TrainingMethod.LogisticRegression
+        );
+    }
+
+    TunableTrainerConfig parseLogisticRegressionTrainerConfigForNodeRegression(Map<String, Object> configuration) {
+        return parseTrainerConfiguration(
+            configuration,
+            LogisticRegressionTrainConfig.DEFAULT.configKeys(),
+            TrainingMethod.LinearRegression
         );
     }
 
@@ -137,11 +142,19 @@ class PipelineConfigurationParser {
         return parseConfiguration(NodeRegressionPipelineTrainConfig::of, configuration);
     }
 
-    TunableTrainerConfig parseRandomForestClassifierTrainerConfig(Map<String, Object> configuration) {
+    TunableTrainerConfig parseRandomForestClassifierTrainerConfigForLinkPredictionOrNodeClassification(Map<String, Object> configuration) {
         return parseTrainerConfiguration(
             configuration,
             RandomForestClassifierTrainerConfig.DEFAULT.configKeys(),
             TrainingMethod.RandomForestClassification
+        );
+    }
+
+    TunableTrainerConfig parseRandomForestClassifierTrainerConfigForNodeRegression(Map<String, Object> configuration) {
+        return parseTrainerConfiguration(
+            configuration,
+            RandomForestRegressorTrainerConfig.DEFAULT.configKeys(),
+            TrainingMethod.RandomForestRegression
         );
     }
 

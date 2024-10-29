@@ -322,6 +322,10 @@ class PipelineApplications {
         return pipelineRepository.createNodeClassificationTrainingPipeline(user, pipelineName);
     }
 
+    NodeRegressionTrainingPipeline createNodeRegressionTrainingPipeline(PipelineName pipelineName) {
+        return pipelineRepository.createNodeRegressionTrainingPipeline(user, pipelineName);
+    }
+
     /**
      * Straight delegation, the store will throw an exception
      */

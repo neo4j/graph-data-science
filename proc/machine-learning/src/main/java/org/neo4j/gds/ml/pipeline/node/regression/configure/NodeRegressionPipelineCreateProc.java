@@ -19,12 +19,9 @@
  */
 package org.neo4j.gds.ml.pipeline.node.regression.configure;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.StringIdentifierValidations;
-import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.pipelines.NodePipelineInfoResult;
-import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainingPipeline;
-import org.neo4j.gds.procedures.pipelines.NodePipelineInfoResultTransformer;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -33,17 +30,13 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class NodeRegressionPipelineCreateProc extends BaseProc {
+public class NodeRegressionPipelineCreateProc {
+    @Context
+    public GraphDataScienceProcedures facade;
 
     @Procedure(name = "gds.alpha.pipeline.nodeRegression.create", mode = READ)
     @Description("Creates a node regression training pipeline in the pipeline catalog.")
     public Stream<NodePipelineInfoResult> create(@Name("pipelineName") String pipelineName) {
-        StringIdentifierValidations.validateNoWhiteCharacter(pipelineName, "pipelineName");
-
-        var pipeline = new NodeRegressionTrainingPipeline();
-
-        PipelineCatalog.set(username(), pipelineName, pipeline);
-
-        return Stream.of(NodePipelineInfoResultTransformer.create(pipelineName, pipeline));
+        return facade.pipelines().nodeRegression().createPipeline(pipelineName);
     }
 }

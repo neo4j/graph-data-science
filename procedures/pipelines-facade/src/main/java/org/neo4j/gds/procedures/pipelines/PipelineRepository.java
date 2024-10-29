@@ -45,7 +45,15 @@ public class PipelineRepository {
     NodeClassificationTrainingPipeline createNodeClassificationTrainingPipeline(User user, PipelineName pipelineName) {
         var pipeline = new NodeClassificationTrainingPipeline();
 
-        PipelineCatalog.set(user.getUsername(), pipelineName.value, pipeline);
+        registerPipeline(user, pipelineName, pipeline);
+
+        return pipeline;
+    }
+
+    NodeRegressionTrainingPipeline createNodeRegressionTrainingPipeline(User user, PipelineName pipelineName) {
+        var pipeline = new NodeRegressionTrainingPipeline();
+
+        registerPipeline(user, pipelineName, pipeline);
 
         return pipeline;
     }
@@ -101,5 +109,13 @@ public class PipelineRepository {
 
     private TrainingPipeline<?> get(User user, PipelineName pipelineName) {
         return PipelineCatalog.get(user.getUsername(), pipelineName.value);
+    }
+
+    private void registerPipeline(
+        User user,
+        PipelineName pipelineName,
+        TrainingPipeline<?> pipeline
+    ) {
+        PipelineCatalog.set(user.getUsername(), pipelineName.value, pipeline);
     }
 }

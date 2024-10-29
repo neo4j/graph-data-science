@@ -22,6 +22,7 @@ package org.neo4j.gds.procedures.pipelines;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainingPipeline;
 
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -66,6 +67,23 @@ class Configurer {
         return configure(
             pipelineNameAsString,
             pipelineName -> pipelineRepository.getNodeClassificationTrainingPipeline(user, pipelineName),
+            configurationSupplier,
+            action,
+            NodePipelineInfoResultTransformer::create
+        );
+    }
+
+    /**
+     * Some more dull scaffolding
+     */
+    <CONFIGURATION> Stream<NodePipelineInfoResult> configureNodeRegressionTrainingPipeline(
+        String pipelineNameAsString,
+        Supplier<CONFIGURATION> configurationSupplier,
+        BiConsumer<NodeRegressionTrainingPipeline, CONFIGURATION> action
+    ) {
+        return configure(
+            pipelineNameAsString,
+            pipelineName -> pipelineRepository.getNodeRegressionTrainingPipeline(user, pipelineName),
             configurationSupplier,
             action,
             NodePipelineInfoResultTransformer::create

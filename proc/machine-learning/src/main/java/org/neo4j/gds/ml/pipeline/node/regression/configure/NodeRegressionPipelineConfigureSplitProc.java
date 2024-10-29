@@ -19,13 +19,9 @@
  */
 package org.neo4j.gds.ml.pipeline.node.regression.configure;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.pipelines.NodePipelineInfoResult;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
-import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainingPipeline;
-import org.neo4j.gds.procedures.pipelines.NodePipelineInfoResultTransformer;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -35,7 +31,9 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class NodeRegressionPipelineConfigureSplitProc extends BaseProc {
+public class NodeRegressionPipelineConfigureSplitProc {
+    @Context
+    public GraphDataScienceProcedures facade;
 
     @Procedure(name = "gds.alpha.pipeline.nodeRegression.configureSplit", mode = READ)
     @Description("Configures the graph splitting of a node regression pipeline.")
@@ -43,14 +41,6 @@ public class NodeRegressionPipelineConfigureSplitProc extends BaseProc {
         @Name("pipelineName") String pipelineName,
         @Name("configuration") Map<String, Object> configMap
     ) {
-        var cypherConfig = CypherMapWrapper.create(configMap);
-        var config = NodePropertyPredictionSplitConfig.of(cypherConfig);
-        cypherConfig.requireOnlyKeysFrom(config.configKeys());
-
-        var pipeline = PipelineCatalog.getTyped(username(), pipelineName, NodeRegressionTrainingPipeline.class);
-
-        pipeline.setSplitConfig(config);
-
-        return Stream.of(NodePipelineInfoResultTransformer.create(pipelineName, pipeline));
+        return facade.pipelines().nodeRegression().configureSplit(pipelineName, configMap);
     }
 }
