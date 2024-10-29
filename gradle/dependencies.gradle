@@ -1,24 +1,20 @@
 ext {
     neos = [
-        '5.25': properties.getOrDefault('neo4jVersion525', '5.25.1'),
         '5.26': properties.getOrDefault('neo4jVersion526', '5.26.0-SNAPSHOT'),
     ]
 
-    neo4jDefault = neos.'5.25'
+    neo4jDefault = neos.'5.26'
     neo4j_minor = properties.getOrDefault('neo4jVersion', neo4jDefault).toString().split('\\.')[0..1].join('.')
 
     scalas = [
-        '5.25': '2.13.11',
         '5.26': '2.13.11',
     ]
 
     log4js = [
-        '5.25': '2.20.0',
         '5.26': '2.20.0',
     ]
 
     shiros = [
-        '5.25': '2.0.1',
         '5.26': '2.0.1',
     ]
 
