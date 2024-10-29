@@ -17,22 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.junit.annotation;
+package org.neo4j.gds.compat._526;
 
-@SuppressWarnings("all") // squelch checkstyle
-public enum Neo4jVersion {
-    V_5_24(24),
-    V_5_25(25),
-    V_5_26(26),
-    ;
+import org.neo4j.gds.compat.Neo4jProxyApi;
 
-    private final int minor;
+public final class Neo4jProxyImpl implements Neo4jProxyApi {
 
-    Neo4jVersion(int minor) {
-        this.minor = minor;
-    }
-
-    public boolean matches(org.neo4j.gds.compat.Neo4jVersion version) {
-        return version.matches(5, this.minor);
-    }
 }
