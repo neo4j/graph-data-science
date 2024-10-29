@@ -413,8 +413,6 @@ include('algorithm-specifications')
 project(':algorithm-specifications').projectDir = file('algorithm-specifications')
 
 
-include('neo4j-kernel-adapter-5.23')
-project(':neo4j-kernel-adapter-5.23').projectDir = file('compatibility/5.23/neo4j-kernel-adapter')
 
 include('neo4j-kernel-adapter-5.24')
 project(':neo4j-kernel-adapter-5.24').projectDir = file('compatibility/5.24/neo4j-kernel-adapter')

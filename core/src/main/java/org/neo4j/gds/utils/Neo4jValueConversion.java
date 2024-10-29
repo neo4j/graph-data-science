@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.utils;
 
-import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.values.SequenceValue;
 import org.neo4j.values.storable.ByteArray;
 import org.neo4j.values.storable.DoubleArray;
 import org.neo4j.values.storable.FloatArray;
@@ -99,7 +99,7 @@ public final class Neo4jValueConversion {
     }
 
     private static double[] integralToDoubleArray(IntegralArray intArray) {
-        var length = Neo4jProxy.sequenceSizeAsInt(intArray);
+        var length = intArray.intSize();
         var result = new double[length];
 
         IntToLongFunction longValueProvider = resolvelongValueProvider(intArray);
@@ -116,7 +116,7 @@ public final class Neo4jValueConversion {
     }
 
     private static double[] floatToDoubleArray(FloatArray floatArray) {
-        var length = Neo4jProxy.sequenceSizeAsInt(floatArray);
+        var length = ((SequenceValue) floatArray).intSize();
         var result = new double[length];
 
         for (int idx = 0; idx < length; idx++) {
@@ -127,7 +127,7 @@ public final class Neo4jValueConversion {
     }
 
     private static float[] doubleToFloatArray(DoubleArray doubleArray) {
-        var length = Neo4jProxy.sequenceSizeAsInt(doubleArray);
+        var length = ((SequenceValue) doubleArray).intSize();
         var result = new float[length];
 
         try {
@@ -142,7 +142,7 @@ public final class Neo4jValueConversion {
     }
 
     private static float[] longToFloatArray(IntegralArray integralArray) {
-        var length = Neo4jProxy.sequenceSizeAsInt(integralArray);
+        var length = integralArray.intSize();
         var result = new float[length];
 
         IntToLongFunction longValueProvider = resolvelongValueProvider(integralArray);
@@ -177,7 +177,7 @@ public final class Neo4jValueConversion {
     }
 
     private static long[] floatToLongArray(FloatingPointArray floatArray) {
-        var length = Neo4jProxy.sequenceSizeAsInt(floatArray);
+        var length = floatArray.intSize();
         var result = new long[length];
 
         try {

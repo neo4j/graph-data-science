@@ -32,15 +32,15 @@ class Neo4jVersionLookupTest {
 
     @Test
     void testParse() {
-        assertThat(Neo4jVersionLookup.parse("5.23.0", "5.23.0"))
-            .returns(new Neo4jVersion.MajorMinor(5, 23), Neo4jVersion::semanticVersion)
+        assertThat(Neo4jVersionLookup.parse("5.24.0", "5.24.0"))
+            .returns(new Neo4jVersion.MajorMinor(5, 24), Neo4jVersion::semanticVersion)
             .returns(true, Neo4jVersion::isSupported);
     }
 
     @Test
     void testParseNext() {
-        assertThat(Neo4jVersionLookup.parse("5.24.0SNAPSHOT", "5.24.0-SNAPSHOT"))
-            .returns(true, v -> v.matches(5, 24))
+        assertThat(Neo4jVersionLookup.parse("5.25.0-SNAPSHOT", "5.25.0-SNAPSHOT"))
+            .returns(true, v -> v.matches(5, 25))
             .returns(true, Neo4jVersion::isSupported);
     }
 

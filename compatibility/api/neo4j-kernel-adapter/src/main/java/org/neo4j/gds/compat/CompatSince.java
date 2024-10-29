@@ -32,7 +32,7 @@ import java.lang.annotation.Target;
  * Consequently, when we drop support for a version such that the oldest supported Neo4j version is 5.42,
  * we know that we can remove all compat method with a value of `minor=42` (or lower).
  */
-@Target(ElementType.METHOD)
+@Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.SOURCE)
 public @interface CompatSince {
 

@@ -22,7 +22,6 @@ package org.neo4j.gds.values;
 import org.eclipse.collections.api.block.function.primitive.ObjectIntToObjectFunction;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.construction.NodeLabelToken;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.values.SequenceValue;
@@ -42,7 +41,7 @@ public class CypherNodeLabelTokens {
     }
 
     public static @NotNull NodeLabelToken of(SequenceValue nodeLabels) {
-        return new Sequence<>(nodeLabels, (s, i) -> ((TextValue) Neo4jProxy.sequenceValueAt(s, i)).stringValue());
+        return new Sequence<>(nodeLabels, (s, i) -> ((TextValue) s.value((long) i)).stringValue());
     }
 
     private static final class Sequence<T extends SequenceValue> implements NodeLabelTokens.ValidNodeLabelToken {
@@ -59,7 +58,7 @@ public class CypherNodeLabelTokens {
 
         @Override
         public int size() {
-            return Neo4jProxy.sequenceSizeAsInt(sequence);
+            return sequence.intSize();
         }
 
         @Override

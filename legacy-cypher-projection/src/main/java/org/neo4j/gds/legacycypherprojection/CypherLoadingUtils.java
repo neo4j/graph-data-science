@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.legacycypherprojection;
 
-import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.kernel.impl.query.QueryExecutionKernelException;
 import org.neo4j.kernel.impl.query.QuerySubscription;
 
 public final class CypherLoadingUtils {
@@ -27,8 +27,12 @@ public final class CypherLoadingUtils {
     public static void consume(QuerySubscription execution) {
         try {
             execution.consumeAll();
+        } catch (RuntimeException re) {
+            throw re;
+        } catch (QueryExecutionKernelException e) {
+            throw e.asUserException();
         } catch (Exception e) {
-            throw Neo4jProxy.queryExceptionAsRuntimeException(e);
+            throw new RuntimeException(e);
         }
     }
 
