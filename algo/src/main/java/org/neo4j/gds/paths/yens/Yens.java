@@ -29,8 +29,6 @@ import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.SingleTarget;
-import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
-import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfigImpl;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -180,13 +178,5 @@ public final class Yens extends Algorithm<PathFindingResult> {
         return dijkstra.compute().findFirst();
     }
 
-    static DijkstraSourceTargetsBaseConfig dijkstraConfig(long targetNode) {
-
-        return ShortestPathDijkstraStreamConfigImpl
-            .builder()
-            .sourceNode(targetNode) //this is irrelevant
-            .targetNode(targetNode)
-            .build();
-    }
 
 }
