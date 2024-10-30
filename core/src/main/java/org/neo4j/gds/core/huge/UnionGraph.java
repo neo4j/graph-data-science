@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CSRGraph;
+import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphCharacteristics;
 import org.neo4j.gds.api.IdMap;
@@ -292,7 +293,7 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
-    public Optional<NodeFilteredGraph> asNodeFilteredGraph() {
+    public Optional<FilteredIdMap> asNodeFilteredGraph() {
         return first.asNodeFilteredGraph();
     }
 

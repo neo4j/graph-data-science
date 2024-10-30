@@ -433,7 +433,7 @@ public class HugeGraph implements CSRGraph {
     }
 
     @Override
-    public Optional<NodeFilteredGraph> asNodeFilteredGraph() {
+    public Optional<FilteredIdMap> asNodeFilteredGraph() {
         return Optional.empty();
     }
 

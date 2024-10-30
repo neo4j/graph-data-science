@@ -23,7 +23,6 @@ package org.neo4j.gds.api;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyContainer;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.core.huge.NodeFilteredGraph;
 
 import java.util.Optional;
 import java.util.Set;
@@ -62,7 +61,7 @@ public interface Graph extends IdMap, NodePropertyContainer, Degrees, Relationsh
      * Be aware that it is not guaranteed to contain all relationships of the graph.
      * Otherwise, it will return an empty Optional.
      */
-    Optional<NodeFilteredGraph> asNodeFilteredGraph();
+    Optional<FilteredIdMap> asNodeFilteredGraph();
 
     /**
      * Get the n-th target node id for a given {@code sourceNodeId}.

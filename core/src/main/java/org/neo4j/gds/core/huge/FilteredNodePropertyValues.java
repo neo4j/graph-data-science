@@ -22,6 +22,7 @@ package org.neo4j.gds.core.huge;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
@@ -31,11 +32,11 @@ import java.util.OptionalLong;
 
 public abstract class FilteredNodePropertyValues implements NodePropertyValues {
     protected final NodePropertyValues properties;
-    protected NodeFilteredGraph graph;
+    protected FilteredIdMap graph;
 
     protected abstract long translateId(long nodeId);
 
-    FilteredNodePropertyValues(NodePropertyValues properties, NodeFilteredGraph graph) {
+    FilteredNodePropertyValues(NodePropertyValues properties, FilteredIdMap graph) {
         this.properties = properties;
         this.graph = graph;
     }
@@ -155,11 +156,11 @@ public abstract class FilteredNodePropertyValues implements NodePropertyValues {
     // This class is used when the ID space of the wrapped properties is smaller than the id space used to retrieved node properties.
     public static final class OriginalToFilteredNodePropertyValues extends FilteredNodePropertyValues {
 
-        private OriginalToFilteredNodePropertyValues(NodePropertyValues properties, NodeFilteredGraph graph) {
+        private OriginalToFilteredNodePropertyValues(NodePropertyValues properties, FilteredIdMap graph) {
             super(properties, graph);
         }
 
-        public static NodePropertyValues create(NodePropertyValues properties, NodeFilteredGraph graph) {
+        public static NodePropertyValues create(NodePropertyValues properties, FilteredIdMap graph) {
             return new OriginalToFilteredNodePropertyValues(properties, graph);
         }
 

@@ -25,7 +25,6 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.collections.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.huge.NodeFilteredGraph;
 
 import java.util.Collection;
 import java.util.List;
@@ -65,7 +64,7 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
-    public Optional<NodeFilteredGraph> asNodeFilteredGraph() {
+    public Optional<FilteredIdMap> asNodeFilteredGraph() {
         return graph.asNodeFilteredGraph();
     }
 

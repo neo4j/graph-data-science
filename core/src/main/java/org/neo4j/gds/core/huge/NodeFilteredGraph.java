@@ -291,7 +291,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter implements FilteredIdMap 
     }
 
     @Override
-    public Optional<NodeFilteredGraph> asNodeFilteredGraph() {
+    public Optional<FilteredIdMap> asNodeFilteredGraph() {
         return Optional.of(this);
     }
 
