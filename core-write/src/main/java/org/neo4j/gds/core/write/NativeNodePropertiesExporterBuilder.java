@@ -30,6 +30,10 @@ public class NativeNodePropertiesExporterBuilder extends NodePropertyExporterBui
 
     @Override
     public NativeNodePropertyExporter build() {
+        if (resultStore.isPresent()) {
+            throw new UnsupportedOperationException("Writing to the result store is only supported for licensed GDS");
+        }
+
         return new NativeNodePropertyExporter(
             transactionContext,
             nodeCount,
