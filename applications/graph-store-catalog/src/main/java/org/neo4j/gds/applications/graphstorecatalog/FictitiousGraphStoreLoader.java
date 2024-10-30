@@ -25,6 +25,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.GraphStoreFactorySupplier;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
@@ -69,16 +70,16 @@ public class FictitiousGraphStoreLoader implements GraphStoreCreator {
 
     @Override
     public MemoryEstimation estimateMemoryUsageDuringLoading() {
-        return graphProjectConfig
-            .graphStoreFactory()
+        return GraphStoreFactorySupplier
+            .supplier(graphProjectConfig)
             .getWithDimension(GraphLoaderContext.NULL_CONTEXT, graphDimensions())
             .estimateMemoryUsageDuringLoading();
     }
 
     @Override
     public MemoryEstimation estimateMemoryUsageAfterLoading() {
-        return graphProjectConfig
-            .graphStoreFactory()
+        return GraphStoreFactorySupplier
+            .supplier(graphProjectConfig)
             .getWithDimension(GraphLoaderContext.NULL_CONTEXT, graphDimensions())
             .estimateMemoryUsageAfterLoading();
     }

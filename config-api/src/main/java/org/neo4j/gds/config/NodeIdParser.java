@@ -75,8 +75,7 @@ public final class NodeIdParser {
      * @return A {@code java.lang.Long} of node IDs.
      */
     public static long parseToSingleNodeId(Object input, String parameterName) {
-        if (input instanceof Collection) {
-            var collection = (Collection) input;
+        if (input instanceof Collection collection) {
             if (collection.size() != 1) {
                 throw new IllegalArgumentException(formatWithLocale(
                     "Failed to parse `%s` as a single node ID. A collection can be parsed if it contains a single element, but this `%s` contains `%s` elements.",

@@ -5,9 +5,36 @@ description = 'Neo4j Graph Data Science :: Config API'
 group = 'org.neo4j.gds'
 
 dependencies {
+    annotationProcessor project(':annotations')
+    annotationProcessor project(':config-generator')
+    annotationProcessor openGds.immutables.builder
+    annotationProcessor openGds.immutables.value
+    annotationProcessor group: 'org.neo4j', name: 'annotations', version: ver.'neo4j'
+
     compileOnly project(':annotations')
     compileOnly openGds.immutables.value.annotations
     compileOnly openGds.jetbrains.annotations
 
+    // Neo4j Dependencies
+    // `org.neo4j.gds.config.UserInputAsStringOrListOfString` is using
+    //  - Node
+    //  - Relationship
+    //  - Path
+    // TODO: Move UserInputAsStringOrListOfString up where it belongs
+    compileOnly(
+        [group: 'org.neo4j', name: 'neo4j-graphdb-api', version: ver.'neo4j'],
+    )
+
     api openGds.commons.lang3
+
+    implementation(
+        project(':concurrency'),
+        project(':concurrency-validation-api'),
+        project(':core-api'),
+        project(':graph-projection-api'),
+        project(':graph-schema-api'),
+        // `JobIdConfig` 🙈
+        project(':progress-tracking'),
+        project(':string-formatting'),
+    )
 }

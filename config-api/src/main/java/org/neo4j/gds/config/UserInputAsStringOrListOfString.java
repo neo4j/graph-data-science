@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.config;
 
+import org.neo4j.gds.utils.StringFormatting;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
@@ -26,8 +27,6 @@ import org.neo4j.graphdb.Relationship;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class UserInputAsStringOrListOfString {
 
@@ -53,7 +52,7 @@ public final class UserInputAsStringOrListOfString {
 
     private static IllegalArgumentException illegalArgumentException(Object userInput, String configurationKey) {
         var type = typeOf(userInput);
-        var message = formatWithLocale("Type mismatch for %s: expected List<String> or String, but found %s", configurationKey, type);
+        var message = StringFormatting.formatWithLocale("Type mismatch for %s: expected List<String> or String, but found %s", configurationKey, type);
         return new IllegalArgumentException(message);
     }
 

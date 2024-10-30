@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.beta.generator;
 
-import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.gds.core.utils.statistics.DistributionHelper;
+import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Arrays;
 import java.util.List;

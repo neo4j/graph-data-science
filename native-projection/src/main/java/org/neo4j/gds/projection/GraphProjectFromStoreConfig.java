@@ -27,12 +27,8 @@ import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.Configuration.ConvertWith;
 import org.neo4j.gds.annotation.Configuration.Key;
-import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.GraphDimensions;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -76,30 +72,30 @@ public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
         return PropertyMappings.of();
     }
 
-    @Configuration.Ignore
-    @Override
-    default GraphStoreFactory.Supplier graphStoreFactory() {
-        return new GraphStoreFactory.Supplier() {
-            @Override
-            public GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> get(GraphLoaderContext loaderContext) {
-                return new NativeFactoryBuilder()
-                    .graphProjectFromStoreConfig(GraphProjectFromStoreConfig.this)
-                    .loadingContext(loaderContext)
-                    .build();
-            }
-
-            @Override
-            public GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> getWithDimension(
-                GraphLoaderContext loaderContext, GraphDimensions graphDimensions
-            ) {
-                return new NativeFactoryBuilder()
-                    .graphProjectFromStoreConfig(GraphProjectFromStoreConfig.this)
-                    .loadingContext(loaderContext)
-                    .graphDimensions(graphDimensions)
-                    .build();
-            }
-        };
-    }
+//    @Configuration.Ignore
+//    @Override
+//    default GraphStoreFactory.Supplier graphStoreFactory() {
+//        return new GraphStoreFactory.Supplier() {
+//            @Override
+//            public GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> get(GraphLoaderContext loaderContext) {
+//                return new NativeFactoryBuilder()
+//                    .graphProjectFromStoreConfig(GraphProjectFromStoreConfig.this)
+//                    .loadingContext(loaderContext)
+//                    .build();
+//            }
+//
+//            @Override
+//            public GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> getWithDimension(
+//                GraphLoaderContext loaderContext, GraphDimensions graphDimensions
+//            ) {
+//                return new NativeFactoryBuilder()
+//                    .graphProjectFromStoreConfig(GraphProjectFromStoreConfig.this)
+//                    .loadingContext(loaderContext)
+//                    .graphDimensions(graphDimensions)
+//                    .build();
+//            }
+//        };
+//    }
 
     @Configuration.Check
     default void validateProjectionsAreNotEmpty() {

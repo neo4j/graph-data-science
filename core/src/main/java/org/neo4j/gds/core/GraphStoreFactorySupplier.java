@@ -19,37 +19,15 @@
  */
 package org.neo4j.gds.core;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.config.GraphProjectConfig;
 
-@ValueClass
-public interface GraphLoader {
+public final class GraphStoreFactorySupplier {
 
-    GraphLoaderContext context();
+    private GraphStoreFactorySupplier() {}
 
-    @Value.Default
-    default String username() {
-        return projectConfig().username();
+    public static GraphStoreFactory.Supplier supplier(GraphProjectConfig graphProjectConfig) {
+        return null;
     }
 
-    GraphProjectConfig projectConfig();
-
-    default Graph graph() {
-        return graphStore().getUnion();
-    }
-
-    default GraphStore graphStore() {
-        return graphStoreFactory().build();
-    }
-
-    default GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> graphStoreFactory() {
-        return GraphStoreFactorySupplier
-            .supplier(projectConfig())
-            .get(context());
-    }
 }

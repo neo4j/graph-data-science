@@ -20,12 +20,8 @@
 package org.neo4j.gds.legacycypherprojection;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.GraphDimensions;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -76,23 +72,23 @@ public interface GraphProjectFromCypherConfig extends GraphProjectConfig {
         return true;
     }
 
-    @Configuration.Ignore
-    @Override
-    default GraphStoreFactory.Supplier graphStoreFactory() {
-        return new GraphStoreFactory.Supplier() {
-            @Override
-            public GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> get(GraphLoaderContext loaderContext) {
-                return CypherFactory.createWithDerivedDimensions(GraphProjectFromCypherConfig.this, loaderContext);
-            }
-
-            @Override
-            public GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> getWithDimension(
-                GraphLoaderContext loaderContext, GraphDimensions graphDimensions
-            ) {
-                return CypherFactory.createWithBaseDimensions(GraphProjectFromCypherConfig.this, loaderContext, graphDimensions);
-            }
-        };
-    }
+//    @Configuration.Ignore
+//    @Override
+//    default GraphStoreFactory.Supplier graphStoreFactory() {
+//        return new GraphStoreFactory.Supplier() {
+//            @Override
+//            public GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> get(GraphLoaderContext loaderContext) {
+//                return CypherFactory.createWithDerivedDimensions(GraphProjectFromCypherConfig.this, loaderContext);
+//            }
+//
+//            @Override
+//            public GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> getWithDimension(
+//                GraphLoaderContext loaderContext, GraphDimensions graphDimensions
+//            ) {
+//                return CypherFactory.createWithBaseDimensions(GraphProjectFromCypherConfig.this, loaderContext, graphDimensions);
+//            }
+//        };
+//    }
 
     @Override
     default boolean sudo() {

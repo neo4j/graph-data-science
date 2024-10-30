@@ -20,7 +20,6 @@
 package org.neo4j.gds.config;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.api.GraphStoreFactory;
 
 import java.util.Map;
 
@@ -47,10 +46,10 @@ public interface GraphSampleProcConfig extends GraphProjectConfig, GraphNameConf
     @Configuration.Parameter
     GraphSampleAlgoConfig sampleAlgoConfig();
 
-    @Configuration.Ignore
-    @Override
-    default GraphStoreFactory.Supplier graphStoreFactory() {
-        return originalConfig().graphStoreFactory();
-    }
+//    @Configuration.Ignore
+//    @Override
+//    default GraphStoreFactory.Supplier graphStoreFactory() {
+//        return originalConfig().graphStoreFactory();
+//    }
 
 }

@@ -22,8 +22,13 @@ dependencies {
     }
 
     implementation project(':annotations')
-    implementation project(':core') // TODO move core.concurrency out of core to not depend on whole core
+    implementation project(':concurrency')
+    implementation project(':config-api')
+    // Becase `:core` exposes StatementApi which in turn is used in the various exporters
+    implementation project(':core')
+    implementation project(':core-api')
     implementation project(':core-utils')
+    implementation project(':graph-projection-api')
     implementation project(':neo4j-values')
     implementation project(':progress-tracking')
     implementation project(':graph-schema-api')

@@ -22,7 +22,6 @@ package org.neo4j.gds.projection;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -65,13 +64,13 @@ public interface GraphProjectFromCypherAggregationConfig extends GraphProjectCon
     @Configuration.Parameter()
     String query();
 
-    @Configuration.Ignore
-    @Override
-    default GraphStoreFactory.Supplier graphStoreFactory() {
-        throw new UnsupportedOperationException(
-            "Cypher aggregation does not work over the default graph store framework"
-        );
-    }
+//    @Configuration.Ignore
+//    @Override
+//    default GraphStoreFactory.Supplier graphStoreFactory() {
+//        throw new UnsupportedOperationException(
+//            "Cypher aggregation does not work over the default graph store framework"
+//        );
+//    }
 
     @Configuration.Ignore
     default Set<String> outputFieldDenylist() {

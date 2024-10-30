@@ -21,7 +21,6 @@ package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.config.GraphProjectConfig;
 
 import java.util.Map;
@@ -59,10 +58,10 @@ class StubGraphProjectConfig implements GraphProjectConfig {
         throw new UnsupportedOperationException("TODO");
     }
 
-    @Override
-    public GraphStoreFactory.Supplier graphStoreFactory() {
-        throw new UnsupportedOperationException("TODO");
-    }
+//    @Override
+//    public GraphStoreFactory.Supplier graphStoreFactory() {
+//        throw new UnsupportedOperationException("TODO");
+//    }
 
     @Override
     public Optional<String> usernameOverride() {

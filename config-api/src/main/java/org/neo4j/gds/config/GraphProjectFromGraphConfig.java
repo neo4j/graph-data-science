@@ -20,7 +20,6 @@
 package org.neo4j.gds.config;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -81,11 +80,11 @@ public interface GraphProjectFromGraphConfig extends GraphProjectConfig {
         return Collections.emptyMap();
     }
 
-    @Configuration.Ignore
-    @Override
-    default GraphStoreFactory.Supplier graphStoreFactory() {
-        return originalConfig().graphStoreFactory();
-    }
+//    @Configuration.Ignore
+//    @Override
+//    default GraphStoreFactory.Supplier graphStoreFactory() {
+//        return originalConfig().graphStoreFactory();
+//    }
 
     // Inherited, but ignored config keys
 

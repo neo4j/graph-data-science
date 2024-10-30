@@ -30,7 +30,6 @@ import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -117,12 +116,12 @@ public interface RandomGraphGeneratorConfig extends GraphProjectConfig {
             .build();
     }
 
-    @Configuration.Ignore
-    @Override
-    default GraphStoreFactory.Supplier graphStoreFactory() {
-        // TODO: maybe we could introduce a RandomGraphFactory
-        throw new UnsupportedOperationException("RandomGraphGeneratorConfig requires explicit graph generation.");
-    }
+//    @Configuration.Ignore
+//    @Override
+//    default GraphStoreFactory.Supplier graphStoreFactory() {
+//        // TODO: maybe we could introduce a RandomGraphFactory
+//        throw new UnsupportedOperationException("RandomGraphGeneratorConfig requires explicit graph generation.");
+//    }
 
     @Configuration.Ignore
     default Set<String> outputFieldDenylist() {

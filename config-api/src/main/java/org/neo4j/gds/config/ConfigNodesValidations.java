@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.utils.StringFormatting;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
@@ -72,7 +73,7 @@ public final class ConfigNodesValidations {
             .collect(Collectors.toList());
 
         if (!missingNodes.isEmpty()) {
-            throw new IllegalArgumentException(formatWithLocale(
+            throw new IllegalArgumentException(StringFormatting.formatWithLocale(
                 "%s nodes do not exist in the in-memory graph%s: %s",
                 parameterKey,
                 nodeLabelFilterDescription(filteredNodeLabels, graphStore),
@@ -88,7 +89,7 @@ public final class ConfigNodesValidations {
         @Nullable String propertyName
     ) {
         if (graphStore.hasNodeProperty(nodeLabels, propertyName)) return;
-        throw new IllegalArgumentException(formatWithLocale(
+        throw new IllegalArgumentException(StringFormatting.formatWithLocale(
             "%s `%s` not found in graph with node properties: %s",
             configKey,
             propertyName,

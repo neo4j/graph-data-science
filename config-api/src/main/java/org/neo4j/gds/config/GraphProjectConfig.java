@@ -21,7 +21,6 @@ package org.neo4j.gds.config;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
 import org.neo4j.gds.core.StringIdentifierValidations;
 import org.neo4j.gds.core.Username;
@@ -96,12 +95,12 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
         return false;
     }
 
-    @Configuration.Ignore
-    default GraphStoreFactory.Supplier graphStoreFactory() {
-        return loaderContext -> {
-            throw new UnsupportedOperationException("GraphStoreFactory not set");
-        };
-    }
+//    @Configuration.Ignore
+//    default GraphStoreFactory.Supplier graphStoreFactory() {
+//        return loaderContext -> {
+//            throw new UnsupportedOperationException("GraphStoreFactory not set");
+//        };
+//    }
 
     @Configuration.Check
     default void validateReadConcurrency() {

@@ -23,6 +23,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.GraphStoreFactorySupplier;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
@@ -58,8 +59,9 @@ public class FictitiousGraphStoreEstimationService {
     }
 
     private MemoryEstimation estimateMemoryUsageAfterLoading(GraphProjectConfig graphProjectConfig, GraphDimensions graphDimensions) {
-        return graphProjectConfig
-            .graphStoreFactory()
+
+        return GraphStoreFactorySupplier
+            .supplier(graphProjectConfig)
             .getWithDimension(GraphLoaderContext.NULL_CONTEXT, graphDimensions)
             .estimateMemoryUsageAfterLoading();
     }

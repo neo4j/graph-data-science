@@ -15,12 +15,20 @@ dependencies {
 
     compileOnly openGds.jetbrains.annotations
 
+    // Neo4j Dependencies
+    // `ExportedRelationship` references `org.neo4j.values.storable.Value`
+    compileOnly(
+        [group: 'org.neo4j', name: 'neo4j-values', version: ver.'neo4j'],
+    )
+
     implementation project(':annotations')
     implementation project(':collections')
     implementation project(':concurrency')
     implementation project(':core-utils')
     implementation project(':graph-projection-api')
     implementation project(':graph-schema-api')
+    // `JobIdConfig` 🙈
+    implementation project(':progress-tracking')
     implementation project(':string-formatting')
 
     implementation openGds.hdrhistogram
