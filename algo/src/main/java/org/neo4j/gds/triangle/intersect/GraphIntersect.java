@@ -31,7 +31,7 @@ import static org.neo4j.gds.api.AdjacencyCursor.NOT_FOUND;
 /**
  * An instance of this is not thread-safe; Iteration/Intersection on multiple threads will
  * throw misleading {@link NullPointerException}s.
- * Instances are however safe to use concurrently with other {@link org.neo4j.gds.api.RelationshipIterator}s.
+ * Instances are however safe to use concurrently with other {@link org.neo4j.gds.api.properties.relationships.RelationshipIterator}s.
  */
 
 public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements RelationshipIntersect {

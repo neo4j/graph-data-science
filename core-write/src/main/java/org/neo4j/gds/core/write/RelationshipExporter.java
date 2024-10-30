@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.write;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 

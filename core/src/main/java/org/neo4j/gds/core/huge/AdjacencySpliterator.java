@@ -20,9 +20,9 @@
 package org.neo4j.gds.core.huge;
 
 import org.neo4j.gds.api.AdjacencyCursor;
-import org.neo4j.gds.api.PropertyCursor;
-import org.neo4j.gds.api.RelationshipCursor;
-import org.neo4j.gds.api.ModifiableRelationshipCursor;
+import org.neo4j.gds.api.properties.relationships.ModifiableRelationshipCursor;
+import org.neo4j.gds.api.properties.relationships.PropertyCursor;
+import org.neo4j.gds.api.properties.relationships.RelationshipCursor;
 
 import java.util.Spliterator;
 import java.util.function.Consumer;

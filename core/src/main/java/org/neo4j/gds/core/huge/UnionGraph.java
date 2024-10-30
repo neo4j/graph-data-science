@@ -27,11 +27,11 @@ import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphCharacteristics;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.RelationshipConsumer;
-import org.neo4j.gds.api.RelationshipCursor;
-import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.properties.relationships.RelationshipConsumer;
+import org.neo4j.gds.api.properties.relationships.RelationshipCursor;
+import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.collections.primitive.PrimitiveLongIterable;
 

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.api;
+package org.neo4j.gds.api.properties.relationships;
 
 import java.util.stream.Stream;
 
@@ -85,7 +85,7 @@ public interface RelationshipIterator extends RelationshipPredicate {
      * from the given node id. The id space returned for source and target nodes is the
      * internal id space with respect to the graph this method was called on.
      * <p>
-     * The object returned by the stream is a single instance of {@link org.neo4j.gds.api.RelationshipCursor}.
+     * The object returned by the stream is a single instance of {@link RelationshipCursor}.
      * The same instance is used for every element in the stream and should thus not be
      * stored for later use but instead be consumed directly before consuming the next element of the stream.
      *

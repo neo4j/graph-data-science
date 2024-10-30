@@ -21,7 +21,7 @@ package org.neo4j.gds.k1coloring;
 
 import com.carrotsearch.hppc.BitSet;
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.neo4j.gds.api.RelationshipIterator;
+import org.neo4j.gds.api.properties.relationships.RelationshipIterator;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;

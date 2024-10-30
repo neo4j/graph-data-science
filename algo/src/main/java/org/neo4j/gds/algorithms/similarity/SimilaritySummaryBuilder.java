@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.algorithms.similarity;
 
-import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
 
 import java.util.Map;
 
@@ -39,5 +39,3 @@ public interface SimilaritySummaryBuilder {
     }
 
 }
-
-

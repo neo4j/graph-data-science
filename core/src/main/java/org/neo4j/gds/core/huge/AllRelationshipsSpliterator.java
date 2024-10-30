@@ -20,8 +20,8 @@
 package org.neo4j.gds.core.huge;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.RelationshipCursor;
-import org.neo4j.gds.api.RelationshipIterator;
+import org.neo4j.gds.api.properties.relationships.RelationshipCursor;
+import org.neo4j.gds.api.properties.relationships.RelationshipIterator;
 
 import java.util.Iterator;
 import java.util.Spliterator;

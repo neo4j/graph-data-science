@@ -23,8 +23,8 @@ import com.carrotsearch.hppc.ArraySizingStrategy;
 import com.carrotsearch.hppc.DoubleArrayList;
 import com.carrotsearch.hppc.LongArrayList;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.RelationshipConsumer;
-import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.api.properties.relationships.RelationshipConsumer;
+import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.core.utils.TwoArraysSort;
 
 import java.util.Arrays;

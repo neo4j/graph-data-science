@@ -46,7 +46,7 @@ public interface Degrees {
     /**
      * Much slower than just degree() because it may have to look up all relationships.
      * <br>
-     * This is not thread-safe, so if this is called concurrently please use {@link RelationshipIterator#concurrentCopy()}.
+     * This is not thread-safe, so if this is called concurrently please use {@link org.neo4j.gds.api.properties.relationships.RelationshipIterator#concurrentCopy()}.
      *
      * @see Graph#isMultiGraph()
      */

@@ -21,7 +21,7 @@ package org.neo4j.gds.msbfs;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.RelationshipIterator;
+import org.neo4j.gds.api.properties.relationships.RelationshipIterator;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;

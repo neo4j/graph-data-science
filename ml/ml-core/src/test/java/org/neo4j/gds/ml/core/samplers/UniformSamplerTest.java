@@ -24,8 +24,8 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.api.ImmutableRelationshipCursor;
-import org.neo4j.gds.api.RelationshipCursor;
+import org.neo4j.gds.api.properties.relationships.ImmutableRelationshipCursor;
+import org.neo4j.gds.api.properties.relationships.RelationshipCursor;
 
 import java.util.Arrays;
 import java.util.NoSuchElementException;

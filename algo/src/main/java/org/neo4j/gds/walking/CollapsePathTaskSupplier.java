@@ -21,7 +21,7 @@ package org.neo4j.gds.walking;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.RelationshipIterator;
+import org.neo4j.gds.api.properties.relationships.RelationshipIterator;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.msbfs.MSBFSConstants;
 import org.neo4j.gds.msbfs.MultiSourceBFSRunnable;

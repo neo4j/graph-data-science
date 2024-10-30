@@ -21,7 +21,7 @@ package org.neo4j.gds.core.compression.mixed;
 
 import org.neo4j.gds.api.AdjacencyList;
 import org.neo4j.gds.api.AdjacencyProperties;
-import org.neo4j.gds.api.PropertyCursor;
+import org.neo4j.gds.api.properties.relationships.PropertyCursor;
 
 public class MixedAdjacencyProperties implements AdjacencyProperties {
 

@@ -21,8 +21,8 @@ package org.neo4j.gds.core.loading;
 
 import com.carrotsearch.hppc.DoubleArrayList;
 import com.carrotsearch.hppc.LongArrayList;
-import org.neo4j.gds.api.RelationshipConsumer;
-import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.api.properties.relationships.RelationshipConsumer;
+import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
 
 public class CollectingConsumer implements RelationshipConsumer, RelationshipWithPropertyConsumer {
 

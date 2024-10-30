@@ -20,7 +20,7 @@
 package org.neo4j.gds.msbfs;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.api.RelationshipIterator;
+import org.neo4j.gds.api.properties.relationships.RelationshipIterator;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 
 public interface ExecutionStrategy {

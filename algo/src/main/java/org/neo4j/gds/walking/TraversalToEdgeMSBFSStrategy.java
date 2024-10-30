@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.walking;
 
-import org.neo4j.gds.api.RelationshipIterator;
+import org.neo4j.gds.api.properties.relationships.RelationshipIterator;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.msbfs.ANPStrategy;
 import org.neo4j.gds.msbfs.BfsConsumer;

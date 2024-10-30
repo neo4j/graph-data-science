@@ -21,8 +21,8 @@ package org.neo4j.gds.spanningtree;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphAdapter;
-import org.neo4j.gds.api.RelationshipConsumer;
-import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.api.properties.relationships.RelationshipConsumer;
+import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
 
 import java.util.Arrays;
 

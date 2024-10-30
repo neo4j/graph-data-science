@@ -20,8 +20,8 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.api.IntBinaryPredicate;
-import org.neo4j.gds.api.RelationshipConsumer;
-import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.api.properties.relationships.RelationshipConsumer;
+import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
 
 /**
  * Warning: These conversions are not safe but will fail for very large graphs.

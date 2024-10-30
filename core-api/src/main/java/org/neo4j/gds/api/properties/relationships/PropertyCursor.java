@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.api;
+package org.neo4j.gds.api.properties.relationships;
 
 /**
  * Cursor iterating over the values of relationship properties.
@@ -29,7 +29,7 @@ public interface PropertyCursor extends AutoCloseable {
     /**
      * Initialize this cursor to point to the given {@code index}.
      * The correct value for the index is highly implementation specific.
-     * The better way to initialize a cursor is through {@link AdjacencyProperties#propertyCursor(long)} or related.
+     * The better way to initialize a cursor is through {@link org.neo4j.gds.api.AdjacencyProperties#propertyCursor(long)} or related.
      */
     void init(long index, int degree);
 

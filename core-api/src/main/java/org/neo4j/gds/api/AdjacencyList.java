@@ -28,7 +28,7 @@ import org.neo4j.gds.core.compression.MemoryInfo;
  * The methods in here are not final and may be revised under the continuation of
  * Adjacency Compression III – Return of the Iterator
  * One particular change could be that properties will be returned from {@link AdjacencyCursor}s
- * instead from separate {@link PropertyCursor}s.
+ * instead from separate {@link org.neo4j.gds.api.properties.relationships.PropertyCursor}s.
  */
 public interface AdjacencyList {
 

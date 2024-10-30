@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.core.samplers;
 
-import org.neo4j.gds.api.RelationshipCursor;
+import org.neo4j.gds.api.properties.relationships.RelationshipCursor;
 import org.neo4j.gds.core.utils.queue.BoundedLongPriorityQueue;
 
 import java.util.Random;

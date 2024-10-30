@@ -17,18 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.api;
+package org.neo4j.gds.api.properties.relationships;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.ValueClass;
+/**
+ * Getter for property values at relationships
+ */
+public interface RelationshipProperties {
 
-@ValueClass
-@Value.Modifiable
-public interface RelationshipCursor {
+    /**
+     * get value of property on relationship between source and target node id
+     *
+     * @param sourceNodeId source node
+     * @param targetNodeId target node
+     * @param fallbackValue value to use if relationship has no property value
+     * @return the property value
+     */
+    double relationshipProperty(long sourceNodeId, long targetNodeId, double fallbackValue);
 
-    long sourceId();
-
-    long targetId();
-
-    double property();
+    /**
+     * Returns the property value for a relationship defined by its source and target nodes.
+     */
+    double relationshipProperty(long sourceNodeId, long targetNodeId);
 }

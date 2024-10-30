@@ -20,7 +20,7 @@
 package org.neo4j.gds.algorithms.similarity;
 
 import org.HdrHistogram.DoubleHistogram;
-import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.api.properties.relationships.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.result.SimilarityStatistics;
 
 import java.util.Map;
@@ -74,5 +74,3 @@ public class ActualSimilaritySummaryBuilder implements SimilaritySummaryBuilder 
     }
 
 }
-
-

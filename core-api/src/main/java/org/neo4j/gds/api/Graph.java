@@ -22,6 +22,9 @@ package org.neo4j.gds.api;
 
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyContainer;
+import org.neo4j.gds.api.properties.relationships.RelationshipConsumer;
+import org.neo4j.gds.api.properties.relationships.RelationshipIterator;
+import org.neo4j.gds.api.properties.relationships.RelationshipProperties;
 import org.neo4j.gds.api.schema.GraphSchema;
 
 import java.util.Optional;

@@ -17,16 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.api;
+package org.neo4j.gds.api.properties.relationships;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 
 @ValueClass
-public
-interface Properties {
-    AdjacencyProperties propertiesList();
+@Value.Modifiable
+public interface RelationshipCursor {
 
-    long elementCount();
+    long sourceId();
 
-    double defaultPropertyValue();
+    long targetId();
+
+    double property();
 }
