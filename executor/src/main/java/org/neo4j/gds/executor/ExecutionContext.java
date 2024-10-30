@@ -85,14 +85,6 @@ public interface ExecutionContext {
             .build();
     }
 
-    default ExecutionContext withRelationshipExporterBuilder(RelationshipExporterBuilder relationshipExporterBuilder) {
-        return ImmutableExecutionContext
-            .builder()
-            .from(this)
-            .relationshipExporterBuilder(relationshipExporterBuilder)
-            .build();
-    }
-
     default ExecutionContext withModelCatalog(ModelCatalog modelCatalog) {
         return ImmutableExecutionContext
             .builder()
