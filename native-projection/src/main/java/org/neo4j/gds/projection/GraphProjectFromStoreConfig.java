@@ -72,31 +72,6 @@ public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
         return PropertyMappings.of();
     }
 
-//    @Configuration.Ignore
-//    @Override
-//    default GraphStoreFactory.Supplier graphStoreFactory() {
-//        return new GraphStoreFactory.Supplier() {
-//            @Override
-//            public GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> get(GraphLoaderContext loaderContext) {
-//                return new NativeFactoryBuilder()
-//                    .graphProjectFromStoreConfig(GraphProjectFromStoreConfig.this)
-//                    .loadingContext(loaderContext)
-//                    .build();
-//            }
-//
-//            @Override
-//            public GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> getWithDimension(
-//                GraphLoaderContext loaderContext, GraphDimensions graphDimensions
-//            ) {
-//                return new NativeFactoryBuilder()
-//                    .graphProjectFromStoreConfig(GraphProjectFromStoreConfig.this)
-//                    .loadingContext(loaderContext)
-//                    .graphDimensions(graphDimensions)
-//                    .build();
-//            }
-//        };
-//    }
-
     @Configuration.Check
     default void validateProjectionsAreNotEmpty() {
         if (nodeProjections().isEmpty()) {

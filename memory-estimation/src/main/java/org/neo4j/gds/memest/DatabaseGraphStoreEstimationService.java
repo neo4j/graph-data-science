@@ -22,7 +22,7 @@ package org.neo4j.gds.memest;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.core.ImmutableGraphLoader;
+import org.neo4j.gds.core.GraphStoreFactorySupplier;
 
 public class DatabaseGraphStoreEstimationService {
     private final GraphLoaderContext graphLoaderContext;
@@ -34,13 +34,8 @@ public class DatabaseGraphStoreEstimationService {
     }
 
     public GraphMemoryEstimation estimate(GraphProjectConfig graphProjectConfig) {
-        var graphStoreFactory = ImmutableGraphLoader
-            .builder()
-            .context(this.graphLoaderContext)
-            .username(this.user.getUsername())
-            .projectConfig(graphProjectConfig)
-            .build()
-            .graphStoreFactory();
+        var graphStoreFactory = GraphStoreFactorySupplier.supplier(graphProjectConfig)
+            .get(this.graphLoaderContext);
 
         return new GraphMemoryEstimation(
             graphStoreFactory.dimensions(),

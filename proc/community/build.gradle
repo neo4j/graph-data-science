@@ -14,8 +14,10 @@ dependencies {
 
     // Test dependencies
     // TODO: trim this as much as possible
-    integrationTestImplementation project(':metrics-api')
+    integrationTestAnnotationProcessor group: 'org.neo4j', name: 'annotations', version: ver.'neo4j'
+
     integrationTestImplementation project(':logging')
+    integrationTestImplementation project(':metrics-api')
     integrationTestImplementation project(':memory-usage')
     integrationTestImplementation project(':native-projection')
     integrationTestImplementation project(':proc-test')

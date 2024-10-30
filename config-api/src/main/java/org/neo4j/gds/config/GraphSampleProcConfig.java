@@ -46,10 +46,4 @@ public interface GraphSampleProcConfig extends GraphProjectConfig, GraphNameConf
     @Configuration.Parameter
     GraphSampleAlgoConfig sampleAlgoConfig();
 
-//    @Configuration.Ignore
-//    @Override
-//    default GraphStoreFactory.Supplier graphStoreFactory() {
-//        return originalConfig().graphStoreFactory();
-//    }
-
 }

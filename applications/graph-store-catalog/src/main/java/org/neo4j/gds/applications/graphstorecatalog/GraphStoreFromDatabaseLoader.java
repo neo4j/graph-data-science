@@ -25,7 +25,7 @@ import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.ImmutableGraphLoader;
+import org.neo4j.gds.core.GraphStoreFactorySupplier;
 import org.neo4j.gds.mem.MemoryEstimation;
 
 public class GraphStoreFromDatabaseLoader implements GraphStoreCreator {
@@ -79,12 +79,6 @@ public class GraphStoreFromDatabaseLoader implements GraphStoreCreator {
     }
 
     private GraphStoreFactory<?, ?> graphStoreFactory() {
-        return ImmutableGraphLoader
-            .builder()
-            .context(graphLoaderContext)
-            .username(username)
-            .projectConfig(graphProjectConfig)
-            .build()
-            .graphStoreFactory();
+        return GraphStoreFactorySupplier.supplier(graphProjectConfig).get(graphLoaderContext);
     }
 }

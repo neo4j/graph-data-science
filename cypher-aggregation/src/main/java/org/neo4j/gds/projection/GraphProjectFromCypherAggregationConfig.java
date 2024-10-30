@@ -64,14 +64,6 @@ public interface GraphProjectFromCypherAggregationConfig extends GraphProjectCon
     @Configuration.Parameter()
     String query();
 
-//    @Configuration.Ignore
-//    @Override
-//    default GraphStoreFactory.Supplier graphStoreFactory() {
-//        throw new UnsupportedOperationException(
-//            "Cypher aggregation does not work over the default graph store framework"
-//        );
-//    }
-
     @Configuration.Ignore
     default Set<String> outputFieldDenylist() {
         return Set.of(

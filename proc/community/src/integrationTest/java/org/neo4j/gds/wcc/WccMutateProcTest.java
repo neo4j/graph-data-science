@@ -61,7 +61,7 @@ import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
-import org.neo4j.gds.core.ImmutableGraphLoader;
+import org.neo4j.gds.core.GraphStoreFactorySupplier;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -560,19 +560,18 @@ class WccMutateProcTest extends BaseProcTest {
 
     @NotNull
     private GraphLoader graphLoader(GraphProjectConfig graphProjectConfig) {
-        return ImmutableGraphLoader
-            .builder()
-            .context(ImmutableGraphLoaderContext.builder()
-                .databaseId(DatabaseId.of(db.databaseName()))
-                .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
-                .transactionContext(TestSupport.fullAccessTransaction(db))
-                .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-                .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
-                .log(Log.noOpLog())
-                .build())
-            .username("")
-            .projectConfig(graphProjectConfig)
+        var graphLoaderContext = ImmutableGraphLoaderContext.builder()
+            .databaseId(DatabaseId.of(db.databaseName()))
+            .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(db))
+            .transactionContext(TestSupport.fullAccessTransaction(db))
+            .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
+            .log(Log.noOpLog())
             .build();
+        return new GraphLoader(
+            graphProjectConfig,
+            GraphStoreFactorySupplier.supplier(graphProjectConfig).get(graphLoaderContext)
+        );
     }
 
     /**

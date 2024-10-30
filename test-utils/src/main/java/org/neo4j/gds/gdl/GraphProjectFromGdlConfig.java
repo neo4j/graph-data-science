@@ -56,12 +56,4 @@ public interface GraphProjectFromGdlConfig extends GraphProjectConfig {
     @Value.Default
     default boolean indexInverse() { return false; }
 
-//    @Override
-//    default GraphStoreFactory.Supplier graphStoreFactory() {
-//        return loaderContext -> GdlFactory
-//            .builder()
-//            .graphProjectConfig(this)
-//            .databaseId(loaderContext.databaseId())
-//            .build();
-//    }
 }

@@ -72,24 +72,6 @@ public interface GraphProjectFromCypherConfig extends GraphProjectConfig {
         return true;
     }
 
-//    @Configuration.Ignore
-//    @Override
-//    default GraphStoreFactory.Supplier graphStoreFactory() {
-//        return new GraphStoreFactory.Supplier() {
-//            @Override
-//            public GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> get(GraphLoaderContext loaderContext) {
-//                return CypherFactory.createWithDerivedDimensions(GraphProjectFromCypherConfig.this, loaderContext);
-//            }
-//
-//            @Override
-//            public GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> getWithDimension(
-//                GraphLoaderContext loaderContext, GraphDimensions graphDimensions
-//            ) {
-//                return CypherFactory.createWithBaseDimensions(GraphProjectFromCypherConfig.this, loaderContext, graphDimensions);
-//            }
-//        };
-//    }
-
     @Override
     default boolean sudo() {
         return true;

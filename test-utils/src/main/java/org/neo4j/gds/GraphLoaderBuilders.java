@@ -28,7 +28,7 @@ import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
-import org.neo4j.gds.core.ImmutableGraphLoader;
+import org.neo4j.gds.core.GraphStoreFactorySupplier;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -189,21 +189,19 @@ public final class GraphLoaderBuilders {
         Optional<String> userName,
         GraphProjectConfig graphProjectConfig
     ) {
-        return ImmutableGraphLoader.builder()
-            .context(ImmutableGraphLoaderContext.builder()
-                .databaseId(DatabaseId.of(databaseService.databaseName()))
-                .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(databaseService))
-                .transactionContext(transactionContext.orElseGet(() -> TestSupport.fullAccessTransaction(databaseService)))
-                .executor(executorService.orElse(DefaultPool.INSTANCE))
-                .terminationFlag(terminationFlag.orElse(TerminationFlag.RUNNING_TRUE))
-                .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
-                .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
-                .log(log.orElseGet(org.neo4j.gds.logging.Log::noOpLog))
-                .build())
-            .username(userName
-                .or(() -> transactionContext.map(TransactionContext::username))
-                .orElse(""))
-            .projectConfig(graphProjectConfig)
+        var graphLoaderContext = ImmutableGraphLoaderContext.builder()
+            .databaseId(DatabaseId.of(databaseService.databaseName()))
+            .dependencyResolver(GraphDatabaseApiProxy.dependencyResolver(databaseService))
+            .transactionContext(transactionContext.orElseGet(() -> TestSupport.fullAccessTransaction(databaseService)))
+            .executor(executorService.orElse(DefaultPool.INSTANCE))
+            .terminationFlag(terminationFlag.orElse(TerminationFlag.RUNNING_TRUE))
+            .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
+            .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
+            .log(log.orElseGet(Log::noOpLog))
             .build();
+        return new GraphLoader(
+            graphProjectConfig,
+            GraphStoreFactorySupplier.supplier(graphProjectConfig).get(graphLoaderContext)
+        );
     }
 }

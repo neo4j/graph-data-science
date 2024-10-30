@@ -116,13 +116,6 @@ public interface RandomGraphGeneratorConfig extends GraphProjectConfig {
             .build();
     }
 
-//    @Configuration.Ignore
-//    @Override
-//    default GraphStoreFactory.Supplier graphStoreFactory() {
-//        // TODO: maybe we could introduce a RandomGraphFactory
-//        throw new UnsupportedOperationException("RandomGraphGeneratorConfig requires explicit graph generation.");
-//    }
-
     @Configuration.Ignore
     default Set<String> outputFieldDenylist() {
         return Set.of(READ_CONCURRENCY_KEY,  NODE_COUNT_KEY, RELATIONSHIP_COUNT_KEY, "validateRelationships");

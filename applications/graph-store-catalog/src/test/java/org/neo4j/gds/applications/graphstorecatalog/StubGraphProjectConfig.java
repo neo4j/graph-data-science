@@ -58,11 +58,6 @@ class StubGraphProjectConfig implements GraphProjectConfig {
         throw new UnsupportedOperationException("TODO");
     }
 
-//    @Override
-//    public GraphStoreFactory.Supplier graphStoreFactory() {
-//        throw new UnsupportedOperationException("TODO");
-//    }
-
     @Override
     public Optional<String> usernameOverride() {
         throw new UnsupportedOperationException("TODO");

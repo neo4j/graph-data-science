@@ -80,12 +80,6 @@ public interface GraphProjectFromGraphConfig extends GraphProjectConfig {
         return Collections.emptyMap();
     }
 
-//    @Configuration.Ignore
-//    @Override
-//    default GraphStoreFactory.Supplier graphStoreFactory() {
-//        return originalConfig().graphStoreFactory();
-//    }
-
     // Inherited, but ignored config keys
 
     @Override

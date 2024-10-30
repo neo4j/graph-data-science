@@ -19,37 +19,36 @@
  */
 package org.neo4j.gds.core;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.config.GraphProjectConfig;
 
-@ValueClass
-public interface GraphLoader {
+public class GraphLoader {
+    private final GraphProjectConfig projectConfig;
+    private final GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> graphStoreFactory;
 
-    GraphLoaderContext context();
-
-    @Value.Default
-    default String username() {
-        return projectConfig().username();
+    public GraphLoader(
+        GraphProjectConfig projectConfig,
+        GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> graphStoreFactory
+    ) {
+        this.projectConfig = projectConfig;
+        this.graphStoreFactory = graphStoreFactory;
     }
 
-    GraphProjectConfig projectConfig();
-
-    default Graph graph() {
+    public Graph graph() {
         return graphStore().getUnion();
     }
 
-    default GraphStore graphStore() {
-        return graphStoreFactory().build();
+    public GraphStore graphStore() {
+        return graphStoreFactory.build();
     }
 
-    default GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> graphStoreFactory() {
-        return GraphStoreFactorySupplier
-            .supplier(projectConfig())
-            .get(context());
+    public GraphProjectConfig projectConfig() {
+        return projectConfig;
+    }
+
+    public GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> graphStoreFactory() {
+        return graphStoreFactory;
     }
 }

@@ -20,14 +20,37 @@
 package org.neo4j.gds.core;
 
 import org.neo4j.gds.api.GraphStoreFactory;
+import org.neo4j.gds.api.GraphStoreFactorySupplierProvider;
 import org.neo4j.gds.config.GraphProjectConfig;
+
+import java.util.List;
+import java.util.ServiceLoader;
+import java.util.stream.Collectors;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class GraphStoreFactorySupplier {
 
     private GraphStoreFactorySupplier() {}
 
-    public static GraphStoreFactory.Supplier supplier(GraphProjectConfig graphProjectConfig) {
-        return null;
+    private static final List<GraphStoreFactorySupplierProvider> PROVIDERS;
+
+    static {
+        PROVIDERS = ServiceLoader
+            .load(GraphStoreFactorySupplierProvider.class, GraphStoreFactorySupplierProvider.class.getClassLoader())
+            .stream()
+            .map(ServiceLoader.Provider::get)
+            .collect(Collectors.toList());
     }
 
+    public static GraphStoreFactory.Supplier supplier(GraphProjectConfig graphProjectConfig) {
+        return PROVIDERS.stream()
+            .filter(f -> f.canSupplyFactoryFor(graphProjectConfig))
+            .findFirst()
+            .orElseThrow(() -> new UnsupportedOperationException(formatWithLocale(
+                "%s does not support GraphStoreFactory creation",
+                graphProjectConfig.getClass().getName()
+            )))
+            .supplier(graphProjectConfig);
+    }
 }
