@@ -71,6 +71,7 @@ public enum AlgorithmLabel implements Label {
     ScaleProperties("ScaleProperties"),
     SCC("SCC"),
     SingleSourceDijkstra("All Shortest Paths"),
+    SLLPA("SpeakerListenerLPA"),
     SpanningTree("SpanningTree"),
     SplitRelationships("SplitRelationships"),
     SteinerTree("SteinerTree"),
@@ -138,6 +139,7 @@ public enum AlgorithmLabel implements Label {
             case ScaleProperties -> ScaleProperties;
             case SCC -> SCC;
             case SingleSourceDijkstra -> SingleSourceDijkstra;
+            case SLLPA -> SLLPA;
             case SpanningTree -> SpanningTree;
             case SplitRelationships -> SplitRelationships;
             case SteinerTree -> SteinerTree;

@@ -38,6 +38,8 @@ import org.neo4j.gds.influenceMaximization.InfluenceMaximizationBaseConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.pagerank.PageRankMemoryEstimateDefinition;
 import org.neo4j.gds.pagerank.RankConfig;
+import org.neo4j.gds.sllp.SpeakerListenerLPAConfig;
+import org.neo4j.gds.sllp.SpeakerListenerLPAMemoryEstimateDefinition;
 
 public class CentralityAlgorithmsEstimationModeBusinessFacade {
     private final AlgorithmEstimationTemplate algorithmEstimationTemplate;
@@ -93,6 +95,8 @@ public class CentralityAlgorithmsEstimationModeBusinessFacade {
             memoryEstimation
         );
     }
+
+
 
     public MemoryEstimation celf(InfluenceMaximizationBaseConfig configuration) {
         return new CELFMemoryEstimateDefinition(configuration.toParameters()).memoryEstimation();
@@ -151,4 +155,18 @@ public class CentralityAlgorithmsEstimationModeBusinessFacade {
         return new IndirectExposureMemoryEstimationDefinition().memoryEstimation();
     }
 
+
+    MemoryEstimation SpeakerListenerLPA() {
+        return new SpeakerListenerLPAMemoryEstimateDefinition().memoryEstimation();
+    }
+
+    public MemoryEstimateResult SpeakerListenerLPA(SpeakerListenerLPAConfig configuration, Object graphNameOrConfiguration) {
+        var memoryEstimation = SpeakerListenerLPA();
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
+        );
+    }
 }
