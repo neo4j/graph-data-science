@@ -21,7 +21,7 @@ package org.neo4j.gds.sllpa;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.algorithms.centrality.SpeakerListenerLPAStatsResult;
+import org.neo4j.gds.procedures.algorithms.centrality.SpeakerListenerLPAWriteResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -35,50 +35,51 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.gds.sllpa.Constants.SLLP_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
-public class SpeakerListenerLPAStatsProc {
+public class SpeakerListenerLPAWriteProc {
 
     @Context
     public GraphDataScienceProcedures facade;
 
-    @Procedure(value = "gds.sllpa.stats", mode = READ)
+    @Procedure(value = "gds.sllpa.write", mode = WRITE)
     @Description(SLLP_DESCRIPTION)
-    public Stream<SpeakerListenerLPAStatsResult> stats(
+    public Stream<SpeakerListenerLPAWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.algorithms().centrality().sllpaStats(graphName, configuration);
+        return facade.algorithms().centrality().sllpaWrite(graphName, configuration);
     }
 
-    @Procedure(value = "gds.sllpa.stats.estimate", mode = READ)
+    @Procedure(value = "gds.sllpa.write.estimate", mode = READ)
     @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.algorithms().centrality().sllpaStatsEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().centrality().sllpaWriteEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Internal
     @Deprecated(forRemoval = true)
-    @Procedure(name = "gds.alpha.sllpa.stats", mode = Mode.READ, deprecatedBy = "gds.sllpa.stats")
+    @Procedure(name = "gds.alpha.sllpa.write", mode = Mode.WRITE, deprecatedBy = "gds.sllpa.write")
     @Description(SLLP_DESCRIPTION)
-    public Stream<SpeakerListenerLPAStatsResult> alphaStats(
+    public Stream<SpeakerListenerLPAWriteResult> alphaWrite(
         @Name("graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ){
-        facade.deprecatedProcedures().called("gds.alpha.sllpa.stats");
-        return  stats(graphName,configuration);
+        facade.deprecatedProcedures().called("gds.alpha.sllpa.write");
+        return  write(graphName,configuration);
     }
 
     @Internal
     @Deprecated(forRemoval = true)
-    @Procedure(name = "gds.alpha.sllpa.stats.estimate", mode = Mode.READ, deprecatedBy = "gds.sllpa.stats.estimate")
+    @Procedure(name = "gds.alpha.sllpa.write.estimate", mode = Mode.READ, deprecatedBy = "gds.sllpa.write.estimate")
     @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> alphaEstimate(
         @Name("graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name("algoConfiguration") Map<String, Object> algoConfiguration) {
-        facade.deprecatedProcedures().called("gds.alpha.sllpa.stats.estimate");
+        facade.deprecatedProcedures().called("gds.alpha.sllpa.write.estimate");
         return  estimate(graphNameOrConfiguration,algoConfiguration);
     }
 

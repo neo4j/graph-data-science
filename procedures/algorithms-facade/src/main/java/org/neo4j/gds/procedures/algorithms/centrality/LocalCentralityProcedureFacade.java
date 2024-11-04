@@ -1278,4 +1278,33 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
         );
     }
 
+    @Override
+    public Stream<MemoryEstimateResult> sllpaWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var parsedConfiguration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            SpeakerListenerLPAConfig::of
+        );
+
+        return Stream.of(estimationModeBusinessFacade.speakerListenerLPA(parsedConfiguration, graphNameOrConfiguration));
+    }
+
+    @Override
+    public Stream<SpeakerListenerLPAWriteResult> sllpaWrite(String graphName, Map<String, Object> configuration) {
+        var parsedConfiguration = configurationParser.parseConfiguration(
+            configuration,
+            SpeakerListenerLPAConfig::of
+        );
+        var resultBuilder = new SpeakerListenerLPAResultBuilderForWriteMode();
+
+
+        return writeModeBusinessFacade.sllpa(
+            GraphName.parse(graphName),
+            parsedConfiguration,
+            resultBuilder
+        );
+    }
+
 }

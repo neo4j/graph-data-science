@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.sllpa;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.centrality.SpeakerListenerLPAStreamResult;
@@ -63,7 +62,7 @@ public class SpeakerListenerLPAStreamProc {
     @Internal
     @Deprecated(forRemoval = true)
     @Procedure(name = "gds.alpha.sllpa.stream", mode = Mode.READ, deprecatedBy = "gds.sllpa.stream")
-    @Description("The Speaker Listener Label Propagation algorithm is a fast algorithm for finding overlapping communities in a graph.")
+    @Description(SLLP_DESCRIPTION)
     public Stream<SpeakerListenerLPAStreamResult> alphaStream(
         @Name("graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -75,7 +74,7 @@ public class SpeakerListenerLPAStreamProc {
     @Internal
     @Deprecated(forRemoval = true)
     @Procedure(name = "gds.alpha.sllpa.stream.estimate", mode = Mode.READ, deprecatedBy = "gds.sllpa.stream.estimate")
-    @Description(BaseProc.ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> alphaEstimate(
         @Name("graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name("algoConfiguration") Map<String, Object> algoConfiguration) {
