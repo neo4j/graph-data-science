@@ -31,6 +31,7 @@ import org.neo4j.gds.procedures.algorithms.centrality.stubs.ClosenessCentralityM
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.DegreeCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.HarmonicCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.PageRankMutateStub;
+import org.neo4j.gds.procedures.algorithms.centrality.stubs.SpeakerListenerLPAMutateStub;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -312,5 +313,8 @@ public interface CentralityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     );
+
+
+    SpeakerListenerLPAMutateStub speakerListenerLPAMutateStub();
 
 }

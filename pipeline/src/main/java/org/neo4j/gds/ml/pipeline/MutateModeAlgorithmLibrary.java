@@ -105,7 +105,7 @@ final class MutateModeAlgorithmLibrary {
             case ScaleProperties -> CanonicalProcedureName.parse("gds.scaleProperties");
             case SCC -> CanonicalProcedureName.parse("gds.scc");
             case SingleSourceDijkstra -> CanonicalProcedureName.parse("gds.allShortestPaths.dijkstra");
-            case SLLPA -> null;
+            case SLLPA -> CanonicalProcedureName.parse("gds.allShortestPaths.sllpa");
             case SpanningTree -> CanonicalProcedureName.parse("gds.spanningTree");
             case SplitRelationships -> CanonicalProcedureName.parse("gds.alpha.ml.splitRelationships");
             case SteinerTree -> CanonicalProcedureName.parse("gds.steinerTree");

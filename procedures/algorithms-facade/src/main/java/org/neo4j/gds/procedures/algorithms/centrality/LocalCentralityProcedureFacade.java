@@ -75,7 +75,9 @@ import org.neo4j.gds.procedures.algorithms.centrality.stubs.LocalClosenessCentra
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.LocalDegreeCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.LocalHarmonicCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.LocalPageRankMutateStub;
+import org.neo4j.gds.procedures.algorithms.centrality.stubs.LocalSpeakerListenerLPAMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.PageRankMutateStub;
+import org.neo4j.gds.procedures.algorithms.centrality.stubs.SpeakerListenerLPAMutateStub;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
@@ -96,6 +98,7 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
     private final PageRankMutateStub<EigenvectorMutateConfig> eigenVectorMutateStub;
     private final HarmonicCentralityMutateStub harmonicCentralityMutateStub;
     private final PageRankMutateStub<PageRankMutateConfig> pageRankMutateStub;
+    private final SpeakerListenerLPAMutateStub speakerListenerLPAMutateStub;
 
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
     private final CentralityAlgorithmsStatsModeBusinessFacade statsModeBusinessFacade;
@@ -116,6 +119,7 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
         HarmonicCentralityMutateStub harmonicCentralityMutateStub,
         ArticulationPointsMutateStub articulationPointsMutateStub,
         PageRankMutateStub<PageRankMutateConfig> pageRankMutateStub,
+        SpeakerListenerLPAMutateStub speakerListenerLPAMutateStub,
         CentralityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
         CentralityAlgorithmsStatsModeBusinessFacade statsModeBusinessFacade,
         CentralityAlgorithmsStreamModeBusinessFacade streamModeBusinessFacade,
@@ -133,6 +137,7 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
         this.eigenVectorMutateStub = eigenVectorMutateStub;
         this.harmonicCentralityMutateStub = harmonicCentralityMutateStub;
         this.pageRankMutateStub = pageRankMutateStub;
+        this.speakerListenerLPAMutateStub = speakerListenerLPAMutateStub;
         this.estimationModeBusinessFacade = estimationModeBusinessFacade;
         this.statsModeBusinessFacade = statsModeBusinessFacade;
         this.streamModeBusinessFacade = streamModeBusinessFacade;
@@ -222,6 +227,12 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
             estimationModeBusinessFacade
         );
 
+        var speakerListenerLPAMutateStub = new LocalSpeakerListenerLPAMutateStub(
+            genericStub,
+            mutateModeBusinessFacade,
+            estimationModeBusinessFacade
+        );
+
         return new LocalCentralityProcedureFacade(
             procedureReturnColumns,
             articleRankMutateStub,
@@ -234,6 +245,7 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
             harmonicCentralityMutateStub,
             articulationPointsMutateStub,
             pageRankMutateStub,
+            speakerListenerLPAMutateStub,
             estimationModeBusinessFacade,
             centralityApplications.stats(),
             centralityApplications.stream(),
@@ -1305,6 +1317,11 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
             parsedConfiguration,
             resultBuilder
         );
+    }
+
+    @Override
+    public SpeakerListenerLPAMutateStub speakerListenerLPAMutateStub() {
+        return speakerListenerLPAMutateStub;
     }
 
 }

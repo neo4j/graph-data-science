@@ -61,6 +61,7 @@ import org.neo4j.gds.similarity.filteredknn.FilteredKnnMutateConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityMutateConfig;
 import org.neo4j.gds.similarity.knn.KnnMutateConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateConfig;
+import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.spanningtree.SpanningTreeMutateConfig;
 import org.neo4j.gds.steiner.SteinerTreeMutateConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateConfig;
@@ -128,7 +129,7 @@ public class ConfigurationParsersForMutateMode {
             case ScaleProperties -> ScalePropertiesMutateConfig::of;
             case SCC -> SccMutateConfig::of;
             case SingleSourceDijkstra -> AllShortestPathsDijkstraMutateConfig::of;
-            case SLLPA -> null;
+            case SLLPA -> SpeakerListenerLPAConfig::of;
             case SpanningTree -> SpanningTreeMutateConfig::of;
             case SplitRelationships -> SplitRelationshipsMutateConfig::of;
             case SteinerTree -> SteinerTreeMutateConfig::of;

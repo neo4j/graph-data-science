@@ -156,7 +156,7 @@ public class CentralityAlgorithmsEstimationModeBusinessFacade {
     }
 
 
-    MemoryEstimation speakerListenerLPA() {
+    public  MemoryEstimation speakerListenerLPA() {
         return new SpeakerListenerLPAMemoryEstimateDefinition().memoryEstimation();
     }
 

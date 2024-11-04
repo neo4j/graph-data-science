@@ -26,6 +26,7 @@ import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.articulationpoints.ArticulationPointsMutateConfig;
+import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
@@ -42,6 +43,7 @@ import org.neo4j.gds.pagerank.ArticleRankMutateConfig;
 import org.neo4j.gds.pagerank.EigenvectorMutateConfig;
 import org.neo4j.gds.pagerank.PageRankMutateConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
+import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticleRank;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticulationPoints;
@@ -53,6 +55,7 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Eig
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HarmonicCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.IndirectExposure;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PageRank;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SLLPA;
 
 public class CentralityAlgorithmsMutateModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimation;
@@ -248,6 +251,24 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
             IndirectExposure,
             estimation::indirectExposure,
             (graph, __) -> algorithms.indirectExposure(graph, configuration),
+            mutateStep,
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT speakerListenerLPA(
+        GraphName graphName,
+        SpeakerListenerLPAConfig configuration,
+        ResultBuilder<SpeakerListenerLPAConfig, PregelResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var mutateStep = new SpeakerListenerLPAMutateStep(mutateNodeProperty, configuration);
+
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInMutateMode(
+            graphName,
+            configuration,
+            SLLPA,
+            estimation::indirectExposure,
+            (graph, __) -> algorithms.speakerListenerLPA(graph, configuration),
             mutateStep,
             resultBuilder
         );
