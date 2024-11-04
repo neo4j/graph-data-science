@@ -293,4 +293,14 @@ public interface CentralityProcedureFacade {
         Map<String, Object> configuration
     );
 
+    Stream<MemoryEstimateResult> sllpaStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
+
+    Stream<SpeakerListenerLPAStatsResult> sllpaStats(
+        String graphName,
+        Map<String, Object> configuration
+    );
+
 }

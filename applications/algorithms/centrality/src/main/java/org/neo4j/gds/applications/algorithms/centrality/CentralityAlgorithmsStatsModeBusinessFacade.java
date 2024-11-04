@@ -25,6 +25,7 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.StatsResultBuilder;
 import org.neo4j.gds.articulationpoints.ArticulationPointsStatsConfig;
+import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityStatsConfig;
 import org.neo4j.gds.degree.DegreeCentralityStatsConfig;
@@ -35,6 +36,7 @@ import org.neo4j.gds.pagerank.ArticleRankStatsConfig;
 import org.neo4j.gds.pagerank.EigenvectorStatsConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankStatsConfig;
+import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticleRank;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticulationPoints;
@@ -45,6 +47,7 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Deg
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.EigenVector;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HarmonicCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PageRank;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SLLPA;
 
 public class CentralityAlgorithmsStatsModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
@@ -192,6 +195,21 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
             PageRank,
             estimationFacade::pageRank,
             (graph, __) -> centralityAlgorithms.pageRank(graph, configuration),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT sllpa(
+        GraphName graphName,
+        SpeakerListenerLPAConfig configuration,
+        StatsResultBuilder<PregelResult, RESULT> resultBuilder
+    ) {
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStatsMode(
+            graphName,
+            configuration,
+            SLLPA,
+            estimationFacade::speakerListenerLPA,
+            (graph, __) -> centralityAlgorithms.speakerListenerLPA(graph, configuration),
             resultBuilder
         );
     }
