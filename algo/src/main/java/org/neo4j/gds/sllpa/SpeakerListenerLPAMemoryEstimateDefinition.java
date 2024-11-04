@@ -17,23 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.sllp;
+package org.neo4j.gds.sllpa;
 
-import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.beta.pregel.Pregel;
+import org.neo4j.gds.mem.MemoryEstimateDefinition;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
 
-import java.util.List;
+import java.util.Map;
 
-public class SpeakerListenerLPAProgressTrackerCreator {
+import static org.neo4j.gds.sllpa.SpeakerListenerLPA.LABELS_PROPERTY;
 
-    public static Task progressTask(long nodeCount, int maxIterations,String taskName) {
-        return Tasks.iterativeDynamic(
-            taskName,
-            () -> List.of(
-                Tasks.leaf("Compute iteration", nodeCount),
-                Tasks.leaf("Master compute iteration", nodeCount)
-            ),
-            maxIterations
-        );
-}
+
+public class SpeakerListenerLPAMemoryEstimateDefinition  implements MemoryEstimateDefinition {
+
+    @Override
+    public MemoryEstimation memoryEstimation() {
+        return MemoryEstimations.builder()
+            .add(Pregel.memoryEstimation(
+                Map.of(LABELS_PROPERTY, ValueType.LONG_ARRAY),
+                false,
+                false
+            )).build();
+    }
 }

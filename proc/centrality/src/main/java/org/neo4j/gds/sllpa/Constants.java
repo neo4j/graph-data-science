@@ -17,27 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.sllp;
+package org.neo4j.gds.sllpa;
 
-import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.beta.pregel.Pregel;
-import org.neo4j.gds.mem.MemoryEstimateDefinition;
-import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.mem.MemoryEstimations;
+public class Constants {
 
-import java.util.Map;
-
-import static org.neo4j.gds.sllp.SpeakerListenerLPAComputation.LABELS_PROPERTY;
-
-public class SpeakerListenerLPAMemoryEstimateDefinition  implements MemoryEstimateDefinition {
-
-    @Override
-    public MemoryEstimation memoryEstimation() {
-        return MemoryEstimations.builder()
-            .add(Pregel.memoryEstimation(
-                Map.of(LABELS_PROPERTY, ValueType.LONG_ARRAY),
-                false,
-                false
-            )).build();
-    }
+    public static final String SLLP_DESCRIPTION="The Speaker Listener Label Propagation algorithm is a fast algorithm for finding overlapping communities in a graph.";
 }

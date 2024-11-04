@@ -128,6 +128,7 @@ public class ConfigurationParsersForMutateMode {
             case ScaleProperties -> ScalePropertiesMutateConfig::of;
             case SCC -> SccMutateConfig::of;
             case SingleSourceDijkstra -> AllShortestPathsDijkstraMutateConfig::of;
+            case SLLPA -> null;
             case SpanningTree -> SpanningTreeMutateConfig::of;
             case SplitRelationships -> SplitRelationshipsMutateConfig::of;
             case SteinerTree -> SteinerTreeMutateConfig::of;

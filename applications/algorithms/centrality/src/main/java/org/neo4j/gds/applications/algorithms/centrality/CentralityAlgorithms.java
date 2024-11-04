@@ -68,9 +68,9 @@ import org.neo4j.gds.pagerank.PageRankAlgorithm;
 import org.neo4j.gds.pagerank.PageRankComputation;
 import org.neo4j.gds.pagerank.PageRankConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
-import org.neo4j.gds.sllp.SpeakerListenerLPA;
-import org.neo4j.gds.sllp.SpeakerListenerLPAConfig;
-import org.neo4j.gds.sllp.SpeakerListenerLPAProgressTrackerCreator;
+import org.neo4j.gds.sllpa.SpeakerListenerLPA;
+import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
+import org.neo4j.gds.sllpa.SpeakerListenerLPAProgressTrackerCreator;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;

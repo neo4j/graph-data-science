@@ -78,6 +78,7 @@ import org.neo4j.gds.procedures.algorithms.centrality.stubs.LocalPageRankMutateS
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.PageRankMutateStub;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
+import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -1216,6 +1217,35 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
         );
 
         return Stream.of(estimationModeBusinessFacade.pageRank(parsedConfiguration, graphNameOrConfiguration));
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> sllpaStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var parsedConfiguration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            SpeakerListenerLPAConfig::of
+        );
+
+        return Stream.of(estimationModeBusinessFacade.speakerListenerLPA(parsedConfiguration, graphNameOrConfiguration));
+    }
+
+    @Override
+    public Stream<SpeakerListenerLPAStreamResult> sllpaStream(String graphName, Map<String, Object> configuration) {
+        var resultBuilder = new SpeakerListenerLPAResultBuilderForStreamMode();
+
+        var parsedConfiguration = configurationParser.parseConfiguration(
+            configuration,
+            SpeakerListenerLPAConfig::of
+        );
+
+        return streamModeBusinessFacade.sllpa(
+            GraphName.parse(graphName),
+            parsedConfiguration,
+            resultBuilder
+        );
     }
 
 }

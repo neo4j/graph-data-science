@@ -127,6 +127,7 @@ class StubbyHolder {
             case ScaleProperties -> new ScalePropertiesStub();
             case SCC -> new SccStub();
             case SingleSourceDijkstra -> new SingleSourceShortestPathDijkstraStub();
+            case SLLPA -> null;
             case SpanningTree -> new SpanningTreeStub();
             case SplitRelationships -> new SplitRelationshipsStub();
             case SteinerTree -> new SteinerTreeStub();

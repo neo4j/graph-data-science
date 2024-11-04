@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.sllp;
+package org.neo4j.gds.sllpa;
 
 import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.LongIntScatterMap;
@@ -37,9 +37,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.SplittableRandom;
 
+import static org.neo4j.gds.sllpa.SpeakerListenerLPA.LABELS_PROPERTY;
+
 class SpeakerListenerLPAComputation implements PregelComputation<SpeakerListenerLPAConfig> {
 
-    static final String LABELS_PROPERTY = "communityIds";
     private final CloseableThreadLocal<SplittableRandom> random;
 
     SpeakerListenerLPAComputation(Optional<Long> seed) {

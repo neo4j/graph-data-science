@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.sllp;
+package org.neo4j.gds.sllpa;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -43,7 +43,7 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.assertj.Extractors.replaceTimings;
-import static org.neo4j.gds.sllp.SpeakerListenerLPAComputation.LABELS_PROPERTY;
+import static org.neo4j.gds.sllpa.SpeakerListenerLPA.LABELS_PROPERTY;
 
 @GdlExtension
 class SpeakerListenerLPATest {

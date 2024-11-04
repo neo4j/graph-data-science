@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.sllp;
+package org.neo4j.gds.sllpa;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
@@ -31,6 +31,7 @@ import java.util.concurrent.ExecutorService;
 
 
 public class SpeakerListenerLPA extends Algorithm<PregelResult> {
+    public static final String LABELS_PROPERTY = "communityIds";
 
     private final Graph graph;
     private final SpeakerListenerLPAConfig config;
