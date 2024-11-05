@@ -85,4 +85,27 @@ class PerDatabaseTaskStoreTest {
         assertThat(taskStore.query(new JobId("42"))).hasSize(1);
         assertThat(taskStore.query(new JobId(""))).hasSize(0);
     }
+
+    @Test
+    void shouldReturnEmptyOptionalForNonExistingUser() {
+        var taskStore = new PerDatabaseTaskStore();
+
+        var bogus = taskStore.query("bogus", null);
+
+        assertThat(bogus).isEmpty();
+    }
+
+    @Test
+    void shouldReturnNonEmptyOptionalForExistingUser() {
+        var taskStore = new PerDatabaseTaskStore();
+        var aliceLeafTask = Tasks.leaf("leaf");
+        taskStore.store("alice", new JobId("42"), aliceLeafTask);
+        taskStore.store("alice", new JobId("43"), Tasks.leaf("leaf_2"));
+        taskStore.store("bob", new JobId("1337"), Tasks.leaf("other"));
+
+        var alice = taskStore.query("alice", new JobId("42"));
+        assertThat(alice)
+            .isPresent()
+            .hasValue(new UserTask("alice", new JobId("42"), aliceLeafTask));
+    }
 }

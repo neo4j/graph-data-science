@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 public class PerDatabaseTaskStore implements TaskStore {
-    private final Map<String, Map<JobId, Task>> registeredTasks;
+    private final Map<String, Map<JobId, UserTask>> registeredTasks;
     private final List<TaskStoreListener> listeners;
 
     public PerDatabaseTaskStore() {
@@ -42,7 +42,7 @@ public class PerDatabaseTaskStore implements TaskStore {
         listeners.forEach(TaskStoreListener::onTaskStoreUpdate);
         this.registeredTasks
             .computeIfAbsent(username, __ -> new ConcurrentHashMap<>())
-            .put(jobId, task);
+            .put(jobId, new UserTask(username, jobId, task));
     }
 
     @Override
@@ -60,9 +60,8 @@ public class PerDatabaseTaskStore implements TaskStore {
             .stream()
             .flatMap(tasksPerUsers -> tasksPerUsers
                 .getValue()
-                .entrySet()
-                .stream()
-                .map(jobTask -> new UserTask(tasksPerUsers.getKey(), jobTask.getKey(), jobTask.getValue())));
+                .values()
+                .stream());
     }
 
     @Override
@@ -74,19 +73,14 @@ public class PerDatabaseTaskStore implements TaskStore {
     public Stream<UserTask> query(String username) {
         return registeredTasks
             .getOrDefault(username, Map.of())
-            .entrySet()
-            .stream()
-            .map(jobIdTask -> new UserTask(username, jobIdTask.getKey(), jobIdTask.getValue()));
+            .values()
+            .stream();
     }
 
     @Override
     public Optional<UserTask> query(String username, JobId jobId) {
-        if (registeredTasks.containsKey(username)) {
-            return Optional
-                .ofNullable(registeredTasks.get(username).get(jobId))
-                .map(task -> new UserTask(username, jobId, task));
-        }
-        return Optional.empty();
+        return Optional.ofNullable(registeredTasks.get(username))
+            .map(userTasks -> userTasks.get(jobId));
     }
 
     @Override
