@@ -20,7 +20,7 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.functions.AsNodeFunc;
-import org.neo4j.gds.pregel.SpeakerListenerLPAStreamProc;
+import org.neo4j.gds.sllpa.SpeakerListenerLPAStreamProc;
 
 import java.util.List;
 

@@ -24,15 +24,18 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.beta.generator.GraphGenerateProc;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.HashSet;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG_ARRAY;
 
@@ -53,7 +56,8 @@ class SpeakerListenerLPAWriteProcTest extends BaseProcTest {
     void setup() throws Exception {
         registerProcedures(
             SpeakerListenerLPAWriteProc.class,
-            GraphProjectProc.class
+            GraphProjectProc.class,
+            GraphGenerateProc.class
         );
 
         runQuery(
@@ -95,6 +99,24 @@ class SpeakerListenerLPAWriteProcTest extends BaseProcTest {
         );
 
         assertThat(influentialQueryRow).isEqualTo(3);
+    }
+
+    @Test
+    void shouldFailWhenRunningOnNonWritableGraph() {
+        runQuery("CALL gds.graph.generate('randomGraph', 5, 2, {relationshipSeed:19}) YIELD name, nodes, relationships, relationshipDistribution");
+
+        assertThatExceptionOfType(QueryExecutionException.class)
+            .isThrownBy(
+                () -> runQuery("CALL gds.alpha.sllpa.write('randomGraph', {writeProperty: 'm', maxIterations: 4, minAssociationStrength: 0.1})")
+            )
+            .withRootCauseInstanceOf(IllegalArgumentException.class)
+            .withMessageContaining("The provided graph does not support `write` execution mode.");
+        assertThatExceptionOfType(QueryExecutionException.class)
+            .isThrownBy(
+                () -> runQuery("CALL gds.sllpa.write('randomGraph', {writeProperty: 'm', maxIterations: 4, minAssociationStrength: 0.1})")
+            )
+            .withRootCauseInstanceOf(IllegalArgumentException.class)
+            .withMessageContaining("The provided graph does not support `write` execution mode.");
     }
 
 }

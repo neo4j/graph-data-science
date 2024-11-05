@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.beta.generator.GraphGenerateProc;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
@@ -32,6 +33,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
 class SpeakerListenerLPAStreamProcTest extends BaseProcTest {
 
@@ -50,7 +52,8 @@ class SpeakerListenerLPAStreamProcTest extends BaseProcTest {
     void setup() throws Exception {
         registerProcedures(
             SpeakerListenerLPAStreamProc.class,
-            GraphProjectProc.class
+            GraphProjectProc.class,
+            GraphGenerateProc.class
         );
 
         runQuery(
@@ -86,4 +89,15 @@ class SpeakerListenerLPAStreamProcTest extends BaseProcTest {
         assertThat(rowCount).isEqualTo(3l);
     }
 
+    @Test
+    void shouldNotFailWhenRunningOnNonWritableGraph() {
+        runQuery("CALL gds.graph.generate('randomGraph', 5, 2, {relationshipSeed:19}) YIELD name, nodes, relationships, relationshipDistribution");
+
+        assertThatNoException().isThrownBy(
+            () -> runQuery("CALL gds.alpha.sllpa.stream('randomGraph', {maxIterations: 4, minAssociationStrength: 0.1})")
+        );
+        assertThatNoException().isThrownBy(
+            () -> runQuery("CALL gds.sllpa.stream('randomGraph', {maxIterations: 4, minAssociationStrength: 0.1})")
+        );
+    }
 }
