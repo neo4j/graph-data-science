@@ -29,7 +29,7 @@ import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 
 import java.util.Optional;
 
-class SpeakerListenerLPAResultBuilderForMutateMode implements ResultBuilder<SpeakerListenerLPAConfig,PregelResult, SpeakerListenerLPAMutateResult, NodePropertiesWritten> {
+public class SpeakerListenerLPAResultBuilderForMutateMode implements ResultBuilder<SpeakerListenerLPAConfig,PregelResult, SpeakerListenerLPAMutateResult, NodePropertiesWritten> {
 
     @Override
     public SpeakerListenerLPAMutateResult build(
