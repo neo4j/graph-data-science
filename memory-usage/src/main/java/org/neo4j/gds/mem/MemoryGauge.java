@@ -32,12 +32,13 @@ public class MemoryGauge {
         this.availableMemory = availableMemory;
     }
 
-    // Start with `synchronized` and improve if needed.
-    public synchronized long tryToReserveMemory(long bytesToReserve) {
-        var available = availableMemory.get();
-        if (bytesToReserve > available) {
-            throw new MemoryReservationExceededException(bytesToReserve, available);
-        }
-        return availableMemory.addAndGet(-bytesToReserve);
+    public long tryToReserveMemory(long bytesToReserve) {
+        return availableMemory.accumulateAndGet(bytesToReserve, (available, toReserve) -> {
+            if(toReserve > available) {
+                throw new MemoryReservationExceededException(bytesToReserve, available);
+            }
+            return available - toReserve;
+        });
+
     }
 }
