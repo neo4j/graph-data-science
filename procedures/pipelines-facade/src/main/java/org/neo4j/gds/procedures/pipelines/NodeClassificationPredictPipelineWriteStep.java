@@ -59,7 +59,8 @@ class NodeClassificationPredictPipelineWriteStep implements WriteStep<NodeClassi
         return nodePropertyWriter.writeNodeProperties(
             graph,
             graphStore,
-            Optional.of(resultStore), nodeProperties,
+            configuration.resolveResultStore(resultStore),
+            nodeProperties,
             jobId,
             new StandardLabel("NodeClassificationPipelineWrite"),
             configuration
