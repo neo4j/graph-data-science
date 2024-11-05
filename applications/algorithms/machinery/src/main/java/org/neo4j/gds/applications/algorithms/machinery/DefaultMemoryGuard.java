@@ -26,6 +26,7 @@ import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryGauge;
+import org.neo4j.gds.mem.MemoryReservationExceededException;
 import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.function.Supplier;
@@ -77,25 +78,21 @@ public final class DefaultMemoryGuard implements MemoryGuard {
 
             var bytesRequired = useMaxMemoryEstimation ? memoryRange.max : memoryRange.min;
 
-            assertAlgorithmCanRun(label, bytesRequired);
+            try {
+                memoryGauge.tryToReserveMemory(bytesRequired);
+            } catch (MemoryReservationExceededException e) {
+                var message = StringFormatting.formatWithLocale(
+                    "Memory required to run %s (%db) exceeds available memory (%db)",
+                    label,
+                    e.bytesRequired(),
+                    e.bytesAvailable()
+                );
+
+                throw new IllegalStateException(message);
+
+            }
         } catch (MemoryEstimationNotImplementedException e) {
             log.info("Memory usage estimate not available for " + label + ", skipping guard");
-        }
-    }
-
-    private void assertAlgorithmCanRun(Label label, long bytesRequired)
-    throws IllegalStateException {
-        long bytesAvailable = memoryGauge.availableMemory();
-
-        if (bytesRequired > bytesAvailable) {
-            var message = StringFormatting.formatWithLocale(
-                "Memory required to run %s (%db) exceeds available memory (%db)",
-                label,
-                bytesRequired,
-                bytesAvailable
-            );
-
-            throw new IllegalStateException(message);
         }
     }
 }

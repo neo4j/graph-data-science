@@ -51,6 +51,7 @@ public class MemoryEstimateResult {
         MemoryRange estimateMemoryUsage,
         GraphDimensions dimensions
     ) {
+        // FIXME: pass the heap size from the outside?
         long heapSize = Runtime.getRuntime().maxMemory();
         this.requiredMemory = estimateMemoryUsage.toString();
         this.treeView = treeView;

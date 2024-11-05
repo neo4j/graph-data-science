@@ -19,25 +19,20 @@
  */
 package org.neo4j.gds.mem;
 
-import java.util.concurrent.atomic.AtomicLong;
+public class MemoryReservationExceededException extends RuntimeException {
 
-/**
- * An oracle we ask for information about system memory.
- * We inject an AtomicLong that is populated elsewhere, and read from that.
- */
-public class MemoryGauge {
-    private final AtomicLong availableMemory;
+    private final long bytesRequired;
+    private final long bytesAvailable;
 
-    public MemoryGauge(AtomicLong availableMemory) {
-        this.availableMemory = availableMemory;
+    public MemoryReservationExceededException(long bytesRequired, long bytesAvailable) {
+        this.bytesRequired = bytesRequired;
+        this.bytesAvailable = bytesAvailable;
     }
 
-    // Start with `synchronized` and improve if needed.
-    public synchronized long tryToReserveMemory(long bytesToReserve) {
-        var available = availableMemory.get();
-        if (bytesToReserve > available) {
-            throw new MemoryReservationExceededException(bytesToReserve, available);
-        }
-        return availableMemory.addAndGet(-bytesToReserve);
+    public long bytesRequired() {
+        return bytesRequired;
+    }
+    public long bytesAvailable() {
+        return bytesAvailable;
     }
 }
