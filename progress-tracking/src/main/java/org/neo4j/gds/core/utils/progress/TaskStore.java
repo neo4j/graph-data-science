@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
 import java.util.Optional;
@@ -44,15 +43,6 @@ public interface TaskStore {
     long taskCount();
 
     void addListener(TaskStoreListener listener);
-
-    @ValueClass
-    interface UserTask {
-        String username();
-
-        JobId jobId();
-
-        Task task();
-    }
 
     interface TaskStoreListener {
         void onTaskStoreUpdate();

@@ -21,7 +21,7 @@ package org.neo4j.gds.applications.operations;
 
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.core.utils.progress.TaskStore;
+import org.neo4j.gds.core.utils.progress.UserTask;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 
 import java.util.stream.Stream;
@@ -58,7 +58,7 @@ public final class OperationsApplications {
     /**
      * List progress for the given user, or for all users if in administrator mode
      */
-    public Stream<TaskStore.UserTask> listProgress() {
+    public Stream<UserTask> listProgress() {
         var taskStore = requestScopedDependencies.getTaskStore();
         var user = requestScopedDependencies.getUser();
 

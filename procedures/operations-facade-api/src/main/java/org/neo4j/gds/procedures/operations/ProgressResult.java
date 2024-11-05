@@ -22,7 +22,7 @@ package org.neo4j.gds.procedures.operations;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.neo4j.gds.core.utils.ClockService;
 import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.core.utils.progress.TaskStore;
+import org.neo4j.gds.core.utils.progress.UserTask;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
 import java.time.Instant;
@@ -39,7 +39,7 @@ public class ProgressResult {
     public LocalTime timeStarted;
     public String elapsedTime;
 
-    static ProgressResult fromTaskStoreEntry(TaskStore.UserTask userTask) {
+    static ProgressResult fromTaskStoreEntry(UserTask userTask) {
         return new ProgressResult(
             userTask.username(),
             userTask.task(),

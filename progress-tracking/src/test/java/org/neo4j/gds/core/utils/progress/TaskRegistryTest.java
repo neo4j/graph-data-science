@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.utils.progress;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.progress.TaskStore.UserTask;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 import static org.assertj.core.api.Assertions.assertThat;

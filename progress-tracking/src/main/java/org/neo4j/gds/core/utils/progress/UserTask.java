@@ -17,15 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.operations;
+package org.neo4j.gds.core.utils.progress;
 
-import org.neo4j.gds.core.utils.progress.UserTask;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
 
-import java.util.Optional;
-import java.util.stream.Stream;
-
-public interface ResultRenderer<RESULT> {
-    Stream<RESULT> renderAdministratorView(Stream<UserTask> results);
-
-    Stream<RESULT> render(Optional<UserTask> results);
+public record UserTask(
+    String username,
+    JobId jobId,
+    Task task
+) {
 }

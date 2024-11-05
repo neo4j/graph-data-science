@@ -62,7 +62,7 @@ public class PerDatabaseTaskStore implements TaskStore {
                 .getValue()
                 .entrySet()
                 .stream()
-                .map(jobTask -> ImmutableUserTask.of(tasksPerUsers.getKey(), jobTask.getKey(), jobTask.getValue())));
+                .map(jobTask -> new UserTask(tasksPerUsers.getKey(), jobTask.getKey(), jobTask.getValue())));
     }
 
     @Override
@@ -76,7 +76,7 @@ public class PerDatabaseTaskStore implements TaskStore {
             .getOrDefault(username, Map.of())
             .entrySet()
             .stream()
-            .map(jobIdTask -> ImmutableUserTask.of(username, jobIdTask.getKey(), jobIdTask.getValue()));
+            .map(jobIdTask -> new UserTask(username, jobIdTask.getKey(), jobIdTask.getValue()));
     }
 
     @Override
@@ -84,7 +84,7 @@ public class PerDatabaseTaskStore implements TaskStore {
         if (registeredTasks.containsKey(username)) {
             return Optional
                 .ofNullable(registeredTasks.get(username).get(jobId))
-                .map(task -> ImmutableUserTask.of(username, jobId, task));
+                .map(task -> new UserTask(username, jobId, task));
         }
         return Optional.empty();
     }

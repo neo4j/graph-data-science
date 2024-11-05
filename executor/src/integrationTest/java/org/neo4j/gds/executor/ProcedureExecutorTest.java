@@ -34,6 +34,7 @@ import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskStore;
+import org.neo4j.gds.core.utils.progress.UserTask;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
@@ -118,7 +119,7 @@ class ProcedureExecutorTest {
             .withFailMessage(
                 () -> formatWithLocale(
                     "Expected no tasks to be open but found %s",
-                    StringJoining.join(taskStore.query().map(TaskStore.UserTask::task).map(Task::description))
+                    StringJoining.join(taskStore.query().map(UserTask::task).map(Task::description))
                 )
             )
             .isEmpty();

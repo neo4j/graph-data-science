@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
-import static org.neo4j.gds.core.utils.progress.TaskStore.UserTask;
 
 abstract class BaseTaskRegistryExtensionTest extends BaseTest {
     abstract boolean featureEnabled();
