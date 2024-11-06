@@ -66,20 +66,11 @@ public final class DefaultMemoryGuard implements MemoryGuard {
         if (configuration.sudo()) return;
 
         try {
-            var memoryEstimation = estimationFactory.get();
 
-            var graphDimensions = graphDimensionFactory.create(graphStore, configuration);
-
-            var transformedGraphDimensions = dimensionTransformer.transform(graphDimensions);
-
-            var memoryTree = memoryEstimation.estimate(transformedGraphDimensions, configuration.concurrency());
-
-            var memoryRange = memoryTree.memoryUsage();
-
-            var bytesRequired = useMaxMemoryEstimation ? memoryRange.max : memoryRange.min;
+           var memoryRequirement = MemoryRequirement.create(estimationFactory,graphStore,graphDimensionFactory,dimensionTransformer,configuration,useMaxMemoryEstimation);
 
             try {
-                memoryGauge.tryToReserveMemory(bytesRequired);
+                memoryGauge.tryToReserveMemory(memoryRequirement.requiredMemory());
             } catch (MemoryReservationExceededException e) {
                 var message = StringFormatting.formatWithLocale(
                     "Memory required to run %s (%db) exceeds available memory (%db)",
