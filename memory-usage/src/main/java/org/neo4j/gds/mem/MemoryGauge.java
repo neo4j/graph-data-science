@@ -41,4 +41,8 @@ public class MemoryGauge {
         });
 
     }
+
+    public long releaseMemory(long bytesToRelease) {
+        return availableMemory.addAndGet(bytesToRelease);
+    }
 }

@@ -56,4 +56,13 @@ class MemoryGaugeTest {
             });
     }
 
+    @Test
+    void canReleaseMemory() {
+        var memoryGauge = new MemoryGauge(new AtomicLong(10));
+        memoryGauge.tryToReserveMemory(7);
+
+        var memoryAfterRelease = memoryGauge.releaseMemory(3);
+
+        assertThat(memoryAfterRelease).isEqualTo(6);
+    }
 }
