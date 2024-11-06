@@ -23,12 +23,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.TestTaskStore;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskStore;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
+import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.NoValue;
 import org.neo4j.values.storable.Values;
 import org.neo4j.values.virtual.MapValue;
@@ -37,6 +39,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ProductGraphAggregatorTest {
 
@@ -85,6 +88,7 @@ class ProductGraphAggregatorTest {
     @MethodSource("emptyGraphNames")
     void shouldFailOnEmptyGraphName(String emptyGraphName, String description) {
 
+        TestTaskStore taskStore = new TestTaskStore();
         var aggregator = new ProductGraphAggregator(
             DatabaseId.random(),
             "neo4j",
@@ -92,7 +96,7 @@ class ProductGraphAggregatorTest {
             QueryEstimator.empty(),
             ExecutingQueryProvider.empty(),
             ProjectionMetricsService.DISABLED,
-            EmptyTaskStore.INSTANCE,
+            taskStore,
             Log.noOpLog()
         );
 
@@ -105,6 +109,8 @@ class ProductGraphAggregatorTest {
                 MapValue.EMPTY,
                 NoValue.NO_VALUE
             )).withMessageContaining("`graphName` can not be null or blank");
+
+        assertThat(taskStore.tasks()).isEmpty();
     }
 
     private static Stream<Arguments> emptyGraphNames() {
@@ -114,5 +120,34 @@ class ProductGraphAggregatorTest {
             Arguments.of("\n", "new line"),
             Arguments.of("   ", "spaces")
         );
+    }
+
+    @Test
+    void shouldCleanupTaskOnFailure() {
+        TestTaskStore taskStore = new TestTaskStore();
+        var aggregator = new ProductGraphAggregator(
+            DatabaseId.random(),
+            "neo4j",
+            WriteMode.LOCAL,
+            QueryEstimator.empty(),
+            ExecutingQueryProvider.empty(),
+            ProjectionMetricsService.DISABLED,
+            taskStore,
+            Log.noOpLog()
+        );
+
+        assertThatThrownBy(() ->
+            aggregator.update(new AnyValue[] {
+                Values.stringValue("my-graph"),
+                Values.longValue(1L),
+                Values.stringValue("invalidID"),
+                MapValue.EMPTY,
+                MapValue.EMPTY,
+                NoValue.NO_VALUE }
+            ))
+            .hasCauseInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("The node has to be either a NODE or an INTEGER, but got String");
+
+        assertThat(taskStore.tasks()).isEmpty();
     }
 }

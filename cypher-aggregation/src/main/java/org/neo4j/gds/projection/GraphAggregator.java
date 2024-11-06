@@ -41,6 +41,7 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.BatchingTaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskStore;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.logging.Log;
@@ -97,6 +98,7 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
 
     // #result() may be called twice, we cache the result of the first call to return it again in the second invocation
     private @Nullable AggregationResult result;
+    private ProgressTracker progressTracker;
 
     GraphAggregator(
         DatabaseId databaseId,
@@ -213,7 +215,7 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
             TaskRegistryFactory.local(username, taskStore),
             EmptyUserLogRegistryFactory.INSTANCE
         );
-        var progressTracker = BatchingTaskProgressTracker.create(internalProgressTracker, taskVolume, config.readConcurrency());
+        this.progressTracker = BatchingTaskProgressTracker.create(internalProgressTracker, taskVolume, config.readConcurrency());
 
         return new GraphImporter(
             config,
@@ -281,6 +283,7 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
             projectionMetric.start();
             result = buildGraph();
         } catch (Exception e) {
+            this.onFailure();
             projectionMetric.failed(e);
             throw new ProcedureException(
                 Status.Procedure.ProcedureCallFailed,
@@ -303,6 +306,12 @@ abstract class GraphAggregator implements UserAggregationReducer, UserAggregatio
         builder.add("configuration", ValueUtils.asAnyValue(result.configuration()));
         builder.add("query", ValueUtils.asAnyValue(result.query()));
         return builder.build();
+    }
+
+    void onFailure() {
+        if (progressTracker != null) {
+            this.progressTracker.endSubTaskWithFailure();
+        }
     }
 
     public @Nullable AggregationResult buildGraph() {

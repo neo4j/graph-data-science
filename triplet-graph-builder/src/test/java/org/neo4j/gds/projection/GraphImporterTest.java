@@ -451,5 +451,7 @@ class GraphImporterTest {
         log.assertContainsMessage(TestLog.INFO, "Graph aggregation :: Build graph store :: Relationships :: Finished");
         log.assertContainsMessage(TestLog.INFO, "Graph aggregation :: Build graph store :: Finished");
         log.assertContainsMessage(TestLog.INFO, "Graph aggregation :: Finished");
-    }
+
+        assertThat(taskStore.tasks()).isEmpty();
+     }
 }

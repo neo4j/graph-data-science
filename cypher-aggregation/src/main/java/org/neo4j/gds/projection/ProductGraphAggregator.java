@@ -58,6 +58,7 @@ public class ProductGraphAggregator extends GraphAggregator {
                 input[5]
             );
         } catch (Exception e) {
+            super.onFailure();
             throw new ProcedureException(
                 Status.Procedure.ProcedureCallFailed,
                 e,
