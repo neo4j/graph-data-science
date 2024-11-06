@@ -28,9 +28,9 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistry;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.utils.GdsFeatureToggles;
-import org.neo4j.gds.logging.Log;
 
 import java.util.Locale;
 import java.util.Optional;
@@ -153,13 +153,13 @@ public class TaskProgressTracker implements ProgressTracker {
     @Override
     public void logSteps(long steps) {
         requireCurrentTask();
-        if (currentTask.isPresent()) {
-            long volume = currentTask.get().getProgress().volume();
+        currentTask.ifPresent(task -> {
+            long volume = task.getProgress().volume();
             double progress = steps * volume / (double) currentTotalSteps + progressLeftOvers;
             long longProgress = (long) progress;
             progressLeftOvers = progress - longProgress;
             logProgress(longProgress);
-        }
+        });
     }
 
     @Override
@@ -172,16 +172,19 @@ public class TaskProgressTracker implements ProgressTracker {
     @Override
     public void endSubTask() {
         requireCurrentTask();
-        if (currentTask.isPresent()) {
-            taskProgressLogger.logEndSubTask(currentTask.get(), parentTask());
-            currentTask.get().finish();
-            if (nestedTasks.isEmpty()) {
-                this.currentTask = Optional.empty();
-                release();
-            } else {
-                this.currentTask = Optional.of(nestedTasks.pop());
+        currentTask.ifPresent(
+            task -> {
+                taskProgressLogger.logEndSubTask(task, parentTask());
+                task.finish();
+                if (nestedTasks.isEmpty()) {
+                    this.currentTask = Optional.empty();
+                    release();
+                } else {
+                    this.currentTask = Optional.of(nestedTasks.pop());
+                }
             }
-        }
+        );
+
     }
 
     @Override
@@ -193,38 +196,34 @@ public class TaskProgressTracker implements ProgressTracker {
     @Override
     public void logProgress(long value) {
         requireCurrentTask();
-        if (currentTask.isPresent()) {
-            currentTask.get().logProgress(value);
+        currentTask.ifPresent(task -> {
+            task.logProgress(value);
             taskProgressLogger.logProgress(value);
-        }
+        });
     }
 
     @Override
     public void logProgress(long value, String messageTemplate) {
         requireCurrentTask();
-        if (currentTask.isPresent()) {
-            currentTask.get().logProgress(value);
+        currentTask.ifPresent(task -> {
+            task.logProgress(value);
             taskProgressLogger.logMessage(formatWithLocale(messageTemplate, value));
-        }
+        });
     }
 
     @Override
     public void setVolume(long volume) {
         requireCurrentTask();
-        if (currentTask.isPresent()) {
-            currentTask.get().setVolume(volume);
+        currentTask.ifPresent(task -> {
+            task.setVolume(volume);
             taskProgressLogger.reset(volume);
-        }
+        });
     }
 
     @Override
     public long currentVolume() {
         requireCurrentTask();
-        if (currentTask.isPresent()) {
-            return currentTask.get().getProgress().volume();
-        } else {
-            return UNKNOWN_VOLUME;
-        }
+        return currentTask.map(task -> task.getProgress().volume()).orElse(UNKNOWN_VOLUME);
     }
 
     @Override
@@ -260,9 +259,9 @@ public class TaskProgressTracker implements ProgressTracker {
     @Override
     public void endSubTaskWithFailure() {
         requireCurrentTask();
-        if (currentTask.isPresent()) {
-            currentTask.get().fail();
-            taskProgressLogger.logEndSubTaskWithFailure(currentTask.get(), parentTask());
+        currentTask.ifPresent(task -> {
+            task.fail();
+            taskProgressLogger.logEndSubTaskWithFailure(task, parentTask());
 
             if (nestedTasks.isEmpty()) {
                 this.currentTask = Optional.empty();
@@ -271,7 +270,7 @@ public class TaskProgressTracker implements ProgressTracker {
                 this.currentTask = Optional.of(nestedTasks.pop());
                 endSubTaskWithFailure();
             }
-        }
+        });
     }
 
     @Override
@@ -319,13 +318,13 @@ public class TaskProgressTracker implements ProgressTracker {
     }
 
     private void assertSubTask(String subTaskSubString) {
-        if (currentTask.isPresent()) {
-            var currentTaskDescription = currentTask.get().description();
+        currentTask.ifPresent(task -> {
+            var currentTaskDescription = task.description();
             assert currentTaskDescription.contains(subTaskSubString) : formatWithLocale(
                 "Expected task name to contain `%s`, but was `%s`",
                 subTaskSubString,
                 currentTaskDescription
             );
-        }
+        });
     }
 }

@@ -30,7 +30,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class Task {
 
-    public static final int UNKNOWN_VOLUME = -1;
+    public static final long UNKNOWN_VOLUME = -1;
     public static final int UNKNOWN_CONCURRENCY = -1;
     public static final long NOT_STARTED = -1L;
     public static final long NOT_FINISHED = -1L;
