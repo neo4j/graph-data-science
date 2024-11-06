@@ -25,6 +25,7 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.articulationpoints.ArticulationPointsStreamConfig;
+import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
 import org.neo4j.gds.bridges.BridgeResult;
 import org.neo4j.gds.bridges.BridgesStreamConfig;
@@ -38,6 +39,7 @@ import org.neo4j.gds.pagerank.ArticleRankStreamConfig;
 import org.neo4j.gds.pagerank.EigenvectorStreamConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankStreamConfig;
+import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 
 import java.util.stream.Stream;
 
@@ -51,6 +53,7 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Deg
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.EigenVector;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HarmonicCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PageRank;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SLLPA;
 
 public class CentralityAlgorithmsStreamModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
@@ -213,6 +216,21 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
             PageRank,
             estimationFacade::pageRank,
             (graph, __) -> centralityAlgorithms.pageRank(graph, configuration),
+            streamResultBuilder
+        );
+    }
+
+    public <RESULT> Stream<RESULT> sllpa(
+        GraphName graphName,
+        SpeakerListenerLPAConfig configuration,
+        StreamResultBuilder<PregelResult, RESULT> streamResultBuilder
+    ) {
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
+            graphName,
+            configuration,
+            SLLPA,
+            estimationFacade::pageRank,
+            (graph, __) -> centralityAlgorithms.speakerListenerLPA(graph, configuration),
             streamResultBuilder
         );
     }

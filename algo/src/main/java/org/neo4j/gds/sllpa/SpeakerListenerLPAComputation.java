@@ -17,77 +17,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.pregel;
+package org.neo4j.gds.sllpa;
 
 import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.LongIntScatterMap;
 import com.carrotsearch.hppc.cursors.LongIntCursor;
-import org.neo4j.gds.mem.MemoryEstimateDefinition;
-import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.pregel.Messages;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.beta.pregel.PregelComputation;
-import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelSchema;
-import org.neo4j.gds.beta.pregel.annotation.PregelProcedure;
 import org.neo4j.gds.beta.pregel.context.ComputeContext;
 import org.neo4j.gds.beta.pregel.context.InitContext;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.SplittableRandom;
 
-@PregelProcedure(
-    name = "gds.sllpa",
-    description = "The Speaker Listener Label Propagation algorithm is a fast algorithm for finding overlapping communities in a graph."
-)
-public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.SpeakerListenerLPAConfig> {
+import static org.neo4j.gds.sllpa.SpeakerListenerLPA.LABELS_PROPERTY;
 
-    public static final String LABELS_PROPERTY = "communityIds";
+class SpeakerListenerLPAComputation implements PregelComputation<SpeakerListenerLPAConfig> {
 
     private final CloseableThreadLocal<SplittableRandom> random;
 
-    @SuppressWarnings("unused") // Needed for the @PregelProcedure annotation
-    public SpeakerListenerLPA() {
-        this(System.currentTimeMillis());
-    }
-
-    public SpeakerListenerLPA(long seed) {
-        var splittableRandom = new SplittableRandom(seed);
+    SpeakerListenerLPAComputation(Optional<Long> seed) {
+        var splittableRandom = new SplittableRandom(seed.orElse(System.currentTimeMillis()));
         random = CloseableThreadLocal.withInitial(splittableRandom::split);
-    }
-
-    @Override
-    public PregelSchema schema(SpeakerListenerLPAConfig config) {
-        return new PregelSchema.Builder()
-            .add(LABELS_PROPERTY, ValueType.LONG_ARRAY)
-            .build();
-    }
-
-
-    @Override
-    public MemoryEstimateDefinition estimateDefinition(boolean isAsynchronous) {
-        return () -> Pregel.memoryEstimation(
-            Map.of(LABELS_PROPERTY, ValueType.LONG_ARRAY),
-            false,
-            false
-        );
-    }
-
-    @Override
-    public void init(InitContext<SpeakerListenerLPAConfig> context) {
-        var initialLabels = new long[context.config().maxIterations()];
-        // when nodes do not have incoming rels, it should vote for itself always
-        Arrays.fill(initialLabels, context.nodeId());
-        context.setNodeValue(LABELS_PROPERTY, initialLabels);
-    }
-
-    @Override
-    public void close() {
-        random.close();
     }
 
     @Override
@@ -104,6 +62,31 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
             listen(context, messages, labels);
             prune(context, labels);
         }
+    }
+
+    @Override
+    public void init(InitContext<SpeakerListenerLPAConfig> context) {
+        var initialLabels = new long[context.config().maxIterations()];
+        // when nodes do not have incoming rels, it should vote for itself always
+        Arrays.fill(initialLabels, context.nodeId());
+        context.setNodeValue(LABELS_PROPERTY, initialLabels);
+    }
+
+
+    @Override
+    public PregelSchema schema(SpeakerListenerLPAConfig config) {
+        return new PregelSchema.Builder()
+            .add(LABELS_PROPERTY, ValueType.LONG_ARRAY)
+            .build();
+    }
+
+    @Override
+    public MemoryEstimateDefinition estimateDefinition(boolean isAsynchronous) {
+        return () -> Pregel.memoryEstimation(
+            Map.of(LABELS_PROPERTY, ValueType.LONG_ARRAY),
+            false,
+            false
+        );
     }
 
     private void listen(
@@ -161,28 +144,8 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
         );
     }
 
-
-    @Configuration
-    public interface SpeakerListenerLPAConfig extends PregelProcedureConfig {
-
-        default double minAssociationStrength() {
-            return 0.2;
-        }
-
-        static SpeakerListenerLPAConfig of(CypherMapWrapper userConfig) {
-            return new SpeakerListenerLPAConfigImpl(userConfig);
-        }
-
-        @Override
-        @Configuration.Ignore
-        default boolean isAsynchronous() {
-            return true;
-        }
-
-
-        @Configuration.Ignore
-        default int propagationSteps() {
-            return maxIterations() - 1;
-        }
+    @Override
+    public void close() {
+        random.close();
     }
 }

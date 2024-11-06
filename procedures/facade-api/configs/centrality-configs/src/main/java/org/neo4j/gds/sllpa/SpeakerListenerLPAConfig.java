@@ -17,30 +17,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.doc;
+package org.neo4j.gds.sllpa;
 
-import org.neo4j.gds.functions.AsNodeFunc;
-import org.neo4j.gds.sllpa.SpeakerListenerLPAStreamProc;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.List;
+@Configuration
+public interface SpeakerListenerLPAConfig extends PregelProcedureConfig {
 
-class SpeakerListenerLPADocTest extends SingleFileDocTestBase {
+        default double minAssociationStrength() {
+            return 0.2;
+        }
 
-    @Override
-    protected List<Class<?>> functions() {
-        return List.of(AsNodeFunc.class);
+        static SpeakerListenerLPAConfig of(CypherMapWrapper userConfig) {
+            return new SpeakerListenerLPAConfigImpl(userConfig);
+        }
+
+        @Override
+        @Configuration.Ignore
+        default boolean isAsynchronous() {
+            return true;
+        }
+
+        @Configuration.Ignore
+        default int propagationSteps() {
+            return maxIterations() - 1;
+        }
     }
-
-    @Override
-    protected List<Class<?>> procedures() {
-        return List.of(
-            SpeakerListenerLPAStreamProc.class
-        );
-    }
-
-    @Override
-    protected String adocFile() {
-        return "pages/algorithms/sllpa.adoc";
-    }
-
-}

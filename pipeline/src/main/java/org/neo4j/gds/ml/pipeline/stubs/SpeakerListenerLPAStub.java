@@ -17,30 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.doc;
+package org.neo4j.gds.ml.pipeline.stubs;
 
-import org.neo4j.gds.functions.AsNodeFunc;
-import org.neo4j.gds.sllpa.SpeakerListenerLPAStreamProc;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.centrality.SpeakerListenerLPAMutateResult;
+import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
+import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 
-import java.util.List;
-
-class SpeakerListenerLPADocTest extends SingleFileDocTestBase {
-
-    @Override
-    protected List<Class<?>> functions() {
-        return List.of(AsNodeFunc.class);
+public class SpeakerListenerLPAStub extends AbstractStub<SpeakerListenerLPAConfig, SpeakerListenerLPAMutateResult> {
+    protected MutateStub<SpeakerListenerLPAConfig, SpeakerListenerLPAMutateResult> stub(AlgorithmsProcedureFacade facade) {
+        return facade.centrality().speakerListenerLPAMutateStub();
     }
-
-    @Override
-    protected List<Class<?>> procedures() {
-        return List.of(
-            SpeakerListenerLPAStreamProc.class
-        );
-    }
-
-    @Override
-    protected String adocFile() {
-        return "pages/algorithms/sllpa.adoc";
-    }
-
 }

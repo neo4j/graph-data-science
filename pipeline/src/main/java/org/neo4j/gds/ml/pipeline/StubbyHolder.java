@@ -62,6 +62,7 @@ import org.neo4j.gds.ml.pipeline.stubs.SinglePairShortestPathYensStub;
 import org.neo4j.gds.ml.pipeline.stubs.SingleSourceShortestPathDeltaStub;
 import org.neo4j.gds.ml.pipeline.stubs.SingleSourceShortestPathDijkstraStub;
 import org.neo4j.gds.ml.pipeline.stubs.SpanningTreeStub;
+import org.neo4j.gds.ml.pipeline.stubs.SpeakerListenerLPAStub;
 import org.neo4j.gds.ml.pipeline.stubs.SplitRelationshipsStub;
 import org.neo4j.gds.ml.pipeline.stubs.SteinerTreeStub;
 import org.neo4j.gds.ml.pipeline.stubs.ToUndirectedStub;
@@ -127,6 +128,7 @@ class StubbyHolder {
             case ScaleProperties -> new ScalePropertiesStub();
             case SCC -> new SccStub();
             case SingleSourceDijkstra -> new SingleSourceShortestPathDijkstraStub();
+            case SLLPA -> new SpeakerListenerLPAStub();
             case SpanningTree -> new SpanningTreeStub();
             case SplitRelationships -> new SplitRelationshipsStub();
             case SteinerTree -> new SteinerTreeStub();

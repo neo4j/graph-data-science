@@ -17,30 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.doc;
+package org.neo4j.gds.sllpa;
 
-import org.neo4j.gds.functions.AsNodeFunc;
-import org.neo4j.gds.sllpa.SpeakerListenerLPAStreamProc;
+public class Constants {
 
-import java.util.List;
-
-class SpeakerListenerLPADocTest extends SingleFileDocTestBase {
-
-    @Override
-    protected List<Class<?>> functions() {
-        return List.of(AsNodeFunc.class);
-    }
-
-    @Override
-    protected List<Class<?>> procedures() {
-        return List.of(
-            SpeakerListenerLPAStreamProc.class
-        );
-    }
-
-    @Override
-    protected String adocFile() {
-        return "pages/algorithms/sllpa.adoc";
-    }
-
+    public static final String SLLP_DESCRIPTION="The Speaker Listener Label Propagation algorithm is a fast algorithm for finding overlapping communities in a graph.";
 }

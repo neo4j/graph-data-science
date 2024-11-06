@@ -17,30 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.doc;
+package org.neo4j.gds.sllpa;
 
-import org.neo4j.gds.functions.AsNodeFunc;
-import org.neo4j.gds.sllpa.SpeakerListenerLPAStreamProc;
+import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.beta.pregel.Pregel;
+import org.neo4j.gds.mem.MemoryEstimateDefinition;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
 
-import java.util.List;
+import java.util.Map;
 
-class SpeakerListenerLPADocTest extends SingleFileDocTestBase {
+import static org.neo4j.gds.sllpa.SpeakerListenerLPA.LABELS_PROPERTY;
 
-    @Override
-    protected List<Class<?>> functions() {
-        return List.of(AsNodeFunc.class);
-    }
 
-    @Override
-    protected List<Class<?>> procedures() {
-        return List.of(
-            SpeakerListenerLPAStreamProc.class
-        );
-    }
+public class SpeakerListenerLPAMemoryEstimateDefinition  implements MemoryEstimateDefinition {
 
     @Override
-    protected String adocFile() {
-        return "pages/algorithms/sllpa.adoc";
+    public MemoryEstimation memoryEstimation() {
+        return MemoryEstimations.builder()
+            .add(Pregel.memoryEstimation(
+                Map.of(LABELS_PROPERTY, ValueType.LONG_ARRAY),
+                false,
+                false
+            )).build();
     }
-
 }

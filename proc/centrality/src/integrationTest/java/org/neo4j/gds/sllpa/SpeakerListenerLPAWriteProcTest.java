@@ -17,25 +17,88 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.pregel;
+package org.neo4j.gds.sllpa;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.beta.generator.GraphGenerateProc;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.graphdb.QueryExecutionException;
 
+import java.util.HashSet;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG_ARRAY;
 
 class SpeakerListenerLPAWriteProcTest extends BaseProcTest {
+
+    @Neo4jGraph
+    private static final String DB_CYPHER =
+        "CREATE" +
+        "  (a:Node {name: 'a'})" +
+        ", (b:Node {name: 'b'})" +
+        ", (c:Node {name: 'c'})" +
+        ", (a)-[:REL]->(b)";
+
+    @Inject
+    private IdFunction idFunction;
 
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(
             SpeakerListenerLPAWriteProc.class,
-            DeprecatedAlphaSpeakerListenerLPAWriteProc.class,
+            GraphProjectProc.class,
             GraphGenerateProc.class
         );
+
+        runQuery(
+            GdsCypher.call(DEFAULT_GRAPH_NAME)
+                .graphProject()
+                .loadEverything(Orientation.NATURAL)
+                .yields()
+        );
+    }
+
+    @Test
+    void testWrite() {
+        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .algo("gds.sllpa")
+            .writeMode()
+            .addParameter("maxIterations",1)
+            .addParameter("writeProperty","foo")
+            .yields();
+
+
+        var rowCount = runQueryWithRowConsumer(query, (resultRow) -> {
+            assertThat(resultRow.getNumber("ranIterations")).asInstanceOf(LONG).isEqualTo(1L);
+            assertThat(resultRow.getNumber("nodePropertiesWritten")).asInstanceOf(LONG).isEqualTo(3L);
+
+        });
+        assertThat(rowCount).isEqualTo(1);
+        HashSet<Long> expected =new HashSet<>(List.of(0L,1L,2L));
+
+        var influentialQueryRow = runQueryWithRowConsumer(
+            "MATCH (n) RETURN n.foo AS foo",
+            resultRow -> {
+                assertThat(resultRow.get("foo"))
+                    .asInstanceOf(LONG_ARRAY)
+                    .satisfies( v ->{
+                            assertThat(expected.contains(v[0])).isTrue();
+                            expected.remove(v[0]);
+                    });
+            }
+        );
+
+        assertThat(influentialQueryRow).isEqualTo(3);
     }
 
     @Test
@@ -55,4 +118,5 @@ class SpeakerListenerLPAWriteProcTest extends BaseProcTest {
             .withRootCauseInstanceOf(IllegalArgumentException.class)
             .withMessageContaining("The provided graph does not support `write` execution mode.");
     }
+
 }

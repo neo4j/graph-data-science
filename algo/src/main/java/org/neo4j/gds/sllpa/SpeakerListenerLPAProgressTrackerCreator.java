@@ -17,30 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.doc;
+package org.neo4j.gds.sllpa;
 
-import org.neo4j.gds.functions.AsNodeFunc;
-import org.neo4j.gds.sllpa.SpeakerListenerLPAStreamProc;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 import java.util.List;
 
-class SpeakerListenerLPADocTest extends SingleFileDocTestBase {
+public class SpeakerListenerLPAProgressTrackerCreator {
 
-    @Override
-    protected List<Class<?>> functions() {
-        return List.of(AsNodeFunc.class);
-    }
-
-    @Override
-    protected List<Class<?>> procedures() {
-        return List.of(
-            SpeakerListenerLPAStreamProc.class
+    public static Task progressTask(long nodeCount, int maxIterations,String taskName) {
+        return Tasks.iterativeDynamic(
+            taskName,
+            () -> List.of(
+                Tasks.leaf("Compute iteration", nodeCount),
+                Tasks.leaf("Master compute iteration", nodeCount)
+            ),
+            maxIterations
         );
-    }
-
-    @Override
-    protected String adocFile() {
-        return "pages/algorithms/sllpa.adoc";
-    }
-
+}
 }

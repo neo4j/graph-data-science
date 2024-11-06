@@ -17,30 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.doc;
+package org.neo4j.gds.procedures.algorithms.centrality;
 
-import org.neo4j.gds.functions.AsNodeFunc;
-import org.neo4j.gds.sllpa.SpeakerListenerLPAStreamProc;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 
-import java.util.List;
+import java.util.Map;
 
-class SpeakerListenerLPADocTest extends SingleFileDocTestBase {
+public record SpeakerListenerLPAWriteResult(long ranIterations, boolean didConverge, long preProcessingMillis, long computeMillis, long writeMillis, long nodePropertiesWritten, Map<String,Object> configuration){
 
-    @Override
-    protected List<Class<?>> functions() {
-        return List.of(AsNodeFunc.class);
+    static SpeakerListenerLPAWriteResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+        return new SpeakerListenerLPAWriteResult(0,false,timings.preProcessingMillis,timings.computeMillis,timings.sideEffectMillis, 0,configurationMap);
     }
-
-    @Override
-    protected List<Class<?>> procedures() {
-        return List.of(
-            SpeakerListenerLPAStreamProc.class
-        );
-    }
-
-    @Override
-    protected String adocFile() {
-        return "pages/algorithms/sllpa.adoc";
-    }
-
 }
+
+
+

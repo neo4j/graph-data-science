@@ -31,6 +31,7 @@ import org.neo4j.gds.procedures.algorithms.centrality.stubs.ClosenessCentralityM
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.DegreeCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.HarmonicCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.PageRankMutateStub;
+import org.neo4j.gds.procedures.algorithms.centrality.stubs.SpeakerListenerLPAMutateStub;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -282,5 +283,38 @@ public interface CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     );
+
+    Stream<MemoryEstimateResult> sllpaStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
+
+    Stream<SpeakerListenerLPAStreamResult> sllpaStream(
+        String graphName,
+        Map<String, Object> configuration
+    );
+
+    Stream<MemoryEstimateResult> sllpaStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
+
+    Stream<SpeakerListenerLPAStatsResult> sllpaStats(
+        String graphName,
+        Map<String, Object> configuration
+    );
+
+    Stream<MemoryEstimateResult> sllpaWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
+
+    Stream<SpeakerListenerLPAWriteResult> sllpaWrite(
+        String graphName,
+        Map<String, Object> configuration
+    );
+
+
+    SpeakerListenerLPAMutateStub speakerListenerLPAMutateStub();
 
 }

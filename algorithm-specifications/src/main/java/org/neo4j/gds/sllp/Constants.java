@@ -17,13 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.pregel;
+package org.neo4j.gds.sllp;
 
-import org.neo4j.gds.beta.pregel.annotation.PregelProcedure;
+public class Constants {
 
-@PregelProcedure(
-    name = "gds.alpha.sllpa",
-    description = "The Speaker Listener Label Propagation algorithm is a fast algorithm for finding overlapping communities in a graph.",
-    deprecatedBy = "gds.sllpa"
-)
-public class DeprecatedAlphaSpeakerListenerLPA extends SpeakerListenerLPA {}
+    public static final String SLLP_DESCRIPTION="The Speaker Listener Label Propagation algorithm is a fast algorithm for finding overlapping communities in a graph.";
+}

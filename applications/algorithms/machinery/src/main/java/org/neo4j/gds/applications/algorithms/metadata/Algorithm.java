@@ -75,6 +75,7 @@ public enum Algorithm {
     ScaleProperties,
     SCC,
     SingleSourceDijkstra,
+    SLLPA,
     SpanningTree,
     SplitRelationships,
     SteinerTree,
