@@ -28,6 +28,7 @@ import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.articulationpoints.ArticulationPoints;
 import org.neo4j.gds.articulationpoints.ArticulationPointsProgressTaskCreator;
 import org.neo4j.gds.beta.pregel.Pregel;
+import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.betweenness.BetweennessCentrality;
 import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
@@ -52,6 +53,9 @@ import org.neo4j.gds.degree.DegreeCentralityResult;
 import org.neo4j.gds.harmonic.HarmonicCentrality;
 import org.neo4j.gds.harmonic.HarmonicCentralityBaseConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
+import org.neo4j.gds.hits.Hits;
+import org.neo4j.gds.hits.HitsConfig;
+import org.neo4j.gds.hits.HitsProgressTrackerCreator;
 import org.neo4j.gds.indirectExposure.IndirectExposure;
 import org.neo4j.gds.indirectExposure.IndirectExposureConfig;
 import org.neo4j.gds.indirectExposure.IndirectExposureResult;
@@ -338,5 +342,18 @@ public class CentralityAlgorithms {
         return new PageRankComputation(configuration, mappedSourceNodes, degreeFunction);
     }
 
+    PregelResult hits(Graph graph, HitsConfig configuration) {
+        var task = HitsProgressTrackerCreator.progressTask(graph.nodeCount(),configuration.maxIterations(),AlgorithmLabel.HITS.asString());
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var algorithm = new Hits(
+            graph,
+            configuration,
+            DefaultPool.INSTANCE,
+            progressTracker
+        );
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+    }
 
 }

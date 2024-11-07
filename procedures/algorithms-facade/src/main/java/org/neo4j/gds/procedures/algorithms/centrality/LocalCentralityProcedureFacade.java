@@ -45,6 +45,7 @@ import org.neo4j.gds.harmonic.DeprecatedTieredHarmonicCentralityWriteConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityStatsConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
+import org.neo4j.gds.hits.HitsConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStreamConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationWriteConfig;
@@ -1220,6 +1221,33 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
         return Stream.of(estimationModeBusinessFacade.pageRank(parsedConfiguration, graphNameOrConfiguration));
     }
 
+    @Override
+    public Stream<HitsStreamResult> hitsStream(String graphName, Map<String, Object> configuration) {
 
+        var parsedConfiguration = configurationParser.parseConfiguration(
+            configuration,
+            HitsConfig::of
+        );
+
+        var resultBuilder =new HitsResultBuilderForStreamMode(parsedConfiguration);
+
+        return streamModeBusinessFacade.hits(
+            GraphName.parse(graphName),
+            parsedConfiguration,
+            resultBuilder
+        );
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> hitsStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var parsedConfiguration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            HitsConfig::of
+        );
+        return Stream.of(estimationModeBusinessFacade.hits(parsedConfiguration,graphNameOrConfiguration));
+    }
 
 }

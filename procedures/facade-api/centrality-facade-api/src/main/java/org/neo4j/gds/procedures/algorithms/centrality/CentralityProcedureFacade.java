@@ -283,6 +283,13 @@ public interface CentralityProcedureFacade {
         Map<String, Object> algorithmConfiguration
     );
 
+    Stream<HitsStreamResult> hitsStream(String graphName, Map<String, Object> configuration);
+
+    Stream<MemoryEstimateResult> hitsStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
+
 
 
 }

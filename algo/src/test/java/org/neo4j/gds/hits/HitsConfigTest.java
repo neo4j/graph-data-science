@@ -19,11 +19,20 @@
  */
 package org.neo4j.gds.hits;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.beta.pregel.Partitioning;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.Inject;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class HitsConfigTest {
 
@@ -44,5 +53,33 @@ class HitsConfigTest {
                 .withNumber("hitsIterations", 5)
         );
         assertThat(config.toMap().get("partitioning")).isInstanceOf(String.class);
+    }
+
+    @GdlExtension
+    @Nested
+    class UndirectedTest {
+
+        @GdlGraph(orientation = Orientation.UNDIRECTED)
+        private static final String DB_CYPHER =
+            "CREATE " +
+                "  (a:node)," +
+                "  (b:node)," +
+                "(a)-[:R]->(b)";
+
+
+        @Inject
+        private GraphStore graphStore;
+
+        @Test
+        void shouldThrowForUndirected() {
+            var config = HitsConfigImpl.builder().relationshipTypes(List.of("R")).build();
+            assertThatThrownBy(() -> config.graphStoreValidation(
+                graphStore,
+                config.nodeLabelIdentifiers(graphStore),
+                config.internalRelationshipTypes(graphStore)
+            ))
+                .hasMessageContaining("This algorithm requires a directed graph, but the following configured relationship types are undirected: [R]");
+
+        }
     }
 }

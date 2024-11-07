@@ -62,6 +62,9 @@ public final class CentralityApplications {
             progressTrackerCreator,
             requestScopedDependencies.getTerminationFlag()
         );
+
+        var hitsHookGenerator =new HitsHookGenerator(progressTrackerCreator,requestScopedDependencies.getTerminationFlag());
+
         var mutation = new CentralityAlgorithmsMutateModeBusinessFacade(
             estimation,
             algorithms,
@@ -76,7 +79,8 @@ public final class CentralityApplications {
         var streaming = new CentralityAlgorithmsStreamModeBusinessFacade(
             estimation,
             algorithms,
-            algorithmProcessingTemplateConvenience
+            algorithmProcessingTemplateConvenience,
+            hitsHookGenerator
         );
         var writing = CentralityAlgorithmsWriteModeBusinessFacade.create(
             log,

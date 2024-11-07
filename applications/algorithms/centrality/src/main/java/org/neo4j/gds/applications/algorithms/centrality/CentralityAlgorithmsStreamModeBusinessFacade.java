@@ -25,6 +25,7 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplateConvenience;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.articulationpoints.ArticulationPointsStreamConfig;
+import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
 import org.neo4j.gds.bridges.BridgeResult;
 import org.neo4j.gds.bridges.BridgesStreamConfig;
@@ -32,6 +33,7 @@ import org.neo4j.gds.closeness.ClosenessCentralityStreamConfig;
 import org.neo4j.gds.degree.DegreeCentralityStreamConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
+import org.neo4j.gds.hits.HitsConfig;
 import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStreamConfig;
 import org.neo4j.gds.pagerank.ArticleRankStreamConfig;
@@ -39,6 +41,8 @@ import org.neo4j.gds.pagerank.EigenvectorStreamConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankStreamConfig;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticleRank;
@@ -49,6 +53,7 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CEL
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ClosenessCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DegreeCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.EigenVector;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HITS;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HarmonicCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PageRank;
 
@@ -56,15 +61,18 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final CentralityAlgorithms centralityAlgorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
+    private final HitsHookGenerator hitsHookGenerator;
 
     CentralityAlgorithmsStreamModeBusinessFacade(
         CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade,
         CentralityAlgorithms centralityAlgorithms,
-        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience
+        AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
+        HitsHookGenerator hitsHookGenerator
     ) {
         this.estimationFacade = estimationFacade;
         this.centralityAlgorithms = centralityAlgorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
+        this.hitsHookGenerator = hitsHookGenerator;
     }
 
     public <RESULT> Stream<RESULT> articleRank(
@@ -214,6 +222,27 @@ public class CentralityAlgorithmsStreamModeBusinessFacade {
             estimationFacade::pageRank,
             (graph, __) -> centralityAlgorithms.pageRank(graph, configuration),
             streamResultBuilder
+        );
+    }
+
+    public <RESULT> Stream<RESULT> hits(
+        GraphName graphName,
+        HitsConfig configuration,
+        StreamResultBuilder<PregelResult, RESULT> streamResultBuilder
+    ) {
+
+        var hitsETLHook = hitsHookGenerator.createETLHook(configuration);
+
+        return algorithmProcessingTemplateConvenience.processAlgorithmInStreamMode(
+            graphName,
+            configuration,
+            HITS,
+            estimationFacade::hits,
+            (graph, __) -> centralityAlgorithms.hits(graph, configuration),
+            streamResultBuilder,
+            Optional.empty(),
+            Optional.of(List.of(hitsETLHook)),
+            Optional.empty()
         );
     }
 

@@ -21,11 +21,17 @@ package org.neo4j.gds.hits;
 
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.beta.pregel.Partitioning;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.StringIdentifierValidations;
+
+import java.util.Collection;
+import java.util.Locale;
 
 @Configuration
 public interface HitsConfig extends PregelProcedureConfig {
@@ -73,6 +79,37 @@ public interface HitsConfig extends PregelProcedureConfig {
 
     static HitsConfig of(CypherMapWrapper userConfig) {
         return new HitsConfigImpl(userConfig);
+    }
+
+
+    @Configuration.GraphStoreValidationCheck
+    default void validateTargetRelIsUndirected(
+        GraphStore graphStore,
+        Collection<NodeLabel> ignored,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+
+        var relationshipTypes = selectedRelationshipTypes;
+        var relationshipSchema = graphStore.schema().relationshipSchema();
+
+        var undirectedTypes = relationshipTypes
+            .stream()
+            .filter(relationshipSchema::isUndirected)
+            .map(RelationshipType::name)
+            .toList();
+
+        if (!undirectedTypes.isEmpty()) {
+            var stringBuilder= new StringBuilder("["+undirectedTypes.get(0));
+            for (int index=1; index < undirectedTypes.size();++index){
+                stringBuilder.append(",").append(undirectedTypes.get(index));
+            }
+            stringBuilder.append("]");
+            throw new IllegalArgumentException(String.format(
+                Locale.US,
+                "This algorithm requires a directed graph, but the following configured relationship types are undirected: %s.",
+                stringBuilder
+            ));
+        }
     }
 }
 

@@ -48,6 +48,8 @@ public enum AlgorithmLabel implements Label {
     GraphSageTrain("GraphSageTrain"),
     HarmonicCentrality("HarmonicCentrality"),
     HashGNN("HashGNN"),
+    HITS("HITS"),
+
     IndexInverse("IndexInverse"),
     IndirectExposure("IndirectExposure"),
     K1Coloring("K1Coloring"),
