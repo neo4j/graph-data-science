@@ -19,10 +19,12 @@
  */
 package org.neo4j.gds.projection;
 
-import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.transaction.TransactionContext;
 
+import static org.neo4j.gds.projection.Constants.UNKNOWN_ROW_COUNT;
+
 public interface QueryEstimator {
+
     int estimateRows(String query);
 
     static QueryEstimator fromTransaction(TransactionContext transaction) {
@@ -30,7 +32,7 @@ public interface QueryEstimator {
     }
 
     static QueryEstimator empty() {
-        return __ -> Task.UNKNOWN_VOLUME;
+        return __ -> UNKNOWN_ROW_COUNT;
     }
 }
 

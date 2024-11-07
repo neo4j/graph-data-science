@@ -19,11 +19,12 @@
  */
 package org.neo4j.gds.projection;
 
-import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.ExecutionPlanDescription;
 
 import java.util.Optional;
+
+import static org.neo4j.gds.projection.Constants.UNKNOWN_ROW_COUNT;
 
 final class QueryRowEstimationUtil {
 
@@ -42,9 +43,9 @@ final class QueryRowEstimationUtil {
             var aggregationChild = findChildOfRemoteAggregation(executionPlan);
             return aggregationChild
                 .map(child -> ((Number) child.getArguments().get("EstimatedRows")).intValue())
-                .orElse(Task.UNKNOWN_VOLUME);
+                .orElse(UNKNOWN_ROW_COUNT);
         } catch (Exception e) {
-            return Task.UNKNOWN_VOLUME;
+            return UNKNOWN_ROW_COUNT;
         }
     }
 
