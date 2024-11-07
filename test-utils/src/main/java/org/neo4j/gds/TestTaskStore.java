@@ -19,8 +19,9 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
+import org.neo4j.gds.core.utils.progress.UserTask;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
 import java.util.ArrayList;
@@ -34,17 +35,17 @@ public class TestTaskStore extends PerDatabaseTaskStore {
     private final List<String> tasksSeen = new ArrayList<>();
 
     @Override
-    public void store(String username, JobId jobId, Task task) {
-        super.store(username, jobId, task);
-
+    protected UserTask storeUserTask(String username, JobId jobId, Task task) {
         tasks.put(jobId, task.description());
         tasksSeen.add(task.description());
+
+        return super.storeUserTask(username, jobId, task);
     }
 
     @Override
-    public void remove(String username, JobId jobId) {
-        super.remove(username, jobId);
+    protected UserTask removeUserTask(String username, JobId jobId) {
         tasks.remove(jobId);
+        return super.removeUserTask(username, jobId);
     }
 
     public List<String> tasksSeen() {

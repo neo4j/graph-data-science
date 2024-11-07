@@ -22,35 +22,34 @@ package org.neo4j.gds.core.utils.progress;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-public class PerDatabaseTaskStore implements TaskStore {
+public class PerDatabaseTaskStore extends ObservableTaskStore {
     private final Map<String, Map<JobId, UserTask>> registeredTasks;
-    private final List<TaskStoreListener> listeners;
 
     public PerDatabaseTaskStore() {
+        super(new ArrayList<>());
         this.registeredTasks = new ConcurrentHashMap<>();
-        this.listeners = new ArrayList<>();
     }
 
     @Override
-    public void store(String username, JobId jobId, Task task) {
-        listeners.forEach(TaskStoreListener::onTaskStoreUpdate);
+    protected UserTask storeUserTask(String username, JobId jobId, Task task) {
+        var userTask = new UserTask(username, jobId, task);
         this.registeredTasks
             .computeIfAbsent(username, __ -> new ConcurrentHashMap<>())
-            .put(jobId, new UserTask(username, jobId, task));
+            .put(jobId, userTask);
+
+        return userTask;
     }
 
     @Override
-    public void remove(String username, JobId jobId) {
-        listeners.forEach(TaskStoreListener::onTaskStoreUpdate);
-        if (this.registeredTasks.containsKey(username)) {
-            this.registeredTasks.get(username).remove(jobId);
-        }
+    protected UserTask removeUserTask(String username, JobId jobId) {
+        return Optional.ofNullable(this.registeredTasks.get(username))
+            .map(userTasks -> userTasks.remove(jobId))
+            .orElse(null);
     }
 
     @Override
@@ -96,8 +95,4 @@ public class PerDatabaseTaskStore implements TaskStore {
         return registeredTasks.values().stream().mapToLong(Map::size).sum();
     }
 
-    @Override
-    public synchronized void addListener(TaskStoreListener listener) {
-        this.listeners.add(listener);
-    }
 }

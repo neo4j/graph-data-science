@@ -163,10 +163,10 @@ class ProcedureExecutorTest {
         Set<JobId> seenJobIds = new HashSet<>();
 
         @Override
-        public void store(String username, JobId jobId, Task task) {
-            super.store(username, jobId, task);
+        public UserTask storeUserTask(String username, JobId jobId, Task task) {
             registerTaskInvocations++;
             seenJobIds.add(jobId);
+            return super.storeUserTask(username, jobId, task);
         }
     }
 

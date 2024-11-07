@@ -20,8 +20,9 @@
 package org.neo4j.gds;
 
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
+import org.neo4j.gds.core.utils.progress.UserTask;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
 import java.util.HashSet;
@@ -34,15 +35,15 @@ public class InvocationCountingTaskStore extends PerDatabaseTaskStore {
     public Set<JobId> seenJobIds = new HashSet<>();
 
     @Override
-    public void store(String username, JobId jobId, Task task) {
-        super.store(username, jobId, task);
+    public UserTask storeUserTask(String username, JobId jobId, Task task) {
         registerTaskInvocations++;
         seenJobIds.add(jobId);
+        return super.storeUserTask(username, jobId, task);
     }
 
     @Override
-    public void remove(String username, JobId jobId) {
-        super.remove(username, jobId);
+    public UserTask removeUserTask(String username, JobId jobId) {
         removeTaskInvocations++;
+        return super.removeUserTask(username, jobId);
     }
 }

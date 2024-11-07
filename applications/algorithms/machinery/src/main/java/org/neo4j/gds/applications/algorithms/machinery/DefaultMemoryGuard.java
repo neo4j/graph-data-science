@@ -67,7 +67,14 @@ public final class DefaultMemoryGuard implements MemoryGuard {
 
         try {
 
-           var memoryRequirement = MemoryRequirement.create(estimationFactory,graphStore,graphDimensionFactory,dimensionTransformer,configuration,useMaxMemoryEstimation);
+            var memoryRequirement = MemoryRequirement.create(
+                estimationFactory,
+                graphStore,
+                graphDimensionFactory,
+                dimensionTransformer,
+                configuration,
+                useMaxMemoryEstimation
+            );
 
             try {
                 memoryGauge.tryToReserveMemory(memoryRequirement.requiredMemory());

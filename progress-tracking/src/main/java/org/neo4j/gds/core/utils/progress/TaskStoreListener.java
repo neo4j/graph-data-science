@@ -19,29 +19,9 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
-import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
-import java.util.stream.Stream;
-
-public interface TaskStore {
-
-    void store(String username, JobId jobId, Task task);
-
-    void remove(String username, JobId jobId);
-
-    Stream<UserTask> query();
-
-    Stream<UserTask> query(JobId jobId);
-
-    Stream<UserTask> query(String username);
-
-    Optional<UserTask> query(String username, JobId jobId);
-
-    boolean isEmpty();
-
-    long taskCount();
-
-    void addListener(TaskStoreListener listener);
-
+public interface TaskStoreListener {
+    void onTaskAdded(UserTask userTask);
+    void onTaskRemoved(@Nullable UserTask userTask);
 }
