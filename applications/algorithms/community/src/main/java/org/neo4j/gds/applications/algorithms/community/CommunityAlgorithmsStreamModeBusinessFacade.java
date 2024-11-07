@@ -24,6 +24,7 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTempla
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
+import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.conductance.ConductanceStreamConfig;
@@ -45,6 +46,7 @@ import org.neo4j.gds.modularity.ModularityStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.scc.SccStreamConfig;
+import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
@@ -67,6 +69,7 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Lou
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Modularity;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ModularityOptimization;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SCC;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SLLPA;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.TriangleCount;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Triangles;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.WCC;
@@ -307,6 +310,21 @@ public class CommunityAlgorithmsStreamModeBusinessFacade {
             WCC,
             () -> estimationFacade.wcc(configuration),
             (graph, __) -> algorithms.wcc(graph, configuration),
+            streamResultBuilder
+        );
+    }
+
+    public <RESULT> Stream<RESULT> sllpa(
+        GraphName graphName,
+        SpeakerListenerLPAConfig configuration,
+        StreamResultBuilder<PregelResult, RESULT> streamResultBuilder
+    ) {
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInStreamMode(
+            graphName,
+            configuration,
+            SLLPA,
+            estimationFacade::speakerListenerLPA,
+            (graph, __) -> algorithms.speakerListenerLPA(graph, configuration),
             streamResultBuilder
         );
     }

@@ -17,16 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.centrality;
+package org.neo4j.gds.procedures.algorithms.community;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 
 import java.util.Map;
 
-public record SpeakerListenerLPAWriteResult(long ranIterations, boolean didConverge, long preProcessingMillis, long computeMillis, long writeMillis, long nodePropertiesWritten, Map<String,Object> configuration){
+public record SpeakerListenerLPAStatsResult(long ranIterations, boolean didConverge, long preProcessingMillis, long computeMillis, Map<String,Object> configuration){
 
-    static SpeakerListenerLPAWriteResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
-        return new SpeakerListenerLPAWriteResult(0,false,timings.preProcessingMillis,timings.computeMillis,timings.sideEffectMillis, 0,configurationMap);
+    static SpeakerListenerLPAStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+        return new SpeakerListenerLPAStatsResult(0,false,timings.preProcessingMillis,timings.computeMillis,configurationMap);
     }
 }
 

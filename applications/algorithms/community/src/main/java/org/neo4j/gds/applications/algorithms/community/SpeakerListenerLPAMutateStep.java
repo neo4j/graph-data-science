@@ -17,53 +17,40 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.centrality;
+package org.neo4j.gds.applications.algorithms.community;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.applications.algorithms.machinery.Label;
-import org.neo4j.gds.applications.algorithms.machinery.WriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
+import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.MutateStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.beta.pregel.PregelResult;
-import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.sllpa.SpeakerListenerLPA;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 
-class SpeakerListenerLPAWriteStep implements WriteStep<PregelResult, NodePropertiesWritten> {
-    private final WriteToDatabase writeToDatabase;
+class SpeakerListenerLPAMutateStep implements MutateStep<PregelResult, NodePropertiesWritten> {
+    private final MutateNodeProperty mutateNodeProperty;
     private final SpeakerListenerLPAConfig configuration;
-    private final Label label;
 
-    SpeakerListenerLPAWriteStep(
-        WriteToDatabase writeToDatabase,
-        SpeakerListenerLPAConfig configuration,
-        Label label
-    ) {
-        this.writeToDatabase = writeToDatabase;
+    SpeakerListenerLPAMutateStep(
+        MutateNodeProperty mutateNodeProperty,
+        SpeakerListenerLPAConfig configuration) {
+        this.mutateNodeProperty = mutateNodeProperty;
         this.configuration = configuration;
-        this.label = label;
     }
 
     @Override
     public NodePropertiesWritten execute(
         Graph graph,
         GraphStore graphStore,
-        ResultStore resultStore,
-        PregelResult result,
-        JobId jobId
+        PregelResult result
     ) {
-        return writeToDatabase.perform(
+        return mutateNodeProperty.mutateNodeProperties(
             graph,
             graphStore,
-            resultStore,
             configuration,
-            configuration,
-            label,
-            jobId,
             nodePropertyValues(result)
         );
     }

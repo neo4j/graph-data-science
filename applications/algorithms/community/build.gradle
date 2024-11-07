@@ -14,6 +14,7 @@ dependencies {
     implementation project(":graph-schema-api")
     implementation project(":logging")
     implementation project(":memory-usage")
+    implementation project(":pregel")
     implementation project(":progress-tracking")
     implementation project(":termination")
 }

@@ -29,7 +29,6 @@ import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.articulationpoints.ArticulationPointsWriteConfig;
-import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
 import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
@@ -42,7 +41,6 @@ import org.neo4j.gds.pagerank.ArticleRankWriteConfig;
 import org.neo4j.gds.pagerank.EigenvectorWriteConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankWriteConfig;
-import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticleRank;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticulationPoints;
@@ -53,7 +51,6 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Deg
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.EigenVector;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HarmonicCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PageRank;
-import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SLLPA;
 
 public final class CentralityAlgorithmsWriteModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
@@ -246,24 +243,6 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             PageRank,
             estimationFacade::pageRank,
             (graph, __) -> centralityAlgorithms.pageRank(graph, configuration),
-            writeStep,
-            resultBuilder
-        );
-    }
-
-    public <RESULT> RESULT sllpa(
-        GraphName graphName,
-        SpeakerListenerLPAConfig configuration,
-        ResultBuilder<SpeakerListenerLPAConfig, PregelResult, RESULT, NodePropertiesWritten> resultBuilder
-    ) {
-        var writeStep = new SpeakerListenerLPAWriteStep(writeToDatabase, configuration, SLLPA);
-
-        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
-            graphName,
-            configuration,
-            SLLPA,
-            estimationFacade::speakerListenerLPA,
-            (graph, __) -> centralityAlgorithms.speakerListenerLPA(graph, configuration),
             writeStep,
             resultBuilder
         );

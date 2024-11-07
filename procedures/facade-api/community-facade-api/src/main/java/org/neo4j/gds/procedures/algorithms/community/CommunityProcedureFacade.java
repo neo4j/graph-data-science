@@ -30,6 +30,7 @@ import org.neo4j.gds.procedures.algorithms.community.stubs.LeidenMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.LouvainMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.ModularityOptimizationMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.SccMutateStub;
+import org.neo4j.gds.procedures.algorithms.community.stubs.SpeakerListenerLPAMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.TriangleCountMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.WccMutateStub;
 
@@ -404,4 +405,37 @@ public interface CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     );
+
+    Stream<MemoryEstimateResult> sllpaStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
+
+    Stream<SpeakerListenerLPAStreamResult> sllpaStream(
+        String graphName,
+        Map<String, Object> configuration
+    );
+
+    Stream<MemoryEstimateResult> sllpaStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
+
+    Stream<SpeakerListenerLPAStatsResult> sllpaStats(
+        String graphName,
+        Map<String, Object> configuration
+    );
+
+    Stream<MemoryEstimateResult> sllpaWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    );
+
+    Stream<SpeakerListenerLPAWriteResult> sllpaWrite(
+        String graphName,
+        Map<String, Object> configuration
+    );
+
+
+    SpeakerListenerLPAMutateStub speakerListenerLPAMutateStub();
 }

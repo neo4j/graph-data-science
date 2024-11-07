@@ -28,6 +28,7 @@ import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.algorithms.machinery.WriteToDatabase;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
+import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
@@ -47,6 +48,7 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
 import org.neo4j.gds.scc.SccAlphaWriteConfig;
 import org.neo4j.gds.scc.SccWriteConfig;
+import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientWriteConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
@@ -62,6 +64,7 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Lei
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.Louvain;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ModularityOptimization;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SCC;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.SLLPA;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.TriangleCount;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.WCC;
 
@@ -312,6 +315,24 @@ public final class CommunityAlgorithmsWriteModeBusinessFacade {
             WCC,
             () -> estimationFacade.wcc(configuration),
             (graph, __) -> algorithms.wcc(graph, configuration),
+            writeStep,
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT sllpa(
+        GraphName graphName,
+        SpeakerListenerLPAConfig configuration,
+        ResultBuilder<SpeakerListenerLPAConfig, PregelResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var writeStep = new SpeakerListenerLPAWriteStep(writeToDatabase, configuration, SLLPA);
+
+        return algorithmProcessingTemplateConvenience.processRegularAlgorithmInWriteMode(
+            graphName,
+            configuration,
+            SLLPA,
+            estimationFacade::speakerListenerLPA,
+            (graph, __) -> algorithms.speakerListenerLPA(graph, configuration),
             writeStep,
             resultBuilder
         );

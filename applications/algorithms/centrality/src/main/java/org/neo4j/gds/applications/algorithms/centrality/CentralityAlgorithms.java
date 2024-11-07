@@ -28,7 +28,6 @@ import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.articulationpoints.ArticulationPoints;
 import org.neo4j.gds.articulationpoints.ArticulationPointsProgressTaskCreator;
 import org.neo4j.gds.beta.pregel.Pregel;
-import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.betweenness.BetweennessCentrality;
 import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
@@ -68,12 +67,7 @@ import org.neo4j.gds.pagerank.PageRankAlgorithm;
 import org.neo4j.gds.pagerank.PageRankComputation;
 import org.neo4j.gds.pagerank.PageRankConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
-import org.neo4j.gds.sllpa.SpeakerListenerLPA;
-import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
-import org.neo4j.gds.sllpa.SpeakerListenerLPAProgressTrackerCreator;
 import org.neo4j.gds.termination.TerminationFlag;
-
-import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticleRank;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.EigenVector;
@@ -344,18 +338,5 @@ public class CentralityAlgorithms {
         return new PageRankComputation(configuration, mappedSourceNodes, degreeFunction);
     }
 
-    PregelResult speakerListenerLPA(Graph graph, SpeakerListenerLPAConfig configuration){
-        var task  =SpeakerListenerLPAProgressTrackerCreator.progressTask(graph.nodeCount(),configuration.maxIterations(),AlgorithmLabel.SLLPA.asString());
-        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
-        var algorithm = new SpeakerListenerLPA(
-            graph,
-            configuration,
-            DefaultPool.INSTANCE,
-            progressTracker,
-            Optional.empty()
-        );
-
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
-    }
 }

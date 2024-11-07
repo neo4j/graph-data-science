@@ -27,6 +27,7 @@ import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCut;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
+import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.conductance.Conductance;
 import org.neo4j.gds.conductance.ConductanceBaseConfig;
@@ -68,6 +69,9 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationFactory;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.scc.Scc;
 import org.neo4j.gds.scc.SccCommonBaseConfig;
+import org.neo4j.gds.sllpa.SpeakerListenerLPA;
+import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
+import org.neo4j.gds.sllpa.SpeakerListenerLPAProgressTrackerCreator;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.IntersectingTriangleCount;
 import org.neo4j.gds.triangle.IntersectingTriangleCountFactory;
@@ -76,8 +80,8 @@ import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
-import org.neo4j.gds.triangle.TriangleStream;
 import org.neo4j.gds.triangle.TriangleResult;
+import org.neo4j.gds.triangle.TriangleStream;
 import org.neo4j.gds.wcc.Wcc;
 import org.neo4j.gds.wcc.WccBaseConfig;
 
@@ -488,5 +492,20 @@ public class CommunityAlgorithms {
             .maxIterations(K1COLORING_MAX_ITERATIONS)
             .build();
 
+    }
+
+    PregelResult speakerListenerLPA(Graph graph, SpeakerListenerLPAConfig configuration){
+        var task  = SpeakerListenerLPAProgressTrackerCreator.progressTask(graph.nodeCount(),configuration.maxIterations(),AlgorithmLabel.SLLPA.asString());
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var algorithm = new SpeakerListenerLPA(
+            graph,
+            configuration,
+            DefaultPool.INSTANCE,
+            progressTracker,
+            Optional.empty()
+        );
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 }

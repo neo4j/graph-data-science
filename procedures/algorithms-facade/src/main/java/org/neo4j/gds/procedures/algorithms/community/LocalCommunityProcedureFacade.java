@@ -70,11 +70,13 @@ import org.neo4j.gds.procedures.algorithms.community.stubs.LocalLeidenMutateStub
 import org.neo4j.gds.procedures.algorithms.community.stubs.LocalLouvainMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.LocalModularityOptimizationMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.LocalSccMutateStub;
+import org.neo4j.gds.procedures.algorithms.community.stubs.LocalSpeakerListenerLPAMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.LocalTriangleCountMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.LocalWccMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.LouvainMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.ModularityOptimizationMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.SccMutateStub;
+import org.neo4j.gds.procedures.algorithms.community.stubs.SpeakerListenerLPAMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.TriangleCountMutateStub;
 import org.neo4j.gds.procedures.algorithms.community.stubs.WccMutateStub;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
@@ -83,6 +85,7 @@ import org.neo4j.gds.scc.SccAlphaWriteConfig;
 import org.neo4j.gds.scc.SccStatsConfig;
 import org.neo4j.gds.scc.SccStreamConfig;
 import org.neo4j.gds.scc.SccWriteConfig;
+import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientWriteConfig;
@@ -120,6 +123,8 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
     private final SccMutateStub sccMutateStub;
     private final TriangleCountMutateStub triangleCountMutateStub;
     private final WccMutateStub wccMutateStub;
+    private final SpeakerListenerLPAMutateStub speakerListenerLPAMutateStub;
+
 
     private final UserSpecificConfigurationParser configurationParser;
 
@@ -140,6 +145,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         LeidenMutateStub leidenMutateStub,
         LouvainMutateStub louvainMutateStub,
         ModularityOptimizationMutateStub modularityOptimizationMutateStub,
+        SpeakerListenerLPAMutateStub speakerListenerLPAMutateStub,
         SccMutateStub sccMutateStub,
         TriangleCountMutateStub triangleCountMutateStub,
         WccMutateStub wccMutateStub,
@@ -163,6 +169,8 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
         this.lccMutateStub = lccMutateStub;
         this.triangleCountMutateStub = triangleCountMutateStub;
         this.wccMutateStub = wccMutateStub;
+        this.speakerListenerLPAMutateStub = speakerListenerLPAMutateStub;
+
         this.configurationParser = configurationParser;
     }
 
@@ -253,6 +261,12 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
             procedureReturnColumns
         );
 
+        var speakerListenerLPAMutateStub = new LocalSpeakerListenerLPAMutateStub(
+            genericStub,
+            communityApplications.mutate(),
+            communityApplications.estimate()
+        );
+
         return new LocalCommunityProcedureFacade(
             closeableResourceRegistry,
             procedureReturnColumns,
@@ -269,6 +283,7 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
             leidenMutateStub,
             louvainMutateStub,
             modularityOptimizationMutateStub,
+            speakerListenerLPAMutateStub,
             sccMutateStub,
             triangleCountMutateStub,
             wccMutateStub,
@@ -1178,5 +1193,98 @@ public final class LocalCommunityProcedureFacade implements CommunityProcedureFa
 
         var configuration = configurationParser.parseConfiguration(algorithmConfiguration, WccWriteConfig::of);
         return Stream.of(estimationModeBusinessFacade.wcc(configuration, graphNameOrConfiguration));
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> sllpaStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var parsedConfiguration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            SpeakerListenerLPAConfig::of
+        );
+
+        return Stream.of(estimationModeBusinessFacade.speakerListenerLPA(parsedConfiguration, graphNameOrConfiguration));
+    }
+
+    @Override
+    public Stream<SpeakerListenerLPAStreamResult> sllpaStream(String graphName, Map<String, Object> configuration) {
+        var resultBuilder = new SpeakerListenerLPAResultBuilderForStreamMode();
+
+        var parsedConfiguration = configurationParser.parseConfiguration(
+            configuration,
+            SpeakerListenerLPAConfig::of
+        );
+
+        return streamModeBusinessFacade.sllpa(
+            GraphName.parse(graphName),
+            parsedConfiguration,
+            resultBuilder
+        );
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> sllpaStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var parsedConfiguration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            SpeakerListenerLPAConfig::of
+        );
+
+        return Stream.of(estimationModeBusinessFacade.speakerListenerLPA(parsedConfiguration, graphNameOrConfiguration));
+    }
+
+    @Override
+    public Stream<SpeakerListenerLPAStatsResult> sllpaStats(String graphName, Map<String, Object> configuration) {
+
+        var parsedConfiguration = configurationParser.parseConfiguration(
+            configuration,
+            SpeakerListenerLPAConfig::of
+        );
+
+        var resultBuilder = new SpeakerListenerLPAResultBuilderForStatsMode(parsedConfiguration);
+
+        return statsModeBusinessFacade.sllpa(
+            GraphName.parse(graphName),
+            parsedConfiguration,
+            resultBuilder
+        );
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> sllpaWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var parsedConfiguration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            SpeakerListenerLPAConfig::of
+        );
+
+        return Stream.of(estimationModeBusinessFacade.speakerListenerLPA(parsedConfiguration, graphNameOrConfiguration));
+    }
+
+    @Override
+    public Stream<SpeakerListenerLPAWriteResult> sllpaWrite(String graphName, Map<String, Object> configuration) {
+        var parsedConfiguration = configurationParser.parseConfiguration(
+            configuration,
+            SpeakerListenerLPAConfig::of
+        );
+        var resultBuilder = new SpeakerListenerLPAResultBuilderForWriteMode();
+
+
+        return writeModeBusinessFacade.sllpa(
+            GraphName.parse(graphName),
+            parsedConfiguration,
+            resultBuilder
+        );
+    }
+
+    @Override
+    public SpeakerListenerLPAMutateStub speakerListenerLPAMutateStub() {
+        return speakerListenerLPAMutateStub;
     }
 }

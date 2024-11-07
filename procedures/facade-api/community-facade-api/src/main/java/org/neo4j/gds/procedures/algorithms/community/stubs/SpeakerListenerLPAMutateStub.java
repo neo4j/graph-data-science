@@ -17,11 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.centrality.stubs;
+package org.neo4j.gds.procedures.algorithms.community.stubs;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.procedures.algorithms.centrality.SpeakerListenerLPAMutateResult;
+import org.neo4j.gds.procedures.algorithms.community.SpeakerListenerLPAMutateResult;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 

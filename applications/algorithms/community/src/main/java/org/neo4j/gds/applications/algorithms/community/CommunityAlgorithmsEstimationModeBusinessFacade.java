@@ -44,6 +44,8 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationBaseConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationMemoryEstimateDefinition;
 import org.neo4j.gds.scc.SccBaseConfig;
 import org.neo4j.gds.scc.SccMemoryEstimateDefinition;
+import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
+import org.neo4j.gds.sllpa.SpeakerListenerLPAMemoryEstimateDefinition;
 import org.neo4j.gds.triangle.IntersectingTriangleCountMemoryEstimateDefinition;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientMemoryEstimateDefinition;
@@ -252,6 +254,20 @@ public class CommunityAlgorithmsEstimationModeBusinessFacade {
 
     public MemoryEstimateResult wcc(WccBaseConfig configuration, Object graphNameOrConfiguration) {
         var memoryEstimation = wcc(configuration);
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
+        );
+    }
+
+    public  MemoryEstimation speakerListenerLPA() {
+        return new SpeakerListenerLPAMemoryEstimateDefinition().memoryEstimation();
+    }
+
+    public MemoryEstimateResult speakerListenerLPA(SpeakerListenerLPAConfig configuration, Object graphNameOrConfiguration) {
+        var memoryEstimation = speakerListenerLPA();
 
         return algorithmEstimationTemplate.estimate(
             configuration,

@@ -75,12 +75,9 @@ import org.neo4j.gds.procedures.algorithms.centrality.stubs.LocalClosenessCentra
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.LocalDegreeCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.LocalHarmonicCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.LocalPageRankMutateStub;
-import org.neo4j.gds.procedures.algorithms.centrality.stubs.LocalSpeakerListenerLPAMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.PageRankMutateStub;
-import org.neo4j.gds.procedures.algorithms.centrality.stubs.SpeakerListenerLPAMutateStub;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
-import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -98,7 +95,6 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
     private final PageRankMutateStub<EigenvectorMutateConfig> eigenVectorMutateStub;
     private final HarmonicCentralityMutateStub harmonicCentralityMutateStub;
     private final PageRankMutateStub<PageRankMutateConfig> pageRankMutateStub;
-    private final SpeakerListenerLPAMutateStub speakerListenerLPAMutateStub;
 
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
     private final CentralityAlgorithmsStatsModeBusinessFacade statsModeBusinessFacade;
@@ -119,7 +115,6 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
         HarmonicCentralityMutateStub harmonicCentralityMutateStub,
         ArticulationPointsMutateStub articulationPointsMutateStub,
         PageRankMutateStub<PageRankMutateConfig> pageRankMutateStub,
-        SpeakerListenerLPAMutateStub speakerListenerLPAMutateStub,
         CentralityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade,
         CentralityAlgorithmsStatsModeBusinessFacade statsModeBusinessFacade,
         CentralityAlgorithmsStreamModeBusinessFacade streamModeBusinessFacade,
@@ -137,7 +132,6 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
         this.eigenVectorMutateStub = eigenVectorMutateStub;
         this.harmonicCentralityMutateStub = harmonicCentralityMutateStub;
         this.pageRankMutateStub = pageRankMutateStub;
-        this.speakerListenerLPAMutateStub = speakerListenerLPAMutateStub;
         this.estimationModeBusinessFacade = estimationModeBusinessFacade;
         this.statsModeBusinessFacade = statsModeBusinessFacade;
         this.streamModeBusinessFacade = streamModeBusinessFacade;
@@ -227,11 +221,7 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
             estimationModeBusinessFacade
         );
 
-        var speakerListenerLPAMutateStub = new LocalSpeakerListenerLPAMutateStub(
-            genericStub,
-            mutateModeBusinessFacade,
-            estimationModeBusinessFacade
-        );
+
 
         return new LocalCentralityProcedureFacade(
             procedureReturnColumns,
@@ -245,7 +235,6 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
             harmonicCentralityMutateStub,
             articulationPointsMutateStub,
             pageRankMutateStub,
-            speakerListenerLPAMutateStub,
             estimationModeBusinessFacade,
             centralityApplications.stats(),
             centralityApplications.stream(),
@@ -1231,97 +1220,6 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
         return Stream.of(estimationModeBusinessFacade.pageRank(parsedConfiguration, graphNameOrConfiguration));
     }
 
-    @Override
-    public Stream<MemoryEstimateResult> sllpaStreamEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algorithmConfiguration
-    ) {
-        var parsedConfiguration = configurationParser.parseConfiguration(
-            algorithmConfiguration,
-            SpeakerListenerLPAConfig::of
-        );
 
-        return Stream.of(estimationModeBusinessFacade.speakerListenerLPA(parsedConfiguration, graphNameOrConfiguration));
-    }
-
-    @Override
-    public Stream<SpeakerListenerLPAStreamResult> sllpaStream(String graphName, Map<String, Object> configuration) {
-        var resultBuilder = new SpeakerListenerLPAResultBuilderForStreamMode();
-
-        var parsedConfiguration = configurationParser.parseConfiguration(
-            configuration,
-            SpeakerListenerLPAConfig::of
-        );
-
-        return streamModeBusinessFacade.sllpa(
-            GraphName.parse(graphName),
-            parsedConfiguration,
-            resultBuilder
-        );
-    }
-
-    @Override
-    public Stream<MemoryEstimateResult> sllpaStatsEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algorithmConfiguration
-    ) {
-        var parsedConfiguration = configurationParser.parseConfiguration(
-            algorithmConfiguration,
-            SpeakerListenerLPAConfig::of
-        );
-
-        return Stream.of(estimationModeBusinessFacade.speakerListenerLPA(parsedConfiguration, graphNameOrConfiguration));
-    }
-
-    @Override
-    public Stream<SpeakerListenerLPAStatsResult> sllpaStats(String graphName, Map<String, Object> configuration) {
-
-        var parsedConfiguration = configurationParser.parseConfiguration(
-            configuration,
-            SpeakerListenerLPAConfig::of
-        );
-
-        var resultBuilder = new SpeakerListenerLPAResultBuilderForStatsMode(parsedConfiguration);
-
-        return statsModeBusinessFacade.sllpa(
-            GraphName.parse(graphName),
-            parsedConfiguration,
-            resultBuilder
-        );
-    }
-
-    @Override
-    public Stream<MemoryEstimateResult> sllpaWriteEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algorithmConfiguration
-    ) {
-        var parsedConfiguration = configurationParser.parseConfiguration(
-            algorithmConfiguration,
-            SpeakerListenerLPAConfig::of
-        );
-
-        return Stream.of(estimationModeBusinessFacade.speakerListenerLPA(parsedConfiguration, graphNameOrConfiguration));
-    }
-
-    @Override
-    public Stream<SpeakerListenerLPAWriteResult> sllpaWrite(String graphName, Map<String, Object> configuration) {
-        var parsedConfiguration = configurationParser.parseConfiguration(
-            configuration,
-            SpeakerListenerLPAConfig::of
-        );
-        var resultBuilder = new SpeakerListenerLPAResultBuilderForWriteMode();
-
-
-        return writeModeBusinessFacade.sllpa(
-            GraphName.parse(graphName),
-            parsedConfiguration,
-            resultBuilder
-        );
-    }
-
-    @Override
-    public SpeakerListenerLPAMutateStub speakerListenerLPAMutateStub() {
-        return speakerListenerLPAMutateStub;
-    }
 
 }

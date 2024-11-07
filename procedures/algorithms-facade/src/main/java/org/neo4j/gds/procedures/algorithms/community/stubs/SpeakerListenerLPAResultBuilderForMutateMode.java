@@ -17,38 +17,38 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.centrality;
+package org.neo4j.gds.procedures.algorithms.community.stubs;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.beta.pregel.PregelResult;
+import org.neo4j.gds.procedures.algorithms.community.SpeakerListenerLPAMutateResult;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 
 import java.util.Optional;
-import java.util.stream.Stream;
 
-class SpeakerListenerLPAResultBuilderForWriteMode implements ResultBuilder<SpeakerListenerLPAConfig,PregelResult, Stream<SpeakerListenerLPAWriteResult>, NodePropertiesWritten> {
+public class SpeakerListenerLPAResultBuilderForMutateMode implements ResultBuilder<SpeakerListenerLPAConfig,PregelResult, SpeakerListenerLPAMutateResult, NodePropertiesWritten> {
 
     @Override
-    public Stream<SpeakerListenerLPAWriteResult> build(
+    public SpeakerListenerLPAMutateResult build(
         Graph graph,
         SpeakerListenerLPAConfig configuration,
         Optional<PregelResult> pregelResult,
         AlgorithmProcessingTimings timings,
         Optional<NodePropertiesWritten> metadata
     ) {
-        return Stream.of(
+        return
             pregelResult
-                .map( result-> new SpeakerListenerLPAWriteResult(result.ranIterations(),
+                .map( result-> new SpeakerListenerLPAMutateResult(result.ranIterations(),
                     result.didConverge(),
                     timings.preProcessingMillis,
                     timings.computeMillis,
                     timings.sideEffectMillis,
                     metadata.map(NodePropertiesWritten::value).orElseThrow(),
                     configuration.toMap()))
-                .orElse(SpeakerListenerLPAWriteResult.emptyFrom(timings,configuration.toMap())));
+                .orElse(SpeakerListenerLPAMutateResult.emptyFrom(timings,configuration.toMap()));
     }
 }
 

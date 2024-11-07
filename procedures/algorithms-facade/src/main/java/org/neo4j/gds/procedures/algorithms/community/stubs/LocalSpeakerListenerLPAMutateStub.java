@@ -17,13 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.centrality.stubs;
+package org.neo4j.gds.procedures.algorithms.community.stubs;
 
-import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsMutateModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.procedures.algorithms.centrality.SpeakerListenerLPAMutateResult;
+import org.neo4j.gds.procedures.algorithms.community.SpeakerListenerLPAMutateResult;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 
@@ -32,13 +32,13 @@ import java.util.stream.Stream;
 
 public class LocalSpeakerListenerLPAMutateStub implements SpeakerListenerLPAMutateStub {
     private final GenericStub genericStub;
-    private final CentralityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
-    private final CentralityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
+    private final CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade;
+    private final CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade;
 
     public LocalSpeakerListenerLPAMutateStub(
         GenericStub genericStub,
-        CentralityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
-        CentralityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade
+        CommunityAlgorithmsMutateModeBusinessFacade mutateModeBusinessFacade,
+        CommunityAlgorithmsEstimationModeBusinessFacade estimationModeBusinessFacade
     ) {
         this.genericStub = genericStub;
         this.mutateModeBusinessFacade = mutateModeBusinessFacade;

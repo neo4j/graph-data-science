@@ -21,7 +21,7 @@ package org.neo4j.gds.sllpa;
 
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.algorithms.centrality.SpeakerListenerLPAStreamResult;
+import org.neo4j.gds.procedures.algorithms.community.SpeakerListenerLPAStreamResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -47,7 +47,7 @@ public class SpeakerListenerLPAStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.algorithms().centrality().sllpaStream(graphName, configuration);
+        return facade.algorithms().community().sllpaStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.sllpa.stream.estimate", mode = READ)
@@ -56,7 +56,7 @@ public class SpeakerListenerLPAStreamProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.algorithms().centrality().sllpaStreamEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().community().sllpaStreamEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Internal

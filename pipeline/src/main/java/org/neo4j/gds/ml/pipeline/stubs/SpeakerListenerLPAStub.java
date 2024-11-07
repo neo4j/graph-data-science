@@ -20,12 +20,12 @@
 package org.neo4j.gds.ml.pipeline.stubs;
 
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.centrality.SpeakerListenerLPAMutateResult;
+import org.neo4j.gds.procedures.algorithms.community.SpeakerListenerLPAMutateResult;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 import org.neo4j.gds.sllpa.SpeakerListenerLPAConfig;
 
 public class SpeakerListenerLPAStub extends AbstractStub<SpeakerListenerLPAConfig, SpeakerListenerLPAMutateResult> {
     protected MutateStub<SpeakerListenerLPAConfig, SpeakerListenerLPAMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.centrality().speakerListenerLPAMutateStub();
+        return facade.community().speakerListenerLPAMutateStub();
     }
 }
