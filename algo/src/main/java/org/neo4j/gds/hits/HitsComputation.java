@@ -17,46 +17,41 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.pregel;
+package org.neo4j.gds.hits;
 
-import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.pregel.BidirectionalPregelComputation;
 import org.neo4j.gds.beta.pregel.Messages;
-import org.neo4j.gds.beta.pregel.Partitioning;
 import org.neo4j.gds.beta.pregel.Pregel;
-import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelSchema;
-import org.neo4j.gds.beta.pregel.annotation.PregelProcedure;
 import org.neo4j.gds.beta.pregel.context.ComputeContext.BidirectionalComputeContext;
 import org.neo4j.gds.beta.pregel.context.InitContext.BidirectionalInitContext;
 import org.neo4j.gds.beta.pregel.context.MasterComputeContext;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.StringIdentifierValidations;
 import org.neo4j.gds.mem.MemoryEstimateDefinition;
 
 import java.util.Map;
 import java.util.concurrent.atomic.DoubleAdder;
 
-@PregelProcedure(
-    name = "gds.hits",
-    description = "Hyperlink-Induced Topic Search (HITS) is a link analysis algorithm that rates nodes"
-)
-public class Hits implements BidirectionalPregelComputation<Hits.HitsConfig> {
+import static org.neo4j.gds.hits.HitsState.CALCULATE_AUTHS;
+import static org.neo4j.gds.hits.HitsState.CALCULATE_HUBS;
+import static org.neo4j.gds.hits.HitsState.INIT;
+import static org.neo4j.gds.hits.HitsState.NORMALIZE_AUTHS;
+import static org.neo4j.gds.hits.HitsState.NORMALIZE_HUBS;
+
+
+public class HitsComputation implements BidirectionalPregelComputation<HitsConfig> {
 
     // Global norm aggregator shared by all workers
     private final DoubleAdder globalNorm = new DoubleAdder();
-    private HitsState state = HitsState.INIT;
+    private HitsState state = INIT;
 
     @Override
-    public PregelSchema schema(Hits.HitsConfig config) {
+    public PregelSchema schema(HitsConfig config) {
         return new PregelSchema.Builder()
             .add(config.authProperty(), ValueType.DOUBLE)
             .add(config.hubProperty(), ValueType.DOUBLE)
             .build();
     }
-
 
     @Override
     public MemoryEstimateDefinition estimateDefinition(boolean isAsynchronous) {
@@ -101,10 +96,10 @@ public class Hits implements BidirectionalPregelComputation<Hits.HitsConfig> {
 
     @Override
     public boolean masterCompute(MasterComputeContext<HitsConfig> context) {
-        if (state == HitsState.INIT || state == HitsState.CALCULATE_AUTHS || state == HitsState.CALCULATE_HUBS) {
+        if (state == INIT || state == CALCULATE_AUTHS || state == CALCULATE_HUBS) {
             var norm = globalNorm.sumThenReset();
             globalNorm.add(Math.sqrt(norm));
-        } else if (state == HitsState.NORMALIZE_AUTHS || state == HitsState.NORMALIZE_HUBS) {
+        } else if (state == NORMALIZE_AUTHS || state == NORMALIZE_HUBS) {
             globalNorm.reset();
         }
         state = state.advance();
@@ -152,88 +147,4 @@ public class Hits implements BidirectionalPregelComputation<Hits.HitsConfig> {
         return normalizedValue;
     }
 
-    @Configuration
-    public interface HitsConfig extends PregelProcedureConfig {
-
-        default int hitsIterations() {
-            return 20;
-        }
-
-        @Override
-        @Configuration.Ignore
-        default int maxIterations() {
-            return hitsIterations() * 4;
-        }
-
-        @Override
-        @Configuration.Ignore
-        default boolean isAsynchronous() {
-            return false;
-        }
-
-        @Configuration.ConvertWith(method = "validateHubProperty")
-        default String hubProperty() {
-            return "hub";
-        }
-
-        @Configuration.ConvertWith(method = "validateAuthProperty")
-        default String authProperty() {
-            return "auth";
-        }
-
-        @Override
-        @Configuration.ConvertWith(method = "org.neo4j.gds.beta.pregel.Partitioning#parse")
-        @Configuration.ToMapValue("org.neo4j.gds.beta.pregel.Partitioning#toString")
-        default Partitioning partitioning() {
-            return Partitioning.AUTO;
-        }
-
-        static @Nullable String validateHubProperty(String input) {
-            return StringIdentifierValidations.validateNoWhiteCharacter(input, "hubProperty");
-        }
-
-        static @Nullable String validateAuthProperty(String input) {
-            return StringIdentifierValidations.validateNoWhiteCharacter(input, "authProperty");
-        }
-
-        static HitsConfig of(CypherMapWrapper userConfig) {
-            return new HitsConfigImpl(userConfig);
-        }
-    }
-
-    private enum HitsState {
-        INIT {
-            @Override
-            HitsState advance() {
-                return NORMALIZE_AUTHS;
-            }
-        },
-
-        CALCULATE_AUTHS {
-            @Override
-            HitsState advance() {
-                return NORMALIZE_AUTHS;
-            }
-        },
-        NORMALIZE_AUTHS {
-            @Override
-            HitsState advance() {
-                return CALCULATE_HUBS;
-            }
-        },
-        CALCULATE_HUBS {
-            @Override
-            public HitsState advance() {
-                return NORMALIZE_HUBS;
-            }
-        },
-        NORMALIZE_HUBS {
-            @Override
-            HitsState advance() {
-                return CALCULATE_AUTHS;
-            }
-        };
-
-        abstract HitsState advance();
-    }
 }
