@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.core.loading.PostLoadETLHook;
 import org.neo4j.gds.core.loading.PostLoadValidationHook;
 import org.neo4j.gds.mem.MemoryEstimation;
 
@@ -43,6 +44,7 @@ public class AlgorithmProcessingTemplateConvenience {
         GraphName graphName,
         CONFIGURATION configuration,
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
+        Optional<Iterable<PostLoadETLHook>> postGraphStoreLoadETLHooks,
         Label label,
         Supplier<MemoryEstimation> estimationFactory,
         Computation<RESULT_FROM_ALGORITHM> computation,
@@ -54,6 +56,7 @@ public class AlgorithmProcessingTemplateConvenience {
             graphName,
             configuration,
             postGraphStoreLoadValidationHooks,
+            postGraphStoreLoadETLHooks,
             label,
             estimationFactory,
             computation,
@@ -79,6 +82,7 @@ public class AlgorithmProcessingTemplateConvenience {
             graphName,
             configuration,
             Optional.empty(),
+            Optional.empty(),
             label,
             estimationFactory,
             computation,
@@ -92,6 +96,7 @@ public class AlgorithmProcessingTemplateConvenience {
         GraphName graphName,
         CONFIGURATION configuration,
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
+        Optional<Iterable<PostLoadETLHook>> postGraphStoreLoadETLHooks,
         Label label,
         Supplier<MemoryEstimation> estimationFactory,
         Computation<RESULT_FROM_ALGORITHM> computation,
@@ -103,6 +108,7 @@ public class AlgorithmProcessingTemplateConvenience {
             graphName,
             configuration,
             postGraphStoreLoadValidationHooks,
+            postGraphStoreLoadETLHooks,
             label,
             estimationFactory,
             computation,
@@ -128,6 +134,7 @@ public class AlgorithmProcessingTemplateConvenience {
             graphName,
             configuration,
             Optional.empty(),
+            Optional.empty(),
             label,
             estimationFactory,
             computation,
@@ -152,6 +159,7 @@ public class AlgorithmProcessingTemplateConvenience {
             graphName,
             configuration,
             Optional.empty(),
+            Optional.empty(),
             label,
             estimationFactory,
             computation,
@@ -167,6 +175,7 @@ public class AlgorithmProcessingTemplateConvenience {
         Computation<RESULT_FROM_ALGORITHM> computation,
         StreamResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder,
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
+        Optional<Iterable<PostLoadETLHook>> postGraphStoreLoadETLHooks,
         Optional<String> relationshipWeightOverride
     ) {
         return algorithmProcessingTemplate.processAlgorithmForStream(
@@ -174,6 +183,7 @@ public class AlgorithmProcessingTemplateConvenience {
             graphName,
             configuration,
             postGraphStoreLoadValidationHooks,
+            postGraphStoreLoadETLHooks,
             label,
             estimationFactory,
             computation,
@@ -196,6 +206,7 @@ public class AlgorithmProcessingTemplateConvenience {
             estimationFactory,
             computation,
             resultBuilder,
+            Optional.empty(),
             Optional.empty(),
             Optional.empty()
         );

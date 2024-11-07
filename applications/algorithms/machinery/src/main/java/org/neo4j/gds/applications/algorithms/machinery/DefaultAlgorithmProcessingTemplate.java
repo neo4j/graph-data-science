@@ -24,6 +24,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.loading.PostLoadETLHook;
 import org.neo4j.gds.core.loading.PostLoadValidationHook;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.logging.Log;
@@ -71,6 +72,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         GraphName graphName,
         CONFIGURATION configuration,
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
+        Optional<Iterable<PostLoadETLHook>> postGraphStoreLoadETLHooks,
         Label label,
         Supplier<MemoryEstimation> estimationSupplier,
         Computation<RESULT_FROM_ALGORITHM> computation,
@@ -85,6 +87,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             graphName,
             configuration,
             postGraphStoreLoadValidationHooks,
+            postGraphStoreLoadETLHooks,
             label,
             DimensionTransformer.DISABLED,
             estimationSupplier,
@@ -100,6 +103,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         GraphName graphName,
         CONFIGURATION configuration,
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
+        Optional<Iterable<PostLoadETLHook>> postGraphStoreLoadETLHooks,
         Label label,
         Supplier<MemoryEstimation> estimationSupplier,
         Computation<RESULT_FROM_ALGORITHM> computation,
@@ -112,6 +116,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             graphName,
             configuration,
             postGraphStoreLoadValidationHooks,
+            postGraphStoreLoadETLHooks,
             label,
             DimensionTransformer.DISABLED,
             estimationSupplier,
@@ -127,6 +132,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         GraphName graphName,
         CONFIGURATION configuration,
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
+        Optional<Iterable<PostLoadETLHook>> postGraphStoreLoadETLHooks,
         Label label,
         Supplier<MemoryEstimation> estimationSupplier,
         Computation<RESULT_FROM_ALGORITHM> computation,
@@ -139,6 +145,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             graphName,
             configuration,
             postGraphStoreLoadValidationHooks,
+            postGraphStoreLoadETLHooks,
             label,
             DimensionTransformer.DISABLED,
             estimationSupplier,
@@ -154,6 +161,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         GraphName graphName,
         CONFIGURATION configuration,
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
+        Optional<Iterable<PostLoadETLHook>> postGraphStoreLoadETLHooks,
         Label label,
         Supplier<MemoryEstimation> estimationSupplier,
         Computation<RESULT_FROM_ALGORITHM> computation,
@@ -168,6 +176,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             graphName,
             configuration,
             postGraphStoreLoadValidationHooks,
+            postGraphStoreLoadETLHooks,
             label,
             DimensionTransformer.DISABLED,
             estimationSupplier,
@@ -195,6 +204,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         GraphName graphName,
         CONFIGURATION configuration,
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
+        Optional<Iterable<PostLoadETLHook>> postGraphStoreLoadETLHooks,
         Label label,
         DimensionTransformer dimensionTransformer,
         Supplier<MemoryEstimation> estimationSupplier,
@@ -210,7 +220,8 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             relationshipWeightOverride,
             graphName,
             configuration,
-            postGraphStoreLoadValidationHooks
+            postGraphStoreLoadValidationHooks,
+            postGraphStoreLoadETLHooks
         );
 
         var result = runComputation(
@@ -237,7 +248,8 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         Optional<String> relationshipWeightOverride,
         GraphName graphName,
         CONFIGURATION configuration,
-        Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks
+        Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
+        Optional<Iterable<PostLoadETLHook>> postGraphStoreLoadETLHooks
     ) {
         try (var ignored = ProgressTimer.start(timingsBuilder::withPreProcessingMillis)) {
             var relationshipProperty = determineRelationshipProperty(configuration, relationshipWeightOverride);
@@ -246,6 +258,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
                 graphName,
                 configuration,
                 postGraphStoreLoadValidationHooks,
+                postGraphStoreLoadETLHooks,
                 relationshipProperty,
                 requestScopedDependencies.getUser(),
                 requestScopedDependencies.getDatabaseId()

@@ -72,6 +72,7 @@ public class NodeEmbeddingAlgorithmsTrainModeBusinessFacade {
             graphName,
             configuration,
             Optional.of(List.of(validationHook)),
+            Optional.empty(),
             GraphSageTrain,
             () -> estimation.graphSageTrain(configuration),
             (graph, __) -> algorithms.graphSageTrain(graph, configuration),

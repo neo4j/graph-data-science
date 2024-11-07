@@ -77,6 +77,7 @@ public class GraphStoreCatalogService {
         GraphName graphName,
         AlgoBaseConfig configuration,
         Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
+        Optional<Iterable<PostLoadETLHook>> postGraphStoreLoadETLHooks,
         Optional<String> relationshipProperty,
         User user,
         DatabaseId databaseId
@@ -92,6 +93,8 @@ public class GraphStoreCatalogService {
 
         // Validate the graph store before going any further
         configuration.graphStoreValidation(graphStore, nodeLabels, relationshipTypes);
+
+        postGraphStoreLoadETLHooks.ifPresent( postLoadETLHooks -> extractAndTransform(graphStore,postLoadETLHooks));
 
         var graph = graphStore.getGraph(nodeLabels, relationshipTypes, relationshipProperty);
 
@@ -121,6 +124,12 @@ public class GraphStoreCatalogService {
      */
     private void validateGraphStore(GraphStore graphStore, Iterable<PostLoadValidationHook> validationHooks) {
         for (PostLoadValidationHook hook : validationHooks) {
+            hook.onGraphStoreLoaded(graphStore);
+        }
+    }
+
+    private void extractAndTransform(GraphStore graphStore, Iterable<PostLoadETLHook> etlHooks) {
+        for (PostLoadETLHook hook : etlHooks) {
             hook.onGraphStoreLoaded(graphStore);
         }
     }

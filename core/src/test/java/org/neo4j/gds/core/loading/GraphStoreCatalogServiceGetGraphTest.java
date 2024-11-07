@@ -82,6 +82,7 @@ class GraphStoreCatalogServiceGetGraphTest {
             configMock,
             Optional.empty(),
             Optional.empty(),
+            Optional.empty(),
             new User("bogusUser", false),
             DatabaseId.EMPTY
         );
@@ -126,6 +127,7 @@ class GraphStoreCatalogServiceGetGraphTest {
             configMock,
             Optional.empty(),
             Optional.empty(),
+            Optional.empty(),
             new User("bogusUser", false),
             DatabaseId.EMPTY
         );
@@ -168,6 +170,7 @@ class GraphStoreCatalogServiceGetGraphTest {
         var graphResources = serviceSpy.getGraphResources(
             GraphName.parse("bogus"),
             configMock,
+            Optional.empty(),
             Optional.empty(),
             Optional.empty(),
             new User("bogusUser", false),
@@ -215,6 +218,7 @@ class GraphStoreCatalogServiceGetGraphTest {
             configMock,
             Optional.empty(),
             Optional.empty(),
+            Optional.empty(),
             new User("bogusUser", false),
             DatabaseId.EMPTY
         );
@@ -259,6 +263,7 @@ class GraphStoreCatalogServiceGetGraphTest {
         var graphResources = serviceSpy.getGraphResources(
             GraphName.parse("bogus"),
             configMock,
+            Optional.empty(),
             Optional.empty(),
             Optional.empty(),
             new User("bogusUser", false),

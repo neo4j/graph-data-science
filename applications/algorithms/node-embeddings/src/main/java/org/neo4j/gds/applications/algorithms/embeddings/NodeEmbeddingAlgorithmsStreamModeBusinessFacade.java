@@ -88,6 +88,7 @@ public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
             (graph, __) -> algorithms.graphSage(graph, configuration),
             resultBuilder,
             Optional.of(List.of(graphSageProcessParameters.validationHook())),
+            Optional.empty(),
             graphSageProcessParameters.relationshipWeightPropertyFromTrainConfiguration()
         );
     }
@@ -120,6 +121,7 @@ public class NodeEmbeddingAlgorithmsStreamModeBusinessFacade {
             (graph, __) -> algorithms.node2Vec(graph, configuration),
             resultBuilder,
             Optional.of(List.of(new Node2VecValidationHook(configuration))),
+            Optional.empty(),
             Optional.empty()
         );
     }
