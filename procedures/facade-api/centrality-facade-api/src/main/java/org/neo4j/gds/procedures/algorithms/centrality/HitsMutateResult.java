@@ -17,23 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.centrality;
+package org.neo4j.gds.procedures.algorithms.centrality;
 
-import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
-import org.neo4j.gds.hits.HitsConfig;
-import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 
-public class HitsHookGenerator {
+import java.util.Map;
 
-    private final ProgressTrackerCreator progressTrackerCreator;
-    private final TerminationFlag terminationFlag;
+public record HitsMutateResult(long ranIterations, boolean didConverge, long preProcessingMillis, long computeMillis, long mutateMillis, long nodePropertiesWritten, Map<String,Object> configuration){
 
-    public HitsHookGenerator(ProgressTrackerCreator progressTrackerCreator, TerminationFlag terminationFlag) {
-        this.progressTrackerCreator = progressTrackerCreator;
-        this.terminationFlag = terminationFlag;
-    }
-
-    HitsETLHook createETLHook(HitsConfig hitsConfig){
-        return  new HitsETLHook(hitsConfig,progressTrackerCreator,terminationFlag);
+    public static HitsMutateResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+        return new HitsMutateResult(0,false,timings.preProcessingMillis,timings.computeMillis,timings.sideEffectMillis, 0,configurationMap);
     }
 }
+
+
+

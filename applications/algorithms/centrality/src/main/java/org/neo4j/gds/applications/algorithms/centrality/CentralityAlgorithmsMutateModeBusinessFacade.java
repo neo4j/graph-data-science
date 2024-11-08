@@ -26,6 +26,7 @@ import org.neo4j.gds.applications.algorithms.machinery.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.articulationpoints.ArticulationPointsMutateConfig;
+import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
@@ -34,6 +35,7 @@ import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
 import org.neo4j.gds.degree.DegreeCentralityResult;
 import org.neo4j.gds.harmonic.HarmonicCentralityMutateConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
+import org.neo4j.gds.hits.HitsConfig;
 import org.neo4j.gds.indirectExposure.IndirectExposureMutateConfig;
 import org.neo4j.gds.indirectExposure.IndirectExposureResult;
 import org.neo4j.gds.influenceMaximization.CELFResult;
@@ -43,6 +45,9 @@ import org.neo4j.gds.pagerank.EigenvectorMutateConfig;
 import org.neo4j.gds.pagerank.PageRankMutateConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 
+import java.util.List;
+import java.util.Optional;
+
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticleRank;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticulationPoints;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.BetweennessCentrality;
@@ -50,6 +55,7 @@ import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.CEL
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ClosenessCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.DegreeCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.EigenVector;
+import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HITS;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.HarmonicCentrality;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.IndirectExposure;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.PageRank;
@@ -59,17 +65,21 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
     private final CentralityAlgorithms algorithms;
     private final AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience;
     private final MutateNodeProperty mutateNodeProperty;
+    private final HitsHookGenerator hitsHookGenerator;
+
 
     public CentralityAlgorithmsMutateModeBusinessFacade(
         CentralityAlgorithmsEstimationModeBusinessFacade estimation,
         CentralityAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
-        MutateNodeProperty mutateNodeProperty
+        MutateNodeProperty mutateNodeProperty,
+        HitsHookGenerator hitsHookGenerator
     ) {
         this.estimation = estimation;
         this.algorithms = algorithms;
         this.algorithmProcessingTemplateConvenience = algorithmProcessingTemplateConvenience;
         this.mutateNodeProperty = mutateNodeProperty;
+        this.hitsHookGenerator = hitsHookGenerator;
     }
 
     public <RESULT> RESULT articleRank(
@@ -248,6 +258,27 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
             IndirectExposure,
             estimation::indirectExposure,
             (graph, __) -> algorithms.indirectExposure(graph, configuration),
+            mutateStep,
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT hits(
+        GraphName graphName,
+        HitsConfig configuration,
+        ResultBuilder<HitsConfig, PregelResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var mutateStep = new HitsMutateStep(mutateNodeProperty, configuration);
+        var hook = hitsHookGenerator.createETLHook(configuration);
+        return algorithmProcessingTemplateConvenience.processAlgorithmInMutateMode(
+            Optional.empty(),
+            graphName,
+            configuration,
+            Optional.empty(),
+            Optional.of(List.of(hook)),
+            HITS,
+            estimation::hits,
+            (graph, __) -> algorithms.hits(graph, configuration),
             mutateStep,
             resultBuilder
         );

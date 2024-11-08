@@ -68,6 +68,7 @@ import org.neo4j.gds.procedures.algorithms.centrality.stubs.CelfMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.ClosenessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.DegreeCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.HarmonicCentralityMutateStub;
+import org.neo4j.gds.procedures.algorithms.centrality.stubs.HitsMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.LocalArticulationPointsMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.LocalBetaClosenessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.LocalBetweennessCentralityMutateStub;
@@ -75,6 +76,7 @@ import org.neo4j.gds.procedures.algorithms.centrality.stubs.LocalCelfMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.LocalClosenessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.LocalDegreeCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.LocalHarmonicCentralityMutateStub;
+import org.neo4j.gds.procedures.algorithms.centrality.stubs.LocalHitsMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.LocalPageRankMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.PageRankMutateStub;
 import org.neo4j.gds.procedures.algorithms.configuration.UserSpecificConfigurationParser;
@@ -91,6 +93,8 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
     private final BetaClosenessCentralityMutateStub betaClosenessCentralityMutateStub;
     private final BetweennessCentralityMutateStub betweennessCentralityMutateStub;
     private final CelfMutateStub celfMutateStub;
+    private final HitsMutateStub hitsMutateStub;
+
     private final ClosenessCentralityMutateStub closenessCentralityMutateStub;
     private final DegreeCentralityMutateStub degreeCentralityMutateStub;
     private final PageRankMutateStub<EigenvectorMutateConfig> eigenVectorMutateStub;
@@ -110,8 +114,9 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
         BetaClosenessCentralityMutateStub betaClosenessCentralityMutateStub,
         BetweennessCentralityMutateStub betweennessCentralityMutateStub,
         CelfMutateStub celfMutateStub,
-        ClosenessCentralityMutateStub closenessCentralityMutateStub,
         DegreeCentralityMutateStub degreeCentralityMutateStub,
+        ClosenessCentralityMutateStub closenessCentralityMutateStub,
+        HitsMutateStub hitsMutateStub,
         PageRankMutateStub<EigenvectorMutateConfig> eigenVectorMutateStub,
         HarmonicCentralityMutateStub harmonicCentralityMutateStub,
         ArticulationPointsMutateStub articulationPointsMutateStub,
@@ -124,6 +129,7 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
     ) {
         this.procedureReturnColumns = procedureReturnColumns;
         this.articleRankMutateStub = articleRankMutateStub;
+        this.hitsMutateStub = hitsMutateStub;
         this.articulationPointsMutateStub = articulationPointsMutateStub;
         this.betaClosenessCentralityMutateStub = betaClosenessCentralityMutateStub;
         this.betweennessCentralityMutateStub = betweennessCentralityMutateStub;
@@ -222,7 +228,11 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
             estimationModeBusinessFacade
         );
 
-
+        var hitsMutateStub = new LocalHitsMutateStub(
+            genericStub,
+            mutateModeBusinessFacade,
+            estimationModeBusinessFacade
+        );
 
         return new LocalCentralityProcedureFacade(
             procedureReturnColumns,
@@ -230,8 +240,7 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
             betaClosenessCentralityMutateStub,
             betweennessCentralityMutateStub,
             celfMutateStub,
-            closenessCentralityMutateStub,
-            degreeCentralityMutateStub,
+            degreeCentralityMutateStub, closenessCentralityMutateStub, hitsMutateStub,
             eigenVectorMutateStub,
             harmonicCentralityMutateStub,
             articulationPointsMutateStub,
@@ -1304,6 +1313,11 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
             HitsConfig::of
         );
         return Stream.of(estimationModeBusinessFacade.hits(parsedConfiguration,graphNameOrConfiguration));
+    }
+
+    @Override
+    public HitsMutateStub hitsMutateStub() {
+        return hitsMutateStub;
     }
 
 }

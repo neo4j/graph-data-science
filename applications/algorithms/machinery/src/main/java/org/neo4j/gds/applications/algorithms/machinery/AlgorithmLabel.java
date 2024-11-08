@@ -117,6 +117,7 @@ public enum AlgorithmLabel implements Label {
             case FilteredNodeSimilarity -> FilteredNodeSimilarity;
             case GraphSage -> GraphSage;
             case GraphSageTrain -> GraphSageTrain;
+            case HITS -> HITS;
             case HarmonicCentrality -> HarmonicCentrality;
             case HashGNN -> HashGNN;
             case IndexInverse -> IndexInverse;

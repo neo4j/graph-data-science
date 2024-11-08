@@ -69,7 +69,8 @@ public final class CentralityApplications {
             estimation,
             algorithms,
             algorithmProcessingTemplateConvenience,
-            mutateNodeProperty
+            mutateNodeProperty,
+            hitsHookGenerator
         );
         var stats = new CentralityAlgorithmsStatsModeBusinessFacade(
             estimation,

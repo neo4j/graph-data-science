@@ -81,6 +81,7 @@ final class MutateModeAlgorithmLibrary {
             case FilteredNodeSimilarity -> CanonicalProcedureName.parse("gds.nodeSimilarity.filtered");
             case GraphSage -> CanonicalProcedureName.parse("gds.beta.graphSage");
             case GraphSageTrain -> null;
+            case HITS -> CanonicalProcedureName.parse("gds.hits");
             case HarmonicCentrality -> CanonicalProcedureName.parse("gds.closeness.harmonic");
             case HashGNN -> CanonicalProcedureName.parse("gds.hashgnn");
             case IndexInverse -> CanonicalProcedureName.parse("gds.graph.relationships.indexInverse");

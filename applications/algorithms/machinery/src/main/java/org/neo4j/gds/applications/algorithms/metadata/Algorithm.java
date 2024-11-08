@@ -51,6 +51,7 @@ public enum Algorithm {
     FilteredNodeSimilarity,
     GraphSage,
     GraphSageTrain,
+    HITS,
     HarmonicCentrality,
     HashGNN,
     IndexInverse,
