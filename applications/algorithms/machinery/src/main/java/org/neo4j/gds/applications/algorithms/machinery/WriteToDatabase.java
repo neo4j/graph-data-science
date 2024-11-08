@@ -29,6 +29,8 @@ import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.logging.Log;
 
+import java.util.Map;
+
 public class WriteToDatabase {
     private final Log log;
     private final RequestScopedDependencies requestScopedDependencies;
@@ -65,4 +67,30 @@ public class WriteToDatabase {
             log
         );
     }
+
+    public NodePropertiesWritten perform(
+        Graph graph,
+        GraphStore graphStore,
+        ResultStore resultStore,
+        WriteConfig writeConfiguration,
+        Label label,
+        JobId jobId,
+        Map<String,NodePropertyValues> nodePropertyValuesMap
+    ) {
+
+        return Neo4jDatabaseNodePropertyWriter.writeNodeProperties(
+            writeContext.nodePropertyExporterBuilder(),
+            requestScopedDependencies.getTaskRegistryFactory(),
+            graph,
+            graphStore,
+            writeConfiguration.writeConcurrency(),
+            nodePropertyValuesMap,
+            label.asString(),
+            writeConfiguration.resolveResultStore(resultStore),
+            jobId,
+            requestScopedDependencies.getTerminationFlag(),
+            log
+        );
+    }
+
 }

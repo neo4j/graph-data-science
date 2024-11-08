@@ -56,7 +56,6 @@ final class Neo4jDatabaseNodePropertyWriter {
 
     private Neo4jDatabaseNodePropertyWriter() {
     }
-
     static NodePropertiesWritten writeNodeProperty(
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
@@ -72,6 +71,69 @@ final class Neo4jDatabaseNodePropertyWriter {
         Log log
     ) {
         var nodeProperties = List.of(new NodeProperty(writeProperty, nodePropertyValues));
+        return  writeNodeProperties(
+            nodePropertyExporterBuilder,
+            taskRegistryFactory,
+            graph,
+            graphStore,
+            writeConcurrency,
+            nodeProperties,
+            procedureName,
+            resultStore,
+            jobId,
+            terminationFlag,
+            log
+        );
+
+    }
+
+    static NodePropertiesWritten writeNodeProperties(
+        NodePropertyExporterBuilder nodePropertyExporterBuilder,
+        TaskRegistryFactory taskRegistryFactory,
+        Graph graph,
+        GraphStore graphStore,
+        Concurrency writeConcurrency,
+        Map<String,NodePropertyValues> nodePropertyValuesMap,
+        String procedureName,
+        Optional<ResultStore> resultStore,
+        JobId jobId,
+        TerminationFlag terminationFlag,
+        Log log
+    ) {
+        var nodeProperties = nodePropertyValuesMap
+            .entrySet()
+            .stream()
+            .map( v-> new NodeProperty(v.getKey(),v.getValue()))
+            .toList();
+
+        return  writeNodeProperties(
+            nodePropertyExporterBuilder,
+            taskRegistryFactory,
+            graph,
+            graphStore,
+            writeConcurrency,
+            nodeProperties,
+            procedureName,
+            resultStore,
+            jobId,
+            terminationFlag,
+            log
+        );
+    }
+
+    static NodePropertiesWritten writeNodeProperties(
+        NodePropertyExporterBuilder nodePropertyExporterBuilder,
+        TaskRegistryFactory taskRegistryFactory,
+        Graph graph,
+        GraphStore graphStore,
+        Concurrency writeConcurrency,
+        List<NodeProperty> nodeProperties,
+        String procedureName,
+        Optional<ResultStore> resultStore,
+        JobId jobId,
+        TerminationFlag terminationFlag,
+        Log log
+    ) {
 
         var propertiesWritten = new MutableLong();
 

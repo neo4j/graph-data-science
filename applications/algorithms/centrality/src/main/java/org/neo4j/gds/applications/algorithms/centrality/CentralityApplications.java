@@ -89,7 +89,8 @@ public final class CentralityApplications {
             writeContext,
             estimation,
             algorithms,
-            algorithmProcessingTemplateConvenience
+            algorithmProcessingTemplateConvenience,
+            hitsHookGenerator
         );
 
         return new CentralityApplications(estimation, mutation, stats, streaming, writing);

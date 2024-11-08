@@ -1278,4 +1278,32 @@ public final class LocalCentralityProcedureFacade implements CentralityProcedure
         return Stream.of(estimationModeBusinessFacade.hits(parsedConfiguration,graphNameOrConfiguration));
     }
 
+    @Override
+    public Stream<HitsWriteResult> hitsWrite(String graphName, Map<String, Object> configuration) {
+        var parsedConfiguration = configurationParser.parseConfiguration(
+            configuration,
+            HitsConfig::of
+        );
+
+        var resultBuilder =new HitsResultBuilderForWriteMode();
+
+        return writeModeBusinessFacade.hits(
+            GraphName.parse(graphName),
+            parsedConfiguration,
+            resultBuilder
+        );
+    }
+
+    @Override
+    public Stream<MemoryEstimateResult> hitsWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var parsedConfiguration = configurationParser.parseConfiguration(
+            algorithmConfiguration,
+            HitsConfig::of
+        );
+        return Stream.of(estimationModeBusinessFacade.hits(parsedConfiguration,graphNameOrConfiguration));
+    }
+
 }
