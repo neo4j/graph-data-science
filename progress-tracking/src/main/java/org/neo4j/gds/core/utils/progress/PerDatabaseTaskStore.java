@@ -46,10 +46,9 @@ public class PerDatabaseTaskStore extends ObservableTaskStore {
     }
 
     @Override
-    protected UserTask removeUserTask(String username, JobId jobId) {
+    protected Optional<UserTask> removeUserTask(String username, JobId jobId) {
         return Optional.ofNullable(this.registeredTasks.get(username))
-            .map(userTasks -> userTasks.remove(jobId))
-            .orElse(null);
+            .map(userTasks -> userTasks.remove(jobId));
     }
 
     @Override

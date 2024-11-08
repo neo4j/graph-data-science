@@ -34,6 +34,7 @@ import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskStore;
+import org.neo4j.gds.core.utils.progress.TaskStoreListener;
 import org.neo4j.gds.core.utils.progress.UserTask;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
@@ -78,7 +79,9 @@ class ProcedureExecutorTest {
     @Test
     void shouldRegisterTaskWithCorrectJobId() {
         // Arrange
-        var taskStore = new InvocationCountingTaskStore();
+        var jobIdTracker = new JobIdTracker();
+        var taskStore = new PerDatabaseTaskStore();
+        taskStore.addListener(jobIdTracker);
         var executor = new ProcedureExecutor<>(new TestMutateSpec(), executionContext(taskStore));
         var someJobId = new JobId();
         var configuration = Map.of(
@@ -94,13 +97,15 @@ class ProcedureExecutorTest {
         executor.compute("graph", configuration);
 
         // Assert
-        assertThat(taskStore.seenJobIds).containsExactly(someJobId);
+        assertThat(jobIdTracker.seenJobIds).containsExactly(someJobId);
     }
 
     @Test
     void shouldUnregisterTaskAfterComputation() {
         // Arrange
-        var taskStore = new InvocationCountingTaskStore();
+        var invocationCounter = new TaskCreatedCounter();
+        var taskStore = new PerDatabaseTaskStore();
+        taskStore.addListener(invocationCounter);
         var executor1 = new ProcedureExecutor<>(new TestMutateSpec(), executionContext(taskStore));
         var executor2 = new ProcedureExecutor<>(new TestMutateSpec(), executionContext(taskStore));
         var configuration = Map.<String, Object>of(
@@ -124,7 +129,7 @@ class ProcedureExecutorTest {
             )
             .isEmpty();
 
-        assertThat(taskStore.registerTaskInvocations)
+        assertThat(invocationCounter.registerTaskInvocations)
             .as("We created two tasks => two tasks must have been registered")
             .isEqualTo(2);
     }
@@ -158,15 +163,31 @@ class ProcedureExecutorTest {
             .build();
     }
 
-    private static class InvocationCountingTaskStore extends PerDatabaseTaskStore {
+    private static class TaskCreatedCounter implements TaskStoreListener {
         int registerTaskInvocations;
+
+        @Override
+        public void onTaskAdded(UserTask userTask) {
+            registerTaskInvocations++;
+        }
+
+        @Override
+        public void onTaskRemoved(UserTask userTask) {
+
+        }
+    }
+
+    private static class JobIdTracker implements TaskStoreListener {
         Set<JobId> seenJobIds = new HashSet<>();
 
         @Override
-        public UserTask storeUserTask(String username, JobId jobId, Task task) {
-            registerTaskInvocations++;
-            seenJobIds.add(jobId);
-            return super.storeUserTask(username, jobId, task);
+        public void onTaskAdded(UserTask userTask) {
+            seenJobIds.add(userTask.jobId());
+        }
+
+        @Override
+        public void onTaskRemoved(UserTask userTask) {
+
         }
     }
 

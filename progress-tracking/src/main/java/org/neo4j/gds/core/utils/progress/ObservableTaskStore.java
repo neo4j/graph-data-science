@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
 import java.util.List;
+import java.util.Optional;
 
 public abstract class ObservableTaskStore implements TaskStore {
     private final List<TaskStoreListener> listeners;
@@ -38,7 +38,7 @@ public abstract class ObservableTaskStore implements TaskStore {
     @Override
     public final void remove(String username, JobId jobId) {
         var userTask = removeUserTask(username, jobId);
-        listeners.forEach(listener -> listener.onTaskRemoved(userTask));
+        userTask.ifPresent(task -> listeners.forEach(listener -> listener.onTaskRemoved(task)));
     }
 
     @Override
@@ -48,6 +48,5 @@ public abstract class ObservableTaskStore implements TaskStore {
 
     protected abstract UserTask storeUserTask(String username, JobId jobId, Task task);
 
-    @Nullable
-    protected abstract UserTask removeUserTask(String username, JobId jobId);
+    protected abstract Optional<UserTask> removeUserTask(String username, JobId jobId);
 }

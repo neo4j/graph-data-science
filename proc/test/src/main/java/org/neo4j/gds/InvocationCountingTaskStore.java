@@ -26,6 +26,7 @@ import org.neo4j.gds.core.utils.progress.UserTask;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @TestOnly
@@ -42,7 +43,7 @@ public class InvocationCountingTaskStore extends PerDatabaseTaskStore {
     }
 
     @Override
-    public UserTask removeUserTask(String username, JobId jobId) {
+    public Optional<UserTask> removeUserTask(String username, JobId jobId) {
         removeTaskInvocations++;
         return super.removeUserTask(username, jobId);
     }

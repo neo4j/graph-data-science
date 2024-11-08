@@ -19,9 +19,7 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
-import org.jetbrains.annotations.Nullable;
-
 public interface TaskStoreListener {
     void onTaskAdded(UserTask userTask);
-    void onTaskRemoved(@Nullable UserTask userTask);
+    void onTaskRemoved(UserTask userTask);
 }

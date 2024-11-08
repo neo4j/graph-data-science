@@ -30,6 +30,7 @@ dependencies {
     implementation project(':string-formatting')
 
     implementation openGds.commons.lang3
+    implementation openGds.hppc
 
 
     // TEST DEPENDENCIES

@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class TestTaskStore extends PerDatabaseTaskStore {
 
@@ -43,7 +44,7 @@ public class TestTaskStore extends PerDatabaseTaskStore {
     }
 
     @Override
-    protected UserTask removeUserTask(String username, JobId jobId) {
+    protected Optional<UserTask> removeUserTask(String username, JobId jobId) {
         tasks.remove(jobId);
         return super.removeUserTask(username, jobId);
     }
