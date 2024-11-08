@@ -74,7 +74,8 @@ public final class CentralityApplications {
         var stats = new CentralityAlgorithmsStatsModeBusinessFacade(
             estimation,
             algorithms,
-            algorithmProcessingTemplateConvenience
+            algorithmProcessingTemplateConvenience,
+            hitsHookGenerator
         );
         var streaming = new CentralityAlgorithmsStreamModeBusinessFacade(
             estimation,

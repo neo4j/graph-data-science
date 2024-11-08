@@ -167,6 +167,30 @@ public class AlgorithmProcessingTemplateConvenience {
         );
     }
 
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM> RESULT_TO_CALLER processAlgorithmInStatsMode(
+        GraphName graphName,
+        CONFIGURATION configuration,
+        Label label,
+        Supplier<MemoryEstimation> estimationFactory,
+        Computation<RESULT_FROM_ALGORITHM> computation,
+        StatsResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder,
+        Optional<Iterable<PostLoadValidationHook>> postGraphStoreLoadValidationHooks,
+        Optional<Iterable<PostLoadETLHook>> postGraphStoreLoadETLHooks,
+        Optional<String> relationshipWeightOverride
+    ) {
+        return algorithmProcessingTemplate.processAlgorithmForStats(
+            relationshipWeightOverride,
+            graphName,
+            configuration,
+            postGraphStoreLoadValidationHooks,
+            postGraphStoreLoadETLHooks,
+            label,
+            estimationFactory,
+            computation,
+            resultBuilder
+        );
+    }
+
     public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM> Stream<RESULT_TO_CALLER> processAlgorithmInStreamMode(
         GraphName graphName,
         CONFIGURATION configuration,
