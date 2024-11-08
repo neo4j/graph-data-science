@@ -29,7 +29,7 @@ import org.neo4j.gds.procedures.algorithms.centrality.HitsMutateResult;
 
 import java.util.Optional;
 
-class HitsResultBuilderForMutateMode implements ResultBuilder<HitsConfig,PregelResult, HitsMutateResult, NodePropertiesWritten> {
+public class HitsResultBuilderForMutateMode implements ResultBuilder<HitsConfig,PregelResult, HitsMutateResult, NodePropertiesWritten> {
 
     @Override
     public HitsMutateResult build(
