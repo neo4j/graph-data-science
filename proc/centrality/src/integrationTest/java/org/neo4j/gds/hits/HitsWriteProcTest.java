@@ -43,7 +43,7 @@ class HitsWriteProcTest extends BaseProcTest {
            ", (b:Node {name: 'b'})" +
            ", (c:Node {name: 'c'})" +
            ", (a)-[:REL]->(b)" +
-           ", (b)-[:REL]->(c)" ;
+           ", (b)-[:REL]->(c)";
 
    @Inject
    private IdFunction idFunction;

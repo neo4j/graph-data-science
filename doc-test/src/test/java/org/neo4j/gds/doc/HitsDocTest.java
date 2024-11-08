@@ -20,7 +20,7 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.functions.AsNodeFunc;
-import org.neo4j.gds.pregel.HitsStreamProc;
+import org.neo4j.gds.hits.HitsStreamProc;
 
 import java.util.List;
 

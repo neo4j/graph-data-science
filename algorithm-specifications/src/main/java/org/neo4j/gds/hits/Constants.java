@@ -17,13 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.pregel;
+package org.neo4j.gds.hits;
 
-import org.neo4j.gds.beta.pregel.annotation.PregelProcedure;
+public class Constants {
 
-@PregelProcedure(
-    name = "gds.alpha.hits",
-    description = "Hyperlink-Induced Topic Search (HITS) is a link analysis algorithm that rates nodes",
-    deprecatedBy = "gds.hits"
-)
-public class DeprecatedAlphaHits extends Hits {}
+    public static final String HITS_DESCRIPTION = "Hyperlink-Induced Topic Search (HITS) is a link analysis algorithm that rates nodes";
+}
