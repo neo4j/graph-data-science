@@ -22,7 +22,7 @@ package org.neo4j.gds.core.utils.mem;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * @deprecated Migrate to using {@link org.neo4j.gds.mem.MemoryGauge}
+ * @deprecated Migrate to using {@link org.neo4j.gds.mem.MemoryTracker}
  */
 @Deprecated
 public final class GcListenerExtension {
