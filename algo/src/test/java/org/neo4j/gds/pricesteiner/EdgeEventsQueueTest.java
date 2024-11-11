@@ -26,6 +26,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 class EdgeEventsQueueTest {
 
     @Test
+    void shouldNotFailForEmptyQueue() {
+        var edgeEventsQueue = new EdgeEventsQueue(10);
+
+        assertThat(edgeEventsQueue.nextEventTime()).isEqualTo(Double.MAX_VALUE);
+    }
+
+    @Test
     void shouldActAsAQueue() {
 
         var edgeEventsQueue = new EdgeEventsQueue(10);

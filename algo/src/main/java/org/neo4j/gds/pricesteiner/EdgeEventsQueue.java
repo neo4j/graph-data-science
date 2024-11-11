@@ -43,6 +43,10 @@ class EdgeEventsQueue {
     }
 
     double nextEventTime(){
+
+        if (edgeEventsPriorityQueue.isEmpty()){
+            return  Double.MAX_VALUE;
+        }
         return edgeEventsPriorityQueue.cost(edgeEventsPriorityQueue.top());
     }
 

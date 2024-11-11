@@ -221,4 +221,69 @@ class PCSTFastTest {
 
         }
     }
+
+    @Nested
+    @GdlExtension
+    class CompletelyDetachedGraphAfterMerging{
+        @GdlGraph(orientation = Orientation.UNDIRECTED)
+        private static final String DB_CYPHER =
+            "CREATE " +
+                "(a0:Node{prize: 0.0})," +
+                "(a1:Node{prize: 0.0})," +
+                "(a2:Node{prize: 0.0})," +
+                "(a3:Node{prize: 3.0})," +
+                "(a4:Node{prize: 0.0})," +
+                "(a5:Node{prize: 3.0})," +
+                "(a6:Node{prize: 4.0})," +
+                "(a7:Node{prize: 0.0})," +
+
+                "(a6)-[:R{w:-4}]->(a7)," +
+                "(a3)-[:R{w:-1}]->(a0)," +
+                "(a5)-[:R{w:-2}]->(a1)," +
+                "(a4)-[:R{w:-3}]->(a2)";
+
+
+        @Inject
+        private  TestGraph graph;
+
+        @Test
+        void shouldWorkProperly(){
+
+            var prizes = graph.nodeProperties("prize");
+            var pcst = new PCSTFast(graph, prizes::doubleValue, ProgressTracker.NULL_TRACKER);
+            var result = pcst.compute();
+
+            var  a6 =graph.toMappedNodeId("a6");
+            var  a7 =graph.toMappedNodeId("a7");
+
+
+            var parents = result.parentArray();
+
+            for (int i=0;i<6;++i){
+                assertThat(parents.get(graph.toMappedNodeId("a"+i))).isEqualTo(PrizeSteinerTreeResult.PRUNED);
+            }
+            assertThat(parents).satisfiesAnyOf(
+                pars-> {
+                    assertThat(pars.get(a6)).isEqualTo(a7);
+                    assertThat(pars.get(a7)).isEqualTo(PrizeSteinerTreeResult.ROOT);
+                },
+                pars-> {
+                    assertThat(pars.get(a7)).isEqualTo(a6);
+                    assertThat(pars.get(a6)).isEqualTo(PrizeSteinerTreeResult.ROOT);
+                }
+            );
+            var costs = result.relationshipToParentCost();
+            assertThat(costs).satisfiesAnyOf(
+                cost-> {
+                    assertThat(cost.get(a6)).isEqualTo(-4);
+                },
+                cost-> {
+                    assertThat(cost.get(a7)).isEqualTo(-4);
+
+                }
+            );
+        }
+
+    }
+
 }
