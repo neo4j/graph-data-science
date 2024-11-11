@@ -34,7 +34,7 @@ import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.mem.MemoryGauge;
+import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
@@ -136,9 +136,11 @@ public final class OpenGraphDataScienceExtensionBuilder {
         //  _could_ be garbage, and we want to err on the side of seeing more free heap.
         // It also has the effect that we allow all operations that theoretically fit into memory
         //  if the extension does never load.
-        var freeMemoryAfterLastGc = new AtomicLong(Runtime.getRuntime().maxMemory());
+        var availableMemory = Runtime.getRuntime().maxMemory();
+        var freeMemoryAfterLastGc = new AtomicLong(availableMemory);
         // We make it available in a neat service
-        var memoryGauge = new MemoryGauge(freeMemoryAfterLastGc);
+        var memoryTracker = new MemoryTracker(availableMemory);
+
         // in the short term, until we eradicate old usages, we also install the shared state in its old place
         GcListenerExtension.setMemoryGauge(freeMemoryAfterLastGc);
         // State is populated from a GC listener
@@ -150,19 +152,21 @@ public final class OpenGraphDataScienceExtensionBuilder {
 
         var componentRegistration = new ComponentRegistration(log, globalProcedures);
 
+        componentRegistration.registerComponent("GDS Memory Tracker", MemoryTracker.class, __ -> memoryTracker);
+
         var graphDataScienceProviderFactory = new GraphDataScienceProceduresProviderFactory(
             log,
             neo4jConfiguration,
             exporterBuildersProviderService,
             exportLocation,
             featureTogglesRepository,
-            memoryGauge,
             metrics,
             modelCatalog,
             modelRepository,
             algorithmProcessingTemplateDecorator,
             graphCatalogApplicationsDecorator,
-            modelCatalogApplicationsDecorator
+            modelCatalogApplicationsDecorator,
+            memoryTracker
         );
 
         var graphDataScienceExtensionBuilder = new OpenGraphDataScienceExtensionBuilder(

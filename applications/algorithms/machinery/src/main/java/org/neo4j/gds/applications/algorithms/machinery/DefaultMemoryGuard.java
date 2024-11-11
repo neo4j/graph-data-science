@@ -25,8 +25,8 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.mem.MemoryGauge;
 import org.neo4j.gds.mem.MemoryReservationExceededException;
+import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.function.Supplier;
@@ -35,35 +35,38 @@ public final class DefaultMemoryGuard implements MemoryGuard {
     private final Log log;
     private final GraphDimensionFactory graphDimensionFactory;
     private final boolean useMaxMemoryEstimation;
-    private final MemoryGauge memoryGauge;
+    private final MemoryTracker memoryTracker;
 
     DefaultMemoryGuard(
         Log log,
         GraphDimensionFactory graphDimensionFactory,
         boolean useMaxMemoryEstimation,
-        MemoryGauge memoryGauge
+        MemoryTracker memoryTracker
     ) {
         this.log = log;
         this.graphDimensionFactory = graphDimensionFactory;
         this.useMaxMemoryEstimation = useMaxMemoryEstimation;
-        this.memoryGauge = memoryGauge;
+        this.memoryTracker = memoryTracker;
     }
 
-    public static DefaultMemoryGuard create(Log log, boolean useMaxMemoryEstimation, MemoryGauge memoryGauge) {
+    public static DefaultMemoryGuard create(
+        Log log,
+        boolean useMaxMemoryEstimation,
+        MemoryTracker memoryTracker
+    ) {
         var graphDimensionFactory = new GraphDimensionFactory();
 
-        return new DefaultMemoryGuard(log, graphDimensionFactory, useMaxMemoryEstimation, memoryGauge);
+        return new DefaultMemoryGuard(log, graphDimensionFactory, useMaxMemoryEstimation, memoryTracker);
     }
 
     @Override
-    public <CONFIGURATION extends AlgoBaseConfig> void assertAlgorithmCanRun(
+    public synchronized <CONFIGURATION extends AlgoBaseConfig> void assertAlgorithmCanRun(
         Supplier<MemoryEstimation> estimationFactory,
         GraphStore graphStore,
         CONFIGURATION configuration,
         Label label,
         DimensionTransformer dimensionTransformer
     ) throws IllegalStateException {
-        if (configuration.sudo()) return;
 
         try {
 
@@ -76,8 +79,18 @@ public final class DefaultMemoryGuard implements MemoryGuard {
                 useMaxMemoryEstimation
             );
 
+            // TODO: I don't really like this, think how we can refactor it better.
             try {
-                memoryGauge.tryToReserveMemory(memoryRequirement.requiredMemory());
+                var bytesToReserve = memoryRequirement.requiredMemory();
+                if (configuration.sudo()) {
+                    memoryTracker.track(configuration.jobId(), bytesToReserve);
+                    return;
+                }
+                var availableMemory = memoryTracker.availableMemory();
+                if (bytesToReserve > availableMemory) {
+                    throw new MemoryReservationExceededException(bytesToReserve, availableMemory);
+                }
+                memoryTracker.track(configuration.jobId(), bytesToReserve);
             } catch (MemoryReservationExceededException e) {
                 var message = StringFormatting.formatWithLocale(
                     "Memory required to run %s (%db) exceeds available memory (%db)",

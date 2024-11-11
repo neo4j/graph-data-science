@@ -32,7 +32,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.mem.MemoryGauge;
+import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
 import org.neo4j.gds.procedures.GraphCatalogProcedureFacadeFactory;
@@ -67,13 +67,13 @@ final class GraphDataScienceProceduresProviderFactory {
     private final ExporterBuildersProviderService exporterBuildersProviderService;
     private final ExportLocation exportLocation;
     private final FeatureTogglesRepository featureTogglesRepository;
-    private final MemoryGauge memoryGauge;
     private final Metrics metrics;
     private final ModelCatalog modelCatalog;
     private final ModelRepository modelRepository;
     private final Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator;
     private final Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator;
     private final Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator;
+    private final MemoryTracker memoryTracker;
 
     GraphDataScienceProceduresProviderFactory(
         Log log,
@@ -81,26 +81,26 @@ final class GraphDataScienceProceduresProviderFactory {
         ExporterBuildersProviderService exporterBuildersProviderService,
         ExportLocation exportLocation,
         FeatureTogglesRepository featureTogglesRepository,
-        MemoryGauge memoryGauge,
         Metrics metrics,
         ModelCatalog modelCatalog,
         ModelRepository modelRepository,
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
         Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
-        Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator
+        Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator,
+        MemoryTracker memoryTracker
     ) {
         this.log = log;
         this.neo4jConfiguration = neo4jConfiguration;
         this.exporterBuildersProviderService = exporterBuildersProviderService;
         this.exportLocation = exportLocation;
         this.featureTogglesRepository = featureTogglesRepository;
-        this.memoryGauge = memoryGauge;
         this.metrics = metrics;
         this.modelCatalog = modelCatalog;
         this.modelRepository = modelRepository;
         this.algorithmProcessingTemplateDecorator = algorithmProcessingTemplateDecorator;
         this.graphCatalogApplicationsDecorator = graphCatalogApplicationsDecorator;
         this.modelCatalogApplicationsDecorator = modelCatalogApplicationsDecorator;
+        this.memoryTracker = memoryTracker;
     }
 
     GraphDataScienceProceduresProvider createGraphDataScienceProvider(
@@ -111,7 +111,7 @@ final class GraphDataScienceProceduresProviderFactory {
     ) {
         var catalogProcedureFacadeFactory = new GraphCatalogProcedureFacadeFactory(log);
 
-        var memoryGuard = DefaultMemoryGuard.create(log, useMaxMemoryEstimation, memoryGauge);
+        var memoryGuard = DefaultMemoryGuard.create(log, useMaxMemoryEstimation, memoryTracker);
 
         return new GraphDataScienceProceduresProvider(
             log,
@@ -133,7 +133,8 @@ final class GraphDataScienceProceduresProviderFactory {
             userLogServices,
             algorithmProcessingTemplateDecorator,
             graphCatalogApplicationsDecorator,
-            modelCatalogApplicationsDecorator
+            modelCatalogApplicationsDecorator,
+            memoryTracker
         );
     }
 }

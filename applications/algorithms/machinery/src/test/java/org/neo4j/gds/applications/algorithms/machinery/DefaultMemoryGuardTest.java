@@ -25,16 +25,15 @@ import org.neo4j.gds.applications.services.GraphDimensionFactory;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.MemoryEstimation;
-import org.neo4j.gds.mem.MemoryGauge;
 import org.neo4j.gds.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.mem.MemoryTree;
-
-import java.util.concurrent.atomic.AtomicLong;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -45,6 +44,7 @@ import static org.mockito.Mockito.when;
  * So bear with and take it in the best spirit.
  */
 class DefaultMemoryGuardTest {
+
     @Test
     void shouldAllowExecution() {
         var graphDimensionFactory = mock(GraphDimensionFactory.class);
@@ -52,7 +52,7 @@ class DefaultMemoryGuardTest {
             null,
             graphDimensionFactory,
             false,
-            new MemoryGauge(new AtomicLong(42L))
+            new MemoryTracker(42)
         );
 
         var graphStore = mock(GraphStore.class);
@@ -81,7 +81,7 @@ class DefaultMemoryGuardTest {
             null,
             graphDimensionFactory,
             false,
-            new MemoryGauge(new AtomicLong(42L))
+            new MemoryTracker(42)
         );
 
         var graphStore = mock(GraphStore.class);
@@ -116,7 +116,7 @@ class DefaultMemoryGuardTest {
             null,
             graphDimensionFactory,
             true,
-            new MemoryGauge(new AtomicLong(42L))
+            new MemoryTracker(42)
         );
 
         var graphStore = mock(GraphStore.class);
@@ -151,22 +151,23 @@ class DefaultMemoryGuardTest {
             null,
             graphDimensionFactory,
             false,
-            new MemoryGauge(new AtomicLong(42L))
+            new MemoryTracker(42)
         );
 
         var graphStore = mock(GraphStore.class);
-        var configuration = new ExampleConfiguration();
-        when(graphDimensionFactory.create(graphStore, configuration)).thenReturn(GraphDimensions.of(23L, 87L));
+
+        when(graphDimensionFactory.create(any(), any())).thenReturn(GraphDimensions.of(23L, 87L));
+
         var memoryEstimation = mock(MemoryEstimation.class);
         var memoryTree = mock(MemoryTree.class);
         var concurrency = new Concurrency(7);
         when(memoryEstimation.estimate(GraphDimensions.of(23L, 87L), concurrency)).thenReturn(memoryTree);
-        when(memoryTree.memoryUsage()).thenReturn(MemoryRange.of(117, 243));
+        when(memoryTree.memoryUsage()).thenReturn(MemoryRange.of(43, 99));
 
         assertThatIllegalStateException().isThrownBy(() -> memoryGuard.assertAlgorithmCanRun(
             () -> memoryEstimation,
             graphStore,
-            configuration,
+            new ExampleConfiguration(false),
             new StandardLabel("some other label"),
             DimensionTransformer.DISABLED
         ));

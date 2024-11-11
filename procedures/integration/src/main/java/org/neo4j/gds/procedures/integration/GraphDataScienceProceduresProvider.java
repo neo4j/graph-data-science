@@ -36,6 +36,7 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.procedures.DatabaseIdAccessor;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
@@ -90,6 +91,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
     private final Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator;
     private final Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator;
     private final Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator;
+    private final MemoryTracker memoryTracker;
 
     GraphDataScienceProceduresProvider(
         Log log,
@@ -111,7 +113,8 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         UserLogServices userLogServices,
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
         Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
-        Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator
+        Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator,
+        MemoryTracker memoryTracker
     ) {
         this.log = log;
         this.neo4jConfiguration = neo4jConfiguration;
@@ -135,6 +138,7 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
         this.algorithmProcessingTemplateDecorator = algorithmProcessingTemplateDecorator;
         this.graphCatalogApplicationsDecorator = graphCatalogApplicationsDecorator;
         this.modelCatalogApplicationsDecorator = modelCatalogApplicationsDecorator;
+        this.memoryTracker = memoryTracker;
     }
 
     @Override
@@ -155,6 +159,8 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
 
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var taskStore = taskStoreService.getTaskStore(databaseId);
+        taskStore.addListener(memoryTracker);
+
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
         var userLogStore = userLogServices.getUserLogStore(databaseId);
 
