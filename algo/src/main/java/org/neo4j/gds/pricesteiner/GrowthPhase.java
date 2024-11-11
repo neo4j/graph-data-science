@@ -135,6 +135,7 @@ class GrowthPhase {
             }
 
         }
+
         progressTracker.endSubTask("Growing");
        progressTracker.endSubTask("Growth Phase");
         return new GrowthResult(
