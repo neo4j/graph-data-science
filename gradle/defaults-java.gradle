@@ -36,6 +36,11 @@ allprojects {
             integrationTest {
                 compileClasspath += sourceSets.main.output
                 runtimeClasspath += sourceSets.main.output
+
+                // We make the test resources available to the integration tests so that
+                // we can use the same test utils for both unit and integration tests.
+                compileClasspath += sourceSets.test.output
+                runtimeClasspath += sourceSets.test.output
             }
         }
 
