@@ -16,8 +16,6 @@ dependencies {
     implementation(
             project(':annotations'),
             project(':string-formatting'),
-            openGds.eclipse.collections.api,
-            openGds.eclipse.collections,
     )
 
     api openGds.jackson.databind
