@@ -79,14 +79,6 @@ public final class Neo4jSettings {
         return SettingValueParsers.BYTES.parse(value);
     }
 
-    public static Setting<GraphDatabaseSettings.TransactionStateMemoryAllocation> transactionStateAllocation() {
-        return GraphDatabaseSettings.tx_state_memory_allocation;
-    }
-
-    public static Setting<Long> transactionStateMaxOffHeapMemory() {
-        return GraphDatabaseSettings.tx_state_max_off_heap_memory;
-    }
-
     public static <T> T disableOnlineBackup(T builder, SettingsUtil.SetConfig<T, Boolean> setConfig) {
         return SettingsUtil.tryConfigure(
             builder,

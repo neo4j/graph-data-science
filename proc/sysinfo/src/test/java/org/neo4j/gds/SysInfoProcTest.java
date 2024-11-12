@@ -23,7 +23,6 @@ import org.assertj.core.api.Condition;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.settings.Neo4jSettings;
 import org.neo4j.gds.utils.GdsFeatureToggles;
@@ -77,12 +76,7 @@ class SysInfoProcTest extends BaseProcTest {
         builder
             // add another unrestricted to test string concatenation in debug output
             .setConfig(Neo4jSettings.procedureUnrestricted(), List.of("gds.*", "foo.bar"))
-            .setConfig(Neo4jSettings.pageCacheMemory(), Neo4jSettings.pageCacheMemoryValue("42M"))
-            .setConfig(
-                Neo4jSettings.transactionStateAllocation(),
-                GraphDatabaseSettings.TransactionStateMemoryAllocation.ON_HEAP
-            )
-            .setConfig(Neo4jSettings.transactionStateMaxOffHeapMemory(), 1337L);
+            .setConfig(Neo4jSettings.pageCacheMemory(), Neo4jSettings.pageCacheMemoryValue("42M"));
     }
 
     @Test
@@ -172,8 +166,6 @@ class SysInfoProcTest extends BaseProcTest {
             .hasEntrySatisfying("containerized", anyOf(isTrue, isFalse))
             .containsEntry("dbms.security.procedures.unrestricted", "gds.*,foo.bar")
             .containsEntry(Neo4jSettings.pageCacheMemory().name(), Neo4jSettings.pageCacheMemoryValue("42M"))
-            .containsEntry(Neo4jSettings.transactionStateAllocation().name(), "ON_HEAP")
-            .containsEntry(Neo4jSettings.transactionStateMaxOffHeapMemory().name(), 1337L)
             .containsEntry("featureBitIdMap", GdsFeatureToggles.USE_BIT_ID_MAP.isEnabled())
             .containsEntry(
                 "featureUncompressedAdjacencyList",

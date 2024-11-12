@@ -286,7 +286,6 @@ public class SysInfoProc {
 
     private static void configInfo(Config config, Consumer<DebugValue> builder) {
         builder.accept(configVal(config, Neo4jSettings.procedureUnrestricted(), s -> String.join(",", s)));
-        builder.accept(configVal(config, Neo4jSettings.transactionStateAllocation(), Enum::name));
 
         // the following keys are different on different Neo4j versions, we add those that are available
 
