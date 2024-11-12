@@ -31,6 +31,9 @@ import org.neo4j.gds.beta.pregel.context.InitContext;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.degree.DegreeFunction;
 import org.neo4j.gds.mem.MemoryEstimateDefinition;
+import org.neo4j.gds.values.FloatingPointValue;
+import org.neo4j.gds.values.IntegralValue;
+import org.neo4j.gds.values.primitive.PrimitiveValues;
 
 import java.util.Map;
 import java.util.Optional;
@@ -41,6 +44,9 @@ class IndirectExposureComputation implements PregelComputation<IndirectExposureC
     static final String HOP = "hop";
     static final String PARENT = "parent";
     static final String ROOT = "root";
+
+    static final IntegralValue UNDEFINED = PrimitiveValues.longValue(-1);
+    static final FloatingPointValue DEFAULT_EXPOSURE = PrimitiveValues.floatingPointValue(0.0);
 
     private final DegreeFunction totalTransfers;
     private final HugeAtomicBitSet visited;
@@ -109,10 +115,10 @@ class IndirectExposureComputation implements PregelComputation<IndirectExposureC
     @Override
     public PregelSchema schema(IndirectExposureConfig config) {
         return new PregelSchema.Builder()
-            .add(EXPOSURE, ValueType.DOUBLE, PregelSchema.Visibility.PRIVATE)
-            .add(HOP, ValueType.LONG, PregelSchema.Visibility.PRIVATE)
-            .add(PARENT, ValueType.LONG, PregelSchema.Visibility.PRIVATE)
-            .add(ROOT, ValueType.LONG, PregelSchema.Visibility.PRIVATE)
+            .add(EXPOSURE, DEFAULT_EXPOSURE, PregelSchema.Visibility.PRIVATE)
+            .add(HOP, UNDEFINED, PregelSchema.Visibility.PRIVATE)
+            .add(PARENT, UNDEFINED, PregelSchema.Visibility.PRIVATE)
+            .add(ROOT, UNDEFINED, PregelSchema.Visibility.PRIVATE)
             .build();
     }
 

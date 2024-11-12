@@ -32,10 +32,12 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.indirectExposure.IndirectExposureComputation.DEFAULT_EXPOSURE;
+import static org.neo4j.gds.indirectExposure.IndirectExposureComputation.UNDEFINED;
 
 @GdlExtension
 @ExtendWith(SoftAssertionsExtension.class)
@@ -53,6 +55,7 @@ class IndirectExposureTest {
         (e24)
         (e31)
         (e41)
+        (e42)
         (e00)-[:TRANSFER { w:  10 }]->(e11)
         (e00)-[:TRANSFER { w:  20 }]->(e12)
         (e00)-[:TRANSFER { w:  30 }]->(e13)
@@ -70,19 +73,25 @@ class IndirectExposureTest {
 
     @Test
     void compute(SoftAssertions softly) {
-        var expectedResults = Map.of(
-            // Node, [Exposure, Hop, Parent, Root]
-            "e00", List.of(1.0, 0L, "e00", "e00"),
-            "e11", List.of(0.200, 1L, "e00", "e00"),
-            "e12", List.of(0.154, 1L, "e00", "e00"),
-            "e13", List.of(0.167, 1L, "e00", "e00"),
-            "e21", List.of(0.200, 2L, "e11", "e00"),
-            "e22", List.of(0.055, 2L, "e12", "e00"),
-            "e23", List.of(0.090, 2L, "e13", "e00"),
-            "e24", List.of(0.167, 2L, "e13", "e00"),
-            "e31", List.of(0.026, 3L, "e22", "e00"),
-            "e41", List.of(0.026, 4L, "e31", "e00")
-        );
+        var expectedResults = new HashMap<String, List<Object>>();
+        // Node, [Exposure, Hop, Parent, Root]
+        expectedResults.put("e00", List.of(1.0, 0L, "e00", "e00"));
+        expectedResults.put("e11", List.of(0.200, 1L, "e00", "e00"));
+        expectedResults.put("e12", List.of(0.154, 1L, "e00", "e00"));
+        expectedResults.put("e13", List.of(0.167, 1L, "e00", "e00"));
+        expectedResults.put("e21", List.of(0.200, 2L, "e11", "e00"));
+        expectedResults.put("e22", List.of(0.055, 2L, "e12", "e00"));
+        expectedResults.put("e23", List.of(0.090, 2L, "e13", "e00"));
+        expectedResults.put("e24", List.of(0.167, 2L, "e13", "e00"));
+        expectedResults.put("e31", List.of(0.026, 3L, "e22", "e00"));
+        expectedResults.put("e41", List.of(0.026, 4L, "e31", "e00"));
+        // disconnected and not sanctioned, should get default values
+        expectedResults.put("e42", List.of(
+            DEFAULT_EXPOSURE.doubleValue(),
+            UNDEFINED.longValue(),
+            UNDEFINED.longValue(),
+            UNDEFINED.longValue()
+        ));
 
         var config = IndirectExposureConfigImpl.builder()
             .concurrency(1)
@@ -108,15 +117,24 @@ class IndirectExposureTest {
         var parents = result.parents();
         var roots = result.roots();
 
-        var nodeVars = List.of("e00", "e11", "e12", "e13", "e21", "e22", "e23", "e24", "e31", "e41");
+        var nodeVars = List.of("e00", "e11", "e12", "e13", "e21", "e22", "e23", "e24", "e31", "e41", "e42");
 
         nodeVars.forEach(nodeVar -> {
             var nodeId = graph.toMappedNodeId(nodeVar);
             var expected = expectedResults.get(nodeVar);
             var expectedExposure = (Double) expected.get(0);
             var expectedHop = (Long) expected.get(1);
-            var expectedParent = graph.toOriginalNodeId((String) expected.get(2));
-            var expectedRoot = graph.toOriginalNodeId((String) expected.get(3));
+
+            long expectedParent = switch (expected.get(2)) {
+                case String p -> graph.toOriginalNodeId(p);
+                case Long p -> p;
+                default -> throw new IllegalStateException("Unexpected value: " + expected.get(2));
+            };
+            long expectedRoot = switch (expected.get(3)) {
+                case String p -> graph.toOriginalNodeId(p);
+                case Long p -> p;
+                default -> throw new IllegalStateException("Unexpected value: " + expected.get(3));
+            };
 
             softly.assertThat(exposures.get(nodeId)).as(nodeVar).isCloseTo(expectedExposure, offset);
             softly.assertThat(hops.get(nodeId)).as(nodeVar).isEqualTo(expectedHop);
