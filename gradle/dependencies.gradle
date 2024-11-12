@@ -1,13 +1,13 @@
 ext {
     neos = [
-        '5.26': properties.getOrDefault('neo4jVersion526', '5.26.0-SNAPSHOT'),
+        '5.26': '5.26.0-SNAPSHOT',
     ]
 
     neo4jDefault = neos.'5.26'
 
     ver = [
         'log4j'                : '2.20.0',
-        'neo4j'                : properties.getOrDefault('neo4jVersion', neo4jDefault),
+        'neo4j'                : neo4jDefault,
         'scala'                : '2.13.11',
         'shiro'                : '2.0.1',
     ]
