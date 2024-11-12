@@ -96,8 +96,8 @@ RETURN gds.graph.project(
 | sourceNodeProperties   | Map                      | {}      | The properties of the source node.
 | targetNodeProperties   | Map                      | {}      | The properties of the target node.
 | sourceNodeLabels       | List of String or String | []      | The label(s) of the source node.
-| targetNodeLabels       | List of String or String | []      | The label(s) of the source node.
-| relationshipProperties | Map                      | {}      | The properties of the source node.
+| targetNodeLabels       | List of String or String | []      | The label(s) of the target node.
+| relationshipProperties | Map                      | {}      | The properties of the relationship.
 | relationshipType       | String                   | '*'     | The type of the relationship.
 |===
 
