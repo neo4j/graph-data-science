@@ -22,6 +22,7 @@ package org.neo4j.gds.beta.pregel;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.values.GdsValue;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -51,7 +52,21 @@ public interface PregelSchema {
         }
 
         public PregelSchema.Builder add(String propertyKey, ValueType propertyType, Visibility visibility) {
-            elements.add(ImmutableElement.of(propertyKey, propertyType, visibility));
+            this.elements.add(ImmutableElement.builder()
+                .propertyKey(propertyKey)
+                .propertyType(propertyType)
+                .visibility(visibility)
+                .build());
+            return this;
+        }
+
+        public PregelSchema.Builder add(String propertyKey, GdsValue defaultValue, Visibility visibility) {
+            this.elements.add(ImmutableElement.builder()
+                .propertyKey(propertyKey)
+                .propertyType(defaultValue.type())
+                .defaultValue(defaultValue)
+                .visibility(visibility)
+                .build());
             return this;
         }
 

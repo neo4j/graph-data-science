@@ -33,6 +33,8 @@ import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.utils.StringFormatting;
 import org.neo4j.gds.utils.StringJoining;
+import org.neo4j.gds.values.FloatingPointValue;
+import org.neo4j.gds.values.IntegralValue;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -188,25 +190,39 @@ public abstract class NodeValue {
         switch (element.propertyType()) {
             case DOUBLE:
                 var doubleNodeValues = HugeDoubleArray.newArray(nodeCount);
+                double doubleDefaultValue = element.defaultValue()
+                    .map(v -> (FloatingPointValue) v)
+                    .map(FloatingPointValue::doubleValue)
+                    .orElse(DefaultValue.DOUBLE_DEFAULT_FALLBACK);
                 ParallelUtil.parallelForEachNode(
                     nodeCount,
                     concurrency,
                     TerminationFlag.RUNNING_TRUE,
-                    nodeId -> doubleNodeValues.set(nodeId, DefaultValue.DOUBLE_DEFAULT_FALLBACK)
+                    nodeId -> doubleNodeValues.set(nodeId, doubleDefaultValue)
                 );
                 return doubleNodeValues;
             case LONG:
                 var longNodeValues = HugeLongArray.newArray(nodeCount);
+                long longDefaultValue = element.defaultValue()
+                    .map(v -> (IntegralValue) v)
+                    .map(IntegralValue::longValue)
+                    .orElse(DefaultValue.LONG_DEFAULT_FALLBACK);
                 ParallelUtil.parallelForEachNode(
                     nodeCount,
                     concurrency,
                     TerminationFlag.RUNNING_TRUE,
-                    nodeId -> longNodeValues.set(nodeId, DefaultValue.LONG_DEFAULT_FALLBACK)
+                    nodeId -> longNodeValues.set(nodeId, longDefaultValue)
                 );
                 return longNodeValues;
             case LONG_ARRAY:
+                if (element.defaultValue().isPresent()) {
+                    throw new IllegalArgumentException("Default value is not supported for long array properties");
+                }
                 return HugeObjectArray.newArray(long[].class, nodeCount);
             case DOUBLE_ARRAY:
+                if (element.defaultValue().isPresent()) {
+                    throw new IllegalArgumentException("Default value is not supported for double array properties");
+                }
                 return HugeObjectArray.newArray(double[].class, nodeCount);
             default:
                 throw new IllegalArgumentException(StringFormatting.formatWithLocale(

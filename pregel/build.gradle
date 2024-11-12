@@ -20,6 +20,7 @@ dependencies {
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':core-utils')
+    implementation project(':gds-values')
     implementation project(':memory-usage')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')

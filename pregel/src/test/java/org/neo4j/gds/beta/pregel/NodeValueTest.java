@@ -25,6 +25,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.values.GdsValue;
+import org.neo4j.gds.values.primitive.PrimitiveValues;
 
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
@@ -108,5 +110,39 @@ class NodeValueTest {
             arguments(ValueType.LONG_ARRAY, longGetter),
             arguments(ValueType.DOUBLE_ARRAY, doubleGetter)
         );
+    }
+
+    @Test
+    void defaultValuesForPrimitiveTypes() {
+        var nodeCount = 10;
+        var schema = new PregelSchema.Builder()
+            .add("L", PrimitiveValues.longValue(42L), PregelSchema.Visibility.PUBLIC)
+            .add("D", PrimitiveValues.floatingPointValue(4.2), PregelSchema.Visibility.PUBLIC)
+            .build();
+
+        var nodeValue = NodeValue.of(schema, nodeCount, new Concurrency(4));
+
+        assertThat(nodeValue.longProperties("L").toArray()).containsOnly(42L);
+        assertThat(nodeValue.doubleProperties("D").toArray()).containsOnly(4.2);
+    }
+
+    static Stream<GdsValue> defaultValuesForArrayTypes() {
+        return Stream.of(
+            PrimitiveValues.longArray(new long[]{42L}),
+            PrimitiveValues.doubleArray(new double[]{4.2})
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.neo4j.gds.beta.pregel.NodeValueTest#defaultValuesForArrayTypes")
+    void defaultValuesForArrayTypesThrows(GdsValue arrayValue) {
+        assertThatThrownBy(() -> {
+            var schema = new PregelSchema.Builder()
+                .add("A", arrayValue, PregelSchema.Visibility.PUBLIC)
+                .build();
+            NodeValue.of(schema, 10, new Concurrency(4));
+        }).isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Default value is not supported for")
+            .hasMessageContaining("array properties");
     }
 }

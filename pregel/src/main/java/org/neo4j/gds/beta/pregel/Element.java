@@ -22,11 +22,17 @@ package org.neo4j.gds.beta.pregel;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.values.GdsValue;
+
+import java.util.Optional;
 
 @ValueClass
 public interface Element {
 
     String propertyKey();
+
+    @Value.Auxiliary
+    Optional<GdsValue> defaultValue();
 
     @Value.Auxiliary
     ValueType propertyType();
