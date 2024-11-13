@@ -125,21 +125,23 @@ class IndirectExposureTest {
             var expectedExposure = (Double) expected.get(0);
             var expectedHop = (Long) expected.get(1);
 
-            long expectedParent = switch (expected.get(2)) {
-                case String p -> graph.toOriginalNodeId(p);
-                case Long p -> p;
-                default -> throw new IllegalStateException("Unexpected value: " + expected.get(2));
-            };
-            long expectedRoot = switch (expected.get(3)) {
-                case String p -> graph.toOriginalNodeId(p);
-                case Long p -> p;
-                default -> throw new IllegalStateException("Unexpected value: " + expected.get(3));
-            };
+            long expectedParent = getId(expected.get(2));
+            long expectedRoot = getId(expected.get(3));
 
             softly.assertThat(exposures.get(nodeId)).as(nodeVar).isCloseTo(expectedExposure, offset);
             softly.assertThat(hops.get(nodeId)).as(nodeVar).isEqualTo(expectedHop);
             softly.assertThat(parents.get(nodeId)).as(nodeVar).isEqualTo(expectedParent);
             softly.assertThat(roots.get(nodeId)).as(nodeVar).isEqualTo(expectedRoot);
         });
+    }
+
+    private long getId(Object idObject) {
+        if (idObject instanceof String s) {
+            return this.graph.toOriginalNodeId(s);
+        }
+        if (idObject instanceof Long l) {
+            return l;
+        }
+        throw new IllegalArgumentException("Expected id must be either String or Long");
     }
 }
