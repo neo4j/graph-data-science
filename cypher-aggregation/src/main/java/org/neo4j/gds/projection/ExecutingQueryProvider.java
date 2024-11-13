@@ -26,7 +26,7 @@ import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 
 import java.util.Optional;
 
-interface ExecutingQueryProvider {
+public interface ExecutingQueryProvider {
     Optional<String> executingQuery();
 
     static ExecutingQueryProvider fromTransaction(KernelTransactions ktxs, Transaction transaction) {
