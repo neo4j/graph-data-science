@@ -21,7 +21,7 @@ dependencies {
     testImplementation project(':config-api')
     testImplementation project(':core')
     testImplementation project(':neo4j-api')
-    testImplementation project(':neo4j-kernel-adapter')
+    testImplementation project(':neo4j-kernel-adapter-api')
     testImplementation project(':proc-test')
     testImplementation project(':proc-common')
     testImplementation project(':progress-tracking')

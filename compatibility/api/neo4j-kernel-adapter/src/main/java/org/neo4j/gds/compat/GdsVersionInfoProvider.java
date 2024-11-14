@@ -19,18 +19,27 @@
  */
 package org.neo4j.gds.compat;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.annotation.GenerateBuilder;
+import org.neo4j.logging.Log;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 public final class GdsVersionInfoProvider {
 
     private GdsVersionInfoProvider() {}
 
     @GenerateBuilder
-    public record GdsVersionInfo(String gdsVersion, Optional<ProxyUtil.ErrorInfo> error) {
+    public record GdsVersionInfo(String rawGdsVersion, AtomicReference<Optional<ErrorInfo>> error) {
+        public String gdsVersion() {
+            this.error
+                .getAndSet(Optional.empty())
+                .ifPresent(err -> err.log(OutputStreamLog.builder(System.out).build().log()));
+            return this.rawGdsVersion;
+        }
     }
 
     public static final GdsVersionInfo GDS_VERSION_INFO = loadGdsVersion();
@@ -66,31 +75,53 @@ public final class GdsVersionInfoProvider {
             var gdsVersion = gdsVersionHandle.invoke(buildInfoProperties);
 
             return builder
-                .gdsVersion(String.valueOf(gdsVersion))
+                .rawGdsVersion(String.valueOf(gdsVersion))
                 .build();
         } catch (ClassNotFoundException e) {
-            builder.error(new ProxyUtil.ErrorInfo(
+            builder.error(new AtomicReference<>(Optional.of(new ErrorInfo(
                 "Could not determine GDS version, BuildInfoProperties is missing. " +
                     "This is likely due to not running GDS as a plugin, " +
                     "for example when running tests or using GDS as a Java module dependency.",
-                ProxyUtil.LogLevel.INFO,
+                LogLevel.INFO,
                 e
-            ));
+            ))));
         } catch (NoSuchMethodException | IllegalAccessException e) {
-            builder.error(new ProxyUtil.ErrorInfo(
+            builder.error(new AtomicReference<>(Optional.of(new ErrorInfo(
                 "Could not determine GDS version, the according methods on BuildInfoProperties could not be found.",
-                ProxyUtil.LogLevel.WARN,
+                LogLevel.WARN,
                 e
-            ));
+            ))));
         } catch (Throwable e) {
-            builder.error(new ProxyUtil.ErrorInfo(
+            builder.error(new AtomicReference<>(Optional.of(new ErrorInfo(
                 "Could not determine GDS version, the according methods on BuildInfoProperties failed.",
-                ProxyUtil.LogLevel.WARN,
+                LogLevel.WARN,
                 e
-            ));
+            ))));
         }
 
-        return builder.gdsVersion("Unknown").build();
+        return builder.rawGdsVersion("Unknown").build();
     }
 
+
+    record ErrorInfo(
+        @NotNull String message,
+        @NotNull LogLevel logLevel,
+        @NotNull Throwable reason
+    ) {
+        void log(Log log) {
+            switch (logLevel) {
+                case DEBUG -> log.debug(message, reason);
+                case INFO -> log.info(message, reason);
+                case WARN -> log.warn(message, reason);
+                case ERROR -> log.error(message, reason);
+            }
+        }
+    }
+
+    enum LogLevel {
+        DEBUG,
+        INFO,
+        WARN,
+        ERROR
+    }
 }

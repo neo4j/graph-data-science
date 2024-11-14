@@ -17,7 +17,7 @@ dependencies {
 
     integrationTestImplementation project(':algo-common')
     integrationTestImplementation project(':core')
-    integrationTestImplementation project(':neo4j-kernel-adapter')
+    integrationTestImplementation project(':neo4j-kernel-adapter-api')
     integrationTestImplementation project(':proc-test')
     integrationTestImplementation project(':proc-common')
     integrationTestImplementation project(':graph-schema-api')

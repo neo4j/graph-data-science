@@ -194,9 +194,6 @@ project(':native-projection').projectDir = file('native-projection')
 include('neo4j-adapter')
 project(':neo4j-adapter').projectDir = file('neo4j-adapter')
 
-include('neo4j-kernel-adapter')
-project(':neo4j-kernel-adapter').projectDir = file('compatibility/common/neo4j-kernel-adapter')
-
 include('neo4j-kernel-adapter-api')
 project(':neo4j-kernel-adapter-api').projectDir = file('compatibility/api/neo4j-kernel-adapter')
 
@@ -414,6 +411,3 @@ project(':algorithm-specifications').projectDir = file('algorithm-specifications
 
 include('core-api')
 project(':core-api').projectDir = file('core-api')
-
-include('neo4j-kernel-adapter-5.25')
-project(':neo4j-kernel-adapter-5.25').projectDir = file('compatibility/5.25/neo4j-kernel-adapter')

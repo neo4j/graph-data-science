@@ -19,7 +19,7 @@ dependencies {
 
     implementation project(':config-api')
     implementation project(':neo4j-api')
-    implementation project(':neo4j-kernel-adapter')
+    implementation project(':neo4j-kernel-adapter-api')
     implementation project(':licensing')
 
     testImplementation project(':edition-api')
