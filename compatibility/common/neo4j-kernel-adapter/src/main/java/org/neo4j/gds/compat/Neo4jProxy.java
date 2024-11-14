@@ -21,11 +21,6 @@ package org.neo4j.gds.compat;
 
 public final class Neo4jProxy {
 
-    private static final Neo4jProxyApi IMPL = ProxyUtil.findProxy(
-        Neo4jProxyFactory.class,
-        ProxyUtil.MayLogToStdout.YES
-    );
-
     private Neo4jProxy() {
         throw new UnsupportedOperationException("No instances");
     }
