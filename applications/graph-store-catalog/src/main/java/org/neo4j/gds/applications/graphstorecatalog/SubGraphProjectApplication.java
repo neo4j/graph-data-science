@@ -42,7 +42,7 @@ public class SubGraphProjectApplication {
     private final Log log;
     private final GraphStoreCatalogService graphStoreCatalogService;
 
-    SubGraphProjectApplication(
+    public SubGraphProjectApplication(
         Log log,
         GraphStoreCatalogService graphStoreCatalogService
     ) {
