@@ -22,8 +22,6 @@ package org.neo4j.gds;
 import org.apache.commons.text.WordUtils;
 import org.neo4j.configuration.Config;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.compat.Neo4jProxyFactory;
-import org.neo4j.gds.compat.ProxyUtil;
 import org.neo4j.gds.core.utils.mem.GcListenerExtension;
 import org.neo4j.gds.settings.Neo4jSettings;
 import org.neo4j.gds.utils.GdsFeatureToggles;
@@ -91,7 +89,6 @@ public class SysInfoProc {
         editionInfo(values);
         values.add(value("neo4jVersion", Version.getNeo4jVersion()));
         values.add(value("minimumRequiredJavaVersion", buildInfo.minimumRequiredJavaVersion()));
-        compatLayers(values);
         features(values);
         buildInfo(buildInfo, values);
         cpuInfo(runtime, values);
@@ -137,14 +134,6 @@ public class SysInfoProc {
             builder.add(value("gdsLicenseError", errorMessage));
             return null;
         }
-    }
-
-    private void compatLayers(Stream.Builder<DebugValue> values) {
-        var proxies = ProxyUtil.findProxyInfo(Neo4jProxyFactory.class);
-        proxies.availability().forEach((name, availability) -> {
-            var key = (availability) ? "availableCompatibility" : "unavailableCompatibility";
-            values.add(value(key, name));
-        });
     }
 
     private static void features(Stream.Builder<DebugValue> builder) {
@@ -286,7 +275,6 @@ public class SysInfoProc {
 
     private static void configInfo(Config config, Consumer<DebugValue> builder) {
         builder.accept(configVal(config, Neo4jSettings.procedureUnrestricted(), s -> String.join(",", s)));
-        builder.accept(configVal(config, Neo4jSettings.transactionStateAllocation(), Enum::name));
 
         // the following keys are different on different Neo4j versions, we add those that are available
 

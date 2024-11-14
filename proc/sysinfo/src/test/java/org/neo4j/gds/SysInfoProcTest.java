@@ -20,11 +20,8 @@
 package org.neo4j.gds;
 
 import org.assertj.core.api.Condition;
-import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.configuration.GraphDatabaseSettings;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.settings.Neo4jSettings;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.kernel.internal.Version;
@@ -33,12 +30,8 @@ import org.neo4j.test.extension.ExtensionCallback;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import java.util.function.Consumer;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -47,23 +40,6 @@ import static org.assertj.core.condition.AnyOf.anyOf;
 import static org.neo4j.gds.GdsEditionTestCondition.GDS_EDITION;
 
 class SysInfoProcTest extends BaseProcTest {
-
-    private static final Collection<String> ALL_COMPATIBILITIES = List.of(
-        "Neo4j 5.15",
-        "Neo4j 5.16",
-        "Neo4j 5.17",
-        "Neo4j 5.18",
-        "Neo4j 5.19",
-        "Neo4j 5.20",
-        "Neo4j 5.21",
-        "Neo4j 5.22",
-        "Neo4j 5.23",
-        "Neo4j 5.24",
-        "Neo4j 5.25",
-        "Neo4j 5.26",
-        "Neo4j RC",
-        "Neo4j DEV"
-    );
 
     @BeforeEach
     void setup() throws Exception {
@@ -77,12 +53,7 @@ class SysInfoProcTest extends BaseProcTest {
         builder
             // add another unrestricted to test string concatenation in debug output
             .setConfig(Neo4jSettings.procedureUnrestricted(), List.of("gds.*", "foo.bar"))
-            .setConfig(Neo4jSettings.pageCacheMemory(), Neo4jSettings.pageCacheMemoryValue("42M"))
-            .setConfig(
-                Neo4jSettings.transactionStateAllocation(),
-                GraphDatabaseSettings.TransactionStateMemoryAllocation.ON_HEAP
-            )
-            .setConfig(Neo4jSettings.transactionStateMaxOffHeapMemory(), 1337L);
+            .setConfig(Neo4jSettings.pageCacheMemory(), Neo4jSettings.pageCacheMemoryValue("42M"));
     }
 
     @Test
@@ -106,29 +77,6 @@ class SysInfoProcTest extends BaseProcTest {
         var isTrue = new Condition<>(Boolean.TRUE::equals, "true");
         var isFalse = new Condition<>(Boolean.FALSE::equals, "false");
         var isInteger = new Condition<>(v -> (v instanceof Long) || (v instanceof Integer), "isInteger");
-
-        var neo4jVersion = GraphDatabaseApiProxy.neo4jVersion();
-
-        var expectedCompatibility = Set.of("Neo4j %s".formatted(neo4jVersion));
-
-        var allCompatibilities = new HashSet<>(ALL_COMPATIBILITIES);
-        allCompatibilities.removeAll(expectedCompatibility);
-
-        Consumer<Object> availableCompat = (items) -> {
-            var actualItems = (items instanceof String) ? List.of(items) : items;
-            assertThat(actualItems)
-                .asInstanceOf(InstanceOfAssertFactories.list(String.class))
-                .isSubsetOf(expectedCompatibility)
-                .doesNotContainAnyElementsOf(allCompatibilities);
-        };
-
-        Consumer<Object> unavailableCompat = (items) -> {
-            var actualItems = (items instanceof String) ? List.of(items) : items;
-            assertThat(actualItems)
-                .asInstanceOf(InstanceOfAssertFactories.list(String.class))
-                .isSubsetOf(allCompatibilities)
-                .doesNotContainAnyElementsOf(expectedCompatibility);
-        };
 
         assertThat(result)
             .hasSizeGreaterThanOrEqualTo(42)
@@ -172,8 +120,6 @@ class SysInfoProcTest extends BaseProcTest {
             .hasEntrySatisfying("containerized", anyOf(isTrue, isFalse))
             .containsEntry("dbms.security.procedures.unrestricted", "gds.*,foo.bar")
             .containsEntry(Neo4jSettings.pageCacheMemory().name(), Neo4jSettings.pageCacheMemoryValue("42M"))
-            .containsEntry(Neo4jSettings.transactionStateAllocation().name(), "ON_HEAP")
-            .containsEntry(Neo4jSettings.transactionStateMaxOffHeapMemory().name(), 1337L)
             .containsEntry("featureBitIdMap", GdsFeatureToggles.USE_BIT_ID_MAP.isEnabled())
             .containsEntry(
                 "featureUncompressedAdjacencyList",
