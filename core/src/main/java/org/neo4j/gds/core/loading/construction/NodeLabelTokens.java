@@ -22,7 +22,6 @@ package org.neo4j.gds.core.loading.construction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.graphdb.Label;
 
 import java.util.Arrays;
 import java.util.List;
@@ -59,10 +58,6 @@ public final class NodeLabelTokens {
 
         if (nodeLabels instanceof String[]) {
             return new Array<>((String[]) nodeLabels, NodeLabelTokens::labelOf);
-        }
-
-        if (nodeLabels instanceof Label[]) {
-            return new Array<>((Label[]) nodeLabels, NodeLabelTokens::labelOf);
         }
 
         if (nodeLabels instanceof List) {
@@ -120,10 +115,6 @@ public final class NodeLabelTokens {
             //noinspection unchecked
             return new JavaList<>((List<String>) nodeLabels, NodeLabelTokens::labelOf);
         }
-        if (label instanceof Label) {
-            //noinspection unchecked
-            return new JavaList<>((List<Label>) nodeLabels, NodeLabelTokens::labelOf);
-        }
 
         return invalid();
     }
@@ -137,19 +128,11 @@ public final class NodeLabelTokens {
             return new Singleton<>((String) nodeLabel, NodeLabelTokens::labelOf);
         }
 
-        if (nodeLabel instanceof Label) {
-            return new Singleton<>((Label) nodeLabel, NodeLabelTokens::labelOf);
-        }
-
         return invalid();
     }
 
     public static NodeLabel labelOf(String label) {
         return new NodeLabel(label);
-    }
-
-    private static NodeLabel labelOf(Label label) {
-        return new NodeLabel(label.name());
     }
 
     private enum Missing implements NodeLabelToken {
