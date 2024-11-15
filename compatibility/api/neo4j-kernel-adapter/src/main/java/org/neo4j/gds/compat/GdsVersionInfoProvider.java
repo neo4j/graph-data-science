@@ -32,6 +32,8 @@ public final class GdsVersionInfoProvider {
 
     private GdsVersionInfoProvider() {}
 
+    public static final GdsVersionInfo GDS_VERSION_INFO = loadGdsVersion();
+
     @GenerateBuilder
     public record GdsVersionInfo(String rawGdsVersion, AtomicReference<Optional<ErrorInfo>> error) {
         public String gdsVersion() {
@@ -42,10 +44,10 @@ public final class GdsVersionInfoProvider {
         }
     }
 
-    public static final GdsVersionInfo GDS_VERSION_INFO = loadGdsVersion();
-
     private static GdsVersionInfo loadGdsVersion() {
-        var builder = GdsVersionInfoBuilder.builder();
+        var builder = GdsVersionInfoBuilder.builder()
+            .rawGdsVersion("unknown")
+            .error(new AtomicReference<>(Optional.empty()));
         try {
             // The class that we use to get the GDS version lives in proc-sysinfo, which is part of the released GDS jar,
             // but we don't want to depend on that here. One reason is that this class gets generated and re-generated
@@ -74,34 +76,31 @@ public final class GdsVersionInfoProvider {
             // var gdsVersion = buildInfoProperties.gdsVersion()
             var gdsVersion = gdsVersionHandle.invoke(buildInfoProperties);
 
-            return builder
-                .rawGdsVersion(String.valueOf(gdsVersion))
-                .build();
+            builder.rawGdsVersion(String.valueOf(gdsVersion));
         } catch (ClassNotFoundException e) {
-            builder.error(new AtomicReference<>(Optional.of(new ErrorInfo(
+            builder.error().set(Optional.of(new ErrorInfo(
                 "Could not determine GDS version, BuildInfoProperties is missing. " +
                     "This is likely due to not running GDS as a plugin, " +
                     "for example when running tests or using GDS as a Java module dependency.",
                 LogLevel.INFO,
                 e
-            ))));
+            )));
         } catch (NoSuchMethodException | IllegalAccessException e) {
-            builder.error(new AtomicReference<>(Optional.of(new ErrorInfo(
+            builder.error().set(Optional.of(new ErrorInfo(
                 "Could not determine GDS version, the according methods on BuildInfoProperties could not be found.",
                 LogLevel.WARN,
                 e
-            ))));
+            )));
         } catch (Throwable e) {
-            builder.error(new AtomicReference<>(Optional.of(new ErrorInfo(
+            builder.error().set(Optional.of(new ErrorInfo(
                 "Could not determine GDS version, the according methods on BuildInfoProperties failed.",
                 LogLevel.WARN,
                 e
-            ))));
+            )));
         }
 
-        return builder.rawGdsVersion("Unknown").build();
+        return builder.build();
     }
-
 
     record ErrorInfo(
         @NotNull String message,
