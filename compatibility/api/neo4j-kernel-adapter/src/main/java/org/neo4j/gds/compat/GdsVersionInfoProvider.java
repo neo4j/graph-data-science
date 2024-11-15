@@ -58,12 +58,7 @@ public final class GdsVersionInfoProvider {
             // Let's do a bit of class loading and reflection to get the version.
             var lookup = MethodHandles.lookup();
 
-            Class<?> buildInfoPropertiesClass;
-            try {
-                buildInfoPropertiesClass = Class.forName("org.neo4j.gds.BuildInfoProperties");
-            } catch (ClassNotFoundException e) {
-                buildInfoPropertiesClass = Class.forName("com.neo4j.gds.estimation.cli.BuildInfoProperties");
-            }
+            var buildInfoPropertiesClass = Class.forName("org.neo4j.gds.BuildInfoProperties");
 
             // equivalent to: BuildInfoProperties.get()
             var buildInfoPropertiesHandle = lookup.findStatic(
