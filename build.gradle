@@ -20,12 +20,6 @@ ext {
     isOpenGds = true
 
     checkstyleReportsDir = "${layout.buildDirectory.get()}/reports/checkstyle/"
-
-    compatibilityModules = [
-            'kernel-adapter': [
-                project(':neo4j-kernel-adapter-5.25')
-            ]
-    ]
 }
 
 apply from: 'gradle/version.gradle'
