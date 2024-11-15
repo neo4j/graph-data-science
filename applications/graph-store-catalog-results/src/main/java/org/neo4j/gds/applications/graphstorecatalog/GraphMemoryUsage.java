@@ -63,6 +63,28 @@ public final class GraphMemoryUsage {
     private static final Pattern DOT = Pattern.compile("\\.");
     private static final Object DUMMY = new Object();
 
+    private static final class PackedUnsupported extends RuntimeException {
+        private static final Class<?> PAL_CLASS;
+
+        static {
+            try {
+                PAL_CLASS = Class.forName("org.neo4j.gds.core.compression.packed.PackedAdjacencyList");
+            } catch (ClassNotFoundException e) {
+                throw new LinkageError("Location of the PackedAdjacencyList has changed, adapt this code.");
+            }
+        }
+
+        private static void check(Class<?> cls) {
+            if (PAL_CLASS.isAssignableFrom(cls)) {
+                throw new PackedUnsupported();
+            }
+        }
+
+        private PackedUnsupported() {
+            super("PackedAdjacencyList does not support sizeOf.", null, false, false);
+        }
+    }
+
     private static Map<String, Object> internalSizeOfGraph(GraphStore graphStore, MutableLong totalSize) {
         if (MemoryUsage.sizeOf(DUMMY) == -1L) {
             return Map.of();
@@ -77,6 +99,8 @@ public final class GraphMemoryUsage {
         var relationshipsTotal = new MutableLong();
 
         var graphWalker = new GraphWalker(gpr -> {
+            PackedUnsupported.check(gpr.klass());
+
             var size = gpr.size();
             var path = gpr.path();
 
@@ -113,7 +137,10 @@ public final class GraphMemoryUsage {
             totalSize.add(size);
         });
 
-        graphWalker.walk(graphStore);
+        try {
+            graphWalker.walk(graphStore);
+        } catch (PackedUnsupported ignore) {
+        }
 
         var mappingTotal = mappingSparseLongArray.longValue() + mappingForward.longValue() + mappingBackward.longValue();
         var adjacencyTotal = adjacencyDegrees.longValue() + adjacencyOffsets.longValue() + adjacencyLists.longValue();
@@ -135,9 +162,8 @@ public final class GraphMemoryUsage {
             "total", relationshipsTotal.longValue()
         ));
 
-        if (graphStore instanceof CSRGraphStore) {
+        if (graphStore instanceof CSRGraphStore csrGraphStore) {
             var adjacencyListDetails = new HashMap<String, Object>();
-            var csrGraphStore = ((CSRGraphStore) graphStore);
             var unionGraph = csrGraphStore.getUnion();
             unionGraph.relationshipTopologies().forEach((relationshipType, adjacency) -> {
                 var mi = adjacency.adjacencyList().memoryInfo();
