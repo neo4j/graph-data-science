@@ -21,6 +21,7 @@ package org.neo4j.gds.compat;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.annotation.GenerateBuilder;
+import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.logging.Log;
 
 import java.lang.invoke.MethodHandles;
@@ -36,6 +37,7 @@ public final class GdsVersionInfoProvider {
 
     @GenerateBuilder
     public record GdsVersionInfo(String rawGdsVersion, AtomicReference<Optional<ErrorInfo>> error) {
+        @SuppressForbidden(reason = "We can't do any better with this")
         public String gdsVersion() {
             this.error
                 .getAndSet(Optional.empty())
