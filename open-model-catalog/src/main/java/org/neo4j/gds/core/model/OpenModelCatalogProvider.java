@@ -22,14 +22,21 @@ package org.neo4j.gds.core.model;
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.gds.LicenseState;
 
+import java.util.Optional;
+
 @ServiceProvider
 public class OpenModelCatalogProvider implements ModelCatalogProvider {
 
     private static final ModelCatalog INSTANCE = new OpenModelCatalog();
 
     @Override
-    public ModelCatalog get(LicenseState licenseState) {
+    public ModelCatalog setAndGet(LicenseState licenseState) {
         return INSTANCE;
+    }
+
+    @Override
+    public Optional<ModelCatalog> get() {
+        return Optional.of(INSTANCE);
     }
 
     @Override

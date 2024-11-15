@@ -59,7 +59,7 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
         ExporterBuildersProviderService exporterBuildersProviderService = (__, ___) -> new NativeExportBuildersProvider(); // we always just offer native writes in OpenGDS
         var exportLocation = new DefaultExportLocation(log, neo4jConfiguration);
         var featureTogglesRepository = new FeatureTogglesRepository();
-        var modelCatalog = new OpenModelCatalogProvider().get(null);
+        var modelCatalog = new OpenModelCatalogProvider().get().orElseThrow();
 
         var graphDataScienceExtensionBuilderAndAssociatedProducts = OpenGraphDataScienceExtensionBuilder.create(
             log,

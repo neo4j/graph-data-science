@@ -128,7 +128,7 @@ class EditionLifecycleAdapter extends LifecycleAdapter {
             ModelCatalogProvider::priority
         );
 
-        var modelCatalog = modelCatalogProvider.get(licenseState);
+        var modelCatalog = modelCatalogProvider.setAndGet(licenseState);
 
         globalProceduresRegistry.registerComponent(
             ModelCatalog.class,

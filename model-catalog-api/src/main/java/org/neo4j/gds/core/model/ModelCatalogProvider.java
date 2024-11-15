@@ -22,10 +22,14 @@ package org.neo4j.gds.core.model;
 import org.neo4j.annotations.service.Service;
 import org.neo4j.gds.LicenseState;
 
+import java.util.Optional;
+
 @Service
 public interface ModelCatalogProvider {
 
-    ModelCatalog get(LicenseState licenseState);
+    ModelCatalog setAndGet(LicenseState licenseState);
+
+    Optional<ModelCatalog> get();
 
     int priority();
 }
