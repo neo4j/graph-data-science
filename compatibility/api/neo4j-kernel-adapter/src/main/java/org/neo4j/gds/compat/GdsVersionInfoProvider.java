@@ -22,10 +22,11 @@ package org.neo4j.gds.compat;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.annotation.GenerateBuilder;
 import org.neo4j.gds.annotation.SuppressForbidden;
-import org.neo4j.logging.Log;
 
+import java.io.PrintStream;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -41,7 +42,7 @@ public final class GdsVersionInfoProvider {
         public String gdsVersion() {
             this.error
                 .getAndSet(Optional.empty())
-                .ifPresent(err -> err.log(OutputStreamLog.builder(System.out).build().log()));
+                .ifPresent(err -> err.log(System.out));
             return this.rawGdsVersion;
         }
     }
@@ -109,20 +110,17 @@ public final class GdsVersionInfoProvider {
         @NotNull LogLevel logLevel,
         @NotNull Throwable reason
     ) {
-        void log(Log log) {
+        void log(PrintStream out) {
             switch (logLevel) {
-                case DEBUG -> log.debug(message, reason);
-                case INFO -> log.info(message, reason);
-                case WARN -> log.warn(message, reason);
-                case ERROR -> log.error(message, reason);
-            }
+                case INFO -> out.printf(Locale.ENGLISH, "[info] %s: %s%n", this.message, this.reason.getMessage());
+                case WARN -> out.printf(Locale.ENGLISH, "[warn] %s: %s%n", this.message, this.reason.getMessage());
+            };
+            this.reason.printStackTrace(out);
         }
     }
 
     enum LogLevel {
-        DEBUG,
         INFO,
         WARN,
-        ERROR
     }
 }
