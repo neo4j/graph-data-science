@@ -19,16 +19,10 @@
  */
 package org.neo4j.gds.compat;
 
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.annotation.GenerateBuilder;
-import org.neo4j.gds.annotation.SuppressForbidden;
 
-import java.io.PrintStream;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 
 public final class GdsVersionInfoProvider {
 
@@ -37,20 +31,11 @@ public final class GdsVersionInfoProvider {
     public static final GdsVersionInfo GDS_VERSION_INFO = loadGdsVersion();
 
     @GenerateBuilder
-    public record GdsVersionInfo(String rawGdsVersion, AtomicReference<Optional<ErrorInfo>> error) {
-        @SuppressForbidden(reason = "We can't do any better with this")
-        public String gdsVersion() {
-            this.error
-                .getAndSet(Optional.empty())
-                .ifPresent(err -> err.log(System.out));
-            return this.rawGdsVersion;
-        }
+    public record GdsVersionInfo(String gdsVersion) {
     }
 
     private static GdsVersionInfo loadGdsVersion() {
-        var builder = GdsVersionInfoBuilder.builder()
-            .rawGdsVersion("unknown")
-            .error(new AtomicReference<>(Optional.empty()));
+        var builder = GdsVersionInfoBuilder.builder().gdsVersion("unknown");
         try {
             // The class that we use to get the GDS version lives in proc-sysinfo, which is part of the released GDS jar,
             // but we don't want to depend on that here. One reason is that this class gets generated and re-generated
@@ -79,48 +64,13 @@ public final class GdsVersionInfoProvider {
             // var gdsVersion = buildInfoProperties.gdsVersion()
             var gdsVersion = gdsVersionHandle.invoke(buildInfoProperties);
 
-            builder.rawGdsVersion(String.valueOf(gdsVersion));
-        } catch (ClassNotFoundException e) {
-            builder.error().set(Optional.of(new ErrorInfo(
-                "Could not determine GDS version, BuildInfoProperties is missing. " +
-                    "This is likely due to not running GDS as a plugin, " +
-                    "for example when running tests or using GDS as a Java module dependency.",
-                LogLevel.INFO,
-                e
-            )));
-        } catch (NoSuchMethodException | IllegalAccessException e) {
-            builder.error().set(Optional.of(new ErrorInfo(
-                "Could not determine GDS version, the according methods on BuildInfoProperties could not be found.",
-                LogLevel.WARN,
-                e
-            )));
+            builder.gdsVersion(String.valueOf(gdsVersion));
         } catch (Throwable e) {
-            builder.error().set(Optional.of(new ErrorInfo(
-                "Could not determine GDS version, the according methods on BuildInfoProperties failed.",
-                LogLevel.WARN,
-                e
-            )));
+            // Could not determine GDS version, BuildInfoProperties is missing.
+            // This is likely due to not running GDS as a plugin, for example when running tests
+            // or using GDS as a Java module dependency.",
         }
 
         return builder.build();
-    }
-
-    record ErrorInfo(
-        @NotNull String message,
-        @NotNull LogLevel logLevel,
-        @NotNull Throwable reason
-    ) {
-        void log(PrintStream out) {
-            switch (logLevel) {
-                case INFO -> out.printf(Locale.ENGLISH, "[info] %s: %s%n", this.message, this.reason.getMessage());
-                case WARN -> out.printf(Locale.ENGLISH, "[warn] %s: %s%n", this.message, this.reason.getMessage());
-            };
-            this.reason.printStackTrace(out);
-        }
-    }
-
-    enum LogLevel {
-        INFO,
-        WARN,
     }
 }
