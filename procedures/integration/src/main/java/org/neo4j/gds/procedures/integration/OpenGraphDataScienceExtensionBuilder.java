@@ -26,6 +26,7 @@ import org.neo4j.gds.applications.graphstorecatalog.GraphCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelCatalogApplications;
 import org.neo4j.gds.applications.modelcatalog.ModelRepository;
 import org.neo4j.gds.applications.operations.FeatureTogglesRepository;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.GcListenerExtension;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
@@ -139,7 +140,9 @@ public final class OpenGraphDataScienceExtensionBuilder {
         var availableMemory = Runtime.getRuntime().maxMemory();
         var freeMemoryAfterLastGc = new AtomicLong(availableMemory);
         // We make it available in a neat service
-        var memoryTracker = new MemoryTracker(availableMemory);
+        var memoryTracker = new MemoryTracker(availableMemory, log);
+        GraphStoreCatalog.registerGraphStoreAddedListener(memoryTracker);
+        GraphStoreCatalog.registerGraphStoreRemovedListener(memoryTracker);
 
         // in the short term, until we eradicate old usages, we also install the shared state in its old place
         GcListenerExtension.setMemoryGauge(freeMemoryAfterLastGc);

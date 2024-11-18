@@ -39,6 +39,7 @@ import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
@@ -119,7 +120,8 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
         WriteContext writeContext,
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
         Optional<Function<GraphCatalogApplications, GraphCatalogApplications>> graphCatalogApplicationsDecorator,
-        Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator
+        Optional<Function<ModelCatalogApplications, ModelCatalogApplications>> modelCatalogApplicationsDecorator,
+        MemoryTracker memoryTracker
     ) {
         var closeableResourceRegistry = new TransactionCloseableResourceRegistry(kernelTransaction);
 
@@ -189,7 +191,8 @@ public class LocalGraphDataScienceProcedures implements GraphDataScienceProcedur
             procedureTransaction,
             requestScopedDependencies,
             writeContext,
-            procedureReturnColumns
+            procedureReturnColumns,
+            memoryTracker
         );
 
         var modelCatalogProcedureFacade = new LocalModelCatalogProcedureFacade(applicationsFacade);

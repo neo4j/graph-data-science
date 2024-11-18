@@ -19,17 +19,16 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
-import org.neo4j.common.DependencyResolver;
-import org.neo4j.configuration.Config;
 import org.neo4j.gds.config.BaseConfig;
+import org.neo4j.gds.config.JobIdConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.mem.GcListenerExtension;
-import org.neo4j.gds.mem.MemoryRange;
-import org.neo4j.gds.mem.MemoryTreeWithDimensions;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
-import org.neo4j.gds.mem.Estimate;
-import org.neo4j.gds.settings.GdsSettings;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.mem.Estimate;
+import org.neo4j.gds.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryTracker;
+import org.neo4j.gds.mem.MemoryTreeWithDimensions;
 
 import java.util.StringJoiner;
 import java.util.function.Function;
@@ -38,62 +37,59 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class MemoryUsageValidator {
 
-    @FunctionalInterface
-    public interface FreeMemoryInspector {
-        long freeMemory();
-    }
-
     private final Log log;
-    private final DependencyResolver dependencyResolver;
+    private final boolean useMaxMemoryEstimation;
+    private final MemoryTracker memoryTracker;
 
-    public MemoryUsageValidator(Log log, DependencyResolver dependencyResolver) {
+    public MemoryUsageValidator(MemoryTracker memoryTracker, boolean useMaxMemoryEstimation, Log log) {
         this.log = log;
-        this.dependencyResolver = dependencyResolver;
+        this.useMaxMemoryEstimation = useMaxMemoryEstimation;
+        this.memoryTracker = memoryTracker;
     }
 
-    public <C extends BaseConfig> MemoryRange tryValidateMemoryUsage(C config, Function<C, MemoryTreeWithDimensions> runEstimation) {
-        return tryValidateMemoryUsage(config, runEstimation, GcListenerExtension::freeMemory);
-    }
-
-    public <C extends BaseConfig> MemoryRange tryValidateMemoryUsage(
+    public <C extends BaseConfig & JobIdConfig> MemoryRange tryValidateMemoryUsage(
         C config,
-        Function<C, MemoryTreeWithDimensions> runEstimation,
-        FreeMemoryInspector inspector
+        Function<C, MemoryTreeWithDimensions> runEstimation
     ) {
-        MemoryTreeWithDimensions memoryTreeWithDimensions = null;
-
         try {
-            memoryTreeWithDimensions = runEstimation.apply(config);
-        } catch (MemoryEstimationNotImplementedException ignored) {
-        }
+            var memoryTreeWithDimensions = runEstimation.apply(config);
 
-        if (memoryTreeWithDimensions == null) {
+            var estimatedMemoryRange = memoryTreeWithDimensions.memoryTree.memoryUsage();
+            if (config.sudo()) {
+                log.debug("Sudo mode: Won't check for available memory.");
+                memoryTracker.track(
+                    config.jobId(),
+                    useMaxMemoryEstimation ? estimatedMemoryRange.max : estimatedMemoryRange.min
+                );
+            } else {
+                validateMemoryUsage(
+                    estimatedMemoryRange,
+                    memoryTracker.availableMemory(),
+                    useMaxMemoryEstimation,
+                    config.jobId(),
+                    log
+                );
+            }
+
+            return estimatedMemoryRange;
+        } catch (MemoryEstimationNotImplementedException ignored) {
             return MemoryRange.empty();
         }
-
-        if (config.sudo()) {
-            log.debug("Sudo mode: Won't check for available memory.");
-        } else {
-            var neo4jConfig = dependencyResolver.resolveDependency(Config.class);
-            var useMaxMemoryEstimation = neo4jConfig.get(GdsSettings.validateUsingMaxMemoryEstimation());
-            validateMemoryUsage(memoryTreeWithDimensions, inspector.freeMemory(), useMaxMemoryEstimation, log);
-        }
-
-        return memoryTreeWithDimensions.memoryTree.memoryUsage();
     }
 
-    public static void validateMemoryUsage(
-        MemoryTreeWithDimensions memoryTreeWithDimensions,
+    void validateMemoryUsage(
+        MemoryRange estimatedMemoryRange,
         long availableBytes,
         boolean useMaxMemoryEstimation,
+        JobId jobId,
         Log log
     ) {
         if (useMaxMemoryEstimation) {
             validateMemoryUsage(
                 availableBytes,
-                memoryTreeWithDimensions.memoryTree.memoryUsage().max,
+                estimatedMemoryRange.max,
                 "maximum",
-                log,
+                log, jobId,
                 "Consider resizing your Aura instance via console.neo4j.io.",
                 "Alternatively, use 'sudo: true' to override the memory validation.",
                 "Overriding the validation is at your own risk.",
@@ -102,18 +98,18 @@ public class MemoryUsageValidator {
         } else {
             validateMemoryUsage(
                 availableBytes,
-                memoryTreeWithDimensions.memoryTree.memoryUsage().min,
+                estimatedMemoryRange.min,
                 "minimum",
-                log
+                log, jobId
             );
         }
     }
 
-    private static void validateMemoryUsage(
+    private void validateMemoryUsage(
         long availableBytes,
         long requiredBytes,
         String memoryString,
-        Log log,
+        Log log, JobId jobId,
         String... messages
     ) {
         if (requiredBytes > availableBytes) {
@@ -141,5 +137,6 @@ public class MemoryUsageValidator {
             log.info(message);
             throw new IllegalStateException(message);
         }
+        memoryTracker.track(jobId, requiredBytes);
     }
 }

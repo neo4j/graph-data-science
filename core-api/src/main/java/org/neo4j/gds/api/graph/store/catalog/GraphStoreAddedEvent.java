@@ -17,22 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.mem;
+package org.neo4j.gds.api.graph.store.catalog;
 
-public class MemoryReservationExceededException extends RuntimeException {
-
-    private final long bytesRequired;
-    private final long bytesAvailable;
-
-    public MemoryReservationExceededException(long bytesRequired, long bytesAvailable) {
-        this.bytesRequired = bytesRequired;
-        this.bytesAvailable = bytesAvailable;
-    }
-
-    public long bytesRequired() {
-        return bytesRequired;
-    }
-    public long bytesAvailable() {
-        return bytesAvailable;
-    }
+public record GraphStoreAddedEvent(String user, String database, String graphName, long memoryInBytes) {
 }

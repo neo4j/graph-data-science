@@ -25,6 +25,7 @@ import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies
 import org.neo4j.gds.applications.algorithms.machinery.WriteContext;
 import org.neo4j.gds.applications.graphstorecatalog.GraphProjectMemoryUsageService;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.procedures.catalog.DatabaseModeRestriction;
 import org.neo4j.gds.procedures.catalog.GraphCatalogProcedureFacade;
 import org.neo4j.gds.procedures.catalog.LocalGraphCatalogProcedureFacade;
@@ -68,10 +69,11 @@ public class GraphCatalogProcedureFacadeFactory {
         Transaction procedureTransaction,
         RequestScopedDependencies requestScopedDependencies,
         WriteContext writeContext,
-        ProcedureReturnColumns procedureReturnColumns
+        ProcedureReturnColumns procedureReturnColumns,
+        MemoryTracker memoryTracker
     ) {
         // Derived data and services
-        var graphProjectMemoryUsageService = new GraphProjectMemoryUsageService(log, graphDatabaseService);
+        var graphProjectMemoryUsageService = new GraphProjectMemoryUsageService(log, graphDatabaseService, memoryTracker);
         var streamCloser = new Consumer<AutoCloseable>() {
             @Override
             public void accept(AutoCloseable autoCloseable) {

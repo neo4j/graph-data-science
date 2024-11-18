@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.executor;
 
+import org.neo4j.configuration.Config;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreFromCatalogLoader;
 import org.neo4j.gds.applications.graphstorecatalog.MemoryUsageValidator;
@@ -27,9 +28,11 @@ import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.executor.validation.Validator;
+import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.procedures.algorithms.configuration.AlgoConfigParser;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.algorithms.configuration.ProcConfigParser;
+import org.neo4j.gds.settings.GdsSettings;
 
 public class ProcedureExecutorSpec<
     ALGO extends Algorithm<ALGO_RESULT>,
@@ -54,6 +57,9 @@ public class ProcedureExecutorSpec<
 
     @Override
     public GraphCreationFactory<ALGO, ALGO_RESULT, CONFIG> graphCreationFactory(ExecutionContext executionContext) {
+        var neo4jConfig = executionContext.dependencyResolver().resolveDependency(Config.class);
+        var useMaxMemoryEstimation = neo4jConfig.get(GdsSettings.validateUsingMaxMemoryEstimation());
+
         return new ProcedureGraphCreationFactory<>(
             (config, graphName) -> new GraphStoreFromCatalogLoader(
                 graphName,
@@ -62,7 +68,7 @@ public class ProcedureExecutorSpec<
                 executionContext.databaseId(),
                 executionContext.isGdsAdmin()
             ),
-            new MemoryUsageValidator(executionContext.log(), executionContext.dependencyResolver())
+            new MemoryUsageValidator(new MemoryTracker(Long.MAX_VALUE, executionContext.log()), useMaxMemoryEstimation, executionContext.log())
         );
     }
 }

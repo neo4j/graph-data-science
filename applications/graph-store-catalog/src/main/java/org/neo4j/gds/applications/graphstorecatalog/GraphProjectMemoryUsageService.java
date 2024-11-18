@@ -19,26 +19,33 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
+import org.neo4j.configuration.Config;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.mem.MemoryTracker;
+import org.neo4j.gds.mem.MemoryTreeWithDimensions;
+import org.neo4j.gds.settings.GdsSettings;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 public class GraphProjectMemoryUsageService {
     private final Log log;
     private final GraphDatabaseService graphDatabaseService;
+    private final MemoryTracker memoryTracker;
 
-    public GraphProjectMemoryUsageService(Log log, GraphDatabaseService graphDatabaseService) {
+    public GraphProjectMemoryUsageService(Log log, GraphDatabaseService graphDatabaseService,
+        MemoryTracker memoryTracker
+    ) {
         this.log = log;
         this.graphDatabaseService = graphDatabaseService;
+        this.memoryTracker = memoryTracker;
     }
 
     public void validateMemoryUsage(
@@ -94,10 +101,11 @@ public class GraphProjectMemoryUsageService {
     }
 
     private MemoryUsageValidator memoryUsageValidator() {
-        return new MemoryUsageValidator(
-            log,
-            GraphDatabaseApiProxy.dependencyResolver(graphDatabaseService)
-        );
+        var neo4jConfig = GraphDatabaseApiProxy.dependencyResolver(graphDatabaseService)
+            .resolveDependency(Config.class);
+        var useMaxMemoryEstimation = neo4jConfig.get(GdsSettings.validateUsingMaxMemoryEstimation());
+
+        return new MemoryUsageValidator(memoryTracker, useMaxMemoryEstimation, log);
     }
 
     private GraphLoaderContext graphLoaderContext(

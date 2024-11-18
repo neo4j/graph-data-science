@@ -21,7 +21,7 @@ package org.neo4j.gds.core.utils.progress;
 
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,7 +31,7 @@ public class PerDatabaseTaskStore extends ObservableTaskStore {
     private final Map<String, Map<JobId, UserTask>> registeredTasks;
 
     public PerDatabaseTaskStore() {
-        super(new ArrayList<>());
+        super(new HashSet<>());
         this.registeredTasks = new ConcurrentHashMap<>();
     }
 

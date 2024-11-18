@@ -20,19 +20,31 @@
 package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.mem.MemoryTree;
 import org.neo4j.gds.mem.MemoryTreeWithDimensions;
 
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -43,11 +55,13 @@ class MemoryUsageValidatorTest extends BaseTest {
         var dimensions = GraphDimensions.builder().nodeCount(1000).build();
         var memoryTree = MemoryTree.empty();
 
-        assertThatNoException().isThrownBy(() -> new MemoryUsageValidator(Log.noOpLog(), GraphDatabaseApiProxy.dependencyResolver(db))
+        assertThatNoException().isThrownBy(() -> new MemoryUsageValidator(new MemoryTracker(10000000, Log.noOpLog()),
+            false,
+            Log.noOpLog()
+        )
             .tryValidateMemoryUsage(
                 TestConfig.empty(),
-                (config) -> new MemoryTreeWithDimensions(memoryTree, dimensions),
-                () -> 10000000
+                (config) -> new MemoryTreeWithDimensions(memoryTree, dimensions)
             ));
     }
 
@@ -56,11 +70,13 @@ class MemoryUsageValidatorTest extends BaseTest {
         var dimensions = GraphDimensions.builder().nodeCount(1000).build();
         var memoryTree = new TestTree("test", MemoryRange.of(42));
 
-        assertThatThrownBy(() -> new MemoryUsageValidator(Log.noOpLog(), GraphDatabaseApiProxy.dependencyResolver(db))
+        assertThatThrownBy(() -> new MemoryUsageValidator(new MemoryTracker(21, Log.noOpLog()),
+            false,
+            Log.noOpLog()
+        )
             .tryValidateMemoryUsage(
                 TestConfig.empty(),
-                (config) -> new MemoryTreeWithDimensions(memoryTree, dimensions),
-                () -> 21
+                (config) -> new MemoryTreeWithDimensions(memoryTree, dimensions)
         ))
             .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("Procedure was blocked since minimum estimated memory (42 Bytes) exceeds current free memory (21 Bytes).");
@@ -71,11 +87,13 @@ class MemoryUsageValidatorTest extends BaseTest {
         var dimensions = GraphDimensions.builder().nodeCount(1000).build();
         var memoryTree = new TestTree("test", MemoryRange.of(42));
 
-        assertThatNoException().isThrownBy(() -> new MemoryUsageValidator(Log.noOpLog(), GraphDatabaseApiProxy.dependencyResolver(db))
+        assertThatNoException().isThrownBy(() -> new MemoryUsageValidator(new MemoryTracker(21, Log.noOpLog()),
+            false,
+            Log.noOpLog()
+        )
             .tryValidateMemoryUsage(
                 TestConfig.of(CypherMapWrapper.empty().withBoolean("sudo", true)),
-                (config) -> new MemoryTreeWithDimensions(memoryTree, dimensions),
-                () -> 21
+                (config) -> new MemoryTreeWithDimensions(memoryTree, dimensions)
             ));
     }
 
@@ -84,18 +102,104 @@ class MemoryUsageValidatorTest extends BaseTest {
         var log = mock(Log.class);
         var dimensions = GraphDimensions.builder().nodeCount(1000).build();
         var memoryTree = new TestTree("test", MemoryRange.of(42));
-        var memoryUsageValidator = new MemoryUsageValidator(log, GraphDatabaseApiProxy.dependencyResolver(db));
-        try {
-            memoryUsageValidator.tryValidateMemoryUsage(
+        var memoryUsageValidator = new MemoryUsageValidator(
+            new MemoryTracker(21, log), false, log
+        );
+
+        assertThatIllegalStateException().isThrownBy(
+            () -> memoryUsageValidator.tryValidateMemoryUsage(
                 TestConfig.of(CypherMapWrapper.empty()),
-                (config -> new MemoryTreeWithDimensions(memoryTree, dimensions)),
-                () -> 21
-            );
-        } catch (IllegalStateException ex) {
-            // do nothing
-        }
+                (config -> new MemoryTreeWithDimensions(memoryTree, dimensions))
+            )
+        );
 
         verify(log).info("Procedure was blocked since minimum estimated memory (42 Bytes) exceeds current free memory (21 Bytes).");
+    }
+
+    private static final GraphDimensions TEST_DIMENSIONS = ImmutableGraphDimensions
+        .builder()
+        .nodeCount(100)
+        .relCountUpperBound(1000)
+        .build();
+
+    static Stream<Arguments> input() {
+        var fixedMemory = MemoryEstimations.builder().fixed("foobar", 1337);
+        var memoryRange = MemoryEstimations
+            .builder()
+            .rangePerGraphDimension("foobar", (dimensions, concurrency) -> MemoryRange.of(42, 1337));
+        return Stream.of(
+            Arguments.of(fixedMemory.build(), false),
+            Arguments.of(fixedMemory.build(), true),
+            Arguments.of(memoryRange.build(), false),
+            Arguments.of(memoryRange.build(), true)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("input")
+    void doesNotThrow(MemoryEstimation estimation, boolean useMaxMemoryUsage) {
+        var memoryTrackerMock = mock(MemoryTracker.class);
+        var memoryUsageValidator = new MemoryUsageValidator(
+            memoryTrackerMock,
+            false,
+            Log.noOpLog()
+        );
+            var memoryTree = estimation.estimate(TEST_DIMENSIONS, new Concurrency(1));
+        var memoryTreeWithDimensions = new MemoryTreeWithDimensions(memoryTree, TEST_DIMENSIONS);
+
+        assertDoesNotThrow(() -> memoryUsageValidator.validateMemoryUsage(
+            memoryTreeWithDimensions.memoryTree.memoryUsage(), 10_000,
+            useMaxMemoryUsage,
+            new JobId("foo"), Log.noOpLog()
+        ));
+    }
+
+    @ParameterizedTest
+    @MethodSource("input")
+    void throwsOnMinUsageExceeded(MemoryEstimation estimation, boolean ignored) {
+        var memoryUsageValidator = new MemoryUsageValidator(
+            null,
+            false,
+            Log.noOpLog()
+        );
+
+        var memoryTree = estimation.estimate(TEST_DIMENSIONS, new Concurrency(1));
+        var memoryTreeWithDimensions = new MemoryTreeWithDimensions(memoryTree, TEST_DIMENSIONS);
+
+        assertThatThrownBy(() -> memoryUsageValidator.validateMemoryUsage(
+            memoryTreeWithDimensions.memoryTree.memoryUsage(), 1,
+            false,
+            new JobId("foo"), Log.noOpLog()
+        ))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("Procedure was blocked since minimum estimated memory");
+    }
+
+    @ParameterizedTest
+    @MethodSource("input")
+    void throwsOnMaxUsageExceeded(MemoryEstimation estimation, boolean ignored) {
+        var memoryUsageValidator = new MemoryUsageValidator(
+            null,
+            false,
+            Log.noOpLog()
+        );
+
+        var memoryTree = estimation.estimate(TEST_DIMENSIONS, new Concurrency(1));
+        var memoryTreeWithDimensions = new MemoryTreeWithDimensions(memoryTree, TEST_DIMENSIONS);
+
+        assertThatThrownBy(() -> memoryUsageValidator.validateMemoryUsage(
+            memoryTreeWithDimensions.memoryTree.memoryUsage(), 1,
+            true,
+            new JobId("foo"), Log.noOpLog()
+        ))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("Procedure was blocked since maximum estimated memory")
+            .hasMessageContaining(
+                "Consider resizing your Aura instance via console.neo4j.io. " +
+                    "Alternatively, use 'sudo: true' to override the memory validation. " +
+                    "Overriding the validation is at your own risk. " +
+                    "The database can run out of memory and data can be lost."
+            );
     }
 
     @Configuration

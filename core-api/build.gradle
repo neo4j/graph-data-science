@@ -27,8 +27,6 @@ dependencies {
     implementation project(':core-utils')
     implementation project(':graph-projection-api')
     implementation project(':graph-schema-api')
-    // `JobIdConfig` 🙈
-    implementation project(':progress-tracking')
     implementation project(':string-formatting')
 
     implementation openGds.hdrhistogram

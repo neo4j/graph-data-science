@@ -36,5 +36,8 @@ dependencies {
         // `JobIdConfig` 🙈
         project(':progress-tracking'),
         project(':string-formatting'),
+
     )
+
+    testImplementation project(':test-utils')
 }

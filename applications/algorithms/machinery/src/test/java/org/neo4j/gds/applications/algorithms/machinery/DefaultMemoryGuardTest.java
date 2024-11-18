@@ -24,6 +24,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.services.GraphDimensionFactory;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.mem.MemoryTracker;
@@ -52,7 +53,7 @@ class DefaultMemoryGuardTest {
             null,
             graphDimensionFactory,
             false,
-            new MemoryTracker(42)
+            new MemoryTracker(42, Log.noOpLog())
         );
 
         var graphStore = mock(GraphStore.class);
@@ -81,7 +82,7 @@ class DefaultMemoryGuardTest {
             null,
             graphDimensionFactory,
             false,
-            new MemoryTracker(42)
+            new MemoryTracker(42, Log.noOpLog())
         );
 
         var graphStore = mock(GraphStore.class);
@@ -116,7 +117,7 @@ class DefaultMemoryGuardTest {
             null,
             graphDimensionFactory,
             true,
-            new MemoryTracker(42)
+            new MemoryTracker(42, Log.noOpLog())
         );
 
         var graphStore = mock(GraphStore.class);
@@ -151,7 +152,7 @@ class DefaultMemoryGuardTest {
             null,
             graphDimensionFactory,
             false,
-            new MemoryTracker(42)
+            new MemoryTracker(42, Log.noOpLog())
         );
 
         var graphStore = mock(GraphStore.class);

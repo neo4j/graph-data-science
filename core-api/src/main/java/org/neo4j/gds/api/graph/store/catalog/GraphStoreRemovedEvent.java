@@ -17,9 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.api.graph.store.catalog;
 
-public interface GraphStoreCatalogListener {
-
-    void onProject(String user, String database, String graphName);
+public record GraphStoreRemovedEvent(String user, String database, String graphName, long memoryInBytes) {
 }

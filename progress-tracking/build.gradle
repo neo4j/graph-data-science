@@ -21,6 +21,9 @@ dependencies {
         }
     }
 
+    // `JobId` and `JobIdConfig`
+    api project(':core-api')
+
     implementation project(':annotations')
     implementation project(':concurrency')
     implementation project(':core-utils')

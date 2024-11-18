@@ -17,10 +17,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.progress;
 
-// TODO: Split this in two listeners
-public interface TaskStoreListener {
-    void onTaskAdded(UserTask userTask);
-    void onTaskRemoved(UserTask userTask);
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.neo4j.gds.config.JobIdConfigImpl;
+
+class JobIdConfigTest {
+
+    @Test
+    void shouldAcceptValidJobId() {
+        var configBuilder = JobIdConfigImpl.builder();
+
+        configBuilder
+            .jobId("df16706f-0fb7-4a85-bf1c-a2c6f3c1cf08")
+            .build();
+
+        configBuilder
+            .jobId("banana-sweatshirt")
+            .build();
+    }
+
+    @Test
+    void shouldRejectInvalidJobId() {
+        Assertions.assertThrows(
+            IllegalArgumentException.class,
+            () -> JobIdConfigImpl.builder().jobId(Long.valueOf(42L)).build()
+        );
+    }
 }

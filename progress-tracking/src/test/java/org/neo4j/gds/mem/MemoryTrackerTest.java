@@ -23,8 +23,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Answers;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.UserTask;
+import org.neo4j.gds.logging.Log;
 
 import java.util.Random;
 import java.util.stream.Stream;
@@ -40,21 +42,21 @@ class MemoryTrackerTest {
     @MethodSource("invalidInitialMemoryValues")
     void shouldNotAllowNegativeInitialValue(long initialMemoryValue) {
         assertThatIllegalArgumentException()
-            .isThrownBy(() -> new MemoryTracker(initialMemoryValue))
+            .isThrownBy(() -> new MemoryTracker(initialMemoryValue, Log.noOpLog()))
             .withMessageContaining("Negative values are not allowed.");
     }
 
     @ParameterizedTest
     @MethodSource("validInitialMemoryValues")
     void shouldBeCreatedConsistently(long initialMemoryValue) {
-        var memoryTracker = new MemoryTracker(initialMemoryValue);
+        var memoryTracker = new MemoryTracker(initialMemoryValue, Log.noOpLog());
 
         assertThat(memoryTracker.initialMemory()).isEqualTo(initialMemoryValue);
     }
 
     @Test
     void shouldHaveAvailableMemorySameAsInitialBeforeAnyTracking() {
-        var memoryTracker = new MemoryTracker(19L);
+        var memoryTracker = new MemoryTracker(19L, Log.noOpLog());
 
         assertThat(memoryTracker.availableMemory())
             .isEqualTo(memoryTracker.availableMemory())
@@ -63,7 +65,7 @@ class MemoryTrackerTest {
 
     @Test
     void shouldHaveAvailableMemoryWithoutTheTrackedMemory() {
-        var memoryTracker = new MemoryTracker(19L);
+        var memoryTracker = new MemoryTracker(19L, Log.noOpLog());
 
         memoryTracker.track(new JobId("foo"), 9);
         memoryTracker.track(new JobId("bar"), 3);
@@ -75,12 +77,12 @@ class MemoryTrackerTest {
 
     @Test
     void shouldFreeMemoryOnTaskRemoved() {
-        var memoryTracker = new MemoryTracker(19L);
+        var memoryTracker = new MemoryTracker(19L, Log.noOpLog());
 
         memoryTracker.track(new JobId("foo"), 9);
         memoryTracker.track(new JobId("bar"), 3);
 
-        var userTaskMock = mock(UserTask.class);
+        var userTaskMock = mock(UserTask.class, Answers.RETURNS_MOCKS);
         when(userTaskMock.jobId()).thenReturn(new JobId("foo"));
 
         memoryTracker.onTaskRemoved(userTaskMock);

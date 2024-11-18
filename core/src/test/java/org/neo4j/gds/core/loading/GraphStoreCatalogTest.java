@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.graph.store.catalog.GraphStoreAddedEventListener;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -410,20 +411,15 @@ class GraphStoreCatalogTest {
     void callListeners() {
         var listenerCalls = new MutableInt(0);
 
-        var listener = new GraphStoreCatalogListener() {
-            @Override
-            public void onProject(String user, String database, String graphName) {
-                listenerCalls.increment();
-            }
-        };
+        GraphStoreAddedEventListener listener = graphStoreAddedEvent -> listenerCalls.increment();
 
-        GraphStoreCatalog.registerListener(listener);
+        GraphStoreCatalog.registerGraphStoreAddedListener(listener);
         assertThat(listenerCalls.intValue()).isZero();
 
         GraphStoreCatalog.set(CONFIG, graphStore);
         assertThat(listenerCalls.intValue()).isEqualTo(1);
 
-        GraphStoreCatalog.unregisterListener(listener);
+        GraphStoreCatalog.unregisterGraphStoreAddedListener(listener);
         GraphStoreCatalog.set(GraphProjectConfig.emptyWithName("bob", GRAPH_NAME), graphStore);
         assertThat(listenerCalls.intValue()).isEqualTo(1);
     }

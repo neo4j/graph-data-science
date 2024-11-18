@@ -17,32 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.config;
+package org.neo4j.gds.api.graph.store.catalog;
 
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-class JobIdConfigTest {
-
-    @Test
-    void shouldAcceptValidJobId() {
-        var configBuilder = JobIdConfigImpl.builder();
-
-        configBuilder
-            .jobId("df16706f-0fb7-4a85-bf1c-a2c6f3c1cf08")
-            .build();
-
-        configBuilder
-            .jobId("banana-sweatshirt")
-            .build();
-    }
-
-    @Test
-    void shouldRejectInvalidJobId() {
-        assertThrows(
-            IllegalArgumentException.class,
-            () -> JobIdConfigImpl.builder().jobId(Long.valueOf(42L)).build()
-        );
-    }
+public interface GraphStoreAddedEventListener {
+    void onGraphStoreAdded(GraphStoreAddedEvent graphStoreAddedEvent);
 }

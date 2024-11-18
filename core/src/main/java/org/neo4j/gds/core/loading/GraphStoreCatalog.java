@@ -25,8 +25,13 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.EphemeralResultStore;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.graph.store.catalog.GraphStoreAddedEvent;
+import org.neo4j.gds.api.graph.store.catalog.GraphStoreAddedEventListener;
+import org.neo4j.gds.api.graph.store.catalog.GraphStoreRemovedEvent;
+import org.neo4j.gds.api.graph.store.catalog.GraphStoreRemovedEventListener;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.gds.utils.StringJoining;
 
@@ -36,7 +41,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -48,7 +52,8 @@ public final class GraphStoreCatalog {
 
     private static final ConcurrentHashMap<String, UserCatalog> userCatalogs = new ConcurrentHashMap<>();
 
-    private static final Set<GraphStoreCatalogListener> listeners = new HashSet<>();
+    private static final Collection<GraphStoreAddedEventListener> graphStoreAddedEventListeners = new HashSet<>();
+    private static final Collection<GraphStoreRemovedEventListener> graphStoreRemovedEventListeners = new HashSet<>();
 
     // as we want to use the Neo4j log if possible and the catalog is a static instance,
     // we make the log injectable
@@ -57,12 +62,20 @@ public final class GraphStoreCatalog {
     private GraphStoreCatalog() {
     }
 
-    public static void registerListener(GraphStoreCatalogListener listener) {
-        listeners.add(listener);
+    public static void registerGraphStoreAddedListener(GraphStoreAddedEventListener listener) {
+        graphStoreAddedEventListeners.add(listener);
     }
 
-    public static void unregisterListener(GraphStoreCatalogListener listener) {
-        listeners.remove(listener);
+    public static void unregisterGraphStoreAddedListener(GraphStoreAddedEventListener listener) {
+        graphStoreAddedEventListeners.remove(listener);
+    }
+
+    public static void registerGraphStoreRemovedListener(GraphStoreRemovedEventListener listener) {
+        graphStoreRemovedEventListeners.add(listener);
+    }
+
+    public static void unregisterGraphStoreRemovedListener(GraphStoreRemovedEventListener listener) {
+        graphStoreRemovedEventListeners.remove(listener);
     }
 
     public static void setLog(Log log) {
@@ -86,7 +99,7 @@ public final class GraphStoreCatalog {
                     .ofNullable(e.getValue().get(userCatalogKey, false))
                     .map(graph -> Map.entry(e.getKey(), graph))
             )
-            .collect(Collectors.toList());
+            .toList();
 
         if (usersWithMatchingGraphs.size() == 1) {
             return usersWithMatchingGraphs.get(0).getValue();
@@ -185,7 +198,7 @@ public final class GraphStoreCatalog {
             return userCatalog;
         });
 
-        listeners.forEach(
+        graphStoreAddedEventListeners.forEach(
             listener -> ExceptionUtil.safeRunWithLogException(
                 () -> String.format(
                     Locale.US,
@@ -193,10 +206,13 @@ public final class GraphStoreCatalog {
                     listener,
                     config.graphName()
                 ),
-                () -> listener.onProject(
-                    config.username(),
-                    graphStore.databaseInfo().databaseId().databaseName(),
-                    config.graphName()
+                () -> listener.onGraphStoreAdded(
+                    new GraphStoreAddedEvent(
+                        config.username(),
+                        graphStore.databaseInfo().databaseId().databaseName(),
+                        config.graphName(),
+                        MemoryUsage.sizeOf(graphStore)
+                    )
                 ),
                 log.orElseGet(Log::noOpLog)::warn
             )
@@ -391,7 +407,31 @@ public final class GraphStoreCatalog {
                 .map(graphStoreWithConfig -> {
                     removedGraphConsumer.accept(graphStoreWithConfig);
                     removeDegreeDistribution(userCatalogKey);
-                    graphsByName.remove(userCatalogKey);
+                    var removed = graphsByName.remove(userCatalogKey);
+                    var config = removed.config();
+                    var graphStore = removed.graphStore();
+
+                    graphStoreRemovedEventListeners.forEach(
+                        listener -> ExceptionUtil.safeRunWithLogException(
+                            () -> String.format(
+                                Locale.US,
+                                "Could not call listener %s on setting the graph %s",
+                                listener,
+                                config.graphName()
+                            ),
+                            () -> listener.onGraphStoreRemoved(
+                                new GraphStoreRemovedEvent(
+                                    config.username(),
+                                    graphStore.databaseInfo().databaseId().databaseName(),
+                                    config.graphName(),
+                                    MemoryUsage.sizeOf(graphStore)
+                                )
+                            ),
+                            log.orElseGet(Log::noOpLog)::warn
+                        )
+                    );
+
+
                     return Boolean.TRUE;
                 })
                 .orElse(Boolean.FALSE);

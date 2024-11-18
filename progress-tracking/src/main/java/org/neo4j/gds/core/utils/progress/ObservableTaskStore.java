@@ -21,13 +21,13 @@ package org.neo4j.gds.core.utils.progress;
 
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public abstract class ObservableTaskStore implements TaskStore {
-    private final List<TaskStoreListener> listeners;
+    private final Set<TaskStoreListener> listeners;
 
-    ObservableTaskStore(List<TaskStoreListener> listeners) {this.listeners = listeners;}
+    ObservableTaskStore(Set<TaskStoreListener> listeners) {this.listeners = listeners;}
 
     @Override
     public final void store(String username, JobId jobId, Task task) {

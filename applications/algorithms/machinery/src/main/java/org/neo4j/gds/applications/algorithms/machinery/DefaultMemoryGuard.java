@@ -69,7 +69,6 @@ public final class DefaultMemoryGuard implements MemoryGuard {
     ) throws IllegalStateException {
 
         try {
-
             var memoryRequirement = MemoryRequirement.create(
                 estimationFactory,
                 graphStore,
@@ -79,31 +78,26 @@ public final class DefaultMemoryGuard implements MemoryGuard {
                 useMaxMemoryEstimation
             );
 
-            // TODO: I don't really like this, think how we can refactor it better.
-            try {
-                var bytesToReserve = memoryRequirement.requiredMemory();
-                if (configuration.sudo()) {
-                    memoryTracker.track(configuration.jobId(), bytesToReserve);
-                    return;
-                }
-                var availableMemory = memoryTracker.availableMemory();
-                if (bytesToReserve > availableMemory) {
-                    throw new MemoryReservationExceededException(bytesToReserve, availableMemory);
-                }
+            var bytesToReserve = memoryRequirement.requiredMemory();
+            if (configuration.sudo()) {
                 memoryTracker.track(configuration.jobId(), bytesToReserve);
-            } catch (MemoryReservationExceededException e) {
-                var message = StringFormatting.formatWithLocale(
-                    "Memory required to run %s (%db) exceeds available memory (%db)",
-                    label,
-                    e.bytesRequired(),
-                    e.bytesAvailable()
-                );
-
-                throw new IllegalStateException(message);
-
+                return;
             }
+
+            memoryTracker.tryToTrack(configuration.jobId(), bytesToReserve);
+
         } catch (MemoryEstimationNotImplementedException e) {
             log.info("Memory usage estimate not available for " + label + ", skipping guard");
+        } catch (MemoryReservationExceededException e) {
+            var message = StringFormatting.formatWithLocale(
+                "Memory required to run %s (%db) exceeds available memory (%db)",
+                label,
+                e.bytesRequired(),
+                e.bytesAvailable()
+            );
+
+            throw new IllegalStateException(message);
+
         }
     }
 }

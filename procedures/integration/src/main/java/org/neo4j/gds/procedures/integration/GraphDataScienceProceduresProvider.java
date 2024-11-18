@@ -207,7 +207,8 @@ public class GraphDataScienceProceduresProvider implements ThrowingFunction<Cont
             writeContext,
             algorithmProcessingTemplateDecorator,
             graphCatalogApplicationsDecorator,
-            modelCatalogApplicationsDecorator
+            modelCatalogApplicationsDecorator,
+            memoryTracker
         );
     }
 

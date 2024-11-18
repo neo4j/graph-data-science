@@ -36,11 +36,12 @@ import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogStore;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.logging.LogAdapter;
+import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.procedures.DatabaseIdAccessor;
 import org.neo4j.gds.procedures.GraphCatalogProcedureFacadeFactory;
-import org.neo4j.gds.procedures.LocalGraphDataScienceProcedures;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.LocalGraphDataScienceProcedures;
 import org.neo4j.gds.procedures.ProcedureCallContextReturnColumns;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
@@ -190,7 +191,8 @@ public final class ProcedureRunner {
             procedureContext,
             Optional.empty(),
             Optional.empty(),
-            Optional.empty()
+            Optional.empty(),
+            new MemoryTracker(Long.MAX_VALUE, gdsLog)
         );
     }
 }
