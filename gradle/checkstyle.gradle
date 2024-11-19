@@ -24,13 +24,13 @@ if (shouldCheckstyle) {
             reports {
                 xml {
                     setRequired(false)
-                    destination file("${checkstyleReportsDir}/xml/${fileName}.xml")
+                    setOutputLocation(file("${checkstyleReportsDir}/xml/${fileName}.xml"))
                 }
                 html {
                     // Disable HTML reports by default, TeamCity would make use only of the XML ones.
                     // Keeping this here for local checks/investigation.
                     setRequired(true)
-                    destination file("${checkstyleReportsDir}/html/${fileName}.html")
+                    setOutputLocation(file("${checkstyleReportsDir}/html/${fileName}.html"))
                     stylesheet resources.text.fromFile("$publicDir/etc/checkstyle/xsl/checkstyle-simple.xsl")
                 }
             }
