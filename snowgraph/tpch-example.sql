@@ -28,6 +28,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -- For that we will look at parts that are often ordered together and use the node similarity algorithm to find similar parts.
 -- We will then write the results back to Snowflake and query the results.
 --
+-- See https://docs.snowflake.com/en/user-guide/sample-data-tpch for information about the sample data, its schema.
+-- NOTE: You may need to install the dataset if it's not already present in your account.
+--
 -- For this example to run, we make the following assumptions:
 --
 -- * Neo4j Graph Data Science application is installed correctly and called "Neo4j_GDS"
