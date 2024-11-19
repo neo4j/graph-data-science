@@ -30,7 +30,7 @@ class GraphStoreMemoryContainer {
 
     private final ConcurrentHashMap<String, ConcurrentHashMap<String,Long>> graphStoresMemory = new ConcurrentHashMap<>();
     private  final AtomicLong graphStoreReservedMemory = new AtomicLong();
-    private static final ConcurrentHashMap<String,Long> EMPTY_HASH_MAP   =new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String,Long> EMPTY_HASH_MAP   = new ConcurrentHashMap<>();
 
     long addGraph(GraphStoreAddedEvent graphStoreAddedEvent){
         var addedGraphMemory = graphStoreAddedEvent.memoryInBytes();

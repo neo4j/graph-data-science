@@ -19,9 +19,6 @@
  */
 package org.neo4j.gds.mem;
 
-import com.carrotsearch.hppc.ObjectLongHashMap;
-import com.carrotsearch.hppc.ObjectLongMap;
-import com.carrotsearch.hppc.procedures.LongProcedure;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreAddedEvent;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreAddedEventListener;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreRemovedEvent;
@@ -31,14 +28,12 @@ import org.neo4j.gds.core.utils.progress.TaskStoreListener;
 import org.neo4j.gds.core.utils.progress.UserTask;
 import org.neo4j.gds.logging.Log;
 
-import java.util.concurrent.atomic.LongAdder;
-
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class MemoryTracker implements TaskStoreListener, GraphStoreAddedEventListener, GraphStoreRemovedEventListener {
     private final long initialMemory;
     private final  GraphStoreMemoryContainer  graphStoreMemoryContainer = new GraphStoreMemoryContainer();
-    private final  ObjectLongMap<JobId> memoryInUse = new ObjectLongHashMap<>();
+    private final  TaskMemoryContainer taskMemoryContainer = new TaskMemoryContainer();
     private final  Log log;
 
     public MemoryTracker(long initialMemory, Log log) {
@@ -53,7 +48,7 @@ public class MemoryTracker implements TaskStoreListener, GraphStoreAddedEventLis
 
     public synchronized void track(JobId jobId, long memoryEstimate) {
         log.debug("Tracking %s:  %s bytes", jobId.asString(), memoryEstimate);
-        memoryInUse.put(jobId, memoryEstimate);
+        taskMemoryContainer.reserve(jobId, memoryEstimate);
         log.debug("Available memory after tracking task: %s bytes", availableMemory());
     }
 
@@ -66,14 +61,13 @@ public class MemoryTracker implements TaskStoreListener, GraphStoreAddedEventLis
     }
 
     public synchronized long availableMemory() {
-        var reservedMemory = new LongAdder();
-        memoryInUse.values().forEach((LongProcedure) reservedMemory::add);
-        return initialMemory - (reservedMemory.longValue() + graphStoreMemoryContainer.graphStoreReservedMemory());
+        return initialMemory - graphStoreMemoryContainer.graphStoreReservedMemory() - taskMemoryContainer.taskReservedMemory();
     }
 
     @Override
     public void onTaskAdded(UserTask userTask) {
         // do nothing, we add the memory explicitly prior to execution
+        taskMemoryContainer.addTask(userTask);
     }
 
     @Override
@@ -81,7 +75,7 @@ public class MemoryTracker implements TaskStoreListener, GraphStoreAddedEventLis
         var taskDescription = userTask.task().description();
         log.debug("Removing task: %s", taskDescription);
         var jobId = userTask.jobId();
-        var removed = memoryInUse.remove(jobId);
+        var removed= taskMemoryContainer.removeTask(userTask);
         log.debug("Removed task %s (%s):  %s bytes", taskDescription, jobId.asString(), removed);
         log.debug("Available memory after removing task: %s bytes", availableMemory());
         log.debug("Done removing task: %s", taskDescription);
