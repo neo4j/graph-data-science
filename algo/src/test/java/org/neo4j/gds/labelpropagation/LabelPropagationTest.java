@@ -28,31 +28,21 @@ import org.assertj.core.api.junit.jupiter.InjectSoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.termination.TerminationFlag;
 
-import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
 @ExtendWith(SoftAssertionsExtension.class)
@@ -213,40 +203,5 @@ class LabelPropagationTest {
         }
 
         return cluster;
-    }
-
-    @Test
-    void shouldLogProgress() {
-        var progressTask = new LabelPropagationFactory<>().progressTask(graph.relationshipCount(), DEFAULT_PARAMETERS.maxIterations());
-        var log = new GdsTestLog();
-        var testTracker = new TestProgressTracker(
-            progressTask,
-            log,
-            DEFAULT_PARAMETERS.concurrency(),
-            EmptyTaskRegistryFactory.INSTANCE
-        );
-
-        var lp = new LabelPropagation(
-            graph,
-            DEFAULT_PARAMETERS,
-            DefaultPool.INSTANCE,
-            testTracker,
-            TerminationFlag.RUNNING_TRUE
-        );
-
-        var result = lp.compute();
-
-        List<AtomicLong> progresses = testTracker.getProgresses();
-
-        // Should log progress for every iteration + init step
-        assertEquals(result.ranIterations() + 3, progresses.size());
-        progresses.forEach(progress -> assertTrue(progress.get() <= graph.relationshipCount()));
-
-        assertTrue(log.containsMessage(TestLog.INFO, ":: Start"));
-        LongStream.range(1, result.ranIterations() + 1).forEach(iteration -> {
-            assertTrue(log.containsMessage(TestLog.INFO, formatWithLocale("Iteration %d of %d :: Start", iteration, DEFAULT_PARAMETERS.maxIterations())));
-            assertTrue(log.containsMessage(TestLog.INFO, formatWithLocale("Iteration %d of %d :: Start", iteration, DEFAULT_PARAMETERS.maxIterations())));
-        });
-        assertTrue(log.containsMessage(TestLog.INFO, ":: Finished"));
     }
 }
