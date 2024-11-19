@@ -31,18 +31,15 @@ import org.neo4j.gds.core.utils.progress.TaskStoreListener;
 import org.neo4j.gds.core.utils.progress.UserTask;
 import org.neo4j.gds.logging.Log;
 
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.LongAdder;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class MemoryTracker implements TaskStoreListener, GraphStoreAddedEventListener, GraphStoreRemovedEventListener {
     private final long initialMemory;
-
-    private final AtomicLong graphStoresMemory = new AtomicLong();
-
-    private final ObjectLongMap<JobId> memoryInUse = new ObjectLongHashMap<>();
-    private final Log log;
+    private final  GraphStoreMemoryContainer  graphStoreMemoryContainer = new GraphStoreMemoryContainer();
+    private final  ObjectLongMap<JobId> memoryInUse = new ObjectLongHashMap<>();
+    private final  Log log;
 
     public MemoryTracker(long initialMemory, Log log) {
         this.log = log;
@@ -71,7 +68,7 @@ public class MemoryTracker implements TaskStoreListener, GraphStoreAddedEventLis
     public synchronized long availableMemory() {
         var reservedMemory = new LongAdder();
         memoryInUse.values().forEach((LongProcedure) reservedMemory::add);
-        return initialMemory - (reservedMemory.longValue() + graphStoresMemory.longValue());
+        return initialMemory - (reservedMemory.longValue() + graphStoreMemoryContainer.graphStoreReservedMemory());
     }
 
     @Override
@@ -100,24 +97,23 @@ public class MemoryTracker implements TaskStoreListener, GraphStoreAddedEventLis
 
     @Override
     public void onGraphStoreAdded(GraphStoreAddedEvent graphStoreAddedEvent) {
-        var addedGraphMemory = graphStoreAddedEvent.memoryInBytes();
-        var graphsMemory = graphStoresMemory.addAndGet(addedGraphMemory);
+        var graphsMemory = graphStoreMemoryContainer.addGraph(graphStoreAddedEvent);
         log.debug(
             "Added graph %s, which added another %s bytes, now there are %s bytes occupied by projected graphs",
             graphStoreAddedEvent.graphName(),
-            addedGraphMemory,
+            graphStoreAddedEvent.memoryInBytes(),
             graphsMemory
         );
     }
 
     @Override
-    public void onGraphStoreRemoved(GraphStoreRemovedEvent graphStoreAddedEvent) {
-        var graphMemoryToRemove = graphStoreAddedEvent.memoryInBytes();
-        var graphsMemoryAfterRemoval = graphStoresMemory.addAndGet(-graphMemoryToRemove);
+    public void onGraphStoreRemoved(GraphStoreRemovedEvent graphStoreRemovedEvent) {
+
+       var graphsMemoryAfterRemoval= graphStoreMemoryContainer.removeGraph(graphStoreRemovedEvent);
         log.debug(
             "Removed graph %s, which freed %s bytes, there are still %s bytes occupied by projected graphs",
-            graphStoreAddedEvent.graphName(),
-            graphMemoryToRemove,
+            graphStoreRemovedEvent.graphName(),
+            graphStoreRemovedEvent.memoryInBytes(),
             graphsMemoryAfterRemoval
         );
     }
