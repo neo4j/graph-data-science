@@ -46,18 +46,18 @@ public class MemoryTracker implements TaskStoreListener, GraphStoreAddedEventLis
         return initialMemory;
     }
 
-    public synchronized void track(JobId jobId, long memoryEstimate) {
+    public synchronized void track(String username, String taskName, JobId jobId, long memoryEstimate) {
         log.debug("Tracking %s:  %s bytes", jobId.asString(), memoryEstimate);
-        taskMemoryContainer.reserve(jobId, memoryEstimate);
+        taskMemoryContainer.reserve(username,taskName,jobId, memoryEstimate);
         log.debug("Available memory after tracking task: %s bytes", availableMemory());
     }
 
-    public synchronized void tryToTrack(JobId jobId, long memoryEstimate) throws MemoryReservationExceededException {
+    public synchronized void tryToTrack(String username, String taskName,JobId jobId, long memoryEstimate) throws MemoryReservationExceededException {
         var availableMemory = availableMemory();
         if (memoryEstimate > availableMemory) {
             throw new MemoryReservationExceededException(memoryEstimate, availableMemory);
         }
-        track(jobId, memoryEstimate);
+        track(username,taskName,jobId, memoryEstimate);
     }
 
     public synchronized long availableMemory() {
@@ -67,7 +67,6 @@ public class MemoryTracker implements TaskStoreListener, GraphStoreAddedEventLis
     @Override
     public void onTaskAdded(UserTask userTask) {
         // do nothing, we add the memory explicitly prior to execution
-        taskMemoryContainer.addTask(userTask);
     }
 
     @Override

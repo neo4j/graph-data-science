@@ -19,8 +19,7 @@
  */
 package org.neo4j.gds.mem;
 
-import com.carrotsearch.hppc.ObjectLongHashMap;
-import com.carrotsearch.hppc.ObjectLongMap;
+import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.UserTask;
 
@@ -30,25 +29,20 @@ import java.util.stream.Stream;
 
 class TaskMemoryContainer {
 
-    private final ConcurrentHashMap<String,ConcurrentHashMap<UserTask,Long>> memoryInUse = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String,ConcurrentHashMap<JobId, Pair<String,Long>>> memoryInUse = new ConcurrentHashMap<>();
     private final AtomicLong allocatedMemory = new AtomicLong();
-    private final ObjectLongMap<JobId>  temporaryMap =new ObjectLongHashMap<>();
-    private static final ConcurrentHashMap<UserTask,Long> EMPTY_HASH_MAP = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<JobId,Pair<String,Long>> EMPTY_HASH_MAP = new ConcurrentHashMap<>();
 
-    void reserve(JobId jobId,long memoryAmount){
-        temporaryMap.put(jobId,memoryAmount);
+    void reserve(String username, String taskName, JobId jobId,long memoryAmount){
+        memoryInUse.putIfAbsent(username, new ConcurrentHashMap<>());
+        memoryInUse.get(username).put(jobId,Pair.of(taskName,memoryAmount));
+
         allocatedMemory.addAndGet(memoryAmount);
     }
 
-    void addTask(UserTask task){
-        var memoryAmount = temporaryMap.remove(task.jobId());
-        memoryInUse.putIfAbsent(task.username(), new ConcurrentHashMap<>());
-        memoryInUse.get(task.username()).put(task,memoryAmount);
-    }
-
     long removeTask(UserTask task){
-         var mem=  memoryInUse.getOrDefault(task.username(), EMPTY_HASH_MAP).remove(task);
-         allocatedMemory.addAndGet(-mem);
+         var mem=  memoryInUse.getOrDefault(task.username(), EMPTY_HASH_MAP).remove(task.jobId()).getRight();
+         allocatedMemory.addAndGet(mem);
          return  mem;
     }
 
@@ -59,9 +53,9 @@ class TaskMemoryContainer {
     Stream<UserEntityMemory> listTasks(String user){
         return  memoryInUse
             .getOrDefault(user, EMPTY_HASH_MAP)
-            .entrySet()
+            .values()
             .stream()
-            .map( entry -> new UserEntityMemory(user, entry.getKey().task().description(), entry.getValue()));
+            .map(stringLongPair -> new UserEntityMemory(user, stringLongPair.getLeft(), stringLongPair.getRight()));
     }
 
     Stream<UserEntityMemory> listTasks(){

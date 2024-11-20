@@ -39,13 +39,15 @@ public class GraphProjectMemoryUsageService {
     private final Log log;
     private final GraphDatabaseService graphDatabaseService;
     private final MemoryTracker memoryTracker;
+    private final String username;
 
-    public GraphProjectMemoryUsageService(Log log, GraphDatabaseService graphDatabaseService,
+    public GraphProjectMemoryUsageService(String username,Log log, GraphDatabaseService graphDatabaseService,
         MemoryTracker memoryTracker
     ) {
         this.log = log;
         this.graphDatabaseService = graphDatabaseService;
         this.memoryTracker = memoryTracker;
+        this.username = username;
     }
 
     public void validateMemoryUsage(
@@ -57,6 +59,7 @@ public class GraphProjectMemoryUsageService {
         GraphProjectConfig configuration
     ) {
         memoryUsageValidator().tryValidateMemoryUsage(
+            "Loading",
             configuration,
             graphProjectConfig -> getEstimate(
                 databaseId,
@@ -105,7 +108,7 @@ public class GraphProjectMemoryUsageService {
             .resolveDependency(Config.class);
         var useMaxMemoryEstimation = neo4jConfig.get(GdsSettings.validateUsingMaxMemoryEstimation());
 
-        return new MemoryUsageValidator(memoryTracker, useMaxMemoryEstimation, log);
+        return new MemoryUsageValidator(username,memoryTracker, useMaxMemoryEstimation, log);
     }
 
     private GraphLoaderContext graphLoaderContext(

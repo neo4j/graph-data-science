@@ -35,6 +35,7 @@ public interface MemoryGuard {
     MemoryGuard DISABLED = new MemoryGuard() {
         @Override
         public <CONFIGURATION extends AlgoBaseConfig> void assertAlgorithmCanRun(
+            String username,
             Supplier<MemoryEstimation> estimationFactory,
             GraphStore graphStore,
             CONFIGURATION configuration,
@@ -51,6 +52,7 @@ public interface MemoryGuard {
      * @throws IllegalStateException when there is not enough memory available to run the algorithm in the given configuration on the given graph
      */
     <CONFIGURATION extends AlgoBaseConfig> void assertAlgorithmCanRun(
+        String username,
         Supplier<MemoryEstimation> estimationFactory,
         GraphStore graphStore,
         CONFIGURATION configuration,

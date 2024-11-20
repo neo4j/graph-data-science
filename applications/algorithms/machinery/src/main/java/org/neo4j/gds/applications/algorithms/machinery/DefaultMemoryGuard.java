@@ -61,6 +61,7 @@ public final class DefaultMemoryGuard implements MemoryGuard {
 
     @Override
     public synchronized <CONFIGURATION extends AlgoBaseConfig> void assertAlgorithmCanRun(
+        String username,
         Supplier<MemoryEstimation> estimationFactory,
         GraphStore graphStore,
         CONFIGURATION configuration,
@@ -80,11 +81,11 @@ public final class DefaultMemoryGuard implements MemoryGuard {
 
             var bytesToReserve = memoryRequirement.requiredMemory();
             if (configuration.sudo()) {
-                memoryTracker.track(configuration.jobId(), bytesToReserve);
+                memoryTracker.track(username,label.asString(), configuration.jobId(), bytesToReserve);
                 return;
             }
 
-            memoryTracker.tryToTrack(configuration.jobId(), bytesToReserve);
+            memoryTracker.tryToTrack(username, label.asString(), configuration.jobId(), bytesToReserve);
 
         } catch (MemoryEstimationNotImplementedException e) {
             log.info("Memory usage estimate not available for " + label + ", skipping guard");

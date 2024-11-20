@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.services.GraphDimensionFactory;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -67,7 +68,8 @@ class DefaultMemoryGuardTest {
 
         // there is enough memory available
         memoryGuard.assertAlgorithmCanRun(
-            () -> memoryEstimation,
+            User.DEFAULT.getUsername(),
+            ()-> memoryEstimation,
             graphStore,
             configuration,
             new StandardLabel("some label"),
@@ -97,6 +99,7 @@ class DefaultMemoryGuardTest {
         // uh oh
         try {
             memoryGuard.assertAlgorithmCanRun(
+                User.DEFAULT.getUsername(),
                 () -> memoryEstimation,
                 graphStore,
                 configuration,
@@ -132,6 +135,7 @@ class DefaultMemoryGuardTest {
         // uh oh
         try {
             memoryGuard.assertAlgorithmCanRun(
+                User.DEFAULT.getUsername(),
                 () -> memoryEstimation,
                 graphStore,
                 configuration,
@@ -166,6 +170,7 @@ class DefaultMemoryGuardTest {
         when(memoryTree.memoryUsage()).thenReturn(MemoryRange.of(43, 99));
 
         assertThatIllegalStateException().isThrownBy(() -> memoryGuard.assertAlgorithmCanRun(
+            User.DEFAULT.getUsername(),
             () -> memoryEstimation,
             graphStore,
             new ExampleConfiguration(false),
@@ -175,6 +180,7 @@ class DefaultMemoryGuardTest {
 
         // now with sudo
         assertDoesNotThrow(() -> memoryGuard.assertAlgorithmCanRun(
+            User.DEFAULT.getUsername(),
             () -> memoryEstimation,
             graphStore,
             new ExampleConfiguration(true),

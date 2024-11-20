@@ -67,8 +67,8 @@ class MemoryTrackerTest {
     void shouldHaveAvailableMemoryWithoutTheTrackedMemory() {
         var memoryTracker = new MemoryTracker(19L, Log.noOpLog());
 
-        memoryTracker.track(new JobId("foo"), 9);
-        memoryTracker.track(new JobId("bar"), 3);
+        memoryTracker.track("a","b",new JobId("foo"), 9);
+        memoryTracker.track("a","b",new JobId("bar"), 3);
 
         assertThat(memoryTracker.availableMemory())
             .isEqualTo(memoryTracker.availableMemory())
@@ -79,8 +79,8 @@ class MemoryTrackerTest {
     void shouldFreeMemoryOnTaskRemoved() {
         var memoryTracker = new MemoryTracker(19L, Log.noOpLog());
 
-        memoryTracker.track(new JobId("foo"), 9);
-        memoryTracker.track(new JobId("bar"), 3);
+        memoryTracker.track("a","b",new JobId("foo"), 9);
+        memoryTracker.track("a","b",new JobId("bar"), 3);
 
         var userTaskMock = mock(UserTask.class, Answers.RETURNS_MOCKS);
         when(userTaskMock.jobId()).thenReturn(new JobId("foo"));

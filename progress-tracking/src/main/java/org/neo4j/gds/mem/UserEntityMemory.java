@@ -19,5 +19,5 @@
  */
 package org.neo4j.gds.mem;
 
-public record UserEntityMemory(String user, String graph, long memoryInBytes) {
+public record UserEntityMemory(String user, String entity, long memoryInBytes) {
 }

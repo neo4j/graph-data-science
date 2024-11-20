@@ -68,7 +68,7 @@ public class ProcedureExecutorSpec<
                 executionContext.databaseId(),
                 executionContext.isGdsAdmin()
             ),
-            new MemoryUsageValidator(new MemoryTracker(Long.MAX_VALUE, executionContext.log()), useMaxMemoryEstimation, executionContext.log())
+            new MemoryUsageValidator(executionContext.username(), new MemoryTracker(Long.MAX_VALUE, executionContext.log()), useMaxMemoryEstimation, executionContext.log())
         );
     }
 }

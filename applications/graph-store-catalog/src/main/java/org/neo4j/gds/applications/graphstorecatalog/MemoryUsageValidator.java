@@ -40,14 +40,17 @@ public class MemoryUsageValidator {
     private final Log log;
     private final boolean useMaxMemoryEstimation;
     private final MemoryTracker memoryTracker;
+    private final String username;
 
-    public MemoryUsageValidator(MemoryTracker memoryTracker, boolean useMaxMemoryEstimation, Log log) {
+    public MemoryUsageValidator(String username,MemoryTracker memoryTracker, boolean useMaxMemoryEstimation, Log log) {
         this.log = log;
         this.useMaxMemoryEstimation = useMaxMemoryEstimation;
         this.memoryTracker = memoryTracker;
+        this.username = username;
     }
 
     public <C extends BaseConfig & JobIdConfig> MemoryRange tryValidateMemoryUsage(
+        String taskName,
         C config,
         Function<C, MemoryTreeWithDimensions> runEstimation
     ) {
@@ -58,11 +61,14 @@ public class MemoryUsageValidator {
             if (config.sudo()) {
                 log.debug("Sudo mode: Won't check for available memory.");
                 memoryTracker.track(
+                    username,
+                    taskName,
                     config.jobId(),
                     useMaxMemoryEstimation ? estimatedMemoryRange.max : estimatedMemoryRange.min
                 );
             } else {
                 validateMemoryUsage(
+                    username,
                     estimatedMemoryRange,
                     memoryTracker.availableMemory(),
                     useMaxMemoryEstimation,
@@ -78,6 +84,7 @@ public class MemoryUsageValidator {
     }
 
     void validateMemoryUsage(
+        String taskName,
         MemoryRange estimatedMemoryRange,
         long availableBytes,
         boolean useMaxMemoryEstimation,
@@ -86,6 +93,7 @@ public class MemoryUsageValidator {
     ) {
         if (useMaxMemoryEstimation) {
             validateMemoryUsage(
+                taskName,
                 availableBytes,
                 estimatedMemoryRange.max,
                 "maximum",
@@ -97,6 +105,7 @@ public class MemoryUsageValidator {
             );
         } else {
             validateMemoryUsage(
+                taskName,
                 availableBytes,
                 estimatedMemoryRange.min,
                 "minimum",
@@ -106,6 +115,7 @@ public class MemoryUsageValidator {
     }
 
     private void validateMemoryUsage(
+        String taskName,
         long availableBytes,
         long requiredBytes,
         String memoryString,
@@ -137,6 +147,6 @@ public class MemoryUsageValidator {
             log.info(message);
             throw new IllegalStateException(message);
         }
-        memoryTracker.track(jobId, requiredBytes);
+        memoryTracker.track(username,taskName,jobId, requiredBytes);
     }
 }

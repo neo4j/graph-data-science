@@ -89,6 +89,6 @@ public class ProcedureGraphCreation<
             graphStoreLoader.graphDimensions(),
             algorithmFactory
         );
-        return memoryUsageValidator.tryValidateMemoryUsage(config, procedureMemoryEstimation::memoryEstimation);
+        return memoryUsageValidator.tryValidateMemoryUsage("Loading",config, procedureMemoryEstimation::memoryEstimation);
     }
 }
