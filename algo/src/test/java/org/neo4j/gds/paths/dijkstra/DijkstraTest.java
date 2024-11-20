@@ -25,17 +25,12 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.TestProgressTracker;
-import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.paths.ImmutablePathResult;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfigImpl;
@@ -46,7 +41,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -277,47 +271,6 @@ final class DijkstraTest {
                 .pathSet();
 
             assertEquals(expected, paths);
-        }
-
-        @Test
-        void shouldLogProgress() {
-
-            var config = defaultSourceTargetConfigBuilder()
-                .sourceNode(graph.toOriginalNodeId("a"))
-                .targetNode(graph.toOriginalNodeId("f"))
-                .build();
-
-            var progressTask = new DijkstraFactory.SourceTargetDijkstraFactory<>().progressTask(graph, config);
-            var testLog = new GdsTestLog();
-            var progressTracker = new TestProgressTracker(progressTask, testLog, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
-
-            Dijkstra.sourceTarget(
-                    graph,
-                    config.sourceNode(),
-                    config.targetsList(),
-                    false,
-                    Optional.empty(),
-                    progressTracker,
-                    TerminationFlag.RUNNING_TRUE
-                )
-                .compute()
-                .pathSet();
-
-            List<AtomicLong> progresses = progressTracker.getProgresses();
-            assertEquals(1, progresses.size());
-            assertEquals(graph.relationshipCount(), progresses.get(0).get());
-
-            assertTrue(testLog.containsMessage(TestLog.INFO, ":: Start"));
-            assertTrue(testLog.containsMessage(TestLog.INFO, "Dijkstra 28%"));
-            assertTrue(testLog.containsMessage(TestLog.INFO, "Dijkstra 42%"));
-            assertTrue(testLog.containsMessage(TestLog.INFO, "Dijkstra 71%"));
-            assertTrue(testLog.containsMessage(TestLog.INFO, "Dijkstra 85%"));
-            assertTrue(testLog.containsMessage(TestLog.INFO, "Dijkstra 100%"));
-            assertTrue(testLog.containsMessage(TestLog.INFO, ":: Finished"));
-
-            // no duplicate entries in progress logger
-            var logMessages = testLog.getMessages(TestLog.INFO);
-            assertEquals(Set.copyOf(logMessages).size(), logMessages.size());
         }
     }
 

@@ -27,8 +27,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraBaseConfig;
-import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 
@@ -53,26 +51,6 @@ public abstract class DijkstraFactory<CONFIG extends DijkstraBaseConfig> extends
     @NotNull
     public static Task dijkstraProgressTask(String taskName, Graph graph) {
         return Tasks.leaf(taskName, graph.relationshipCount());
-    }
-
-    public static class SourceTargetDijkstraFactory<T extends DijkstraSourceTargetsBaseConfig> extends
-        DijkstraFactory<T> {
-        @Override
-        public Dijkstra build(
-            Graph graph,
-            T configuration,
-            ProgressTracker progressTracker
-        ) {
-            return Dijkstra.sourceTarget(
-                graph,
-                configuration.sourceNode(),
-                configuration.targetsList(),
-                false,
-                Optional.empty(),
-                progressTracker,
-                TerminationFlag.RUNNING_TRUE
-            );
-        }
     }
 
     public static class AllShortestPathsDijkstraFactory<T extends DijkstraBaseConfig> extends DijkstraFactory<T> {
