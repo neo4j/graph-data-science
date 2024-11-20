@@ -21,6 +21,4 @@ package org.neo4j.gds.djikstra;
 
 class Constants {
     static final String SINGLE_SOURCE_DIJKSTRA_DESCRIPTION = "The Dijkstra shortest path algorithm computes the shortest (weighted) path between one node and any other node in the graph.";
-    static final String SOURCE_TARGET_DIJKSTRA_DESCRIPTION = "The Dijkstra shortest path algorithm computes the shortest (weighted) path between a pair of nodes.";
-
 }
