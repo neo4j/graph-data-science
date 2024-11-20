@@ -19,33 +19,25 @@
  */
 package org.neo4j.gds.betweenness;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
-import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.Orientation.UNDIRECTED;
 import static org.neo4j.gds.TestSupport.crossArguments;
 import static org.neo4j.gds.TestSupport.fromGdl;
-import static org.neo4j.gds.assertj.Extractors.removingThreadId;
-import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 class BetweennessCentralityTest {
 
@@ -170,62 +162,5 @@ class BetweennessCentralityTest {
         assertEquals(4.0, actualResult.get((int) graph.toMappedNodeId("c")));
         assertEquals(3.0, actualResult.get((int) graph.toMappedNodeId("d")));
         assertEquals(0.0, actualResult.get((int) graph.toMappedNodeId("e")));
-    }
-
-    @Test
-    void testShouldLogProgress() {
-        Concurrency concurrency = new Concurrency(4);
-        var parameters = new BetweennessCentralityParameters(concurrency, Optional.of(2L), Optional.empty(), false);
-        var factory = new BetweennessCentralityFactory<>();
-        var log = new GdsTestLog();
-        var testGraph = fromGdl(DIAMOND, "diamond");
-        var progressTracker = new TestProgressTracker(
-            factory.progressTask(testGraph, parameters.samplingSize()),
-            log,
-            concurrency,
-            EmptyTaskRegistryFactory.INSTANCE
-        );
-        factory.build(testGraph, parameters, progressTracker).compute();
-
-        assertThat(log.getMessages(TestLog.INFO))
-            .extracting(removingThreadId())
-            .extracting(replaceTimings())
-            .containsExactly(
-                "BetweennessCentrality :: Start",
-                "BetweennessCentrality 50%",
-                "BetweennessCentrality 100%",
-                "BetweennessCentrality :: Finished"
-            );
-    }
-
-    @Test
-    void testShouldLogProgressNoSampling() {
-        var concurrency = new Concurrency(4);
-        var parameters = new BetweennessCentralityParameters(concurrency, Optional.empty(), Optional.empty(), false);
-        var factory = new BetweennessCentralityFactory<>();
-        var log = new GdsTestLog();
-        var testGraph = fromGdl(DIAMOND, "diamond");
-        var progressTracker = new TestProgressTracker(
-            factory.progressTask(testGraph, parameters.samplingSize()),
-            log,
-            concurrency,
-            EmptyTaskRegistryFactory.INSTANCE
-        );
-        factory.build(testGraph, parameters, progressTracker).compute();
-
-        assertThat(log.getMessages(TestLog.INFO))
-            .extracting(removingThreadId())
-            .extracting(replaceTimings())
-            .containsExactly(
-                "BetweennessCentrality :: Start",
-                "BetweennessCentrality 14%",
-                "BetweennessCentrality 28%",
-                "BetweennessCentrality 42%",
-                "BetweennessCentrality 57%",
-                "BetweennessCentrality 71%",
-                "BetweennessCentrality 85%",
-                "BetweennessCentrality 100%",
-                "BetweennessCentrality :: Finished"
-            );
     }
 }

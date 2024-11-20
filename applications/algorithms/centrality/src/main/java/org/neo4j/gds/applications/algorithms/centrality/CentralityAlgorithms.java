@@ -31,6 +31,7 @@ import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.betweenness.BetweennessCentrality;
 import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
+import org.neo4j.gds.betweenness.BetweennessCentralityParameters;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 import org.neo4j.gds.betweenness.ForwardTraverser;
 import org.neo4j.gds.betweenness.FullSelectionStrategy;
@@ -46,12 +47,12 @@ import org.neo4j.gds.closeness.WassermanFaustCentralityComputer;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.degree.DegreeCentrality;
 import org.neo4j.gds.degree.DegreeCentralityConfig;
 import org.neo4j.gds.degree.DegreeCentralityResult;
 import org.neo4j.gds.harmonic.HarmonicCentrality;
-import org.neo4j.gds.harmonic.HarmonicCentralityBaseConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.hits.Hits;
 import org.neo4j.gds.hits.HitsConfig;
@@ -72,6 +73,9 @@ import org.neo4j.gds.pagerank.PageRankComputation;
 import org.neo4j.gds.pagerank.PageRankConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.termination.TerminationFlag;
+
+import java.util.Optional;
+import java.util.function.Function;
 
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.ArticleRank;
 import static org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel.EigenVector;
@@ -111,8 +115,22 @@ public class CentralityAlgorithms {
     }
 
     BetwennessCentralityResult betweennessCentrality(Graph graph, BetweennessCentralityBaseConfig configuration) {
-        var parameters = configuration.toParameters();
+        return betweennessCentrality(
+            graph, configuration.toParameters(), samplingSize -> {
+                var task = Tasks.leaf(
+                    AlgorithmLabel.BetweennessCentrality.asString(),
+                    samplingSize.orElse(graph.nodeCount())
+                );
+                return progressTrackerCreator.createProgressTracker(configuration, task);
+            }
+        );
+    }
 
+    public BetwennessCentralityResult betweennessCentrality(
+        Graph graph,
+        BetweennessCentralityParameters parameters,
+        Function<Optional<Long>, ProgressTracker> progressTrackerFromSamplingSize
+    ) {
         var samplingSize = parameters.samplingSize();
         var samplingSeed = parameters.samplingSeed();
 
@@ -124,11 +142,7 @@ public class CentralityAlgorithms {
             ? ForwardTraverser.Factory.weighted()
             : ForwardTraverser.Factory.unweighted();
 
-        var task = Tasks.leaf(
-            AlgorithmLabel.BetweennessCentrality.asString(),
-            samplingSize.orElse(graph.nodeCount())
-        );
-        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+        var progressTracker = progressTrackerFromSamplingSize.apply(samplingSize);
 
         var algorithm = new BetweennessCentrality(
             graph,
@@ -163,11 +177,13 @@ public class CentralityAlgorithms {
             ? new WassermanFaustCentralityComputer(graph.nodeCount())
             : new DefaultCentralityComputer();
 
-        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, Tasks.task(
-            AlgorithmLabel.ClosenessCentrality.asString(),
-            Tasks.leaf("Farness computation", graph.nodeCount() * graph.nodeCount()),
-            Tasks.leaf("Closeness computation", graph.nodeCount())
-        ));
+        var progressTracker = progressTrackerCreator.createProgressTracker(
+            configuration, Tasks.task(
+                AlgorithmLabel.ClosenessCentrality.asString(),
+                Tasks.leaf("Farness computation", graph.nodeCount() * graph.nodeCount()),
+                Tasks.leaf("Closeness computation", graph.nodeCount())
+            )
+        );
 
         var algorithm = new ClosenessCentrality(
             graph,
@@ -257,7 +273,7 @@ public class CentralityAlgorithms {
         return eigenvector.compute();
     }
 
-    HarmonicResult harmonicCentrality(Graph graph, HarmonicCentralityBaseConfig configuration) {
+    HarmonicResult harmonicCentrality(Graph graph, AlgoBaseConfig configuration) {
         var task = Tasks.leaf(AlgorithmLabel.HarmonicCentrality.asString());
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
@@ -289,7 +305,7 @@ public class CentralityAlgorithms {
         return pageRank.compute();
     }
 
-    private ArticleRankComputation articleRankComputation(Graph graph, ArticleRankConfig configuration) {
+    private ArticleRankComputation<ArticleRankConfig> articleRankComputation(Graph graph, ArticleRankConfig configuration) {
         var degreeFunction = DegreeFunctions.pageRankDegreeFunction(
             graph,
             configuration.hasRelationshipWeightProperty(),
@@ -303,10 +319,10 @@ public class CentralityAlgorithms {
 
         double avgDegree = DegreeFunctions.averageDegree(graph, configuration.concurrency());
 
-        return new ArticleRankComputation(configuration, mappedSourceNodes, degreeFunction, avgDegree);
+        return new ArticleRankComputation<>(configuration, mappedSourceNodes, degreeFunction, avgDegree);
     }
 
-    private EigenvectorComputation eigenvectorComputation(Graph graph, EigenvectorConfig configuration) {
+    private EigenvectorComputation<EigenvectorConfig> eigenvectorComputation(Graph graph, EigenvectorConfig configuration) {
         var mappedSourceNodes = new LongScatterSet(configuration.sourceNodes().size());
         configuration.sourceNodes().stream()
             .mapToLong(graph::toMappedNodeId)
@@ -320,7 +336,7 @@ public class CentralityAlgorithms {
             concurrency
         );
 
-        return new EigenvectorComputation(
+        return new EigenvectorComputation<>(
             graph.nodeCount(),
             configuration,
             mappedSourceNodes,
@@ -328,7 +344,7 @@ public class CentralityAlgorithms {
         );
     }
 
-    private PageRankComputation pageRankComputation(Graph graph, PageRankConfig configuration) {
+    private PageRankComputation<PageRankConfig> pageRankComputation(Graph graph, PageRankConfig configuration) {
         var degreeFunction = DegreeFunctions.pageRankDegreeFunction(
             graph,
             configuration.hasRelationshipWeightProperty(), configuration.concurrency()
@@ -339,11 +355,15 @@ public class CentralityAlgorithms {
             .mapToLong(graph::toMappedNodeId)
             .forEach(mappedSourceNodes::add);
 
-        return new PageRankComputation(configuration, mappedSourceNodes, degreeFunction);
+        return new PageRankComputation<>(configuration, mappedSourceNodes, degreeFunction);
     }
 
     PregelResult hits(Graph graph, HitsConfig configuration) {
-        var task = HitsProgressTrackerCreator.progressTask(graph.nodeCount(),configuration.maxIterations(),AlgorithmLabel.HITS.asString());
+        var task = HitsProgressTrackerCreator.progressTask(
+            graph.nodeCount(),
+            configuration.maxIterations(),
+            AlgorithmLabel.HITS.asString()
+        );
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
         var algorithm = new Hits(
@@ -355,5 +375,4 @@ public class CentralityAlgorithms {
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
-
 }
