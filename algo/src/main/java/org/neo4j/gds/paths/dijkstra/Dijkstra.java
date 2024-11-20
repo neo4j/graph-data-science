@@ -70,29 +70,6 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
     private RelationshipFilter relationshipFilter = (sourceId, targetId, relationshipId) -> true;
 
     /**
-     * @deprecated Use the other one, with termination flag
-     */
-    @Deprecated
-    public static Dijkstra sourceTarget(
-        Graph graph,
-        long originalNodeId,
-        Collection<Long> targetsList,
-        boolean trackRelationships,
-        Optional<HeuristicFunction> heuristicFunction,
-        ProgressTracker progressTracker
-    ) {
-        return sourceTarget(
-            graph,
-            originalNodeId,
-            targetsList,
-            trackRelationships,
-            heuristicFunction,
-            progressTracker,
-            TerminationFlag.RUNNING_TRUE
-        );
-    }
-
-    /**
      * Configure Dijkstra to compute at most one source-target shortest path.
      */
     public static Dijkstra sourceTarget(

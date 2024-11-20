@@ -40,6 +40,7 @@ import org.neo4j.gds.paths.ImmutablePathResult;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfigImpl;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfigImpl;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -104,14 +105,14 @@ final class DijkstraTest {
                 .targetNode(graph.toOriginalNodeId("a"))
                 .build();
 
-            var paths = Dijkstra
-                .sourceTarget(
+            var paths = Dijkstra.sourceTarget(
                     graph,
                     config.sourceNode(),
                     config.targetsList(),
                     false,
                     Optional.empty(),
-                    ProgressTracker.NULL_TRACKER
+                    ProgressTracker.NULL_TRACKER,
+                    TerminationFlag.RUNNING_TRUE
                 )
                 .compute()
                 .pathSet();
@@ -128,14 +129,14 @@ final class DijkstraTest {
                 .targetNode(graph.toOriginalNodeId("f"))
                 .build();
 
-            var path = Dijkstra
-                .sourceTarget(
+            var path = Dijkstra.sourceTarget(
                     graph,
                     config.sourceNode(),
                     config.targetsList(),
                     false,
                     Optional.empty(),
-                    ProgressTracker.NULL_TRACKER
+                    ProgressTracker.NULL_TRACKER,
+                    TerminationFlag.RUNNING_TRUE
                 )
                 .compute()
                 .findFirst()
@@ -157,14 +158,14 @@ final class DijkstraTest {
                 .targetNode(targetNode)
                 .build();
 
-            var dijkstra = Dijkstra
-                .sourceTarget(
+            var dijkstra = Dijkstra.sourceTarget(
                     graph,
                     config.sourceNode(),
                     config.targetsList(),
                     false,
                     Optional.empty(),
-                    ProgressTracker.NULL_TRACKER
+                    ProgressTracker.NULL_TRACKER,
+                    TerminationFlag.RUNNING_TRUE
                 )
                 .withRelationshipFilter(relationshipFilter);
             var paths = dijkstra
@@ -188,14 +189,14 @@ final class DijkstraTest {
                 .targetNode(graph.toOriginalNodeId("f"))
                 .build();
 
-            var path = Dijkstra
-                .sourceTarget(
+            var path = Dijkstra.sourceTarget(
                     graph,
                     config.sourceNode(),
                     config.targetsList(),
                     true,
                     Optional.empty(),
-                    ProgressTracker.NULL_TRACKER
+                    ProgressTracker.NULL_TRACKER,
+                    TerminationFlag.RUNNING_TRUE
                 )
                 .compute()
                 .findFirst()
@@ -296,7 +297,8 @@ final class DijkstraTest {
                     config.targetsList(),
                     false,
                     Optional.empty(),
-                    progressTracker
+                    progressTracker,
+                    TerminationFlag.RUNNING_TRUE
                 )
                 .compute()
                 .pathSet();
@@ -359,14 +361,14 @@ final class DijkstraTest {
                 .targetNode(graph.toOriginalNodeId("n7"))
                 .build();
 
-            var path = Dijkstra
-                .sourceTarget(
+            var path = Dijkstra.sourceTarget(
                     graph,
                     config.sourceNode(),
                     config.targetsList(),
                     false,
                     Optional.empty(),
-                    ProgressTracker.NULL_TRACKER
+                    ProgressTracker.NULL_TRACKER,
+                    TerminationFlag.RUNNING_TRUE
                 )
                 .compute()
                 .findFirst()
@@ -386,14 +388,14 @@ final class DijkstraTest {
                 .targetNodes(List.of(graph.toOriginalNodeId(n7), graph.toOriginalNodeId(n6)))
                 .build();
 
-            var path = Dijkstra
-                .sourceTarget(
+            var path = Dijkstra.sourceTarget(
                     graph,
                     config.sourceNode(),
                     config.targetsList(),
                     false,
                     Optional.empty(),
-                    ProgressTracker.NULL_TRACKER
+                    ProgressTracker.NULL_TRACKER,
+                    TerminationFlag.RUNNING_TRUE
                 )
                 .compute().pathSet().stream().map(PathResult::targetNode).collect(Collectors.toList());
 
@@ -473,14 +475,14 @@ final class DijkstraTest {
                 return graph.nodeProperties("distance").doubleValue(nodeId);
             };
 
-            var path = Dijkstra
-                .sourceTarget(
+            var path = Dijkstra.sourceTarget(
                     graph,
                     config.sourceNode(),
                     config.targetsList(),
                     false,
                     Optional.of(heuristicFunction),
-                    ProgressTracker.NULL_TRACKER
+                    ProgressTracker.NULL_TRACKER,
+                    TerminationFlag.RUNNING_TRUE
                 )
                 .compute()
                 .findFirst()

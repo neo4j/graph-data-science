@@ -28,6 +28,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraBaseConfig;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 
@@ -68,7 +69,8 @@ public abstract class DijkstraFactory<CONFIG extends DijkstraBaseConfig> extends
                 configuration.targetsList(),
                 false,
                 Optional.empty(),
-                progressTracker
+                progressTracker,
+                TerminationFlag.RUNNING_TRUE
             );
         }
     }
