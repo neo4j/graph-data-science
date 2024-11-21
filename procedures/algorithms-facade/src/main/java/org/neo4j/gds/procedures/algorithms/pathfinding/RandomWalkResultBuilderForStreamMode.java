@@ -60,7 +60,8 @@ class RandomWalkResultBuilderForStreamMode implements StreamResultBuilder<Stream
     ) {
         if (result.isEmpty()) return Stream.empty();
 
-        Function<List<Long>, Path> pathCreator = returnPath
+        boolean constructPath = returnPath && graphStore.capabilities().canWriteToLocalDatabase();
+        Function<List<Long>, Path> pathCreator = constructPath
             ? (List<Long> nodes) -> PathFactory.create(nodeLookup, nodes, RelationshipType.withName(
             RELATIONSHIP_TYPE_NAME))
             : (List<Long> nodes) -> null;
