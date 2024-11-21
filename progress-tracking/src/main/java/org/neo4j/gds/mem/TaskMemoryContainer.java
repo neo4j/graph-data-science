@@ -23,6 +23,9 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.UserTask;
 
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
@@ -42,7 +45,7 @@ class TaskMemoryContainer {
 
     long removeTask(UserTask task){
          var mem=  memoryInUse.getOrDefault(task.username(), EMPTY_HASH_MAP).remove(task.jobId()).getRight();
-         allocatedMemory.addAndGet(mem);
+         allocatedMemory.addAndGet(-mem);
          return  mem;
     }
 
@@ -53,13 +56,31 @@ class TaskMemoryContainer {
     Stream<UserEntityMemory> listTasks(String user){
         return  memoryInUse
             .getOrDefault(user, EMPTY_HASH_MAP)
-            .values()
+            .entrySet()
             .stream()
-            .map(stringLongPair -> new UserEntityMemory(user, stringLongPair.getLeft(), stringLongPair.getRight()));
+            .map(
+                jobIdPairEntry
+                ->  UserEntityMemory.createTask(user, jobIdPairEntry.getValue().getLeft(), jobIdPairEntry.getKey(),jobIdPairEntry.getValue().getRight()));
     }
 
     Stream<UserEntityMemory> listTasks(){
         return  memoryInUse.keySet().stream().flatMap(this::listTasks);
+    }
+
+    long memoryOfTasks(String user){
+        return  memoryInUse
+            .getOrDefault(user, EMPTY_HASH_MAP)
+            .values()
+            .stream()
+            .map(Pair::getRight)
+            .reduce(0L, Long::sum);
+
+    }
+
+    Set<String> taskUsers(Optional<Set<String>> inputUsers){
+        Set<String> users = inputUsers.orElseGet(HashSet::new);
+        users.addAll(memoryInUse.keySet());
+        return  users;
     }
 
 }

@@ -53,7 +53,7 @@ class GraphStoreMemoryContainerTest {
         graphStoreMemoryContainer.addGraph(new GraphStoreAddedEvent("Bob","DB","graph3",20));
         var aliceList =graphStoreMemoryContainer.listGraphs("Alice").toList();
         assertThat(aliceList).hasSize(2);
-        assertThat(aliceList.stream().map(UserEntityMemory::entity).toList()).containsExactlyInAnyOrder("graph1","graph2");
+        assertThat(aliceList.stream().map(UserEntityMemory::name).toList()).containsExactlyInAnyOrder("graph1","graph2");
         assertThat(aliceList.stream().map(UserEntityMemory::memoryInBytes).toList()).containsExactlyInAnyOrder(10L,15L);
 
     }
@@ -67,9 +67,21 @@ class GraphStoreMemoryContainerTest {
         graphStoreMemoryContainer.addGraph(new GraphStoreAddedEvent("Bob","DB","graph3",20));
         var graphList =graphStoreMemoryContainer.listGraphs().toList();
         assertThat(graphList).hasSize(3);
-        assertThat(graphList.stream().map(UserEntityMemory::entity).toList()).containsExactlyInAnyOrder("graph1","graph2","graph3");
+        assertThat(graphList.stream().map(UserEntityMemory::name).toList()).containsExactlyInAnyOrder("graph1","graph2","graph3");
         assertThat(graphList.stream().map(UserEntityMemory::memoryInBytes).toList()).containsExactlyInAnyOrder(10L,15L,20L);
 
     }
+
+    @Test
+    void shouldReturnMemoryForUser(){
+        GraphStoreMemoryContainer graphStoreMemoryContainer=new GraphStoreMemoryContainer();
+        graphStoreMemoryContainer.addGraph(new GraphStoreAddedEvent("Alice","DB","graph1",10));
+        graphStoreMemoryContainer.addGraph(new GraphStoreAddedEvent("Alice","DB","graph2",15));
+
+        graphStoreMemoryContainer.addGraph(new GraphStoreAddedEvent("Bob","DB","graph3",20));
+        assertThat(graphStoreMemoryContainer.memoryOfGraphs("Alice")).isEqualTo(25L);
+    }
+
+
 
 }

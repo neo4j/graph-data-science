@@ -19,15 +19,5 @@
  */
 package org.neo4j.gds.mem;
 
-import org.neo4j.gds.core.utils.progress.JobId;
+public record UserMemorySummary(String user, long totalGraphMemory, long totalTasksMemory) {}
 
-public record UserEntityMemory(String user, String name, String entity, long memoryInBytes) {
-
-    static UserEntityMemory createGraph(String user, String name, long memoryInBytes){
-        return  new UserEntityMemory(user,name,"graph",memoryInBytes);
-    }
-    static UserEntityMemory createTask(String user, String name,  JobId jobId, long memoryInBytes){
-        return  new UserEntityMemory(user, name, jobId.asString(), memoryInBytes);
-    }
-
-}

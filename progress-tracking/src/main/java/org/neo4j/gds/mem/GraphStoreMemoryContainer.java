@@ -22,6 +22,9 @@ package org.neo4j.gds.mem;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreAddedEvent;
 import org.neo4j.gds.api.graph.store.catalog.GraphStoreRemovedEvent;
 
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
@@ -56,11 +59,25 @@ class GraphStoreMemoryContainer {
             .getOrDefault(user, EMPTY_HASH_MAP)
             .entrySet()
             .stream()
-            .map( entry -> new UserEntityMemory(user, entry.getKey(), entry.getValue()));
+            .map( entry ->  UserEntityMemory.createGraph(user, entry.getKey(), entry.getValue()));
     }
 
     Stream<UserEntityMemory> listGraphs(){
        return   graphStoresMemory.keySet().stream().flatMap(this::listGraphs);
+    }
+
+    long memoryOfGraphs(String user){
+        return   graphStoresMemory
+            .getOrDefault(user, EMPTY_HASH_MAP)
+            .values()
+            .stream()
+            .reduce(0L, Long::sum);
+    }
+
+    Set<String> graphUsers(Optional<Set<String>> inputUsers){
+            Set<String> users = inputUsers.orElseGet(HashSet::new);
+            users.addAll(graphStoresMemory.keySet());
+            return  users;
     }
 
 }

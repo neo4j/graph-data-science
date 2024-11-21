@@ -28,6 +28,9 @@ import org.neo4j.gds.core.utils.progress.TaskStoreListener;
 import org.neo4j.gds.core.utils.progress.UserTask;
 import org.neo4j.gds.logging.Log;
 
+import java.util.Optional;
+import java.util.stream.Stream;
+
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class MemoryTracker implements TaskStoreListener, GraphStoreAddedEventListener, GraphStoreRemovedEventListener {
@@ -62,6 +65,34 @@ public class MemoryTracker implements TaskStoreListener, GraphStoreAddedEventLis
 
     public synchronized long availableMemory() {
         return initialMemory - graphStoreMemoryContainer.graphStoreReservedMemory() - taskMemoryContainer.taskReservedMemory();
+    }
+
+    public Stream<UserEntityMemory> listUser(String user){
+        return  Stream.concat(taskMemoryContainer.listTasks(user), graphStoreMemoryContainer.listGraphs(user));
+    }
+
+    public Stream<UserEntityMemory> listAll(){
+        return  Stream.concat(taskMemoryContainer.listTasks(), graphStoreMemoryContainer.listGraphs());
+    }
+
+    public UserMemorySummary memorySummary(String user){
+        return  new UserMemorySummary(user,
+            graphStoreMemoryContainer.memoryOfGraphs(user),
+            taskMemoryContainer.memoryOfTasks(user)
+        );
+    }
+
+    public Stream<UserMemorySummary> memorySummary(){
+
+        var  users = graphStoreMemoryContainer.graphUsers(Optional.empty());
+        users= taskMemoryContainer.taskUsers(Optional.of(users));
+
+        return  users.stream()
+            .map(user -> new UserMemorySummary(
+                user,
+                graphStoreMemoryContainer.memoryOfGraphs(user),
+                taskMemoryContainer.memoryOfTasks(user)
+            ));
     }
 
     @Override
