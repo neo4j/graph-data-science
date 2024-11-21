@@ -25,14 +25,11 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.applications.algorithms.machinery.StreamResultBuilder;
-import org.neo4j.gds.paths.PathFactory;
-import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.RelationshipType;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.procedures.algorithms.pathfinding.RandomWalkStreamResult.RELATIONSHIP_TYPE_NAME;
@@ -60,17 +57,14 @@ class RandomWalkResultBuilderForStreamMode implements StreamResultBuilder<Stream
     ) {
         if (result.isEmpty()) return Stream.empty();
 
-        boolean constructPath = returnPath && graphStore.capabilities().canWriteToLocalDatabase();
-        Function<List<Long>, Path> pathCreator = constructPath
-            ? (List<Long> nodes) -> PathFactory.create(nodeLookup, nodes, RelationshipType.withName(
-            RELATIONSHIP_TYPE_NAME))
-            : (List<Long> nodes) -> null;
+
+        var  pathFactoryFacade = PathFactoryFacade.create(returnPath,nodeLookup,graphStore);
 
         var streamOfLongArrays = result.get();
 
         var resultStream = streamOfLongArrays.map(nodes -> {
             var translatedNodes = translateInternalToNeoIds(nodes, graph);
-            var path = pathCreator.apply(translatedNodes);
+            var path = pathFactoryFacade.createPath(translatedNodes, RelationshipType.withName(RELATIONSHIP_TYPE_NAME));
             return new RandomWalkStreamResult(translatedNodes, path);
         });
 

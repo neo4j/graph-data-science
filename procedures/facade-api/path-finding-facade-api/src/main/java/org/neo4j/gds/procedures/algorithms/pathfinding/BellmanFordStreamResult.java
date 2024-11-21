@@ -19,14 +19,9 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.graphdb.Path;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public final class BellmanFordStreamResult {
 
@@ -66,48 +61,6 @@ public final class BellmanFordStreamResult {
         this.isNegativeCycle = isNegativeCycle;
     }
 
-    public static class Builder {
-        private final IdMap idMap;
-        private final NodeLookup nodeLookup;
-        private boolean isCycle;
 
-        public Builder(IdMap idMap, NodeLookup nodeLookup) {
-            this.idMap = idMap;
-            this.nodeLookup = nodeLookup;
-        }
 
-        public Builder withIsCycle(boolean isCycle) {
-            this.isCycle = isCycle;
-            return this;
-        }
-
-        public BellmanFordStreamResult build(long[] nodeIds, double[] costs, long pathIndex, long sourceNode, long targetNode, double totalCost, boolean createCypherPath) {
-            // convert internal ids to Neo ids
-            for (int i = 0; i < nodeIds.length; i++) {
-                nodeIds[i] = idMap.toOriginalNodeId(nodeIds[i]);
-            }
-
-            Path path = null;
-            if (createCypherPath) {
-                path = StandardStreamPathCreator.create(
-                    nodeLookup,
-                    nodeIds,
-                    costs,
-                    pathIndex
-                );
-            }
-
-            return new BellmanFordStreamResult(
-                pathIndex,
-                idMap.toOriginalNodeId(sourceNode),
-                idMap.toOriginalNodeId(targetNode),
-                totalCost,
-                // 😿
-                Arrays.stream(nodeIds).boxed().collect(Collectors.toCollection(() -> new ArrayList<>(nodeIds.length))),
-                Arrays.stream(costs).boxed().collect(Collectors.toCollection(() -> new ArrayList<>(costs.length))),
-                path,
-                isCycle
-            );
-        }
-    }
 }

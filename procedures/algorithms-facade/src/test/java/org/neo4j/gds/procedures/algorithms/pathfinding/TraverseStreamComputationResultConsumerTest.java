@@ -31,25 +31,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyNoInteractions;
 
 class TraverseStreamComputationResultConsumerTest {
 
     @Test
     void shouldNotComputePath() {
-        var pathFactoryFacadeMock = mock(PathFactoryFacade.class);
+        var pathFactoryFacade = PathFactoryFacade.create(false,null,null);
         var result = TraverseStreamComputationResultConsumer.consume(
             0L,
             HugeLongArray.of(1L, 2L),
             l -> l,
             TestResult::new,
-            false,
-            pathFactoryFacadeMock,
+            pathFactoryFacade,
             RelationshipType.withName("TEST"),
             mock(InternalTransaction.class)::getNodeById
         );
 
-        verifyNoInteractions(pathFactoryFacadeMock);
 
         assertThat(result)
             .hasSize(1)
@@ -63,13 +60,12 @@ class TraverseStreamComputationResultConsumerTest {
     @Test
     void shouldComputePath() {
         var pathFactoryFacadeMock = mock(PathFactoryFacade.class);
-        doReturn(mock(Path.class)).when(pathFactoryFacadeMock).createPath(any(), any(), any());
+        doReturn(mock(Path.class)).when(pathFactoryFacadeMock).createPath(any(), any());
         var result = TraverseStreamComputationResultConsumer.consume(
             0L,
             HugeLongArray.of(1L, 2L),
             l -> l,
             TestResult::new,
-            true,
             pathFactoryFacadeMock,
             RelationshipType.withName("TEST"),
             mock(InternalTransaction.class)::getNodeById

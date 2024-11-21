@@ -59,48 +59,4 @@ public final class PathFindingStreamResult {
         this.path = path;
     }
 
-//    public static class Builder {
-//        private final IdMap idMap;
-//        private final NodeLookup nodeLookup;
-//
-//        public Builder(IdMap idMap, NodeLookup nodeLookup) {
-//            this.idMap = idMap;
-//            this.nodeLookup = nodeLookup;
-//        }
-//
-//        public PathFindingStreamResult build(PathResult pathResult, boolean createCypherPath) {
-//            var nodeIds = pathResult.nodeIds();
-//            var costs = pathResult.costs();
-//            var pathIndex = pathResult.index();
-//
-//
-//            // convert internal ids to Neo ids
-//            for (int i = 0; i < nodeIds.length; i++) {
-//                nodeIds[i] = idMap.toOriginalNodeId(nodeIds[i]);
-//            }
-//
-//            Path path = null;
-//            if (createCypherPath) {
-//                    path = StandardStreamPathCreator.create(
-//                        nodeLookup,
-//                        nodeIds,
-//                        costs,
-//                        pathIndex
-//                    );
-//
-//
-//            }
-//
-//            return new PathFindingStreamResult(
-//                pathIndex,
-//                idMap.toOriginalNodeId(pathResult.sourceNode()),
-//                idMap.toOriginalNodeId(pathResult.targetNode()),
-//                pathResult.totalCost(),
-//                // 😿
-//                Arrays.stream(nodeIds).boxed().collect(Collectors.toCollection(() -> new ArrayList<>(nodeIds.length))),
-//                Arrays.stream(costs).boxed().collect(Collectors.toCollection(() -> new ArrayList<>(costs.length))),
-//                path
-//            );
-//        }
-//    }
 }
