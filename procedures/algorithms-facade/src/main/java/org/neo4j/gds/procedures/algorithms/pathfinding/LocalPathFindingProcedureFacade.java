@@ -468,7 +468,7 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
 
     @Override
     public Stream<PathFindingStreamResult> deltaSteppingStream(String graphName, Map<String, Object> configuration) {
-        var resultBuilder = new PathFindingResultBuilderForStreamMode<AllShortestPathsDeltaStreamConfig>(
+        var resultBuilder = new PathFindingResultBuilderForStreamMode(
             closeableResourceRegistry,
             nodeLookup,
             procedureReturnColumns.contains("path")
@@ -562,7 +562,7 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
 
     @Override
     public Stream<PathFindingStreamResult> longestPathStream(String graphName, Map<String, Object> configuration) {
-        var resultBuilder = new PathFindingResultBuilderForStreamMode<DagLongestPathStreamConfig>(
+        var resultBuilder = new PathFindingResultBuilderForStreamMode(
             closeableResourceRegistry,
             nodeLookup,
             procedureReturnColumns.contains("path")
@@ -646,7 +646,7 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
         String graphName,
         Map<String, Object> configuration
     ) {
-        var resultBuilder = new PathFindingResultBuilderForStreamMode<ShortestPathAStarStreamConfig>(
+        var resultBuilder = new PathFindingResultBuilderForStreamMode(
             closeableResourceRegistry,
             nodeLookup,
             procedureReturnColumns.contains("path")
@@ -710,7 +710,7 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
         String graphName,
         Map<String, Object> configuration
     ) {
-        var resultBuilder = new PathFindingResultBuilderForStreamMode<ShortestPathDijkstraStreamConfig>(
+        var resultBuilder = new PathFindingResultBuilderForStreamMode(
             closeableResourceRegistry,
             nodeLookup,
             procedureReturnColumns.contains("path")
@@ -774,7 +774,7 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
         String graphName,
         Map<String, Object> configuration
     ) {
-        var resultBuilder = new PathFindingResultBuilderForStreamMode<ShortestPathYensStreamConfig>(
+        var resultBuilder = new PathFindingResultBuilderForStreamMode(
             closeableResourceRegistry,
             nodeLookup,
             procedureReturnColumns.contains("path")
@@ -838,7 +838,7 @@ public final class LocalPathFindingProcedureFacade implements PathFindingProcedu
         String graphName,
         Map<String, Object> configuration
     ) {
-        var resultBuilder = new PathFindingResultBuilderForStreamMode<AllShortestPathsDijkstraStreamConfig>(
+        var resultBuilder = new PathFindingResultBuilderForStreamMode(
             closeableResourceRegistry,
             nodeLookup,
             procedureReturnColumns.contains("path")

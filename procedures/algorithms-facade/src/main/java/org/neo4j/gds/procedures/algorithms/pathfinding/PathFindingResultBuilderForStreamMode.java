@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class PathFindingResultBuilderForStreamMode<CONFIGURATION> implements StreamResultBuilder<PathFindingResult, PathFindingStreamResult> {
+public class PathFindingResultBuilderForStreamMode implements StreamResultBuilder<PathFindingResult, PathFindingStreamResult> {
     private final CloseableResourceRegistry closeableResourceRegistry;
     private final NodeLookup nodeLookup;
     private final boolean pathRequested;
