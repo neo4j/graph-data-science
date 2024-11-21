@@ -18,9 +18,18 @@ dependencies {
     implementation project(":model-catalog-api")
     implementation project(":model-catalog-applications")
     implementation project(":node-embeddings-configs")
-    // TODO: the `:path-finding-configs` is needed because it's indirectly used by `node2vec` parameters.
     implementation project(':path-finding-configs')
     implementation project(":progress-tracking")
     implementation project(":string-formatting")
     implementation project(":termination")
+
+    testImplementation platform(openGds.junit5bom)
+    testImplementation openGds.junit5.jupiter.api
+    testImplementation openGds.junit5.jupiter.params
+    testImplementation openGds.mockito.junit.jupiter
+    testImplementation openGds.assertj.core
+
+    testRuntimeOnly openGds.junit5.jupiter.engine
+
+    testImplementation project(':test-utils')
 }

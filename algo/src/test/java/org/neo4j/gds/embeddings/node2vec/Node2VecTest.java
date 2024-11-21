@@ -25,20 +25,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
-import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.ArrayIdMap;
@@ -46,14 +43,12 @@ import org.neo4j.gds.core.loading.LabelInformationBuilders;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.Intersections;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.shuffle.ShuffleUtil;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
-import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -65,7 +60,6 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 @ExtendWith(SoftAssertionsExtension.class)
 @GdlExtension
@@ -131,77 +125,6 @@ class Node2VecTest {
                 return true;
             }
         );
-    }
-
-    @ParameterizedTest
-    @CsvSource(value = {
-        "true,4",
-        "false,3"
-    })
-    void shouldLogProgress(boolean relationshipWeights, int expectedProgresses) {
-        Graph currentGraph;
-        if (relationshipWeights) {
-            currentGraph = graph;
-        } else {
-            currentGraph = graphStore.getGraph(RelationshipType.of("REL"), Optional.empty());
-        }
-
-        int embeddingDimension = 128;
-        Node2VecStreamConfig config = Node2VecStreamConfigImpl
-            .builder()
-            .embeddingDimension(embeddingDimension)
-            .build();
-        var progressTask = new Node2VecAlgorithmFactory<>().progressTask(currentGraph, config);
-
-        var walkParameters = new SamplingWalkParameters(10, 80, 1.0, 1.0, 0.001, 0.75);
-        var trainParameters = new TrainParameters(
-            0.025,
-            0.0001,
-            1,
-            10,
-            5,
-            embeddingDimension,
-            EmbeddingInitializer.NORMALIZED
-        );
-        var concurrency = new Concurrency(4);
-        var log = new GdsTestLog();
-        var progressTracker = new TestProgressTracker(progressTask, log, concurrency, EmptyTaskRegistryFactory.INSTANCE);
-        new Node2Vec(
-            currentGraph,
-            concurrency,
-            NO_SOURCE_NODES,
-            NO_RANDOM_SEED,
-            1000,
-            new Node2VecParameters(walkParameters, trainParameters),
-            progressTracker,
-            TerminationFlag.RUNNING_TRUE
-        ).compute();
-
-        assertThat(log.getMessages(TestLog.INFO))
-            .extracting(removingThreadId())
-            .contains(
-                "Node2Vec :: Start",
-                "Node2Vec :: RandomWalk :: Start",
-                "Node2Vec :: RandomWalk :: create walks :: Start",
-                "Node2Vec :: RandomWalk :: create walks 100%",
-                "Node2Vec :: RandomWalk :: create walks :: Finished",
-                "Node2Vec :: RandomWalk :: Finished",
-                "Node2Vec :: train :: Start",
-                "Node2Vec :: train :: iteration 1 of 1 :: Start",
-                "Node2Vec :: train :: iteration 1 of 1 100%",
-                "Node2Vec :: train :: iteration 1 of 1 :: Finished",
-                "Node2Vec :: train :: Finished",
-                "Node2Vec :: Finished"
-            );
-
-        if (relationshipWeights) {
-            assertThat(log.getMessages(TestLog.INFO))
-                .extracting(removingThreadId())
-                .contains(
-                    "Node2Vec :: RandomWalk :: DegreeCentrality :: Start",
-                    "Node2Vec :: RandomWalk :: DegreeCentrality :: Finished"
-                );
-        }
     }
 
     @Test

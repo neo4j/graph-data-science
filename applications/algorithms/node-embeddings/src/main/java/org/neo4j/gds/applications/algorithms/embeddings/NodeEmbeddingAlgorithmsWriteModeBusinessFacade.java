@@ -48,7 +48,7 @@ public final class NodeEmbeddingAlgorithmsWriteModeBusinessFacade {
     private final WriteToDatabase writeToDatabase;
     private final GraphSageAlgorithmProcessing graphSageAlgorithmProcessing;
 
-    private NodeEmbeddingAlgorithmsWriteModeBusinessFacade(
+    NodeEmbeddingAlgorithmsWriteModeBusinessFacade(
         NodeEmbeddingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         NodeEmbeddingAlgorithms algorithms,
         AlgorithmProcessingTemplateConvenience algorithmProcessingTemplateConvenience,
