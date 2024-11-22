@@ -23,8 +23,10 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.compat.TestLog;
@@ -32,7 +34,6 @@ import org.neo4j.gds.conductance.ConductanceStreamConfigImpl;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -40,13 +41,18 @@ import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.k1coloring.K1ColoringStreamConfigImpl;
 import org.neo4j.gds.kcore.KCoreDecompositionStreamConfigImpl;
 import org.neo4j.gds.kmeans.KmeansStreamConfigImpl;
+import org.neo4j.gds.labelpropagation.LabelPropagationStreamConfigImpl;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -359,20 +365,86 @@ final class CommunityAlgorithmsTest {
                 );
         }
     }
+    @Nested
+    @GdlExtension
+    class LabelPropagation{
 
-    static  ProgressTrackerCreator progressTrackerCreator(int concurrency, Log log) {
+        @GdlGraph
+        private static final String GRAPH =
+            "CREATE" +
+                "  (nAlice:User   {seedId: 2})" +
+                ", (nBridget:User {seedId: 3})" +
+                ", (nCharles:User {seedId: 4})" +
+                ", (nDoug:User    {seedId: 3})" +
+                ", (nMark:User    {seedId: 4})" +
+                ", (nMichael:User {seedId: 2})" +
+                ", (nAlice)-[:FOLLOW]->(nBridget)" +
+                ", (nAlice)-[:FOLLOW]->(nCharles)" +
+                ", (nMark)-[:FOLLOW]->(nDoug)" +
+                ", (nBridget)-[:FOLLOW]->(nMichael)" +
+                ", (nDoug)-[:FOLLOW]->(nMark)" +
+                ", (nMichael)-[:FOLLOW]->(nAlice)" +
+                ", (nAlice)-[:FOLLOW]->(nMichael)" +
+                ", (nBridget)-[:FOLLOW]->(nAlice)" +
+                ", (nMichael)-[:FOLLOW]->(nBridget)" +
+                ", (nCharles)-[:FOLLOW]->(nDoug)";
 
-        var progressTrackerCreator = mock(ProgressTrackerCreator.class);
+        @Inject
+        private TestGraph graph;
+
+        @Test
+        void shouldLogProgress() {
+            var config = LabelPropagationStreamConfigImpl.builder().build();
+            var log = new GdsTestLog();
+            var progressTrackerCreator = progressTrackerCreator(1,log);
+
+            var algorithms = new CommunityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
+            var result = algorithms.labelPropagation(graph,config);
+            var testTracker = progressTrackerCreator.progressTracker().get();
+            List<AtomicLong> progresses = testTracker.getProgresses();
+
+            // Should log progress for every iteration + init step
+            assertEquals(result.ranIterations() + 3, progresses.size());
+            progresses.forEach(progress -> assertTrue(progress.get() <= graph.relationshipCount()));
+            assertTrue(log.containsMessage(TestLog.INFO, ":: Start"));
+            LongStream.range(1, result.ranIterations() + 1).forEach(iteration -> {
+                assertTrue(log.containsMessage(TestLog.INFO, "Iteration %d of %d :: Start".formatted(iteration, config.maxIterations())));
+            });
+            assertTrue(log.containsMessage(TestLog.INFO, ":: Finished"));
+        }
+    }
+
+
+    abstract static class TestProgressTrackerCreator  extends   ProgressTrackerCreator {
+
+        public TestProgressTrackerCreator(Log log, RequestScopedDependencies requestScopedDependencies) {
+            super(log, requestScopedDependencies);
+        }
+
+        abstract AtomicReference<TestProgressTracker>  progressTracker();
+
+    }
+
+TestProgressTrackerCreator progressTrackerCreator(int concurrency, Log log) {
+
+    AtomicReference<TestProgressTracker> progressTrackerAtomicReference=new AtomicReference<>();
+        var progressTrackerCreator = mock(TestProgressTrackerCreator.class);
         when(progressTrackerCreator.createProgressTracker(any(), any(Task.class))).then(
             i ->
-                new TaskProgressTracker(
+            {
+                var taskProgressTracker = new TestProgressTracker(
                     i.getArgument(1),
                     log,
                     new Concurrency(concurrency),
                     EmptyTaskRegistryFactory.INSTANCE
-                )
+                );
+                progressTrackerAtomicReference.set(taskProgressTracker);
+                return taskProgressTracker;
+            }
         );
-        return progressTrackerCreator;
+    when(progressTrackerCreator.progressTracker()).thenReturn(progressTrackerAtomicReference);
+
+    return progressTrackerCreator;
     }
 
 }
