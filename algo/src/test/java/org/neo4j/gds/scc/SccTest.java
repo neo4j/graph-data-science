@@ -20,26 +20,19 @@
 package org.neo4j.gds.scc;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.HashMap;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.assertj.Extractors.removingThreadId;
-import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 @GdlExtension
 class SccTest {
@@ -142,37 +135,6 @@ class SccTest {
             }
             assertThat(components.get(node)).isNotEqualTo(component);
         }
-    }
-
-    @Test
-    void shouldLogProgress() {
-        var config = SccStreamConfigImpl.builder().build();
-        var factory = new SccAlgorithmFactory<>();
-        var log = new GdsTestLog();
-        var progressTracker = new TestProgressTracker(
-            factory.progressTask(graph, config),
-            log,
-            new Concurrency(4),
-            EmptyTaskRegistryFactory.INSTANCE
-        );
-        factory.build(graph, config, progressTracker).compute();
-
-        assertThat(log.getMessages(TestLog.INFO))
-            .extracting(removingThreadId())
-            .extracting(replaceTimings())
-            .containsExactly(
-                "Scc :: Start",
-                "Scc 11%",
-                "Scc 22%",
-                "Scc 33%",
-                "Scc 44%",
-                "Scc 55%",
-                "Scc 66%",
-                "Scc 77%",
-                "Scc 88%",
-                "Scc 100%",
-                "Scc :: Finished"
-            );
     }
 
 }

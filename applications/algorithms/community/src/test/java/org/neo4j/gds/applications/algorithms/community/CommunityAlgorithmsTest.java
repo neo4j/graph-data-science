@@ -54,6 +54,7 @@ import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.louvain.LouvainStreamConfigImpl;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfigImpl;
+import org.neo4j.gds.scc.SccStreamConfigImpl;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfigImpl;
 
@@ -677,7 +678,7 @@ final class CommunityAlgorithmsTest {
             var log = new GdsTestLog();
             var config = ModularityOptimizationStreamConfigImpl.builder().maxIterations(K1COLORING_MAX_ITERATIONS).concurrency(new Concurrency(3)).batchSize(2).build();
 
-            var progressTrackerCreator = progressTrackerCreator(1,log);
+            var progressTrackerCreator = progressTrackerCreator(2,log);
 
             var algorithms = new CommunityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
             algorithms.modularityOptimization(graph,config);
@@ -695,6 +696,67 @@ final class CommunityAlgorithmsTest {
                 );
         }
 
+    }
+    @Nested
+    @GdlExtension
+    class Scc{
+
+        @GdlGraph
+        private static final String DB_CYPHER =
+            "CREATE" +
+                "  (a:Node)" +
+                ", (b:Node)" +
+                ", (c:Node)" +
+                ", (d:Node)" +
+                ", (e:Node)" +
+                ", (f:Node)" +
+                ", (g:Node)" +
+                ", (h:Node)" +
+                ", (i:Node)" +
+
+                ", (a)-[:TYPE {cost: 5}]->(b)" +
+                ", (b)-[:TYPE {cost: 5}]->(c)" +
+                ", (c)-[:TYPE {cost: 5}]->(a)" +
+
+                ", (d)-[:TYPE {cost: 2}]->(e)" +
+                ", (e)-[:TYPE {cost: 2}]->(f)" +
+                ", (f)-[:TYPE {cost: 2}]->(d)" +
+
+                ", (a)-[:TYPE {cost: 2}]->(d)" +
+
+                ", (g)-[:TYPE {cost: 3}]->(h)" +
+                ", (h)-[:TYPE {cost: 3}]->(i)" +
+                ", (i)-[:TYPE {cost: 3}]->(g)";
+
+        @Inject
+        private TestGraph graph;
+
+        @Test
+        void shouldLogProgress() {
+            var config = SccStreamConfigImpl.builder().build();
+            var log = new GdsTestLog();
+
+            var progressTrackerCreator = progressTrackerCreator(1,log);
+
+            var algorithms = new CommunityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
+            algorithms.scc(graph,config);
+            assertThat(log.getMessages(TestLog.INFO))
+                .extracting(removingThreadId())
+                .extracting(replaceTimings())
+                .containsExactly(
+                    "SCC :: Start",
+                    "SCC 11%",
+                    "SCC 22%",
+                    "SCC 33%",
+                    "SCC 44%",
+                    "SCC 55%",
+                    "SCC 66%",
+                    "SCC 77%",
+                    "SCC 88%",
+                    "SCC 100%",
+                    "SCC :: Finished"
+                );
+        }
     }
 
     abstract static class TestProgressTrackerCreator  extends   ProgressTrackerCreator {
