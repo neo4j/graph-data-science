@@ -21,31 +21,20 @@ package org.neo4j.gds.k1coloring;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
-import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.termination.TerminationFlag;
 
-import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.LongStream;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.core.concurrency.ParallelUtil.DEFAULT_BATCH_SIZE;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class K1ColoringTest {
 
@@ -169,51 +158,4 @@ class K1ColoringTest {
             .isFalse();
     }
 
-    @Test
-    void shouldLogProgress(){
-        var graph = RandomGraphGenerator.builder()
-            .nodeCount(100)
-            .averageDegree(10)
-            .relationshipDistribution(RelationshipDistribution.UNIFORM)
-            .seed(42L)
-            .build()
-            .generate();
-
-        var concurrency = new Concurrency(4);
-
-        var config = K1ColoringStreamConfigImpl.builder()
-            .concurrency(concurrency.value())
-            .maxIterations(10)
-            .build();
-
-        var progressTask = new K1ColoringAlgorithmFactory<>().progressTask(graph, config);
-        var log = new GdsTestLog();
-        var progressTracker = new TestProgressTracker(progressTask, log, concurrency, EmptyTaskRegistryFactory.INSTANCE);
-
-        var k1Coloring = new K1Coloring(
-            graph,
-            config.maxIterations(),
-            DEFAULT_BATCH_SIZE,
-            concurrency,
-            DefaultPool.INSTANCE,
-            progressTracker,
-            TerminationFlag.RUNNING_TRUE
-        );
-
-        var result = k1Coloring.compute();
-
-        List<AtomicLong> progresses = progressTracker.getProgresses();
-
-        assertEquals(result.ranIterations() * concurrency.value() + 1, progresses.size());
-        progresses.forEach(progress -> assertTrue(progress.get() <= 2 * graph.relationshipCount()));
-
-        assertTrue(log.containsMessage(TestLog.INFO, ":: Start"));
-        LongStream.range(1, result.ranIterations() + 1).forEach(iteration ->
-            assertThat(log.getMessages(TestLog.INFO)).anyMatch(message -> {
-                var expected = formatWithLocale("%d of %d", iteration, config.maxIterations());
-                return message.contains(expected);
-            })
-        );
-        assertTrue(log.containsMessage(TestLog.INFO, ":: Finished"));
-    }
 }

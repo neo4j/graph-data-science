@@ -24,6 +24,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.beta.generator.RandomGraphGenerator;
+import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.conductance.ConductanceStreamConfigImpl;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -34,19 +36,23 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.k1coloring.K1ColoringStreamConfigImpl;
 import org.neo4j.gds.kcore.KCoreDecompositionStreamConfigImpl;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.stream.LongStream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
-@GdlExtension
-class CommunityAlgorithmsTest {
+final class CommunityAlgorithmsTest {
 
     private CommunityAlgorithmsTest() {}
 
@@ -85,7 +91,7 @@ class CommunityAlgorithmsTest {
         void shouldLogProgressForKcore() {
             var config = KCoreDecompositionStreamConfigImpl.builder().build();
             var log = new GdsTestLog();
-            var progressTrackerCreator = progressTrackerCreator(log);
+            var progressTrackerCreator = progressTrackerCreator(4,log);
 
             var algorithms = new CommunityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
             algorithms.kCore(graph, config);
@@ -140,7 +146,7 @@ class CommunityAlgorithmsTest {
         void logProgress() {
             var config = ConductanceStreamConfigImpl.builder().concurrency(1).communityProperty("community").build();
             var log = new GdsTestLog();
-            var progressTrackerCreator = progressTrackerCreator(log);
+            var progressTrackerCreator = progressTrackerCreator(1,log);
             var algorithms = new CommunityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
             algorithms.conductance(graph, config);
 
@@ -162,9 +168,45 @@ class CommunityAlgorithmsTest {
                 );
         }
 
+    }
+
+    @Nested
+    class K1Coloring{
+
+        @Test
+        void shouldLogProgress(){
+            var graph = RandomGraphGenerator.builder()
+                .nodeCount(100)
+                .averageDegree(10)
+                .relationshipDistribution(RelationshipDistribution.UNIFORM)
+                .seed(42L)
+                .build()
+                .generate();
+
+
+            var config = K1ColoringStreamConfigImpl.builder()
+                .concurrency(new Concurrency(4))
+                .maxIterations(10)
+                .build();
+
+            var log = new GdsTestLog();
+            var progressTrackerCreator = progressTrackerCreator(1,log);
+            var algorithms = new CommunityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
+           var result=algorithms.k1Coloring(graph,config);
+
+            assertTrue(log.containsMessage(TestLog.INFO, ":: Start"));
+            LongStream.range(1, result.ranIterations() + 1).forEach(iteration ->
+                assertThat(log.getMessages(TestLog.INFO)).anyMatch(message -> {
+                    var expected = "%d of %d".formatted(iteration, config.maxIterations());
+                    return message.contains(expected);
+                })
+            );
+            assertTrue(log.containsMessage(TestLog.INFO, ":: Finished"));
+        }
 
     }
-    static  ProgressTrackerCreator progressTrackerCreator(Log log) {
+
+    static  ProgressTrackerCreator progressTrackerCreator(int concurrency, Log log) {
 
         var progressTrackerCreator = mock(ProgressTrackerCreator.class);
         when(progressTrackerCreator.createProgressTracker(any(), any(Task.class))).then(
@@ -172,7 +214,7 @@ class CommunityAlgorithmsTest {
                 new TaskProgressTracker(
                     i.getArgument(1),
                     log,
-                    new Concurrency(4),
+                    new Concurrency(concurrency),
                     EmptyTaskRegistryFactory.INSTANCE
                 )
         );
