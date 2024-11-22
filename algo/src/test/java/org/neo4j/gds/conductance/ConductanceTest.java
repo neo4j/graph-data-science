@@ -20,30 +20,23 @@
 package org.neo4j.gds.conductance;
 
 import org.assertj.core.data.Offset;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.logging.GdsTestLog;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.assertj.Extractors.removingThreadId;
-import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 @GdlExtension
 final class ConductanceTest {
@@ -142,36 +135,5 @@ final class ConductanceTest {
         );
     }
 
-    @Test
-    void logProgress() {
-        var parameters = new ConductanceParameters(new Concurrency(1), 10_000, false, "community");
-        var factory = new ConductanceAlgorithmFactory<>();
-        var progressTask = factory.progressTask(naturalGraph.nodeCount());
-        var log = new GdsTestLog();
-        var progressTracker = new TaskProgressTracker(
-            progressTask,
-            log,
-            parameters.concurrency(),
-            EmptyTaskRegistryFactory.INSTANCE
-        );
 
-        factory.build(naturalGraph, parameters, progressTracker).compute();
-
-        assertThat(log.getMessages(TestLog.INFO))
-            .extracting(removingThreadId())
-            .extracting(replaceTimings())
-            .containsExactly(
-                "Conductance :: Start",
-                "Conductance :: count relationships :: Start",
-                "Conductance :: count relationships 100%",
-                "Conductance :: count relationships :: Finished",
-                "Conductance :: accumulate counts :: Start",
-                "Conductance :: accumulate counts 100%",
-                "Conductance :: accumulate counts :: Finished",
-                "Conductance :: perform conductance computations :: Start",
-                "Conductance :: perform conductance computations 100%",
-                "Conductance :: perform conductance computations :: Finished",
-                "Conductance :: Finished"
-            );
-    }
 }
