@@ -20,6 +20,7 @@
 package org.neo4j.gds.applications.algorithms.community;
 
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfigImpl;
 import org.neo4j.gds.assertj.Extractors;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
@@ -122,7 +124,7 @@ final class CommunityAlgorithmsTest {
         void shouldLogProgressForKcore() {
             var config = KCoreDecompositionStreamConfigImpl.builder().build();
             var log = new GdsTestLog();
-            var progressTrackerCreator = progressTrackerCreator(4,log);
+            var progressTrackerCreator = progressTrackerCreator(4, log);
 
             var algorithms = new CommunityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
             algorithms.kCore(graph, config);
@@ -142,7 +144,7 @@ final class CommunityAlgorithmsTest {
 
     @GdlExtension
     @Nested
-    class Conductance{
+    class Conductance {
 
         @GdlGraph(orientation = Orientation.NATURAL)
         private static final String TEST_GRAPH =
@@ -177,7 +179,7 @@ final class CommunityAlgorithmsTest {
         void logProgress() {
             var config = ConductanceStreamConfigImpl.builder().concurrency(1).communityProperty("community").build();
             var log = new GdsTestLog();
-            var progressTrackerCreator = progressTrackerCreator(1,log);
+            var progressTrackerCreator = progressTrackerCreator(1, log);
             var algorithms = new CommunityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
             algorithms.conductance(graph, config);
 
@@ -202,10 +204,10 @@ final class CommunityAlgorithmsTest {
     }
 
     @Nested
-    class K1Coloring{
+    class K1Coloring {
 
         @Test
-        void shouldLogProgress(){
+        void shouldLogProgress() {
             var graph = RandomGraphGenerator.builder()
                 .nodeCount(100)
                 .averageDegree(10)
@@ -221,9 +223,9 @@ final class CommunityAlgorithmsTest {
                 .build();
 
             var log = new GdsTestLog();
-            var progressTrackerCreator = progressTrackerCreator(1,log);
+            var progressTrackerCreator = progressTrackerCreator(1, log);
             var algorithms = new CommunityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
-           var result=algorithms.k1Coloring(graph,config);
+            var result = algorithms.k1Coloring(graph, config);
 
             assertTrue(log.containsMessage(TestLog.INFO, ":: Start"));
             LongStream.range(1, result.ranIterations() + 1).forEach(iteration ->
@@ -239,7 +241,7 @@ final class CommunityAlgorithmsTest {
 
     @Nested
     @GdlExtension
-    class  Kmeans{
+    class Kmeans {
 
         @GdlGraph
         private static final String DB_CYPHER =
@@ -263,7 +265,7 @@ final class CommunityAlgorithmsTest {
                 .build();
 
             var log = new GdsTestLog();
-            var progressTrackerCreator = progressTrackerCreator(1,log);
+            var progressTrackerCreator = progressTrackerCreator(1, log);
 
             var algorithms = new CommunityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
             algorithms.kMeans(graph, kmeansConfig);
@@ -301,7 +303,7 @@ final class CommunityAlgorithmsTest {
                 .build();
 
             var log = new GdsTestLog();
-            var progressTrackerCreator = progressTrackerCreator(1,log);
+            var progressTrackerCreator = progressTrackerCreator(1, log);
 
             var algorithms = new CommunityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
             algorithms.kMeans(graph, kmeansConfig);
@@ -356,7 +358,7 @@ final class CommunityAlgorithmsTest {
                 .build();
 
             var log = new GdsTestLog();
-            var progressTrackerCreator = progressTrackerCreator(1,log);
+            var progressTrackerCreator = progressTrackerCreator(1, log);
 
             var algorithms = new CommunityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
             algorithms.kMeans(graph, kmeansConfig);
@@ -388,9 +390,10 @@ final class CommunityAlgorithmsTest {
                 );
         }
     }
+
     @Nested
     @GdlExtension
-    class LabelPropagation{
+    class LabelPropagation {
 
         @GdlGraph
         private static final String GRAPH =
@@ -419,10 +422,10 @@ final class CommunityAlgorithmsTest {
         void shouldLogProgress() {
             var config = LabelPropagationStreamConfigImpl.builder().build();
             var log = new GdsTestLog();
-            var progressTrackerCreator = progressTrackerCreator(1,log);
+            var progressTrackerCreator = progressTrackerCreator(1, log);
 
             var algorithms = new CommunityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
-            var result = algorithms.labelPropagation(graph,config);
+            var result = algorithms.labelPropagation(graph, config);
             var testTracker = progressTrackerCreator.progressTracker().get();
             List<AtomicLong> progresses = testTracker.getProgresses();
 
@@ -431,14 +434,18 @@ final class CommunityAlgorithmsTest {
             progresses.forEach(progress -> assertTrue(progress.get() <= graph.relationshipCount()));
             assertTrue(log.containsMessage(TestLog.INFO, ":: Start"));
             LongStream.range(1, result.ranIterations() + 1).forEach(iteration -> {
-                assertTrue(log.containsMessage(TestLog.INFO, "Iteration %d of %d :: Start".formatted(iteration, config.maxIterations())));
+                assertTrue(log.containsMessage(
+                    TestLog.INFO,
+                    "Iteration %d of %d :: Start".formatted(iteration, config.maxIterations())
+                ));
             });
             assertTrue(log.containsMessage(TestLog.INFO, ":: Finished"));
         }
     }
+
     @Nested
     @GdlExtension
-    class Leiden{
+    class Leiden {
 
         @GdlGraph(orientation = Orientation.UNDIRECTED)
         private static final String DB_CYPHER =
@@ -472,10 +479,10 @@ final class CommunityAlgorithmsTest {
         void shouldLogProgress() {
             var config = LeidenStatsConfigImpl.builder().maxLevels(3).randomSeed(19L).build();
             var log = new GdsTestLog();
-            var progressTrackerCreator = progressTrackerCreator(1,log);
+            var progressTrackerCreator = progressTrackerCreator(1, log);
 
             var algorithms = new CommunityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
-             algorithms.leiden(graph,config);
+            algorithms.leiden(graph, config);
 
             assertThat(log.getMessages(TestLog.INFO))
                 .extracting(removingThreadId())
@@ -537,52 +544,80 @@ final class CommunityAlgorithmsTest {
                 );
         }
     }
+
     @Nested
     class LocalClustering {
 
         @ParameterizedTest
         @ValueSource(booleans = {true, false})
         void progressLogging(boolean useSeed) {
-            var graph = TestSupport.fromGdl("CREATE" +
-                " (a {triangles: 2})" +
-                " (b {triangles: 2})" +
-                " (c {triangles: 1})" +
-                " (d {triangles: 1})" +
-                " (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
-                ",(a)-[:T]->(b)" +
-                ",(d)-[:T]->(a)", Orientation.UNDIRECTED).graph();
+            var graph = TestSupport.fromGdl(
+                "CREATE" +
+                    " (a {triangles: 2})" +
+                    " (b {triangles: 2})" +
+                    " (c {triangles: 1})" +
+                    " (d {triangles: 1})" +
+                    " (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
+                    ",(a)-[:T]->(b)" +
+                    ",(d)-[:T]->(a)", Orientation.UNDIRECTED
+            ).graph();
 
             var configbuilder = LocalClusteringCoefficientBaseConfigImpl.builder();
             if (useSeed) {
                 configbuilder = configbuilder.seedProperty("triangles");
             }
             var log = new GdsTestLog();
-            var progressTrackerCreator = progressTrackerCreator(4,log);
+            var progressTrackerCreator = progressTrackerCreator(4, log);
 
             var algorithms = new CommunityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
-            algorithms.lcc(graph,configbuilder.build());
+            algorithms.lcc(graph, configbuilder.build());
 
             log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Start");
             if (!useSeed) {
-                log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount :: Start");
+                log.assertContainsMessage(
+                    TestLog.INFO,
+                    "LocalClusteringCoefficient :: IntersectingTriangleCount :: Start"
+                );
                 log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount 25%");
                 log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount 50%");
                 log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount 75%");
                 log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount 100%");
-                log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount :: Finished");
+                log.assertContainsMessage(
+                    TestLog.INFO,
+                    "LocalClusteringCoefficient :: IntersectingTriangleCount :: Finished"
+                );
             }
-            log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient :: Start");
-            log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient 25%");
-            log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient 50%");
-            log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient 75%");
-            log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient 100%");
-            log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient :: Finished");
+            log.assertContainsMessage(
+                TestLog.INFO,
+                "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient :: Start"
+            );
+            log.assertContainsMessage(
+                TestLog.INFO,
+                "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient 25%"
+            );
+            log.assertContainsMessage(
+                TestLog.INFO,
+                "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient 50%"
+            );
+            log.assertContainsMessage(
+                TestLog.INFO,
+                "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient 75%"
+            );
+            log.assertContainsMessage(
+                TestLog.INFO,
+                "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient 100%"
+            );
+            log.assertContainsMessage(
+                TestLog.INFO,
+                "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient :: Finished"
+            );
             log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Finished");
         }
     }
+
     @Nested
     @GdlExtension
-    class Louvain{
+    class Louvain {
 
         @GdlGraph(orientation = Orientation.UNDIRECTED, idOffset = 0)
         private static final String DB_CYPHER =
@@ -646,19 +681,24 @@ final class CommunityAlgorithmsTest {
             var maxIterations = 10;
             var maxLevels = 10;
             var log = new GdsTestLog();
-            var progressTrackerCreator = progressTrackerCreator(4,log);
+            var progressTrackerCreator = progressTrackerCreator(4, log);
 
             var algorithms = new CommunityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
-            var config= LouvainStreamConfigImpl.builder().concurrency(concurrency).maxIterations(maxIterations).maxLevels(maxLevels).build();
-            algorithms.louvain(graph,config);
+            var config = LouvainStreamConfigImpl.builder()
+                .concurrency(concurrency)
+                .maxIterations(maxIterations)
+                .maxLevels(maxLevels)
+                .build();
+            algorithms.louvain(graph, config);
 
             assertTrue(log.containsMessage(INFO, ":: Start"));
             assertTrue(log.containsMessage(INFO, ":: Finished"));
         }
     }
+
     @GdlExtension
     @Nested
-    class ModularityOptimization{
+    class ModularityOptimization {
 
         @GdlGraph(orientation = Orientation.UNDIRECTED, idOffset = 0)
         private static final String DB_CYPHER =
@@ -684,12 +724,16 @@ final class CommunityAlgorithmsTest {
         @Test
         void testLogging() {
             var log = new GdsTestLog();
-            var config = ModularityOptimizationStreamConfigImpl.builder().maxIterations(K1COLORING_MAX_ITERATIONS).concurrency(new Concurrency(3)).batchSize(2).build();
+            var config = ModularityOptimizationStreamConfigImpl.builder()
+                .maxIterations(K1COLORING_MAX_ITERATIONS)
+                .concurrency(new Concurrency(3))
+                .batchSize(2)
+                .build();
 
-            var progressTrackerCreator = progressTrackerCreator(2,log);
+            var progressTrackerCreator = progressTrackerCreator(2, log);
 
             var algorithms = new CommunityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
-            algorithms.modularityOptimization(graph,config);
+            algorithms.modularityOptimization(graph, config);
             assertThat(log.getMessages(INFO))
                 .extracting(Extractors.removingThreadId())
                 .contains(
@@ -705,9 +749,10 @@ final class CommunityAlgorithmsTest {
         }
 
     }
+
     @Nested
     @GdlExtension
-    class Scc{
+    class Scc {
 
         @GdlGraph
         private static final String DB_CYPHER =
@@ -744,10 +789,10 @@ final class CommunityAlgorithmsTest {
             var config = SccStreamConfigImpl.builder().build();
             var log = new GdsTestLog();
 
-            var progressTrackerCreator = progressTrackerCreator(1,log);
+            var progressTrackerCreator = progressTrackerCreator(1, log);
 
             var algorithms = new CommunityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
-            algorithms.scc(graph,config);
+            algorithms.scc(graph, config);
             assertThat(log.getMessages(TestLog.INFO))
                 .extracting(removingThreadId())
                 .extracting(replaceTimings())
@@ -768,7 +813,7 @@ final class CommunityAlgorithmsTest {
     }
 
     @Nested
-    class Wcc{
+    class Wcc {
 
         private static final int SETS_COUNT = 16;
         private static final int SET_SIZE = 10;
@@ -781,10 +826,10 @@ final class CommunityAlgorithmsTest {
             var config = WccStreamConfigImpl.builder().concurrency(2).build();
             var log = new GdsTestLog();
 
-            var progressTrackerCreator = progressTrackerCreator(2,log);
+            var progressTrackerCreator = progressTrackerCreator(2, log);
 
             var algorithms = new CommunityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
-            algorithms.wcc(graph,config);
+            algorithms.wcc(graph, config);
 
             var messagesInOrder = log.getMessages(INFO);
 
@@ -830,7 +875,7 @@ final class CommunityAlgorithmsTest {
 
     @Nested
     @GdlExtension
-    class SpeakerListenerLPA{
+    class SpeakerListenerLPA {
 
         // using an offset of 0 as the tests were written against a specific random seed
         @GdlGraph(idOffset = 0)
@@ -852,15 +897,15 @@ final class CommunityAlgorithmsTest {
         private TestGraph graph;
 
         @Test
-        void shouldLogProgress(){
+        void shouldLogProgress() {
 
             var config = SpeakerListenerLPAConfigImpl.builder().concurrency(1).maxIterations(5).build();
             var log = new GdsTestLog();
 
-            var progressTrackerCreator = progressTrackerCreator(1,log);
+            var progressTrackerCreator = progressTrackerCreator(1, log);
 
             var algorithms = new CommunityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
-            algorithms.speakerListenerLPA(graph,config);
+            algorithms.speakerListenerLPA(graph, config);
             Assertions.assertThat(log.getMessages(TestLog.INFO))
                 .extracting(removingThreadId())
                 .extracting(replaceTimings())
@@ -902,19 +947,156 @@ final class CommunityAlgorithmsTest {
 
     }
 
-    abstract static class TestProgressTrackerCreator  extends   ProgressTrackerCreator {
+    @GdlExtension
+    @Nested
+    class ApproxMaxCut {
+        @GdlGraph
+        private static final String DB_CYPHER =
+            "CREATE" +
+                "  (a:Label1)" +
+                ", (b:Label1)" +
+                ", (c:Label1)" +
+                ", (d:Label1)" +
+                ", (e:Label1)" +
+                ", (f:Label1)" +
+                ", (g:Label1)" +
+
+                ", (a)-[:TYPE1 {weight: 81.0}]->(b)" +
+                ", (a)-[:TYPE1 {weight: 7.0}]->(d)" +
+                ", (b)-[:TYPE1 {weight: 1.0}]->(d)" +
+                ", (b)-[:TYPE1 {weight: 1.0}]->(e)" +
+                ", (b)-[:TYPE1 {weight: 1.0}]->(f)" +
+                ", (b)-[:TYPE1 {weight: 1.0}]->(g)" +
+                ", (c)-[:TYPE1 {weight: 45.0}]->(b)" +
+                ", (c)-[:TYPE1 {weight: 3.0}]->(e)" +
+                ", (d)-[:TYPE1 {weight: 3.0}]->(c)" +
+                ", (d)-[:TYPE1 {weight: 1.0}]->(b)" +
+                ", (e)-[:TYPE1 {weight: 1.0}]->(b)" +
+                ", (f)-[:TYPE1 {weight: 3.0}]->(a)" +
+                ", (f)-[:TYPE1 {weight: 1.0}]->(b)" +
+                ", (g)-[:TYPE1 {weight: 1.0}]->(b)" +
+                ", (g)-[:TYPE1 {weight: 4.0}]->(c)" +
+                ", (g)-[:TYPE1 {weight: 999.0}]->(g)";
+
+        @Inject
+        private TestGraph graph;
+
+        @ParameterizedTest
+        @ValueSource(ints = {0, 2})
+        void progressLogging(int vnsMaxNeighborhoodOrder) {
+            var config = ApproxMaxKCutBaseConfigImpl.builder()
+                .vnsMaxNeighborhoodOrder(vnsMaxNeighborhoodOrder)
+                .build();
+            var log = new GdsTestLog();
+            var progressTrackerCreator = progressTrackerCreator(4, log);
+
+            var algorithms = new CommunityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
+            algorithms.approximateMaximumKCut(graph, config);
+
+            AssertionsForClassTypes.assertThat(log.containsMessage(TestLog.INFO, ":: Start")).isTrue();
+            AssertionsForClassTypes.assertThat(log.containsMessage(TestLog.INFO, ":: Finish")).isTrue();
+
+            for (int i = 1; i <= config.iterations(); i++) {
+                AssertionsForClassTypes.assertThat(log.containsMessage(
+                    TestLog.INFO,
+                    "place nodes randomly %s of %s :: Start".formatted(i, config.iterations())
+                )).isTrue();
+                AssertionsForClassTypes.assertThat(log.containsMessage(
+                    TestLog.INFO,
+                    "place nodes randomly %s of %s 100%%".formatted(i, config.iterations())
+                )).isTrue();
+                AssertionsForClassTypes.assertThat(log.containsMessage(
+                    TestLog.INFO,
+                    "place nodes randomly %s of %s :: Finished".formatted(i, config.iterations())
+                )).isTrue();
+
+                if (vnsMaxNeighborhoodOrder == 0) {
+                    AssertionsForClassTypes.assertThat(log.containsMessage(
+                        TestLog.INFO,
+                        "local search %s of %s :: Start".formatted(i, config.iterations())
+                    )).isTrue();
+                    AssertionsForClassTypes.assertThat(log.containsMessage(
+                        TestLog.INFO,
+                        "local search %s of %s :: Finished".formatted(i, config.iterations())
+                    )).isTrue();
+                    AssertionsForClassTypes.assertThat(log.containsMessage(
+                        TestLog.INFO,
+                        "local search %s of %s :: improvement loop :: Start".formatted(i, config.iterations())
+                    )).isTrue();
+                    AssertionsForClassTypes.assertThat(log.containsMessage(
+                        TestLog.INFO,
+                        "local search %s of %s :: improvement loop :: Finished".formatted(i, config.iterations())
+                    )).isTrue();
+
+                    // May occur several times but we don't know.
+                    AssertionsForClassTypes.assertThat(log.containsMessage(
+                        TestLog.INFO,
+                        "local search %s of %s :: improvement loop :: compute node to community weights 1 :: Start"
+                            .formatted(i, config.iterations())
+                    )).isTrue();
+                    AssertionsForClassTypes.assertThat(log.containsMessage(
+                        TestLog.INFO,
+                        "local search %s of %s :: improvement loop :: compute node to community weights 1 100%%"
+                            .formatted(i, config.iterations())
+                    )).isTrue();
+                    AssertionsForClassTypes.assertThat(log.containsMessage(
+                        TestLog.INFO,
+                        "local search %s of %s :: improvement loop :: compute node to community weights 1 :: Finished"
+                            .formatted(i, config.iterations())
+                    )).isTrue();
+                    AssertionsForClassTypes.assertThat(log.containsMessage(
+                        TestLog.INFO,
+                        "local search %s of %s :: improvement loop :: swap for local improvements 1 :: Start".formatted(i, config.iterations())
+                    )).isTrue();
+                    AssertionsForClassTypes.assertThat(log.containsMessage(
+                        TestLog.INFO,
+                        "local search %s of %s :: improvement loop :: swap for local improvements 1 100%%".formatted(i, config.iterations())
+                    )).isTrue();
+                    AssertionsForClassTypes.assertThat(log.containsMessage(
+                        TestLog.INFO,
+                        "local search %s of %s :: improvement loop :: swap for local improvements 1 :: Finished".formatted(i, config.iterations())
+                    )).isTrue();
+
+                    AssertionsForClassTypes.assertThat(log.containsMessage(
+                        TestLog.INFO,
+                        "local search %s of %s :: compute current solution cost :: Start".formatted(i, config.iterations())
+                    )).isTrue();
+                    AssertionsForClassTypes.assertThat(log.containsMessage(
+                        TestLog.INFO,
+                        "local search %s of %s :: compute current solution cost 100%%".formatted(i, config.iterations())
+                    )).isTrue();
+                    AssertionsForClassTypes.assertThat(log.containsMessage(
+                        TestLog.INFO,
+                        "local search %s of %s :: compute current solution cost :: Finished".formatted(i, config.iterations())
+                    )).isTrue();
+                } else {
+                    // We merely check that VNS is indeed run. The rest is very similar to the non-VNS case.
+                    AssertionsForClassTypes.assertThat(log.containsMessage(
+                        TestLog.INFO,
+                        "variable neighborhood search %s of %s :: Start".formatted(i, config.iterations())
+                    )).isTrue();
+                    AssertionsForClassTypes.assertThat(log.containsMessage(
+                        TestLog.INFO,
+                        "variable neighborhood search %s of %s :: Finished".formatted(i, config.iterations())
+                    )).isTrue();
+                }
+            }
+        }
+    }
+
+    abstract static class TestProgressTrackerCreator extends ProgressTrackerCreator {
 
         public TestProgressTrackerCreator(Log log, RequestScopedDependencies requestScopedDependencies) {
             super(log, requestScopedDependencies);
         }
 
-        abstract AtomicReference<TestProgressTracker>  progressTracker();
+        abstract AtomicReference<TestProgressTracker> progressTracker();
 
     }
 
-TestProgressTrackerCreator progressTrackerCreator(int concurrency, Log log) {
+    TestProgressTrackerCreator progressTrackerCreator(int concurrency, Log log) {
 
-    AtomicReference<TestProgressTracker> progressTrackerAtomicReference=new AtomicReference<>();
+        AtomicReference<TestProgressTracker> progressTrackerAtomicReference = new AtomicReference<>();
         var progressTrackerCreator = mock(TestProgressTrackerCreator.class);
         when(progressTrackerCreator.createProgressTracker(any(), any(Task.class))).then(
             i ->
@@ -929,9 +1111,9 @@ TestProgressTrackerCreator progressTrackerCreator(int concurrency, Log log) {
                 return taskProgressTracker;
             }
         );
-    when(progressTrackerCreator.progressTracker()).thenReturn(progressTrackerAtomicReference);
+        when(progressTrackerCreator.progressTracker()).thenReturn(progressTrackerAtomicReference);
 
-    return progressTrackerCreator;
+        return progressTrackerCreator;
     }
 
 }

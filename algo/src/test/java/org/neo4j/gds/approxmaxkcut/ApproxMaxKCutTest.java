@@ -23,18 +23,14 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junitpioneer.jupiter.cartesian.ArgumentSets;
 import org.junitpioneer.jupiter.cartesian.CartesianTest;
-import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfigImpl;
-import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Collections;
@@ -44,7 +40,6 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
 final class ApproxMaxKCutTest {
@@ -232,145 +227,6 @@ final class ApproxMaxKCutTest {
 
         assertThat(cardinalities[0]).isIn(1L, 6L);
         assertThat(cardinalities[1]).isIn(1L, 6L);
-    }
-
-    @ParameterizedTest
-    @ValueSource(ints = {0, 2})
-    void progressLogging(int vnsMaxNeighborhoodOrder) {
-        var config = ApproxMaxKCutBaseConfigImpl.builder()
-            .vnsMaxNeighborhoodOrder(vnsMaxNeighborhoodOrder)
-            .build();
-
-        var log = new GdsTestLog();
-        var approxMaxKCut = new ApproxMaxKCutAlgorithmFactory<>().build(
-            maxGraph,
-            config,
-            log,
-            EmptyTaskRegistryFactory.INSTANCE
-        );
-        approxMaxKCut.compute();
-
-        assertThat(log.containsMessage(TestLog.INFO, ":: Start")).isTrue();
-        assertThat(log.containsMessage(TestLog.INFO, ":: Finish")).isTrue();
-
-        for (int i = 1; i <= config.iterations(); i++) {
-            assertThat(log.containsMessage(
-                TestLog.INFO,
-                formatWithLocale("place nodes randomly %s of %s :: Start", i, config.iterations())
-            )).isTrue();
-            assertThat(log.containsMessage(
-                TestLog.INFO,
-                formatWithLocale("place nodes randomly %s of %s 100%%", i, config.iterations())
-            )).isTrue();
-            assertThat(log.containsMessage(
-                TestLog.INFO,
-                formatWithLocale("place nodes randomly %s of %s :: Finished", i, config.iterations())
-            )).isTrue();
-
-            if (vnsMaxNeighborhoodOrder == 0) {
-                assertThat(log.containsMessage(
-                    TestLog.INFO,
-                    formatWithLocale("local search %s of %s :: Start", i, config.iterations())
-                )).isTrue();
-                assertThat(log.containsMessage(
-                    TestLog.INFO,
-                    formatWithLocale("local search %s of %s :: Finished", i, config.iterations())
-                )).isTrue();
-                assertThat(log.containsMessage(
-                    TestLog.INFO,
-                    formatWithLocale("local search %s of %s :: improvement loop :: Start", i, config.iterations())
-                )).isTrue();
-                assertThat(log.containsMessage(
-                    TestLog.INFO,
-                    formatWithLocale("local search %s of %s :: improvement loop :: Finished", i, config.iterations())
-                )).isTrue();
-
-                // May occur several times but we don't know.
-                assertThat(log.containsMessage(
-                    TestLog.INFO,
-                    formatWithLocale(
-                        "local search %s of %s :: improvement loop :: compute node to community weights 1 :: Start",
-                        i,
-                        config.iterations()
-                    )
-                )).isTrue();
-                assertThat(log.containsMessage(
-                    TestLog.INFO,
-                    formatWithLocale(
-                        "local search %s of %s :: improvement loop :: compute node to community weights 1 100%%",
-                        i,
-                        config.iterations()
-                    )
-                )).isTrue();
-                assertThat(log.containsMessage(
-                    TestLog.INFO,
-                    formatWithLocale(
-                        "local search %s of %s :: improvement loop :: compute node to community weights 1 :: Finished",
-                        i,
-                        config.iterations()
-                    )
-                )).isTrue();
-                assertThat(log.containsMessage(
-                    TestLog.INFO,
-                    formatWithLocale(
-                        "local search %s of %s :: improvement loop :: swap for local improvements 1 :: Start",
-                        i,
-                        config.iterations()
-                    )
-                )).isTrue();
-                assertThat(log.containsMessage(
-                    TestLog.INFO,
-                    formatWithLocale(
-                        "local search %s of %s :: improvement loop :: swap for local improvements 1 100%%",
-                        i,
-                        config.iterations()
-                    )
-                )).isTrue();
-                assertThat(log.containsMessage(
-                    TestLog.INFO,
-                    formatWithLocale(
-                        "local search %s of %s :: improvement loop :: swap for local improvements 1 :: Finished",
-                        i,
-                        config.iterations()
-                    )
-                )).isTrue();
-
-                assertThat(log.containsMessage(
-                    TestLog.INFO,
-                    formatWithLocale(
-                        "local search %s of %s :: compute current solution cost :: Start",
-                        i,
-                        config.iterations()
-                    )
-                )).isTrue();
-                assertThat(log.containsMessage(
-                    TestLog.INFO,
-                    formatWithLocale(
-                        "local search %s of %s :: compute current solution cost 100%%",
-                        i,
-                        config.iterations()
-                    )
-                )).isTrue();
-                assertThat(log.containsMessage(
-                    TestLog.INFO,
-                    formatWithLocale(
-                        "local search %s of %s :: compute current solution cost :: Finished",
-                        i,
-                        config.iterations()
-                    )
-                )).isTrue();
-            } else {
-                // We merely check that VNS is indeed run. The rest is very similar to the non-VNS case.
-                assertThat(log.containsMessage(
-                    TestLog.INFO,
-                    formatWithLocale("variable neighborhood search %s of %s :: Start", i, config.iterations())
-                )).isTrue();
-                assertThat(log.containsMessage(
-                    TestLog.INFO,
-                    formatWithLocale("variable neighborhood search %s of %s :: Finished", i, config.iterations())
-                )).isTrue();
-            }
-        }
     }
 
 }
