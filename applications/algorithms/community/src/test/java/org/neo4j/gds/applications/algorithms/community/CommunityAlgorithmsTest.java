@@ -22,8 +22,11 @@ package org.neo4j.gds.applications.algorithms.community;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProgressTracker;
+import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -46,6 +49,7 @@ import org.neo4j.gds.leiden.LeidenStatsConfigImpl;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfigImpl;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -515,7 +519,49 @@ final class CommunityAlgorithmsTest {
                 );
         }
     }
+    @Nested
+    class LocalClustering {
 
+        @ParameterizedTest
+        @ValueSource(booleans = {true, false})
+        void progressLogging(boolean useSeed) {
+            var graph = TestSupport.fromGdl("CREATE" +
+                " (a {triangles: 2})" +
+                " (b {triangles: 2})" +
+                " (c {triangles: 1})" +
+                " (d {triangles: 1})" +
+                " (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
+                ",(a)-[:T]->(b)" +
+                ",(d)-[:T]->(a)", Orientation.UNDIRECTED).graph();
+
+            var configbuilder = LocalClusteringCoefficientBaseConfigImpl.builder();
+            if (useSeed) {
+                configbuilder = configbuilder.seedProperty("triangles");
+            }
+            var log = new GdsTestLog();
+            var progressTrackerCreator = progressTrackerCreator(4,log);
+
+            var algorithms = new CommunityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
+            algorithms.lcc(graph,configbuilder.build());
+
+            log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Start");
+            if (!useSeed) {
+                log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount :: Start");
+                log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount 25%");
+                log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount 50%");
+                log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount 75%");
+                log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount 100%");
+                log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount :: Finished");
+            }
+            log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient :: Start");
+            log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient 25%");
+            log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient 50%");
+            log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient 75%");
+            log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient 100%");
+            log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient :: Finished");
+            log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Finished");
+        }
+    }
 
     abstract static class TestProgressTrackerCreator  extends   ProgressTrackerCreator {
 

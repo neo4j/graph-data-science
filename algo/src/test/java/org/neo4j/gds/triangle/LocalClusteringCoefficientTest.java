@@ -27,12 +27,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.ArrayList;
@@ -261,44 +257,7 @@ class LocalClusteringCoefficientTest {
         assertEquals(0, result.localClusteringCoefficients().get(3)); // d
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void progressLogging(boolean useSeed) {
-        var graph = TestSupport.fromGdl("CREATE" +
-            " (a {triangles: 2})" +
-            " (b {triangles: 2})" +
-            " (c {triangles: 1})" +
-            " (d {triangles: 1})" +
-            " (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
-            ",(a)-[:T]->(b)" +
-            ",(d)-[:T]->(a)", Orientation.UNDIRECTED).graph();
 
-        var factory = new LocalClusteringCoefficientFactory<>();
-        var seedProperty = useSeed ? "triangles" : null;
-
-        var progressTask = factory.progressTask(graph, seedProperty);
-        var log = new GdsTestLog();
-        var progressTracker = new TaskProgressTracker(progressTask, log, new Concurrency(4), EmptyTaskRegistryFactory.INSTANCE);
-
-        new LocalClusteringCoefficient(graph, new Concurrency(4), Long.MAX_VALUE, seedProperty, progressTracker, TerminationFlag.RUNNING_TRUE).compute();
-
-        log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Start");
-        if (!useSeed) {
-            log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount :: Start");
-            log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount 25%");
-            log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount 50%");
-            log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount 75%");
-            log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount 100%");
-            log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: IntersectingTriangleCount :: Finished");
-        }
-        log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient :: Start");
-        log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient 25%");
-        log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient 50%");
-        log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient 75%");
-        log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient 100%");
-        log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient :: Finished");
-        log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Finished");
-    }
 
     @Test
     void manyTrianglesAndOtherThings() {
