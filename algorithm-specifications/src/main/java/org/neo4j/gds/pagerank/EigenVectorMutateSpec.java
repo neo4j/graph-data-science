@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 
-@GdsCallable(name = "gds.eigenvector.mutate", description = Constants.ARTICLE_RANK_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
+@GdsCallable(name = "gds.eigenvector.mutate", description = Constants.EIGENVECTOR_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class EigenVectorMutateSpec implements AlgorithmSpec<PageRankAlgorithm<EigenvectorMutateConfig>, PageRankResult, EigenvectorMutateConfig, Stream<PageRankMutateResult>, EigenvectorAlgorithmFactory<EigenvectorMutateConfig>> {
 
     @Override
