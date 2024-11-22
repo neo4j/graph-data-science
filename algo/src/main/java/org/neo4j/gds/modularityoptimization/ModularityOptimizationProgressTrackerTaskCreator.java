@@ -26,7 +26,7 @@ import org.neo4j.gds.k1coloring.K1ColoringProgressTrackerTaskCreator;
 
 import java.util.List;
 
-public class ModularityOptimizationProgressTrackerTaskCreator {
+public final class ModularityOptimizationProgressTrackerTaskCreator {
 
     private ModularityOptimizationProgressTrackerTaskCreator() {}
 
@@ -36,7 +36,7 @@ public class ModularityOptimizationProgressTrackerTaskCreator {
             nodeCount,
             ModularityOptimization.K1COLORING_MAX_ITERATIONS
         );
-        var task = Tasks.task(
+        return Tasks.task(
             AlgorithmLabel.ModularityOptimization.asString(),
             Tasks.task(
                 "initialization",
@@ -48,6 +48,5 @@ public class ModularityOptimizationProgressTrackerTaskCreator {
                 maxIterations
             )
         );
-        return task;
     }
 }

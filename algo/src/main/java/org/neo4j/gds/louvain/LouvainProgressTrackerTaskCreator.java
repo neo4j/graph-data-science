@@ -27,17 +27,17 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationProgressTracke
 import java.util.List;
 import java.util.function.Supplier;
 
-public class LouvainProgressTrackerTaskCreator {
+public final class LouvainProgressTrackerTaskCreator {
+
+    private LouvainProgressTrackerTaskCreator() {}
 
     public static Task createTask(long nodeCount, long relationshipCount, int maxLevels, int maxIterations) {
         Supplier<List<Task>> modOptTask = ()->List.of(ModularityOptimizationProgressTrackerTaskCreator.progressTask(nodeCount,relationshipCount,maxIterations));
 
-        var task = Tasks.iterativeDynamic(
+        return Tasks.iterativeDynamic(
             AlgorithmLabel.Louvain.asString(),
             modOptTask,
             maxLevels
         );
-
-        return task;
     }
 }

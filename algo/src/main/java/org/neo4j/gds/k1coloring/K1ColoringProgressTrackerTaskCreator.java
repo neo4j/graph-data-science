@@ -27,9 +27,11 @@ import java.util.List;
 
 public class K1ColoringProgressTrackerTaskCreator {
 
+    private K1ColoringProgressTrackerTaskCreator() {}
+
     public static Task progressTask(long nodeCount, int maxIterations) {
 
-        var task = Tasks.iterativeDynamic(
+        return Tasks.iterativeDynamic(
             AlgorithmLabel.K1Coloring.asString(),
             () -> List.of(
                 Tasks.leaf("color nodes", nodeCount),
@@ -37,6 +39,5 @@ public class K1ColoringProgressTrackerTaskCreator {
             ),
             maxIterations
         );
-        return task;
     }
 }
