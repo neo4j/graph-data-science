@@ -552,13 +552,9 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var result = new EigenvectorAlgorithmFactory()
-                .build(
-                    graph,
-                    config,
-                    ProgressTracker.NULL_TRACKER
-                )
-                .compute();
+            var centralityAlgorithms = new CentralityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
+
+            var result = centralityAlgorithms.eigenVector(graph, config, ProgressTracker.NULL_TRACKER);
 
             var rankProvider = result.centralityScoreProvider();
 
@@ -581,13 +577,10 @@ class PageRankTest {
                 .tolerance(0)
                 .concurrency(1)
                 .build();
-            var result = new EigenvectorAlgorithmFactory()
-                .build(
-                    graph,
-                    config,
-                    ProgressTracker.NULL_TRACKER
-                )
-                .compute();
+
+            var centralityAlgorithms = new CentralityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
+
+            var result = centralityAlgorithms.eigenVector(graph, config, ProgressTracker.NULL_TRACKER);
 
             var rankProvider = result.centralityScoreProvider();
 
@@ -611,13 +604,9 @@ class PageRankTest {
                 .sourceNodes(List.of(idFunction.of("d")))
                 .build();
 
-            var result = new EigenvectorAlgorithmFactory()
-                .build(
-                    graph,
-                    config,
-                    ProgressTracker.NULL_TRACKER
-                )
-                .compute();
+            var centralityAlgorithms = new CentralityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
+
+            var result = centralityAlgorithms.eigenVector(graph, config, ProgressTracker.NULL_TRACKER);
 
             var rankProvider = result.centralityScoreProvider();
 

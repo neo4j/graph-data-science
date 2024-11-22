@@ -244,6 +244,14 @@ public class CentralityAlgorithms {
         var task = Pregel.progressTask(graph, configuration, EigenVector.asString());
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
+        return eigenVector(graph, configuration, progressTracker);
+    }
+
+    public PageRankResult eigenVector(
+        Graph graph,
+        EigenvectorConfig configuration,
+        ProgressTracker progressTracker
+    ) {
         var eigenvectorComputation = eigenvectorComputation(graph, configuration);
 
         var eigenvector = new PageRankAlgorithm<>(

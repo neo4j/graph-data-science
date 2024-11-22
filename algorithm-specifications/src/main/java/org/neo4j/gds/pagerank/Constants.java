@@ -22,8 +22,6 @@ package org.neo4j.gds.pagerank;
 final class Constants {
     static final String PAGE_RANK_DESCRIPTION =
         "Page Rank is an algorithm that measures the transitive influence or connectivity of nodes.";
-    static final String EIGENVECTOR_DESCRIPTION =
-        "Eigenvector Centrality is an algorithm that measures the transitive influence or connectivity of nodes.";
 
     private Constants() {}
 }
