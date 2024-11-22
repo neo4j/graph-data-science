@@ -57,6 +57,7 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.louvain.LouvainStreamConfigImpl;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfigImpl;
 import org.neo4j.gds.scc.SccStreamConfigImpl;
+import org.neo4j.gds.sllpa.SpeakerListenerLPAConfigImpl;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfigImpl;
 import org.neo4j.gds.wcc.WccStreamConfigImpl;
@@ -824,6 +825,80 @@ final class CommunityAlgorithmsTest {
                 .collect(Collectors.joining("-[:REL]->"));
         }
 
+
+    }
+
+    @Nested
+    @GdlExtension
+    class SpeakerListenerLPA{
+
+        // using an offset of 0 as the tests were written against a specific random seed
+        @GdlGraph(idOffset = 0)
+        private static final String GDL =
+            "(x), (a), (b), (c), (d), (e), (f), (g), (h), (i)" +
+                ", (a)-->(b)" +
+                ", (a)-->(c)" +
+                ", (b)-->(e)" +
+                ", (b)-->(d)" +
+                ", (b)-->(c)" +
+                ", (e)-->(f)" +
+                ", (f)-->(g)" +
+                ", (f)-->(h)" +
+                ", (f)-->(i)" +
+                ", (h)-->(i)" +
+                ", (g)-->(i)";
+
+        @Inject
+        private TestGraph graph;
+
+        @Test
+        void shouldLogProgress(){
+
+            var config = SpeakerListenerLPAConfigImpl.builder().concurrency(1).maxIterations(5).build();
+            var log = new GdsTestLog();
+
+            var progressTrackerCreator = progressTrackerCreator(1,log);
+
+            var algorithms = new CommunityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
+            algorithms.speakerListenerLPA(graph,config);
+            Assertions.assertThat(log.getMessages(TestLog.INFO))
+                .extracting(removingThreadId())
+                .extracting(replaceTimings())
+                .containsExactly(
+                    "SpeakerListenerLPA :: Start",
+                    "SpeakerListenerLPA :: Compute iteration 1 of 5 :: Start",
+                    "SpeakerListenerLPA :: Compute iteration 1 of 5 100%",
+                    "SpeakerListenerLPA :: Compute iteration 1 of 5 :: Finished",
+                    "SpeakerListenerLPA :: Master compute iteration 1 of 5 :: Start",
+                    "SpeakerListenerLPA :: Master compute iteration 1 of 5 100%",
+                    "SpeakerListenerLPA :: Master compute iteration 1 of 5 :: Finished",
+                    "SpeakerListenerLPA :: Compute iteration 2 of 5 :: Start",
+                    "SpeakerListenerLPA :: Compute iteration 2 of 5 100%",
+                    "SpeakerListenerLPA :: Compute iteration 2 of 5 :: Finished",
+                    "SpeakerListenerLPA :: Master compute iteration 2 of 5 :: Start",
+                    "SpeakerListenerLPA :: Master compute iteration 2 of 5 100%",
+                    "SpeakerListenerLPA :: Master compute iteration 2 of 5 :: Finished",
+                    "SpeakerListenerLPA :: Compute iteration 3 of 5 :: Start",
+                    "SpeakerListenerLPA :: Compute iteration 3 of 5 100%",
+                    "SpeakerListenerLPA :: Compute iteration 3 of 5 :: Finished",
+                    "SpeakerListenerLPA :: Master compute iteration 3 of 5 :: Start",
+                    "SpeakerListenerLPA :: Master compute iteration 3 of 5 100%",
+                    "SpeakerListenerLPA :: Master compute iteration 3 of 5 :: Finished",
+                    "SpeakerListenerLPA :: Compute iteration 4 of 5 :: Start",
+                    "SpeakerListenerLPA :: Compute iteration 4 of 5 100%",
+                    "SpeakerListenerLPA :: Compute iteration 4 of 5 :: Finished",
+                    "SpeakerListenerLPA :: Master compute iteration 4 of 5 :: Start",
+                    "SpeakerListenerLPA :: Master compute iteration 4 of 5 100%",
+                    "SpeakerListenerLPA :: Master compute iteration 4 of 5 :: Finished",
+                    "SpeakerListenerLPA :: Compute iteration 5 of 5 :: Start",
+                    "SpeakerListenerLPA :: Compute iteration 5 of 5 100%",
+                    "SpeakerListenerLPA :: Compute iteration 5 of 5 :: Finished",
+                    "SpeakerListenerLPA :: Master compute iteration 5 of 5 :: Start",
+                    "SpeakerListenerLPA :: Master compute iteration 5 of 5 100%",
+                    "SpeakerListenerLPA :: Master compute iteration 5 of 5 :: Finished",
+                    "SpeakerListenerLPA :: Finished"
+                );
+        }
 
     }
 

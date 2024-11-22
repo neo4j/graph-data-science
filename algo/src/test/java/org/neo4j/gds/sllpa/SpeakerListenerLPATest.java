@@ -19,20 +19,14 @@
  */
 package org.neo4j.gds.sllpa;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.logging.GdsTestLog;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,8 +35,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.assertj.Extractors.removingThreadId;
-import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 import static org.neo4j.gds.sllpa.SpeakerListenerLPA.LABELS_PROPERTY;
 
 @GdlExtension
@@ -144,52 +136,5 @@ class SpeakerListenerLPATest {
         assertThat(communities).containsExactlyInAnyOrderEntriesOf(expected);
     }
 
-    @Test
-    void shouldLogProgress(){
 
-        var config = SpeakerListenerLPAConfigImpl.builder().concurrency(1).maxIterations(5).build();
-        var progressTask = SpeakerListenerLPAProgressTrackerCreator.progressTask(graph.nodeCount(),30,"SLLP");
-        var log = new GdsTestLog();
-        var progressTracker = new TaskProgressTracker(progressTask, log, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
-
-        var sllp =new SpeakerListenerLPA(graph,config,DefaultPool.INSTANCE,progressTracker, Optional.of(42L));
-            sllp.compute();
-        Assertions.assertThat(log.getMessages(TestLog.INFO))
-            .extracting(removingThreadId())
-            .extracting(replaceTimings())
-            .containsExactly(
-                "SLLP :: Start",
-                "SLLP :: Compute iteration 1 of 30 :: Start",
-                "SLLP :: Compute iteration 1 of 30 100%",
-                "SLLP :: Compute iteration 1 of 30 :: Finished",
-                "SLLP :: Master compute iteration 1 of 30 :: Start",
-                "SLLP :: Master compute iteration 1 of 30 100%",
-                "SLLP :: Master compute iteration 1 of 30 :: Finished",
-                "SLLP :: Compute iteration 2 of 30 :: Start",
-                "SLLP :: Compute iteration 2 of 30 100%",
-                "SLLP :: Compute iteration 2 of 30 :: Finished",
-                "SLLP :: Master compute iteration 2 of 30 :: Start",
-                "SLLP :: Master compute iteration 2 of 30 100%",
-                "SLLP :: Master compute iteration 2 of 30 :: Finished",
-                "SLLP :: Compute iteration 3 of 30 :: Start",
-                "SLLP :: Compute iteration 3 of 30 100%",
-                "SLLP :: Compute iteration 3 of 30 :: Finished",
-                "SLLP :: Master compute iteration 3 of 30 :: Start",
-                "SLLP :: Master compute iteration 3 of 30 100%",
-                "SLLP :: Master compute iteration 3 of 30 :: Finished",
-                "SLLP :: Compute iteration 4 of 30 :: Start",
-                "SLLP :: Compute iteration 4 of 30 100%",
-                "SLLP :: Compute iteration 4 of 30 :: Finished",
-                "SLLP :: Master compute iteration 4 of 30 :: Start",
-                "SLLP :: Master compute iteration 4 of 30 100%",
-                "SLLP :: Master compute iteration 4 of 30 :: Finished",
-                "SLLP :: Compute iteration 5 of 30 :: Start",
-                "SLLP :: Compute iteration 5 of 30 100%",
-                "SLLP :: Compute iteration 5 of 30 :: Finished",
-                "SLLP :: Master compute iteration 5 of 30 :: Start",
-                "SLLP :: Master compute iteration 5 of 30 100%",
-                "SLLP :: Master compute iteration 5 of 30 :: Finished",
-                "SLLP :: Finished"
-            );
-    }
 }
