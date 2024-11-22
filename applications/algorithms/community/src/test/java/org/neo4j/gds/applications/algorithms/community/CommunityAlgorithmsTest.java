@@ -24,10 +24,13 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
@@ -48,10 +51,12 @@ import org.neo4j.gds.labelpropagation.LabelPropagationStreamConfigImpl;
 import org.neo4j.gds.leiden.LeidenStatsConfigImpl;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.louvain.LouvainStreamConfigImpl;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfigImpl;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.LongStream;
@@ -64,6 +69,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.assertj.Extractors.replaceTimings;
+import static org.neo4j.gds.compat.TestLog.INFO;
 
 final class CommunityAlgorithmsTest {
 
@@ -560,6 +566,82 @@ final class CommunityAlgorithmsTest {
             log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient 100%");
             log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Calculate Local Clustering Coefficient :: Finished");
             log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Finished");
+        }
+    }
+    @Nested
+    @GdlExtension
+    class Louvain{
+
+        @GdlGraph(orientation = Orientation.UNDIRECTED, idOffset = 0)
+        private static final String DB_CYPHER =
+            "CREATE" +
+                "  (a:Node {seed: 1,seed2: -1})" +        // 0
+                ", (b:Node {seed: 1,seed2: 10})" +        // 1
+                ", (c:Node {seed: 1})" +        // 2
+                ", (d:Node {seed: 1})" +        // 3
+                ", (e:Node {seed: 1})" +        // 4
+                ", (f:Node {seed: 1})" +        // 5
+                ", (g:Node {seed: 2})" +        // 6
+                ", (h:Node {seed: 2})" +        // 7
+                ", (i:Node {seed: 2})" +        // 8
+                ", (j:Node {seed: 42})" +       // 9
+                ", (k:Node {seed: 42})" +       // 10
+                ", (l:Node {seed: 42})" +       // 11
+                ", (m:Node {seed: 42})" +       // 12
+                ", (n:Node {seed: 42})" +       // 13
+                ", (x:Node {seed: 1})" +        // 14
+                ", (u:Some)" +
+                ", (v:Other)" +
+                ", (w:Label)" +
+
+                ", (a)-[:TYPE_OUT {weight: 1.0}]->(b)" +
+                ", (a)-[:TYPE_OUT {weight: 1.0}]->(d)" +
+                ", (a)-[:TYPE_OUT {weight: 1.0}]->(f)" +
+                ", (b)-[:TYPE_OUT {weight: 1.0}]->(d)" +
+                ", (b)-[:TYPE_OUT {weight: 1.0}]->(x)" +
+                ", (b)-[:TYPE_OUT {weight: 1.0}]->(g)" +
+                ", (b)-[:TYPE_OUT {weight: 1.0}]->(e)" +
+                ", (c)-[:TYPE_OUT {weight: 1.0}]->(x)" +
+                ", (c)-[:TYPE_OUT {weight: 1.0}]->(f)" +
+                ", (d)-[:TYPE_OUT {weight: 1.0}]->(k)" +
+                ", (e)-[:TYPE_OUT {weight: 1.0}]->(x)" +
+                ", (e)-[:TYPE_OUT {weight: 0.01}]->(f)" +
+                ", (e)-[:TYPE_OUT {weight: 1.0}]->(h)" +
+                ", (f)-[:TYPE_OUT {weight: 1.0}]->(g)" +
+                ", (g)-[:TYPE_OUT {weight: 1.0}]->(h)" +
+                ", (h)-[:TYPE_OUT {weight: 1.0}]->(i)" +
+                ", (h)-[:TYPE_OUT {weight: 1.0}]->(j)" +
+                ", (i)-[:TYPE_OUT {weight: 1.0}]->(k)" +
+                ", (j)-[:TYPE_OUT {weight: 1.0}]->(k)" +
+                ", (j)-[:TYPE_OUT {weight: 1.0}]->(m)" +
+                ", (j)-[:TYPE_OUT {weight: 1.0}]->(n)" +
+                ", (k)-[:TYPE_OUT {weight: 1.0}]->(m)" +
+                ", (k)-[:TYPE_OUT {weight: 1.0}]->(l)" +
+                ", (l)-[:TYPE_OUT {weight: 1.0}]->(n)" +
+                ", (m)-[:TYPE_OUT {weight: 1.0}]->(n)";
+
+        @Inject
+        private GraphStore graphStore;
+
+        @Test
+        void testLogging() {
+            var graph = graphStore.getGraph(
+                NodeLabel.listOf("Node"),
+                RelationshipType.listOf("TYPE_OUT"),
+                Optional.empty()
+            );
+            var concurrency = new Concurrency(4);
+            var maxIterations = 10;
+            var maxLevels = 10;
+            var log = new GdsTestLog();
+            var progressTrackerCreator = progressTrackerCreator(4,log);
+
+            var algorithms = new CommunityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
+            var config= LouvainStreamConfigImpl.builder().concurrency(concurrency).maxIterations(maxIterations).maxLevels(maxLevels).build();
+            algorithms.louvain(graph,config);
+
+            assertTrue(log.containsMessage(INFO, ":: Start"));
+            assertTrue(log.containsMessage(INFO, ":: Finished"));
         }
     }
 

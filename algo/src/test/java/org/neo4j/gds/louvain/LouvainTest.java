@@ -35,14 +35,11 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.HugeGraph;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.modularity.ModularityCalculator;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -53,9 +50,7 @@ import java.util.function.LongUnaryOperator;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.TestSupport.ids;
-import static org.neo4j.gds.compat.TestLog.INFO;
 import static org.neo4j.gds.core.ProcedureConstants.TOLERANCE_DEFAULT;
 import static org.neo4j.gds.graphbuilder.TransactionTerminationTestUtils.assertTerminates;
 
@@ -339,38 +334,7 @@ class LouvainTest {
         );
     }
 
-    @Test
-    void testLogging() {
-        var graph = graphStore.getGraph(
-            NodeLabel.listOf("Node"),
-            RelationshipType.listOf("TYPE_OUT"),
-            Optional.empty()
-        );
-        var concurrency = new Concurrency(4);
-        var maxIterations = 10;
-        var maxLevels = 10;
-        var progressTask = new LouvainAlgorithmFactory<>().progressTask(graph, maxIterations, maxLevels);
-        var log = new GdsTestLog();
-        var progressTracker = new TaskProgressTracker(progressTask, log, concurrency, EmptyTaskRegistryFactory.INSTANCE);
 
-        var louvain = new Louvain(
-            graph,
-            concurrency,
-            maxIterations,
-            TOLERANCE_DEFAULT,
-            maxLevels,
-            false,
-            null,
-            progressTracker,
-            DefaultPool.INSTANCE,
-            TerminationFlag.RUNNING_TRUE
-        );
-
-        louvain.compute();
-
-        assertTrue(log.containsMessage(INFO, ":: Start"));
-        assertTrue(log.containsMessage(INFO, ":: Finished"));
-    }
 
     @Test
     void shouldThrowOnNegativeSeed() {
