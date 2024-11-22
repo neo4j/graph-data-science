@@ -99,6 +99,10 @@ public class CentralityAlgorithms {
         var task = Pregel.progressTask(graph, configuration, ArticleRank.asString());
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
+        return articleRank(graph, configuration, progressTracker);
+    }
+
+    public PageRankResult articleRank(Graph graph, ArticleRankConfig configuration, ProgressTracker progressTracker) {
         var articleRankComputation = articleRankComputation(graph, configuration);
 
         var articleRank = new PageRankAlgorithm<>(
@@ -112,6 +116,16 @@ public class CentralityAlgorithms {
         );
 
         return articleRank.compute();
+    }
+
+    BitSet articulationPoints(Graph graph, AlgoBaseConfig configuration) {
+
+        var task = ArticulationPointsProgressTaskCreator.progressTask(graph.nodeCount());
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var algorithm = new ArticulationPoints(graph, progressTracker);
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
     BetwennessCentralityResult betweennessCentrality(Graph graph, BetweennessCentralityBaseConfig configuration) {
@@ -157,6 +171,16 @@ public class CentralityAlgorithms {
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
+    BridgeResult bridges(Graph graph, AlgoBaseConfig configuration) {
+
+        var task = BridgeProgressTaskCreator.progressTask(graph.nodeCount());
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var algorithm = new Bridges(graph, progressTracker);
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+    }
+
     CELFResult celf(Graph graph, InfluenceMaximizationBaseConfig configuration) {
         var task = Tasks.task(
             AlgorithmLabel.CELF.asString(),
@@ -197,24 +221,6 @@ public class CentralityAlgorithms {
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
-    IndirectExposureResult indirectExposure(Graph graph, IndirectExposureConfig configuration) {
-        var task = Tasks.task(
-            AlgorithmLabel.IndirectExposure.asString(),
-            Tasks.leaf("TotalTransfers", graph.nodeCount()),
-            Pregel.progressTask(graph, configuration, "ExposurePropagation")
-        );
-        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
-
-        var algorithm = new IndirectExposure(
-            graph,
-            configuration,
-            DefaultPool.INSTANCE,
-            progressTracker
-        );
-
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
-    }
-
     DegreeCentralityResult degreeCentrality(Graph graph, DegreeCentralityConfig configuration) {
         var parameters = configuration.toParameters();
 
@@ -230,26 +236,6 @@ public class CentralityAlgorithms {
             parameters.minBatchSize(),
             progressTracker
         );
-
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
-    }
-
-    BitSet articulationPoints(Graph graph, AlgoBaseConfig configuration) {
-
-        var task = ArticulationPointsProgressTaskCreator.progressTask(graph.nodeCount());
-        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
-
-        var algorithm = new ArticulationPoints(graph, progressTracker);
-
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
-    }
-
-    BridgeResult bridges(Graph graph, AlgoBaseConfig configuration) {
-
-        var task = BridgeProgressTaskCreator.progressTask(graph.nodeCount());
-        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
-
-        var algorithm = new Bridges(graph, progressTracker);
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
@@ -283,6 +269,42 @@ public class CentralityAlgorithms {
             DefaultPool.INSTANCE,
             progressTracker,
             terminationFlag
+        );
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+    }
+
+    PregelResult hits(Graph graph, HitsConfig configuration) {
+        var task = HitsProgressTrackerCreator.progressTask(
+            graph.nodeCount(),
+            configuration.maxIterations(),
+            AlgorithmLabel.HITS.asString()
+        );
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var algorithm = new Hits(
+            graph,
+            configuration,
+            DefaultPool.INSTANCE,
+            progressTracker
+        );
+
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+    }
+
+    IndirectExposureResult indirectExposure(Graph graph, IndirectExposureConfig configuration) {
+        var task = Tasks.task(
+            AlgorithmLabel.IndirectExposure.asString(),
+            Tasks.leaf("TotalTransfers", graph.nodeCount()),
+            Pregel.progressTask(graph, configuration, "ExposurePropagation")
+        );
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var algorithm = new IndirectExposure(
+            graph,
+            configuration,
+            DefaultPool.INSTANCE,
+            progressTracker
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
@@ -356,23 +378,5 @@ public class CentralityAlgorithms {
             .forEach(mappedSourceNodes::add);
 
         return new PageRankComputation<>(configuration, mappedSourceNodes, degreeFunction);
-    }
-
-    PregelResult hits(Graph graph, HitsConfig configuration) {
-        var task = HitsProgressTrackerCreator.progressTask(
-            graph.nodeCount(),
-            configuration.maxIterations(),
-            AlgorithmLabel.HITS.asString()
-        );
-        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
-
-        var algorithm = new Hits(
-            graph,
-            configuration,
-            DefaultPool.INSTANCE,
-            progressTracker
-        );
-
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 }

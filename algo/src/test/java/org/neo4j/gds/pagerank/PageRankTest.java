@@ -26,12 +26,12 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithms;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.compat.TestLog;
@@ -44,12 +44,12 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.scaling.ScalerFactory;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
@@ -263,14 +263,6 @@ class PageRankTest {
                 );
         }
 
-        static Stream<Arguments> pageRankVariantFactories() {
-            return Stream.of(
-                Arguments.of(new PageRankAlgorithmFactory<>()),
-                Arguments.of(new EigenvectorAlgorithmFactory()),
-                Arguments.of(new ArticleRankAlgorithmFactory())
-            );
-        }
-
         @Test
         void checkTerminationFlag() {
             var config = PageRankStreamConfigImpl.builder()
@@ -479,13 +471,9 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var result = new ArticleRankAlgorithmFactory()
-                .build(
-                    graph,
-                    config,
-                    ProgressTracker.NULL_TRACKER
-                )
-                .compute();
+            var centralityAlgorithms = new CentralityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
+
+            var result = centralityAlgorithms.articleRank(graph, config, ProgressTracker.NULL_TRACKER);
 
             var rankProvider = result.centralityScoreProvider();
 
@@ -507,14 +495,9 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var result = new ArticleRankAlgorithmFactory()
-                .build(
-                    paperGraph,
-                    config,
-                    ProgressTracker.NULL_TRACKER
-                )
-                .compute();
+            var centralityAlgorithms = new CentralityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
 
+            var result = centralityAlgorithms.articleRank(paperGraph, config, ProgressTracker.NULL_TRACKER);
 
             var rankProvider = result.centralityScoreProvider();
 

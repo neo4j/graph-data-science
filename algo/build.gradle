@@ -35,8 +35,6 @@ dependencies {
     implementation project(':path-finding-params')
     implementation project(':similarity-params')
 
-    // This dependency is needed because we still have factories next to the algorithms.
-    // TODO: move the factories out
     implementation project(':centrality-configs')
     implementation project(':community-configs')
     implementation project(':miscellaneous-configs')
@@ -80,4 +78,5 @@ dependencies {
     testImplementation openGds.gdl
     testImplementation openGds.mockito.junit.jupiter
 
+    testImplementation project(':centrality-algorithms')
 }
