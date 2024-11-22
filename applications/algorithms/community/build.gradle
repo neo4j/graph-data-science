@@ -17,4 +17,7 @@ dependencies {
     implementation project(":pregel")
     implementation project(":progress-tracking")
     implementation project(":termination")
+
+    testImplementation project(':test-utils')
+
 }
