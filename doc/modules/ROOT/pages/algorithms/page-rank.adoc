@@ -15,7 +15,7 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 [[algorithms-page-rank-intro]]
 == Introduction
 
-The PageRank algorithm measures the importance of each node within the graph, based on the number incoming relationships and the importance of the corresponding source nodes.
+The PageRank algorithm measures the importance of each node within the graph, based on the number of incoming relationships and the importance of the corresponding source nodes.
 The underlying assumption roughly speaking is that a page is only as important as the pages that link to it.
 
 PageRank is introduced in the original Google paper as a function that solves the following equation:
