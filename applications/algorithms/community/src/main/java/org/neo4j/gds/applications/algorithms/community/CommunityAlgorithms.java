@@ -41,10 +41,9 @@ import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.k1coloring.K1Coloring;
-import org.neo4j.gds.k1coloring.K1ColoringAlgorithmFactory;
 import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
+import org.neo4j.gds.k1coloring.K1ColoringProgressTrackerTaskCreator;
 import org.neo4j.gds.k1coloring.K1ColoringResult;
-import org.neo4j.gds.k1coloring.K1ColoringStreamConfigImpl;
 import org.neo4j.gds.kcore.KCoreDecomposition;
 import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import org.neo4j.gds.kmeans.ImmutableKmeansContext;
@@ -59,13 +58,14 @@ import org.neo4j.gds.leiden.LeidenBaseConfig;
 import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.louvain.Louvain;
 import org.neo4j.gds.louvain.LouvainBaseConfig;
+import org.neo4j.gds.louvain.LouvainProgressTrackerTaskCreator;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityCalculator;
 import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimization;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationBaseConfig;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationFactory;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationProgressTrackerTaskCreator;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.scc.Scc;
 import org.neo4j.gds.scc.SccCommonBaseConfig;
@@ -89,8 +89,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
-
-import static org.neo4j.gds.modularityoptimization.ModularityOptimization.K1COLORING_MAX_ITERATIONS;
 
 public class CommunityAlgorithms {
     private final AlgorithmMachinery algorithmMachinery = new AlgorithmMachinery();
@@ -150,17 +148,11 @@ public class CommunityAlgorithms {
     }
 
     K1ColoringResult k1Coloring(Graph graph, K1ColoringBaseConfig configuration) {
-        var task = Tasks.iterativeDynamic(
-            AlgorithmLabel.K1Coloring.asString(),
-            () -> List.of(
-                Tasks.leaf("color nodes", graph.nodeCount()),
-                Tasks.leaf("validate nodes", graph.nodeCount())
-            ),
-            configuration.maxIterations()
-        );
-        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
 
         var parameters = configuration.toParameters();
+        var task = K1ColoringProgressTrackerTaskCreator.progressTask(graph.nodeCount(),parameters.maxIterations());
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
         var algorithm = new K1Coloring(
             graph,
@@ -296,14 +288,11 @@ public class CommunityAlgorithms {
     }
 
     LouvainResult louvain(Graph graph, LouvainBaseConfig configuration) {
-        var task = Tasks.iterativeDynamic(
-            AlgorithmLabel.Louvain.asString(),
-            () -> List.of(ModularityOptimizationFactory.progressTask(graph, configuration.maxIterations())),
-            configuration.maxLevels()
-        );
-        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
         var parameters = configuration.toParameters();
+
+        var task = LouvainProgressTrackerTaskCreator.createTask(graph.nodeCount(),graph.relationshipCount(),parameters.maxLevels(),parameters.maxIterations());
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
         var algorithm = new Louvain(
             graph,
@@ -332,18 +321,15 @@ public class CommunityAlgorithms {
     }
 
     ModularityOptimizationResult modularityOptimization(Graph graph, ModularityOptimizationBaseConfig configuration) {
-        var task = Tasks.task(
-            AlgorithmLabel.ModularityOptimization.asString(),
-            Tasks.task(
-                "initialization",
-                K1ColoringAlgorithmFactory.k1ColoringProgressTask(graph, createModularityConfig())
-            ),
-            Tasks.iterativeDynamic(
-                "compute modularity",
-                () -> List.of(Tasks.leaf("optimizeForColor", graph.relationshipCount())),
-                configuration.maxIterations()
-            )
+
+        var parameters = configuration.toParameters();
+
+        var task = ModularityOptimizationProgressTrackerTaskCreator.progressTask(
+            graph.nodeCount(),
+            graph.relationshipCount(),
+            parameters.maxIterations()
         );
+
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
         var seedPropertyValues = configuration.seedProperty() != null ?
@@ -351,8 +337,6 @@ public class CommunityAlgorithms {
                 graph,
                 configuration.seedProperty()
             ) : null;
-
-        var parameters = configuration.toParameters();
 
         var algorithm = new ModularityOptimization(
             graph,
@@ -484,14 +468,6 @@ public class CommunityAlgorithms {
             ),
             Tasks.leaf("compute current solution cost", nodeCount)
         );
-    }
-
-    private K1ColoringBaseConfig createModularityConfig() {
-        return K1ColoringStreamConfigImpl
-            .builder()
-            .maxIterations(K1COLORING_MAX_ITERATIONS)
-            .build();
-
     }
 
     PregelResult speakerListenerLPA(Graph graph, SpeakerListenerLPAConfig configuration){
