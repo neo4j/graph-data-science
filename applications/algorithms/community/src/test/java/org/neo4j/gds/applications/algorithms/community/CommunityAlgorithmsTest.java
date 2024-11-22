@@ -23,6 +23,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
@@ -38,6 +39,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.k1coloring.K1ColoringStreamConfigImpl;
 import org.neo4j.gds.kcore.KCoreDecompositionStreamConfigImpl;
+import org.neo4j.gds.kmeans.KmeansStreamConfigImpl;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -206,6 +208,158 @@ final class CommunityAlgorithmsTest {
 
     }
 
+    @Nested
+    @GdlExtension
+    class  Kmeans{
+
+        @GdlGraph
+        private static final String DB_CYPHER =
+            "CREATE" +
+                "  (a {  kmeans: [1.0, 1.0], fail: [1.0]} )" +
+                "  (b {  kmeans: [1.0, 2.0]} )" +
+                "  (c {  kmeans: [102.0, 100.0], fail:[1.0]} )" +
+                "  (d {  kmeans: [100.0, 102.0]} )";
+        @Inject
+        private Graph graph;
+
+        @Test
+        void progressTracking() {
+            var kmeansConfig = KmeansStreamConfigImpl.builder()
+                .nodeProperty("kmeans")
+                .concurrency(1)
+                .randomSeed(19L)
+                .maxIterations(5)
+                .numberOfRestarts(1)
+                .k(2)
+                .build();
+
+            var log = new GdsTestLog();
+            var progressTrackerCreator = progressTrackerCreator(1,log);
+
+            var algorithms = new CommunityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
+            algorithms.kMeans(graph, kmeansConfig);
+
+            assertThat(log.getMessages(TestLog.INFO))
+                .extracting(removingThreadId())
+                .extracting(replaceTimings())
+                .containsExactly(
+                    "K-Means :: Start",
+                    "K-Means :: Initialization :: Start",
+                    "K-Means :: Initialization 50%",
+                    "K-Means :: Initialization 100%",
+                    "K-Means :: Initialization :: Finished",
+                    "K-Means :: Main :: Start",
+                    "K-Means :: Main :: Iteration 1 of 5 :: Start",
+                    "K-Means :: Main :: Iteration 1 of 5 100%",
+                    "K-Means :: Main :: Iteration 1 of 5 :: Finished",
+                    "K-Means :: Main :: Iteration 2 of 5 :: Start",
+                    "K-Means :: Main :: Iteration 2 of 5 100%",
+                    "K-Means :: Main :: Iteration 2 of 5 :: Finished",
+                    "K-Means :: Main :: Finished",
+                    "K-Means :: Finished"
+                );
+        }
+
+        @Test
+        void progressTrackingWithRestarts() {
+            var kmeansConfig = KmeansStreamConfigImpl.builder()
+                .nodeProperty("kmeans")
+                .concurrency(1)
+                .randomSeed(19L)
+                .maxIterations(5)
+                .numberOfRestarts(2)
+                .k(2)
+                .build();
+
+            var log = new GdsTestLog();
+            var progressTrackerCreator = progressTrackerCreator(1,log);
+
+            var algorithms = new CommunityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
+            algorithms.kMeans(graph, kmeansConfig);
+
+            assertThat(log.getMessages(TestLog.INFO))
+                .extracting(removingThreadId())
+                .extracting(replaceTimings())
+                .containsExactly(
+                    "K-Means :: Start",
+                    "K-Means :: KMeans Iteration 1 of 2 :: Start",
+                    "K-Means :: KMeans Iteration 1 of 2 :: Initialization :: Start",
+                    "K-Means :: KMeans Iteration 1 of 2 :: Initialization 50%",
+                    "K-Means :: KMeans Iteration 1 of 2 :: Initialization 100%",
+                    "K-Means :: KMeans Iteration 1 of 2 :: Initialization :: Finished",
+                    "K-Means :: KMeans Iteration 1 of 2 :: Main :: Start",
+                    "K-Means :: KMeans Iteration 1 of 2 :: Main :: Iteration 1 of 5 :: Start",
+                    "K-Means :: KMeans Iteration 1 of 2 :: Main :: Iteration 1 of 5 100%",
+                    "K-Means :: KMeans Iteration 1 of 2 :: Main :: Iteration 1 of 5 :: Finished",
+                    "K-Means :: KMeans Iteration 1 of 2 :: Main :: Iteration 2 of 5 :: Start",
+                    "K-Means :: KMeans Iteration 1 of 2 :: Main :: Iteration 2 of 5 100%",
+                    "K-Means :: KMeans Iteration 1 of 2 :: Main :: Iteration 2 of 5 :: Finished",
+                    "K-Means :: KMeans Iteration 1 of 2 :: Main :: Finished",
+                    "K-Means :: KMeans Iteration 1 of 2 :: Finished",
+                    "K-Means :: KMeans Iteration 2 of 2 :: Start",
+                    "K-Means :: KMeans Iteration 2 of 2 :: Initialization :: Start",
+                    "K-Means :: KMeans Iteration 2 of 2 :: Initialization 50%",
+                    "K-Means :: KMeans Iteration 2 of 2 :: Initialization 100%",
+                    "K-Means :: KMeans Iteration 2 of 2 :: Initialization :: Finished",
+                    "K-Means :: KMeans Iteration 2 of 2 :: Main :: Start",
+                    "K-Means :: KMeans Iteration 2 of 2 :: Main :: Iteration 1 of 5 :: Start",
+                    "K-Means :: KMeans Iteration 2 of 2 :: Main :: Iteration 1 of 5 100%",
+                    "K-Means :: KMeans Iteration 2 of 2 :: Main :: Iteration 1 of 5 :: Finished",
+                    "K-Means :: KMeans Iteration 2 of 2 :: Main :: Iteration 2 of 5 :: Start",
+                    "K-Means :: KMeans Iteration 2 of 2 :: Main :: Iteration 2 of 5 100%",
+                    "K-Means :: KMeans Iteration 2 of 2 :: Main :: Iteration 2 of 5 :: Finished",
+                    "K-Means :: KMeans Iteration 2 of 2 :: Main :: Finished",
+                    "K-Means :: KMeans Iteration 2 of 2 :: Finished",
+                    "K-Means :: Finished"
+                );
+        }
+
+        @Test
+        void progressTrackingWithSilhouette() {
+            var kmeansConfig = KmeansStreamConfigImpl.builder()
+                .nodeProperty("kmeans")
+                .concurrency(1)
+                .randomSeed(19L)
+                .maxIterations(5)
+                .computeSilhouette(true)
+                .numberOfRestarts(1)
+                .k(2)
+                .build();
+
+            var log = new GdsTestLog();
+            var progressTrackerCreator = progressTrackerCreator(1,log);
+
+            var algorithms = new CommunityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
+            algorithms.kMeans(graph, kmeansConfig);
+
+            assertThat(log.getMessages(TestLog.INFO))
+                .extracting(removingThreadId())
+                .extracting(replaceTimings())
+                .containsExactly(
+                    "K-Means :: Start",
+                    "K-Means :: Initialization :: Start",
+                    "K-Means :: Initialization 50%",
+                    "K-Means :: Initialization 100%",
+                    "K-Means :: Initialization :: Finished",
+                    "K-Means :: Main :: Start",
+                    "K-Means :: Main :: Iteration 1 of 5 :: Start",
+                    "K-Means :: Main :: Iteration 1 of 5 100%",
+                    "K-Means :: Main :: Iteration 1 of 5 :: Finished",
+                    "K-Means :: Main :: Iteration 2 of 5 :: Start",
+                    "K-Means :: Main :: Iteration 2 of 5 100%",
+                    "K-Means :: Main :: Iteration 2 of 5 :: Finished",
+                    "K-Means :: Main :: Finished",
+                    "K-Means :: Silhouette :: Start",
+                    "K-Means :: Silhouette 25%",
+                    "K-Means :: Silhouette 50%",
+                    "K-Means :: Silhouette 75%",
+                    "K-Means :: Silhouette 100%",
+                    "K-Means :: Silhouette :: Finished",
+                    "K-Means :: Finished"
+                );
+        }
+    }
+
     static  ProgressTrackerCreator progressTrackerCreator(int concurrency, Log log) {
 
         var progressTrackerCreator = mock(ProgressTrackerCreator.class);
@@ -220,6 +374,7 @@ final class CommunityAlgorithmsTest {
         );
         return progressTrackerCreator;
     }
+
 }
 
 
