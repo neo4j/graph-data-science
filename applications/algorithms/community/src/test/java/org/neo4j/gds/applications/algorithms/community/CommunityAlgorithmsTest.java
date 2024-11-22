@@ -33,6 +33,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.assertj.Extractors;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.compat.TestLog;
@@ -52,6 +53,7 @@ import org.neo4j.gds.leiden.LeidenStatsConfigImpl;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.louvain.LouvainStreamConfigImpl;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfigImpl;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfigImpl;
 
@@ -70,6 +72,7 @@ import static org.mockito.Mockito.when;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 import static org.neo4j.gds.compat.TestLog.INFO;
+import static org.neo4j.gds.modularityoptimization.ModularityOptimization.K1COLORING_MAX_ITERATIONS;
 
 final class CommunityAlgorithmsTest {
 
@@ -643,6 +646,55 @@ final class CommunityAlgorithmsTest {
             assertTrue(log.containsMessage(INFO, ":: Start"));
             assertTrue(log.containsMessage(INFO, ":: Finished"));
         }
+    }
+    @GdlExtension
+    @Nested
+    class ModularityOptimization{
+
+        @GdlGraph(orientation = Orientation.UNDIRECTED, idOffset = 0)
+        private static final String DB_CYPHER =
+            "CREATE" +
+                "  (a:Node {seed1:  1,  seed2: 21})" +
+                ", (b:Node {seed1: 5})" +
+                ", (c:Node {seed1:  2,  seed2: 42})" +
+                ", (d:Node {seed1:  3,  seed2: 33})" +
+                ", (e:Node {seed1:  2,  seed2: 42})" +
+                ", (f:Node {seed1:  3,  seed2: 33})" +
+
+                ", (a)-[:TYPE_OUT {weight: 0.01}]->(b)" +
+                ", (a)-[:TYPE_OUT {weight: 5.0}]->(e)" +
+                ", (a)-[:TYPE_OUT {weight: 5.0}]->(f)" +
+                ", (b)-[:TYPE_OUT {weight: 5.0}]->(c)" +
+                ", (b)-[:TYPE_OUT {weight: 5.0}]->(d)" +
+                ", (c)-[:TYPE_OUT {weight: 0.01}]->(e)" +
+                ", (f)-[:TYPE_OUT {weight: 0.01}]->(d)";
+
+        @Inject
+        private TestGraph graph;
+
+        @Test
+        void testLogging() {
+            var log = new GdsTestLog();
+            var config = ModularityOptimizationStreamConfigImpl.builder().maxIterations(K1COLORING_MAX_ITERATIONS).concurrency(new Concurrency(3)).batchSize(2).build();
+
+            var progressTrackerCreator = progressTrackerCreator(1,log);
+
+            var algorithms = new CommunityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
+            algorithms.modularityOptimization(graph,config);
+            assertThat(log.getMessages(INFO))
+                .extracting(Extractors.removingThreadId())
+                .contains(
+                    "ModularityOptimization :: Start",
+                    "ModularityOptimization :: initialization :: K1Coloring :: color nodes 1 of 5 :: Start",
+                    "ModularityOptimization :: initialization :: K1Coloring :: color nodes 1 of 5 :: Finished",
+                    "ModularityOptimization :: initialization :: K1Coloring :: validate nodes 1 of 5 :: Start",
+                    "ModularityOptimization :: initialization :: K1Coloring :: validate nodes 1 of 5 :: Finished",
+                    "ModularityOptimization :: compute modularity :: optimizeForColor 1 of 5 :: Start",
+                    "ModularityOptimization :: compute modularity :: optimizeForColor 1 of 5 :: Finished",
+                    "ModularityOptimization :: Finished"
+                );
+        }
+
     }
 
     abstract static class TestProgressTrackerCreator  extends   ProgressTrackerCreator {

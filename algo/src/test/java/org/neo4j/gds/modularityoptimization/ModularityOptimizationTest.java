@@ -29,7 +29,6 @@ import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.assertj.Extractors;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -48,9 +47,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.TestSupport.ids;
-import static org.neo4j.gds.compat.TestLog.INFO;
 import static org.neo4j.gds.core.ProcedureConstants.TOLERANCE_DEFAULT;
-import static org.neo4j.gds.modularityoptimization.ModularityOptimization.K1COLORING_MAX_ITERATIONS;
 
 @GdlExtension
 class ModularityOptimizationTest {
@@ -160,26 +157,6 @@ class ModularityOptimizationTest {
             communityIds[i] = pmo.communityId(i);
         }
         return communityIds;
-    }
-
-    @Test
-    void testLogging() {
-        var log = new GdsTestLog();
-
-        compute(graph, K1COLORING_MAX_ITERATIONS, null, new Concurrency(3), 2, log);
-
-        assertThat(log.getMessages(INFO))
-            .extracting(Extractors.removingThreadId())
-            .contains(
-                "ModularityOptimization :: Start",
-                "ModularityOptimization :: initialization :: K1Coloring :: color nodes 1 of 5 :: Start",
-                "ModularityOptimization :: initialization :: K1Coloring :: color nodes 1 of 5 :: Finished",
-                "ModularityOptimization :: initialization :: K1Coloring :: validate nodes 1 of 5 :: Start",
-                "ModularityOptimization :: initialization :: K1Coloring :: validate nodes 1 of 5 :: Finished",
-                "ModularityOptimization :: compute modularity :: optimizeForColor 1 of 5 :: Start",
-                "ModularityOptimization :: compute modularity :: optimizeForColor 1 of 5 :: Finished",
-                "ModularityOptimization :: Finished"
-            );
     }
 
 
