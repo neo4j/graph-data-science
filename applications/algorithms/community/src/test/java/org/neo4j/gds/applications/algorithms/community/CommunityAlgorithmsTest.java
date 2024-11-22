@@ -42,6 +42,7 @@ import org.neo4j.gds.k1coloring.K1ColoringStreamConfigImpl;
 import org.neo4j.gds.kcore.KCoreDecompositionStreamConfigImpl;
 import org.neo4j.gds.kmeans.KmeansStreamConfigImpl;
 import org.neo4j.gds.labelpropagation.LabelPropagationStreamConfigImpl;
+import org.neo4j.gds.leiden.LeidenStatsConfigImpl;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -411,6 +412,107 @@ final class CommunityAlgorithmsTest {
                 assertTrue(log.containsMessage(TestLog.INFO, "Iteration %d of %d :: Start".formatted(iteration, config.maxIterations())));
             });
             assertTrue(log.containsMessage(TestLog.INFO, ":: Finished"));
+        }
+    }
+    @Nested
+    @GdlExtension
+    class Leiden{
+
+        @GdlGraph(orientation = Orientation.UNDIRECTED)
+        private static final String DB_CYPHER =
+            "CREATE " +
+                "  (a0:Node {optimal: 5000, seed: 1, seed2:-1})," +
+                "  (a1:Node {optimal: 4000,seed: 2})," +
+                "  (a2:Node {optimal: 5000,seed: 2})," +
+                "  (a3:Node {optimal: 5000})," +
+                "  (a4:Node {optimal: 5000,seed: 5})," +
+                "  (a5:Node {optimal: 4000,seed: 6})," +
+                "  (a6:Node {optimal: 4000,seed: 7})," +
+                "  (a7:Node {optimal: 4000,seed: 8})," +
+                "  (a0)-[:R {weight: 1.0}]->(a1)," +
+                "  (a0)-[:R {weight: 1.0}]->(a2)," +
+                "  (a0)-[:R {weight: 1.0}]->(a3)," +
+                "  (a0)-[:R {weight: 1.0}]->(a4)," +
+                "  (a2)-[:R {weight: 1.0}]->(a3)," +
+                "  (a2)-[:R {weight: 1.0}]->(a4)," +
+                "  (a3)-[:R {weight: 1.0}]->(a4)," +
+                "  (a1)-[:R {weight: 1.0}]->(a5)," +
+                "  (a1)-[:R {weight: 1.0}]->(a6)," +
+                "  (a1)-[:R {weight: 1.0}]->(a7)," +
+                "  (a5)-[:R {weight: 1.0}]->(a6)," +
+                "  (a5)-[:R {weight: 1.0}]->(a7)," +
+                "  (a6)-[:R {weight: 1.0}]->(a7)";
+
+        @Inject
+        private TestGraph graph;
+
+        @Test
+        void shouldLogProgress() {
+            var config = LeidenStatsConfigImpl.builder().maxLevels(3).randomSeed(19L).build();
+            var log = new GdsTestLog();
+            var progressTrackerCreator = progressTrackerCreator(1,log);
+
+            var algorithms = new CommunityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
+             algorithms.leiden(graph,config);
+
+            assertThat(log.getMessages(TestLog.INFO))
+                .extracting(removingThreadId())
+                .extracting(replaceTimings())
+                .containsExactly(
+                    "Leiden :: Start",
+                    "Leiden :: Initialization :: Start",
+                    "Leiden :: Initialization 12%",
+                    "Leiden :: Initialization 25%",
+                    "Leiden :: Initialization 37%",
+                    "Leiden :: Initialization 50%",
+                    "Leiden :: Initialization 62%",
+                    "Leiden :: Initialization 75%",
+                    "Leiden :: Initialization 87%",
+                    "Leiden :: Initialization 100%",
+                    "Leiden :: Initialization :: Finished",
+                    "Leiden :: Iteration :: Start",
+                    "Leiden :: Iteration :: Local Move 1 of 3 :: Start",
+                    "Leiden :: Iteration :: Local Move 1 of 3 100%",
+                    "Leiden :: Iteration :: Local Move 1 of 3 :: Finished",
+                    "Leiden :: Iteration :: Modularity Computation 1 of 3 :: Start",
+                    "Leiden :: Iteration :: Modularity Computation 1 of 3 12%",
+                    "Leiden :: Iteration :: Modularity Computation 1 of 3 25%",
+                    "Leiden :: Iteration :: Modularity Computation 1 of 3 37%",
+                    "Leiden :: Iteration :: Modularity Computation 1 of 3 50%",
+                    "Leiden :: Iteration :: Modularity Computation 1 of 3 62%",
+                    "Leiden :: Iteration :: Modularity Computation 1 of 3 75%",
+                    "Leiden :: Iteration :: Modularity Computation 1 of 3 87%",
+                    "Leiden :: Iteration :: Modularity Computation 1 of 3 100%",
+                    "Leiden :: Iteration :: Modularity Computation 1 of 3 :: Finished",
+                    "Leiden :: Iteration :: Refinement 1 of 3 :: Start",
+                    "Leiden :: Iteration :: Refinement 1 of 3 12%",
+                    "Leiden :: Iteration :: Refinement 1 of 3 25%",
+                    "Leiden :: Iteration :: Refinement 1 of 3 37%",
+                    "Leiden :: Iteration :: Refinement 1 of 3 50%",
+                    "Leiden :: Iteration :: Refinement 1 of 3 62%",
+                    "Leiden :: Iteration :: Refinement 1 of 3 75%",
+                    "Leiden :: Iteration :: Refinement 1 of 3 87%",
+                    "Leiden :: Iteration :: Refinement 1 of 3 100%",
+                    "Leiden :: Iteration :: Refinement 1 of 3 :: Finished",
+                    "Leiden :: Iteration :: Aggregation 1 of 3 :: Start",
+                    "Leiden :: Iteration :: Aggregation 1 of 3 12%",
+                    "Leiden :: Iteration :: Aggregation 1 of 3 25%",
+                    "Leiden :: Iteration :: Aggregation 1 of 3 37%",
+                    "Leiden :: Iteration :: Aggregation 1 of 3 50%",
+                    "Leiden :: Iteration :: Aggregation 1 of 3 62%",
+                    "Leiden :: Iteration :: Aggregation 1 of 3 75%",
+                    "Leiden :: Iteration :: Aggregation 1 of 3 87%",
+                    "Leiden :: Iteration :: Aggregation 1 of 3 100%",
+                    "Leiden :: Iteration :: Aggregation 1 of 3 :: Finished",
+                    "Leiden :: Iteration :: Local Move 2 of 3 :: Start",
+                    "Leiden :: Iteration :: Local Move 2 of 3 100%",
+                    "Leiden :: Iteration :: Local Move 2 of 3 :: Finished",
+                    "Leiden :: Iteration :: Modularity Computation 2 of 3 :: Start",
+                    "Leiden :: Iteration :: Modularity Computation 2 of 3 100%",
+                    "Leiden :: Iteration :: Modularity Computation 2 of 3 :: Finished",
+                    "Leiden :: Iteration :: Finished",
+                    "Leiden :: Finished"
+                );
         }
     }
 
