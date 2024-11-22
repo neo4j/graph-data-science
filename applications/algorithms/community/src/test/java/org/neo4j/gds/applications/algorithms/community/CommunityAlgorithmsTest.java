@@ -20,9 +20,11 @@
 package org.neo4j.gds.applications.algorithms.community;
 
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.AssertionsForInterfaceTypes;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
@@ -57,11 +59,15 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfigIm
 import org.neo4j.gds.scc.SccStreamConfigImpl;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfigImpl;
+import org.neo4j.gds.wcc.WccStreamConfigImpl;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -70,6 +76,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 import static org.neo4j.gds.compat.TestLog.INFO;
@@ -757,6 +764,67 @@ final class CommunityAlgorithmsTest {
                     "SCC :: Finished"
                 );
         }
+    }
+
+    @Nested
+    class Wcc{
+
+        private static final int SETS_COUNT = 16;
+        private static final int SET_SIZE = 10;
+
+        @ParameterizedTest
+        @EnumSource(Orientation.class)
+        void shouldLogProgress(Orientation orientation) {
+            var graph = createTestGraph(orientation);
+
+            var config = WccStreamConfigImpl.builder().concurrency(2).build();
+            var log = new GdsTestLog();
+
+            var progressTrackerCreator = progressTrackerCreator(2,log);
+
+            var algorithms = new CommunityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
+            algorithms.wcc(graph,config);
+
+            var messagesInOrder = log.getMessages(INFO);
+
+            AssertionsForInterfaceTypes.assertThat(messagesInOrder)
+                // avoid asserting on the thread id
+                .extracting(removingThreadId())
+                .hasSize(103)
+                .containsSequence(
+                    "WCC :: Start",
+                    "WCC 0%",
+                    "WCC 1%",
+                    "WCC 2%"
+                )
+                .containsSequence(
+                    "WCC 98%",
+                    "WCC 99%",
+                    "WCC 100%",
+                    "WCC :: Finished"
+                );
+        }
+
+        private static Graph createTestGraph(Orientation orientation) {
+            int[] setSizes = new int[SETS_COUNT];
+            Arrays.fill(setSizes, SET_SIZE);
+
+            StringBuilder gdl = new StringBuilder();
+
+            for (int setSize : setSizes) {
+                gdl.append(createLine(setSize));
+            }
+
+            return fromGdl(gdl.toString(), orientation);
+        }
+
+        static String createLine(int setSize) {
+            return IntStream.range(0, setSize)
+                .mapToObj(i -> "()")
+                .collect(Collectors.joining("-[:REL]->"));
+        }
+
+
     }
 
     abstract static class TestProgressTrackerCreator  extends   ProgressTrackerCreator {

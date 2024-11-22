@@ -31,7 +31,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.CommunityHelper;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -57,7 +56,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
-import static org.neo4j.gds.compat.TestLog.INFO;
 import static org.neo4j.gds.compat.TestLog.WARN;
 
 class WccTest {
@@ -184,43 +182,6 @@ class WccTest {
         Assertions.assertThat(log.getMessages(WARN))
             .extracting(removingThreadId())
             .containsExactly("WCC :: Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set.");
-    }
-
-    @ParameterizedTest
-    @EnumSource(Orientation.class)
-    void shouldLogProgress(Orientation orientation) {
-        var graph = createTestGraph(orientation);
-
-        var log = new GdsTestLog();
-        var factory = new WccAlgorithmFactory<>();
-        var parameters = new WccParameters(0D, new Concurrency(2));
-        var progressTracker = new TestProgressTracker(
-            factory.progressTask(graph),
-            log,
-            parameters.concurrency(),
-            EmptyTaskRegistryFactory.INSTANCE
-        );
-        var wcc = factory.build(graph, parameters, progressTracker);
-        wcc.compute();
-
-        var messagesInOrder = log.getMessages(INFO);
-
-        assertThat(messagesInOrder)
-            // avoid asserting on the thread id
-            .extracting(removingThreadId())
-            .hasSize(103)
-            .containsSequence(
-                "WCC :: Start",
-                "WCC 0%",
-                "WCC 1%",
-                "WCC 2%"
-            )
-            .containsSequence(
-                "WCC 98%",
-                "WCC 99%",
-                "WCC 100%",
-                "WCC :: Finished"
-            );
     }
 
 
