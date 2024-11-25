@@ -19,10 +19,11 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
+import org.eclipse.collections.api.block.HashingStrategy;
 import org.eclipse.collections.api.map.primitive.MutableObjectLongMap;
 import org.eclipse.collections.api.map.primitive.ObjectLongMap;
 import org.eclipse.collections.impl.collection.mutable.AbstractMultiReaderMutableCollection;
-import org.eclipse.collections.impl.factory.primitive.ObjectLongMaps;
+import org.eclipse.collections.impl.map.mutable.primitive.ObjectLongHashMapWithHashingStrategy;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -125,12 +126,24 @@ public final class ShardedByteArrayLongMap {
 
     abstract static class MapShard {
 
+        private static class ArrayHashingStrategy implements HashingStrategy<byte[]> {
+            @Override
+            public int computeHashCode(byte[] object) {
+                return Arrays.hashCode(object);
+            }
+
+            @Override
+            public boolean equals(byte[] object1, byte[] object2) {
+                return Arrays.equals(object1, object2);
+            }
+        }
+
         private final ReentrantLock lock;
         private final AbstractMultiReaderMutableCollection.LockWrapper lockWrapper;
         final MutableObjectLongMap<byte[]> mapping;
 
         MapShard() {
-            this.mapping = ObjectLongMaps.mutable.empty();
+            this.mapping = new ObjectLongHashMapWithHashingStrategy<>(new ArrayHashingStrategy());
             this.lock = new ReentrantLock();
             this.lockWrapper = new AbstractMultiReaderMutableCollection.LockWrapper(lock);
         }

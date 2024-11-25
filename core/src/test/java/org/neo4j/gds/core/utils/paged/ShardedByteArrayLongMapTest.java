@@ -34,6 +34,7 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,7 +44,9 @@ class ShardedByteArrayLongMapTest {
     @Provide
     Arbitrary<byte[][]> nodes() {
         var idGen = Arbitraries.bytes().array(byte[].class).ofSize(10);
-        return Arbitraries.create(idGen::sample).array(byte[][].class);
+        return Arbitraries
+            .create(idGen::sample)
+            .array(byte[][].class);
     }
 
     @Test
@@ -61,8 +64,7 @@ class ShardedByteArrayLongMapTest {
     void addNodes(@ForAll("nodes") @Size(100) byte[][] nodes) {
         var builder = ShardedByteArrayLongMap.builder(new Concurrency(1));
         for (byte[] node : nodes) {
-            long mapped = builder.addNode(node);
-            assertThat(mapped).isGreaterThanOrEqualTo(0);
+            builder.addNode(node);
         }
         var map = builder.build();
 
@@ -70,6 +72,34 @@ class ShardedByteArrayLongMapTest {
         for (byte[] node : nodes) {
             assertThat(map.toOriginalNodeId(map.toMappedNodeId(node))).isEqualTo(node);
         }
+    }
+
+    @Property
+    void addNodesDifferentObject(@ForAll("nodes") @Size(100) byte[][] nodes) {
+        var builder = ShardedByteArrayLongMap.builder(new Concurrency(1));
+        for (byte[] node : nodes) {
+            builder.addNode(node);
+        }
+        var map = builder.build();
+
+        assertThat(map.size()).isEqualTo(nodes.length);
+        for (byte[] node : nodes) {
+            // Ensure that hashCode and equals work correctly for byte arrays
+            // with same elements, but different objects.
+            var nodeCopy = Arrays.copyOf(node, node.length);
+            assertThat(map.toOriginalNodeId(map.toMappedNodeId(nodeCopy))).isEqualTo(node);
+        }
+    }
+
+    @Test
+    void addExistingNode() {
+        byte[] node1 = "foobar".getBytes(StandardCharsets.UTF_8);
+        byte[] node2 = "foobar".getBytes(StandardCharsets.UTF_8);
+        var builder = ShardedByteArrayLongMap.builder(new Concurrency(1));
+        long mappedNode1 = builder.addNode(node1);
+        assertThat(mappedNode1).isGreaterThanOrEqualTo(0);
+        long mappedNode2 = builder.addNode(node2);
+        assertThat(mappedNode2).isEqualTo(-(mappedNode1 + 1));
     }
 
     @ParameterizedTest
