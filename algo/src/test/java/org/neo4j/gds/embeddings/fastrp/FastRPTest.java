@@ -27,6 +27,9 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.applications.algorithms.embeddings.NodeEmbeddingAlgorithms;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
@@ -40,8 +43,8 @@ import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.Intersections;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.shuffle.ShuffleUtil;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -546,40 +549,28 @@ class FastRPTest {
 
     @Test
     void shouldLogProgress() {
+        var log = new GdsTestLog();
+        var progressTrackerCreator = new ProgressTrackerCreator(log, RequestScopedDependencies.builder()
+            .with(EmptyTaskRegistryFactory.INSTANCE)
+            .with(EmptyUserLogRegistryFactory.INSTANCE)
+            .build());
+        var nodeEmbeddingAlgorithms = new NodeEmbeddingAlgorithms(null, progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
+
         var graph = scalarGraphStore.getGraph(
             List.of(NodeLabel.of("Node1"), NodeLabel.of("Node2")),
             List.of(RelationshipType.of("REL")),
             Optional.empty()
         );
-        var concurrency = new Concurrency(4);
-        var minBatchSize = 10_000;
-
-        var parameters = new FastRPParameters(
-            List.of("f1", "f2", "f3"),
-            List.of(0.0D),
-            DEFAULT_EMBEDDING_DIMENSION,
-            (int) (0.5 * DEFAULT_EMBEDDING_DIMENSION),
-            Optional.empty(),
-            0.0F,
-            0.6
-        );
-
-        var factory = new FastRPFactory<>();
-
-        var progressTask = factory.progressTask(graph, parameters.nodeSelfInfluence(), parameters.iterationWeights().size());
-        var log = new GdsTestLog();
-        var progressTracker = new TaskProgressTracker(progressTask, log, concurrency, EmptyTaskRegistryFactory.INSTANCE);
-
-        new FastRP(
-            graph,
-            parameters,
-            concurrency,
-            minBatchSize,
-            List.of(),
-            progressTracker,
-            Optional.of(42L),
-            TerminationFlag.RUNNING_TRUE
-        ).compute();
+        var configuration = FastRPBaseConfigImpl.builder()
+            .concurrency(4)
+            .embeddingDimension(DEFAULT_EMBEDDING_DIMENSION)
+            .featureProperties(List.of("f1", "f2", "f3"))
+            .iterationWeights(List.of(0.0D))
+            .nodeSelfInfluence(0.6)
+            .normalizationStrength(0.0F)
+            .randomSeed(42L)
+            .build();
+        nodeEmbeddingAlgorithms.fastRP(graph, configuration);
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())

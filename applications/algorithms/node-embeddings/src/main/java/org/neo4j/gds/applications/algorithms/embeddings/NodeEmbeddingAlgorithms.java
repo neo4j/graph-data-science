@@ -76,10 +76,14 @@ public class NodeEmbeddingAlgorithms {
         this.terminationFlag = terminationFlag;
     }
 
-    FastRPResult fastRP(Graph graph, FastRPBaseConfig configuration) {
+    public FastRPResult fastRP(Graph graph, FastRPBaseConfig configuration) {
         var task = createFastRPTask(graph, configuration.nodeSelfInfluence(), configuration.iterationWeights().size());
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
+        return fastRP(graph, configuration, progressTracker);
+    }
+
+    public FastRPResult fastRP(Graph graph, FastRPBaseConfig configuration, ProgressTracker progressTracker) {
         var parameters = FastRPConfigTransformer.toParameters(configuration);
 
         var featureExtractors = FeatureExtraction.propertyExtractors(graph, parameters.featureProperties());

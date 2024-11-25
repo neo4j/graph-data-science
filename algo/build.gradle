@@ -79,4 +79,5 @@ dependencies {
     testImplementation openGds.mockito.junit.jupiter
 
     testImplementation project(':centrality-algorithms')
+    testImplementation project(':node-embedding-algorithms')
 }
