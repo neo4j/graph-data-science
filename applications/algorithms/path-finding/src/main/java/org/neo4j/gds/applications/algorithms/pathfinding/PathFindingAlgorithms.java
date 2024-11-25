@@ -150,7 +150,7 @@ public class PathFindingAlgorithms {
         );
     }
 
-    PathFindingResult deltaStepping(Graph graph, AllShortestPathsDeltaBaseConfig configuration) {
+    public PathFindingResult deltaStepping(Graph graph, AllShortestPathsDeltaBaseConfig configuration) {
         var iterativeTask = Tasks.iterativeOpen(
             AlgorithmLabel.DeltaStepping.asString(),
             () -> List.of(

@@ -27,17 +27,19 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.schema.Direction;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -48,16 +50,13 @@ import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStreamConfigImpl;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.termination.TerminationFlag;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.INFO;
 import static org.neo4j.gds.paths.PathTestUtil.expected;
@@ -179,49 +178,45 @@ final class DeltaSteppingTest {
 
         @Test
         void shouldLogProgress() {
+            var log = new GdsTestLog();
+            var requestScopedDependencies = RequestScopedDependencies.builder()
+                .with(EmptyTaskRegistryFactory.INSTANCE)
+                .with(TerminationFlag.RUNNING_TRUE)
+                .with(EmptyUserLogRegistryFactory.INSTANCE)
+                .build();
+            var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
+            var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, progressTrackerCreator);
+
             var config = AllShortestPathsDeltaStreamConfigImpl.builder()
                 .concurrency(4)
                 .sourceNode(idFunction.of("c"))
                 .delta(5)
                 .build();
+            pathFindingAlgorithms.deltaStepping(graph, config).pathSet();
 
-            var progressTask = new DeltaSteppingFactory<>().progressTask(graph, config);
-            var testLog = new GdsTestLog();
-            var progressTracker = new TestProgressTracker(progressTask, testLog, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
-
-            DeltaStepping.of(graph, config, DefaultPool.INSTANCE, progressTracker)
-                .compute()
-                .pathSet();
-
-            List<AtomicLong> progresses = progressTracker.getProgresses();
-            assertEquals(7, progresses.size());
-
-            var messagesInOrder = testLog.getMessages(INFO);
-
-            assertThat(messagesInOrder)
+            assertThat(log.getMessages(INFO))
                 // avoid asserting on the thread id
                 .extracting(removingThreadId())
                 .hasSize(20)
                 .containsSequence(
-                    "DeltaStepping :: Start",
-                    "DeltaStepping :: RELAX 1 :: Start",
-                    "DeltaStepping :: RELAX 1 100%",
-                    "DeltaStepping :: RELAX 1 :: Finished",
-                    "DeltaStepping :: SYNC 1 :: Start",
-                    "DeltaStepping :: SYNC 1 100%",
-                    "DeltaStepping :: SYNC 1 :: Finished"
+                    "Delta Stepping :: Start",
+                    "Delta Stepping :: RELAX 1 :: Start",
+                    "Delta Stepping :: RELAX 1 100%",
+                    "Delta Stepping :: RELAX 1 :: Finished",
+                    "Delta Stepping :: SYNC 1 :: Start",
+                    "Delta Stepping :: SYNC 1 100%",
+                    "Delta Stepping :: SYNC 1 :: Finished"
                 )
                 .containsSequence(
-                    "DeltaStepping :: RELAX 3 :: Start",
-                    "DeltaStepping :: RELAX 3 100%",
-                    "DeltaStepping :: RELAX 3 :: Finished",
-                    "DeltaStepping :: SYNC 3 :: Start",
-                    "DeltaStepping :: SYNC 3 100%",
-                    "DeltaStepping :: SYNC 3 :: Finished",
-                    "DeltaStepping :: Finished"
+                    "Delta Stepping :: RELAX 3 :: Start",
+                    "Delta Stepping :: RELAX 3 100%",
+                    "Delta Stepping :: RELAX 3 :: Finished",
+                    "Delta Stepping :: SYNC 3 :: Start",
+                    "Delta Stepping :: SYNC 3 100%",
+                    "Delta Stepping :: SYNC 3 :: Finished",
+                    "Delta Stepping :: Finished"
                 );
         }
-
     }
 
     @Nested
