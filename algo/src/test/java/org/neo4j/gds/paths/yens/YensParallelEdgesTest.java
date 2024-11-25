@@ -21,23 +21,23 @@ package org.neo4j.gds.paths.yens;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfigImpl;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
 class YensParallelEdgesTest {
-
     static ShortestPathYensStreamConfigImpl.Builder defaultSourceTargetConfigBuilder() {
-        return ShortestPathYensStreamConfigImpl.builder()
-            .concurrency(1);
+        return ShortestPathYensStreamConfigImpl.builder().concurrency(1);
     }
-
 
     @GdlGraph
     private static final String DB_CYPHER =
@@ -64,16 +64,20 @@ class YensParallelEdgesTest {
     @Inject
     private IdFunction idFunction;
 
-
     @Test
     void shouldWorkWithParallelEdges() {
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .with(TerminationFlag.RUNNING_TRUE)
+            .build();
+        var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, null);
+
         var config = defaultSourceTargetConfigBuilder()
             .sourceNode(idFunction.of("a"))
             .targetNode(idFunction.of("d"))
             .k(9)
             .build();
-        var yens = new YensFactory<>().build(graph, config, ProgressTracker.NULL_TRACKER);
-        var result = yens.compute();
+        var result = pathFindingAlgorithms.singlePairShortestPathYens(graph, config, ProgressTracker.NULL_TRACKER);
+
         var associatedCosts = result.pathSet().stream().mapToInt(path -> (int) path.totalCost()).toArray();
         assertThat(associatedCosts.length).isEqualTo(9);
         assertThat(associatedCosts).doesNotContain(200); //paths are  1 + (1..3)+(1..3)

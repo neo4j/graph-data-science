@@ -27,7 +27,7 @@ import org.neo4j.gds.logging.Log;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class TaskProgressLogger extends BatchingProgressLogger {
+public class TaskProgressLogger extends BatchingProgressLogger {
 
     private final Task baseTask;
     private final TaskVisitor loggingLeafTaskVisitor;

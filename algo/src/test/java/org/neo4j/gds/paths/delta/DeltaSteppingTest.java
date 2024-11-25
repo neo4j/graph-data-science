@@ -46,6 +46,7 @@ import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStreamConfigImpl;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Optional;
@@ -378,7 +379,7 @@ final class DeltaSteppingTest {
         ).compute();
 
         var dijkstraAlgo = Dijkstra
-            .singleSource(newGraph, config.sourceNode(), true, Optional.empty(), ProgressTracker.NULL_TRACKER)
+            .singleSource(newGraph, config.sourceNode(), true, Optional.empty(), ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE)
             .compute();
 
         double[] delta = new double[nodeCount];

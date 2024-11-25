@@ -80,4 +80,5 @@ dependencies {
 
     testImplementation project(':centrality-algorithms')
     testImplementation project(':node-embedding-algorithms')
+    testImplementation project(':path-finding-algorithms')
 }

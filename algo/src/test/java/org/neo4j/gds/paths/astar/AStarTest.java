@@ -22,24 +22,24 @@ package org.neo4j.gds.paths.astar;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.neo4j.gds.TestProgressTracker;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.logging.GdsTestLog;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfigImpl;
+import org.neo4j.gds.termination.TerminationFlag;
 
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
-
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.paths.PathTestUtil.expected;
 
 @GdlExtension
@@ -114,7 +114,7 @@ class AStarTest {
             .build();
 
         var path = AStar
-            .sourceTarget(graph, config, ProgressTracker.NULL_TRACKER)
+            .sourceTarget(graph, config, ProgressTracker.NULL_TRACKER, TerminationFlag.RUNNING_TRUE)
             .compute()
             .findFirst()
             .get();
@@ -124,38 +124,36 @@ class AStarTest {
 
     @Test
     void shouldLogProgress() {
+        var log = new GdsTestLog();
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .with(EmptyTaskRegistryFactory.INSTANCE)
+            .with(TerminationFlag.RUNNING_TRUE)
+            .with(EmptyUserLogRegistryFactory.INSTANCE)
+            .build();
+        var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
+        var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, progressTrackerCreator);
 
         var config = defaultSourceTargetConfigBuilder()
             .sourceNode(graph.toOriginalNodeId("nA"))
             .targetNode(graph.toOriginalNodeId("nX"))
             .build();
+        pathFindingAlgorithms.singlePairShortestPathAStar(graph, config).pathSet();
 
-        var progressTask = new AStarFactory<>().progressTask(graph, config);
-        var log = new GdsTestLog();
-        var progressTracker = new TestProgressTracker(progressTask, log, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
-
-        AStar.sourceTarget(graph, config, progressTracker)
-            .compute()
-            .pathSet();
-
-        List<AtomicLong> progresses = progressTracker.getProgresses();
-        assertEquals(1, progresses.size());
-        assertEquals(9, progresses.get(0).get());
-
-        assertTrue(log.containsMessage(TestLog.INFO, "AStar :: Start"));
-        assertTrue(log.containsMessage(TestLog.INFO, "AStar 5%"));
-        assertTrue(log.containsMessage(TestLog.INFO, "AStar 17%"));
-        assertTrue(log.containsMessage(TestLog.INFO, "AStar 23%"));
-        assertTrue(log.containsMessage(TestLog.INFO, "AStar 29%"));
-        assertTrue(log.containsMessage(TestLog.INFO, "AStar 35%"));
-        assertTrue(log.containsMessage(TestLog.INFO, "AStar 41%"));
-        assertTrue(log.containsMessage(TestLog.INFO, "AStar 47%"));
-        assertTrue(log.containsMessage(TestLog.INFO, "AStar 52%"));
-        assertTrue(log.containsMessage(TestLog.INFO, "AStar :: Finished"));
-
-        // no duplicate entries in progress logger
-        var logMessages = log.getMessages(TestLog.INFO);
-        assertEquals(Set.copyOf(logMessages).size(), logMessages.size());
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .contains(
+                "AStar :: Start",
+                "AStar 5%",
+                "AStar 17%",
+                "AStar 23%",
+                "AStar 29%",
+                "AStar 35%",
+                "AStar 41%",
+                "AStar 47%",
+                "AStar 52%",
+                "AStar 100%",
+                "AStar :: Finished"
+            );
     }
 
     // Validated against https://www.vcalc.com/wiki/vCalc/Haversine+-+Distance

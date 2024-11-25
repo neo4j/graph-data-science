@@ -236,7 +236,8 @@ final class DijkstraTest {
                     config.sourceNode(),
                     false,
                     Optional.empty(),
-                    ProgressTracker.NULL_TRACKER
+                    ProgressTracker.NULL_TRACKER,
+                    TerminationFlag.RUNNING_TRUE
                 ).compute()
                 .pathSet();
 
@@ -265,7 +266,8 @@ final class DijkstraTest {
                     config.sourceNode(),
                     false,
                     Optional.empty(),
-                    ProgressTracker.NULL_TRACKER
+                    ProgressTracker.NULL_TRACKER,
+                    TerminationFlag.RUNNING_TRUE
                 )
                 .compute()
                 .pathSet();
@@ -380,7 +382,8 @@ final class DijkstraTest {
                     config.sourceNode(),
                     false,
                     Optional.empty(),
-                    ProgressTracker.NULL_TRACKER
+                    ProgressTracker.NULL_TRACKER,
+                    TerminationFlag.RUNNING_TRUE
                 )
                 .compute()
                 .pathSet();

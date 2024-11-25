@@ -44,18 +44,6 @@ public final class AStar extends Algorithm<PathFindingResult> {
         this.terminationFlag = terminationFlag;
     }
 
-    /**
-     * @deprecated Use the one with termination flag
-     */
-    @Deprecated
-    public static AStar sourceTarget(
-        Graph graph,
-        ShortestPathAStarBaseConfig config,
-        ProgressTracker progressTracker
-    ) {
-        return sourceTarget(graph, config, progressTracker, TerminationFlag.RUNNING_TRUE);
-    }
-
     public static AStar sourceTarget(
         Graph graph,
         ShortestPathAStarBaseConfig config,

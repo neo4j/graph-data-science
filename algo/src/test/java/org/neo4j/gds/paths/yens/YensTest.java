@@ -26,12 +26,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.TestProgressTracker;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -58,12 +60,9 @@ import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 @GdlExtension
 class YensTest {
-
     static ShortestPathYensStreamConfigImpl.Builder defaultSourceTargetConfigBuilder(int concurrency) {
-        return ShortestPathYensStreamConfigImpl.builder()
-            .concurrency(concurrency);
+        return ShortestPathYensStreamConfigImpl.builder().concurrency(concurrency);
     }
-
 
     // https://en.wikipedia.org/wiki/Yen%27s_algorithm#/media/File:Yen's_K-Shortest_Path_Algorithm,_K=3,_A_to_F.gif
     @GdlGraph(aggregation = Aggregation.SINGLE)
@@ -144,26 +143,26 @@ class YensTest {
     @ParameterizedTest
     @MethodSource("pathInput")
     void compute(Collection<String> expectedPaths) {
-        assertResult(graph, expectedPaths, false, 4);
+        assertResult(graph, expectedPaths, false);
     }
 
     @Test
     void shouldLogProgress() {
-        int k = 3;
+        var log = new GdsTestLog();
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .with(EmptyTaskRegistryFactory.INSTANCE)
+            .with(TerminationFlag.RUNNING_TRUE)
+            .with(EmptyUserLogRegistryFactory.INSTANCE)
+            .build();
+        var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
+        var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, progressTrackerCreator);
 
         var config = defaultSourceTargetConfigBuilder(1)
             .sourceNode(graph.toOriginalNodeId("c"))
             .targetNode(graph.toOriginalNodeId("h"))
-            .k(k)
+            .k(3)
             .build();
-
-        var progressTask = new YensFactory<>().progressTask(graph, config);
-        var log = new GdsTestLog();
-        var progressTracker = new TestProgressTracker(progressTask, log, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
-
-        Yens.sourceTarget(graph, config, config.concurrency(), progressTracker, TerminationFlag.RUNNING_TRUE)
-            .compute()
-            .pathSet();
+        pathFindingAlgorithms.singlePairShortestPathYens(graph, config).pathSet();
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
@@ -187,21 +186,21 @@ class YensTest {
 
     @Test
     void shouldLogProgressIfNothingToDo() {
-        int k = 3;
+        var log = new GdsTestLog();
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .with(EmptyTaskRegistryFactory.INSTANCE)
+            .with(TerminationFlag.RUNNING_TRUE)
+            .with(EmptyUserLogRegistryFactory.INSTANCE)
+            .build();
+        var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
+        var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, progressTrackerCreator);
 
         var config = defaultSourceTargetConfigBuilder(1)
             .sourceNode(graph.toOriginalNodeId("z"))
             .targetNode(graph.toOriginalNodeId("h"))
-            .k(k)
+            .k(3)
             .build();
-
-        var progressTask = new YensFactory<>().progressTask(graph, config);
-        var log = new GdsTestLog();
-        var progressTracker = new TestProgressTracker(progressTask, log, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
-
-        Yens.sourceTarget(graph, config, config.concurrency(), progressTracker, TerminationFlag.RUNNING_TRUE)
-            .compute()
-            .pathSet();
+        pathFindingAlgorithms.singlePairShortestPathYens(graph, config).pathSet();
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
@@ -215,12 +214,10 @@ class YensTest {
             );
     }
 
-
     private static void assertResult(
         TestGraph graph,
         Collection<String> expectedPaths,
-        boolean trackRelationships,
-        int concurrency
+        boolean trackRelationships
     ) {
         var expectedPathResults = expectedPathResults(graph::toMappedNodeId, expectedPaths, trackRelationships);
 
@@ -235,7 +232,7 @@ class YensTest {
             throw new IllegalArgumentException("All expected paths must have the same source and target nodes.");
         }
 
-        var config = defaultSourceTargetConfigBuilder(concurrency)
+        var config = defaultSourceTargetConfigBuilder(4)
             .sourceNode(graph.toOriginalNodeId(firstResult.sourceNode()))
             .targetNode(graph.toOriginalNodeId(firstResult.targetNode()))
             .k(expectedPathResults.size())
@@ -359,7 +356,7 @@ class YensTest {
         @ParameterizedTest
         @MethodSource("pathInput")
         void compute(Collection<String> expectedPaths) {
-            assertResult(graph, expectedPaths, true, 4);
+            assertResult(graph, expectedPaths, true);
         }
     }
 }

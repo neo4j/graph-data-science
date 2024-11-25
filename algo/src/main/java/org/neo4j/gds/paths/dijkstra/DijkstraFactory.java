@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.paths.dijkstra;
 
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -27,6 +26,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraBaseConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 
@@ -44,13 +44,7 @@ public abstract class DijkstraFactory<CONFIG extends DijkstraBaseConfig> extends
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        return dijkstraProgressTask(taskName(), graph);
-    }
-
-
-    @NotNull
-    public static Task dijkstraProgressTask(String taskName, Graph graph) {
-        return Tasks.leaf(taskName, graph.relationshipCount());
+        return Tasks.leaf(taskName(), graph.relationshipCount());
     }
 
     public static class AllShortestPathsDijkstraFactory<T extends DijkstraBaseConfig> extends DijkstraFactory<T> {
@@ -65,7 +59,8 @@ public abstract class DijkstraFactory<CONFIG extends DijkstraBaseConfig> extends
                 configuration.sourceNode(),
                 false,
                 Optional.empty(),
-                progressTracker
+                progressTracker,
+                TerminationFlag.RUNNING_TRUE
             );
         }
     }

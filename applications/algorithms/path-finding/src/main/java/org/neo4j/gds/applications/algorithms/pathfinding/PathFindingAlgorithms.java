@@ -289,7 +289,7 @@ public class PathFindingAlgorithms {
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
-    PathFindingResult singlePairShortestPathAStar(Graph graph, ShortestPathAStarBaseConfig configuration) {
+    public PathFindingResult singlePairShortestPathAStar(Graph graph, ShortestPathAStarBaseConfig configuration) {
         var progressTracker = createProgressTracker(
             configuration,
             Tasks.leaf(AlgorithmLabel.AStar.asString(), graph.relationshipCount())
@@ -330,7 +330,7 @@ public class PathFindingAlgorithms {
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, false);
     }
 
-    PathFindingResult singlePairShortestPathYens(Graph graph, ShortestPathYensBaseConfig configuration) {
+    public PathFindingResult singlePairShortestPathYens(Graph graph, ShortestPathYensBaseConfig configuration) {
         var initialTask = Tasks.leaf(AlgorithmLabel.Dijkstra.asString(), graph.relationshipCount());
         var pathGrowingTask = Tasks.leaf("Path growing", configuration.k() - 1);
         var yensTask = Tasks.task(AlgorithmLabel.Yens.asString(), initialTask, pathGrowingTask);
@@ -340,6 +340,14 @@ public class PathFindingAlgorithms {
             yensTask
         );
 
+        return singlePairShortestPathYens(graph, configuration, progressTracker);
+    }
+
+    public PathFindingResult singlePairShortestPathYens(
+        Graph graph,
+        ShortestPathYensBaseConfig configuration,
+        ProgressTracker progressTracker
+    ) {
         var algorithm = Yens.sourceTarget(
             graph,
             configuration,

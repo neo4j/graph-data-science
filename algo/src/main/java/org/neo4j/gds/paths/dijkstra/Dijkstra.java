@@ -95,27 +95,6 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
     }
 
     /**
-     * @deprecated Use the other one with termination flag
-     */
-    @Deprecated
-    public static Dijkstra singleSource(
-        Graph graph,
-        long originalNodeId,
-        boolean trackRelationships,
-        Optional<HeuristicFunction> heuristicFunction,
-        ProgressTracker progressTracker
-    ) {
-        return singleSource(
-            graph,
-            originalNodeId,
-            trackRelationships,
-            heuristicFunction,
-            progressTracker,
-            TerminationFlag.RUNNING_TRUE
-        );
-    }
-
-    /**
      * Configure Dijkstra to compute all single-source shortest path.
      */
     public static Dijkstra singleSource(
