@@ -28,15 +28,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithms;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -49,12 +51,10 @@ import org.neo4j.gds.termination.TerminationFlag;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @ExtendWith(SoftAssertionsExtension.class)
 class PageRankTest {
@@ -109,13 +109,9 @@ class PageRankTest {
                 .tolerance(0)
                 .build();
 
-            var rankProvider = new PageRankAlgorithmFactory<>()
-                .build(
-                    graph,
-                    config,
-                    ProgressTracker.NULL_TRACKER
-                )
-                .compute().centralityScoreProvider();
+            var centralityAlgorithms = new CentralityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
+            var result = centralityAlgorithms.pageRank(graph, config, ProgressTracker.NULL_TRACKER);
+            var rankProvider = result.centralityScoreProvider();
 
             var expected = graph.nodeProperties("expectedRank");
 
@@ -136,13 +132,9 @@ class PageRankTest {
                 .tolerance(tolerance)
                 .build();
 
-            var pregelResult = new PageRankAlgorithmFactory<>()
-                .build(
-                    graph,
-                    config,
-                    ProgressTracker.NULL_TRACKER
-                )
-                .compute();
+            var centralityAlgorithms = new CentralityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
+
+            var pregelResult = centralityAlgorithms.pageRank(graph, config, ProgressTracker.NULL_TRACKER);
 
             // initial iteration is counted extra in Pregel
             assertThat(pregelResult.iterations()).isEqualTo(expectedIterations);
@@ -166,13 +158,9 @@ class PageRankTest {
                 .sourceNodes(sourceNodeIds)
                 .build();
 
-            var rankProvider = new PageRankAlgorithmFactory<>()
-                .build(
-                    graph,
-                    config,
-                    ProgressTracker.NULL_TRACKER
-                )
-                .compute().centralityScoreProvider();
+            var centralityAlgorithms = new CentralityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
+            var result = centralityAlgorithms.pageRank(graph, config, ProgressTracker.NULL_TRACKER);
+            var rankProvider = result.centralityScoreProvider();
 
             var expected = graph.nodeProperties(expectedPropertyKey);
 
@@ -186,100 +174,96 @@ class PageRankTest {
 
         @Test
         void shouldLogProgress() {
-            var maxIterations = 10;
-            var config = PageRankConfigImpl.builder()
-                .maxIterations(maxIterations)
-                .build();
-
-            var factory = new PageRankAlgorithmFactory<>();
-
-            var progressTask = factory.progressTask(graph, config);
             var log = new GdsTestLog();
+            var requestScopedDependencies = RequestScopedDependencies.builder()
+                .with(EmptyTaskRegistryFactory.INSTANCE)
+                .with(EmptyUserLogRegistryFactory.INSTANCE)
+                .build();
+            var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
+            var centralityAlgorithms = new CentralityAlgorithms(progressTrackerCreator, TerminationFlag.RUNNING_TRUE);
 
-            var progressTracker = new TestProgressTracker(
-                progressTask,
-                log,
-                config.concurrency(),
-                EmptyTaskRegistryFactory.INSTANCE
-            );
+            var maxIterations = 10;
+            var config = PageRankConfigImpl.builder().maxIterations(maxIterations).build();
+            centralityAlgorithms.pageRank(graph, config);
 
-            factory.build(
-                    graph,
-                    config,
-                    progressTracker
-                )
-                .compute();
-
-            var progresses = progressTracker.getProgresses().stream()
-                .filter(it -> it.get() > 0)
-                .collect(Collectors.toList());
-
-            // the algorithm doesn't converge in `maxIterations`, so we should have at least that many non-zero progresses
-            assertThat(progresses.size()).isGreaterThanOrEqualTo(maxIterations);
-
-            progresses.forEach(progress -> {
-                // the first iteration will compute degree centrality and therefore log nodeCount messages twice
-                assertThat(progress.get()).isIn(List.of(graph.nodeCount(), graph.nodeCount() * 2));
-            });
-
-            var messages = log.getMessages(TestLog.INFO);
-
-            LongStream.rangeClosed(1, config.maxIterations()).forEach(iteration ->
-                assertThat(messages)
-                    // avoid asserting on the thread id
-                    .extracting(removingThreadId())
-                    .contains(
-                        formatWithLocale(
-                            "%s :: Compute iteration %d of %d :: Start",
-                            factory.taskName(),
-                            iteration,
-                            config.maxIterations()
-                        ),
-                        formatWithLocale(
-                            "%s :: Compute iteration %d of %d :: Finished",
-                            factory.taskName(),
-                            iteration,
-                            config.maxIterations()
-                        ),
-                        formatWithLocale(
-                            "%s :: Master compute iteration %d of %d :: Start",
-                            factory.taskName(),
-                            iteration,
-                            config.maxIterations()
-                        ),
-                        formatWithLocale(
-                            "%s :: Master compute iteration %d of %d :: Finished",
-                            factory.taskName(),
-                            iteration,
-                            config.maxIterations()
-                        )
-                    )
-            );
-            assertThat(messages)
+            assertThat(log.getMessages(TestLog.INFO))
                 .extracting(removingThreadId())
                 .contains(
-                    formatWithLocale("%s :: Start", factory.taskName()),
-                    formatWithLocale("%s :: Finished", factory.taskName())
+                    "PageRank :: Start",
+                    "PageRank :: Compute iteration 1 of 10 :: Start",
+                    "PageRank :: Compute iteration 1 of 10 100%",
+                    "PageRank :: Compute iteration 1 of 10 :: Finished",
+                    "PageRank :: Master compute iteration 1 of 10 :: Start",
+                    "PageRank :: Master compute iteration 1 of 10 100%",
+                    "PageRank :: Master compute iteration 1 of 10 :: Finished",
+                    "PageRank :: Compute iteration 2 of 10 :: Start",
+                    "PageRank :: Compute iteration 2 of 10 100%",
+                    "PageRank :: Compute iteration 2 of 10 :: Finished",
+                    "PageRank :: Master compute iteration 2 of 10 :: Start",
+                    "PageRank :: Master compute iteration 2 of 10 100%",
+                    "PageRank :: Master compute iteration 2 of 10 :: Finished",
+                    "PageRank :: Compute iteration 3 of 10 :: Start",
+                    "PageRank :: Compute iteration 3 of 10 100%",
+                    "PageRank :: Compute iteration 3 of 10 :: Finished",
+                    "PageRank :: Master compute iteration 3 of 10 :: Start",
+                    "PageRank :: Master compute iteration 3 of 10 100%",
+                    "PageRank :: Master compute iteration 3 of 10 :: Finished",
+                    "PageRank :: Compute iteration 4 of 10 :: Start",
+                    "PageRank :: Compute iteration 4 of 10 100%",
+                    "PageRank :: Compute iteration 4 of 10 :: Finished",
+                    "PageRank :: Master compute iteration 4 of 10 :: Start",
+                    "PageRank :: Master compute iteration 4 of 10 100%",
+                    "PageRank :: Master compute iteration 4 of 10 :: Finished",
+                    "PageRank :: Compute iteration 5 of 10 :: Start",
+                    "PageRank :: Compute iteration 5 of 10 100%",
+                    "PageRank :: Compute iteration 5 of 10 :: Finished",
+                    "PageRank :: Master compute iteration 5 of 10 :: Start",
+                    "PageRank :: Master compute iteration 5 of 10 100%",
+                    "PageRank :: Master compute iteration 5 of 10 :: Finished",
+                    "PageRank :: Compute iteration 6 of 10 :: Start",
+                    "PageRank :: Compute iteration 6 of 10 100%",
+                    "PageRank :: Compute iteration 6 of 10 :: Finished",
+                    "PageRank :: Master compute iteration 6 of 10 :: Start",
+                    "PageRank :: Master compute iteration 6 of 10 100%",
+                    "PageRank :: Master compute iteration 6 of 10 :: Finished",
+                    "PageRank :: Compute iteration 7 of 10 :: Start",
+                    "PageRank :: Compute iteration 7 of 10 100%",
+                    "PageRank :: Compute iteration 7 of 10 :: Finished",
+                    "PageRank :: Master compute iteration 7 of 10 :: Start",
+                    "PageRank :: Master compute iteration 7 of 10 100%",
+                    "PageRank :: Master compute iteration 7 of 10 :: Finished",
+                    "PageRank :: Compute iteration 8 of 10 :: Start",
+                    "PageRank :: Compute iteration 8 of 10 100%",
+                    "PageRank :: Compute iteration 8 of 10 :: Finished",
+                    "PageRank :: Master compute iteration 8 of 10 :: Start",
+                    "PageRank :: Master compute iteration 8 of 10 100%",
+                    "PageRank :: Master compute iteration 8 of 10 :: Finished",
+                    "PageRank :: Compute iteration 9 of 10 :: Start",
+                    "PageRank :: Compute iteration 9 of 10 100%",
+                    "PageRank :: Compute iteration 9 of 10 :: Finished",
+                    "PageRank :: Master compute iteration 9 of 10 :: Start",
+                    "PageRank :: Master compute iteration 9 of 10 100%",
+                    "PageRank :: Master compute iteration 9 of 10 :: Finished",
+                    "PageRank :: Compute iteration 10 of 10 :: Start",
+                    "PageRank :: Compute iteration 10 of 10 100%",
+                    "PageRank :: Compute iteration 10 of 10 :: Finished",
+                    "PageRank :: Master compute iteration 10 of 10 :: Start",
+                    "PageRank :: Master compute iteration 10 of 10 100%",
+                    "PageRank :: Master compute iteration 10 of 10 :: Finished",
+                    "PageRank :: Finished"
                 );
         }
 
         @Test
         void checkTerminationFlag() {
+            var centralityAlgorithms = new CentralityAlgorithms(null, TerminationFlag.STOP_RUNNING);
+
             var config = PageRankStreamConfigImpl.builder()
                 .maxIterations(40)
                 .concurrency(1)
                 .build();
 
-            var algo = new PageRankAlgorithmFactory<>()
-                .build(
-                    graph,
-                    config,
-                    ProgressTracker.NULL_TRACKER
-                );
-
-            algo.setTerminationFlag(() -> false);
-
-            TestSupport.assertTransactionTermination(algo::compute);
+            TestSupport.assertTransactionTermination(() -> centralityAlgorithms.pageRank(graph, config, ProgressTracker.NULL_TRACKER));
         }
     }
 
@@ -358,13 +342,9 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var rankProvider = new PageRankAlgorithmFactory<>()
-                .build(
-                    graph,
-                    config,
-                    ProgressTracker.NULL_TRACKER
-                )
-                .compute().centralityScoreProvider();
+            var centralityAlgorithms = new CentralityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
+            var result = centralityAlgorithms.pageRank(graph, config, ProgressTracker.NULL_TRACKER);
+            var rankProvider = result.centralityScoreProvider();
 
             var expected = graph.nodeProperties("expectedRank");
 
@@ -385,13 +365,9 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var rankProvider = new PageRankAlgorithmFactory<>()
-                .build(
-                    zeroWeightsGraph,
-                    config,
-                    ProgressTracker.NULL_TRACKER
-                )
-                .compute().centralityScoreProvider();
+            var centralityAlgorithms = new CentralityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
+            var result = centralityAlgorithms.pageRank(zeroWeightsGraph, config, ProgressTracker.NULL_TRACKER);
+            var rankProvider = result.centralityScoreProvider();
 
             var expected = zeroWeightsGraph.nodeProperties("expectedRank");
 
@@ -661,13 +637,10 @@ class PageRankTest {
                 .scaler(ScalerFactory.parse(scalerName))
                 .build();
 
-            var rankProvider = new PageRankAlgorithmFactory<>()
-                .build(
-                    graph,
-                    config,
-                    ProgressTracker.NULL_TRACKER
-                )
-                .compute().centralityScoreProvider();
+            var centralityAlgorithms = new CentralityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
+
+            var result = centralityAlgorithms.pageRank(graph, config, ProgressTracker.NULL_TRACKER);
+            var rankProvider = result.centralityScoreProvider();
 
             var expected = graph.nodeProperties(expectedPropertyKey);
 
@@ -692,25 +665,16 @@ class PageRankTest {
         var configBuilder = PageRankConfigImpl.builder();
 
         PageRankConfig config1 = configBuilder.concurrency(1).build();
-        var singleThreaded = new PageRankAlgorithmFactory<>()
-            .build(
-                graph,
-                config1,
-                ProgressTracker.NULL_TRACKER
-            )
-            .compute().centralityScoreProvider();
+        var centralityAlgorithms = new CentralityAlgorithms(null, TerminationFlag.RUNNING_TRUE);
+        var result = centralityAlgorithms.pageRank(graph, config1, ProgressTracker.NULL_TRACKER);
+        var singleThreaded = result.centralityScoreProvider();
+
         PageRankConfig config = configBuilder.concurrency(4).build();
-        var multiThreaded = new PageRankAlgorithmFactory<>()
-            .build(
-                graph,
-                config,
-                ProgressTracker.NULL_TRACKER
-            )
-            .compute().centralityScoreProvider();
+        var result2 = centralityAlgorithms.pageRank(graph, config, ProgressTracker.NULL_TRACKER);
+        var multiThreaded = result2.centralityScoreProvider();
 
         for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
             assertThat(singleThreaded.applyAsDouble(nodeId)).isEqualTo(multiThreaded.applyAsDouble(nodeId), Offset.offset(1e-5));
         }
     }
-
 }

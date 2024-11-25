@@ -318,11 +318,16 @@ public class CentralityAlgorithms {
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
-    PageRankResult pageRank(Graph graph, PageRankConfig configuration) {
+    public PageRankResult pageRank(Graph graph, PageRankConfig configuration) {
         var task = Pregel.progressTask(graph, configuration, PageRank.asString());
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
+        return pageRank(graph, configuration, progressTracker);
+    }
+
+    public PageRankResult pageRank(Graph graph, PageRankConfig configuration, ProgressTracker progressTracker) {
         var pageRankComputation = pageRankComputation(graph, configuration);
+
         var pageRank = new PageRankAlgorithm<>(
             graph,
             configuration,
@@ -332,6 +337,7 @@ public class CentralityAlgorithms {
             progressTracker,
             terminationFlag
         );
+
         return pageRank.compute();
     }
 
