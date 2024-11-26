@@ -181,7 +181,7 @@ public class CentralityAlgorithms {
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
-    CELFResult celf(Graph graph, InfluenceMaximizationBaseConfig configuration) {
+    public CELFResult celf(Graph graph, InfluenceMaximizationBaseConfig configuration) {
         var task = Tasks.task(
             AlgorithmLabel.CELF.asString(),
             Tasks.leaf("Greedy", graph.nodeCount()),
