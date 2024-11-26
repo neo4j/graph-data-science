@@ -39,9 +39,6 @@ import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
 
 public final class Kmeans extends Algorithm<KmeansResult> {
-
-    static final String KMEANS_DESCRIPTION =
-        "The Kmeans  algorithm clusters nodes into different communities based on Euclidean distance";
     private static final int UNASSIGNED = -1;
     private HugeIntArray bestCommunities;
     private final Graph graph;
@@ -166,7 +163,7 @@ public final class Kmeans extends Algorithm<KmeansResult> {
         int restartIteration
     ) {
 
-        //note: currentDistanceFromCentroid is not reset to a [0,...,0] distance array but it does not have to
+        //note: currentDistanceFromCentroid is not reset to a [0,...,0] distance array, but it does not have to
         // it's used only in K-Means++ (where it is essentially reset; see func distanceFromLastSampledCentroid in KmeansTask)
         // or during final distance calculation where it is reset as well (see calculateFinalDistance in KmeansTask)
 
@@ -242,7 +239,7 @@ public final class Kmeans extends Algorithm<KmeansResult> {
         }
         progressTracker.endSubTask(); // Main - end
 
-        double averageDistanceFromCentroid = calculatedistancePhase(tasks);
+        double averageDistanceFromCentroid = calculateDistancePhase(tasks);
         updateBestSolution(
             restartIteration,
             clusterManager,
@@ -262,7 +259,7 @@ public final class Kmeans extends Algorithm<KmeansResult> {
         progressTracker.endSubTask(); // Initialization - end
     }
 
-    private void recomputeCentroids(ClusterManager clusterManager, List<KmeansTask> tasks) {
+    private void recomputeCentroids(ClusterManager clusterManager, Iterable<KmeansTask> tasks) {
         clusterManager.reset();
 
         for (KmeansTask task : tasks) {
@@ -367,7 +364,7 @@ public final class Kmeans extends Algorithm<KmeansResult> {
 
     }
 
-    private double calculatedistancePhase(List<KmeansTask> tasks) {
+    private double calculateDistancePhase(Iterable<KmeansTask> tasks) {
         for (KmeansTask task : tasks) {
             task.switchToPhase(TaskPhase.DISTANCE);
         }

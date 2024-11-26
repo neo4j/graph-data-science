@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithms;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -265,6 +265,8 @@ class KmeansTest {
 
     @Test
     void shouldNotWorkForRestartsAndSeeds() {
+        var communityAlgorithms = new CommunityAlgorithms(null, null);
+
         var kmeansConfig = KmeansStreamConfigImpl.builder()
             .nodeProperty("kmeans")
             .concurrency(1)
@@ -273,17 +275,14 @@ class KmeansTest {
             .k(2)
             .numberOfRestarts(10)
             .build();
-
-        var kmeansAlgorithmFactory = new KmeansAlgorithmFactory<>();
-        assertThatThrownBy(() -> kmeansAlgorithmFactory.build(
-            lineGraph,
-            kmeansConfig,
-            ProgressTracker.NULL_TRACKER
-        )).hasMessageContaining("cannot be run");
+        assertThatThrownBy(() -> communityAlgorithms.kMeans(lineGraph, kmeansConfig))
+            .hasMessageContaining("cannot be run");
     }
 
     @Test
     void shouldNotWorkForDifferentSeedAndK() {
+        var communityAlgorithms = new CommunityAlgorithms(null, null);
+
         var kmeansConfig = KmeansStreamConfigImpl.builder()
             .nodeProperty("kmeans")
             .concurrency(1)
@@ -291,13 +290,8 @@ class KmeansTest {
             .seedCentroids(List.of(List.of(1d)))
             .k(2)
             .build();
-
-        var kmeansAlgorithmFactory = new KmeansAlgorithmFactory<>();
-        assertThatThrownBy(() -> kmeansAlgorithmFactory.build(
-            lineGraph,
-            kmeansConfig,
-            ProgressTracker.NULL_TRACKER
-        )).hasMessageContaining("Incorrect");
+        assertThatThrownBy(() -> communityAlgorithms.kMeans(lineGraph, kmeansConfig))
+            .hasMessageContaining("Incorrect");
     }
 
     @Test

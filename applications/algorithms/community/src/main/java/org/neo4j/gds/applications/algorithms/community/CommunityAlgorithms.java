@@ -176,12 +176,12 @@ public class CommunityAlgorithms {
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
-    KmeansResult kMeans(Graph graph, KmeansBaseConfig configuration) {
-        var seedCentroids = (List) configuration.seedCentroids();
-        if (configuration.numberOfRestarts() > 1 && seedCentroids.size() > 0) {
+    public KmeansResult kMeans(Graph graph, KmeansBaseConfig configuration) {
+        var seedCentroids = configuration.seedCentroids();
+        if (configuration.numberOfRestarts() > 1 && !seedCentroids.isEmpty()) {
             throw new IllegalArgumentException("K-Means cannot be run multiple time when seeded");
         }
-        if (seedCentroids.size() > 0 && seedCentroids.size() != configuration.k()) {
+        if (!seedCentroids.isEmpty() && seedCentroids.size() != configuration.k()) {
             throw new IllegalArgumentException("Incorrect number of seeded centroids given for running K-Means");
         }
 
