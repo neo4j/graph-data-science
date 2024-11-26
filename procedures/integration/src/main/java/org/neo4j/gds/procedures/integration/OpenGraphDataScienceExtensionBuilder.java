@@ -36,6 +36,7 @@ import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryTracker;
+import org.neo4j.gds.memory.MemoryFacade;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
@@ -155,7 +156,9 @@ public final class OpenGraphDataScienceExtensionBuilder {
 
         var componentRegistration = new ComponentRegistration(log, globalProcedures);
 
-        componentRegistration.registerComponent("GDS Memory Tracker", MemoryTracker.class, __ -> memoryTracker);
+        var memoryFacade = new MemoryFacade(memoryTracker);
+
+        componentRegistration.registerComponent("GDS Memory Facade", MemoryFacade.class, __ -> memoryFacade);
 
         var graphDataScienceProviderFactory = new GraphDataScienceProceduresProviderFactory(
             log,

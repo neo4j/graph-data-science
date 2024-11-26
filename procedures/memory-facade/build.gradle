@@ -1,0 +1,11 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Memory Procedure Facade API'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+
+    implementation project(':progress-tracking')
+
+}

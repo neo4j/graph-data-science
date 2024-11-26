@@ -11,6 +11,8 @@ dependencies {
     implementation project(':procedures-facade-api')
     implementation project(':proc-common')
     implementation project(':progress-tracking')
+    implementation project(':memory-facade')
+
 
     compileOnly openGds.jetbrains.annotations
 

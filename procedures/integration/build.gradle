@@ -27,6 +27,8 @@ dependencies {
     implementation project(':legacy-cypher-projection')
     implementation project(':logging')
     implementation project(':memory-estimation')
+    implementation project(':memory-facade')
+
     implementation project(':memory-usage')
     implementation project(':metrics-api')
     implementation project(':model-catalog-api')
