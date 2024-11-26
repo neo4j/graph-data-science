@@ -36,6 +36,7 @@ import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -63,12 +64,16 @@ class ShardedByteArrayLongMapTest {
     @Property
     void addNodes(@ForAll("nodes") @Size(100) byte[][] nodes) {
         var builder = ShardedByteArrayLongMap.builder(new Concurrency(1));
+        var size = 0;
         for (byte[] node : nodes) {
-            builder.addNode(node);
+            if (builder.addNode(node) >= 0) {
+                size++;
+            }
+
         }
         var map = builder.build();
 
-        assertThat(map.size()).isEqualTo(nodes.length);
+        assertThat(map.size()).isEqualTo(size);
         for (byte[] node : nodes) {
             assertThat(map.toOriginalNodeId(map.toMappedNodeId(node))).isEqualTo(node);
         }
@@ -77,12 +82,15 @@ class ShardedByteArrayLongMapTest {
     @Property
     void addNodesDifferentObject(@ForAll("nodes") @Size(100) byte[][] nodes) {
         var builder = ShardedByteArrayLongMap.builder(new Concurrency(1));
+        var size = 0;
         for (byte[] node : nodes) {
-            builder.addNode(node);
+            if (builder.addNode(node) >= 0) {
+                size++;
+            }
         }
         var map = builder.build();
 
-        assertThat(map.size()).isEqualTo(nodes.length);
+        assertThat(map.size()).isEqualTo(size);
         for (byte[] node : nodes) {
             // Ensure that hashCode and equals work correctly for byte arrays
             // with same elements, but different objects.
@@ -144,6 +152,7 @@ class ShardedByteArrayLongMapTest {
     void testAddingMultipleNodesInParallel(@ForAll("nodes") @Size(10000) byte[][] originalIds) {
         var concurrency = new Concurrency(4);
         var builder = ShardedByteArrayLongMap.builder(concurrency);
+        var size = new AtomicInteger(0);
 
         var tasks = PartitionUtils.rangePartition(
             concurrency,
@@ -152,7 +161,9 @@ class ShardedByteArrayLongMapTest {
                 byte[][] batch = new byte[(int) partition.nodeCount()][];
                 System.arraycopy(originalIds, (int) partition.startNode(), batch, 0, batch.length);
                 for (byte[] node : batch) {
-                    builder.addNode(node);
+                    if (builder.addNode(node) >= 0) {
+                        size.incrementAndGet();
+                    }
                 }
             },
             Optional.of(100)
@@ -162,11 +173,9 @@ class ShardedByteArrayLongMapTest {
 
         var map = builder.build();
 
-        assertThat(map.size()).isEqualTo(originalIds.length);
-        long[] mappedIds = new long[originalIds.length];
-        for (int i = 0; i < map.size(); i++) {
-            mappedIds[i] = map.toMappedNodeId(originalIds[i]);
+        assertThat(map.size()).isEqualTo(size.get());
+        for (byte[] node : originalIds) {
+            assertThat(map.toOriginalNodeId(map.toMappedNodeId(node))).isEqualTo(node);
         }
-        assertThat(mappedIds).doesNotHaveDuplicates();
     }
 }
