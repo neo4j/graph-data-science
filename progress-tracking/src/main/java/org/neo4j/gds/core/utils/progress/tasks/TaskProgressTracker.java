@@ -103,9 +103,13 @@ public class TaskProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void setEstimatedResourceFootprint(MemoryRange memoryRangeInBytes, Concurrency maxConcurrency) {
+    public void setEstimatedResourceFootprint(MemoryRange memoryRangeInBytes) {
         this.baseTask.setEstimatedMemoryRangeInBytes(memoryRangeInBytes);
-        this.baseTask.setMaxConcurrency(maxConcurrency);
+    }
+
+    @Override
+    public void requestedConcurrency(Concurrency concurrency) {
+        this.baseTask.setMaxConcurrency(concurrency);
     }
 
     @Override

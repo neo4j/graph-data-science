@@ -28,7 +28,9 @@ public interface ProgressTracker {
 
     ProgressTracker NULL_TRACKER = new EmptyProgressTracker();
 
-    void setEstimatedResourceFootprint(MemoryRange memoryEstimationInBytes, Concurrency concurrency);
+    void setEstimatedResourceFootprint(MemoryRange memoryEstimationInBytes);
+
+    void requestedConcurrency(Concurrency concurrency);
 
     void beginSubTask();
 
@@ -89,7 +91,12 @@ public interface ProgressTracker {
     class EmptyProgressTracker implements ProgressTracker {
 
         @Override
-        public void setEstimatedResourceFootprint(MemoryRange memoryRangeInBytes, Concurrency concurrency) {
+        public void setEstimatedResourceFootprint(MemoryRange memoryRangeInBytes) {
+        }
+
+        @Override
+        public void requestedConcurrency(Concurrency concurrency) {
+
         }
 
         @Override

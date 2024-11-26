@@ -33,8 +33,13 @@ public abstract class ProgressTrackerAdapter implements ProgressTracker {
     }
 
     @Override
-    public void setEstimatedResourceFootprint(MemoryRange memoryEstimationInBytes, Concurrency concurrency) {
-        delegate.setEstimatedResourceFootprint(memoryEstimationInBytes, concurrency);
+    public void setEstimatedResourceFootprint(MemoryRange memoryEstimationInBytes) {
+        delegate.setEstimatedResourceFootprint(memoryEstimationInBytes);
+    }
+
+    @Override
+    public void requestedConcurrency(Concurrency concurrency) {
+        delegate.requestedConcurrency(concurrency);
     }
 
     @Override
