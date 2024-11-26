@@ -21,7 +21,7 @@ For a comprehensive API overview including examples and tutorials, see link:http
 
 === Session lifecycle operations
 
-* Create GDS Sessions connected to an AuraDB instance in the link:https://neo4j.com/docs/aura/auradb/#_plans[Virtual Dedicated Cloud] plan.
+* Create GDS Sessions connected to an AuraDB instance in the link:https://neo4j.com/docs/aura/auradb/#_plans[Business Critical or Virtual Dedicated Cloud] plan.
 * Create GDS Sessions connected to a self-hosted Neo4j DBMS, version `5.24.0` or newer.
 * List running sessions in a specific Aura project.
 * Delete specific sessions.
