@@ -85,7 +85,7 @@ public class MemoryTracker implements TaskStoreListener, GraphStoreAddedEventLis
     public Stream<UserMemorySummary> memorySummary(){
 
         var  users = graphStoreMemoryContainer.graphUsers(Optional.empty());
-        users= taskMemoryContainer.taskUsers(Optional.of(users));
+        users = taskMemoryContainer.taskUsers(Optional.of(users));
 
         return  users.stream()
             .map(user -> new UserMemorySummary(
@@ -102,6 +102,7 @@ public class MemoryTracker implements TaskStoreListener, GraphStoreAddedEventLis
 
     @Override
     public synchronized void onTaskRemoved(UserTask userTask) {
+
         var taskDescription = userTask.task().description();
         log.debug("Removing task: %s", taskDescription);
         var jobId = userTask.jobId();

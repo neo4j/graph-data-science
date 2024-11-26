@@ -8,4 +8,7 @@ dependencies {
 
     implementation project(':progress-tracking')
 
+    testImplementation project(':test-utils')
+
+
 }

@@ -17,8 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.memory;
+package org.neo4j.gds.procedures.memory;
 
+import org.neo4j.gds.api.User;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.mem.MemoryTracker;
 import org.neo4j.gds.mem.UserEntityMemory;
 import org.neo4j.gds.mem.UserMemorySummary;
@@ -28,26 +30,32 @@ import java.util.stream.Stream;
 public class MemoryFacade {
 
     private final MemoryTracker memoryTracker;
+    private final User user;
 
-    public MemoryFacade(MemoryTracker memoryTracker){
+    public MemoryFacade(User user,MemoryTracker memoryTracker){
         this.memoryTracker = memoryTracker;
+        this.user = user;
     }
 
-    public Stream<UserEntityMemory> listUser(String user){
-        return   memoryTracker.listUser(user);
+    public void track(String taskName, JobId jobId, long memoryEstimate) {
+        memoryTracker.track(user.getUsername(), taskName,jobId,memoryEstimate);
     }
 
-    public Stream<UserEntityMemory> listAll(){
-        return  memoryTracker.listAll();
+    public Stream<UserEntityMemory> list() {
+        if (user.isAdmin()){
+            return memoryTracker.listAll();
+        }else{
+            return  memoryTracker.listUser(user.getUsername());
+        }
     }
 
-    public UserMemorySummary memorySummary(String user){
-        return  memoryTracker.memorySummary(user);
-
-    }
 
     public Stream<UserMemorySummary> memorySummary() {
-        return  memoryTracker.memorySummary();
+        if (user.isAdmin()){
+            return memoryTracker.memorySummary();
+        }else{
+            return  Stream.of(memoryTracker.memorySummary(user.getUsername()));
+        }
     }
 
 }

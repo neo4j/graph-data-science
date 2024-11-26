@@ -36,12 +36,13 @@ import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryTracker;
-import org.neo4j.gds.memory.MemoryFacade;
 import org.neo4j.gds.metrics.Metrics;
 import org.neo4j.gds.procedures.ExporterBuildersProviderService;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
+import org.neo4j.gds.procedures.UserAccessor;
 import org.neo4j.gds.procedures.UserLogServices;
+import org.neo4j.gds.procedures.memory.MemoryFacade;
 import org.neo4j.gds.settings.GdsSettings;
 import org.neo4j.graphdb.config.Configuration;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
@@ -156,9 +157,11 @@ public final class OpenGraphDataScienceExtensionBuilder {
 
         var componentRegistration = new ComponentRegistration(log, globalProcedures);
 
-        var memoryFacade = new MemoryFacade(memoryTracker);
-
-        componentRegistration.registerComponent("GDS Memory Facade", MemoryFacade.class, __ -> memoryFacade);
+        componentRegistration.registerComponent("GDS Memory Facade", MemoryFacade.class, context -> {
+             var userAccessor = new UserAccessor();
+            var user  = userAccessor.getUser(context.securityContext());
+           return new MemoryFacade(user,memoryTracker);
+        });
 
         var graphDataScienceProviderFactory = new GraphDataScienceProceduresProviderFactory(
             log,

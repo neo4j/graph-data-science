@@ -42,7 +42,6 @@ public interface MemoryGuard {
             Label label,
             DimensionTransformer dimensionTransformer
         ) {
-            // do nothing
         }
     };
 

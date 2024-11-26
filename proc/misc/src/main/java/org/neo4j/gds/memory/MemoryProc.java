@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.memory;
 
-import org.neo4j.gds.procedures.operations.ProgressResult;
+import org.neo4j.gds.mem.UserEntityMemory;
+import org.neo4j.gds.mem.UserMemorySummary;
+import org.neo4j.gds.procedures.memory.MemoryFacade;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Procedure;
@@ -34,7 +36,13 @@ public class MemoryProc {
 
     @Procedure("gds.listMemory")
     @Description(DESCRIPTION)
-    public Stream<ProgressResult> listMemory() {
-        return facade.operations().listProgress(jobId);
+    public Stream<UserEntityMemory> listMemory() {
+        return facade.list();
+    }
+
+    @Procedure("gds.listMemory.summary")
+    @Description(DESCRIPTION)
+    public Stream<UserMemorySummary> summary() {
+        return facade.memorySummary();
     }
 }
