@@ -26,6 +26,7 @@ import org.neo4j.gds.config.SourceNodeConfig;
 
 import java.util.function.DoubleUnaryOperator;
 
+@Configuration
 public interface SpanningTreeBaseConfig extends
     AlgoBaseConfig,
     RelationshipWeightConfig,

@@ -20,7 +20,7 @@
 package org.neo4j.gds.spanningtree;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
 import org.neo4j.gds.gdl.GdlFactory;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -29,9 +29,9 @@ class SpanningTreeAlgorithmFactoryTest {
     @Test
     void shouldThrowIfNotUndirected() {
         var graph = GdlFactory.of("(a)-[:foo{cost:1.0}]->(b)").build().getUnion();
-        var parameters = new SpanningTreeParameters(PrimOperators.MIN_OPERATOR, 0);
-        var spanningTreeAlgorithmFactory = new SpanningTreeAlgorithmFactory<>();
-        assertThatThrownBy(() -> spanningTreeAlgorithmFactory.build(graph, parameters, ProgressTracker.NULL_TRACKER))
+        var pathFindingAlgorithms = new PathFindingAlgorithms(null, null);
+
+        assertThatThrownBy(() -> pathFindingAlgorithms.spanningTree(graph, null))
             .hasMessageContaining("undirected");
     }
 }

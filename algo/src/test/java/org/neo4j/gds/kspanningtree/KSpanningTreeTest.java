@@ -25,12 +25,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -268,34 +270,36 @@ class KSpanningTreeTest {
 
     @Test
     void shouldLogProgress() {
-        var config = KSpanningTreeBaseConfigImpl.builder().sourceNode(idFunction.of("a")).k(2).build();
-        var factory = new KSpanningTreeAlgorithmFactory<>();
         var log = new GdsTestLog();
-        var progressTracker = new TestProgressTracker(
-            factory.progressTask(graph, config),
-            log,
-            new Concurrency(1),
-            EmptyTaskRegistryFactory.INSTANCE
-        );
-        factory.build(graph, config, progressTracker).compute();
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .with(EmptyTaskRegistryFactory.INSTANCE)
+            .with(TerminationFlag.RUNNING_TRUE)
+            .with(EmptyUserLogRegistryFactory.INSTANCE)
+            .build();
+        var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
+        var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, progressTrackerCreator);
+
+        var config = KSpanningTreeBaseConfigImpl.builder().sourceNode(idFunction.of("a")).k(2).build();
+        pathFindingAlgorithms.kSpanningTree(graph, config);
+
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
             .extracting(replaceTimings())
             .containsExactly(
-                "KSpanningTree :: Start",
-                "KSpanningTree :: SpanningTree :: Start",
-                "KSpanningTree :: SpanningTree 30%",
-                "KSpanningTree :: SpanningTree 50%",
-                "KSpanningTree :: SpanningTree 80%",
-                "KSpanningTree :: SpanningTree 100%",
-                "KSpanningTree :: SpanningTree :: Finished",
-                "KSpanningTree :: Remove relationships :: Start",
-                "KSpanningTree :: Remove relationships 20%",
-                "KSpanningTree :: Remove relationships 40%",
-                "KSpanningTree :: Remove relationships 60%",
-                "KSpanningTree :: Remove relationships 100%",
-                "KSpanningTree :: Remove relationships :: Finished",
-                "KSpanningTree :: Finished"
+                "K Spanning Tree :: Start",
+                "K Spanning Tree :: SpanningTree :: Start",
+                "K Spanning Tree :: SpanningTree 30%",
+                "K Spanning Tree :: SpanningTree 50%",
+                "K Spanning Tree :: SpanningTree 80%",
+                "K Spanning Tree :: SpanningTree 100%",
+                "K Spanning Tree :: SpanningTree :: Finished",
+                "K Spanning Tree :: Remove relationships :: Start",
+                "K Spanning Tree :: Remove relationships 20%",
+                "K Spanning Tree :: Remove relationships 40%",
+                "K Spanning Tree :: Remove relationships 60%",
+                "K Spanning Tree :: Remove relationships 100%",
+                "K Spanning Tree :: Remove relationships :: Finished",
+                "K Spanning Tree :: Finished"
             );
     }
 
