@@ -26,11 +26,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.TestProgressTracker;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -150,16 +152,18 @@ class PrimTest {
 
     @Test
     void shouldLogProgress() {
-        var parameters = new SpanningTreeParameters(PrimOperators.MIN_OPERATOR, graph.toOriginalNodeId("a"));
-        var factory = new SpanningTreeAlgorithmFactory<>();
         var log = new GdsTestLog();
-        var progressTracker = new TestProgressTracker(
-            factory.progressTask(graph),
-            log,
-            new Concurrency(1),
-            EmptyTaskRegistryFactory.INSTANCE
-        );
-        factory.build(graph, parameters, progressTracker).compute();
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .with(EmptyTaskRegistryFactory.INSTANCE)
+            .with(TerminationFlag.RUNNING_TRUE)
+            .with(EmptyUserLogRegistryFactory.INSTANCE)
+            .build();
+        var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
+        var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, progressTrackerCreator);
+
+        var config = SpanningTreeBaseConfigImpl.builder().sourceNode(graph.toOriginalNodeId("a")).build();
+        pathFindingAlgorithms.spanningTree(graph, config);
+
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
             .extracting(replaceTimings())

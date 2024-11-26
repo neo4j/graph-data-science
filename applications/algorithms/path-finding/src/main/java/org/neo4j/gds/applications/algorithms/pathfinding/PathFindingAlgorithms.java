@@ -182,7 +182,7 @@ public class PathFindingAlgorithms {
         );
     }
 
-    SpanningTree kSpanningTree(Graph graph, KSpanningTreeBaseConfig configuration) {
+    public SpanningTree kSpanningTree(Graph graph, KSpanningTreeBaseConfig configuration) {
         if (!graph.schema().isUndirected()) {
             throw new IllegalArgumentException(
                 "The K-Spanning Tree algorithm works only with undirected graphs. Please orient the edges properly");
@@ -377,7 +377,7 @@ public class PathFindingAlgorithms {
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, false);
     }
 
-    SpanningTree spanningTree(Graph graph, SpanningTreeBaseConfig configuration) {
+    public SpanningTree spanningTree(Graph graph, SpanningTreeBaseConfig configuration) {
         if (!graph.schema().isUndirected()) {
             throw new IllegalArgumentException(
                 "The Spanning Tree algorithm works only with undirected graphs. Please orient the edges properly");
@@ -386,7 +386,7 @@ public class PathFindingAlgorithms {
         var parameters = configuration.toParameters();
         var progressTracker = createProgressTracker(
             configuration,
-            Tasks.leaf(AlgorithmLabel.SpanningTree.asString())
+            Tasks.leaf(AlgorithmLabel.SpanningTree.asString(), graph.relationshipCount())
         );
 
         var algorithm = new Prim(
@@ -400,7 +400,7 @@ public class PathFindingAlgorithms {
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
     }
 
-    SteinerTreeResult steinerTree(Graph graph, SteinerTreeBaseConfig configuration) {
+    public SteinerTreeResult steinerTree(Graph graph, SteinerTreeBaseConfig configuration) {
         var parameters = configuration.toParameters();
         var mappedSourceNodeId = graph.toMappedNodeId(parameters.sourceNode());
         var mappedTargetNodeIds = parameters.targetNodes().stream()
