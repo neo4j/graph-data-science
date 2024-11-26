@@ -99,7 +99,12 @@ public class NodeEmbeddingAlgorithms {
             terminationFlag
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     GraphSageResult graphSage(Graph graph, GraphSageBaseConfig configuration) {
@@ -119,7 +124,12 @@ public class NodeEmbeddingAlgorithms {
             terminationFlag
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> graphSageTrain(
@@ -146,7 +156,12 @@ public class NodeEmbeddingAlgorithms {
             terminationFlag
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     private static GraphSageTrain constructGraphSageTrainAlgorithm(
@@ -186,7 +201,12 @@ public class NodeEmbeddingAlgorithms {
 
         var algorithm = new HashGNN(graph, HashGNNConfigTransformer.toParameters(configuration), progressTracker, terminationFlag);
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     Node2VecResult node2Vec(Graph graph, Node2VecBaseConfig configuration) {
@@ -204,7 +224,12 @@ public class NodeEmbeddingAlgorithms {
             terminationFlag
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     private Task createFastRPTask(Graph graph, Number nodeSelfInfluence, int iterationWeightsSize) {

@@ -120,7 +120,12 @@ public class CommunityAlgorithms {
             terminationFlag
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     ConductanceResult conductance(Graph graph, ConductanceBaseConfig configuration) {
@@ -144,7 +149,12 @@ public class CommunityAlgorithms {
             progressTracker
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     K1ColoringResult k1Coloring(Graph graph, K1ColoringBaseConfig configuration) {
@@ -164,7 +174,12 @@ public class CommunityAlgorithms {
             terminationFlag
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     KCoreDecompositionResult kCore(Graph graph, AlgoBaseConfig configuration) {
@@ -173,7 +188,12 @@ public class CommunityAlgorithms {
 
         var algorithm = new KCoreDecomposition(graph, configuration.concurrency(), progressTracker, terminationFlag);
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     public KmeansResult kMeans(Graph graph, KmeansBaseConfig configuration) {
@@ -194,7 +214,12 @@ public class CommunityAlgorithms {
             .build();
         var algorithm = Kmeans.createKmeans(graph, configuration.toParameters(), kmeansContext, terminationFlag);
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     LabelPropagationResult labelPropagation(Graph graph, LabelPropagationBaseConfig configuration) {
@@ -217,7 +242,12 @@ public class CommunityAlgorithms {
             terminationFlag
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     LocalClusteringCoefficientResult lcc(Graph graph, LocalClusteringCoefficientBaseConfig configuration) {
@@ -240,7 +270,12 @@ public class CommunityAlgorithms {
             terminationFlag
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     LeidenResult leiden(Graph graph, LeidenBaseConfig configuration) {
@@ -284,7 +319,12 @@ public class CommunityAlgorithms {
             terminationFlag
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     LouvainResult louvain(Graph graph, LouvainBaseConfig configuration) {
@@ -307,7 +347,12 @@ public class CommunityAlgorithms {
             terminationFlag
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     ModularityResult modularity(Graph graph, ModularityBaseConfig configuration) {
@@ -350,7 +395,12 @@ public class CommunityAlgorithms {
             terminationFlag
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     HugeLongArray scc(Graph graph, SccCommonBaseConfig configuration) {
@@ -361,7 +411,12 @@ public class CommunityAlgorithms {
 
         var algorithm = new Scc(graph, progressTracker, terminationFlag);
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     TriangleCountResult triangleCount(Graph graph, TriangleCountBaseConfig configuration) {
@@ -379,7 +434,12 @@ public class CommunityAlgorithms {
             terminationFlag
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     Stream<TriangleResult> triangles(Graph graph, ConcurrencyConfig configuration) {
@@ -411,7 +471,12 @@ public class CommunityAlgorithms {
             terminationFlag
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     private Task constructKMeansProgressTask(Graph graph, KmeansBaseConfig configuration) {
@@ -482,6 +547,11 @@ public class CommunityAlgorithms {
             Optional.empty()
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 }

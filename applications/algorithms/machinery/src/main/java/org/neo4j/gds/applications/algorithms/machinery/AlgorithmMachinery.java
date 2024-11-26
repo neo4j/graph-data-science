@@ -20,6 +20,7 @@
 package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 /**
@@ -40,9 +41,11 @@ public class AlgorithmMachinery {
     public <RESULT> RESULT runAlgorithmsAndManageProgressTracker(
         Algorithm<RESULT> algorithm,
         ProgressTracker progressTracker,
-        boolean shouldReleaseProgressTracker
+        boolean shouldReleaseProgressTracker,
+        Concurrency concurrency
     ) {
         try {
+            progressTracker.requestedConcurrency(concurrency);
             return algorithm.compute();
         } catch (Exception e) {
             progressTracker.endSubTaskWithFailure();

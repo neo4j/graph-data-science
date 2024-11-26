@@ -128,7 +128,12 @@ public class PathFindingAlgorithms {
             configuration.concurrency()
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, false);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            false,
+            configuration.concurrency()
+        );
     }
 
     /**
@@ -161,7 +166,12 @@ public class PathFindingAlgorithms {
         var progressTracker = createProgressTracker(configuration, iterativeTask);
         var algorithm = DeltaStepping.of(graph, configuration, DefaultPool.INSTANCE, progressTracker);
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, false);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            false,
+            configuration.concurrency()
+        );
     }
 
     /**
@@ -190,11 +200,13 @@ public class PathFindingAlgorithms {
 
         var parameters = configuration.toKSpanningTreeParameters();
 
-        var progressTracker = createProgressTracker(configuration, Tasks.task(
-            AlgorithmLabel.KSpanningTree.asString(),
-            Tasks.leaf(AlgorithmLabel.SpanningTree.asString(), graph.relationshipCount()),
-            Tasks.leaf("Remove relationships")
-        ));
+        var progressTracker = createProgressTracker(
+            configuration, Tasks.task(
+                AlgorithmLabel.KSpanningTree.asString(),
+                Tasks.leaf(AlgorithmLabel.SpanningTree.asString(), graph.relationshipCount()),
+                Tasks.leaf("Remove relationships")
+            )
+        );
 
         var algorithm = new KSpanningTree(
             graph,
@@ -205,7 +217,12 @@ public class PathFindingAlgorithms {
             requestScopedDependencies.getTerminationFlag()
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     PathFindingResult longestPath(Graph graph, AlgoBaseConfig configuration) {
@@ -221,7 +238,12 @@ public class PathFindingAlgorithms {
             requestScopedDependencies.getTerminationFlag()
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, false);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            false,
+            configuration.concurrency()
+        );
     }
 
     Stream<long[]> randomWalk(Graph graph, RandomWalkBaseConfig configuration) {
@@ -245,22 +267,33 @@ public class PathFindingAlgorithms {
             requestScopedDependencies.getTerminationFlag()
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, false);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            false,
+            configuration.concurrency()
+        );
     }
 
     PrizeSteinerTreeResult pcst(Graph graph, PCSTBaseConfig configuration) {
-        var task = PCSTProgressTrackerTaskCreator.progressTask(graph.nodeCount(),graph.relationshipCount());
+        var task = PCSTProgressTrackerTaskCreator.progressTask(graph.nodeCount(), graph.relationshipCount());
 
         var progressTracker = createProgressTracker(configuration, task);
         var prizeProperty = graph.nodeProperties(configuration.prizeProperty());
         var algorithm = new PCSTFast(
             graph,
-            (v) -> Math.max(prizeProperty.longValue(v),0),
+            (v) -> Math.max(prizeProperty.longValue(v), 0),
             progressTracker
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
+
     HugeAtomicLongArray randomWalkCountingNodeVisits(Graph graph, RandomWalkBaseConfig configuration) {
         var tasks = new ArrayList<Task>();
         if (graph.hasRelationshipProperty()) {
@@ -286,7 +319,12 @@ public class PathFindingAlgorithms {
             requestScopedDependencies.getTerminationFlag()
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     public PathFindingResult singlePairShortestPathAStar(Graph graph, ShortestPathAStarBaseConfig configuration) {
@@ -302,7 +340,12 @@ public class PathFindingAlgorithms {
             requestScopedDependencies.getTerminationFlag()
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, false);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            false,
+            configuration.concurrency()
+        );
     }
 
     /**
@@ -327,7 +370,12 @@ public class PathFindingAlgorithms {
             requestScopedDependencies.getTerminationFlag()
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, false);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            false,
+            configuration.concurrency()
+        );
     }
 
     public PathFindingResult singlePairShortestPathYens(Graph graph, ShortestPathYensBaseConfig configuration) {
@@ -356,7 +404,12 @@ public class PathFindingAlgorithms {
             requestScopedDependencies.getTerminationFlag()
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, false);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            false,
+            configuration.concurrency()
+        );
     }
 
     PathFindingResult singleSourceShortestPathDijkstra(Graph graph, DijkstraBaseConfig configuration) {
@@ -374,7 +427,12 @@ public class PathFindingAlgorithms {
             requestScopedDependencies.getTerminationFlag()
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, false);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            false,
+            configuration.concurrency()
+        );
     }
 
     public SpanningTree spanningTree(Graph graph, SpanningTreeBaseConfig configuration) {
@@ -397,7 +455,12 @@ public class PathFindingAlgorithms {
             requestScopedDependencies.getTerminationFlag()
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     public SteinerTreeResult steinerTree(Graph graph, SteinerTreeBaseConfig configuration) {
@@ -430,7 +493,12 @@ public class PathFindingAlgorithms {
             requestScopedDependencies.getTerminationFlag()
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     public TopologicalSortResult topologicalSort(Graph graph, TopologicalSortBaseConfig configuration) {
@@ -450,7 +518,12 @@ public class PathFindingAlgorithms {
             requestScopedDependencies.getTerminationFlag()
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     private MSBFSASPAlgorithm selectAlgorithm(Graph graph, AllShortestPathsConfig configuration) {

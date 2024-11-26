@@ -113,7 +113,12 @@ class MiscellaneousAlgorithms {
             terminationFlag
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     ScalePropertiesResult scaleProperties(Graph graph, ScalePropertiesBaseConfig configuration) {
@@ -137,7 +142,12 @@ class MiscellaneousAlgorithms {
             DefaultPool.INSTANCE
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     SingleTypeRelationships toUndirected(GraphStore graphStore, ToUndirectedConfig configuration) {
@@ -156,6 +166,11 @@ class MiscellaneousAlgorithms {
             terminationFlag
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 }

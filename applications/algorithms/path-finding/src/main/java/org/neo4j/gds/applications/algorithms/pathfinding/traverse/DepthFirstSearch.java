@@ -67,6 +67,11 @@ public class DepthFirstSearch {
             terminationFlag
         );
 
-        return new AlgorithmMachinery().runAlgorithmsAndManageProgressTracker(dfs, progressTracker, true);
+        return new AlgorithmMachinery().runAlgorithmsAndManageProgressTracker(
+            dfs,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 }

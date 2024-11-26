@@ -21,8 +21,8 @@ package org.neo4j.gds.applications.algorithms.machinelearning;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.algorithms.machinelearning.KGEPredictBaseConfig;
-import org.neo4j.gds.algorithms.machinelearning.KGEPredictResult;
 import org.neo4j.gds.algorithms.machinelearning.KGEPredictConfigTransformer;
+import org.neo4j.gds.algorithms.machinelearning.KGEPredictResult;
 import org.neo4j.gds.algorithms.machinelearning.TopKMapComputer;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -79,7 +79,12 @@ class MachineLearningAlgorithms {
             terminationFlag
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     EdgeSplitter.SplitResult splitRelationships(GraphStore graphStore, SplitRelationshipsBaseConfig configuration) {

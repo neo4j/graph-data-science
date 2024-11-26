@@ -92,7 +92,12 @@ public class SimilarityAlgorithms {
 
         var algorithm = selectAlgorithmConfiguration(graph, configuration, knnContext);
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     NodeSimilarityResult filteredNodeSimilarity(Graph graph, FilteredNodeSimilarityBaseConfig configuration) {
@@ -118,7 +123,12 @@ public class SimilarityAlgorithms {
             requestScopedDependencies.getTerminationFlag()
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     KnnResult knn(Graph graph, KnnBaseConfig configuration) {
@@ -156,7 +166,12 @@ public class SimilarityAlgorithms {
             requestScopedDependencies.getTerminationFlag()
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     NodeSimilarityResult nodeSimilarity(Graph graph, NodeSimilarityBaseConfig configuration) {
@@ -185,7 +200,12 @@ public class SimilarityAlgorithms {
             requestScopedDependencies.getTerminationFlag()
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     private Task filteredNodeSimilarityProgressTask(Graph graph, boolean runWcc) {

@@ -125,7 +125,12 @@ public class CentralityAlgorithms {
 
         var algorithm = new ArticulationPoints(graph, progressTracker);
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     BetwennessCentralityResult betweennessCentrality(Graph graph, BetweennessCentralityBaseConfig configuration) {
@@ -168,7 +173,12 @@ public class CentralityAlgorithms {
             terminationFlag
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            parameters.concurrency()
+        );
     }
 
     BridgeResult bridges(Graph graph, AlgoBaseConfig configuration) {
@@ -178,7 +188,12 @@ public class CentralityAlgorithms {
 
         var algorithm = new Bridges(graph, progressTracker);
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     public CELFResult celf(Graph graph, InfluenceMaximizationBaseConfig configuration) {
@@ -191,7 +206,12 @@ public class CentralityAlgorithms {
 
         var algorithm = new CELF(graph, configuration.toParameters(), DefaultPool.INSTANCE, progressTracker);
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     ClosenessCentralityResult closenessCentrality(Graph graph, ClosenessCentralityBaseConfig configuration) {
@@ -218,7 +238,12 @@ public class CentralityAlgorithms {
             terminationFlag
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     DegreeCentralityResult degreeCentrality(Graph graph, DegreeCentralityConfig configuration) {
@@ -237,7 +262,12 @@ public class CentralityAlgorithms {
             progressTracker
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     PageRankResult eigenVector(Graph graph, EigenvectorConfig configuration) {
@@ -279,7 +309,12 @@ public class CentralityAlgorithms {
             terminationFlag
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     PregelResult hits(Graph graph, HitsConfig configuration) {
@@ -297,7 +332,12 @@ public class CentralityAlgorithms {
             progressTracker
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     IndirectExposureResult indirectExposure(Graph graph, IndirectExposureConfig configuration) {
@@ -315,7 +355,12 @@ public class CentralityAlgorithms {
             progressTracker
         );
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(algorithm, progressTracker, true);
+        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
+            algorithm,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 
     public PageRankResult pageRank(Graph graph, PageRankConfig configuration) {

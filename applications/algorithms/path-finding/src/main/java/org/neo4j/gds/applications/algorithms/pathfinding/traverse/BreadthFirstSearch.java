@@ -68,6 +68,11 @@ public class BreadthFirstSearch {
             terminationFlag
         );
 
-        return new AlgorithmMachinery().runAlgorithmsAndManageProgressTracker(bfs, progressTracker, true);
+        return new AlgorithmMachinery().runAlgorithmsAndManageProgressTracker(
+            bfs,
+            progressTracker,
+            true,
+            configuration.concurrency()
+        );
     }
 }
