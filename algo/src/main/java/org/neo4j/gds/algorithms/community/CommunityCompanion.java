@@ -20,20 +20,18 @@
 package org.neo4j.gds.algorithms.community;
 
 import org.eclipse.collections.api.block.function.primitive.LongToObjectFunction;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.FilteredNodePropertyValuesMarker;
 import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
+import org.neo4j.gds.api.properties.nodes.NodePropertyContainer;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.result.CommunityStatistics;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -144,21 +142,6 @@ public final class CommunityCompanion {
         return new CommunitySizeFilter(nodeProperties, communitySizes, size);
     }
 
-    static List<List<Double>> arrayMatrixToListMatrix(boolean shouldCompute, double[][] matrix) {
-        if (shouldCompute) {
-            var result = new ArrayList<List<Double>>();
-
-            for (double[] row : matrix) {
-                List<Double> rowList = new ArrayList<>();
-                result.add(rowList);
-                for (double column : row)
-                    rowList.add(column);
-            }
-            return result;
-        }
-        return null;
-    }
-
     private static class CommunitySizeFilter implements LongNodePropertyValues, FilteredNodePropertyValuesMarker {
 
         private final LongNodePropertyValues properties;
@@ -211,11 +194,10 @@ public final class CommunityCompanion {
         }
     }
 
-    public static NodePropertyValues extractSeedingNodePropertyValues(Graph graph, String seedingProperty) {
+    public static NodePropertyValues extractSeedingNodePropertyValues(NodePropertyContainer nodePropertyContainer, String seedingProperty) {
+        var nodePropertyValues = nodePropertyContainer.nodeProperties(seedingProperty);
 
-        var nodePropertyValues = graph.nodeProperties(seedingProperty);
-        if (nodePropertyValues == null)
-            return null;
+        if (nodePropertyValues == null) return null;
 
         if (nodePropertyValues.valueType() != ValueType.LONG) {
             throw new IllegalArgumentException(

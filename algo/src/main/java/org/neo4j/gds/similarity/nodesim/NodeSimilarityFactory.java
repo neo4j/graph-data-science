@@ -21,6 +21,7 @@ package org.neo4j.gds.similarity.nodesim;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -28,7 +29,9 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
-import org.neo4j.gds.wcc.WccAlgorithmFactory;
+import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.wcc.WccStub;
+import org.neo4j.gds.wcc.WccTask;
 
 public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> extends GraphAlgorithmFactory<NodeSimilarity, CONFIG> {
 
@@ -50,7 +53,9 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> exte
             DefaultPool.INSTANCE,
             progressTracker,
             NodeFilter.ALLOW_EVERYTHING,
-            NodeFilter.ALLOW_EVERYTHING
+            NodeFilter.ALLOW_EVERYTHING,
+            TerminationFlag.RUNNING_TRUE,
+            new WccStub(TerminationFlag.RUNNING_TRUE, new AlgorithmMachinery()) // very temporary
         );
     }
 
@@ -75,7 +80,7 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> exte
         return Tasks.task(
             taskName(),
             runWCC
-                ? Tasks.task("prepare", new WccAlgorithmFactory<>().progressTask(graph), Tasks.leaf("initialize", graph.relationshipCount()))
+                ? Tasks.task("prepare", WccTask.create(graph), Tasks.leaf("initialize", graph.relationshipCount()))
                 : Tasks.leaf("prepare", graph.relationshipCount()),
             Tasks.leaf("compare node pairs")
         );

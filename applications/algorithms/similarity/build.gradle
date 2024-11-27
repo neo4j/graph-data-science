@@ -8,8 +8,6 @@ dependencies {
     implementation project(":algo")
     implementation project(":algo-common")
     implementation project(":algorithms-machinery")
-    // this is needed because NodeSimilarity internally calls WccAlgorithmFactory
-    implementation project(":community-configs")
     implementation project(":config-api")
     implementation project(":core")
     implementation project(":logging")
@@ -17,4 +15,8 @@ dependencies {
     implementation project(":progress-tracking")
     implementation project(":similarity-configs")
     implementation project(":termination")
+
+    // this is needed because NodeSimilarity internally calls Wcc
+    implementation project(':community-algorithms')
+    implementation project(":community-configs")
 }

@@ -22,12 +22,16 @@ package org.neo4j.gds.similarity.nodesim;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.similarity.filtering.NodeFilter;
+import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.wcc.WccStub;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -69,7 +73,11 @@ import static org.assertj.core.api.Assertions.assertThat;
             parameters,
             new Concurrency(1),
             DefaultPool.INSTANCE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            NodeFilter.ALLOW_EVERYTHING,
+            NodeFilter.ALLOW_EVERYTHING,
+            TerminationFlag.RUNNING_TRUE,
+            new WccStub(TerminationFlag.RUNNING_TRUE, new AlgorithmMachinery())
         );
         var result = nodeSimilarity.compute().streamResult().findFirst().get();
 

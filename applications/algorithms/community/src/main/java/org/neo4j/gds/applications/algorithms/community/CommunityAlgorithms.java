@@ -36,7 +36,6 @@ import org.neo4j.gds.conductance.ConductanceResult;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -82,8 +81,8 @@ import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountResult;
 import org.neo4j.gds.triangle.TriangleResult;
 import org.neo4j.gds.triangle.TriangleStream;
-import org.neo4j.gds.wcc.Wcc;
 import org.neo4j.gds.wcc.WccBaseConfig;
+import org.neo4j.gds.wcc.WccStub;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -453,7 +452,7 @@ public class CommunityAlgorithms {
         return algorithm.compute();
     }
 
-    DisjointSetStruct wcc(Graph graph, WccBaseConfig configuration) {
+    public DisjointSetStruct wcc(Graph graph, WccBaseConfig configuration) {
         var task = Tasks.leaf(AlgorithmLabel.WCC.asString(), graph.relationshipCount());
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
@@ -462,21 +461,9 @@ public class CommunityAlgorithms {
                 "Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set.");
         }
 
-        var algorithm = new Wcc(
-            graph,
-            DefaultPool.INSTANCE,
-            ParallelUtil.DEFAULT_BATCH_SIZE,
-            configuration.toParameters(),
-            progressTracker,
-            terminationFlag
-        );
+        var wccStub = new WccStub(terminationFlag, algorithmMachinery);
 
-        return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
-            algorithm,
-            progressTracker,
-            true,
-            configuration.concurrency()
-        );
+        return wccStub.wcc(graph, configuration.toParameters(), progressTracker);
     }
 
     private Task constructKMeansProgressTask(Graph graph, KmeansBaseConfig configuration) {

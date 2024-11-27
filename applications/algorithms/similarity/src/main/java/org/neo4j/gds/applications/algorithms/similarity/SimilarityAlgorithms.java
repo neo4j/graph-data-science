@@ -20,6 +20,8 @@
 package org.neo4j.gds.applications.algorithms.similarity;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.wcc.WccStub;
+import org.neo4j.gds.wcc.WccTask;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmLabel;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
@@ -42,7 +44,6 @@ import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarity;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityBaseConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
-import org.neo4j.gds.wcc.WccAlgorithmFactory;
 
 import java.util.List;
 
@@ -112,6 +113,8 @@ public class SimilarityAlgorithms {
 
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
 
+        var wccStub = new WccStub(requestScopedDependencies.getTerminationFlag(), algorithmMachinery);
+
         var algorithm = new NodeSimilarity(
             graph,
             configuration.toParameters(),
@@ -120,7 +123,8 @@ public class SimilarityAlgorithms {
             progressTracker,
             sourceNodeFilter,
             targetNodeFilter,
-            requestScopedDependencies.getTerminationFlag()
+            requestScopedDependencies.getTerminationFlag(),
+            wccStub
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
@@ -180,7 +184,7 @@ public class SimilarityAlgorithms {
             configuration.useComponents().computeComponents()
                 ? Tasks.task(
                 "prepare",
-                new WccAlgorithmFactory<>().progressTask(graph),
+                WccTask.create(graph),
                 Tasks.leaf("initialize", graph.relationshipCount())
             )
                 : Tasks.leaf("prepare", graph.relationshipCount()),
@@ -188,6 +192,8 @@ public class SimilarityAlgorithms {
         );
 
         var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var wccStub = new WccStub(requestScopedDependencies.getTerminationFlag(), algorithmMachinery);
 
         var algorithm = new NodeSimilarity(
             graph,
@@ -197,7 +203,8 @@ public class SimilarityAlgorithms {
             progressTracker,
             NodeFilter.ALLOW_EVERYTHING,
             NodeFilter.ALLOW_EVERYTHING,
-            requestScopedDependencies.getTerminationFlag()
+            requestScopedDependencies.getTerminationFlag(),
+            wccStub
         );
 
         return algorithmMachinery.runAlgorithmsAndManageProgressTracker(
@@ -212,7 +219,7 @@ public class SimilarityAlgorithms {
         if (runWcc) {
             return Tasks.task(
                 "prepare",
-                new WccAlgorithmFactory<>().progressTask(graph),
+                WccTask.create(graph),
                 Tasks.leaf("initialize", graph.relationshipCount())
             );
         }

@@ -1117,5 +1117,3 @@ final class CommunityAlgorithmsTest {
     }
 
 }
-
-

@@ -32,11 +32,16 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.CommunityHelper;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.applications.algorithms.community.CommunityAlgorithms;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmMachinery;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -168,23 +173,25 @@ class WccTest {
         assertThat(getSetCount(result)).isEqualTo(5);
     }
 
-
     @Test
     void shouldWarnAboutThresholdOnUnweightedGraphs() {
         var log = new GdsTestLog();
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .with(EmptyTaskRegistryFactory.INSTANCE)
+            .with(TerminationFlag.RUNNING_TRUE)
+            .with(EmptyUserLogRegistryFactory.INSTANCE)
+            .build();
+        var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
+        var communityAlgorithms = new CommunityAlgorithms(progressTrackerCreator, requestScopedDependencies.getTerminationFlag());
 
-        new WccAlgorithmFactory<>().build(
-            createTestGraph(Orientation.NATURAL),
-            WccStreamConfigImpl.builder().relationshipWeightProperty("weights").build(),
-            log,
-            EmptyTaskRegistryFactory.INSTANCE
-        );
+        var graph = createTestGraph(Orientation.NATURAL);
+        var configuration = WccStreamConfigImpl.builder().relationshipWeightProperty("weights").build();
+        communityAlgorithms.wcc(graph, configuration);
 
         Assertions.assertThat(log.getMessages(WARN))
             .extracting(removingThreadId())
             .containsExactly("WCC :: Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set.");
     }
-
 
     private static Graph createTestGraph(Orientation orientation) {
         int[] setSizes = new int[SETS_COUNT];
@@ -299,15 +306,10 @@ class WccTest {
         }
 
         private void assertResults(TestGraph graph) {
-            var config = new WccParameters(0D, new Concurrency(4));
+            var wccStub = new WccStub(TerminationFlag.RUNNING_TRUE, new AlgorithmMachinery());
 
-            var dss = new WccAlgorithmFactory<>()
-                .build(
-                    graph,
-                    config,
-                    ProgressTracker.NULL_TRACKER
-                ).compute();
-
+            var parameters = new WccParameters(0D, new Concurrency(4));
+            var dss = wccStub.wcc(graph, parameters, ProgressTracker.NULL_TRACKER);
 
             var actualCommunities = new ArrayList<Long>();
             graph.forEachNode(node -> actualCommunities.add(dss.setIdOf(node)));

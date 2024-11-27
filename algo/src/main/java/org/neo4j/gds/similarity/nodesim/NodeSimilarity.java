@@ -22,6 +22,7 @@ package org.neo4j.gds.similarity.nodesim;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.relationships.RelationshipConsumer;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -30,7 +31,6 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.SetBitsIterable;
 import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
-import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.SimilarityGraphBuilder;
@@ -38,8 +38,7 @@ import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.wcc.Wcc;
-import org.neo4j.gds.wcc.WccAlgorithmFactory;
+import org.neo4j.gds.wcc.WccStub;
 import org.neo4j.gds.wcc.WccParameters;
 
 import java.util.Objects;
@@ -75,73 +74,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     private Function<Long, LongStream> sourceNodesStream;
     private BiFunction<Long, Long, LongStream> targetNodesStream;
 
-    /**
-     * @deprecated Don't use this, use the one that injects termination flag directly
-     */
-    @Deprecated
-    public NodeSimilarity(
-        Graph graph,
-        NodeSimilarityParameters parameters,
-        Concurrency concurrency,
-        ExecutorService executorService,
-        ProgressTracker progressTracker
-    ) {
-        this(
-            graph,
-            parameters,
-            concurrency,
-            executorService,
-            progressTracker,
-            NodeFilter.ALLOW_EVERYTHING,
-            NodeFilter.ALLOW_EVERYTHING,
-            TerminationFlag.RUNNING_TRUE
-        );
-    }
-
-    public NodeSimilarity(
-        Graph graph,
-        NodeSimilarityParameters parameters,
-        Concurrency concurrency,
-        ExecutorService executorService,
-        ProgressTracker progressTracker,
-        TerminationFlag terminationFlag
-    ) {
-        this(
-            graph,
-            parameters,
-            concurrency,
-            executorService,
-            progressTracker,
-            NodeFilter.ALLOW_EVERYTHING,
-            NodeFilter.ALLOW_EVERYTHING,
-            terminationFlag
-        );
-    }
-
-    /**
-     * @deprecated Don't use this, use the one that injects termination flag directly
-     */
-    @Deprecated
-    public NodeSimilarity(
-        Graph graph,
-        NodeSimilarityParameters parameters,
-        Concurrency concurrency,
-        ExecutorService executorService,
-        ProgressTracker progressTracker,
-        NodeFilter sourceNodeFilter,
-        NodeFilter targetNodeFilter
-    ) {
-        this(
-            graph,
-            parameters,
-            concurrency,
-            executorService,
-            progressTracker,
-            sourceNodeFilter,
-            targetNodeFilter,
-            TerminationFlag.RUNNING_TRUE
-        );
-    }
+    private final WccStub wccStub;
 
     public NodeSimilarity(
         Graph graph,
@@ -151,7 +84,8 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         ProgressTracker progressTracker,
         NodeFilter sourceNodeFilter,
         NodeFilter targetNodeFilter,
-        TerminationFlag terminationFlag
+        TerminationFlag terminationFlag,
+        WccStub wccStub
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -164,6 +98,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         this.executorService = executorService;
         this.sourceNodes = new BitSet(graph.nodeCount());
         this.targetNodes = new BitSet(graph.nodeCount());
+        this.wccStub = wccStub;
         this.weighted = this.parameters.hasRelationshipWeightProperty();
         this.terminationFlag = terminationFlag;
     }
@@ -286,8 +221,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         // run WCC to determine components
         progressTracker.beginSubTask();
         var wccParameters = new WccParameters(0D, concurrency);
-        Wcc wcc = new WccAlgorithmFactory<>().build(graph, wccParameters, ProgressTracker.NULL_TRACKER);
-        DisjointSetStruct disjointSets = wcc.compute();
+        var disjointSets = wccStub.wcc(graph, wccParameters, ProgressTracker.NULL_TRACKER);
         progressTracker.endSubTask();
         return disjointSets::setIdOf;
     }
@@ -465,11 +399,11 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             .filter(Objects::nonNull);
     }
 
-    private static LongUnaryOperator initComponentIdMapping(Graph graph, LongUnaryOperator originComponentIdMapper) {
+    private static LongUnaryOperator initComponentIdMapping(IdMap idMap, LongUnaryOperator originComponentIdMapper) {
         var componentIdMappings = new HugeLongLongMap();
         var mappedComponentId = new AtomicLong(0L);
-        var mappedComponentIdPerNode = HugeLongArray.newArray(graph.nodeCount());
-        graph.forEachNode(n -> {
+        var mappedComponentIdPerNode = HugeLongArray.newArray(idMap.nodeCount());
+        idMap.forEachNode(n -> {
             long originComponentIdForNode = originComponentIdMapper.applyAsLong(n);
             long mappedComponentIdForNode = componentIdMappings.getOrDefault(originComponentIdMapper.applyAsLong(n),
                 mappedComponentId.getAndIncrement());
