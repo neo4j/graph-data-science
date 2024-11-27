@@ -29,6 +29,7 @@ import org.neo4j.gds.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.termination.TerminationFlag;
 
 public final class WccAlgorithmFactory<CONFIG extends WccBaseConfig> extends GraphAlgorithmFactory<Wcc, CONFIG> {
 
@@ -51,7 +52,8 @@ public final class WccAlgorithmFactory<CONFIG extends WccBaseConfig> extends Gra
             DefaultPool.INSTANCE,
             ParallelUtil.DEFAULT_BATCH_SIZE,
             parameters,
-            progressTracker
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         );
     }
 

@@ -59,27 +59,6 @@ public class Wcc extends Algorithm<DisjointSetStruct> {
 
     private final Graph graph;
 
-    /**
-     * @deprecated Stop using this, use the variant that does direct injection of termination flag instead
-     */
-    @Deprecated
-    public Wcc(
-        Graph graph,
-        ExecutorService executor,
-        int minBatchSize,
-        WccParameters parameters,
-        ProgressTracker progressTracker
-    ) {
-        this(
-            graph,
-            executor,
-            minBatchSize,
-            parameters,
-            progressTracker,
-            TerminationFlag.RUNNING_TRUE
-        );
-    }
-
     public Wcc(
         Graph graph,
         ExecutorService executor,

@@ -27,6 +27,7 @@ import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -123,7 +124,8 @@ class IncrementalWccTest {
             DefaultPool.INSTANCE,
             COMMUNITY_SIZE / ConcurrencyConfig.DEFAULT_CONCURRENCY,
             parameters,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
     }
 

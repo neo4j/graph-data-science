@@ -31,6 +31,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.stream.Stream;
 
@@ -110,7 +111,8 @@ class WccThresholdTest {
             DefaultPool.INSTANCE,
             DEFAULT_BATCH_SIZE,
             parameters,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
 
         long[] communityData = new long[(int) graph.nodeCount()];
