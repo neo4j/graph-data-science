@@ -21,14 +21,17 @@ package org.neo4j.gds.paths.bellmanford;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.schema.Direction;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -231,34 +234,49 @@ class BellmanFordTest {
 
     @Test
     void shouldLogProgress() {
+//        var config = AllShortestPathsBellmanFordStatsConfigImpl.builder()
+//            .concurrency(4)
+//            .sourceNode(graph.toOriginalNodeId("a0"))
+//            .build();
+//
+//        var progressTask = new BellmanFordAlgorithmFactory<>().progressTask(graph, config);
+//        var testLog = new GdsTestLog();
+//        var progressTracker = new TestProgressTracker(progressTask, testLog, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
+//
+//        new BellmanFordAlgorithmFactory<>().build(graph, config, progressTracker)
+//            .compute()
+//            .shortestPaths().pathSet();
+//
+//        var messagesInOrder = testLog.getMessages(INFO);
+
+        var log = new GdsTestLog();
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .with(EmptyTaskRegistryFactory.INSTANCE)
+            .with(TerminationFlag.RUNNING_TRUE)
+            .with(EmptyUserLogRegistryFactory.INSTANCE)
+            .build();
+        var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
+        var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, progressTrackerCreator);
+
         var config = AllShortestPathsBellmanFordStatsConfigImpl.builder()
             .concurrency(4)
             .sourceNode(graph.toOriginalNodeId("a0"))
             .build();
+        pathFindingAlgorithms.bellmanFord(graph, config).shortestPaths().pathSet();
 
-        var progressTask = new BellmanFordAlgorithmFactory<>().progressTask(graph, config);
-        var testLog = new GdsTestLog();
-        var progressTracker = new TestProgressTracker(progressTask, testLog, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
-
-        new BellmanFordAlgorithmFactory<>().build(graph, config, progressTracker)
-            .compute()
-            .shortestPaths().pathSet();
-
-        var messagesInOrder = testLog.getMessages(INFO);
-
-        assertThat(messagesInOrder)
+        assertThat(log.getMessages(INFO))
             // avoid asserting on the thread id
             .extracting(removingThreadId())
             .hasSize(8)
             .containsExactly(
-                "BellmanFord :: Start",
-                "BellmanFord :: Relax 1 :: Start",
-                "BellmanFord :: Relax 1 100%",
-                "BellmanFord :: Relax 1 :: Finished",
-                "BellmanFord :: Sync 1 :: Start",
-                "BellmanFord :: Sync 1 100%",
-                "BellmanFord :: Sync 1 :: Finished",
-                "BellmanFord :: Finished"
+                "Bellman-Ford :: Start",
+                "Bellman-Ford :: Relax 1 :: Start",
+                "Bellman-Ford :: Relax 1 100%",
+                "Bellman-Ford :: Relax 1 :: Finished",
+                "Bellman-Ford :: Sync 1 :: Start",
+                "Bellman-Ford :: Sync 1 100%",
+                "Bellman-Ford :: Sync 1 :: Finished",
+                "Bellman-Ford :: Finished"
             );
     }
 

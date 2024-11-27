@@ -109,7 +109,7 @@ public class PathFindingAlgorithms {
         return algorithm.compute();
     }
 
-    BellmanFordResult bellmanFord(Graph graph, AllShortestPathsBellmanFordBaseConfig configuration) {
+    public BellmanFordResult bellmanFord(Graph graph, AllShortestPathsBellmanFordBaseConfig configuration) {
         var task = Tasks.iterativeOpen(
             AlgorithmLabel.BellmanFord.asString(),
             () -> List.of(
